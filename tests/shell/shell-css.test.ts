@@ -42,4 +42,12 @@ describe("shell.css token sözleşmesi", () => {
     expect(shellCss).toMatch(/position:\s*fixed/);
     expect(shellCss).toContain("env(safe-area-inset-bottom)");
   });
+  it("giriş ekranını iki eşit masaüstü paneline böler ve mobilde tek sütuna indirir", () => {
+    expect(shellCss).toMatch(/grid-template-columns:\s*repeat\(2,\s*minmax\(0,\s*1fr\)\)/);
+    expect(shellCss).toContain("@media (max-width: 768px)");
+    expect(shellCss).toMatch(/\.eg-shell-entry__input[\s\S]*?min-height:\s*48px/);
+    expect(shellCss).toContain("prefers-reduced-motion: reduce");
+    expect(shellCss).toContain(":focus-visible");
+    expect(shellCss).not.toMatch(/\.eg-shell-entry__logo\s*\{[^}]*filter:/);
+  });
 });
