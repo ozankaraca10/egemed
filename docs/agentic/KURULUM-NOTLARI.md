@@ -35,3 +35,7 @@ Kullanıcı tercihi: Planning ve yeniden planlama Claude Code içindeki Opus ile
 
 ## DeepSeek varyantı
 OpenCode `agent.build` ayarında `model = opencode-go/deepseek-v4.1-flash`, `variant = max` seçildi. Kurulu OpenCode 1.18.30 üzerinde `opencode debug agent build` çıktısı bu model kimliğini ve `max` varyantını doğruladı. Sağlayıcıya gerçek çağrı henüz yapılmadı. AGTX OpenCode oturumunda build ajanını kullanır; bu ayar hem Research hem Running fazına uygulanır.
+
+## Cursor CLI sonradan kuruldu
+`cursor` komut adı yok; AGTX 1.0.6 Cursor için `agent` binary'sini kullanıyor. `cursor-agent --version` = `2026.09.18-9a7762b`, `agent` PATH'te. Proje `.cursor/mcp.json` dosyasına AGTX MCP kaydı eklendi. Running tercihi kullanıcı isteğiyle OpenCode DeepSeek V4.1 Flash max olarak kalıyor. Cursor MCP ve Sonnet oturumu çalıştırılarak doğrulanmadı. Önceki "Cursor CLI yok" notu ilk kurulum anının tespitidir, güncel durum değildir.
+Cursor `agent mcp enable agtx` sonrası `agent mcp list` çıktısı `agtx: ready` gösterdi.
