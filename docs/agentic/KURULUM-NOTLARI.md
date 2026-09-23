@@ -56,5 +56,23 @@ AGTX 1.0.6 iş ağacındaki `opencode.json`, `.codex/config.toml` ve MCP dosyala
 
 Kullanıcı E0 ve T01 planını 23 Eylül 2026 tarihinde onayladı; T01 Running aşamasına geçebilir. Node 22 / pnpm 10 sürüm ailesi uygulanır.
 
+## 23 Eylül 2026 — OpenCode manuel orkestrasyon (Codex kotası sonrası)
+Kullanıcı yönlendirmesi: Codex kotası bitince planlama, ajan koşturma ve review EGEMED
+CLIX ana OpenCode oturumunda yürür. Bu oturumda uygulanan geçici işletim biçimi:
+- Faz geçişleri AGTX kuyruğu yerine doğrudan görev veritabanında (`tasks.status`) güncellendi;
+  tmux ajan doğurulmadı. Neden: tmux sunucusu ölüydü, T02'nin yetim OpenCode süreci
+  (PID 30493) kapatıldı; T02 insan tarafından zaten merge edilmişti (f264644), veritabanı
+  `done`'a catch-up yapıldı, worktree/branch'ı temizlendi.
+- T04: mevcut Cursor Grok planı kullanıldı; execute OpenCode DeepSeek alt ajanıyla
+  (worktree içinde) yürütüldü; commit `af27a1c`.
+- T03: "kaynak belgeler bekleniyor" koşulu çözüldü — `egemed-sim-ui-ux-framework/tokens/
+  family-tokens.css` ve `egemed-opaca/src/styles.css` `:root` blokları diskte bulundu;
+  plan ana oturumda yazıldı; execute DeepSeek alt ajanıyla yürütüldü; commit `b7d3fc5`.
+- Review Astra yerine ana oturumda yapıldı (bulgular worktree `.egemed-run/review.md`
+  içinde, `VERDICT: APPROVE`); Astra ikinci görüşü hâlâ `Bekleniyor.` ve ADR kabulü
+  yalnız insana aittir. Kapılar her iki worktree'de `--force` ile 5/5 yeşil doğrulandı.
+- Merge ve insan onayı depo sahibini bekler. T12 hâlâ kaynak bekliyor; T13'nin geçici
+  işletim talimatı bu bölümüyle kısmen karşılanmıştır (kök neden analizi ayrıca yürütülebilir).
+
 ## Claude kotası sonrası geçici planlama — 23 Eylül 2026
 Kullanıcının açık yönlendirmesiyle Claude Code kotası bitince `[agents].planning = "cursor"` seçildi. AGTX 1.0.6 Cursor'ı `agent` ikilisiyle başlatır ve faz başına `--model` alanı yoktur. `scripts/agtx/board.sh`, proje içindeki `scripts/agtx/bin/agent` sarmalayıcısını PATH başına koyar; bu sarmalayıcı gerçek Cursor CLI'yi `--model grok-4.7-high` ile çalıştırır. `agent models` bu tam model kimliğini Grok 4.7 High olarak listeledi. Eklentilerin `supported_agents` listesine Cursor eklendi. Bu ayar, yeni açılacak Planning oturumları içindir; mevcut T01/T02 artefaktları değiştirilmez. Kritik kararlar yine Astra ikinci görüşü ve insan onayı bekler.
