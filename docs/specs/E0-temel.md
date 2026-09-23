@@ -1,6 +1,6 @@
-# E0 Temel — Epik spesifikasyonu (TASLAK)
+# E0 Temel — Epik spesifikasyonu
 
-> Durum: **Taslak, insan onayı bekliyor.** Bu belgede geçen ADR, LRS ve kimlik konuları karar değil, açık sorudur.
+> Durum: **E0 ve T01 planı insan tarafından 23 Eylül 2026 tarihinde onaylandı.** Bu belgede geçen ADR, LRS ve kimlik konuları karar değil, açık sorudur.
 > Kaynaklar: `AGENTS.md`, T01 planı (`.egemed-run/plan.md`, T01 worktree), `docs/agentic/KURULUM-NOTLARI.md`, AGTX T01–T12 backlog kaydı.
 > Not: `.egemed-run/research.md` bu epik için henüz yok; ilgili görevlerin Research fazında üretilmeli.
 
@@ -67,8 +67,8 @@ Kurallar: aynı pakette paralel Running görev açılmaz. Sözleşme değişikli
 - ADR-001…005 ve xAPI profili v0 "Önerildi" durumundadır. Astra bulguları karar kaydında görünür. "Kabul" durumuna yalnız insan geçirir.
 - Hiçbir paket birden fazla simülatörün verisini birleştirmez. `sims/*` workspace'e bağımlılık sızdırmaz.
 
-## İnsan kararları (bekleyen)
-- T01: ESLint ve typescript-eslint bağımlılık onayı; pnpm ve Node sürüm sabitleri; Vitest onayı.
+## İnsan kararları
+- T01: `typescript`, `turbo`, `vitest`, `eslint`, `typescript-eslint`, `@eslint/js` bağımlılıkları ve gerçek lint onaylandı. Node 22 ve pnpm 10 sürüm ailesi sabitlenir.
 - T04: ADR-001…005 kabulü. Monorepo, yığın (kabuk ve API çerçevesi), gömme (SCORM/HTML sunumu), LRS ve kimlik konularının hiçbiri henüz karara bağlanmadı.
 - T05: Geliştirme ortamında hangi LRS adayının çalıştırılacağı. Bu, T04 LRS ADR'si onaylanmadan seçilmez.
 - T06: xAPI fiilleri ve activity ID şeması. KVKK açısından hangi öğrenci tanımlayıcısının ifadeye gireceği.
