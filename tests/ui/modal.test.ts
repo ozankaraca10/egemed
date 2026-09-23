@@ -6,6 +6,11 @@ import { Modal, nextFocusTarget, type ModalProps } from "../../packages/ui/src/M
 import { describe, expect, it } from "vitest";
 
 const componentsCss = ts.sys.readFile("packages/ui/styles/components.css") ?? "";
+const modalSource = ts.sys.readFile("packages/ui/src/Modal.tsx") ?? "";
+
+/** B2 sıkılaştırılmış odak seçicisi; `Modal.tsx` ile birebir aynı olmalı. */
+const expectedFocusableSelector =
+  "a[href], area[href], button:not([disabled]), input:not([disabled]):not([type='hidden']), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex='-1'])";
 
 const noop = (): void => undefined;
 
@@ -103,5 +108,31 @@ describe("Modal CSS sözleşmesi", () => {
 
   it("yerel --eg-touch-min .eg-modal kapsamında tanımlıdır", () => {
     expect(touchMinScope()).toContain(".eg-modal");
+  });
+
+  it("diyalog kutusunu border-box ile 360px taşmasına karşı korur (B1)", () => {
+    expect(ruleBody(".eg-modal__dialog")).toMatch(/box-sizing:\s*border-box/);
+  });
+});
+
+describe("Modal odak seçicisi (B2)", () => {
+  it("disabled, gizli girdi ve a/area dışı [href] kaçaklarını kapatır", () => {
+    expect(modalSource).toContain(expectedFocusableSelector);
+    for (const parca of [
+      "a[href]",
+      "area[href]",
+      "button:not([disabled])",
+      "input:not([disabled]):not([type='hidden'])",
+      "select:not([disabled])",
+      "textarea:not([disabled])",
+      "[tabindex]:not([tabindex='-1'])",
+    ]) {
+      expect(expectedFocusableSelector).toContain(parca);
+    }
+  });
+
+  it("sonucu tabindex=-1 taşıyan programatik hedeflerden süzer", () => {
+    expect(modalSource).toMatch(/\.filter\(\s*isTabbable\s*\)/);
+    expect(modalSource).toContain('getAttribute?.("tabindex")');
   });
 });

@@ -21,9 +21,17 @@ export interface ModalProps {
   className?: string;
 }
 
-/** Odaklanabilir öğeler; diyalog kabuğu (`tabindex="-1"`) dışarıda kalır. */
+/** Odaklanabilir öğeler; devre dışı/gizli öğeler ve diyalog kabuğu (`tabindex="-1"`) dışarıda kalır (B2). */
 const focusableSelector =
-  "button:not([disabled]), [href], input, select, textarea, [tabindex]:not([tabindex='-1'])";
+  "a[href], area[href], button:not([disabled]), input:not([disabled]):not([type='hidden']), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex='-1'])";
+
+/** `[tabindex='-1']` taşıyan programatik odak hedeflerini süzer; `button` gibi
+ *  dallar bunları yine de yakalayabildiğinden gerekir. Öznitelik okunamıyorsa
+ *  (DOM'suz ya da yapısal bağlam) öğe korunur. */
+function isTabbable(node: Focusable): boolean {
+  const withAttribute = node as { getAttribute?: (name: string) => string | null };
+  return withAttribute.getAttribute?.("tabindex") !== "-1";
+}
 
 /** Odağı düğüme taşır; kök typecheck DOM lib'siz derlensin diye yapısal tip. */
 function focusNode(node: unknown): void {
@@ -93,7 +101,10 @@ export function Modal({
     }
     if (event.key !== "Tab") return;
     const scope = dialogRef.current as unknown as FocusScope | null;
-    const items = scope === null ? [] : Array.from(scope.querySelectorAll(focusableSelector));
+    const items =
+      scope === null
+        ? []
+        : Array.from(scope.querySelectorAll(focusableSelector)).filter(isTabbable);
     const target = nextFocusTarget(items, activeElement(), event.shiftKey);
     if (target === null) return;
     event.preventDefault();

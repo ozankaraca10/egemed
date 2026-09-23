@@ -265,6 +265,7 @@
   max-width: 32rem;
   max-height: 90vh;
   overflow: auto;
+  box-sizing: border-box;
   padding: var(--sp-5);
   background: var(--card);
   border: 1px solid var(--border);
