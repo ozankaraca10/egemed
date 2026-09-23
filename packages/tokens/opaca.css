@@ -1,0 +1,93 @@
+/*
+ * Opaca tasarım tokenları — anlık görüntü
+ * Kaynak: egemed-opaca/src/styles.css içindeki iki :root bloğu (2026-09-23 durumu).
+ * Değerler elle düzenlenmez; kaynaktan yeniden senkron edilir.
+ */
+:root {
+  --navy-950: #061e44;
+  --navy-900: #0a2a5e;
+  --navy-800: #0d346f;
+  --navy-700: #10457e;
+  --navy-600: #155396;
+  --blue-700: #0f62d8;
+  --blue-600: #1673e6;
+  --blue-500: #2e8df7;
+  --blue-400: #5aa5f9;
+  --blue-300: #8ec1fb;
+  --blue-200: #c3ddf8;
+  --blue-100: #dbeafe;
+  --blue-50: #eff6ff;
+  --ink-900: #0b2559;
+  --ink-800: #142f60;
+  --ink-700: #1e3a6e;
+  --ink-600: #46618c;
+  --ink-500: #5f7ba6;
+  --ink-400: #7c93b8;
+  --ink-300: #a5b9d6;
+  --green-600: #16a34a;
+  --green-500: #1fa971;
+  --green-100: #dcf3e7;
+  --green-50: #ecfaf1;
+  --purple-700: #6d28d9;
+  --purple-600: #7c3aed;
+  --purple-100: #ede4fb;
+  --purple-50: #f5f0fd;
+  --orange-500: #f59e0b;
+  --orange-100: #fdeecd;
+  --amber-700: #92400e;
+  --red-600: #b91c1c;
+  --red-500: #e11d48;
+  --red-100: #fde5ea;
+  --bg-grad-a: #e8f1fc;
+  --bg-grad-b: #f6faff;
+  --card: #ffffff;
+  --card-soft: #f4f8fe;
+  --border: #d9e5f4;
+  --border-strong: #b9cfeb;
+  /* diagnostik panel / kod bloğu — Tailwind slate/sky esintili ayrı mini palet (koyu tema) */
+  --shadow-card: 0 1px 2px rgba(13, 52, 111, 0.05), 0 8px 24px rgba(13, 52, 111, 0.07);
+  --shadow-pop: 0 12px 40px rgba(10, 42, 94, 0.18);
+  --overlay-94: rgba(255, 255, 255, .94);
+  --overlay-90: rgba(255, 255, 255, .9);
+  --overlay-88: rgba(255, 255, 255, .88);
+  --r-sm: 6px;
+  --r-md: 10px;
+  --r-lg: 14px;
+  --r-xl: 22px;
+  --r-pill: 999px;
+  /* madde 1 (wave 3): tipografi ölçeği — TÜM font-size bildirimleri bu 7 kademeye eşlenir */
+  --fs-xs: 12px;
+  --fs-sm: 13px;
+  --fs-md: 14px;
+  --fs-lg: 16px;
+  --fs-xl: 20px;
+  --fs-2xl: 26px;
+  --fs-3xl: 34px;
+  /* madde 3 (wave 3): boşluk ölçeği (4'ün katları) — kart/panel/grid seviyesinde kullanılır */
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 24px;
+  --sp-6: 32px;
+  --font: 'Segoe UI', 'SF Pro Text', -apple-system, BlinkMacSystemFont, Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --head-h: 60px;
+  --foot-h: 52px;
+}
+
+:root {
+  --brand-900: #003898;
+  --brand-600: #0060d0;
+  --scan: #38d6ff;
+  --scan-soft: rgba(56, 214, 255, .22);
+  --film-bg: #020a1a;
+  --film-edge: #0b1d3d;
+  --film-ink: #d8e6fb;
+  --film-ink-dim: #8aa3c7;
+  --zone-a: #7cc4ff;
+  --zone-b: #67e3c0;
+  --zone-c: #ffb86b;
+  --zone-d: #c7a2ff;
+  --zone-e: #ff8fb1;
+  --expert: #ffd84d;
+}

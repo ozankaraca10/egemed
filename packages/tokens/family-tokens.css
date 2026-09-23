@@ -1,0 +1,75 @@
+/*
+ * EGEMED SIM FRAMEWORK — aile tasarım token'ları
+ * ================================================
+ * Kaynak: cardai/styles.css :root (EGEMED Pulse, 21 Eylül 2026 durumu).
+ * Bu dosya ürün-bağımsızdır: Pulse, Ausculta ve Opaca AYNI değerleri kullanır.
+ * Bir ürün ek bir token'a ihtiyaç duyarsa (ör. kendi alan rengi), yeni bir
+ * değişken ekleyin — mevcutları değiştirmeyin (aile tutarlılığı bunlara bağlı).
+ *
+ * Neden tek dosya: Ausculta'nın rengi/tipografisi/radius'u ile Pulse'unki
+ * tarihsel olarak (Ausculta'daki --navy-900/#0d346f ailesi ile Pulse'un eski
+ * --cyan:#087493 kimliği) farklıydı. Aile hizalaması (bkz.
+ * reference/pulse/YONERGE_URUN_AILESI_UIUX_PLANI.md §0.2) bu paleti Pulse'a
+ * taşıdı; Ausculta ve Opaca aynı köke bağlanarak ürün geçişinde görsel
+ * süreklilik sağlanır.
+ */
+
+:root{
+  color-scheme:light;
+
+  /* --- Marka / kimlik renkleri --- */
+  --navy-900:#0a2a5e; --navy-800:#0d346f; --navy-700:#10457e; --navy-600:#155396;
+  --blue-700:#0f62d8; --blue-600:#1673e6; --blue-500:#2e8df7; --blue-400:#5aa5f9;
+  --blue-300:#8ec1fb; --blue-200:#c3ddf8; --blue-100:#dbeafe; --blue-50:#eff6ff;
+  --ink-900:#0b2559; --ink-800:#142f60; --ink-700:#1e3a6e; --ink-600:#46618c;
+  --ink-500:#5f7ba6; --ink-400:#7c93b8; --ink-300:#a5b9d6;
+
+  /* --- Mod kimliği: İnceleme=yeşil, Uygulama=mavi, Değerlendirme=mor --- */
+  --green-600:#16a34a; --green-500:#1fa971; --green-100:#dcf3e7; --green-50:#ecfaf1;
+  --purple-700:#6d28d9; --purple-600:#7c3aed; --purple-100:#ede4fb; --purple-50:#f5f0fd;
+
+  /* --- Uyarı / durum renkleri --- */
+  --orange-500:#f59e0b; --orange-100:#fdeecd; --amber-700:#92400e;
+  --red-600:#b91c1c; --red-500:#e11d48; --red-100:#fde5ea;
+
+  /* --- Zemin, kart, kenar, gölge --- */
+  --bg-grad-a:#e8f1fc; --bg-grad-b:#f6faff; --card:#fff; --card-soft:#f4f8fe;
+  --border:#d9e5f4; --border-strong:#b9cfeb;
+  --shadow-card:0 1px 2px rgba(13,52,111,.05),0 8px 24px rgba(13,52,111,.07);
+  --shadow-pop:0 12px 40px rgba(10,42,94,.18);
+
+  /* --- Radius --- */
+  --r-xs:4px; --r-sm:6px; --r-md:10px; --r-lg:14px; --r-xl:22px; --r-pill:999px;
+
+  /* --- Tipografi: gövde 14px sabit; sabit px font-size KULLANILMAZ, yalnız var(--fs-*) --- */
+  --fs-xs:12px; --fs-sm:13px; --fs-md:14px; --fs-lg:16px; --fs-xl:20px; --fs-2xl:26px; --fs-3xl:34px;
+
+  /* --- Boşluk ölçeği --- */
+  --sp-1:4px; --sp-2:8px; --sp-3:12px; --sp-4:16px; --sp-5:24px; --sp-6:32px;
+
+  --font:'Segoe UI','SF Pro Text',-apple-system,BlinkMacSystemFont,Roboto,'Helvetica Neue',Arial,sans-serif;
+  --head-h:60px; --foot-h:52px; --gap:12px;
+
+  /*
+   * Ürüne özgü köprü token'ları — her ürün KENDİ eski değişken adlarını
+   * aşağıdaki gibi aile token'larına eşler; eski adları SİLMEZ (geri
+   * uyumluluk + kademeli geçiş). Örnek satırlar Pulse'tan; Ausculta/Opaca
+   * kendi eski adlarını aynı mantıkla eşlesin.
+   */
+  --text:var(--ink-900); --muted:var(--ink-600); --cyan:var(--blue-600);
+  --line:var(--border); --ink:var(--ink-800); --radius:var(--r-lg);
+}
+
+/*
+ * Alan rengi istisnası (Pulse örneği): --cyan (#087493) yalnız EKG
+ * sahnesi/monitör içinde "alan kimliği" olarak kalabilir; UI kromunda
+ * (header, buton, kart kenarlığı) KULLANILMAZ — bkz. docs/01-tasarim-sistemi.md
+ * "Alan rengi vs. kroma rengi" bölümü. Opaca kendi alan rengini burada aynı
+ * mantıkla tanımlayabilir: `--opaca-field:[Opaca: belirlenecek]`.
+ */
+
+/*
+ * Üçüncü tur eklentileri (yalnız CSS düzeyinde token gerektirmeyen, ama
+ * ailenin her üyesinde aynı sınıf adlarıyla bulunması gereken yapı taşları):
+ * bkz. components/zoom-group.html, components/topbar.html (.eg-brand-tag).
+ */
