@@ -27,6 +27,9 @@ export const tr = {
   "entry.dev.note": "Yalnız yerel geliştirmede çalışır; üretimde bu giriş kapalıdır.",
   "entry.help": "Giriş bilgileriniz kurum hesabınızla yönetilir; sorun için kurum BT birimine başvurun.",
   "shell.brand": "EGEMED CLIX",
+  "shell.brand.eyebrow": "EGEMED",
+  "shell.brand.name": "CLIX",
+  "shell.brand.tagline": "Klinik Öğrenme Platformu",
   "shell.skip": "İçeriğe geç",
   "shell.nav.label": "Ana gezinme",
   "shell.nav.home": "Ana",
@@ -74,6 +77,38 @@ export const tr = {
     "Moodle/LTI ve LRS bağlantı sağlığı, anahtarların yalnız durumu; sır değeri ekranda gösterilmez.",
   "admin.section.audit.desc":
     "Yönetici eylemleri, kurum ayarları, saklama ve erişim politikası.",
+  "home.hero.title": "Klinik becerileri gerçek verilerle, tek platformda geliştirin.",
+  "home.hero.lead":
+    "EKG, oskültasyon ve radyolojik görüntüleme simülatörleri; sistematik okuma, uygulama ve değerlendirme modları.",
+  "home.hero.cta": "Simülatörlere git",
+  "home.hero.secondary": "Nasıl çalışır?",
+  "home.greeting": "Hoş geldiniz",
+  "home.progress.title": "İlerlemem",
+  "home.progress.empty":
+    "Bir simülatörde ilk oturumunuzu tamamladığınızda ilerlemeniz burada görünür.",
+  "home.trust.title": "Neden güvenilir?",
+  "home.trust.data.title": "Açık ve atıflı veri",
+  "home.trust.data.body":
+    "Görüntü, ses ve EKG içerikleri lisansı ve kaynağı belgelenmiş açık veri setlerinden.",
+  "home.trust.faculty.title": "Öğretim üyesi denetimi",
+  "home.trust.faculty.body":
+    "İçerik, Ege Üniversitesi Tıp Fakültesi öğretim üyelerinin klinik validasyonundan geçer.",
+  "home.trust.privacy.title": "Kişisel veri asgari",
+  "home.trust.privacy.body":
+    "Öğrenme kayıtları kurum altyapısında kalır; simülatör verileri birbirine karışmaz.",
+  "sims.pulse.name": "Pulse",
+  "sims.pulse.tagline": "EKG ve Kardiyak Fizyoloji Simülatörü",
+  "sims.pulse.body": "12 derivasyon EKG'yi kalp döngüsüyle eşzamanlı okuyun.",
+  "sims.ausculta.name": "Ausculta",
+  "sims.ausculta.tagline": "Kardiyopulmoner Oskültasyon Simülatörü",
+  "sims.ausculta.body": "Gerçek kayıtlarla kalp ve akciğer seslerini sistematik dinleyin.",
+  "sims.opaca.name": "Opaca",
+  "sims.opaca.tagline": "Radyolojik Görüntüleme Simülatörü",
+  "sims.opaca.body": "Akciğer grafisi ve toraks BT'yi sistematik okumayı öğrenin.",
+  "sims.open": "Simülatörü aç",
+  "sims.soon": "Platforma taşınıyor",
+  "footer.institution": "Ege Üniversitesi Tıp Fakültesi",
+  "footer.rights": "EGEMED CLIX · Eğitim amaçlıdır, tanı aracı değildir.",
 } as const;
 
 export type TrKey = keyof typeof tr;
