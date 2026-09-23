@@ -23,14 +23,14 @@
   border: 0;
 }
 
-/* Tam klavye gezinmesi için görünür odak halkası. */
+/* Tam klavye gezinmesi için görünür odak halkası. Tüketicinin kendi
+   radius'unu ezmemek için border-radius verilmez. */
 .eg-card:focus-visible,
 .eg-badge:focus-visible,
 .eg-card :focus-visible,
 .eg-badge :focus-visible {
   outline: 2px solid var(--blue-600);
   outline-offset: 2px;
-  border-radius: var(--r-sm);
 }
 
 /* --- Kart --- */
@@ -80,17 +80,44 @@
   line-height: 1.4;
 }
 
-/* Ton yalnız kenarlıkta renklenir (>=3:1); metin her tonda --text kalır ve ton
-   bilgisi metin önekiyle de verilir (--green-600 küçük metinde AA değildir). */
+/* Ton kenarlıkta ve işarette renklenir (>=3:1); metin her tonda --text kalır
+   ve ton bilgisi metin önekiyle de verilir (--green-600 küçük metinde AA
+   değildir). */
 .eg-badge[data-tone="info"] { border-color: var(--blue-600); }
 .eg-badge[data-tone="success"] { border-color: var(--green-600); }
 .eg-badge[data-tone="warning"] { border-color: var(--amber-700); }
 .eg-badge[data-tone="danger"] { border-color: var(--red-600); }
 
-/* Dekoratif şekil: bilgi taşımaz, ekran okuyucudan gizlidir. */
+/* Ton işareti: bilgi taşır (şekil + renk), ekran okuyucudan gizlidir; ton
+   bilgisini önek metni verir. Renk körü kullanıcı için ton başına şekil
+   farklıdır (daire/kare/üçgen/elmas) ve şekil ton rengine boyanır. Renklerin
+   --card-soft üzerinde >=3:1 non-text kontrast olması hedeflenir (statik
+   doğrulanamaz; T09 e2e/axe). */
 .eg-badge__dot {
   width: var(--sp-2);
   height: var(--sp-2);
   border-radius: var(--r-pill);
-  background: currentColor;
+  background: var(--text);
+}
+
+.eg-badge[data-tone="info"] .eg-badge__dot {
+  background: var(--blue-600);
+  border-radius: var(--r-pill);
+}
+
+.eg-badge[data-tone="success"] .eg-badge__dot {
+  background: var(--green-600);
+  border-radius: 0;
+}
+
+.eg-badge[data-tone="warning"] .eg-badge__dot {
+  background: var(--amber-700);
+  border-radius: 0;
+  clip-path: polygon(50% 0, 100% 100%, 0 100%);
+}
+
+.eg-badge[data-tone="danger"] .eg-badge__dot {
+  background: var(--red-600);
+  border-radius: 0;
+  transform: rotate(45deg);
 }

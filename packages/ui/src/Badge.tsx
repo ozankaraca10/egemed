@@ -19,8 +19,10 @@ export interface BadgeProps {
 
 /**
  * Durum rozeti. Bilgi yalnız renkle verilmez: `neutral` dışındaki tonlarda
- * ekran okuyucuya gizli (görsel olarak gizlenmiş) bir ton öneki ve dekoratif
- * bir şekil eklenir; renk yalnız kenarlık ve şekilde kullanılır.
+ * ekran okuyucuya gizli bir ton öneki ve ton başına farklı, ton rengine
+ * boyanmış bir şekil (daire/kare/üçgen/elmas) eklenir. Şekil dekoratif
+ * değildir; renk körü kullanıcı için tonu ayırt eder ve ekran okuyucudan
+ * `aria-hidden` ile gizlenir (bilgiyi önek metni taşır).
  */
 export function Badge({ children, tone = "neutral", className }: BadgeProps): JSX.Element {
   const classes = className === undefined ? "eg-badge" : `eg-badge ${className}`;
