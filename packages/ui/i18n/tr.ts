@@ -15,11 +15,16 @@ export const tr = {
   "entry.field.username": "Kullanıcı adı",
   "entry.field.password": "Parola",
   "entry.error.required": "Bu alan zorunludur.",
+  "entry.error.invalid": "Kullanıcı adı veya parola hatalı.",
   "entry.action.login": "Giriş yap",
   "entry.back": "Geri dön",
   "entry.session.synthetic":
     "Bu sentetik test oturumu yalnız geliştirme ortamı içindir; gerçek öğrenci verisi kullanılmaz.",
   "entry.auth.pending": "Kimlik doğrulama henüz bağlı değil; bu ekran yalnız önizlemedir.",
+  "entry.dev.title": "Geliştirme hesabı",
+  "entry.dev.admin": "Kullanıcı adı: admin · Parola: egemed",
+  "entry.dev.student": "Kullanıcı adı: ogrenci · Parola: egemed",
+  "entry.dev.note": "Yalnız yerel geliştirmede çalışır; üretimde bu giriş kapalıdır.",
   "entry.help": "Giriş bilgileriniz kurum hesabınızla yönetilir; sorun için kurum BT birimine başvurun.",
   "shell.brand": "EGEMED CLIX",
   "shell.skip": "İçeriğe geç",
@@ -44,6 +49,31 @@ export const tr = {
   "shell.notFound.title": "Sayfa bulunamadı",
   "shell.notFound.body": "Bu adres kabukta tanımlı değil.",
   "shell.notFound.link": "Ana sayfaya dön",
+  "shell.session.admin": "Sahte yönetici",
+  "shell.session.student": "Sahte test öğrencisi",
+  "shell.session.logout": "Çıkış yap",
+  "shell.session.banner": "Geliştirme oturumu: gerçek kimlik doğrulama yok, veri kaydedilmez.",
+  "admin.title": "Yönetici paneli",
+  "admin.intro":
+    "Yönetici alanı taslağı. Bölümler kimlik ve yetki kararlarından (K1, K4) sonra açılacak.",
+  "admin.soon": "Yakında",
+  "admin.section.overview": "Özet",
+  "admin.section.users": "Kullanıcılar",
+  "admin.section.roles": "Roller ve erişim",
+  "admin.section.sims": "Simülatörler ve içerik",
+  "admin.section.integrations": "Entegrasyonlar",
+  "admin.section.audit": "Denetim ve ayarlar",
+  "admin.section.overview.desc":
+    "Kurum ve simülatör erişilebilirliği, son entegrasyon hataları, bekleyen yönetim işleri; bireysel öğrenci puanı yok.",
+  "admin.section.users.desc":
+    "Kurum dizininden gelen kullanıcıları arama, rol ve kapsam görüntüleme; seçilen kimlik modeline göre davet ve etkinleştirme.",
+  "admin.section.roles.desc":
+    "Rol matrisi, simülatör bazlı erişim, birim kapsamı, yetki değişikliği onayı.",
+  "admin.section.sims.desc": "Modül durumu, sürüm, görünürlük, içerik ataması.",
+  "admin.section.integrations.desc":
+    "Moodle/LTI ve LRS bağlantı sağlığı, anahtarların yalnız durumu; sır değeri ekranda gösterilmez.",
+  "admin.section.audit.desc":
+    "Yönetici eylemleri, kurum ayarları, saklama ve erişim politikası.",
 } as const;
 
 export type TrKey = keyof typeof tr;
