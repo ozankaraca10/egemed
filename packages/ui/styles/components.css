@@ -6,7 +6,8 @@
 /* Yerel UI değişkenleri: 44 px dokunma hedefi için aile token'ı yok
    (packages/tokens/README.md). --eg- önekiyle yerelde tutulur; T07b tüketir. */
 .eg-card,
-.eg-badge {
+.eg-badge,
+.eg-modal {
   --eg-touch-min: 44px;
 }
 
@@ -27,8 +28,10 @@
    radius'unu ezmemek için border-radius verilmez. */
 .eg-card:focus-visible,
 .eg-badge:focus-visible,
+.eg-modal:focus-visible,
 .eg-card :focus-visible,
-.eg-badge :focus-visible {
+.eg-badge :focus-visible,
+.eg-modal :focus-visible {
   outline: 2px solid var(--blue-600);
   outline-offset: 2px;
 }
@@ -234,4 +237,77 @@
   .eg-table__empty::before {
     content: none;
   }
+}
+
+/* --- Diyalog (Modal) --- */
+.eg-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--sp-4);
+}
+
+/* Yarı saydam perde ayrı öğede `opacity` ile verilir (renk literali yok). */
+.eg-modal__backdrop {
+  position: absolute;
+  inset: 0;
+  background: var(--navy-900);
+  opacity: 0.6;
+}
+
+.eg-modal__dialog {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 32rem;
+  max-height: 90vh;
+  overflow: auto;
+  box-sizing: border-box;
+  padding: var(--sp-5);
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-pop);
+  color: var(--text);
+  font-family: var(--font);
+}
+
+.eg-modal__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-3);
+  margin-bottom: var(--sp-4);
+}
+
+.eg-modal__title {
+  margin: 0;
+  font-size: var(--fs-lg);
+  line-height: 1.3;
+  color: var(--text);
+}
+
+.eg-modal__close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: var(--eg-touch-min);
+  min-height: var(--eg-touch-min);
+  padding: 0 var(--sp-3);
+  background: var(--card-soft);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--r-md);
+  color: var(--text);
+  font-family: var(--font);
+  font-size: var(--fs-md);
+  cursor: pointer;
+}
+
+.eg-modal__body {
+  font-size: var(--fs-md);
+  line-height: 1.5;
+  color: var(--text);
 }

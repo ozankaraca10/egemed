@@ -4,6 +4,7 @@ export const tr = {
   "badge.tone.success": "Başarılı",
   "badge.tone.warning": "Uyarı",
   "badge.tone.danger": "Hata",
+  "modal.close": "Kapat",
   "table.empty": "Kayıt bulunamadı",
 } as const;
 
