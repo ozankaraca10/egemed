@@ -1,3 +1,4 @@
 timestamp,task_id,phase,cli,tokens,cost
 2026-09-23T11:06:57.945368+00:00,f9391938-aab3-4d39-b9d6-28c30b9dfe64,running,opencode,,0.06
 2026-09-23T11:56:24.834468+00:00,3f1822d3-faed-4884-84a7-a7a915b32662,running,cursor-grok-4.7-high,,
+2026-09-23T12:01:53.961247+00:00,f9391938-aab3-4d39-b9d6-28c30b9dfe64,running,opencode,,0.02
