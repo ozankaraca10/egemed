@@ -38,4 +38,5 @@ Kabuk, kullanıcıya tek seferde tek simülatör sunar.
 
 ## Astra ikinci görüşü
 
-Bekleniyor.
+- ADR-006 bu ADR'nin SCORM paketi, iframe, `sims/*` içe aktarmama ve iframe mesajlaşması kararlarını geçersiz kıldı. Bu metin tarihsel karar olarak kalabilir; yeni görevler buradaki gömme kabul ölçütlerini kullanmamalıdır.
+- Korunan değişmez, aynı anda bir sim deneyimi ve sim başına ayrı durumdur. İç modül modelinde bunu SimHost mount/dispose, lazy rota ve CSS/asset kapsamı testleri kanıtlamalıdır.

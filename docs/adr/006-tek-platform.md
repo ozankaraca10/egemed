@@ -47,4 +47,6 @@ Vite+TS; Ausculta Vite+TS; Pulse düz JS, ~30 bin satır toplam).
 
 ## Astra ikinci görüşü
 
-Bekleniyor.
+- Yön uygundur; ancak kaynak envanteri nüansı önemlidir: Opaca ve Ausculta ekranları zaten React+TS, Pulse düz JS/DOM'dur. T15/T17 mevcut React uygulamalarını modül yapıp ortak UI'a uyarlamalı; T18 önce motor/DOM yaşam döngüsünü ayırmalıdır.
+- Sim modülleri `packages/sim-<id>` olarak ayrı lazy chunk, durum ve CSS kökü almalı. Host değişiminde listener, timer, RAF, ses bağlamı ve bekleyen yüklemeler temizlenmelidir. Kaynak SCORM otomatik yazımı ve global localStorage anahtarları körlemesine taşınmamalıdır.
+- Gerçek asset/base path, 360/768/1440, klavye ve kaynak regresyon testleri port dilimlerinde doğrulanmalıdır. xAPI profili kabul edilmeden sim olaylarını üretim ifadesine bağlamak ADR-004/005 sınırlarını fiilen sabitler.

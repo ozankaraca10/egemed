@@ -41,4 +41,6 @@ bu seçime bağlıdır.
 
 ## Astra ikinci görüşü
 
-Bekleniyor.
+- Vite+React tek kabuk kararı ADR-006 ile uyumludur; iframe gömme ve “ince kabuk” gerekçesi geçmiş kapsamdır. Opaca/Ausculta zaten React ekranları taşır, Pulse düz JS'dir; port planı bu farkı yansıtmalıdır.
+- Admin kimliği, rol kontrolü ve olası LRS vekili API sorumluluğunu büyütür. `apps/api` şu an yalnız iskelet olduğundan Hono/kimlik/CORS uygulaması ayrı onaylı görev olmalı; yeni bağımlılık kararı mevcut satırdan çıkarılamaz.
+- Statik kabukta menü/rota gizleme yetki sınırı değildir. Admin işlemleri kurum kapsamını sunucuda her istekte doğrulamalıdır.
