@@ -42,3 +42,7 @@ Cursor `agent mcp enable agtx` sonrası `agent mcp list` çıktısı `agtx: read
 
 ## Yüksek bağlam istisnası
 Kullanıcı Grok 4.7 kullanımına izin verdi. [Cursor Grok 4.7 belgesi](https://prod.cursor.com/docs/models/grok-4-7) `high` çabayı varsayılan olarak tanımlar; `max` çaba varyantı yok (`xhigh` var). Bu nedenle `scripts/agtx/cursor-grok.sh` modeli `grok-4.7` seçer ve varsayılan `high` kullanır. AGTX per-task ajan seçemediğinden, istisna görev ayrı worktree'de manuel Cursor oturumudur. `agent models` bu ortamda kimlik doğrulaması istedi; gerçek Grok çağrısı doğrulanmadı.
+
+T01 bootstrap: pnpm-lock.yaml ilk görevde üretileceğinden init script kilit dosyası yokken kurulumu atlar; sonraki iş ağaçlarında frozen install çalışır.
+
+Astra kullanımı: `.codex/config.toml` `model = "gpt-6-astra"`. Kritik ADR/xAPI/güvenlik/sözleşme kararlarında ikinci görüş ve Review denetimi; insan kararı yerine geçmez.
