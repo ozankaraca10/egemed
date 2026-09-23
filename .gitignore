@@ -5,5 +5,8 @@
 node_modules/
 dist/
 reports/
+.turbo/
+coverage/
+*.tsbuildinfo
 
 work/

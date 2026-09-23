@@ -1,0 +1,25 @@
+{
+  "name": "egemed-clix",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@10.34.5",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "lint": "eslint .",
+    "test": "vitest run",
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "devDependencies": {
+    "@eslint/js": "9.39.5",
+    "eslint": "9.39.5",
+    "turbo": "2.11.3",
+    "typescript": "5.9.3",
+    "typescript-eslint": "8.70.1",
+    "vitest": "3.2.7"
+  }
+}
