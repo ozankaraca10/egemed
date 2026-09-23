@@ -46,3 +46,5 @@ Kullanıcı Grok 4.7 kullanımına izin verdi. [Cursor Grok 4.7 belgesi](https:/
 T01 bootstrap: pnpm-lock.yaml ilk görevde üretileceğinden init script kilit dosyası yokken kurulumu atlar; sonraki iş ağaçlarında frozen install çalışır.
 
 Astra kullanımı: `.codex/config.toml` `model = "gpt-6-astra"`. Kritik ADR/xAPI/güvenlik/sözleşme kararlarında ikinci görüş ve Review denetimi; insan kararı yerine geçmez.
+
+AGTX beceri yolu düzeltmesi: 1.0.6 `resolve_skill_content` eklenti kökünde `<ad>/SKILL.md` arıyor; `skills/<ad>/SKILL.md` yalnız başına okunmuyor. İstenen `skills/` kaynak düzeni korundu ve eklenti köküne `agtx-*` sembolik bağlantıları eklendi. T01'in ilk worktree'si bu düzeltmeden önce yaratıldığı için varsayılan AGTX becerisi kopyalanmıştı; plan Claude Code'a doğrudan görev talimatıyla yazdırıldı.
