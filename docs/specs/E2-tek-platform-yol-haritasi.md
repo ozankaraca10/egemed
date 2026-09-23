@@ -53,6 +53,20 @@ Her kod görevi tek paket/uygulama ve yaklaşık 400 satır diff hedefler. Sözl
 - **Entegrasyonlar:** Moodle/LTI ve LRS bağlantı sağlığı, anahtarların yalnız durumu; sır değeri ekranda gösterilmez.
 - **Denetim ve ayarlar:** yönetici eylemleri, kurum ayarları, saklama ve erişim politikası.
 
+## Önerilen ilk yetki matrisi
+
+Bu matris K1/K4 kararı verilene dek uygulama yetkisi değildir. CLIX'te yerel parola, öğrenci listesi ve ifade okuma API'si öngörmez.
+
+| Rol | Görür / yapar | Göremez |
+|---|---|---|
+| Öğrenci | Moodle/LTI bağlamında yetkili sim | Admin alanı |
+| Eğitmen | Ders/ödev/not için Moodle; ileride kurum LRS raporu ayrı karar | CLIX admin ve başka ders/kurum |
+| Kurum yöneticisi | Kendi kurum entegrasyon sağlığı, IdP grup→rol eşlemesi, sim erişimi | Ham öğrenci ifadesi, başka kurum, sırların açık değeri |
+| Platform operasyonu | Dağıtım/sim sürümü ve anonim sağlık ölçümleri | Varsayılan olarak öğrenci/ifade içeriği |
+| Destek | Salt okunur sağlık ve anonim hata kimliği | Konfigürasyon yazma ve öğrenme verisi |
+
+Admin UI rolü yalnız sunum için kullanır; her API isteği rol ve kurum kapsamını sunucuda yeniden doğrular. İlk API taslağı: `GET /admin/health`, `GET/PUT /admin/integrations/:id`, `GET/PUT /admin/modules/:simId`, `GET/PUT /admin/role-mappings`, `GET /admin/audit`. Gizli değerler yalnız yazılır, okuma yanıtında dönmez. Kurum dizini bağlantısı kabul edilirse kullanıcı araması kuruma vekâlet eden uç noktadan yapılır; CLIX roster veritabanı tutulmaz.
+
 ## Doğrulama ve denetim
 
 - Her dilimde `pnpm turbo lint typecheck test`; çalışan sim portlarında kaynak davranış testleri; etkilenen rotalarda mobil e2e.
