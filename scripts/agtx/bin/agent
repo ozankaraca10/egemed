@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+set -euo pipefail
+# AGTX starts Cursor as `agent`; pin planning to the approved Grok variant.
+exec cursor-agent --model grok-4.7-high "$@"

@@ -1,7 +1,7 @@
 name = "egemed-terse"
 description = "EGEMED CLIX faz akışı"
 init_script = "scripts/agtx/patch-worktree-config.sh {agent}"
-supported_agents = ["claude", "codex", "opencode"]
+supported_agents = ["claude", "codex", "opencode", "cursor"]
 copy_files = ["AGENTS.md", "CLAUDE.md"]
 clear_context_on_advance = true
 cyclic = false

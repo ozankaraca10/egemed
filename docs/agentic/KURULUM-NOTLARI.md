@@ -55,3 +55,6 @@ AGTX 1.0.6 iş ağacındaki `opencode.json`, `.codex/config.toml` ve MCP dosyala
 `claude auth status` oturumu doğruladı. AGTX T01'i Planning sütununa taşıdı; worktree ve tmux penceresi oluştu. Claude Code oturum başlığı `Opus 5.5 · Claude Pro` gösterdi; `.egemed-run/plan.md` üretildi. İlk geçiş, güven değişimi nedeniyle Backlog'da kalmıştı; `agtx trust` ve pano yeniden başlatma sonrası ikinci geçiş tamamlandı. T01 Running başlamadı; E0 taslağının insan onayı bekleniyor.
 
 Kullanıcı E0 ve T01 planını 23 Eylül 2026 tarihinde onayladı; T01 Running aşamasına geçebilir. Node 22 / pnpm 10 sürüm ailesi uygulanır.
+
+## Claude kotası sonrası geçici planlama — 23 Eylül 2026
+Kullanıcının açık yönlendirmesiyle Claude Code kotası bitince `[agents].planning = "cursor"` seçildi. AGTX 1.0.6 Cursor'ı `agent` ikilisiyle başlatır ve faz başına `--model` alanı yoktur. `scripts/agtx/board.sh`, proje içindeki `scripts/agtx/bin/agent` sarmalayıcısını PATH başına koyar; bu sarmalayıcı gerçek Cursor CLI'yi `--model grok-4.7-high` ile çalıştırır. `agent models` bu tam model kimliğini Grok 4.7 High olarak listeledi. Eklentilerin `supported_agents` listesine Cursor eklendi. Bu ayar, yeni açılacak Planning oturumları içindir; mevcut T01/T02 artefaktları değiştirilmez. Kritik kararlar yine Astra ikinci görüşü ve insan onayı bekler.
