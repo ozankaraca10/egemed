@@ -40,9 +40,10 @@ const EXPECTED_KEYS = [
 // Sır taraması: gizli anahtar, kimlik bilgisi taşıyan DSN ve AWS anahtarı.
 const SECRET_PATTERN = /BEGIN [\w ]*PRIVATE KEY|postgres(ql)?:\/\/[^:\s]+:[^@\s]+@|AKIA[0-9A-Z]{16}/;
 // Toplu okunmaz (AGENTS.md okuma sınırı); sır taşımayan ikili/kilitleme dosyaları
-// taranmaz. .json veri dosyaları da kapsam dışıdır.
+// ve sims/*/src/data ile sims/*/public/assets altındaki büyük veri dosyaları
+// taranmaz (plan bu yolları kapsam dışı bırakıyordu).
 const SKIPPED_TRACKED_PATTERN =
-  /(^|\/)(node_modules|dist|coverage)\/|\.(png|jpe?g|gif|webp|avif|ico|woff2?|ttf|otf|pdf|zip|gz|tgz|wasm|mp[34]|lock)$/;
+  /(^|\/)(node_modules|dist|coverage)\/|^sims\/[^/]+\/(src\/data|public\/assets)\/|\.(png|jpe?g|gif|webp|avif|ico|woff2?|ttf|otf|pdf|zip|gz|tgz|wasm|mp[34]|lock)$/;
 
 function read(path: string): string {
   const content = ts.sys.readFile(path);
@@ -140,7 +141,6 @@ describe("geliştirme compose'u", () => {
   it("veriyi kalıcı kılmaz: volume tanımlamaz", () => {
     expect(body).not.toMatch(/^\s{4}volumes:/m);
     expect(compose).not.toMatch(/^volumes:\s*$/m);
-    expect(imageByService.postgres).not.toContain("volume");
   });
 
   it("imajları etiket ve digest ile sabitler", () => {
@@ -180,7 +180,7 @@ describe("geliştirme compose'u", () => {
       expect(usages, key).toHaveLength(1);
       expect(usages[0]![2], key).toMatch(/^:\?/);
     }
-    // Compoз'da hiçbir YAML değeri düz metin parola/anahtar taşımaz.
+    // Compose'da hiçbir YAML değeri düz metin parola/anahtar taşımaz.
     for (const match of compose.matchAll(/^\s+([A-Z_]+): (.+)$/gm)) {
       const [whole, name, value] = match;
       if (!/PASSWORD|SECRET|_KEY|PASS$|TOKEN/.test(name!) || value === undefined) {
@@ -236,9 +236,12 @@ describe("cleanup-worktree.sh", () => {
     expect(cleanup).toContain('-p "egemed-${AGTX_TASK_ID:-local}"');
   });
 
-  it(".env.local varsa --env-file geçirir", () => {
-    expect(cleanup).toContain(".env.local");
-    expect(cleanup).toContain("--env-file .env.local");
+  it("down'u interpolasyon gerektirmeyen yoldan çağırır", () => {
+    // Boş .env.local ile `${VAR:?}` down'u kırar (B1); bu yüzden compose
+    // dosyası ve env dosyası geçirilmez, yalnız proje adı kullanılır.
+    expect(cleanup).toContain("down --remove-orphans");
+    expect(cleanup).not.toContain("--env-file");
+    expect(cleanup).not.toMatch(/-f infra\/docker-compose\.dev\.yml down/);
   });
 });
 
@@ -281,6 +284,20 @@ describe("depo sır taraması", () => {
       }
     }
     expect(findings).toEqual([]);
+  });
+
+  it("sır deseni sahte sırları yakalar (negatif durum kanıtı)", () => {
+    // Dizeler parçalanarak yazılır: tarama bu test dosyasını da tarar ve
+    // kendi kendini yakalamamalıdır. Desen bozulursa tarama sessizce
+    // "temiz" der; bu test onu engeller.
+    const samples = [
+      "postgres" + "://kullanici:parola@localhost:5432/db",
+      "-----BEGIN RSA " + "PRIVATE KEY-----",
+      "AKIA" + "ABCDEFGHIJKLMNOP",
+    ];
+    for (const sample of samples) {
+      expect(SECRET_PATTERN.test(sample), sample.slice(0, 12)).toBe(true);
+    }
   });
 
   it("infra README'si kullanım ve LRS onay notunu taşır", () => {

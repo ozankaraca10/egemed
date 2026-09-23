@@ -22,12 +22,19 @@ Sırlar yalnızca `${VAR:?}` ile interpolasyon yapar; değer yoksa `up`/`down`
 net bir hatayla durur (tanımsız sırla sessizce çalışmaz). Volume tanımlanmaz;
 geliştirme verisi geçicidir ve `down` sonrası kaybolur.
 
+> Bir AGTX görev worktree'sinde `pnpm infra:up` **çalıştırmayın**: tüm
+> worktree'ler aynı `egemed-local` proje adını ve portları paylaşır, proje adı
+> çakışır. Gerekiyorsa elle `docker compose -p egemed-local down
+> --remove-orphans` ile kapatın; görev cleanup betiği `egemed-<görev>`
+> projesini kapatır.
+
 Bağlantı noktaları: `POSTGRES_PORT` (varsayılan 5432), `LRS_PORT` (varsayılan
-8080). LRS uç noktası biçimi `http://localhost:8080/xapi`; sağlık ucu
-`http://localhost:8080/health`, yönetim arayüzü `http://localhost:8080/admin`.
+8080). LRS uç noktası biçimi `http://localhost:8080/xapi` (lrsql varsayılan yol
+öneki `/xapi`); sağlık ucu `http://localhost:8080/health`, yönetim arayüzü
+`http://localhost:8080/admin`.
 
 ```sh
-docker compose -f infra/docker-compose.dev.yml --env-file .env.local config
+docker compose -p egemed-local -f infra/docker-compose.dev.yml --env-file .env.local config
 ```
 
 ## LRS seçimi
