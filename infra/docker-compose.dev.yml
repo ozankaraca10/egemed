@@ -1,0 +1,39 @@
+# EGEMED CLIX geliştirme altyapısı: Postgres + SQL LRS (yetanalytics/lrsql).
+# ADR-004: CLIX ifade saklamaz; geliştirme LRS'si CLIX Postgres'inden ayrıdır,
+# bu yüzden iki servis arasında bağımlılık kurulmaz ve LRS Postgres'e bağlanmaz.
+# Sırlar yalnız .env.local'den gelir; repoda değer yoktur. Volume tanımlanmaz:
+# geliştirme verisi geçicidir (kalıcı veri istenirse ayrı onaylı görev).
+# Kullanım: pnpm infra:up / pnpm infra:down (bkz. infra/README.md).
+services:
+  postgres:
+    image: postgres:18.4-alpine@sha256:9a8afca54e7861fd90fab5fdf4c42477a6b1cb7d293595148e674e0a3181de15
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:?zorunlu (.env.local)}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?zorunlu (.env.local)}
+      POSTGRES_DB: ${POSTGRES_DB:?zorunlu (.env.local)}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+  lrs:
+    image: yetanalytics/lrsql:v0.9.8@sha256:3f566dae7f05c5f7745507436de582b4cb12e0eb93b4bc0a3d38861d0ccb9bad
+    environment:
+      # Tohum API anahtarı ve yönetici hesabı; yalnız geliştirme içindir.
+      LRSQL_API_KEY_DEFAULT: ${LRS_API_KEY:?zorunlu (.env.local)}
+      LRSQL_API_SECRET_DEFAULT: ${LRS_API_SECRET:?zorunlu (.env.local)}
+      LRSQL_ADMIN_USER_DEFAULT: ${LRS_ADMIN_USER:?zorunlu (.env.local)}
+      LRSQL_ADMIN_PASS_DEFAULT: ${LRS_ADMIN_PASS:?zorunlu (.env.local)}
+    ports:
+      - "${LRS_PORT:-8080}:8080"
+    healthcheck:
+      # lrsql /health ucu; imajda busybox wget bulunur (v0.9.8, alpine 3.19).
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:8080/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 40s
