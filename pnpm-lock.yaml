@@ -71,6 +71,12 @@ importers:
 
   packages/sim-host: {}
 
+  packages/sim-opaca:
+    dependencies:
+      '@egemed/sim-host':
+        specifier: workspace:*
+        version: link:../sim-host
+
   packages/tokens: {}
 
   packages/ui:
