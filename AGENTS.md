@@ -20,3 +20,5 @@ Her görev tek paket/uygulama ve yaklaşık en fazla 400 satır diff hedefler. A
 
 ## Okuma sınırı
 `sims/*/src/data/*.json`, `sims/*/public/assets/**`, `**/dist/**`, `**/*.lock`, `reports/**` topluca okunmaz. Gerekirse sadece hedefli `head` veya `jq`. Gerçek veri veya sır içeren dosyayı ajan bağlamına alma.
+
+Uzun bağlam ve yüksek token gerektiren istisna görevlerde, insan triage sonrası Cursor CLI Grok 4.7 `high` kullanılabilir. AGTX faz ajanı proje düzeyinde olduğu için bu görevler ayrı worktree içinde `scripts/agtx/cursor-grok.sh` ile elle yürütülür; varsayılan Running OpenCode DeepSeek V4.1 Flash `max` kalır.

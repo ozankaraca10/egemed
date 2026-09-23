@@ -39,3 +39,6 @@ OpenCode `agent.build` ayarında `model = opencode-go/deepseek-v4.1-flash`, `var
 ## Cursor CLI sonradan kuruldu
 `cursor` komut adı yok; AGTX 1.0.6 Cursor için `agent` binary'sini kullanıyor. `cursor-agent --version` = `2026.09.18-9a7762b`, `agent` PATH'te. Proje `.cursor/mcp.json` dosyasına AGTX MCP kaydı eklendi. Running tercihi kullanıcı isteğiyle OpenCode DeepSeek V4.1 Flash max olarak kalıyor. Cursor MCP ve Sonnet oturumu çalıştırılarak doğrulanmadı. Önceki "Cursor CLI yok" notu ilk kurulum anının tespitidir, güncel durum değildir.
 Cursor `agent mcp enable agtx` sonrası `agent mcp list` çıktısı `agtx: ready` gösterdi.
+
+## Yüksek bağlam istisnası
+Kullanıcı Grok 4.7 kullanımına izin verdi. [Cursor Grok 4.7 belgesi](https://prod.cursor.com/docs/models/grok-4-7) `high` çabayı varsayılan olarak tanımlar; `max` çaba varyantı yok (`xhigh` var). Bu nedenle `scripts/agtx/cursor-grok.sh` modeli `grok-4.7` seçer ve varsayılan `high` kullanır. AGTX per-task ajan seçemediğinden, istisna görev ayrı worktree'de manuel Cursor oturumudur. `agent models` bu ortamda kimlik doğrulaması istedi; gerçek Grok çağrısı doğrulanmadı.
