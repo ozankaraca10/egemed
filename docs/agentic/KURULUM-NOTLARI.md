@@ -55,3 +55,31 @@ AGTX 1.0.6 iş ağacındaki `opencode.json`, `.codex/config.toml` ve MCP dosyala
 `claude auth status` oturumu doğruladı. AGTX T01'i Planning sütununa taşıdı; worktree ve tmux penceresi oluştu. Claude Code oturum başlığı `Opus 5.5 · Claude Pro` gösterdi; `.egemed-run/plan.md` üretildi. İlk geçiş, güven değişimi nedeniyle Backlog'da kalmıştı; `agtx trust` ve pano yeniden başlatma sonrası ikinci geçiş tamamlandı. T01 Running başlamadı; E0 taslağının insan onayı bekleniyor.
 
 Kullanıcı E0 ve T01 planını 23 Eylül 2026 tarihinde onayladı; T01 Running aşamasına geçebilir. Node 22 / pnpm 10 sürüm ailesi uygulanır.
+
+## T13 — faz geçişi teşhisi (23 Eylül 2026)
+
+Üç uyumsuzluk AGTX 1.0.6 ikilisinde. Proje betikleri durumu yazmıyor; bu repoda dar betik yaması yok. Kaynak: ana depo `work/agtx-source`.
+
+### Exited, OpenCode tmux canlı (T01)
+
+Kanıt: `f9391938-T01-Monorepo-iskeleti/.agtx/status/f9391938-aab3-4d39-b9d6-28c30b9dfe64.json` içinde `state=ended`, `agent=claude`, `ts=1790160487` (13:48:07). Aynı saniye `transition_requests.ac75d06d` `move_to_running`, `processed_at=2026-09-23T10:48:07Z`, `claimed_by=57dbc7da`. Pencere `tmux -L agtx` üzerinde `egemed-clinical-learning-experience-platform-clix:task-f9391938-T01-Monorepo-iskeleti`, `pane_dead=0`, `pane_current_command=node`.
+
+Kaynak: `src/agent/hook_status.rs` `read_status` yalnız `Working` kaydını süreli düşürür; `Ended` kalır. `src/agent/spec.rs` OpenCode `hook_config: None`, bu dosyayı yenilemez. `src/tui/app.rs` oturum yenilemesi `HookState::Ended` iken kartı `Exited` yapar; pencere listede olsa da.
+
+Geçici işletim: OpenCode kartı Exited iken pencereyi `tmux -L agtx list-windows` ve `display -p -t <hedef> '#{pane_dead} #{pane_current_command}'` ile doğrula. Pencere canlı ve status dosyası önceki ajanın (`claude`) `ended` kaydıysa o json dosyasını sil. Sonraki yenileme pane özetine döner.
+
+### Running → Review: veritabanı codex, pencere geride
+
+Kanıt: T01 satırı `status=review`, `agent=codex`, `phase_entered_at=2026-09-23T11:39:08Z`. Bu an `move_to_review` (`2a97a7e6`) `processed_at` ile aynı. Daha erken `move_forward` (`8ed7c960`, 10:57:06Z) ikinci TUI `eaa2fe3d` tarafından ~170 ms içinde kapatıldı; o sürecin günlüğünde `Processing transition request` satırı yok. Görev metni 11:08:30Z'de yazıldı: pencere OpenCode kaldı. Teşhis anındaki kaydırma tamponu 11:39 denemesinde `codex --sandbox workspace-write '$agtx-review …'` satırını ve canlı Codex oturumunu gösterdi. `agent=codex` anahtarın bittiğini kanıtlamaz.
+
+Kaynak: `src/tui/app.rs` `mcp_transition_to_review` durumu ve ajanı yazar, `spawn_send_to_agent` işini arka planda bırakır. `switch_agent_in_tmux` OpenCode çıkışını `/exit` olarak birleşik `send_keys` ile yollar (`SendStrategy::OpenCodePicker`). `is_pane_at_shell` `node` sürecini ajan saymaz; kuyrukta `Ask anything` yoksa kabuk varsayar ve `codex` satırını OpenCode içine yazabilir.
+
+Geçici işletim: Tek `agtx` TUI açık kalsın (`claimed_by` iki kimlik görürse ikinciyi kapat). Geçişten sonra pencereyi oku. Hâlâ OpenCode ise komut oraya gitmiştir. OpenCode kabuğa düşünce aynı pencerede Codex'i başlat veya görevi Running'e alıp canlı TUI'den yeniden Review'a taşı.
+
+### void `move_to_running` completed, satır Backlog (T13)
+
+Kanıt: `3f1822d3-faed-4884-84a7-a7a915b32662` `plugin=void`, `status=backlog`, `session_name` ve `worktree_path` boş. İstek `ad369f0a` `move_to_running` `requested_at=2026-09-23T11:09:03.767Z`, `processed_at=…03.938Z`, `error` boş, `claimed_by=eaa2fe3d`. Diskte `.agtx/worktrees/3f1822d3-T13-AGTX-faz-geçişi-ve-Exited` 14:09:04'te oluştu (`.egemed-run`, `.agtx/skills`); tmux penceresi yok.
+
+Kaynak: `src/mcp/server.rs` `get_transition_status` — `processed_at` dolu ve `error` yoksa `completed`. `src/tui/app.rs` `try_start_next_queued_setup`, `move_backlog_to_running_by_id` `Ok` dönünce `resolve_queued_request` ile isteği kapatır. Bu `Ok`, kurulum iş parçacığı bitmeden döner. Hata yalnız kısa TUI uyarısıdır; satır Backlog kalır. `plugins/void/plugin.toml` komut ve prompt tanımlamaz; `WorkflowPlugin::phase_accepts_task` bu yüzden Backlog çıkışını engellemez.
+
+Geçici işletim: MCP `completed` sonrası `tasks.status` ve `worktree_path` oku. Backlog duruyorsa ve yetim iş ağacı varsa `git worktree remove` ile kaldır, sonra geçişi panodan tekrarla. `get_transition_status` fazın değiştiğini söylemez.
