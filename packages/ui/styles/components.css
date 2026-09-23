@@ -29,9 +29,11 @@
 .eg-card:focus-visible,
 .eg-badge:focus-visible,
 .eg-modal:focus-visible,
+.eg-mode-card:focus-visible,
 .eg-card :focus-visible,
 .eg-badge :focus-visible,
-.eg-modal :focus-visible {
+.eg-modal :focus-visible,
+.eg-mode-card :focus-visible {
   outline: 2px solid var(--blue-600);
   outline-offset: 2px;
 }
@@ -310,4 +312,172 @@
   font-size: var(--fs-md);
   line-height: 1.5;
   color: var(--text);
+}
+
+/* --- Mod kartı (İnceleme / Uygulama / Değerlendirme) --- */
+/* Izgara: geniş ekranda üç kolon, 1024 px altında tek kolon; `minmax(0, 1fr)`
+   ve border-box 360 px'te yatay taşmayı önler. */
+.eg-mode-card-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--sp-5);
+}
+
+@media (max-width: 1024px) {
+  .eg-mode-card-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.eg-mode-card {
+  --eg-touch-min: 44px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+  box-sizing: border-box;
+  padding: var(--sp-5) var(--sp-5) var(--sp-4);
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-card);
+  color: var(--text);
+  font-family: var(--font);
+  text-align: center;
+}
+
+/* Ton başına vurgu ve yumuşak zemin; tek yerden yönetilir. */
+.eg-mode-card[data-tone="learn"] { --eg-mode-accent: var(--green-600); --eg-mode-accent-soft: var(--green-50); }
+.eg-mode-card[data-tone="practice"] { --eg-mode-accent: var(--blue-600); --eg-mode-accent-soft: var(--blue-50); }
+.eg-mode-card[data-tone="assessment"] { --eg-mode-accent: var(--purple-600); --eg-mode-accent-soft: var(--purple-50); }
+
+.eg-mode-card__head {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-2);
+}
+
+.eg-mode-card__icon {
+  display: grid;
+  place-items: center;
+  width: 60px;
+  height: 60px;
+  border-radius: var(--r-pill);
+  background: var(--eg-mode-accent-soft);
+  color: var(--eg-mode-accent);
+}
+
+/* Kilit rozeti: bilgi metinle verilir; simge sönükleşir. */
+.eg-mode-card__lock {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--sp-1) var(--sp-2);
+  background: var(--card-soft);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--r-pill);
+  color: var(--muted);
+  font-size: var(--fs-xs);
+  font-weight: 700;
+}
+
+.eg-mode-card[data-locked="true"] .eg-mode-card__icon {
+  background: var(--card-soft);
+  color: var(--muted);
+}
+
+.eg-mode-card__title {
+  margin: 0;
+  font-size: var(--fs-xl);
+  font-weight: 700;
+  line-height: 1.3;
+  color: var(--eg-mode-accent);
+}
+
+.eg-mode-card__desc {
+  margin: 0;
+  color: var(--muted);
+  font-size: var(--fs-md);
+  line-height: 1.5;
+}
+
+.eg-mode-card__items {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  text-align: left;
+}
+
+.eg-mode-card__item {
+  display: flex;
+  align-items: baseline;
+  gap: var(--sp-2);
+  font-size: var(--fs-md);
+  line-height: 1.5;
+}
+
+.eg-mode-card__check {
+  color: var(--eg-mode-accent);
+  font-weight: 700;
+}
+
+.eg-mode-card__status {
+  margin: 0;
+  color: var(--muted);
+  font-size: var(--fs-sm);
+  line-height: 1.5;
+  text-align: left;
+}
+
+.eg-mode-card[data-locked="true"] .eg-mode-card__status {
+  color: var(--amber-700);
+}
+
+.eg-mode-card__progress {
+  height: 6px;
+  overflow: hidden;
+  background: var(--eg-mode-accent-soft);
+  border-radius: var(--r-pill);
+}
+
+.eg-mode-card__bar {
+  display: block;
+  height: 100%;
+  background: var(--eg-mode-accent);
+  border-radius: var(--r-pill);
+}
+
+/* CTA: en az 44 px dokunma hedefi. Etiket --text'tir; dolgu yerine ton kenarı
+   ve yumuşak zemin kullanılır (--green-600 üzerinde küçük metin AA değildir). */
+.eg-mode-card__action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-2);
+  width: 100%;
+  min-height: var(--eg-touch-min);
+  margin-top: auto;
+  padding: var(--sp-2) var(--sp-4);
+  box-sizing: border-box;
+  background: var(--eg-mode-accent-soft);
+  border: 1px solid var(--eg-mode-accent);
+  border-radius: var(--r-md);
+  color: var(--text);
+  font-family: var(--font);
+  font-size: var(--fs-md);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* Kilitli CTA: renk dışında da ayrışır (kesikli çerçeve, sönük kenar). */
+.eg-mode-card[data-locked="true"] .eg-mode-card__action {
+  background: var(--card);
+  border-color: var(--border-strong);
+  border-style: dashed;
+}
+
+.eg-mode-card__arrow {
+  font-weight: 700;
 }
