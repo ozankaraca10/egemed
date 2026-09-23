@@ -35,6 +35,8 @@ const EXPECTED_KEYS = [
   "LRS_API_SECRET",
   "LRS_ADMIN_USER",
   "LRS_ADMIN_PASS",
+  "XAPI_ACTIVITY_BASE_IRI",
+  "XAPI_ACTOR_HOMEPAGE",
 ] as const;
 
 // Sır taraması: gizli anahtar, kimlik bilgisi taşıyan DSN ve AWS anahtarı.
