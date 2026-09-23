@@ -52,6 +52,10 @@ const appConfigs = ts.sys
   .readDirectory("apps", [".json"], ["**/node_modules/**"], ["*/tsconfig.json"])
   .sort();
 
+const packageConfigs = ts.sys
+  .readDirectory("packages", [".json"], ["**/node_modules/**"], ["*/tsconfig.json"])
+  .sort();
+
 describe("tsconfig sözleşmesi", () => {
   it("apps altındaki uygulama tsconfig'lerini bulur", () => {
     expect(appConfigs).toEqual(["apps/api/tsconfig.json", "apps/shell/tsconfig.json"]);
@@ -65,6 +69,22 @@ describe("tsconfig sözleşmesi", () => {
 
   it("her uygulama tsconfig'i dört strict bayrağı korur", () => {
     for (const configFileName of appConfigs) {
+      assertRequiredFlags(configFileName);
+    }
+  });
+
+  it("packages altındaki paket tsconfig'lerini bulur", () => {
+    expect(packageConfigs).toEqual(["packages/ui/tsconfig.json"]);
+  });
+
+  it("her paket tsconfig'i kök base dosyasını genişletir", () => {
+    for (const configFileName of packageConfigs) {
+      expect(readRawExtends(configFileName), configFileName).toBe("../../tsconfig.base.json");
+    }
+  });
+
+  it("her paket tsconfig'i dört strict bayrağı korur", () => {
+    for (const configFileName of packageConfigs) {
       assertRequiredFlags(configFileName);
     }
   });

@@ -20,6 +20,7 @@
         "apps/**/package.json",
         "apps/**/tsconfig.json",
         "packages/**/*.ts",
+        "packages/**/*.tsx",
         "packages/**/package.json",
         "packages/**/tsconfig.json",
         "tests/**/*.ts"
@@ -34,11 +35,20 @@
         "tsconfig.base.json",
         "tsconfig.json",
         "apps/*/tsconfig.json",
-        "apps/**/*.ts"
+        "apps/**/*.ts",
+        "packages/**/*.{ts,tsx,css}",
+        "packages/*/tsconfig.json"
       ]
     },
     "//#typecheck": {
-      "inputs": ["tsconfig.json", "tsconfig.base.json", "*.ts", "tests/**/*.ts"]
+      "inputs": [
+        "tsconfig.json",
+        "tsconfig.base.json",
+        "*.ts",
+        "tests/**/*.ts",
+        "packages/**/*.{ts,tsx,css}",
+        "packages/*/tsconfig.json"
+      ]
     }
   }
 }
