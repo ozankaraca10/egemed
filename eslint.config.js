@@ -3,7 +3,7 @@ import tseslint from "typescript-eslint";
 
 export default tseslint.config(
   {
-    ignores: ["**/dist/**", "**/.turbo/**", "**/coverage/**", "sims/**"],
+    ignores: ["**/dist/**", "**/.turbo/**", "**/coverage/**", "sims/**", "work/**"],
   },
   js.configs.recommended,
   ...tseslint.configs.recommended,
