@@ -50,3 +50,6 @@ Astra kullanımı: `.codex/config.toml` `model = "gpt-6-astra"`. Kritik ADR/xAPI
 AGTX beceri yolu düzeltmesi: 1.0.6 `resolve_skill_content` eklenti kökünde `<ad>/SKILL.md` arıyor; `skills/<ad>/SKILL.md` yalnız başına okunmuyor. İstenen `skills/` kaynak düzeni korundu ve eklenti köküne `agtx-*` sembolik bağlantıları eklendi. T01'in ilk worktree'si bu düzeltmeden önce yaratıldığı için varsayılan AGTX becerisi kopyalanmıştı; plan Claude Code'a doğrudan görev talimatıyla yazdırıldı.
 
 AGTX 1.0.6 iş ağacındaki `opencode.json`, `.codex/config.toml` ve MCP dosyalarını tekrar yazıp proje modeli/yerel DB yönlendirmesini siliyor. Eklenti `init_script` artık `scripts/agtx/patch-worktree-config.sh` çalıştırır; AGTX beceri/MCP dağıtımından sonra model seçimi ve proje-scoped MCP yeniden uygulanır.
+
+## T01 başlangıç doğrulaması
+`claude auth status` oturumu doğruladı. AGTX T01'i Planning sütununa taşıdı; worktree ve tmux penceresi oluştu. Claude Code oturum başlığı `Opus 5.5 · Claude Pro` gösterdi; `.egemed-run/plan.md` üretildi. İlk geçiş, güven değişimi nedeniyle Backlog'da kalmıştı; `agtx trust` ve pano yeniden başlatma sonrası ikinci geçiş tamamlandı. T01 Running başlamadı; E0 taslağının insan onayı bekleniyor.
