@@ -32,3 +32,6 @@ Kullanıcı isteğiyle `[agents].running = "opencode"` yapıldı. `opencode.json
 
 ## Claude Code Opus planlama
 Kullanıcı tercihi: Planning ve yeniden planlama Claude Code içindeki Opus ile yapılır. `.claude/settings.json` içindeki `model = opus` proje seçicisi korunur; AGTX `[agents].planning = claude` olarak kalır. Belirli Opus 5.5 sürümüne erişim, gerçek Claude oturumunda doğrulanmalıdır.
+
+## DeepSeek varyantı
+OpenCode `agent.build` ayarında `model = opencode-go/deepseek-v4.1-flash`, `variant = max` seçildi. Kurulu OpenCode 1.18.30 üzerinde `opencode debug agent build` çıktısı bu model kimliğini ve `max` varyantını doğruladı. Sağlayıcıya gerçek çağrı henüz yapılmadı. AGTX OpenCode oturumunda build ajanını kullanır; bu ayar hem Research hem Running fazına uygulanır.

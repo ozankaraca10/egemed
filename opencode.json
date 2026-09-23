@@ -19,5 +19,11 @@
       "enabled": true
     }
   },
-  "model": "opencode-go/deepseek-v4.1-flash"
+  "model": "opencode-go/deepseek-v4.1-flash",
+  "agent": {
+    "build": {
+      "model": "opencode-go/deepseek-v4.1-flash",
+      "variant": "max"
+    }
+  }
 }
