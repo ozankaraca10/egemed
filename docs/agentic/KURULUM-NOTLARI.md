@@ -111,3 +111,16 @@ Kullanıcı talimatıyla Planning ve review işleri tekrar Claude Code'a verilir
 `[agents].planning = "claude"` geri alındı. ADR/xAPI/güvenlik/sözleşme kararlarında
 Astra ikinci görüşü kotası dönene dek `Bekleniyor.` kalır; review ikinci görüşü bu
 araçta Claude Opus verir, insan onayının yerini tutmaz.
+
+## T07 ailesi kapanışı — 23 Eylül 2026 (manuel orkestrasyon, 1 saatlik devir turu)
+Kullanıcı OpenCode kotası bitmeden işleri ajanlara devretti. Bu tur: T07 planı ve T07b
+planı Claude Opus; yürütme OpenCode DeepSeek alt ajanları; review Claude Opus (rev. 1
+CHANGES → rework → rev. 2 APPROVE döngüsü T07, T07b, T07c'nin üçünde de işledi);
+kapılar her merge öncesi orkestratörce node22 ile `--force` doğrulandı. Sonuç: T07
+(kurulum+i18n+Card+Badge), T07b (Tabs+Table kart listesi), T07c (Modal+odak yönetimi)
+merge edildi; `packages/ui` tamamlandı, 58 test/10 dosya yeşil. Tekrarlayan bulgu sınıfı:
+`box-sizing: border-box` eksikliği (T07b B1, T07c B1) — yeni CSS'te dikkat. T07b
+review'unun T07c'ye bıraktığı iki karar (kök tsconfig DOM lib'e dokunmadan yapısal
+tipler; color-mix yasağının korunması) T07c'de uygulandı. E0 sonrası sıradaki: T08
+(ADR-002/003 kabulü bekler), T09 (Playwright, T08 sonrası); T05/T06 ADR-004/005 kabulü
+bekler; T12 kaynak bekler.
