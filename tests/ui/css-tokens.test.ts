@@ -126,3 +126,35 @@ describe("components.css token sözleşmesi", () => {
     expect(captureAll("color: var(--tanimsiz);", varPattern)).toEqual(["--tanimsiz"]);
   });
 });
+
+/** Verilen seçicinin ilk kural gövdesini döndürür (yoksa boş dize). */
+function ruleBody(selector: string): string {
+  const escaped = selector.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  return new RegExp(`${escaped}\\s*\\{([^}]*)\\}`).exec(components)?.[1] ?? "";
+}
+
+/** Mobil kart bloğundaki paylaşılan `.eg-table tr` kutu kuralının gövdesi. */
+function mobileTableBoxRule(): string {
+  return /\.eg-table tr,[\s\S]*?\{([^}]*)\}/.exec(components)?.[1] ?? "";
+}
+describe("components.css T07b bileşen sözleşmesi", () => {
+  it("yeni seçicileri, 44px dokunma hedefini ve mobil kart listesini tanımlar", () => {
+    for (const selector of [".eg-tabs__list", ".eg-tabs__tab", ".eg-table"]) {
+      expect(ruleBody(selector).length, selector).toBeGreaterThan(0);
+    }
+    expect(components).toMatch(/--eg-touch-min:\s*44px/);
+    expect(ruleBody(".eg-tabs__tab")).toMatch(/min-height:\s*var\(--eg-touch-min\)/);
+    expect(components).toContain("@media (max-width: 767.98px)");
+    expect(components).toMatch(/content:\s*attr\(data-label\)/);
+  });
+
+  it("mobil tablo satır kutusunu border-box ile taşmaya karşı korur (B1)", () => {
+    expect(mobileTableBoxRule()).toMatch(/box-sizing:\s*border-box/);
+  });
+
+  it("etkin sekme işaretini renk dışında da sabitler (not 4)", () => {
+    const selected = ruleBody('.eg-tabs__tab[aria-selected="true"]');
+    expect(selected).toMatch(/box-shadow:\s*inset 0 -3px/);
+    expect(selected).toMatch(/font-weight:\s*600/);
+  });
+});
