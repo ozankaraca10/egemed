@@ -16,5 +16,6 @@ describe("i18n/tr sözlüğü", () => {
     expect(t("badge.tone.success")).toBe("Başarılı");
     expect(t("badge.tone.warning")).toBe("Uyarı");
     expect(t("badge.tone.danger")).toBe("Hata");
+    expect(t("modal.close")).toBe("Kapat");
   });
 });
