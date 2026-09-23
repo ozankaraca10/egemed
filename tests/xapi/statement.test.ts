@@ -152,6 +152,18 @@ describe("xAPI ifadesi", () => {
     expect(() => buildScored("passed", input(), Number.NaN)).toThrow(RangeError);
   });
 
+  it("buildStatement skor sınırını toResult yolunda da uygular (B1)", () => {
+    expect(buildStatement("passed", input(), { scoreScaled: 0.5 }).result).toEqual({
+      score: { scaled: 0.5 },
+    });
+    expect(() => buildStatement("passed", input(), { scoreScaled: 1.5 })).toThrow(RangeError);
+    expect(() => buildStatement("failed", input(), { scoreScaled: -1.5 })).toThrow(RangeError);
+    expect(() => buildStatement("passed", input(), { scoreScaled: Number.NaN })).toThrow(RangeError);
+    expect(() =>
+      buildStatement("passed", input(), { scoreScaled: Number.POSITIVE_INFINITY }),
+    ).toThrow(RangeError);
+  });
+
   it("üretilen ifade saf veridir (JSON round-trip)", () => {
     for (const verb of VERB_KEYS) {
       const statement = buildStatement(verb, input());

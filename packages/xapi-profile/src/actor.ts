@@ -1,3 +1,4 @@
+import { assertHttpsIri } from "./iri";
 import type { OpaqueActorId } from "./profile";
 
 /** Opak kimlik biçimi: 8–128 karakter; `@` ve boşluk yok (ADR-005). */
@@ -22,16 +23,6 @@ export interface XapiActor {
 
 /** Doğrulanmış aktör üretir; `homePage` https değilse RangeError. */
 export function opaqueActor(homePage: string, id: OpaqueActorId): XapiActor {
-  const scheme = "https://";
-  if (
-    homePage.length <= scheme.length ||
-    !homePage.startsWith(scheme) ||
-    homePage.charAt(scheme.length) === "/"
-  ) {
-    throw new RangeError(`homePage https olmalı: ${JSON.stringify(homePage)}`);
-  }
-  if (/[\s?#]/.test(homePage)) {
-    throw new RangeError(`Geçersiz homePage: ${JSON.stringify(homePage)}`);
-  }
+  assertHttpsIri(homePage, "homePage https olmalı", "Geçersiz homePage");
   return { objectType: "Agent", account: { homePage, name: id } };
 }

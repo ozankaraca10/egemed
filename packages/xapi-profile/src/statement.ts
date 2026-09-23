@@ -51,12 +51,26 @@ export interface XapiStatement {
   readonly timestamp: string;
 }
 
+/**
+ * `score.scaled` değişmezi: sonlu ve [-1,1] aralığında olmalı (xAPI 1.0.3
+ * §4.1.5.1). Tüm üretici yolları `toResult` üzerinden buradan geçer. İç
+ * yardımcıdır; paket API'sine (`index.ts`) dışa aktarılmaz (B1).
+ */
+function assertScaled(scoreScaled: number): number {
+  if (!Number.isFinite(scoreScaled) || scoreScaled < -1 || scoreScaled > 1) {
+    throw new RangeError(`scoreScaled [-1,1] aralığında olmalı: ${scoreScaled}`);
+  }
+  return scoreScaled;
+}
+
 /** Dolu alanları koşullu yayarak saf `XapiResult` üretir. */
 function toResult(result: ResultInput): XapiResult {
   return {
     ...(result.success === undefined ? {} : { success: result.success }),
     ...(result.completion === undefined ? {} : { completion: result.completion }),
-    ...(result.scoreScaled === undefined ? {} : { score: { scaled: result.scoreScaled } }),
+    ...(result.scoreScaled === undefined
+      ? {}
+      : { score: { scaled: assertScaled(result.scoreScaled) } }),
     ...(result.response === undefined ? {} : { response: result.response }),
   };
 }
@@ -97,14 +111,11 @@ export function buildAnswered(
   );
 }
 
-/** `passed`/`failed` fiili; skor [-1,1] dışındaysa RangeError. */
+/** `passed`/`failed` fiili; skor [-1,1] dışındaysa RangeError (`assertScaled`). */
 export function buildScored(
   verb: "passed" | "failed",
   input: StatementInput,
   scoreScaled: number,
 ): XapiStatement {
-  if (!Number.isFinite(scoreScaled) || scoreScaled < -1 || scoreScaled > 1) {
-    throw new RangeError(`scoreScaled [-1,1] aralığında olmalı: ${scoreScaled}`);
-  }
   return buildStatement(verb, input, { scoreScaled });
 }

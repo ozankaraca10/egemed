@@ -17,21 +17,34 @@ function assertSegment(value: string, label: string): void {
 }
 
 /**
+ * Ortak `https://` değişmezi: şema https, yetki (authority) dolu, sorgu/
+ * fragment/boşluk yok. Hata metinleri çağırana bırakılır. İç yardımcıdır;
+ * paket API'sine (`index.ts`) dışa aktarılmaz (N3).
+ */
+export function assertHttpsIri(
+  value: string,
+  invalidSchemeMessage: string,
+  invalidCharsMessage: string,
+): void {
+  const scheme = "https://";
+  if (
+    value.length <= scheme.length ||
+    !value.startsWith(scheme) ||
+    value.charAt(scheme.length) === "/"
+  ) {
+    throw new RangeError(`${invalidSchemeMessage}: ${JSON.stringify(value)}`);
+  }
+  if (/[\s?#]/.test(value)) {
+    throw new RangeError(`${invalidCharsMessage}: ${JSON.stringify(value)}`);
+  }
+}
+
+/**
  * base: https, yetki (authority) dolu, sonda "/" zorunlu; sorgu ve fragment
  * yasak. Kök TS lib seti DOM/Node içermediğinden `URL` yerine regex kullanılır.
  */
 function assertBase(base: string): void {
-  const scheme = "https://";
-  if (
-    base.length <= scheme.length ||
-    !base.startsWith(scheme) ||
-    base.charAt(scheme.length) === "/"
-  ) {
-    throw new RangeError(`Geçersiz base IRI: ${JSON.stringify(base)}`);
-  }
-  if (/[\s?#]/.test(base)) {
-    throw new RangeError(`base sorgu veya fragment taşıyamaz: ${JSON.stringify(base)}`);
-  }
+  assertHttpsIri(base, "Geçersiz base IRI", "base sorgu veya fragment taşıyamaz");
   if (!base.endsWith("/")) {
     throw new RangeError(`base "/" ile bitmeli: ${JSON.stringify(base)}`);
   }

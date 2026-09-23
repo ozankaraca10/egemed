@@ -3,7 +3,8 @@
 Durum: **Önerildi.** "Kabul" durumuna yalnız insan geçirir
 (`docs/specs/E0-temel.md`). **İnsan xAPI profilini onaylar (KARAR görevi:
 T06).** Onay gelmeden bu profilin tüketicileri (xapi-client, T10, T11)
-Running'e alınmaz.
+Running'e alınmaz. **Profil tüketicilerinden (`packages/xapi-client`,
+`sims/**` taşıma, oyunlaştırma) önce merge edilir.**
 
 Kapsam: fiil kataloğu, etkinlik tipleri, extension IRI'leri, activity IRI
 üreticisi, opak aktör, Europe/Istanbul damgası ve saf `build*Statement`
@@ -55,6 +56,10 @@ kurum LRS tabanı değildir.
 - Opak kimlik biçimi `^[A-Za-z0-9._:-]{8,128}$`; `@` ve boşluk yasaktır.
   Biçim tek noktadan (`packages/xapi-profile/src/actor.ts`) ayarlanır
   (research.md açık soru 4).
+- Biçim kontrolü opaklığı garanti etmez; opaklık kimliği üreten kurum
+  tarafının sorumluluğudur.
+- `result.response` serbest metindir; tüketici görevlerinde (T10/T11)
+  yanıtın seçenek kimliği/kodlu değer olması kuralı yazılmalıdır.
 - Kimliğin KAYNAĞI (LTI 1.3 / SCORM `cmi.learner_id`) bu profilde
   sabitlenmez; yalnız biçim kısıtlanır.
 
