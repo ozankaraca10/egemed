@@ -53,6 +53,80 @@
   background: var(--blue-700); border-radius: var(--r-md); color: var(--card);
   font-weight: 600; text-decoration: none;
 }
+.eg-shell-entry {
+  --eg-entry-touch: 44px;
+  display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
+  min-height: 100vh; min-height: 100dvh; background: var(--bg-grad-b);
+  color: var(--text); font-family: var(--font); font-size: var(--fs-md); line-height: 1.5;
+}
+.eg-shell-entry :focus-visible { outline: 2px solid var(--blue-600); outline-offset: 3px; }
+.eg-shell-entry__brand {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  box-sizing: border-box; min-width: 0; padding: var(--sp-6);
+  background: linear-gradient(145deg, var(--navy-900), var(--navy-700)); color: var(--card); text-align: center;
+}
+.eg-shell-entry__logo { width: clamp(5rem, 12vw, 9rem); height: auto; }
+.eg-shell-entry__name { margin: var(--sp-4) 0 var(--sp-2); font-size: var(--fs-3xl); font-weight: 700; letter-spacing: .02em; }
+.eg-shell-entry__tagline { max-width: 28rem; margin: 0; color: var(--blue-100); font-size: var(--fs-xl); }
+.eg-shell-entry__main {
+  display: flex; align-items: center; justify-content: center; box-sizing: border-box;
+  min-width: 0; padding: var(--sp-6);
+}
+.eg-shell-entry__panel {
+  box-sizing: border-box; width: min(100%, 30rem); padding: var(--sp-6);
+  background: var(--card); border: 1px solid var(--border); border-radius: var(--r-lg);
+  box-shadow: var(--shadow-card);
+}
+.eg-shell-entry__roles {
+  display: flex; gap: var(--sp-2); margin-bottom: var(--sp-5); padding: var(--sp-1);
+  background: var(--card-soft); border: 1px solid var(--border); border-radius: var(--r-pill);
+}
+.eg-shell-entry__roles a {
+  display: inline-flex; flex: 1; align-items: center; justify-content: center;
+  min-height: var(--eg-entry-touch); padding: 0 var(--sp-2); border-radius: var(--r-pill);
+  color: var(--muted); font-size: var(--fs-sm); font-weight: 600; text-align: center; text-decoration: none;
+}
+.eg-shell-entry__roles a[aria-current="page"] {
+  background: var(--blue-700); color: var(--card); box-shadow: inset 0 -3px 0 var(--navy-900);
+}
+.eg-shell-entry__title { margin: 0 0 var(--sp-2); color: var(--navy-900); font-size: var(--fs-2xl); line-height: 1.2; }
+.eg-shell-entry__help { margin: 0 0 var(--sp-4); color: var(--muted); }
+.eg-shell-entry__notice, .eg-shell-entry__status {
+  margin: 0 0 var(--sp-4); padding: var(--sp-3); border: 1px solid var(--blue-600);
+  border-radius: var(--r-sm); background: var(--blue-50); color: var(--navy-900); font-size: var(--fs-sm);
+}
+.eg-shell-entry__form { display: grid; gap: var(--sp-2); }
+.eg-shell-entry__label { margin-top: var(--sp-2); color: var(--text); font-weight: 600; }
+.eg-shell-entry__input {
+  box-sizing: border-box; width: 100%; min-height: 48px; padding: var(--sp-2) var(--sp-3);
+  border: 1px solid var(--border-strong); border-radius: var(--r-sm); background: var(--card);
+  color: var(--text); font: inherit;
+}
+.eg-shell-entry__submit {
+  min-height: var(--eg-entry-touch); margin-top: var(--sp-3); padding: var(--sp-2) var(--sp-4);
+  border: 0; border-radius: var(--r-md); background: var(--blue-700); color: var(--card);
+  font: inherit; font-weight: 700; cursor: pointer;
+}
+.eg-shell-entry__back { display: inline-flex; align-items: center; min-height: var(--eg-entry-touch); margin-top: var(--sp-3); color: var(--blue-700); font-weight: 600; }
+@media (max-width: 768px) {
+  .eg-shell-entry { grid-template-columns: minmax(0, 1fr); }
+  .eg-shell-entry__brand { min-height: 13rem; padding: var(--sp-4); }
+  .eg-shell-entry__logo { width: 4.5rem; }
+  .eg-shell-entry__name { margin: var(--sp-2) 0; font-size: var(--fs-2xl); }
+  .eg-shell-entry__tagline { font-size: var(--fs-md); }
+  .eg-shell-entry__main { align-items: flex-start; padding: var(--sp-4) var(--sp-3) calc(var(--sp-5) + env(safe-area-inset-bottom)); }
+  .eg-shell-entry__panel { padding: var(--sp-4); }
+}
+@media (max-width: 380px) {
+  .eg-shell-entry__brand { min-height: 11rem; }
+  .eg-shell-entry__roles { gap: var(--sp-1); }
+  .eg-shell-entry__roles a { font-size: var(--fs-xs); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .eg-shell-entry *, .eg-shell-entry *::before, .eg-shell-entry *::after {
+    scroll-behavior: auto; animation-duration: .01ms; transition-duration: .01ms;
+  }
+}
 @media (min-width: 768px) {
   .eg-shell-nav { position: static; gap: var(--sp-2); padding: 0; background: none; border-top: 0; }
   .eg-shell-nav__link { flex: 0 0 auto; padding: 0 var(--sp-3); font-size: var(--fs-md); }
