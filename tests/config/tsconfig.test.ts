@@ -75,6 +75,7 @@ describe("tsconfig sözleşmesi", () => {
 
   it("packages altındaki paket tsconfig'lerini bulur", () => {
     expect(packageConfigs).toEqual([
+      "packages/sim-host/tsconfig.json",
       "packages/ui/tsconfig.json",
       "packages/xapi-profile/tsconfig.json",
     ]);

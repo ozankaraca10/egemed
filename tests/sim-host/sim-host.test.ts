@@ -1,0 +1,218 @@
+import { describe, expect, it } from "vitest";
+import { createSimHost, isSimulatorId, SIMULATOR_IDS } from "../../packages/sim-host/src/SimHost";
+import type { SimHostEvents, SimModule, SimMountContext, SimMountTarget, SimulatorId } from "../../packages/sim-host/src/SimHost";
+
+const NOW = 1_760_000_000_000;
+
+function deferred() {
+  let resolve!: (module: SimModule) => void;
+  let reject!: (error: unknown) => void;
+  const promise = new Promise<SimModule>((res, rej) => {
+    resolve = res;
+    reject = rej;
+  });
+  return { promise, resolve, reject };
+}
+
+/** Promise zincirinin oturması için mikro görevleri boşaltır. */
+const flush = async (): Promise<void> => {
+  await Promise.resolve();
+  await Promise.resolve();
+};
+
+const messageOf = (error: unknown): string =>
+  error instanceof Error ? error.message : String(error);
+
+function fake(id: SimulatorId, onDispose?: () => void) {
+  const contexts: SimMountContext[] = [];
+  let disposals = 0;
+  const module: SimModule = {
+    id,
+    mount(_target, context) {
+      contexts.push(context);
+      return () => {
+        disposals += 1;
+        onDispose?.();
+      };
+    },
+  };
+  return { module, contexts, disposeCount: () => disposals };
+}
+
+function harness(load: (simId: SimulatorId) => Promise<SimModule>, withEvents = true) {
+  const log = {
+    loading: [] as SimulatorId[],
+    ready: [] as SimulatorId[],
+    errors: [] as { simId: SimulatorId; error: unknown }[],
+  };
+  const events: SimHostEvents = withEvents
+    ? { onLoading: (id) => log.loading.push(id), onReady: (id) => log.ready.push(id), onError: (id, error) => log.errors.push({ simId: id, error }) }
+    : {};
+  const host = createSimHost({ load, now: () => NOW, events });
+  return { host, log, target: { appendChild: (node) => node } as SimMountTarget };
+}
+
+describe("sim kimliği", () => {
+  it("kapalı birlik tipini çalışma zamanında doğrular", () => {
+    expect(SIMULATOR_IDS).toEqual(["pulse", "ausculta", "opaca"]);
+    for (const id of SIMULATOR_IDS) expect(isSimulatorId(id)).toBe(true);
+    for (const value of ["kalp", "", null, 42, { id: "pulse" }]) expect(isSimulatorId(value)).toBe(false);
+  });
+
+  it("bilinmeyen kimlik reddedilir, etkin oturum korunur", async () => {
+    const pulse = fake("pulse");
+    const { host, log, target } = harness(() => Promise.resolve(pulse.module));
+    host.mount(target, "pulse");
+    await flush();
+    expect(() => host.mount(target, "kalp" as unknown as SimulatorId)).toThrow(/Bilinmeyen/);
+    expect([host.active, log.errors]).toEqual(["pulse", []]);
+  });
+});
+
+describe("SimHost yaşam döngüsü", () => {
+  it("istenen bağlamla mount eder; loading/active/ready sırası doğrudur", async () => {
+    const pending = deferred();
+    const pulse = fake("pulse");
+    const { host, log, target } = harness(() => pending.promise);
+    host.mount(target, "pulse");
+    expect([host.loading, host.active, log.loading]).toEqual(["pulse", null, ["pulse"]]);
+    pending.resolve(pulse.module);
+    await flush();
+    expect([host.loading, host.active, log.ready, log.errors]).toEqual([null, "pulse", ["pulse"], []]);
+    const [context] = pulse.contexts;
+    expect([context?.simId, context?.now()]).toEqual(["pulse", NOW]);
+  });
+
+  it("yeni mount önceki oturumu kapatır", async () => {
+    const pulse = fake("pulse");
+    const opaca = fake("opaca");
+    const { host, log, target } = harness((simId) =>
+      Promise.resolve(simId === "pulse" ? pulse.module : opaca.module),
+    );
+    host.mount(target, "pulse");
+    await flush();
+    host.mount(target, "opaca");
+    await flush();
+    expect([pulse.disposeCount(), opaca.disposeCount()]).toEqual([1, 0]);
+    expect([host.active, log.ready, log.errors]).toEqual(["opaca", ["pulse", "opaca"], []]);
+  });
+
+  it("dispose oturumu kapatır ve idempotenttir", async () => {
+    const pulse = fake("pulse");
+    const { host, log, target } = harness(() => Promise.resolve(pulse.module));
+    host.mount(target, "pulse");
+    await flush();
+    host.dispose();
+    host.dispose();
+    expect([host.active, pulse.disposeCount(), log.errors]).toEqual([null, 1, []]);
+  });
+
+  it.each(["dispose", "yeni mount"] as const)(
+    "geç çözülen yükleme mount edilmez (%s sonrası)",
+    async (mode) => {
+      const slow = deferred();
+      const pulse = fake("pulse");
+      const next = fake("ausculta");
+      const { host, log, target } = harness((simId) =>
+        simId === "pulse" ? slow.promise : Promise.resolve(next.module),
+      );
+      host.mount(target, "pulse");
+      if (mode === "dispose") host.dispose();
+      else host.mount(target, "ausculta");
+      await flush();
+      slow.resolve(pulse.module);
+      await flush();
+      expect([host.active, pulse.contexts.length, log.errors]).toEqual([mode === "dispose" ? null : "ausculta", 0, []]);
+      expect(log.ready).toEqual(mode === "dispose" ? [] : ["ausculta"]);
+    },
+  );
+
+  it("mount sırasında host dispose edilirse geç gelen oturum hemen temizlenir", async () => {
+    let disposals = 0;
+    const { host, log, target } = harness(() =>
+      Promise.resolve({
+        id: "pulse",
+        mount() {
+          host.dispose();
+          return () => {
+            disposals += 1;
+          };
+        },
+      }),
+    );
+    host.mount(target, "pulse");
+    await flush();
+    expect([host.active, host.loading, disposals, log.ready, log.errors]).toEqual([null, null, 1, [], []]);
+  });
+
+  it.each(["mount", "dispose"] as const)(
+    "temizlik sırasında başlayan yeni mount ezilmez (%s yolu)",
+    async (entry) => {
+      const ausculta = fake("ausculta");
+      const h = harness((simId) =>
+        Promise.resolve(simId === "pulse" ? pulse.module : ausculta.module),
+      );
+      const pulse = fake("pulse", () => h.host.mount(h.target, "ausculta"));
+      h.host.mount(h.target, "pulse");
+      await flush();
+      if (entry === "mount") h.host.mount(h.target, "ausculta");
+      else h.host.dispose();
+      await flush();
+      expect([pulse.disposeCount(), ausculta.contexts.length]).toEqual([1, 1]);
+      expect([h.host.active, h.host.loading]).toEqual(["ausculta", null]);
+      expect([h.log.loading, h.log.ready, h.log.errors]).toEqual([["pulse", "ausculta"], ["pulse", "ausculta"], []]);
+    },
+  );
+});
+
+const failures: readonly { ad: string; load: () => Promise<SimModule>; beklenen: string }[] = [
+  { ad: "senkron yükleme hatası", load: () => { throw new Error("yükleme hatası"); }, beklenen: "yükleme hatası" },
+  { ad: "asenkron reddetme", load: () => Promise.reject(new Error("ağ hatası")), beklenen: "ağ hatası" },
+  { ad: "yanlış modül kimliği", load: () => Promise.resolve(fake("opaca").module), beklenen: "Yükleyici pulse istendiğinde opaca modülü döndürdü" },
+  { ad: "mount hatası", load: () => Promise.resolve({ id: "pulse", mount() { throw new Error("mount hatası"); } }), beklenen: "mount hatası" },
+  { ad: "cleanup yerine undefined", load: () => Promise.resolve({ id: "pulse", mount: () => undefined } as unknown as SimModule), beklenen: "Sim modülü pulse geçerli bir cleanup fonksiyonu döndürmedi" },
+];
+
+describe("SimHost hata yolları", () => {
+  it.each(failures)(
+    "$ad: oturum kurulmaz, onError bildirilir, host toparlanır",
+    async ({ load, beklenen }) => {
+      const pulse = fake("pulse");
+      let calls = 0;
+      const { host, log, target } = harness(() => {
+        calls += 1;
+        return calls === 1 ? load() : Promise.resolve(pulse.module);
+      });
+      host.mount(target, "pulse");
+      await flush();
+      expect([host.active, host.loading, log.ready]).toEqual([null, null, []]);
+      expect([log.errors[0]?.simId, messageOf(log.errors[0]?.error)]).toEqual(["pulse", beklenen]);
+      host.mount(target, "pulse");
+      await flush();
+      expect([host.active, log.errors.length]).toEqual(["pulse", 1]);
+    },
+  );
+
+  it("temizlik fırlatırsa onError bildirilir, oturum kapanır", async () => {
+    const pulse = fake("pulse", () => {
+      throw new Error("temizlik hatası");
+    });
+    const { host, log, target } = harness(() => Promise.resolve(pulse.module));
+    host.mount(target, "pulse");
+    await flush();
+    host.dispose();
+    host.dispose();
+    expect([host.active, pulse.disposeCount()]).toEqual([null, 1]);
+    expect(log.errors.map((entry) => messageOf(entry.error))).toEqual(["temizlik hatası"]);
+  });
+
+  it("olay geri çağrıları isteğe bağlıdır", async () => {
+    const pending = deferred();
+    const { host, target } = harness(() => pending.promise, false);
+    host.mount(target, "opaca");
+    pending.reject(new Error("yok"));
+    await flush();
+    host.dispose();
+    expect([host.active, host.loading]).toEqual([null, null]);
+  });
+});

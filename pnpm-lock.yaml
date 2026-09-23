@@ -69,6 +69,8 @@ importers:
         specifier: 8.3.0
         version: 8.3.0(esbuild@0.28.2)
 
+  packages/sim-host: {}
+
   packages/tokens: {}
 
   packages/ui:
