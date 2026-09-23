@@ -1,0 +1,96 @@
+/*
+ * @egemed/ui stil temeli. Renk/tipografi/radius/boşluk YALNIZ packages/tokens
+ * değişkenlerinden gelir; renk literali (hex/rgb/hsl) kullanılmaz (test edilir).
+ */
+
+/* Yerel UI değişkenleri: 44 px dokunma hedefi için aile token'ı yok
+   (packages/tokens/README.md). --eg- önekiyle yerelde tutulur; T07b tüketir. */
+.eg-card,
+.eg-badge {
+  --eg-touch-min: 44px;
+}
+
+/* Yalnız ekran okuyucuya görünen içerik (renk dışı ton işareti). */
+.eg-visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Tam klavye gezinmesi için görünür odak halkası. */
+.eg-card:focus-visible,
+.eg-badge:focus-visible,
+.eg-card :focus-visible,
+.eg-badge :focus-visible {
+  outline: 2px solid var(--blue-600);
+  outline-offset: 2px;
+  border-radius: var(--r-sm);
+}
+
+/* --- Kart --- */
+.eg-card {
+  display: block;
+  padding: var(--sp-4);
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-card);
+  color: var(--text);
+  font-family: var(--font);
+}
+
+.eg-card__title {
+  margin: 0 0 var(--sp-3);
+  font-size: var(--fs-lg);
+  line-height: 1.3;
+  color: var(--text);
+}
+
+.eg-card__body {
+  font-size: var(--fs-md);
+  line-height: 1.5;
+}
+
+.eg-card__footer {
+  margin-top: var(--sp-4);
+  padding-top: var(--sp-3);
+  border-top: 1px solid var(--border);
+  color: var(--muted);
+  font-size: var(--fs-sm);
+}
+
+/* --- Rozet --- */
+.eg-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-1);
+  padding: var(--sp-1) var(--sp-2);
+  background: var(--card-soft);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--r-pill);
+  color: var(--text);
+  font-family: var(--font);
+  font-size: var(--fs-xs);
+  line-height: 1.4;
+}
+
+/* Ton yalnız kenarlıkta renklenir (>=3:1); metin her tonda --text kalır ve ton
+   bilgisi metin önekiyle de verilir (--green-600 küçük metinde AA değildir). */
+.eg-badge[data-tone="info"] { border-color: var(--blue-600); }
+.eg-badge[data-tone="success"] { border-color: var(--green-600); }
+.eg-badge[data-tone="warning"] { border-color: var(--amber-700); }
+.eg-badge[data-tone="danger"] { border-color: var(--red-600); }
+
+/* Dekoratif şekil: bilgi taşımaz, ekran okuyucudan gizlidir. */
+.eg-badge__dot {
+  width: var(--sp-2);
+  height: var(--sp-2);
+  border-radius: var(--r-pill);
+  background: currentColor;
+}
