@@ -26,7 +26,15 @@
       ]
     },
     "//#test": {
-      "inputs": ["vitest.config.ts", "tests/**/*.ts", "tsconfig.base.json", "tsconfig.json"]
+      "inputs": [
+        "vitest.config.ts",
+        "eslint.config.js",
+        "tests/**/*.ts",
+        "tsconfig.base.json",
+        "tsconfig.json",
+        "apps/*/tsconfig.json",
+        "apps/**/*.ts"
+      ]
     },
     "//#typecheck": {
       "inputs": ["tsconfig.json", "tsconfig.base.json", "*.ts", "tests/**/*.ts"]
