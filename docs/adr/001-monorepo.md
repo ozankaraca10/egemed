@@ -1,6 +1,7 @@
 # ADR-001: Monorepo
 
-Durum: Önerildi
+Durum: Kabul
+Kabul eden: depo sahibi (canlı oturum), 2026-09-23
 Tarih: 2026-09-23
 
 ## Bağlam
