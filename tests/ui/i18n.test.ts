@@ -31,6 +31,39 @@ const adminKeys: TrKey[] = [
   "admin.section.audit.desc",
 ];
 
+const premiumKeys: TrKey[] = [
+  "shell.brand.eyebrow",
+  "shell.brand.name",
+  "shell.brand.tagline",
+  "home.hero.title",
+  "home.hero.lead",
+  "home.hero.cta",
+  "home.hero.secondary",
+  "home.greeting",
+  "home.progress.title",
+  "home.progress.empty",
+  "home.trust.title",
+  "home.trust.data.title",
+  "home.trust.data.body",
+  "home.trust.faculty.title",
+  "home.trust.faculty.body",
+  "home.trust.privacy.title",
+  "home.trust.privacy.body",
+  "sims.pulse.name",
+  "sims.pulse.tagline",
+  "sims.pulse.body",
+  "sims.ausculta.name",
+  "sims.ausculta.tagline",
+  "sims.ausculta.body",
+  "sims.opaca.name",
+  "sims.opaca.tagline",
+  "sims.opaca.body",
+  "sims.open",
+  "sims.soon",
+  "footer.institution",
+  "footer.rights",
+];
+
 describe("i18n/tr sözlüğü", () => {
   it("her değer boş olmayan bir dizedir", () => {
     const entries = Object.entries(tr);
@@ -63,5 +96,19 @@ describe("i18n/tr sözlüğü", () => {
     }
     expect(t("admin.soon")).toBe("Yakında");
     expect(t("admin.section.overview")).toBe("Özet");
+  });
+
+  it("premium platform anahtarları tanımlı ve boş değil", () => {
+    for (const key of premiumKeys) {
+      expect(t(key).trim().length, key).toBeGreaterThan(0);
+    }
+    expect(t("shell.brand.eyebrow")).toBe("EGEMED");
+    expect(t("shell.brand.name")).toBe("CLIX");
+    expect(t("shell.brand.tagline")).toBe("Klinik Öğrenme Platformu");
+    expect(t("home.greeting")).toBe("Hoş geldiniz");
+    expect(t("home.hero.cta")).toBe("Simülatörlere git");
+    expect(t("sims.open")).toBe("Simülatörü aç");
+    expect(t("sims.soon")).toBe("Platforma taşınıyor");
+    expect(t("footer.institution")).toBe("Ege Üniversitesi Tıp Fakültesi");
   });
 });
