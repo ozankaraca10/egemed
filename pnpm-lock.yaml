@@ -84,6 +84,8 @@ importers:
         specifier: 19.3.0
         version: 19.3.0
 
+  packages/xapi-profile: {}
+
 packages:
 
   '@esbuild/aix-ppc64@0.28.2':

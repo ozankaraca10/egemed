@@ -74,7 +74,10 @@ describe("tsconfig sözleşmesi", () => {
   });
 
   it("packages altındaki paket tsconfig'lerini bulur", () => {
-    expect(packageConfigs).toEqual(["packages/ui/tsconfig.json"]);
+    expect(packageConfigs).toEqual([
+      "packages/ui/tsconfig.json",
+      "packages/xapi-profile/tsconfig.json",
+    ]);
   });
 
   it("her paket tsconfig'i kök base dosyasını genişletir", () => {
