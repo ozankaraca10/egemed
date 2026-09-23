@@ -17,6 +17,8 @@
         "eslint.config.js",
         "*.ts",
         "apps/**/*.ts",
+        "apps/**/*.tsx",
+        "apps/**/*.css",
         "apps/**/package.json",
         "apps/**/tsconfig.json",
         "packages/**/*.ts",
@@ -36,6 +38,8 @@
         "tsconfig.json",
         "apps/*/tsconfig.json",
         "apps/**/*.ts",
+        "apps/**/*.tsx",
+        "apps/**/*.css",
         "packages/**/*.{ts,tsx,css}",
         "packages/*/tsconfig.json"
       ]

@@ -1,0 +1,60 @@
+/* T08 kabuk düzeni. Renk/tipografi/boşluk yalnız packages/tokens aile
+   token'larından gelir; renk literali kullanılmaz. Mobil öncelikli:
+   <768 px alt sekme çubuğu, >=768 px üst bar; dokunma hedefleri >=44 px. */
+.eg-shell {
+  /* Aile token'ında 44 px dokunma hedefi yok; yerelde --eg- önekiyle tutulur. */
+  --eg-shell-touch-min: 44px;
+  position: relative; box-sizing: border-box; min-height: 100vh;
+  background: var(--bg-grad-b); color: var(--text);
+  font-family: var(--font); font-size: var(--fs-md); line-height: 1.5;
+}
+/* Odak halkası kabuğun tüm etkileşimlerinde görünür kalır (WCAG 2.4.7). */
+.eg-shell :focus-visible { outline: 2px solid var(--blue-600); outline-offset: 2px; }
+.eg-shell-skip {
+  position: absolute; top: var(--sp-2); left: var(--sp-2); z-index: 30;
+  padding: var(--sp-2) var(--sp-3); background: var(--card);
+  border: 1px solid var(--border-strong); border-radius: var(--r-sm);
+  color: var(--text); font-size: var(--fs-sm); text-decoration: none;
+  transform: translateY(-200%);
+}
+.eg-shell-skip:focus { transform: none; }
+.eg-shell-header {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: var(--sp-3); padding: var(--sp-3) var(--sp-4);
+  background: var(--card); border-bottom: 1px solid var(--border);
+}
+.eg-shell-brand { margin: 0; color: var(--navy-900); font-size: var(--fs-lg); font-weight: 600; }
+.eg-shell-nav {
+  position: fixed; right: 0; bottom: 0; left: 0; z-index: 20;
+  display: flex; gap: var(--sp-1);
+  padding: var(--sp-1) var(--sp-2) calc(var(--sp-1) + env(safe-area-inset-bottom));
+  background: var(--card); border-top: 1px solid var(--border);
+}
+.eg-shell-nav__link {
+  display: inline-flex; flex: 1 1 0; align-items: center; justify-content: center;
+  min-height: 44px; padding: 0 var(--sp-2);
+  color: var(--muted); font-size: var(--fs-sm); text-decoration: none;
+}
+/* Etkin bağlantı renk dışında da ayırt edilir: kalın yazı + alt çizgi (WCAG 1.4.1). */
+.eg-shell-nav__link[aria-current="page"] {
+  color: var(--navy-900); font-weight: 600; box-shadow: inset 0 -3px 0 var(--blue-600);
+}
+.eg-shell-main {
+  box-sizing: border-box; padding: var(--sp-4);
+  padding-bottom: calc(var(--eg-shell-touch-min) + env(safe-area-inset-bottom) + var(--sp-5));
+}
+.eg-shell-page__title { margin: 0 0 var(--sp-3); color: var(--navy-900); font-size: var(--fs-xl); }
+.eg-shell-page__body { margin: 0 0 var(--sp-4); color: var(--muted); }
+.eg-shell-cards { display: grid; gap: var(--sp-3); margin: 0; padding: 0; list-style: none; }
+.eg-shell-link {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-height: 44px; padding: 0 var(--sp-4);
+  background: var(--blue-700); border-radius: var(--r-md); color: var(--card);
+  font-weight: 600; text-decoration: none;
+}
+@media (min-width: 768px) {
+  .eg-shell-nav { position: static; gap: var(--sp-2); padding: 0; background: none; border-top: 0; }
+  .eg-shell-nav__link { flex: 0 0 auto; padding: 0 var(--sp-3); font-size: var(--fs-md); }
+  .eg-shell-main { max-width: 72rem; margin: 0 auto; padding: var(--sp-5); }
+  .eg-shell-cards { grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr)); }
+}

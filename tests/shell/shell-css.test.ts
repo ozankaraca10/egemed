@@ -1,0 +1,45 @@
+import ts from "typescript";
+import { describe, expect, it } from "vitest";
+
+/** Renk literali desenleri (tests/ui/css-tokens.test.ts ile aynı küme). */
+const colorLiterals = [
+  /#[0-9a-f]{3,8}\b/i,
+  /\brgba?\(/i,
+  /\bhsla?\(/i,
+  /\b(?:oklch|oklab|lab|lch|hwb|color-mix|light-dark)\(/i,
+  /\b(?:red|white|black|blue|green|yellow|orange|purple|gray|grey|silver|maroon|navy|teal|aqua|lime|fuchsia|olive|transparent)\b(?!-)/i,
+];
+
+/** Dosyayı okur; yoksa testi düşürür. */
+function read(path: string): string {
+  const content = ts.sys.readFile(path);
+  if (content === undefined) throw new Error(`Dosya okunamadı: ${path}`);
+  return content;
+}
+
+const capture = (source: string, pattern: RegExp): string[] =>
+  [...source.matchAll(pattern)].map((match) => match[1] ?? "");
+const shellCss = read("apps/shell/src/shell.css");
+const defined = (source: string): Set<string> => new Set(capture(source, /(--[\w-]+)\s*:/g));
+
+describe("shell.css token sözleşmesi", () => {
+  it("renk literali içermez, sınıflar eg-shell- öneklidir, her var() tanımlı token'a bağlanır", () => {
+    for (const pattern of colorLiterals) expect(shellCss).not.toMatch(pattern);
+    const classes = capture(shellCss, /\.([A-Za-z][\w-]*)/g);
+    expect(classes.length).toBeGreaterThan(0);
+    for (const name of classes) expect(name.startsWith("eg-shell"), name).toBe(true);
+    const family = defined(read("packages/tokens/family-tokens.css"));
+    const local = defined(shellCss);
+    const used = capture(shellCss, /var\(\s*(--[\w-]+)\s*[,)]/g);
+    expect(used.length).toBeGreaterThan(0);
+    for (const name of used) {
+      expect((name.startsWith("--eg-") ? local : family).has(name), name).toBe(true);
+    }
+  });
+  it("mobil öncelikli düzeni, 44 px dokunma hedefini ve güvenli alanı tanımlar", () => {
+    expect(shellCss).toMatch(/min-height:\s*44px/);
+    expect(shellCss).toContain("@media (min-width: 768px)");
+    expect(shellCss).toMatch(/position:\s*fixed/);
+    expect(shellCss).toContain("env(safe-area-inset-bottom)");
+  });
+});
