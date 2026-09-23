@@ -12,6 +12,7 @@
 .eg-shell :focus-visible { outline: 2px solid var(--blue-600); outline-offset: 2px; }
 .eg-shell-skip {
   position: absolute; top: var(--sp-2); left: var(--sp-2); z-index: 30;
+  display: inline-flex; align-items: center; min-height: var(--eg-shell-touch-min);
   padding: var(--sp-2) var(--sp-3); background: var(--card);
   border: 1px solid var(--border-strong); border-radius: var(--r-sm);
   color: var(--text); font-size: var(--fs-sm); text-decoration: none;

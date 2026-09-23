@@ -1,6 +1,6 @@
 import { createElement, type ReactNode } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import { ShellLayout } from "../../apps/shell/src/ShellLayout";
+import { ShellLayout, focusMain } from "../../apps/shell/src/ShellLayout";
 import { NotFoundPage, pageFor } from "../../apps/shell/src/pages";
 import { ROUTES, SIM_PATHS, resolveRoute, routeHref } from "../../apps/shell/src/routes";
 import { t } from "../../packages/ui/i18n/tr";
@@ -36,5 +36,29 @@ describe("ShellLayout işaretlemesi", () => {
     expect(html).not.toContain("<iframe");
     expect(html).toContain(t("shell.soon"));
     for (const path of Object.values(SIM_PATHS)) expect(html).toContain(path);
+  });
+  it("atlama bağlantısı hash gezinmesini iptal eden işleyiciye bağlıdır", () => {
+    // Statik HTML olay işleyicisi taşımaz; `ShellLayout` bilinçli olarak hook'suz
+    // ve DOM'suz olduğu için doğrudan çağrılıp işaretleme ağacı denetlenir.
+    const tree = ShellLayout({ children: null, route: resolveRoute("#/") });
+    const children = tree.props.children as { props: { className?: string; href?: string; onClick?: unknown } }[];
+    const skip = children.find((child) => child.props.className === "eg-shell-skip");
+    expect(skip?.props.href).toBe("#icerik");
+    expect(skip?.props.onClick).toBe(focusMain);
+    let prevented = 0;
+    const event = { preventDefault: (): void => { prevented += 1; } };
+    expect(() => focusMain(event)).not.toThrow();
+    expect(prevented).toBe(1);
+  });
+  it("'#icerik' hash'i rota değildir; atlama bağlantısı bu yüzden tıklamayı iptal eder (B1)", () => {
+    expect(resolveRoute("#icerik")).toEqual({ kind: "notFound", path: "icerik" });
+    expect(renderRoute("#/")).toContain('href="#icerik"');
+  });
+  it("her rotada ve bulunamadı sayfasında tek h1 bulunur", () => {
+    for (const route of ROUTES) {
+      const html = renderRoute(routeHref(route.id));
+      expect((html.match(/<h1\b/g) ?? []).length, route.id).toBe(1);
+    }
+    expect((renderRoute("#/yok").match(/<h1\b/g) ?? []).length).toBe(1);
   });
 });
