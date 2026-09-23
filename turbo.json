@@ -29,6 +29,7 @@
       "inputs": [
         "vitest.config.ts",
         "eslint.config.js",
+        ".github/workflows/*.yml",
         "tests/**/*.ts",
         "tsconfig.base.json",
         "tsconfig.json",
