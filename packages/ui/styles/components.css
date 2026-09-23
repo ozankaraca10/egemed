@@ -195,6 +195,9 @@
   .eg-table td {
     display: block;
     width: 100%;
+    /* content-box varsayılanı, kart satırında padding+border'ı %100'e ekleyip
+       yatay taşma üretiyordu; kutu ölçüsü border-box'a alınır (B1). */
+    box-sizing: border-box;
   }
 
   .eg-table thead {
@@ -224,5 +227,11 @@
     flex: 0 0 40%;
     color: var(--muted);
     font-size: var(--fs-sm);
+  }
+
+  /* Boş durum hücresi `data-label` taşımaz; `::before` yer kaplayıp metni
+     sağa itmesin (not 3). */
+  .eg-table__empty::before {
+    content: none;
   }
 }

@@ -40,7 +40,10 @@ export function Tabs({ items, label, defaultSelectedId, onChange }: TabsProps): 
   const baseId = useId();
   const tabRefs = useRef<(HTMLButtonElement | null)[]>([]);
   const [selectedId, setSelectedId] = useState(defaultSelectedId ?? items[0]?.id ?? "");
-  const selectedIndex = items.findIndex((item) => item.id === selectedId);
+  const foundIndex = items.findIndex((item) => item.id === selectedId);
+  // Geçersiz/eskimiş id'de ilk sekme etkinleşir; aksi hâlde tüm sekmeler
+  // `tabIndex=-1` kalıp `tablist` klavyeyle hiç odaklanamaz (WCAG 2.1.1).
+  const selectedIndex = foundIndex === -1 && items.length > 0 ? 0 : foundIndex;
 
   function select(id: string): void {
     setSelectedId(id);

@@ -66,4 +66,13 @@ describe("Tabs işaretlemesi", () => {
     const label = /<button[^>]*aria-selected="true"[^>]*>([^<]*)<\/button>/.exec(render("notlar"))?.[1];
     expect(label).toBe("Notlar");
   });
+
+  it("geçersiz defaultSelectedId ilk sekmeye geri döner (klavye erişimi)", () => {
+    const html = render("yok");
+    const tabs = html.match(/<button[^>]*role="tab"[^>]*>/g) ?? [];
+    expect((html.match(/aria-selected="true"/g) ?? []).length).toBe(1);
+    expect(tabs[0]).toContain('aria-selected="true"');
+    expect(tabs[0]).toContain('tabindex="0"');
+    expect(tabs[1]).toContain('tabindex="-1"');
+  });
 });
