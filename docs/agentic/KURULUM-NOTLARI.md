@@ -13,3 +13,16 @@
 - OpenCode düşük maliyetli sağlayıcı/model kullanıcı tarafından seçilmeli.
 - Review için teknik yazma kısıtı gerekiyorsa ayrı sandbox/izin profili seçilmeli.
 - `docs/legacy/` belgeleri sağlanmadı; T12 kaynaklar gelince yürütülmeli.
+
+## Kabul testi — 23 Eylül 2026
+1. **Kısmi geçiş:** AGTX TUI açıldı ve proje panoda göründü; eklentiler kaynak düzeyinde doğrulandı, seçim menüsü etkileşimli olarak teyit edilemedi.
+2. **Başarısız / çalıştırılamadı:** Dört fazlı deneme görevi yürütülmedi. Cursor CLI yok; Sonnet 5 ve Opus 5.5 oturumları doğrulanamadı. AGTX artefaktı algılar, fakat faz hareketi otomatik değil; insan veya orkestratör taşır.
+3. **Kısmi geçiş:** `.egemed-run/` gitignore içinde; init script mevcut. T01 henüz pnpm lockfile üretmediğinden `pnpm install --frozen-lockfile` başarılı çalışamaz.
+4. **Doğrulanmadı:** Yasaklı Opaca dosyası henüz mevcut değil; Claude deny kuralı gerçek oturumda test edilemedi.
+5. **Kısmi geçiş:** Codex MCP kaydı görüldü; Claude `mcp add` başarılı dedi fakat `mcp list` boş döndü. OpenCode proje config kaydı var; Cursor yok. `/agtx:sweep` oturum testi yapılmadı.
+6. **Başarısız / çalıştırılamadı:** Deneme görevi olmadığı için `maliyet.csv` yalnız başlık içeriyor.
+7. **Geçti:** DOĞRULA sonuçları ve KARAR BEKLİYOR maddeleri bu dosyada.
+
+AGTX günlük/veri dizinini `AGTX_CONFIG_DIR=$PWD/.agtx/local-config` ve `AGTX_DATA_DIR=$PWD/.agtx/local-data` ile yönlendirince pano açıldı. Varsayılan kullanıcı dizininde bu çalışma ortamı `Operation not permitted` hatası verdi. Pano bu değişkenlerle yeniden başlatılmalı.
+
+AGTX proje MCP sunucusu için `scripts/agtx/mcp.sh` kullanılabilir; CLI kayıtları bu komuta çevrilmelidir.

@@ -1,1 +1,22 @@
-{"$schema":"https://opencode.ai/config.json","permission":{"read":{"sims/*/src/data/*.json":"deny","sims/*/public/assets/**":"deny","**/dist/**":"deny","**/*.lock":"deny","reports/**":"deny"}}}
+{
+  "$schema": "https://opencode.ai/config.json",
+  "permission": {
+    "read": {
+      "sims/*/src/data/*.json": "deny",
+      "sims/*/public/assets/**": "deny",
+      "**/dist/**": "deny",
+      "**/*.lock": "deny",
+      "reports/**": "deny"
+    }
+  },
+  "mcp": {
+    "agtx": {
+      "type": "local",
+      "command": [
+        "agtx",
+        "mcp-serve"
+      ],
+      "enabled": true
+    }
+  }
+}
