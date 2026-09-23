@@ -10,6 +10,8 @@
   "scripts": {
     "build": "turbo run build",
     "dev": "turbo run dev",
+    "infra:up": "docker compose -p egemed-local --env-file .env.local -f infra/docker-compose.dev.yml up -d --wait",
+    "infra:down": "docker compose -p egemed-local --env-file .env.local -f infra/docker-compose.dev.yml down --remove-orphans",
     "lint": "eslint .",
     "test": "vitest run",
     "typecheck": "tsc -p tsconfig.json"
