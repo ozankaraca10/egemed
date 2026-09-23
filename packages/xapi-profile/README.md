@@ -86,4 +86,6 @@ belgesi ve şema doğrulama kütüphanesi.
 
 ## Astra ikinci görüşü
 
-Bekleniyor.
+- Saf ifade üreticisi ve her ifadede tek `SimulatorId` doğru sınırdır. `PROFILE_IRI` örnek alan adı, activity base ve aktör `homePage` üretim için gerçek kurum değerleriyle insan kararı gerektirir; tüketici ve LRS testi bunlardan önce açılmamalıdır.
+- `terminated` fiili ve hangi sim olayının `completed`/`passed` sayılacağı pedagojik olay sözlüğünde sabitlenmelidir. `result.response` serbest metin olduğundan port adaptörleri yalnız kodlu seçenek/nesne kimliği göndermelidir; klinik serbest yanıt veya kişisel veri gönderilmemelidir.
+- Opak kimliğin regex kontrolü kimliğin gerçekten opak olduğunu kanıtlamaz. Kimlik kaynağı, kurum eşlemesi, iletim yetkisi ve hata davranışı ADR-004/005 karar kapılarıyla birlikte onaylanmalıdır. Durum bu görüşle `Kabul`e dönüşmez.

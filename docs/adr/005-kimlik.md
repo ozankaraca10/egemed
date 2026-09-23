@@ -37,4 +37,6 @@ CLIX hesap ve not tutmaz; ders, ödev ve not defteri Moodle'dadır.
 
 ## Astra ikinci görüşü
 
-Bekleniyor.
+- Opak `account.name` biçim denetimi kişisel veriden arınmayı tek başına kanıtlamaz; Moodle/kurum kaynağı ham ad, e-posta veya öğrenci numarasını göndermemelidir. Eşleme kurum tarafında kalmalıdır.
+- Yeni admin ve kullanıcı yönetimi isteği bu ADR'deki “CLIX hesap/oturum tutmaz” kuralıyla uzlaştırılmalıdır. Öneri: kurum SSO/Moodle kimliği, sunucuda kurum kapsamlı rol/grup eşlemesi ve CLIX'te öğrenci roster'ı olmaması. Yerel kullanıcı/parola veritabanı istenirse ayrı ADR ve veri sahipliği kararı gerekir.
+- Test öğrenci girişi yalnız sentetik geliştirme akışı olmalı; üretim aktör/oturum kaynağı sayılamaz. LTI/OIDC akışı, admin rol kaynağı ve kimlik yaşam döngüsü insan kararı olarak açık kalır.

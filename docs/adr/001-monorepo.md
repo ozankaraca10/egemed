@@ -38,4 +38,6 @@ Tek depo kullanılır.
 
 ## Astra ikinci görüşü
 
-Bekleniyor.
+- Tek kilit dosyası ve ortak kapı uygundur. ADR-006 kabulüyle `sims/*` workspace dışı/statik artefakt varsayımı artık geçerli mimari değildir; sim başına `packages/sim-<id>` modülü bu depoda birinci sınıf bağımlılık olmalıdır.
+- Sim bağımsızlığı depo ayrımından değil paket sınırı, ayrı durum, ayrı CSS kökü ve tek `SimulatorId` ile korunur. Paketler birbirlerinin sim motorunu içe aktarmamalıdır.
+- Bu görüş ADR-001'in geçmiş kararını yeniden kabul etmez; ADR-006'nın üstün geldiği satırlar uygulama belgelerinde düzeltilmelidir.
