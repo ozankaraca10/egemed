@@ -27,8 +27,8 @@ Her kod görevi tek paket/uygulama ve yaklaşık 400 satır diff hedefler. Sözl
 | 1 | T20 Ortak sim çerçevesi | Sim başlığı, geri/çıkış, mod kartı, soru, geri bildirim, sonuç; token ve i18n; 360/768/1440 | T14b |
 | 1 | T21 Sim olay sözlüğü | Sim başlatma, mod, etkileşim, yanıt, tamamlama için tipli olaylar; sim başına tek id; ağ yok | T14a, K2 taslağı |
 | 2 | T15a Opaca envanter ve motor sınırı | Dosya/asset haritası; 119 kaynak testinin portta nasıl koşacağı; kopya lisans/atıf | T14b |
-| 2 | T15b… Opaca port dilimleri | Motoru ve ekranları ayrı modülde başlat/temizle; 119 regresyon testi yeşil; ilk çalışan rota | T15a, T20 |
-| 2 | T16a… Opaca React ekranları | Ekran ekran ortak çerçeveye uyum; klinik motor sonuçları değişmez | T15b |
+| 2 | T15b… Opaca port dilimleri | Mevcut React+TS uygulamasını ayrı modülde başlat/temizle; 119 regresyon testi yeşil; ilk çalışan rota | T15a, T20 |
+| 2 | T16a… Opaca ortak UI uyumu | Mevcut React ekranlarını ekran ekran ortak çerçeveye/tokenlara uyarla; klinik motor sonuçları değişmez | T15b |
 | 3 | T17a… Ausculta portu | Ses motoru/asset ömrü, kullanıcı etkileşimi ve temizleme; çalışan rota, kaynak regresyonu | T14b, T20 |
 | 3 | T18a… Pulse portu | EKG motoru, animasyon/zamanlayıcı temizliği, test iskeleti; çalışan rota | T14b, T20 |
 | 4 | T22 xAPI istemcisi | Yapılandırılmış endpoint/kimlik, gönderim, ağ hatası ve tekrar deneme politikası; sır sızdırma testi | K2, K3 |
@@ -43,6 +43,19 @@ Her kod görevi tek paket/uygulama ve yaklaşık 400 satır diff hedefler. Sözl
 | 5 | T31 Denetim ve ayarlar | Admin eylem günlüğü, erişim reddi, kurum ayarları; saklama/maskeleme kararı | T25–T30 |
 | 6 | T09 Mobil e2e | Öğrenci ve admin temel akışları 360/768/1440, klavye, 44 px, yatay taşma, WCAG 2.2 AA | Çalışan rotalar |
 | 6 | T32 Yayın hazırlığı | `build`, dağıtım yapılandırması, ortam değişkeni doğrulaması, yedekleme/sürüm geri alma ve işletim kılavuzu | T09, K1–K4 |
+
+## Opaca port dilimleri — T15/T16 ayrıntısı
+
+Opaca kaynağı zaten React+TS'tir. T15 ekranları yeniden React'e yazmaz; mevcut uygulamayı modül yapar. İlk portta gamification kapalı tutulur; kaynakta SCORM öğrenci adı ve localStorage profil/deneme verisi kullanımı ADR-005 ile uyumsuzdur.
+
+1. `core/types.ts`, `geometry.ts`, `answers.ts` saf alan tipleri; ardından `flow.ts`, `scoring.ts`, `validation.ts`, `session.ts` ve kaynak testlerini küçük sentetik fixture'lara ayır.
+2. Görüntü/veri sınırını ayrı işle: `images.ts`, `pool.ts`, ölçüm/bölge/terminoloji; JSON ve büyük varlıkları içerik topluca okunmadan kontrollü taşı. Mutlak `/assets` yollarını platform taban yolunda doğrula.
+3. `events.ts`, `suspend.ts`, `scorm.ts` için önce runtime arayüzü çiz. SCORM parent/opener ve CMI yazımını doğrudan taşımadan xAPI olaylarına eşleme kararı K2/K3 sonrası verilir.
+4. `store.tsx` dosyasını reducer ile provider/runtime yaşam döngüsü olarak böl. `Date.now()` çağrılarını enjekte edilen saate geçir; mount başına event bus, pagehide/listener/auto-flush cleanup ve idempotent dispose kur.
+5. `ui/chrome.tsx`, ikonlar, diyaloglar, soru ve film bileşenlerini küçük gruplarla taşı. 651 satırlık `FilmViewer.tsx` pointer/etkileşim ve görünüm/kontrol parçalarına ayrılır.
+6. Start/Mode/Tutorial ekranlarını birlikte; Results, Sources, Learn ekranlarını ayrı dilimlerde taşı. 458 satırlık Simulation ekranını oturum durumu ve görünüm parçalarına ayır. DevPanel üretim rotasına girmez.
+7. Opaca `App.tsx`/StoreProvider için SimHost adaptörü yaz. Çift üst bar/footer oluşmasını engelle. Global `:root`, `body`, `button` ve genel sınıfları sim kökü altında kapsamlandır; CSS değişimi ayrı görevlerdir.
+8. Kaynak 119 testi port boyunca semantik gruplarda yeşil tut; route mount→unmount→remount, StrictMode, listener/timer/ses temizliği ve iki opak aktör arasında yerel durum sızıntısı senaryolarını ekle.
 
 ## Admin ekran haritası
 
