@@ -1,0 +1,9 @@
+.agtx/
+.egemed-run/
+.env
+.env.local
+node_modules/
+dist/
+reports/
+
+work/

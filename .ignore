@@ -1,0 +1,5 @@
+sims/*/src/data/*.json
+sims/*/public/assets/**
+**/dist/**
+**/*.lock
+reports/**
