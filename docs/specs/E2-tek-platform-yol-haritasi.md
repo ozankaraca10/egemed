@@ -29,12 +29,15 @@ Her kod görevi tek paket/uygulama ve yaklaşık 400 satır diff hedefler. Sözl
 | 2 | T15a Opaca envanter ve motor sınırı | Dosya/asset haritası; 119 kaynak testinin portta nasıl koşacağı; kopya lisans/atıf | T14b |
 | 2 | T15b… Opaca port dilimleri | Mevcut React+TS uygulamasını ayrı modülde başlat/temizle; 119 regresyon testi yeşil; ilk çalışan rota | T15a, T20 |
 | 2 | T16a… Opaca ortak UI uyumu | Mevcut React ekranlarını ekran ekran ortak çerçeveye/tokenlara uyarla; klinik motor sonuçları değişmez | T15b |
-| 3 | T17a… Ausculta portu | Ses motoru/asset ömrü, kullanıcı etkileşimi ve temizleme; çalışan rota, kaynak regresyonu | T14b, T20 |
+| 3 | T17a… Ausculta portu | Mevcut React ekranlarını modüle al; ses motoru/asset ömrü, kullanıcı etkileşimi ve temizleme; çalışan rota, kaynak regresyonu | T14b, T20 |
 | 3 | T18a… Pulse portu | EKG motoru, animasyon/zamanlayıcı temizliği, test iskeleti; çalışan rota | T14b, T20 |
 | 4 | T22 xAPI istemcisi | Yapılandırılmış endpoint/kimlik, gönderim, ağ hatası ve tekrar deneme politikası; sır sızdırma testi | K2, K3 |
 | 4 | T23 Sim xAPI adaptörleri | Her simin olaylarını profildeki fiillere ayrı eşle; kodlu yanıt, opak aktör, tek `SimulatorId` | T21, T22, çalışan simler |
 | 4 | T24 LRS entegrasyon testi | Geliştirme LRS'sine gerçek ifade; başarılı ve hatalı iletim; CLIX'te kayıt tutulmadığını doğrula | T23 |
 | 5 | T25 Kimlik ve yetki sözleşmesi | Kurum bağlamı, roller, yetki matrisi, API kontrolü; rol değişimi ve erişim reddi testleri | K1, K4 |
+| 5 | T33a Giriş metinleri | Admin ve test öğrenci girişinin Türkçe i18n anahtarları; ortak hata/yardım metni | T20 |
+| 5 | T33b Giriş ekranları | Masaüstü 50/50 sol logo/marka/slogan, sağ form; mobil dikey, 360/768/1440 ve klavye; gerçek auth iddiası yok | T33a merge |
+| 5 | T33c Giriş bağlama | Admin kurum kimliği, geliştirmeye özel test öğrenci girişi, oturum/rol API kontrolü | T25, T33b, K1 |
 | 5 | T26 Admin kabuğu | Ayrı `/admin` alanı, yetkili rota, gezinme, ortak UI; öğrenci kabuğundan ayrım | T25, T20 |
 | 5 | T27 Kullanıcı ve rol ekranları | Arama/filtre, kullanıcı ayrıntısı, rol atama/geri alma, onay/hata/boş durum; her mutasyonda sunucu yetkisi | T25, T26 |
 | 5 | T28 Kurum ve erişim ekranları | Kurum/birim kapsamı, sim erişimi, eğitimci yetkisi; kurumlar arası izolasyon | T27 |
@@ -57,6 +60,11 @@ Opaca kaynağı zaten React+TS'tir. T15 ekranları yeniden React'e yazmaz; mevcu
 7. Opaca `App.tsx`/StoreProvider için SimHost adaptörü yaz. Çift üst bar/footer oluşmasını engelle. Global `:root`, `body`, `button` ve genel sınıfları sim kökü altında kapsamlandır; CSS değişimi ayrı görevlerdir.
 8. Kaynak 119 testi port boyunca semantik gruplarda yeşil tut; route mount→unmount→remount, StrictMode, listener/timer/ses temizliği ve iki opak aktör arasında yerel durum sızıntısı senaryolarını ekle.
 
+## Ausculta ve Pulse port dilimleri — T17/T18 ayrıntısı
+
+- **Ausculta** zaten React+TS'tir. Alan tipleri/akış; puanlama/oturum/çözücü; ses motoru; store reducer/provider; UI; ekranlar; CSS ve SimHost adaptörü ayrı dilimlerdir. Global AudioEngine singleton'ı modül oturumuna indirgenir; geç `fetch/decode` sonrası ses başlatma engellenir. `store.tsx`, `PatientStage`, `SimulationScreen` ve 1000+ satır CSS tek görevde taşınmaz. SCORM, localStorage ve `Date.now()` kullanımı portta ayrı karara bağlanır.
+- **Pulse** düz JS/DOM uygulamasıdır. Önce `model.js` ve deterministik motor testleri; ardından curriculum/state ayrıştırma; root-parametreli controller ve RAF/interval/listener temizliği; özellik ekranları ve React giriş; CSS kapsamlandırma gelir. `app.js` fiziksel satır sayısı düşük ama yoğun kod taşır, görev boyutu mantıksal değişimle ölçülür. Global `window.CardAI*` ve belge çapı DOM aramaları modül oturumuna kapatılır.
+
 ## Admin ekran haritası
 
 - **Özet:** kurum/sim erişilebilirliği, son entegrasyon hataları, bekleyen yönetim işleri; bireysel öğrenci puanı yok.
@@ -65,6 +73,7 @@ Opaca kaynağı zaten React+TS'tir. T15 ekranları yeniden React'e yazmaz; mevcu
 - **Simülatörler ve içerik:** modül durumu, sürüm, görünürlük, içerik ataması.
 - **Entegrasyonlar:** Moodle/LTI ve LRS bağlantı sağlığı, anahtarların yalnız durumu; sır değeri ekranda gösterilmez.
 - **Denetim ve ayarlar:** yönetici eylemleri, kurum ayarları, saklama ve erişim politikası.
+- **Giriş:** admin ve test öğrencisi için aynı marka ailesinde ayrı giriş yolları. Geniş ekranda sol yarı kurum logosu/EGEMED markası/slogan, sağ yarı form; mobilde dikey akış. Test öğrenci oturumu yalnız geliştirme ortamında sunulur. Kimlik doğrulama T33c/K1 kararına bağlıdır.
 
 ## Önerilen ilk yetki matrisi
 
