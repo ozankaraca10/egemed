@@ -4,6 +4,7 @@ export const tr = {
   "badge.tone.success": "Başarılı",
   "badge.tone.warning": "Uyarı",
   "badge.tone.danger": "Hata",
+  "table.empty": "Kayıt bulunamadı",
 } as const;
 
 export type TrKey = keyof typeof tr;

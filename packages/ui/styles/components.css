@@ -121,3 +121,108 @@
   border-radius: 0;
   transform: rotate(45deg);
 }
+
+/* Yerel dokunma hedefi değişkeni (aile token'ı yok). */
+.eg-tabs {
+  --eg-touch-min: 44px;
+  font-family: var(--font);
+}
+
+.eg-tabs__tab:focus-visible {
+  outline: 2px solid var(--blue-600);
+  outline-offset: 2px;
+}
+
+/* --- Sekmeler (segmented) --- */
+.eg-tabs__list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-1);
+  padding: var(--sp-1);
+  background: var(--card-soft);
+  border: 1px solid var(--border);
+  border-radius: var(--r-pill);
+}
+
+.eg-tabs__tab {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--eg-touch-min);
+  padding: 0 var(--sp-4);
+  background: none;
+  border: 0;
+  border-radius: var(--r-pill);
+  color: var(--muted);
+  font-family: var(--font);
+  font-size: var(--fs-md);
+  cursor: pointer;
+}
+
+/* Etkin sekme renk dışında da ayırt edilir: dolgu + kalın yazı + 3px alt çizgi. */
+.eg-tabs__tab[aria-selected="true"] {
+  background: var(--blue-700);
+  color: var(--card);
+  font-weight: 600;
+  box-shadow: inset 0 -3px 0 var(--navy-900);
+}
+
+.eg-tabs__panel {
+  margin-top: var(--sp-3);
+}
+
+/* --- Tablo --- */
+.eg-table {
+  width: 100%;
+  border-collapse: collapse;
+  color: var(--text);
+  font-family: var(--font);
+  font-size: var(--fs-md);
+}
+
+.eg-table th,
+.eg-table td {
+  padding: var(--sp-2) var(--sp-3);
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+}
+
+/* 768px altı: satırlar `data-label` ile kart listesine döner; `thead` görsel gizlenir. */
+@media (max-width: 767.98px) {
+  .eg-table,
+  .eg-table tbody,
+  .eg-table tr,
+  .eg-table td {
+    display: block;
+    width: 100%;
+  }
+
+  .eg-table thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    clip-path: inset(50%);
+  }
+
+  .eg-table tr {
+    margin-bottom: var(--sp-3);
+    padding: var(--sp-3);
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+  }
+
+  .eg-table td {
+    display: flex;
+    gap: var(--sp-2);
+    padding: var(--sp-1) 0;
+    border: 0;
+  }
+
+  .eg-table td::before {
+    content: attr(data-label);
+    flex: 0 0 40%;
+    color: var(--muted);
+    font-size: var(--fs-sm);
+  }
+}
