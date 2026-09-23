@@ -1,6 +1,6 @@
 name = "egemed"
 description = "EGEMED CLIX faz akışı"
-supported_agents = ["claude", "codex", "opencode", "cursor"]
+supported_agents = ["claude", "codex", "opencode"]
 copy_files = ["AGENTS.md", "CLAUDE.md"]
 clear_context_on_advance = true
 cyclic = false

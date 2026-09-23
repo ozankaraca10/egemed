@@ -7,5 +7,5 @@ cleanup_script = "scripts/agtx/cleanup-worktree.sh"
 [agents]
 research = "opencode"
 planning = "claude"
-running = "cursor"
+running = "opencode"
 review = "codex"

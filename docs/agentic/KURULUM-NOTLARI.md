@@ -26,3 +26,9 @@
 AGTX günlük/veri dizinini `AGTX_CONFIG_DIR=$PWD/.agtx/local-config` ve `AGTX_DATA_DIR=$PWD/.agtx/local-data` ile yönlendirince pano açıldı. Varsayılan kullanıcı dizininde bu çalışma ortamı `Operation not permitted` hatası verdi. Pano bu değişkenlerle yeniden başlatılmalı.
 
 AGTX proje MCP sunucusu için `scripts/agtx/mcp.sh` kullanılabilir; CLI kayıtları bu komuta çevrilmelidir.
+
+## 23 Eylül 2026 — Running ajanı değişikliği
+Kullanıcı isteğiyle `[agents].running = "opencode"` yapıldı. `opencode.json` model kimliği `opencode-go/deepseek-v4.1-flash`. [OpenCode Go model listesi](https://dev.opencode.ai/docs/go/) bu kimliği doğruluyor. Bu ortamda `opencode models` yalnız ücretsiz modelleri gösterdi; Go aboneliği/kimlik doğrulaması teyit edilmedi. Bu nedenle gerçek DeepSeek çağrısı ve Running fazı çalıştırılamadı. Önceki Cursor bekleme kararı geçersiz; yapılandırılmış Running ajanı OpenCode'dur.
+
+## Claude Code Opus planlama
+Kullanıcı tercihi: Planning ve yeniden planlama Claude Code içindeki Opus ile yapılır. `.claude/settings.json` içindeki `model = opus` proje seçicisi korunur; AGTX `[agents].planning = claude` olarak kalır. Belirli Opus 5.5 sürümüne erişim, gerçek Claude oturumunda doğrulanmalıdır.
