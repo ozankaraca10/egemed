@@ -1,0 +1,35 @@
+{
+  "$schema": "https://turborepo.com/schemas/2.11.3",
+  "tasks": {
+    "build": {
+      "outputs": ["dist/**"]
+    },
+    "dev": {
+      "cache": false,
+      "persistent": true
+    },
+    "typecheck": {
+      "dependsOn": ["^typecheck"],
+      "inputs": ["$TURBO_DEFAULT$", "$TURBO_ROOT$/tsconfig.base.json"]
+    },
+    "//#lint": {
+      "inputs": [
+        "eslint.config.js",
+        "*.ts",
+        "apps/**/*.ts",
+        "apps/**/package.json",
+        "apps/**/tsconfig.json",
+        "packages/**/*.ts",
+        "packages/**/package.json",
+        "packages/**/tsconfig.json",
+        "tests/**/*.ts"
+      ]
+    },
+    "//#test": {
+      "inputs": ["vitest.config.ts", "tests/**/*.ts", "tsconfig.base.json", "tsconfig.json"]
+    },
+    "//#typecheck": {
+      "inputs": ["tsconfig.json", "tsconfig.base.json", "*.ts", "tests/**/*.ts"]
+    }
+  }
+}
