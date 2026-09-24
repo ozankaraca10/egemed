@@ -10,6 +10,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@egemed/gamification-core": "workspace:*",
     "@egemed/sim-host": "workspace:*",
     "@egemed/tokens": "workspace:*"
   }

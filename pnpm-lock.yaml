@@ -162,6 +162,9 @@ importers:
 
   packages/sim-pulse:
     dependencies:
+      '@egemed/gamification-core':
+        specifier: workspace:*
+        version: link:../gamification-core
       '@egemed/sim-host':
         specifier: workspace:*
         version: link:../sim-host
