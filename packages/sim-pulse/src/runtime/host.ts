@@ -59,6 +59,8 @@ export interface PulseRuntimeOptions {
 export interface PulseRuntimeHandle {
   readonly host: HTMLElement;
   readonly shadow: ShadowRoot;
+  /** Kullanıcı×sim ad alanlı kayıt; platform ekleri (oyunlaştırma) de bunu kullanır. */
+  readonly storage: Storage;
   /** Kaynak `window.*` API'leri (CardAIController, CardAIScorm …); testler ve köprü için. */
   global(name: string): unknown;
   dispose(): void;
@@ -340,6 +342,7 @@ export function mountPulseRuntime(target: HTMLElement, options: PulseRuntimeOpti
   const handle: PulseRuntimeHandle = {
     host,
     shadow,
+    storage,
     global: (name) => local[name],
     dispose() {
       if (disposed) return;

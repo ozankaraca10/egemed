@@ -110,6 +110,20 @@ test.describe("Pulse kaynak runtime", () => {
     }
     await expect(root.locator("#resultsView")).toBeVisible();
     await expect(root.getByRole("button", { name: /Tekrar dene/ })).toBeVisible();
+
+    // Platform oyunlaştırması: deneme kullanıcı×sim ad alanına tek kez yazılır,
+    // sonuç ekranında kazanım kartı ve "İlerlemem" diyaloğu açılır.
+    await expect(root.locator("#egemedGamiGains")).toContainText("Kazanımlar");
+    const gami = await page.evaluate(
+      (key) => JSON.parse(localStorage.getItem(key) ?? "null") as { attempts: { score: number; mode: string }[] } | null,
+      `${namespaceOf(null)}egemed-pulse-gami-1.0`,
+    );
+    expect(gami?.attempts.map((attempt) => [attempt.mode, attempt.score])).toEqual([["assessment", 100]]);
+    await root.locator("#egemedGamiGains").getByRole("button", { name: "Başarılarımı gör" }).click();
+    await expect(root.locator("#egemedGamiDialog")).toBeVisible();
+    await expect(root.locator("#egemedGamiDialog")).toContainText("İlerlemem");
+    await root.locator("#egemedGamiDialog").getByRole("button", { name: "Kapat" }).click();
+    await expect(root.locator("#egemedGamiDialog")).toBeHidden();
     expect(errors).toEqual([]);
   });
 

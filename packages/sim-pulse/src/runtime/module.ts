@@ -1,5 +1,8 @@
 /// <reference lib="dom" />
 import type { SimDispose, SimModule, SimMountContext, SimMountTarget } from "@egemed/sim-host";
+import { createStorageGamiRepo } from "../gamification/repo";
+import type { PulseGamiRepo } from "../gamification/repo";
+import { attachPulseGamification } from "./gami";
 import { mountPulseRuntime } from "./host";
 import type { PulseRuntimeBridge } from "./host";
 
@@ -10,6 +13,10 @@ export interface PulseRuntimeModuleDeps {
   /** Varsayılan: tarayıcı `localStorage`ı; erişilemezse oturumluk bellek. */
   readonly storage?: Storage;
   readonly bridge?: PulseRuntimeBridge;
+  /** Verilmezse oyunlaştırma kullanıcı×sim ad alanlı yerel kayda yazılır. */
+  readonly gamiRepository?: PulseGamiRepo;
+  /** false: oyunlaştırma eklenmez (ör. salt kaynak karşılaştırması). */
+  readonly gamiEnabled?: boolean;
 }
 
 /** Kayıt ad alanı: kullanıcı×sim. Anonim oturumun kaydı hesaba aktarılmaz (PULSE-08). */
@@ -60,7 +67,22 @@ export function createPulseRuntimeModule(deps: PulseRuntimeModuleDeps = {}): Sim
         storageNamespace: pulseStorageNamespace(context.actorId),
         ...(deps.bridge === undefined ? {} : { bridge: deps.bridge }),
       });
-      return () => handle.dispose();
+      let detachGami: (() => void) | null = null;
+      if (deps.gamiEnabled !== false) {
+        try {
+          detachGami = attachPulseGamification(handle, {
+            now: context.now,
+            repo: deps.gamiRepository ?? createStorageGamiRepo(handle.storage),
+          });
+        } catch {
+          // Oyunlaştırma kurulamasa da simülatör çalışmaya devam eder.
+          detachGami = null;
+        }
+      }
+      return () => {
+        detachGami?.();
+        handle.dispose();
+      };
     },
   };
 }
