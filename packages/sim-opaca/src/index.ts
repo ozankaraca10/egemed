@@ -268,3 +268,23 @@ export { TutorialScreen } from "./screens/TutorialScreen";
 export type { TutorialScreenProps } from "./screens/TutorialScreen";
 export { LearnScreen, createNoopLearnScreenEnv } from "./screens/LearnScreen";
 export type { LearnGamiPort, LearnScreenEnv, LearnScreenProps } from "./screens/LearnScreen";
+export {
+  DEFAULT_CASE_TIME_SEC,
+  caseTimeLimitSec,
+  computeQuestionLatency,
+  fmtSec,
+  hasSimulationProgress,
+  patientLine,
+  planK3SessionRegeneration,
+  planNewPracticeSample,
+  planPrimaryAction,
+  resolveSimulationSession,
+  sessionSeedFromNow,
+  sourceNote,
+} from "./screens/simulation-core";
+export type {
+  PrimaryActionPlan,
+  ResolvedSimulationSession,
+  SessionRegenPlan,
+  SimulationDispatch,
+} from "./screens/simulation-core";
