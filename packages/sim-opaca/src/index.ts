@@ -3,6 +3,8 @@ import type { SimulatorId } from "@egemed/sim-host";
 export const SIM_ID = "opaca" satisfies SimulatorId;
 
 export { isAnswerCorrect } from "./core/answers";
+export { LOG_LIMIT, LOG_TRIM, createBus } from "./core/events";
+export type { EventBus, SimEventDraft } from "./core/events";
 export {
   firstWeakLibraryKey,
   isTimedOut,
@@ -33,6 +35,8 @@ export {
 } from "./core/geometry";
 export type { Point } from "./core/geometry";
 export { IMAGES, datasetCounts, examplesFor, expertPositive, getImage, isExpertSource } from "./core/images";
+export { BEST_SCORE_KEY, computeCaseResult, initialState, initialTelemetry, loadBestScore, reducer, saveBestScore } from "./core/reducer";
+export type { Action, AppState, ReducerSeam, StoragePort } from "./core/reducer";
 export { createMemoryRuntimeAdapter, createNoopRuntimeAdapter, createSimRuntime } from "./core/runtime";
 export type {
   FinishReport,
