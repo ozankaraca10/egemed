@@ -13,6 +13,42 @@ export {
 export type { AssignableRole, AuthMethod, Role, SimId, UserStatus } from "./ids";
 
 export {
+  AUSCULTA_EVENT_MAP,
+  INTERACTION_CODES,
+  MODE_CODES,
+  OPACA_EVENT_MAP,
+  PULSE_EVENT_MAP,
+  SESSION_COMPLETION_CODES,
+  SIM_EVENT_CODE_PATTERN,
+  SIM_EVENT_NAMES,
+  SIM_EXIT_REASONS,
+  answerSubmittedEventSchema,
+  caseCompletedEventSchema,
+  interactionEventSchema,
+  mapAuscultaEvent,
+  mapOpacaEvent,
+  mapPulseEvent,
+  modeSelectedEventSchema,
+  sessionCompletedEventSchema,
+  simEventListSchema,
+  simEventSchema,
+  simExitedEventSchema,
+  simStartedEventSchema,
+} from "./sim-events";
+export type {
+  AuscultaSourceEvent,
+  InteractionCode,
+  ModeCode,
+  OpacaSourceEvent,
+  PulseModeCode,
+  PulseSourceEvent,
+  SessionCompletionCode,
+  SimEvent,
+  SimEventName,
+  SimExitReason,
+} from "./sim-events";
+
+export {
   ERROR_CODES_BY_STATUS,
   ERROR_CODE_LIST,
   isErrorCode,
