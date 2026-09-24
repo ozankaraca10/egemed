@@ -56,6 +56,8 @@ export interface StoreProviderProps {
   /** S5 aktarım adaptörü; context'teki `runtime` bunun üzerine kurulu `SimRuntime`'dır. */
   readonly runtime: RuntimeAdapter;
   readonly env: WindowLike;
+  /** Test/fixture: varsayılan `initialState` yerine verilen durumla başlar (bestScore yine storage'dan okunur). */
+  readonly initialState?: AppState;
 }
 
 /** Mount başına tek örnek: render sırasında tembel kurulur, ilk örnek korunur. Kurulan nesneler
@@ -67,12 +69,19 @@ function useMountRef<T>(factory: () => T): T {
   return ref.current;
 }
 
-export function StoreProvider({ children, now, storage, runtime: adapter, env }: StoreProviderProps): JSX.Element {
+export function StoreProvider({
+  children,
+  now,
+  storage,
+  runtime: adapter,
+  env,
+  initialState: seedState,
+}: StoreProviderProps): JSX.Element {
   const bus = useMountRef(() => createBus(now));
   const seam = useMountRef<ReducerSeam>(() => ({ emit: (event) => bus.emit(event) }));
   const [state, dispatch] = useReducer(
     (current: AppState, action: Action): AppState => reducer(current, action, seam),
-    initialState,
+    seedState ?? initialState,
     (init: AppState): AppState => ({ ...init, bestScore: loadBestScore(storage) })
   );
   const stateRef = useRef(state);

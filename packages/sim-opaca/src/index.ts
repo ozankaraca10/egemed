@@ -295,3 +295,5 @@ export type {
   SimulationPopoverEvent,
   SimulationScreenProps,
 } from "./screens/SimulationScreen";
+export { ResultsScreen, createNoopResultsScreenEnv } from "./screens/ResultsScreen";
+export type { ResultsGamiPort, ResultsScreenEnv, ResultsScreenProps } from "./screens/ResultsScreen";
