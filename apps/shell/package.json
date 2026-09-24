@@ -13,6 +13,7 @@
     "@egemed/contracts": "workspace:*",
     "@egemed/sim-host": "workspace:*",
     "@egemed/sim-opaca": "workspace:*",
+    "@egemed/sim-pulse": "workspace:*",
     "@egemed/tokens": "workspace:*",
     "@egemed/ui": "workspace:*",
     "react": "19.3.0",
