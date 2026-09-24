@@ -1,0 +1,13 @@
+/* Ausculta kabuk temeli .eg-sim-ausculta altında kalır; html/body/#root seçicisi yok. */
+.eg-sim-ausculta, .eg-sim-ausculta *, .eg-sim-ausculta *::before, .eg-sim-ausculta *::after { box-sizing: border-box; }
+.eg-sim-ausculta { margin: 0; padding: 0; height: 100%; }
+.eg-sim-ausculta { font-family: var(--eg-ausculta-font); color: var(--eg-ausculta-text); background: linear-gradient(160deg, var(--eg-ausculta-bg-a), var(--eg-ausculta-bg-b) 55%, var(--eg-ausculta-paper)); -webkit-font-smoothing: antialiased; font-size: var(--fs-md); line-height: 1.5; overflow-x: hidden; }
+.eg-sim-ausculta button { font-family: inherit; cursor: pointer; }
+.eg-sim-ausculta :focus-visible { outline: 2px solid var(--eg-ausculta-focus); outline-offset: 2px; border-radius: var(--r-sm); }
+.eg-sim-ausculta { height: 100%; }
+.eg-sim-ausculta { -webkit-text-size-adjust: 100%; }
+.eg-sim-ausculta .app-shell { height: 100dvh; display: flex; flex-direction: column; position: relative; overflow: hidden; }
+.eg-sim-ausculta .app-bg { position: absolute; inset: 0; min-height: 100%; pointer-events: none; z-index: 0; }
+.eg-sim-ausculta .app-bg .bg-wash { position: absolute; inset: 0; min-height: 100%; background: linear-gradient(115deg, rgba(240,247,255,.92) 0%, rgba(238,246,255,.86) 42%, rgba(250,253,255,.94) 78%, rgba(255,255,255,.97) 100%); }
+.eg-sim-ausculta .app-content { position: relative; z-index: 1; flex: 1; display: flex; flex-direction: column; min-height: 0; }
+.eg-sim-ausculta .app-shell--doc { height: auto; min-height: 100dvh; overflow: visible; }
