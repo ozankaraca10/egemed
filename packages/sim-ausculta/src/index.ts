@@ -227,6 +227,33 @@ export { TutorialScreen, createNoopTutorialAudio } from "./screens/TutorialScree
 export type { TutorialAudio, TutorialScreenProps } from "./screens/TutorialScreen";
 export { LearnAudioProvider, LearnScreen, createNoopLearnAudio, createNoopLearnScreenEnv } from "./screens/LearnScreen";
 export type { LearnAudio, LearnScreenEnv, LearnScreenProps } from "./screens/LearnScreen";
+export {
+  CASE_FLASH_MS,
+  CASE_TRANSITION_MS,
+  computeQuestionLatency,
+  hasSessionProgress,
+  isAnswerCorrect,
+  isLastQuestion,
+  planAssessmentAutoAdvance,
+  planK3SessionRegeneration,
+  planPrimaryAction,
+  planSessionAction,
+  planSessionCompletion,
+  questionCursor,
+  resolveSimulationSession,
+  shouldStartCaseTransition,
+  showCaseEndCard,
+  simulationPointIds,
+} from "./screens/simulation/derive";
+export type {
+  PrimaryActionPlan,
+  QuestionCursor,
+  ResolvedSimulationSession,
+  SessionActionKind,
+  SessionCompletionPlan,
+  SessionIdPlan,
+  SimulationDispatch,
+} from "./screens/simulation/derive";
 export { AUDIO_CONFIG } from "./audio/config";
 export { createAudioEngine } from "./audio/engine";
 export type { AudioEngine, AudioEngineDeps, EngineState } from "./audio/engine";
