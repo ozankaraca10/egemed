@@ -31,6 +31,28 @@ export function createLocalStoragePort(
   };
 }
 
+/** Kayıt ad alanı: kullanıcı×sim (PULSE-08 deseni, T93). Anahtara yalnız actorId
+ *  girer; ad/e-posta girmez. Anonim oturumun kaydı hesaba aktarılmaz. */
+export function opacaStorageNamespace(actorId: string | undefined): string {
+  return actorId === undefined || actorId.length === 0
+    ? "egemed:anon:opaca:"
+    : `egemed:u:${encodeURIComponent(actorId)}:opaca:`;
+}
+
+/** Port'u ad alanıyla sarmalar: tüm okuma/yazma anahtarları önekle gider.
+ *  Mount sırasında `context.actorId` ile kurulur (T93); eski öneksiz kayıtlar
+ *  yeni ad alanına taşınmaz. */
+export function createNamespacedStoragePort(port: StoragePort, prefix: string): StoragePort {
+  return {
+    get(key) {
+      return port.get(prefix + key);
+    },
+    set(key, value) {
+      port.set(prefix + key, value);
+    },
+  };
+}
+
 /** `window` + `document` vekillerinden yaşam döngüsü zamanlayıcı yüzeyi. */
 export function createBrowserWindowLike(win: {
   addEventListener(type: string, handler: () => void): void;
