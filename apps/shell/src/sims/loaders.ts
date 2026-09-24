@@ -3,14 +3,14 @@ import type { SimModule, SimModuleLoader, SimulatorId } from "@egemed/sim-host";
 /**
  * Sim başına tek dinamik `import()` noktası. Sim paketleri mount dışa
  * aktarmaya başlayınca yalnız bu tablodaki satır değişir; kabuk kodu ve
- * sözleşme aynı kalır. Opaca (T14c, @egemed/sim-opaca) ve Pulse (T14d,
- * @egemed/sim-pulse) gerçek modüllerine bağlanır, her biri kendi lazy
- * chunk'ıdır; ausculta S18a'ya dek yer tutucuda kalır.
+ * sözleşme aynı kalır. Üç sim de gerçek modüllerine bağlanır (Opaca T14c,
+ * Pulse T14d, Ausculta T14e); her satır kendi lazy chunk'ıdır ve yer tutucu
+ * dönemi kapanmıştır.
  */
 type SimChunkLoader = () => Promise<SimModule>;
 
 const SIM_CHUNKS: Record<SimulatorId, SimChunkLoader> = {
-  ausculta: () => import("./placeholder").then((chunk) => chunk.createPlaceholderModule("ausculta")),
+  ausculta: () => import("@egemed/sim-ausculta").then((mod) => mod.auscultaModule),
   opaca: () => import("@egemed/sim-opaca").then((mod) => mod.opacaModule),
   pulse: () => import("@egemed/sim-pulse").then((mod) => mod.pulseModule),
 };
