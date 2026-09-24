@@ -1,0 +1,17 @@
+/* Pulse köprü tokenları aile paletini korur ve modül kökünde kalır. */
+.eg-sim-pulse {
+  --eg-pulse-text: var(--ink-900);
+  --eg-pulse-muted: var(--ink-600);
+  --eg-pulse-ink: var(--ink-800);
+  --eg-pulse-line: var(--border);
+  --eg-pulse-paper: var(--card);
+  --eg-pulse-cyan: var(--blue-600);
+  --eg-pulse-radius: var(--r-lg);
+  --eg-pulse-gap: var(--sp-3);
+  --eg-pulse-font: var(--font);
+  --eg-pulse-bg-a: var(--bg-grad-a);
+  --eg-pulse-bg-b: var(--bg-grad-b);
+  --eg-pulse-shadow: var(--shadow-card);
+  --eg-pulse-focus: var(--blue-500);
+  --eg-pulse-field: var(--blue-600);
+}

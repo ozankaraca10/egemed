@@ -1,0 +1,101 @@
+/* Kabuk temeli .eg-sim-pulse altında kalır; host sayfanın globalini değiştirmez. */
+.eg-sim-pulse,
+.eg-sim-pulse *,
+.eg-sim-pulse *::before,
+.eg-sim-pulse *::after {
+  box-sizing: border-box;
+}
+
+.eg-sim-pulse {
+  min-height: 100%;
+  margin: 0;
+  color: var(--eg-pulse-text);
+  background: linear-gradient(135deg, var(--eg-pulse-bg-b), var(--blue-50) 55%, var(--blue-50));
+  font: var(--fs-md) / 1.5 var(--eg-pulse-font);
+  -webkit-font-smoothing: antialiased;
+  -webkit-text-size-adjust: 100%;
+}
+
+.eg-sim-pulse button,
+.eg-sim-pulse select,
+.eg-sim-pulse input {
+  font: inherit;
+}
+
+.eg-sim-pulse button {
+  cursor: pointer;
+  color: inherit;
+}
+
+.eg-sim-pulse button:disabled {
+  cursor: default;
+  color: var(--eg-pulse-muted);
+  background: var(--blue-50);
+  border-color: var(--border-strong);
+}
+
+.eg-sim-pulse [hidden] {
+  display: none !important;
+}
+
+.eg-sim-pulse a {
+  color: var(--blue-700);
+}
+
+.eg-sim-pulse :focus-visible {
+  outline: 3px solid var(--eg-pulse-focus);
+  outline-offset: 3px;
+  box-shadow: 0 0 0 3px var(--eg-pulse-paper);
+}
+
+.eg-sim-pulse .app {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  min-height: 100dvh;
+  max-width: 1920px;
+  margin-inline: auto;
+  padding-inline: 18px;
+}
+
+.eg-sim-pulse .topbar {
+  display: flex;
+  align-items: center;
+  gap: var(--eg-pulse-gap);
+  min-height: var(--head-h);
+  margin-inline: -18px;
+  padding: 8px 18px;
+  color: var(--eg-pulse-paper);
+  background: linear-gradient(90deg, var(--navy-900), var(--navy-700));
+  box-shadow: var(--eg-pulse-shadow);
+}
+
+.eg-sim-pulse .eg-brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  padding: 4px 6px;
+  border-radius: var(--r-md);
+  color: var(--eg-pulse-paper);
+  text-decoration: none;
+}
+
+.eg-sim-pulse .eg-brand:hover,
+.eg-sim-pulse .eg-navbtn:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.eg-sim-pulse main,
+.eg-sim-pulse .view {
+  min-width: 0;
+  min-height: 0;
+}
+
+.eg-sim-pulse .active-view {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  gap: var(--eg-pulse-gap);
+  padding-block: var(--sp-3);
+}

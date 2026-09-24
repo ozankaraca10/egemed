@@ -1,3 +1,8 @@
+import "@egemed/tokens/family-tokens.css";
+import "./styles/tokens.css";
+import "./styles/base.css";
+import "./styles/sim.css";
+
 import type { SimulatorId } from "@egemed/sim-host";
 
 export const SIM_ID = "pulse" satisfies SimulatorId;
