@@ -1,0 +1,63 @@
+/** Merkezî ses/DSP konfigürasyonu. DSP, fiziksel stetoskoptan birebir
+ *  devşirme değildir; klinik olarak makul frekans vurgulaması uygular. */
+
+import type { StethHead } from "../core/types";
+
+export type { StethHead };
+
+export interface HeadDsp {
+  /** Uygulanacak biquad zinciri; gerçek davranış: DSP her iki kafa (bell/diyafram) için de
+   *  her zaman uygulanır — kayıt hiçbir zaman bypass edilmez (engine.ts play()). */
+  highshelfDb: number;
+  lowshelfDb: number;
+}
+
+export interface HeadDspConfig {
+  lowshelfDb: number;
+  lowshelfHz: number;
+  highshelfDb: number;
+  highshelfHz: number;
+  peakingDb: number;
+  peakingHz: number;
+  peakingQ: number;
+}
+
+export const AUDIO_CONFIG = {
+  /** Çapraz geçiş süresi ms (80–200 ms) */
+  crossfadeMs: 120,
+  /** Stetoskop yerleştikten sonra ses başlamadan önceki bekleme ms */
+  dwellToPlayMs: 260,
+  /** Kayıt biterse döngü (tam fizyolojik segment) */
+  loopWholeSegment: true,
+  /** Master ses düzeyi varsayılanı */
+  defaultVolume: 0.85,
+  /** Güvenlik limiter'ı (kırpılma koruması) */
+  limiter: { thresholdDb: -1.5, kneeDb: 0, ratio: 20, attackSec: 0.003, releaseSec: 0.25 },
+  dsp: {
+    /** Bell: düşük frekans vurgusu */
+    bell: {
+      lowshelfDb: 6.5,
+      lowshelfHz: 220,
+      highshelfDb: -5,
+      highshelfHz: 1200,
+      peakingDb: 4,
+      peakingHz: 90,
+      peakingQ: 1.2,
+    } satisfies HeadDspConfig,
+    /** Diyafram: orta/yüksek frekans vurgusu */
+    diaphragm: {
+      lowshelfDb: -3.5,
+      lowshelfHz: 160,
+      highshelfDb: 4.5,
+      highshelfHz: 900,
+      peakingDb: 0,
+      peakingHz: 500,
+      peakingQ: 0.8,
+    } satisfies HeadDspConfig,
+  },
+  /** 4 kHz mono WAV kayıtlar için klinik frekans bandı koruması */
+  masterLowpassHz: 3800,
+  /** Kayıtlar içe aktarımda ortak RMS'e normalize edilir;
+   *  bu katsayı yalnız ek güvenlik payıdır. */
+  clipGuardGain: 1.0,
+};
