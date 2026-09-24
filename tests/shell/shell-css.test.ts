@@ -50,4 +50,8 @@ describe("shell.css token sözleşmesi", () => {
     expect(shellCss).toContain(":focus-visible");
     expect(shellCss).not.toMatch(/\.eg-shell-entry__logo\s*\{[^}]*filter:/);
   });
+  it("gövde kenar boşluğunu sıfırlar ve programatik odakta çerçeve çizmez (B2)", () => {
+    expect(shellCss).toMatch(/html\s*,\s*body\s*\{[^}]*margin:\s*0/);
+    expect(shellCss).toMatch(/:focus:not\(:focus-visible\)[^{]*\{[^}]*outline:\s*none/);
+  });
 });

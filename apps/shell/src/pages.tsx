@@ -1,9 +1,12 @@
 import type { JSX, ReactNode } from "react";
-import { Badge, Card } from "@egemed/ui";
+import { Tabs } from "@egemed/ui";
 import { t, type TrKey } from "@egemed/ui/i18n";
-import { SIM_PATHS, routeHref, type RouteId } from "./routes";
+import type { DevSession } from "./devAuth";
+import { routeHref, type RouteId } from "./routes";
+import { SIM_IDS, SimCard } from "./SimCard";
 
-const SIM_IDS = ["pulse", "ausculta", "opaca"] as const;
+const TRUST_KEYS = ["data", "faculty", "privacy"] as const;
+const TRUST_SECTION_ID = "eg-neden-guvenilir";
 type EmptyPageProps = { titleKey: TrKey; bodyKey: TrKey; children?: ReactNode };
 
 function EmptyPage({ titleKey, bodyKey, children }: EmptyPageProps): JSX.Element {
@@ -16,8 +19,97 @@ function EmptyPage({ titleKey, bodyKey, children }: EmptyPageProps): JSX.Element
   );
 }
 
-export function HomePage(): JSX.Element {
-  return <EmptyPage bodyKey="shell.home.body" titleKey="shell.home.title" />;
+/** Yumuşak kaydırma hedefinin en dar arayüzü; DOM lib'ine bağımlı değildir. */
+interface ScrollTarget { scrollIntoView(): void }
+interface ScrollDocument { getElementById(id: string): ScrollTarget | null }
+
+/**
+ * Sayfa içi bölüme kaydırır. `href="#..."` hash yönlendiriciyi tetikleyip
+ * Bulunamadı sayfasına düşüreceği için gezinme iptal edilir (B1 deseni);
+ * DOM'suz ortamda (SSR/test) kaydırma sessizce atlanır.
+ */
+export function scrollToSection(event: { preventDefault(): void }, id: string): void {
+  event.preventDefault();
+  const doc = (globalThis as { document?: ScrollDocument }).document;
+  doc?.getElementById(id)?.scrollIntoView();
+}
+
+export interface HomePageProps {
+  /** Oturum varsa başlığın üstünde "Hoş geldiniz" + rol etiketi çizilir. */
+  readonly session?: DevSession | null;
+}
+
+/** Ana sayfa: hero + üç sim kartı + ilerleme sekmeleri + güven kanıtları. */
+export function HomePage({ session = null }: HomePageProps): JSX.Element {
+  const roleLabel =
+    session === null
+      ? null
+      : t(session.role === "admin" ? "entry.role.admin" : "entry.role.student");
+  const tabs = SIM_IDS.map((id) => ({
+    id,
+    label: t(`sims.${id}.name`),
+    panel: <p className="eg-shell-progress__empty">{t("home.progress.empty")}</p>,
+  }));
+  return (
+    <div className="eg-shell-home">
+      <section className="eg-shell-hero">
+        {roleLabel !== null && (
+          <p className="eg-shell-hero__greeting">
+            {t("home.greeting")} · <span className="eg-shell-hero__role">{roleLabel}</span>
+          </p>
+        )}
+        <h1 className="eg-shell-hero__title">{t("home.hero.title")}</h1>
+        <p className="eg-shell-hero__lead">{t("home.hero.lead")}</p>
+        <p className="eg-shell-hero__actions">
+          <a className="eg-shell-cta" href={routeHref("simulators")}>
+            {t("home.hero.cta")}
+          </a>
+          <a
+            className="eg-shell-hero__secondary"
+            href={`#${TRUST_SECTION_ID}`}
+            onClick={(event) => scrollToSection(event, TRUST_SECTION_ID)}
+          >
+            {t("home.hero.secondary")}
+          </a>
+        </p>
+      </section>
+      <section aria-labelledby="eg-home-sims" className="eg-shell-home__section">
+        <h2 className="eg-shell-section__title" id="eg-home-sims">
+          {t("shell.simulators.title")}
+        </h2>
+        <ul className="eg-shell-cards">
+          {SIM_IDS.map((id) => (
+            <li key={id}>
+              <SimCard href={routeHref("simulators")} id={id} />
+            </li>
+          ))}
+        </ul>
+      </section>
+      <section aria-labelledby="eg-home-progress" className="eg-shell-home__section">
+        <h2 className="eg-shell-section__title" id="eg-home-progress">
+          {t("home.progress.title")}
+        </h2>
+        <Tabs items={tabs} label={t("home.progress.title")} />
+      </section>
+      <section
+        aria-labelledby="eg-home-trust"
+        className="eg-shell-home__section"
+        id={TRUST_SECTION_ID}
+      >
+        <h2 className="eg-shell-section__title" id="eg-home-trust">
+          {t("home.trust.title")}
+        </h2>
+        <ul className="eg-shell-trust">
+          {TRUST_KEYS.map((key) => (
+            <li className="eg-shell-trust__item" key={key}>
+              <h3 className="eg-shell-trust__title">{t(`home.trust.${key}.title`)}</h3>
+              <p className="eg-shell-trust__body">{t(`home.trust.${key}.body`)}</p>
+            </li>
+          ))}
+        </ul>
+      </section>
+    </div>
+  );
 }
 
 export function TasksPage(): JSX.Element {
@@ -40,31 +132,30 @@ export function NotFoundPage(): JSX.Element {
   );
 }
 
-/** Kartlar ADR-003 yol uzayını yalnız METİN olarak gösterir; iframe yoktur (gömme T09 sonrası). */
+/** Kartlar yalnız logo/ad/tanıtım gösterir; iframe yoktur (gömme T09 sonrası). */
 export function SimulatorsPage(): JSX.Element {
   return (
-    <EmptyPage bodyKey="shell.simulators.body" titleKey="shell.simulators.title">
+    <section className="eg-shell-page">
+      <h1 className="eg-shell-page__title">{t("shell.simulators.title")}</h1>
+      <p className="eg-shell-page__body">{t("shell.simulators.body")}</p>
       <ul className="eg-shell-cards">
         {SIM_IDS.map((id) => (
           <li key={id}>
-            <Card footer={<Badge tone="info">{t("shell.soon")}</Badge>} title={t(`shell.sim.${id}`)}>
-              <code>{SIM_PATHS[id]}</code>
-            </Card>
+            <SimCard headingLevel={2} id={id} size="large" />
           </li>
         ))}
       </ul>
-    </EmptyPage>
+    </section>
   );
 }
 
-/** Sayfa tablosu; eksik sayfa derleme zamanında yakalanır. */
-const PAGES: Record<RouteId, () => JSX.Element> = {
-  home: HomePage,
+/** Ana sayfa dışındaki sayfalar; eksik sayfa derleme zamanında yakalanır. */
+const PAGES: Record<Exclude<RouteId, "home">, () => JSX.Element> = {
+  notebook: NotebookPage,
   simulators: SimulatorsPage,
   tasks: TasksPage,
-  notebook: NotebookPage,
 };
 
-export function pageFor(id: RouteId): JSX.Element {
-  return PAGES[id]();
+export function pageFor(id: RouteId, session: DevSession | null = null): JSX.Element {
+  return id === "home" ? <HomePage session={session} /> : PAGES[id]();
 }

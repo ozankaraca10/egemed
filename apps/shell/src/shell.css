@@ -1,6 +1,12 @@
-/* T08 kabuk düzeni. Renk/tipografi/boşluk yalnız packages/tokens aile
+/* T08/T38b kabuk düzeni. Renk/tipografi/boşluk yalnız packages/tokens aile
    token'larından gelir; renk literali kullanılmaz. Mobil öncelikli:
-   <768 px alt sekme çubuğu, >=768 px üst bar; dokunma hedefleri >=44 px. */
+   <768 px alt sekme çubuğu, >=768 px lacivert üst bar; dokunma hedefleri >=44 px. */
+
+/* B2 düzeltmesi: tarayıcının varsayılan 8 px gövde kenar boşluğu tüm
+   ekranlarda beyaz çerçeve bırakıyordu. Tek global kural yalnız bu reset
+   içindir; `packages/ui` bileşenlerine dokunmaz. */
+html, body { margin: 0; }
+
 .eg-shell {
   /* Aile token'ında 44 px dokunma hedefi yok; yerelde --eg- önekiyle tutulur. */
   --eg-shell-touch-min: 44px;
@@ -10,6 +16,11 @@
 }
 /* Odak halkası kabuğun tüm etkileşimlerinde görünür kalır (WCAG 2.4.7). */
 .eg-shell :focus-visible { outline: 2px solid var(--blue-600); outline-offset: 2px; }
+/* B2: programatik odak hedefi (`tabindex=-1`) sayfa açılışında görünür mavi
+   çerçeve çiziyordu. Fare/komut odağında çerçeve kapatılır; klavye odağı
+   (:focus-visible) yukarıdaki kuralla korunur (WCAG 2.4.7). */
+.eg-shell-main:focus:not(:focus-visible),
+.eg-shell-entry__main:focus:not(:focus-visible) { outline: none; }
 .eg-shell-skip {
   position: absolute; top: var(--sp-2); left: var(--sp-2); z-index: 30;
   display: inline-flex; align-items: center; min-height: var(--eg-shell-touch-min);
@@ -19,31 +30,50 @@
   transform: translateY(-200%);
 }
 .eg-shell-skip:focus { transform: none; }
+
+/* --- Üst bar: lacivert degrade, marka bloğu + gezinme (framework topbar) --- */
 .eg-shell-header {
+  position: relative; z-index: 10;
   display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
-  gap: var(--sp-3); padding: var(--sp-3) var(--sp-4);
-  background: var(--card); border-bottom: 1px solid var(--border);
+  gap: var(--sp-3); padding: var(--sp-2) var(--sp-4);
+  background: linear-gradient(90deg, var(--navy-900), var(--navy-700));
+  border-bottom: 1px solid var(--navy-700); color: var(--card);
 }
-.eg-shell-brand { margin: 0; color: var(--navy-900); font-size: var(--fs-lg); font-weight: 600; }
-/* Sahte oturum göstergesi: rol etiketi + çıkış; ikisi de >=44 px (T35b). */
+.eg-shell-brand {
+  display: inline-flex; align-items: center; gap: var(--sp-3);
+  box-sizing: border-box; min-height: var(--eg-shell-touch-min);
+  color: var(--card); text-decoration: none;
+}
+.eg-shell-brand__mark { display: flex; flex-direction: column; line-height: 1.1; }
+.eg-shell-brand__eyebrow {
+  color: var(--blue-100); font-size: var(--fs-xs); font-weight: 600; letter-spacing: .24em;
+}
+.eg-shell-brand__name {
+  color: var(--card); font-size: var(--fs-xl); font-weight: 800; letter-spacing: .06em;
+}
+.eg-shell-brand__divider { align-self: stretch; width: 1px; background: var(--blue-400); opacity: .55; }
+.eg-shell-brand__tagline { display: none; color: var(--blue-100); font-size: var(--fs-sm); white-space: nowrap; }
+.eg-shell-header__side { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-2); }
+/* Sahte oturum göstergesi (T35b) koyu zemine uyarlanır; hedefler >=44 px. */
 .eg-shell-session { display: flex; align-items: center; gap: var(--sp-2); }
 .eg-shell-session__role {
   box-sizing: border-box; display: inline-flex; align-items: center;
   min-height: var(--eg-shell-touch-min); padding: 0 var(--sp-2);
-  background: var(--blue-50); border: 1px solid var(--blue-300); border-radius: var(--r-pill);
-  color: var(--navy-900); font-size: var(--fs-sm); font-weight: 600;
+  background: var(--navy-700); border: 1px solid var(--blue-400); border-radius: var(--r-pill);
+  color: var(--card); font-size: var(--fs-xs); font-weight: 600;
 }
 .eg-shell-session__logout {
   box-sizing: border-box; display: inline-flex; align-items: center; justify-content: center;
   min-height: var(--eg-shell-touch-min); padding: 0 var(--sp-3);
   background: var(--card); border: 1px solid var(--border-strong); border-radius: var(--r-md);
-  color: var(--text); font: inherit; font-size: var(--fs-sm); font-weight: 600; cursor: pointer;
+  color: var(--navy-900); font: inherit; font-size: var(--fs-sm); font-weight: 600; cursor: pointer;
 }
 .eg-shell-session-banner {
   box-sizing: border-box; margin: 0 0 var(--sp-4); padding: var(--sp-2) var(--sp-3);
   background: var(--blue-50); border: 1px solid var(--blue-300); border-radius: var(--r-sm);
   color: var(--navy-900); font-size: var(--fs-sm);
 }
+/* Mobil: beyaz alt sekme çubuğu, etkin sekme mavi; ikon+etiket alt alta. */
 .eg-shell-nav {
   position: fixed; right: 0; bottom: 0; left: 0; z-index: 20;
   display: flex; gap: var(--sp-1);
@@ -51,19 +81,22 @@
   background: var(--card); border-top: 1px solid var(--border);
 }
 .eg-shell-nav__link {
-  display: inline-flex; flex: 1 1 0; align-items: center; justify-content: center;
-  min-height: 44px; padding: 0 var(--sp-2);
-  color: var(--muted); font-size: var(--fs-sm); text-decoration: none;
+  display: inline-flex; flex: 1 1 0; flex-direction: column; align-items: center;
+  justify-content: center; gap: var(--sp-1); min-width: 0; min-height: 44px;
+  padding: 0 var(--sp-1); color: var(--muted); font-size: var(--fs-xs);
+  line-height: 1.15; text-decoration: none; white-space: nowrap;
 }
+.eg-shell-nav__icon { display: inline-flex; }
+.eg-shell-nav__svg { display: block; width: 1.25rem; height: 1.25rem; }
 /* Etkin bağlantı renk dışında da ayırt edilir: kalın yazı + alt çizgi (WCAG 1.4.1). */
 .eg-shell-nav__link[aria-current="page"] {
-  color: var(--navy-900); font-weight: 600; box-shadow: inset 0 -3px 0 var(--blue-600);
+  color: var(--blue-700); font-weight: 600; box-shadow: inset 0 -3px 0 var(--blue-600);
 }
 .eg-shell-main {
   box-sizing: border-box; padding: var(--sp-4);
   padding-bottom: calc(var(--eg-shell-touch-min) + env(safe-area-inset-bottom) + var(--sp-5));
 }
-.eg-shell-page__title { margin: 0 0 var(--sp-3); color: var(--navy-900); font-size: var(--fs-xl); }
+.eg-shell-page__title { margin: 0 0 var(--sp-3); color: var(--navy-900); font-size: var(--fs-2xl); }
 .eg-shell-page__body { margin: 0 0 var(--sp-4); color: var(--muted); }
 .eg-shell-cards { display: grid; gap: var(--sp-3); margin: 0; padding: 0; list-style: none; }
 .eg-shell-admin__desc { margin: 0; }
@@ -73,6 +106,67 @@
   background: var(--blue-700); border-radius: var(--r-md); color: var(--card);
   font-weight: 600; text-decoration: none;
 }
+
+/* --- Ana sayfa: hero, bölümler, sim kartı, güven kanıtları --- */
+.eg-shell-home { display: grid; gap: var(--sp-6); }
+.eg-shell-section__title { margin: 0 0 var(--sp-4); color: var(--navy-900); font-size: var(--fs-xl); }
+.eg-shell-hero {
+  box-sizing: border-box; padding: var(--sp-6) var(--sp-4);
+  background: linear-gradient(160deg, var(--blue-100), var(--bg-grad-b) 55%, var(--card));
+  border: 1px solid var(--border); border-radius: var(--r-xl); text-align: center;
+}
+.eg-shell-hero__greeting {
+  margin: 0 0 var(--sp-2); color: var(--blue-700); font-size: var(--fs-sm);
+  font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
+}
+.eg-shell-hero__role { color: var(--navy-800); }
+.eg-shell-hero__title {
+  max-width: 48rem; margin: 0 auto var(--sp-3); color: var(--navy-900);
+  font-size: clamp(var(--fs-2xl), 5vw, 2.5rem); line-height: 1.15; letter-spacing: -.02em;
+}
+.eg-shell-hero__lead { max-width: 44rem; margin: 0 auto var(--sp-5); color: var(--muted); font-size: var(--fs-lg); }
+.eg-shell-hero__actions {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: center;
+  gap: var(--sp-3); margin: 0;
+}
+.eg-shell-cta {
+  display: inline-flex; align-items: center; justify-content: center; gap: var(--sp-2);
+  box-sizing: border-box; min-height: var(--eg-shell-touch-min); padding: 0 var(--sp-5);
+  background: var(--blue-700); border-radius: var(--r-md); box-shadow: var(--shadow-card);
+  color: var(--card); font-weight: 700; text-decoration: none;
+}
+.eg-shell-hero__secondary {
+  display: inline-flex; align-items: center; box-sizing: border-box;
+  min-height: var(--eg-shell-touch-min); padding: 0 var(--sp-2);
+  color: var(--blue-700); font-weight: 600;
+}
+.eg-shell-sim { display: grid; gap: var(--sp-2); }
+.eg-shell-sim__logo {
+  width: 100%; height: 5.5rem; object-fit: contain; object-position: left center;
+}
+.eg-shell-sim--large .eg-shell-sim__logo { height: 8rem; }
+.eg-shell-sim__tagline { margin: 0; color: var(--navy-800); font-weight: 600; }
+.eg-shell-sim__body { margin: 0; color: var(--muted); }
+.eg-shell-sim__link {
+  justify-self: start; display: inline-flex; align-items: center; box-sizing: border-box;
+  min-height: var(--eg-shell-touch-min); margin-top: var(--sp-1); padding: 0 var(--sp-4);
+  background: var(--blue-50); border: 1px solid var(--blue-600); border-radius: var(--r-md);
+  color: var(--navy-900); font-weight: 600; text-decoration: none;
+}
+.eg-shell-progress__empty {
+  box-sizing: border-box; margin: 0; padding: var(--sp-5) var(--sp-4);
+  background: var(--card-soft); border: 1px dashed var(--border-strong);
+  border-radius: var(--radius); color: var(--muted); text-align: center;
+}
+.eg-shell-trust { display: grid; gap: var(--sp-3); margin: 0; padding: 0; list-style: none; }
+.eg-shell-trust__item {
+  box-sizing: border-box; padding: var(--sp-4); background: var(--card);
+  border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow-card);
+}
+.eg-shell-trust__title { margin: 0 0 var(--sp-2); color: var(--navy-800); font-size: var(--fs-lg); }
+.eg-shell-trust__body { margin: 0; color: var(--muted); }
+
+/* --- Giriş ekranı --- */
 .eg-shell-entry {
   --eg-entry-touch: 44px;
   display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -147,6 +241,9 @@
   .eg-shell-entry__panel { padding: var(--sp-4); }
 }
 @media (max-width: 380px) {
+  /* 360 px'te "Simülatörler"/"Not Defteri" etiketleri kırılmadan sığsın:
+     kısaltma yok, yalnız iç boşluk ve harf aralığı daraltılır. */
+  .eg-shell-nav__link { padding: 0; letter-spacing: -.02em; }
   .eg-shell-entry__brand { min-height: 11rem; }
   .eg-shell-entry__roles { gap: var(--sp-1); }
   .eg-shell-entry__roles a { font-size: var(--fs-xs); }
@@ -157,8 +254,21 @@
   }
 }
 @media (min-width: 768px) {
+  .eg-shell-brand__tagline { display: inline; }
+  /* Alt sekme çubuğu üst bar gezinmesine dönüşür: beyaz zemin yerine lacivert. */
   .eg-shell-nav { position: static; gap: var(--sp-2); padding: 0; background: none; border-top: 0; }
-  .eg-shell-nav__link { flex: 0 0 auto; padding: 0 var(--sp-3); font-size: var(--fs-md); }
+  .eg-shell-nav__link {
+    flex: 0 0 auto; flex-direction: row; padding: 0 var(--sp-3);
+    color: var(--blue-100); font-size: var(--fs-md);
+  }
+  .eg-shell-nav__icon { display: none; }
+  .eg-shell-nav__link:hover { background: var(--navy-700); border-radius: var(--r-md); }
+  .eg-shell-nav__link[aria-current="page"] {
+    background: var(--navy-600); border-radius: var(--r-md);
+    box-shadow: inset 0 -3px 0 var(--blue-400); color: var(--card);
+  }
   .eg-shell-main { max-width: 72rem; margin: 0 auto; padding: var(--sp-5); }
   .eg-shell-cards { grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr)); }
+  .eg-shell-trust { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .eg-shell-hero { padding: var(--sp-6); }
 }

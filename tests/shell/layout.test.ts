@@ -2,7 +2,8 @@ import { createElement, type ReactNode } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { ShellLayout, focusMain } from "../../apps/shell/src/ShellLayout";
 import { NotFoundPage, pageFor } from "../../apps/shell/src/pages";
-import { ROUTES, SIM_PATHS, resolveRoute, routeHref } from "../../apps/shell/src/routes";
+import { ROUTES, resolveRoute, routeHref } from "../../apps/shell/src/routes";
+import { SIM_IDS, SIM_LOGOS } from "../../apps/shell/src/SimCard";
 import { t } from "../../packages/ui/i18n/tr";
 import { describe, expect, it } from "vitest";
 
@@ -30,12 +31,26 @@ describe("ShellLayout işaretlemesi", () => {
     }
     expect(renderRoute("#/yok")).not.toContain('aria-current="page"');
   });
-  it("Simülatörler sayfası üç kart gösterir, iframe kurmaz, yolları metin verir", () => {
+  it("Simülatörler sayfası üç kart gösterir, iframe kurmaz, logo ölçülerini verir", () => {
     const html = renderRoute("#/simulatorler");
     expect((html.match(/class="eg-card"/g) ?? []).length).toBe(3);
     expect(html).not.toContain("<iframe");
-    expect(html).toContain(t("shell.soon"));
-    for (const path of Object.values(SIM_PATHS)) expect(html).toContain(path);
+    expect(html).toContain(t("sims.soon"));
+    for (const id of SIM_IDS) {
+      expect(html, id).toContain(t(`sims.${id}.name`));
+      expect(html, id).toContain(t(`sims.${id}.tagline`));
+      const logo = SIM_LOGOS[id];
+      const tag = html.match(new RegExp(`<img[^>]*src="${logo.src}"[^>]*>`))?.[0] ?? "";
+      expect(tag, id).toContain('alt=""');
+      expect(tag, id).toContain(`width="${logo.width}"`);
+      expect(tag, id).toContain(`height="${logo.height}"`);
+    }
+  });
+  it("üst bar marka bloğu işlenir", () => {
+    const html = renderRoute("#/");
+    expect(html).toContain(t("shell.brand.eyebrow"));
+    expect(html).toContain(t("shell.brand.name"));
+    expect(html).toContain(t("shell.brand.tagline"));
   });
   it("atlama bağlantısı hash gezinmesini iptal eden işleyiciye bağlıdır", () => {
     // Statik HTML olay işleyicisi taşımaz; `ShellLayout` bilinçli olarak hook'suz
