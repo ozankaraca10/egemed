@@ -145,6 +145,73 @@ export { RegionChipList, visibleRegionPoints } from "./ui/RegionChips";
 export type { RegionChipListProps } from "./ui/RegionChips";
 export { FeedbackCard, QuestionCard, nextOptionIndex, toggleOptionValues } from "./ui/Questions";
 export type { FeedbackCardProps, QuestionCardProps } from "./ui/Questions";
+export { TUTORIAL_STEPS, TutorialSteps } from "./ui/TutorialSteps";
+export { ConfirmModal } from "./ui/ConfirmModal";
+export type { ConfirmModalProps } from "./ui/ConfirmModal";
+export { HelpModal } from "./ui/HelpModal";
+export type { HelpModalProps } from "./ui/HelpModal";
+export { PediatricRefModal } from "./ui/PediatricRefModal";
+export type { PediatricRefModalProps } from "./ui/PediatricRefModal";
+export {
+  NOOP_MODAL_ENV,
+  bindModalFocus,
+  createNoopModalEnv,
+  enabledFocusables,
+  tabTrapTarget,
+} from "./ui/modal-env";
+export type { ModalEnv, ModalFocusable, ModalKeyEvent, TabTrapTarget } from "./ui/modal-env";
+export {
+  IconArrowRight,
+  IconBack10,
+  IconBell,
+  IconBodyBack,
+  IconBodyFront,
+  IconBook,
+  IconBrain,
+  IconChart,
+  IconCheck,
+  IconCheckCircle,
+  IconChevronLeft,
+  IconChevronRight,
+  IconClock,
+  IconClose,
+  IconCompare,
+  IconDatabase,
+  IconDiaphragm,
+  IconDoc,
+  IconDrag,
+  IconEcg,
+  IconExit,
+  IconFingerTap,
+  IconFullscreen,
+  IconFullscreenExit,
+  IconFwd10,
+  IconGlobe,
+  IconGraduation,
+  IconHeadphones,
+  IconHeart,
+  IconHelpCircle,
+  IconInfo,
+  IconLightbulb,
+  IconLogo,
+  IconLungs,
+  IconMonitor,
+  IconNetwork,
+  IconPause,
+  IconPlay,
+  IconReplay,
+  IconShieldCheck,
+  IconSource,
+  IconStethoscope,
+  IconSwap,
+  IconTarget,
+  IconTrophy,
+  IconUser,
+  IconVolume,
+  IconVolumeX,
+  IconWave,
+  IconXCircle,
+} from "./ui/icons";
 export { AUDIO_CONFIG } from "./audio/config";
 export { createAudioEngine } from "./audio/engine";
 export type { AudioEngine, AudioEngineDeps, EngineState } from "./audio/engine";
