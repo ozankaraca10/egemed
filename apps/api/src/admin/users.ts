@@ -19,6 +19,9 @@ import {
 import { jsonError, validationDetails, type AppEnv } from "../http";
 import { csrfGuard, type AuthDeps } from "../auth/routes";
 import { SESSION_COOKIE, createSessionService } from "../auth/session";
+import type { AdminBulkRepo } from "./bulk";
+import type { AdminImportRepo } from "./imports";
+import type { AdminRoleRepo } from "./roles";
 
 /**
  * T65 — `/admin/users` CRUD + audit (E3 §b, §c, §d). Her istekte oturum ve
@@ -33,6 +36,12 @@ import { SESSION_COOKIE, createSessionService } from "../auth/session";
 export interface AdminDeps {
   readonly auth: AuthDeps;
   readonly users: AdminUsersRepo;
+  /** T66 — `/admin/users/bulk` atomik toplu işlem deposu. */
+  readonly bulk: AdminBulkRepo;
+  /** T66 — `/admin/users/:id/roles` elle rol atama deposu (E3 §b). */
+  readonly roles: AdminRoleRepo;
+  /** T66 — `/admin/imports` staging ve uygulama deposu (E3 §c, §f). */
+  readonly imports: AdminImportRepo;
   /** Sunucu tarafı opak kimlik üretimi (uuid); testler sayacı enjekte eder. */
   readonly newId: () => string;
 }
@@ -41,6 +50,8 @@ export interface AdminDeps {
 export interface AdminUnit {
   readonly id: string;
   readonly name: string;
+  /** CSV (`birim_kodu`) eşlemesi için; yalnız toplu içe aktarma kullanır. */
+  readonly code?: string;
 }
 
 /** Liste satırı (E3 §d): yaşayan kullanıcılar; `deleted` listelenmez. */
@@ -133,6 +144,8 @@ export interface AdminUsersRepo {
     query: AdminUsersListQuery,
   ): Promise<{ readonly rows: readonly AdminUserListItem[]; readonly total: number }>;
   findById(id: string, institutionId: string): Promise<AdminUserRecord | null>;
+  /** T66 — toplu işlem öncesi tek sorguda kapsam doğrulaması (E3 §d). */
+  findByIds(ids: readonly string[], institutionId: string): Promise<readonly AdminUserRecord[]>;
   findUnit(institutionId: string, unitId: string): Promise<AdminUnit | null>;
   create(input: NewAdminUser): Promise<void>;
   update(id: string, institutionId: string, update: AdminUserUpdate): Promise<void>;
@@ -335,6 +348,15 @@ export function createPgAdminUsersRepo(db: AdminDb): AdminUsersRepo {
       return row === undefined ? null : mapUserRow(row);
     },
 
+    async findByIds(ids, institutionId) {
+      if (ids.length === 0) return [];
+      const result = await db.query(
+        `select ${USER_SELECT_COLUMNS}, (select coalesce(array_agg(s.sim_id), '{}') from sim_access s where s.user_id = u.id) as sim_access from users u left join units un on un.id = u.unit_id where u.id = any($1::uuid[]) and u.institution_id = $2`,
+        [[...ids], institutionId],
+      );
+      return result.rows.map((row) => mapUserRow(row as AdminUserRow));
+    },
+
     async findUnit(institutionId, unitId) {
       const result = await db.query(
         "select id, name from units where id = $1 and institution_id = $2 and deleted_at is null limit 1",
@@ -437,8 +459,8 @@ export interface MemoryAdminUserState {
   displayName: string;
   status: UserStatus;
   readonly authMethod: AuthMethod;
-  readonly roles: readonly Role[];
-  readonly simAccess: readonly SimId[];
+  roles: readonly Role[];
+  simAccess: readonly SimId[];
   readonly createdAt: number;
   updatedAt: number;
   readonly lastLoginAt: number | null;
@@ -449,6 +471,8 @@ export interface MemoryAdminStore {
   readonly users: AdminUsersRepo;
   readonly records: Map<string, MemoryAdminUserState>;
   readonly units: Map<string, AdminUnit>;
+  /** Birimin bağlı olduğu kurum; CSV birim eşlemesi kapsamı için (T66). */
+  readonly unitInstitutions: Map<string, string>;
 }
 
 function findMappingConflict(
@@ -507,6 +531,16 @@ function toMemoryListItem(record: MemoryAdminUserState, units: ReadonlyMap<strin
   };
 }
 
+function toMemoryRecord(record: MemoryAdminUserState, units: ReadonlyMap<string, AdminUnit>): AdminUserRecord {
+  return {
+    ...toMemoryListItem(record, units),
+    institutionId: record.institutionId,
+    simAccess: [...record.simAccess],
+    updatedAt: record.updatedAt,
+    deletedAt: record.deletedAt,
+  };
+}
+
 /** Testlerin durum okuduğu/ayarladığı bellek deposu (DB gerekmez). */
 export function createMemoryAdminStore(seed: MemoryAdminStoreSeed = {}): MemoryAdminStore {
   const records = new Map<string, MemoryAdminUserState>();
@@ -514,7 +548,12 @@ export function createMemoryAdminStore(seed: MemoryAdminStoreSeed = {}): MemoryA
   const unitInstitutions = new Map<string, string>();
 
   for (const unit of seed.units ?? []) {
-    units.set(unit.id, { id: unit.id, name: unit.name });
+    units.set(
+      unit.id,
+      unit.code === undefined
+        ? { id: unit.id, name: unit.name }
+        : { id: unit.id, name: unit.name, code: unit.code },
+    );
     unitInstitutions.set(unit.id, unit.institutionId);
   }
   for (const user of seed.users ?? []) {
@@ -562,7 +601,18 @@ export function createMemoryAdminStore(seed: MemoryAdminStoreSeed = {}): MemoryA
     async findById(id, institutionId) {
       const record = records.get(id);
       if (record === undefined || record.institutionId !== institutionId) return null;
-      return { ...toMemoryListItem(record, units), institutionId: record.institutionId, simAccess: [...record.simAccess], updatedAt: record.updatedAt, deletedAt: record.deletedAt };
+      return toMemoryRecord(record, units);
+    },
+
+    async findByIds(ids, institutionId) {
+      const found: AdminUserRecord[] = [];
+      for (const id of ids) {
+        const record = records.get(id);
+        if (record !== undefined && record.institutionId === institutionId) {
+          found.push(toMemoryRecord(record, units));
+        }
+      }
+      return found;
     },
 
     async findUnit(institutionId, unitId) {
@@ -629,7 +679,7 @@ export function createMemoryAdminStore(seed: MemoryAdminStoreSeed = {}): MemoryA
     },
   };
 
-  return { users, records, units };
+  return { users, records, units, unitInstitutions };
 }
 
 function readJson(c: Context<AppEnv>): Promise<unknown> {
@@ -687,6 +737,36 @@ function userSummary(record: AdminUserRecord): Record<string, string> {
   };
 }
 
+/** Admin uçlarının paylaştığı denetim yazımı; aktör ve request_id bağlamdan gelir. */
+export interface AdminAuditInput {
+  readonly action: string;
+  readonly targetType: string;
+  readonly targetId: string;
+  readonly summaryBefore?: Record<string, string>;
+  readonly summaryAfter: Record<string, string>;
+}
+
+export async function insertAdminAudit(
+  deps: Pick<AdminDeps, "auth">,
+  c: Context<AppEnv>,
+  at: number,
+  input: AdminAuditInput,
+): Promise<void> {
+  const actor = c.get("adminActor");
+  await deps.auth.audit.insert({
+    occurredAt: at,
+    actorUserId: actor.userId,
+    actorRole: "admin",
+    institutionId: actor.institutionId,
+    action: input.action,
+    targetType: input.targetType,
+    targetId: input.targetId,
+    summaryAfter: input.summaryAfter,
+    ...(input.summaryBefore === undefined ? {} : { summaryBefore: input.summaryBefore }),
+    requestId: c.get("requestId"),
+  });
+}
+
 export function registerAdminUserRoutes(app: Hono<AppEnv>, deps: AdminDeps, now: () => number): void {
   const sessions = createSessionService({
     sessions: deps.auth.sessions,
@@ -722,19 +802,7 @@ export function registerAdminUserRoutes(app: Hono<AppEnv>, deps: AdminDeps, now:
       readonly summaryAfter: Record<string, string>;
     },
   ): Promise<void> {
-    const actor = c.get("adminActor");
-    await deps.auth.audit.insert({
-      occurredAt: now(),
-      actorUserId: actor.userId,
-      actorRole: "admin",
-      institutionId: actor.institutionId,
-      action: input.action,
-      targetType: "user",
-      targetId: input.targetId,
-      summaryAfter: input.summaryAfter,
-      ...(input.summaryBefore === undefined ? {} : { summaryBefore: input.summaryBefore }),
-      requestId: c.get("requestId"),
-    });
+    await insertAdminAudit(deps, c, now(), { ...input, targetType: "user" });
   }
 
   async function loadScopedUser(c: Context<AppEnv>, id: string | null): Promise<AdminUserRecord | null> {
