@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { errorResponseSchema } from "../../packages/contracts/src/index";
 import { createApp } from "../../apps/api/src/app";
+import { createMemoryAdminStore, type AdminDeps } from "../../apps/api/src/admin/users";
 import { createMemoryAuthStore } from "../../apps/api/src/auth/repo";
 import type { AuthDeps } from "../../apps/api/src/auth/routes";
 import {
@@ -59,7 +60,13 @@ function createTestAuth(): AuthDeps {
 }
 
 function createTestApp(db = createFakeDb()) {
-  return { app: createApp({ db, now: () => FIXED_NOW, auth: createTestAuth() }), db };
+  const auth = createTestAuth();
+  const admin: AdminDeps = {
+    auth,
+    users: createMemoryAdminStore().users,
+    newId: () => "00000000-0000-4000-8000-0000000000ff",
+  };
+  return { app: createApp({ db, now: () => FIXED_NOW, auth, admin }), db };
 }
 
 describe("request_id ara katmanı", () => {
