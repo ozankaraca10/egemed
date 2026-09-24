@@ -11,6 +11,7 @@
     "build": "turbo run build",
     "dev": "turbo run dev",
     "e2e:mobile": "playwright test",
+    "e2e:api": "E2E_REQUIRE_API=1 playwright test --project=api-dev",
     "infra:up": "docker compose -p egemed-local --env-file .env.local -f infra/docker-compose.dev.yml up -d --wait",
     "infra:down": "docker compose -p egemed-local --env-file .env.local -f infra/docker-compose.dev.yml down --remove-orphans",
     "lint": "eslint .",
