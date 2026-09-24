@@ -1,6 +1,7 @@
-import { useEffect, useRef, useState, type JSX, type KeyboardEvent } from "react";
+import { useEffect, useState, type JSX, type KeyboardEvent } from "react";
 import { Badge, Modal, type BadgeTone } from "@egemed/ui";
 import { t, type TrKey } from "@egemed/ui/i18n";
+import { useShellSource } from "../dataSources";
 import { adminUserCreateHref, adminUserDetailHref } from "../routes";
 import {
   ADMIN_UNITS,
@@ -606,11 +607,6 @@ export function UsersListView({
   );
 }
 
-/** Sentetik kaynağın gerçek çağrısı; `UsersPage` yaşam döngüsü boyunca tek örnek tutar. */
-function defaultSource(): UsersDataSource {
-  return createMockUsersSource(DEFAULT_MOCK_SEED);
-}
-
 export interface UsersPageProps {
   /** Testte/gelecekte gerçek API kaynağıyla değiştirmek için enjekte edilir. */
   readonly dataSource?: UsersDataSource;
@@ -623,8 +619,7 @@ export interface UsersPageProps {
  * `UsersListView`'dedir.
  */
 export function UsersPage({ dataSource }: UsersPageProps): JSX.Element {
-  const sourceRef = useRef<UsersDataSource | null>(null);
-  if (sourceRef.current === null) sourceRef.current = dataSource ?? defaultSource();
+  const source = useShellSource(dataSource, (sources) => sources.users, () => createMockUsersSource(DEFAULT_MOCK_SEED));
 
   const [query, setQuery] = useState<UsersListQuery>(DEFAULT_QUERY);
   const [status, setStatus] = useState<UsersLoadStatus>("loading");
@@ -642,7 +637,7 @@ export function UsersPage({ dataSource }: UsersPageProps): JSX.Element {
   useEffect(() => {
     let active = true;
     setStatus("loading");
-    sourceRef.current?.list(query).then(
+    source.list(query).then(
       (next) => {
         if (!active) return;
         setResult(next);
@@ -666,7 +661,7 @@ export function UsersPage({ dataSource }: UsersPageProps): JSX.Element {
     if (!bulkOpen || selected.size === 0) return;
     let active = true;
     setBulkPreviewStatus("loading");
-    sourceRef.current?.bulkPreview(buildBulkInput([...selected], bulkOperation, bulkValue)).then(
+    source.bulkPreview(buildBulkInput([...selected], bulkOperation, bulkValue)).then(
       (preview) => {
         if (!active) return;
         setBulkPreview(preview);
@@ -693,7 +688,7 @@ export function UsersPage({ dataSource }: UsersPageProps): JSX.Element {
 
   function applyBulk(): void {
     setBulkApplyStatus("loading");
-    sourceRef.current?.bulkApply(buildBulkInput([...selected], bulkOperation, bulkValue)).then(
+    source.bulkApply(buildBulkInput([...selected], bulkOperation, bulkValue)).then(
       (applyResult) => {
         setBulkApplyResult(applyResult);
         setBulkApplyStatus("idle");

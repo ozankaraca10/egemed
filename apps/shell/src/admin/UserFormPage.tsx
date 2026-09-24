@@ -1,6 +1,7 @@
-import { useId, useRef, useState, type JSX } from "react";
+import { useId, useState, type JSX } from "react";
 import { Modal } from "@egemed/ui";
 import { t, type TrKey } from "@egemed/ui/i18n";
+import { useShellSource } from "../dataSources";
 import { adminUsersHref } from "../routes";
 import {
   hasFormErrors,
@@ -247,10 +248,6 @@ export function UserFormView({
   );
 }
 
-function defaultSource(): UsersDataSource {
-  return createMockUsersSource(DEFAULT_MOCK_SEED);
-}
-
 export interface UserFormPageProps {
   /** Testte/gelecekte gerçek API kaynağıyla değiştirmek için enjekte edilir. */
   readonly dataSource?: UsersDataSource;
@@ -278,8 +275,7 @@ function navigateToUsersList(): void {
  * gönderim burada yönetilir; çizim `UserFormView`'dedir.
  */
 export function UserFormPage({ dataSource }: UserFormPageProps): JSX.Element {
-  const sourceRef = useRef<UsersDataSource | null>(null);
-  if (sourceRef.current === null) sourceRef.current = dataSource ?? defaultSource();
+  const source = useShellSource(dataSource, (sources) => sources.users, () => createMockUsersSource(DEFAULT_MOCK_SEED));
 
   const [values, setValues] = useState<CreateUserFormValues>(INITIAL_CREATE_USER_VALUES);
   const [step, setStep] = useState<UserFormStep>("form");
@@ -311,7 +307,7 @@ export function UserFormPage({ dataSource }: UserFormPageProps): JSX.Element {
   function onConfirm(): void {
     setSubmitting(true);
     setSubmitError(false);
-    sourceRef.current?.create(toCreateUserInput(values)).then(
+    source.create(toCreateUserInput(values)).then(
       () => navigateToUsersList(),
       (error: unknown) => {
         setSubmitting(false);

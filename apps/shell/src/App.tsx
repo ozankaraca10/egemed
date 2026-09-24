@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type JSX, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type JSX, type ReactNode } from "react";
 import { t, type TrKey } from "@egemed/ui/i18n";
 import { AdminPage } from "./AdminPage";
 import { AuditPage } from "./admin/AuditPage";
@@ -8,6 +8,11 @@ import { UserDetailPage } from "./admin/UserDetailPage";
 import { UserFormPage } from "./admin/UserFormPage";
 import { UsersPage } from "./admin/UsersPage";
 import { apiSessionBaseUrl } from "./apiMode";
+import {
+  createMockShellDataSources,
+  ShellDataSourcesProvider,
+  type ShellDataSources,
+} from "./dataSources";
 import { createSessionStore, sessionWhenEnabled } from "./devAuth";
 import { EntryPage } from "./EntryPage";
 import { NotFoundPage, pageFor } from "./pages";
@@ -61,6 +66,9 @@ export function App(): JSX.Element | null {
   // oturum kodu üretim paketine girmez.
   const apiBaseUrl = apiSessionBaseUrl(import.meta.env);
   const apiEnabled = apiBaseUrl !== null;
+  const mockSources = useMemo(() => (apiEnabled ? null : createMockShellDataSources()), [apiEnabled]);
+  const [apiSources, setApiSources] = useState<ShellDataSources | null>(null);
+  const sources = apiEnabled ? apiSources : mockSources;
   const [apiSession, setApiSession] = useState<ShellSession | null>(null);
   const [apiReady, setApiReady] = useState(!apiEnabled);
   const loginApplied = useRef(false);
@@ -73,6 +81,22 @@ export function App(): JSX.Element | null {
       : null;
   const apiPending = apiEnabled && !apiReady;
   const guardHref = !apiPending && isAdminProtected(route) ? adminGuardHref(session) : null;
+
+  useEffect(() => {
+    // API kaynakları yalnız geliştirme dalında yüklenir; üretim paketine girmez.
+    if (!import.meta.env.DEV || apiBaseUrl === null) return undefined;
+    let cancelled = false;
+    void import("./apiShellSources")
+      .then((module) => {
+        if (!cancelled) setApiSources(module.createBrowserShellDataSources(apiBaseUrl));
+      })
+      .catch(() => {
+        if (!cancelled) setApiSources(null);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [apiBaseUrl]);
 
   useEffect(() => {
     // API modunda var olan çerez oturumu bir kez okunur; giriş yapıldıysa
@@ -142,6 +166,11 @@ export function App(): JSX.Element | null {
       window.location.hash = entryHref(session.role);
     }
   }
+  function frame(node: ReactNode): JSX.Element | null {
+    if (sources === null) return null;
+    return <ShellDataSourcesProvider sources={sources}>{node}</ShellDataSourcesProvider>;
+  }
+
   if (route.kind === "entry") {
     return (
       <EntryPage
@@ -153,10 +182,12 @@ export function App(): JSX.Element | null {
       />
     );
   }
+  // API oturumunda demo kaynak çizilmeden önce gerçek istemci ve `/auth/me` beklenir.
+  if (apiEnabled && (sources === null || !apiReady)) return null;
   if (isAdminProtected(route) && (apiPending || guardHref !== null)) return null;
-  return (
+  return frame(
     <ShellLayout onLogout={logout} route={route} session={session}>
       {contentFor(route, session)}
-    </ShellLayout>
+    </ShellLayout>,
   );
 }

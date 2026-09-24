@@ -1,5 +1,6 @@
-import { useId, useRef, useState, type JSX } from "react";
+import { useId, useState, type JSX } from "react";
 import { Modal } from "@egemed/ui";
+import { useShellSource } from "../dataSources";
 import { t, type TrKey } from "@egemed/ui/i18n";
 import {
   autoMapHeaders,
@@ -358,10 +359,6 @@ export function ImportWizardView(props: ImportWizardViewProps): JSX.Element {
   );
 }
 
-function defaultSource(): ImportsDataSource {
-  return createMockImportsSource();
-}
-
 export interface ImportWizardPageProps {
   /** Testte/gelecekte gerçek API kaynağıyla değiştirmek için enjekte edilir. */
   readonly dataSource?: ImportsDataSource;
@@ -375,8 +372,7 @@ const INITIAL_FILE_NAME = "kullanicilar.csv";
  * `ImportWizardView`'dedir.
  */
 export function ImportWizardPage({ dataSource }: ImportWizardPageProps): JSX.Element {
-  const sourceRef = useRef<ImportsDataSource | null>(null);
-  if (sourceRef.current === null) sourceRef.current = dataSource ?? defaultSource();
+  const source = useShellSource(dataSource, (sources) => sources.imports, () => createMockImportsSource());
 
   const [step, setStep] = useState<ImportWizardStep>("template");
   const [mode, setMode] = useState<ImportMode>("ekle");
@@ -395,7 +391,7 @@ export function ImportWizardPage({ dataSource }: ImportWizardPageProps): JSX.Ele
 
   function runValidate(batchId: string, currentMapping: ColumnMapping): void {
     setValidateStatus("loading");
-    sourceRef.current?.validate(batchId, currentMapping).then(
+    source.validate(batchId, currentMapping).then(
       (result) => {
         setBatch(result.batch);
         setRows(result.rows);
@@ -421,7 +417,7 @@ export function ImportWizardPage({ dataSource }: ImportWizardPageProps): JSX.Ele
 
   function onUploadRequest(): void {
     setUploadStatus("loading");
-    sourceRef.current?.upload({ csvText, fileName: fileNameInput, mode }).then(
+    source.upload({ csvText, fileName: fileNameInput, mode }).then(
       (result) => {
         setBatch(result.batch);
         setHeaders(result.headers);
@@ -439,7 +435,7 @@ export function ImportWizardPage({ dataSource }: ImportWizardPageProps): JSX.Ele
   function onConfirmApply(): void {
     if (batch === null) return;
     setApplyStatus("loading");
-    sourceRef.current?.apply(batch.id).then(
+    source.apply(batch.id).then(
       (result) => {
         setApplyResult(result);
         setApplyStatus("idle");
@@ -488,7 +484,7 @@ export function ImportWizardPage({ dataSource }: ImportWizardPageProps): JSX.Ele
       onCsvTextChange={setCsvText}
       onDownloadErrors={onDownloadErrors}
       onDownloadTemplate={() => {
-        sourceRef.current?.template().then(({ csv, fileName }) => triggerCsvDownload(fileName, csv));
+        source.template().then(({ csv, fileName }) => triggerCsvDownload(fileName, csv));
       }}
       onFileNameChange={setFileNameInput}
       onMappingChange={(column, header) =>
