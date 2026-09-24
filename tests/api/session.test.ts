@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import { authMeResponseSchema } from "../../packages/contracts/src/index";
 import { createApp } from "../../apps/api/src/app";
 import { createMemoryAdminBulkRepo } from "../../apps/api/src/admin/bulk";
+import { createMemoryAdminOverviewRepo } from "../../apps/api/src/admin/extras";
 import { createMemoryAdminImportRepo } from "../../apps/api/src/admin/imports";
 import { createMemoryAdminRoleRepo } from "../../apps/api/src/admin/roles";
 import { createMemoryAdminStore, type AdminDeps } from "../../apps/api/src/admin/users";
@@ -13,6 +14,7 @@ import {
   sessionCookieOptions,
   type AuthDeps,
 } from "../../apps/api/src/auth/routes";
+import { LOGIN_RATE_MAX, LOGIN_RATE_WINDOW_MS } from "../../apps/api/src/auth/rate-limit";
 import {
   CSRF_COOKIE,
   CSRF_HEADER,
@@ -74,16 +76,18 @@ function createHarness(options: HarnessOptions = {}) {
   };
   const adminStore = createMemoryAdminStore();
   const newId = () => "00000000-0000-4000-8000-0000000000ff";
+  const importStore = createMemoryAdminImportRepo(adminStore, newId);
   const admin: AdminDeps = {
     auth,
     users: adminStore.users,
     bulk: createMemoryAdminBulkRepo(adminStore),
     roles: createMemoryAdminRoleRepo(adminStore),
-    imports: createMemoryAdminImportRepo(adminStore, newId).repo,
+    imports: importStore.repo,
     newId,
   };
   const gamification = createMemoryGamificationRepo().repo;
-  const app = createApp({ db: fakeDb(), now: () => clock, auth, gamification, admin });
+  const overview = createMemoryAdminOverviewRepo(adminStore, importStore);
+  const app = createApp({ db: fakeDb(), now: () => clock, auth, gamification, overview, admin });
   return {
     app,
     store,
@@ -320,6 +324,22 @@ describe("dev sağlayıcı (E3 §a)", () => {
       summaryAfter: { reason: "unknown_user", provider: "dev" },
       requestId: "test-istek-kimligi-1",
     });
+  });
+
+  it("aynı kullanıcı adı eşik aşımında 429 döner; pencereden sonra yeniden dener", async () => {
+    const harness = createHarness();
+    for (let attempt = 0; attempt < LOGIN_RATE_MAX; attempt += 1) {
+      const response = await devLogin(harness, "yok.boyle");
+      expect(response.status).toBe(401);
+    }
+    const limited = await devLogin(harness, "yok.boyle");
+    expect(limited.status).toBe(429);
+    expect(await limited.json()).toEqual({ error: { code: "rate_limited" } });
+    expect(JSON.stringify(harness.store.auditEntries)).not.toContain("yok.boyle");
+
+    harness.advance(LOGIN_RATE_WINDOW_MS);
+    const again = await devLogin(harness, "yok.boyle");
+    expect(again.status).toBe(401);
   });
 
   it("geçersiz gövdeyi 400 invalid_request ile reddeder", async () => {

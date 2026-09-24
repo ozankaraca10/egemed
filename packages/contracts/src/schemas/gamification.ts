@@ -5,9 +5,14 @@ import {
   CODE_PATTERN,
   isoDateSchema,
   isoDateTimeSchema,
+  pageMetaSchema,
+  pageSizeSchema,
   simIdSchema,
   uuidSchema,
 } from "./common";
+
+export const GAMI_PERIODS = ["today", "week", "month", "academic_year"] as const;
+export const GAMI_COHORTS = [1, 2, 3, 4, 5, 6] as const;
 
 /** GET /me/gamification/:simId — sim başına ayrı özet; ham yanıt alanı yoktur. */
 export const gamiStreakSchema = z.strictObject({
@@ -99,3 +104,67 @@ export type AttemptWriteRequest = z.infer<typeof attemptWriteRequestSchema>;
 
 /** Yol parametresi: bilinmeyen sim 404 (E3 §d). */
 export const gamiSimIdParamSchema = simIdSchema;
+
+export const gamiPeriodSchema = z.enum(GAMI_PERIODS);
+export type GamiPeriod = z.infer<typeof gamiPeriodSchema>;
+
+export const gamiCohortSchema = z.union([
+  z.literal(1),
+  z.literal(2),
+  z.literal(3),
+  z.literal(4),
+  z.literal(5),
+  z.literal(6),
+]);
+export type GamiCohort = z.infer<typeof gamiCohortSchema>;
+
+export const gamiCohortFilterSchema = z.union([z.literal("all"), gamiCohortSchema]);
+export type GamiCohortFilter = z.infer<typeof gamiCohortFilterSchema>;
+
+/** GET /me/gamification/:simId/leaderboard sorgusu. */
+export const gamiLeaderboardQuerySchema = z.strictObject({
+  period: gamiPeriodSchema.default("month"),
+  cohort: z
+    .union([z.literal("all"), z.coerce.number().pipe(gamiCohortSchema)])
+    .default("all"),
+  page: z.coerce.number().int().min(1).default(1),
+  pageSize: pageSizeSchema.default(50),
+});
+export type GamiLeaderboardQuery = z.infer<typeof gamiLeaderboardQuerySchema>;
+
+/** Liderlik satırı kimliği opaktır; başka kullanıcının UUID'si dönmez. */
+export const gamiLeaderboardRowIdSchema = z.string().min(1).max(64);
+
+/** Görünen ad yalnız baş harf veya anonim etiket olabilir. */
+export const gamiLeaderboardDisplayNameSchema = z.string().min(1).max(32);
+
+export const gamiLeaderboardRowSchema = z.strictObject({
+  id: gamiLeaderboardRowIdSchema,
+  displayName: gamiLeaderboardDisplayNameSchema,
+  isMe: z.boolean(),
+  isPublic: z.boolean(),
+  cohort: gamiCohortSchema.nullable(),
+  periodScore: z.number().nullable(),
+  attemptsCount: z.number().int().min(0),
+  reachedAt: isoDateTimeSchema.nullable(),
+  totalXp: z.number().int().min(0),
+  level: z.number().int().min(1),
+  rank: z.number().int().min(1).nullable(),
+});
+
+export type GamiLeaderboardRow = z.infer<typeof gamiLeaderboardRowSchema>;
+
+export const gamiLeaderboardDataSchema = z.strictObject({
+  period: gamiPeriodSchema,
+  cohort: gamiCohortFilterSchema,
+  generatedAt: isoDateTimeSchema,
+  isDemo: z.literal(false),
+  rows: z.array(gamiLeaderboardRowSchema),
+});
+
+export const gamiLeaderboardResponseSchema = z.strictObject({
+  data: gamiLeaderboardDataSchema,
+  meta: pageMetaSchema,
+});
+
+export type GamiLeaderboardResponse = z.infer<typeof gamiLeaderboardResponseSchema>;

@@ -20,6 +20,16 @@ const OPACA_ROUTE_PREFIX = "/sims/opaca/";
 /** Git-dışı, `sync:xray` ile doldurulan büyük varlık klasörü (AGENTS.md okuma sınırı). */
 const OPACA_XRAY_RUNTIME_DIR = resolve(OPACA_PUBLIC_DIR, "assets/xray/runtime");
 
+/**
+ * `@egemed/sim-pulse` paketinin genel klasörü (T14d). Pulse `ui/about.ts`
+ * `withAssetBase` ile `/sims/pulse/` taban yolunu bekler (ör. kaynak logosu);
+ * Opaca ile aynı eklenti deseni bu yolu da dev sunucusunda okur, build
+ * çıktısında `dist/sims/pulse/`ya kopyalar. Klasör henüz git-dışıdır/boştur;
+ * yoksa `closeBundle` uyarır, derlemeyi kırmaz (Opaca xray deseniyle aynı).
+ */
+const PULSE_PUBLIC_DIR = resolve(SHELL_ROOT, "../../packages/sim-pulse/public");
+const PULSE_ROUTE_PREFIX = "/sims/pulse/";
+
 const MIME_TYPES: Readonly<Record<string, string>> = {
   ".css": "text/css; charset=utf-8",
   ".gif": "image/gif",
@@ -37,17 +47,19 @@ function mimeTypeFor(filePath: string): string {
 }
 
 /**
- * `/sims/opaca/<alt yol>` isteğini paket genel klasöründeki dosyaya çözer.
+ * `<routePrefix><alt yol>` isteğini paket genel klasöründeki dosyaya çözer.
  * Saf fonksiyon (fs'e dokunmaz): `..`/kaçış girişimleri veya kök dışına
- * çözülen mutlak yollar `null` döner (yol geçişi koruması). Testler bu
- * fonksiyonu doğrudan çağırır.
+ * çözülen mutlak yollar `null` döner (yol geçişi koruması). Opaca ve Pulse
+ * eklentileri aynı çözümleyiciyi paylaşır (T14d); dışa aktarılan sarmalayıcılar
+ * testlerin doğrudan çağırdığı sözleşmedir.
  */
-export function resolveOpacaAssetPath(
+function resolveScopedAssetPath(
+  routePrefix: string,
+  publicDir: string,
   requestUrl: string,
-  publicDir: string = OPACA_PUBLIC_DIR,
 ): string | null {
-  if (!requestUrl.startsWith(OPACA_ROUTE_PREFIX)) return null;
-  const rawPath = requestUrl.slice(OPACA_ROUTE_PREFIX.length).split(/[?#]/)[0] ?? "";
+  if (!requestUrl.startsWith(routePrefix)) return null;
+  const rawPath = requestUrl.slice(routePrefix.length).split(/[?#]/)[0] ?? "";
   let decodedPath: string;
   try {
     decodedPath = decodeURIComponent(rawPath);
@@ -62,33 +74,59 @@ export function resolveOpacaAssetPath(
   return escapesRoot ? null : resolvedPath;
 }
 
+/** Testler bu sarmalayıcıyı doğrudan çağırır (bkz. tests/shell/opaca-assets-plugin.test.ts). */
+export function resolveOpacaAssetPath(
+  requestUrl: string,
+  publicDir: string = OPACA_PUBLIC_DIR,
+): string | null {
+  return resolveScopedAssetPath(OPACA_ROUTE_PREFIX, publicDir, requestUrl);
+}
+
+/** Pulse eşdeğeri (T14d); aynı yol geçişi koruması, ayrı taban dizin/önek. */
+export function resolvePulseAssetPath(
+  requestUrl: string,
+  publicDir: string = PULSE_PUBLIC_DIR,
+): string | null {
+  return resolveScopedAssetPath(PULSE_ROUTE_PREFIX, publicDir, requestUrl);
+}
+
 /** Dev sunucusu orta katmanının en dar istek/yanıt yüzeyi (node:http'e bağımlı değil). */
-interface OpacaRequestLike {
+interface SimAssetRequestLike {
   readonly url?: string;
 }
-interface OpacaResponseLike {
+interface SimAssetResponseLike {
   setHeader(name: string, value: string): void;
   end(chunk: Uint8Array): void;
 }
 
+interface ScopedAssetsPluginOptions {
+  readonly name: string;
+  readonly routePrefix: string;
+  readonly publicDir: string;
+  readonly outSubdir: string;
+  readonly missingDirWarning: string;
+  /** Opaca'nın git-dışı xray çalışma zamanı klasörü gibi ikincil bir uyarı. */
+  readonly missingSubDir?: { readonly path: string; readonly warning: string };
+}
+
 /**
- * Bağımlılıksız Opaca varlık eklentisi (T14c): dev sunucusunda
- * `/sims/opaca/**`'yı paket genel klasöründen okur; build sonrası
- * `closeBundle`de aynı klasörü `dist/sims/opaca/`ya kopyalar. Git-dışı xray
- * klasörü yoksa uyarır, derlemeyi kırmaz.
+ * Bağımlılıksız sim varlık eklentisi (Opaca T14c, Pulse T14d): dev
+ * sunucusunda `<routePrefix>**`'ı paket genel klasöründen okur; build
+ * sonrası `closeBundle`de aynı klasörü `dist/<outSubdir>`a kopyalar. Genel
+ * klasör (veya alt klasörü) git-dışı/yerelde yoksa uyarır, derlemeyi kırmaz.
  */
-function opacaAssetsPlugin(): Plugin {
+function scopedAssetsPlugin(options: ScopedAssetsPluginOptions): Plugin {
   let outDir = resolve(SHELL_ROOT, "dist");
   return {
-    name: "egemed-opaca-assets",
+    name: options.name,
     configResolved(config) {
       outDir = resolve(config.root, config.build.outDir);
     },
     configureServer(server) {
       server.middlewares.use((req, res, next) => {
-        const request = req as unknown as OpacaRequestLike;
-        const response = res as unknown as OpacaResponseLike;
-        const filePath = resolveOpacaAssetPath(request.url ?? "");
+        const request = req as unknown as SimAssetRequestLike;
+        const response = res as unknown as SimAssetResponseLike;
+        const filePath = resolveScopedAssetPath(options.routePrefix, options.publicDir, request.url ?? "");
         if (filePath === null || !existsSync(filePath) || !statSync(filePath).isFile()) {
           next();
           return;
@@ -98,18 +136,14 @@ function opacaAssetsPlugin(): Plugin {
       });
     },
     closeBundle() {
-      if (!existsSync(OPACA_PUBLIC_DIR)) {
-        this.warn(
-          "Opaca genel klasörü bulunamadı (packages/sim-opaca/public); /sims/opaca/ varlıkları kopyalanmadı.",
-        );
+      if (!existsSync(options.publicDir)) {
+        this.warn(options.missingDirWarning);
         return;
       }
-      if (!existsSync(OPACA_XRAY_RUNTIME_DIR)) {
-        this.warn(
-          "Opaca xray çalışma zamanı klasörü git-dışıdır ve yerelde yok; derleme bu görüntüler olmadan sürer (bkz. `pnpm --filter @egemed/sim-opaca sync:xray`).",
-        );
+      if (options.missingSubDir && !existsSync(options.missingSubDir.path)) {
+        this.warn(options.missingSubDir.warning);
       }
-      cpSync(OPACA_PUBLIC_DIR, resolve(outDir, "sims/opaca"), { recursive: true });
+      cpSync(options.publicDir, resolve(outDir, options.outSubdir), { recursive: true });
     },
   };
 }
@@ -136,8 +170,36 @@ function apiProxyConfig(env: Record<string, string>): Record<string, unknown> {
   };
 }
 
+function opacaAssetsPlugin(): Plugin {
+  return scopedAssetsPlugin({
+    missingDirWarning:
+      "Opaca genel klasörü bulunamadı (packages/sim-opaca/public); /sims/opaca/ varlıkları kopyalanmadı.",
+    missingSubDir: {
+      path: OPACA_XRAY_RUNTIME_DIR,
+      warning:
+        "Opaca xray çalışma zamanı klasörü git-dışıdır ve yerelde yok; derleme bu görüntüler olmadan sürer (bkz. `pnpm --filter @egemed/sim-opaca sync:xray`).",
+    },
+    name: "egemed-opaca-assets",
+    outSubdir: "sims/opaca",
+    publicDir: OPACA_PUBLIC_DIR,
+    routePrefix: OPACA_ROUTE_PREFIX,
+  });
+}
+
+/** Pulse varlık eklentisi (T14d); genel klasör henüz git-dışı/boş olsa da dev/build kırılmaz. */
+function pulseAssetsPlugin(): Plugin {
+  return scopedAssetsPlugin({
+    missingDirWarning:
+      "Pulse genel klasörü bulunamadı (packages/sim-pulse/public); /sims/pulse/ varlıkları kopyalanmadı.",
+    name: "egemed-pulse-assets",
+    outSubdir: "sims/pulse",
+    publicDir: PULSE_PUBLIC_DIR,
+    routePrefix: PULSE_ROUTE_PREFIX,
+  });
+}
+
 export default defineConfig(({ mode }) => ({
   base: "./",
-  plugins: [react(), opacaAssetsPlugin()],
+  plugins: [react(), opacaAssetsPlugin(), pulseAssetsPlugin()],
   ...apiProxyConfig(loadEnv(mode, SHELL_ROOT, "VITE_")),
 }));

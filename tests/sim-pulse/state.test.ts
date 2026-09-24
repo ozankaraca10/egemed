@@ -35,6 +35,11 @@ describe("Pulse v6 durum şeması", () => {
     expect([v6.version, v6.cv, v6.m, v6.t, v6.p, v6.u]).toEqual([6, "fixture-1", 0, 2, 1, 4]);
     expect([decode({ ...v6, u: 3 }, context).activeView, decode({ ...v6, u: 4 }, context).activeView,
       decode({ ...v6, u: 7 }, context).activeView]).toEqual(["sim", "modes", "tutorial"]);
+    expect([decode({ ...v6, u: 8 }, context).activeView, decode({ ...v6, u: 9 }, context).activeView])
+      .toEqual(["achievements", "leaderboard"]);
+    const gamiView = blank(context);
+    gamiView.activeView = "leaderboard";
+    expect(decode(encode(gamiView, context), context).activeView).toBe("leaderboard");
   });
 
   it("beş independent_state kontrolünü eşler: bozuk kayıt, göç, türetim, maksimum roundtrip ve deterministik serialize", () => {

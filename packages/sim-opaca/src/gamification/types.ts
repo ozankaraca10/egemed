@@ -1,28 +1,16 @@
 /** Opaca oyunlaştırma görünüm tipleri (repo çıktısı). */
 
-import type { Cohort, CohortFilter, Period } from "@egemed/gamification-core";
+import type {
+  Cohort,
+  CohortFilter,
+  GamiLeaderboardRow,
+  GamiLeaderboardView,
+  Period,
+} from "@egemed/gamification-core";
 
 export type { Cohort, CohortFilter, Period };
 
-/** Liderlik tablosu satırı — repo tarafından çözümlenmiş görünüm modeli. */
-export interface LeaderboardRow {
-  id: string;
-  displayName: string;
-  isMe: boolean;
-  isPublic: boolean;
-  cohort: Cohort | null;
-  periodScore: number | null;
-  attemptsCount: number;
-  reachedAt: string | null;
-  totalXp: number;
-  level: number;
-  rank: number | null;
-}
+/** Liderlik tablosu satırı — `@egemed/gamification-core` PORT çıktısı ile hizalı. */
+export type LeaderboardRow = GamiLeaderboardRow;
 
-export interface LeaderboardView {
-  period: Period;
-  cohort: CohortFilter;
-  generatedAt: string;
-  isDemo: true;
-  rows: LeaderboardRow[];
-}
+export type LeaderboardView = GamiLeaderboardView;

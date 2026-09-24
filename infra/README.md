@@ -53,3 +53,14 @@ değişimiyle yapılabilir. ADR-004'ün açık sorusu bu onayla kapanır.
 `${VAR:?}` deseni, `.env.example` anahtar kümesi, cleanup betiği ve depo sır
 taramasını denetler; Docker gerektirmez. Docker bulunan bir makinede ayrıca
 `docker compose config` ve `pnpm infra:up` elle doğrulanabilir.
+
+## Üretim (infra/prod)
+
+Üretim birimleri `infra/prod/` altındadır: API imajı (`Dockerfile` — node:22
+digest-pinli, non-root, yalnız prod bağımlılıkları), compose örneği
+(`docker-compose.prod.yml` — api + postgres), ters vekil örneği
+(`nginx-egemed.conf`) ve boş değerli `.env.prod.example`. Gerçek sır dosyası
+`infra/prod/.env.prod` repoda izlenmez; compose `--env-file` ile çağrılır.
+Kurulum, migration, admin tohumu, yedekleme ve geri alma akışları
+`docs/ops/ISLETIM.md` içindedir. Aynı test dosyası üretim sözleşmesini de
+denetler (pinli imaj, non-root, sırrın dosyada olmaması).

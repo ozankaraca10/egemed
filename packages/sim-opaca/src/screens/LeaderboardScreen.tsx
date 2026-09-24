@@ -14,6 +14,7 @@ import {
   GamiLeaderboardTable, GamiPodium, GamiPrivacyCard, GamiRewardBanner, GamiRewardHistory, GamiRewardTerms,
 } from '../ui/gami/GamiLeaderboard'
 import { useGami, useLeaderboard } from '../gamification/useGami'
+import { useGamiContext } from '../gamification/GamiContext'
 import { gamiDemoFrom } from '../gamification/flag'
 import { countdownText, meRewardStatus, periodLabel, previousPeriodNow, tableItems } from '../gamification/leaderboardView'
 import { rewardStandings } from '@egemed/gamification-core'
@@ -28,6 +29,7 @@ const PERIODS: { id: Period; label: string }[] = [
 /** Liderlik Tahtası + Ayın Ödülü (tasarım promptu §5, §5.1). Yalnız oyunlaştırma bayrağı açıkken erişilir. */
 export function LeaderboardScreen({ embedded = false, devBuild = false, modalEnv }: { embedded?: boolean; devBuild?: boolean; modalEnv?: ModalEnv }) {
   const { dispatch, now } = useStore()
+  const { reportSyncError } = useGamiContext()
   const [version, setVersion] = useState(0)
   const demo = gamiDemoFrom(locationSearch(), devBuild)
   const view = useGami(version, demo)
@@ -46,9 +48,9 @@ export function LeaderboardScreen({ embedded = false, devBuild = false, modalEnv
     return () => { if (w && t) w.clearInterval(t) }
   }, [now, view.now])
   useEffect(() => {
-    view.repo.getMonthlyReward(monthKeyTr(view.now)).then(setReward)
-    view.repo.getRewardWinners(3, view.now).then(setWinners)
-  }, [view.repo, view.now])
+    void view.repo.getMonthlyReward(monthKeyTr(view.now)).then(setReward).catch((error: unknown) => reportSyncError(error, 'read'))
+    void view.repo.getRewardWinners(3, view.now).then(setWinners).catch((error: unknown) => reportSyncError(error, 'read'))
+  }, [view.repo, view.now, reportSyncError])
 
   const board = useLeaderboard(period, cohort, view.now, view.repo, version)
   const prevNow = useMemo(() => previousPeriodNow(period, view.now), [period, view.now])
@@ -57,7 +59,7 @@ export function LeaderboardScreen({ embedded = false, devBuild = false, modalEnv
 
   const standings = useMemo(() => {
     if (!reward || !monthAll) return null
-    return rewardStandings(monthAll.rows.map((r) => ({
+    return rewardStandings([...monthAll.rows].map((r) => ({
       id: r.id, cohort: r.cohort, public: r.isPublic, periodScore: r.periodScore, attemptsCount: r.attemptsCount, reachedAt: r.reachedAt,
     })), reward)
   }, [reward, monthAll])
@@ -67,7 +69,7 @@ export function LeaderboardScreen({ embedded = false, devBuild = false, modalEnv
   const rows = board?.rows ?? []
   const ranked = rows.filter((r) => r.rank !== null)
   const withPodium = ranked.length >= 3
-  const items = tableItems(rows, withPodium)
+  const items = tableItems([...rows], withPodium)
   const me = rows.find((r) => r.isMe)
   const prevMe = prevBoard?.rows.find((r) => r.isMe)
   const meDelta = me?.rank && prevMe?.rank ? prevMe.rank - me.rank : null
@@ -117,7 +119,7 @@ export function LeaderboardScreen({ embedded = false, devBuild = false, modalEnv
             <span className="gami-range">{periodLabel(period, view.now)}</span>
           </div>
           {board && ranked.length === 0 && <div className="card"><p className="gami-note" style={{ margin: 0 }}>Bu dönemde henüz sıralamaya giren yok.</p></div>}
-          {withPodium && <GamiPodium rows={rows} candidates={candidates} />}
+          {withPodium && <GamiPodium rows={[...rows]} candidates={candidates} />}
           {items.length > 0 && (
             <div className="card">
               <GamiLeaderboardTable items={items} candidates={candidates} meDelta={meDelta} />
@@ -135,7 +137,12 @@ export function LeaderboardScreen({ embedded = false, devBuild = false, modalEnv
             name={profile.displayName ?? (me?.isPublic ? me.displayName : null)}
             isPublic={profile.public}
             cohort={profile.cohort}
-            onChange={(patch) => { void view.repo.updateMe(patch).then(() => setVersion((v) => v + 1)) }}
+            onChange={(patch) => {
+              void view.repo
+                .updateMe(patch)
+                .then(() => setVersion((v) => v + 1))
+                .catch((error: unknown) => reportSyncError(error, 'write'))
+            }}
           />
           <GamiRewardHistory winners={winners} />
         </div>

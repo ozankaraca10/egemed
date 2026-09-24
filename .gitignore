@@ -2,6 +2,8 @@
 .egemed-run/
 .env
 .env.local
+.env.prod
+infra/prod/.env.prod
 node_modules/
 dist/
 reports/
@@ -16,3 +18,6 @@ packages/sim-opaca/public/assets/xray/runtime/
 packages/sim-ausculta/public/assets/audio/runtime/
 
 work/
+
+# Impeccable motoru ilk çalıştırmada indirilir; ikili dosyalar git dışı
+**/skills/impeccable/scripts/bin/

@@ -1,0 +1,69 @@
+# EGEMED üretim dağıtımı örneği (T32): api + postgres.
+# ADR-002 (Hono/Node 22, Postgres 18); ADR-004 (LRS kurumda, compose dışıdır);
+# ADR-007 (kullanıcı ve oyunlaştırma verisi bu Postgres'te kalır).
+# Statik kabuk compose'da değildir; nginx örneği (nginx-egemed.conf) dist
+# klasörünü sunar ve /api'yi bu compose'un yayımladığı 127.0.0.1:3000'e vekiller.
+# Sırlar yalnız yerel infra/prod/.env.prod dosyasından gelir; repoda değer yok,
+# interpolasyon `${VAR:?}` ile eksik değerde net hatayla durur (dev compose ile
+# aynı sözleşme).
+# Kullanım:
+#   cp infra/prod/.env.prod.example infra/prod/.env.prod   # değerleri doldurun
+#   docker compose --env-file infra/prod/.env.prod -f infra/prod/docker-compose.prod.yml up -d --build --wait
+name: egemed-prod
+services:
+  postgres:
+    image: postgres:18.4-alpine@sha256:9a8afca54e7861fd90fab5fdf4c42477a6b1cb7d293595148e674e0a3181de15
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:?zorunlu (.env.prod)}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?zorunlu (.env.prod)}
+      POSTGRES_DB: ${POSTGRES_DB:?zorunlu (.env.prod)}
+    volumes:
+      # Dev'in aksine üretim verisi kalıcıdır: adlandırılmış volume (yedekleme
+      # akışı docs/ops/ISLETIM.md'de).
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    restart: unless-stopped
+
+  api:
+    build:
+      context: ../..
+      dockerfile: infra/prod/Dockerfile
+    environment:
+      # DATABASE_URL sır içerir; compose metnine gömülmez, .env.prod'dan gelir.
+      DATABASE_URL: ${DATABASE_URL:?zorunlu (.env.prod)}
+      NODE_ENV: "production"
+      PORT: "3000"
+      # Üretimde dev sağlayıcı kapalıdır; env.ts bunu ayrıca zorunlu kılar.
+      AUTH_DEV_ENABLED: "false"
+      SSO_PROVIDER: ${SSO_PROVIDER:-none}
+      # SSO_PROVIDER none dışında seçildiğinde zorunludur; boş geçilirse env.ts
+      # açılışta hata verir (sessiz çalışma yoktur).
+      SSO_STATE_SECRET: ${SSO_STATE_SECRET:-}
+    ports:
+      # Ters vekil yalnız ana makineden erişir; API ağa açık değildir.
+      - "127.0.0.1:3000:3000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      # /health yalnızca süreç canlılığını gösterir; DB dâhil doğrulama için
+      # /health/db vardır (işletim kılavuzunda).
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:3000/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 10s
+    restart: unless-stopped
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "5"
+
+volumes:
+  postgres-data:

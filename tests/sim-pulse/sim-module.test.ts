@@ -8,6 +8,7 @@ import {
   type PulseModuleEnv,
   type PulseMountElement,
 } from "../../packages/sim-pulse/src/index";
+import { PULSE_GAMI_STORAGE_KEY } from "../../packages/sim-pulse/src/gamification/repo";
 
 const CONTEXT: SimMountContext = { simId: "pulse", now: () => 1_728_000_000_000 };
 
@@ -91,6 +92,10 @@ function fakeTarget(): FakeTarget {
 
 const click = (dataset: Record<string, string>) => ({ target: { dataset }, preventDefault: () => undefined });
 
+const flush = async (): Promise<void> => {
+  for (let index = 0; index < 8; index += 1) await Promise.resolve();
+};
+
 describe("createPulseModule (SimHost adaptörü)", () => {
   it("pulse kimliğini ve varsayılan assetBase değerini dışa aktarır", () => {
     expect(createPulseModule().id).toBe("pulse");
@@ -170,6 +175,53 @@ describe("createPulseModule (SimHost adaptörü)", () => {
     root.emit("change", { target: { name: "activeQuiz", value: "1" } });
     root.emit("click", click({ quizAction: "submit" }));
     expect(root.innerHTML).toContain("quiz-feedback-v2");
+    dispose();
+  });
+
+  it("Başarılarım ve Liderlik ekranlarını üst çubuktan açar", async () => {
+    const env = new FakeEnv();
+    const target = fakeTarget();
+    const dispose = createPulseModule({ env }).mount(target, CONTEXT);
+    const root = target.children[0]!;
+
+    root.emit("click", click({ pulseView: "achievements" }));
+    expect(root.innerHTML).toContain("Başarılarım");
+    expect(root.innerHTML).toContain("Henüz kazanım yok");
+
+    root.emit("click", click({ pulseView: "leaderboard" }));
+    await flush();
+    expect(root.innerHTML).toContain("Liderlik Tahtası");
+    expect(root.innerHTML).toContain("report-table-v2");
+    expect(root.innerHTML).toContain("Anonim öğrenci");
+
+    root.emit("click", click({ pulseGamiPeriod: "month" }));
+    await flush();
+    expect(root.innerHTML).toContain('data-pulse-gami-period="month" aria-pressed="true"');
+    dispose();
+  });
+
+  it("değerlendirme sonuçları kazanımı bir kez kaydeder ve kartı çizer", async () => {
+    const env = new FakeEnv();
+    const target = fakeTarget();
+    const dispose = createPulseModule({ env }).mount(target, CONTEXT);
+    const root = target.children[0]!;
+
+    root.emit("click", click({ pulseView: "quiz" }));
+    for (let index = 0; index < 10; index += 1) {
+      root.emit("change", { target: { name: "activeQuiz", value: "1" } });
+      root.emit("click", click({ quizAction: "submit" }));
+      if (index < 9) root.emit("click", click({ quizAction: "next" }));
+    }
+    root.emit("click", click({ quizAction: "results" }));
+    await flush();
+    expect(root.innerHTML).toContain("Kazanımlar");
+    const stored = JSON.parse(env.storageValues.get(PULSE_GAMI_STORAGE_KEY) ?? "null") as { attempts: unknown[] } | null;
+    expect(stored?.attempts).toHaveLength(1);
+
+    root.emit("click", click({ quizAction: "results" }));
+    await flush();
+    const repeated = JSON.parse(env.storageValues.get(PULSE_GAMI_STORAGE_KEY) ?? "null") as { attempts: unknown[] } | null;
+    expect(repeated?.attempts).toHaveLength(1);
     dispose();
   });
 });

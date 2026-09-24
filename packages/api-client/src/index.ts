@@ -9,6 +9,8 @@ import {
   emailSchema,
   errorResponseSchema,
   gamiAllResponseSchema,
+  gamiLeaderboardQuerySchema,
+  gamiLeaderboardResponseSchema,
   gamiSimIdParamSchema,
   gamiSummaryResponseSchema,
   isoDateTimeSchema,
@@ -27,6 +29,8 @@ import {
   type CreateUserRequest,
   type ErrorCode,
   type GamiAllResponse,
+  type GamiLeaderboardQuery,
+  type GamiLeaderboardResponse,
   type GamiSummaryResponse,
   type Role,
   type SimId,
@@ -276,6 +280,7 @@ export interface ApiClient {
   readonly gamification: {
     getAll(): Promise<GamiAllResponse>;
     getSummary(simId: SimId): Promise<GamiSummaryResponse>;
+    getLeaderboard(simId: SimId, query?: GamiLeaderboardQuery): Promise<GamiLeaderboardResponse>;
     writeAttempt(simId: SimId, input: AttemptWriteRequest): Promise<void>;
   };
 }
@@ -611,6 +616,28 @@ export function createApiClient(options: CreateApiClientOptions): ApiClient {
           method: "GET",
           path: `/me/gamification/${parsedSimId}`,
           parse: (value, context) => parseSchema(gamiSummaryResponseSchema, value, `${context} response`),
+        });
+      },
+      async getLeaderboard(
+        simId: SimId,
+        query: GamiLeaderboardQuery = { period: "month", cohort: "all", page: 1, pageSize: 50 },
+      ): Promise<GamiLeaderboardResponse> {
+        const parsedSimId = parseSchema(gamiSimIdParamSchema, simId, "GET /me/gamification/:simId/leaderboard path");
+        const parsedQuery = parseSchema(
+          gamiLeaderboardQuerySchema,
+          query,
+          "GET /me/gamification/:simId/leaderboard query",
+        );
+        return requestJson({
+          method: "GET",
+          path: `/me/gamification/${parsedSimId}/leaderboard`,
+          query: {
+            period: parsedQuery.period,
+            cohort: parsedQuery.cohort,
+            page: parsedQuery.page,
+            pageSize: parsedQuery.pageSize,
+          },
+          parse: (value, context) => parseSchema(gamiLeaderboardResponseSchema, value, `${context} response`),
         });
       },
       async writeAttempt(simId: SimId, input: AttemptWriteRequest): Promise<void> {
@@ -1187,3 +1214,10 @@ function toUsersSourceDetail(item: ApiAdminUserDetail): UsersSourceUserDetail {
     history: [],
   };
 }
+
+export {
+  createApiGamiRepository,
+  GamiRepositoryUnsupportedError,
+  type CreateApiGamiRepositoryOptions,
+  type EncodeAttemptInput,
+} from "./gamification-repo";

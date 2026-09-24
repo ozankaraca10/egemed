@@ -10,6 +10,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@egemed/contracts": "workspace:*"
+    "@egemed/contracts": "workspace:*",
+    "@egemed/gamification-core": "workspace:*"
   }
 }

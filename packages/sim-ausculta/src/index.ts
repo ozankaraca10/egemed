@@ -3,6 +3,9 @@ import "@egemed/tokens/ausculta.css";
 import "./styles/tokens.css";
 import "./styles/base.css";
 import "./styles/components.css";
+import "./styles/responsive.css";
+import "./styles/progress.css";
+import "./styles/progress.css";
 
 import type { SimulatorId } from "@egemed/sim-host";
 import fixture from "./data/fixture.json";
@@ -83,6 +86,8 @@ export {
 export type { HeartFindingKey, LungFindingKey } from "./data/terminology";
 export { LOG_LIMIT, LOG_TRIM, createBus } from "./core/events";
 export type { EventBus, SimEventDraft } from "./core/events";
+export { AUSCULTA_GAMI_STORAGE_KEY, LocalGamiRepository } from "./gamification/repo";
+export type { AuscultaGamiEvent, AuscultaGamiState, GamiApiRepository, GamiRepository, GamiStorage } from "./gamification/repo";
 export {
   BEST_SCORE_KEY,
   buildSuspend,

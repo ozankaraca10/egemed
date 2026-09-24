@@ -3,6 +3,8 @@ import {
   attemptWriteRequestSchema,
   authMeResponseSchema,
   gamiAllResponseSchema,
+  gamiLeaderboardQuerySchema,
+  gamiLeaderboardResponseSchema,
   gamiSimIdParamSchema,
   gamiSummaryResponseSchema,
 } from "../../packages/contracts/src/index";
@@ -106,6 +108,72 @@ describe("GET /me/gamification/:simId yanıtı", () => {
     expect(gamiAllResponseSchema.safeParse({ data: { sims: [...sims, simSummary()] } }).success).toBe(false);
     expect(gamiAllResponseSchema.safeParse({ data: { sims: [simSummary(), simSummary()] } }).success).toBe(false);
     expect(gamiAllResponseSchema.safeParse({ data: { sims, totalXp: 4200 } }).success).toBe(false);
+  });
+});
+
+describe("GET /me/gamification/:simId/leaderboard yanıtı", () => {
+  const leaderboard = () => ({
+    data: {
+      period: "month",
+      cohort: "all",
+      generatedAt: "2026-09-24T10:00:00.000+03:00",
+      isDemo: false,
+      rows: [
+        {
+          id: "peer-1",
+          displayName: "MK",
+          isMe: false,
+          isPublic: true,
+          cohort: 5,
+          periodScore: 92.5,
+          attemptsCount: 2,
+          reachedAt: "2026-09-22T14:05:00.000+03:00",
+          totalXp: 9999,
+          level: 9,
+          rank: 1,
+        },
+        {
+          id: "me",
+          displayName: "AV",
+          isMe: true,
+          isPublic: true,
+          cohort: 3,
+          periodScore: 70,
+          attemptsCount: 2,
+          reachedAt: "2026-09-22T14:05:00.000+03:00",
+          totalXp: 1450,
+          level: 4,
+          rank: 2,
+        },
+      ],
+    },
+    meta: { page: 1, pageSize: 50, total: 2 },
+  });
+
+  it("liderlik tablosu yanıtını kabul eder", () => {
+    expect(gamiLeaderboardResponseSchema.safeParse(leaderboard()).success).toBe(true);
+  });
+
+  it("isDemo true veya bilinmeyen alanları reddeder", () => {
+    const demo = {
+      ...leaderboard(),
+      data: { ...leaderboard().data, isDemo: true },
+    };
+    expect(gamiLeaderboardResponseSchema.safeParse(demo).success).toBe(false);
+    expect(
+      gamiLeaderboardResponseSchema.safeParse({ ...leaderboard(), totalXp: 1 }).success,
+    ).toBe(false);
+  });
+
+  it("sorgu şeması varsayılanları ve kohort filtresini doğrular", () => {
+    expect(gamiLeaderboardQuerySchema.parse({})).toEqual({
+      period: "month",
+      cohort: "all",
+      page: 1,
+      pageSize: 50,
+    });
+    expect(gamiLeaderboardQuerySchema.safeParse({ cohort: "7" }).success).toBe(false);
+    expect(gamiLeaderboardQuerySchema.parse({ cohort: "3" }).cohort).toBe(3);
   });
 });
 

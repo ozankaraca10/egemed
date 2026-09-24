@@ -16,6 +16,9 @@ import type { LearnScreenEnv } from "./screens/LearnScreen";
 import type { ResultsScreenEnv } from "./screens/ResultsScreen";
 import type { StartScreenEnv } from "./screens/StartScreen";
 import type { SimulationPopoverEnv } from "./screens/SimulationScreen";
+import type { OpacaAttemptRecord } from "./gamification/attempt";
+import type { GamiRepository } from "@egemed/gamification-core";
+import { GamiProvider, bindGamiRepository } from "./gamification/GamiContext";
 
 /** React kök sözleşmesi — testler DOM'suz double enjekte eder. */
 export interface OpacaRoot {
@@ -43,6 +46,7 @@ export interface OpacaModuleDeps {
   readonly popoverEnv?: SimulationPopoverEnv;
   readonly resultsEnv?: ResultsScreenEnv;
   readonly gamiEnabled?: boolean;
+  readonly gamiRepository?: GamiRepository<OpacaAttemptRecord>;
   readonly devBuild?: boolean;
 }
 
@@ -126,20 +130,27 @@ export function createOpacaModule(deps?: OpacaModuleDeps): SimModule {
       };
 
       root.render(
-        createElement(StoreProvider, {
+        createElement(GamiProvider, {
+          repository: resolved.gamiRepository ?? null,
           now: context.now,
-          storage: resolved.storage,
-          runtime: resolved.runtime ?? createNoopRuntimeAdapter(),
-          env: resolved.env,
-          initialState: { ...initialState, screen: "modes" },
-          children: createElement(App, appProps),
+          children: createElement(StoreProvider, {
+            now: context.now,
+            storage: resolved.storage,
+            runtime: resolved.runtime ?? createNoopRuntimeAdapter(),
+            env: resolved.env,
+            initialState: { ...initialState, screen: "modes" },
+            children: createElement(App, appProps),
+          }),
         }),
       );
+
+      bindGamiRepository(resolved.gamiRepository ?? null);
 
       let disposed = false;
       return () => {
         if (disposed) return;
         disposed = true;
+        bindGamiRepository(null);
         root.unmount();
         container.remove();
         resetAssetBase(previousBase);

@@ -4,6 +4,7 @@ import { statusForErrorCode, type ErrorCode } from "@egemed/contracts";
 import { z } from "zod";
 import { registerAdminAuditRoutes } from "./admin/audit";
 import { registerAdminBulkRoutes } from "./admin/bulk";
+import { registerAdminExtrasRoutes, type AdminOverviewRepo } from "./admin/extras";
 import { registerAdminImportRoutes } from "./admin/imports";
 import { registerAdminRoleRoutes } from "./admin/roles";
 import { registerAdminUserRoutes, type AdminDeps } from "./admin/users";
@@ -37,6 +38,8 @@ export interface AppDeps {
   readonly admin: AdminDeps;
   /** T67 — `/me/gamification` uçları; kimlik `auth` oturumundan çözülür. */
   readonly gamification: GamificationRepo;
+  /** T58 — `/admin/overview` sayımları; kurum kapsamlı, bireysel veri yok. */
+  readonly overview: AdminOverviewRepo;
 }
 
 /** Gelen `x-request-id` biçimi: başlık güvenli ASCII, 8–128 karakter. */
@@ -133,6 +136,18 @@ export function createApp(deps: AppDeps): Hono<AppEnv> {
   // `registerAdminUserRoutes` içinde kaydedildiği için bu rotalar ondan sonra
   // bağlanır. Okuma deposu `auth.audit` üzerindedir (aynı audit_log).
   registerAdminAuditRoutes(app, deps.auth);
+  // T58 — kullanıcı oyunlaştırma özeti, kurum sayımları ve sağlık uçları;
+  // `/admin/*` ara katmanı yukarıda bağlandığı için ondan sonra kaydedilir.
+  registerAdminExtrasRoutes(
+    app,
+    {
+      admin: deps.admin,
+      gamification: deps.gamification,
+      overview: deps.overview,
+      db: deps.db,
+    },
+    deps.now,
+  );
   registerMeGamificationRoutes(app, { auth: deps.auth, gamification: deps.gamification }, deps.now);
 
   app.notFound((c) => c.json(errorBody("not_found"), statusForErrorCode("not_found")));
