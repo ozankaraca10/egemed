@@ -11,6 +11,7 @@
     "sync:runtime": "node tools/sync-runtime.mjs"
   },
   "dependencies": {
+    "@egemed/gami-catalogs": "workspace:*",
     "@egemed/gamification-core": "workspace:*",
     "@egemed/sim-host": "workspace:*",
     "@egemed/tokens": "workspace:*"
