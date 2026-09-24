@@ -148,11 +148,18 @@ export function createApiGamiRepository<TAttempt extends AttemptRecord>(
 
     async recordAttempt(attempt: TAttempt): Promise<void> {
       const summary = await loadSummary();
-      const body = options.encodeAttempt({
+      const encoded = options.encodeAttempt({
         attempt,
         attemptNo: nextAttemptNo(summary),
         startedAt: startedAtForAttempt(attempt),
       });
+      // API-05: XP'yi sunucu hesaplar; ortak deneme alanları sözleşme sınırlarında gönderilir.
+      const body: AttemptWriteRequest = {
+        ...encoded,
+        ...(attempt.mode === "practice" || attempt.mode === "assessment" ? { mode: attempt.mode } : {}),
+        caseCount: Math.min(100, Math.max(1, Math.round(attempt.caseCount))),
+        hintsUsed: Math.min(1000, Math.max(0, Math.round(attempt.hintsUsed))),
+      };
       await options.client.writeAttempt(options.simId, body);
       invalidateSummary();
     },

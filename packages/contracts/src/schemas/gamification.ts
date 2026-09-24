@@ -97,6 +97,10 @@ export const attemptWriteRequestSchema = z
     maxScore: z.number().int().min(0).nullable().optional(),
     passed: z.boolean().optional(),
     summary: attemptSummarySchema,
+    /** API-05: XP'yi sunucu bu alanlardan hesaplar; istemci XP'si yetkili değildir. */
+    mode: z.enum(["practice", "assessment"]).optional(),
+    caseCount: z.number().int().min(1).max(100).optional(),
+    hintsUsed: z.number().int().min(0).max(1000).optional(),
   })
   .refine((value) => value.score == null || value.maxScore == null || value.score <= value.maxScore, {
     message: "score_exceeds_max",

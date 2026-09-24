@@ -358,9 +358,21 @@ describe("down migration'ları", () => {
       const dropped = [
         ...stripComments(migration.down).matchAll(/drop (table|view) if exists ([a-z_][a-z0-9_]*)/g),
       ].map((match) => match[2] ?? "");
-      expect(created.length).toBeGreaterThan(0);
+      const up = stripComments(migration.up);
+      const down = stripComments(migration.down);
+      const addedColumns = [...up.matchAll(/add column ([a-z_][a-z0-9_]*)/g)].map((match) => match[1] ?? "");
+      const addedConstraints = [...up.matchAll(/add constraint ([a-z_][a-z0-9_]*)/g)].map((match) => match[1] ?? "");
+      expect(created.length + addedColumns.length, "migration nesne ya da kolon eklemeli").toBeGreaterThan(0);
       expect([...dropped].reverse()).toEqual(created);
-      expect(stripComments(migration.down).replace(/drop [^\n]*\n?/g, "").trim()).toBe("");
+      // API-05 (005): `alter table` ekleri tersine düşürülmeli.
+      for (const column of addedColumns) expect(down, column).toContain(`drop column if exists ${column}`);
+      for (const constraint of addedConstraints) expect(down, constraint).toContain(`drop constraint if exists ${constraint}`);
+      expect(
+        down
+          .replace(/drop [^\n]*\n?/g, "")
+          .replace(/alter table [a-z_][a-z0-9_]*\s*/g, "")
+          .trim(),
+      ).toBe("");
     });
   }
 
