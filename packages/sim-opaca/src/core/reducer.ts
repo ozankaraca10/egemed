@@ -84,6 +84,8 @@ export interface StoragePort {
 }
 
 export const BEST_SCORE_KEY = "opaca.bestScore";
+/** Tam ekran istemi "Tekrar sorma" onayı (kaynak: `StartScreen.tsx`, E2 §7.2). */
+export const FS_PROMPT_KEY = "opaca.fsPromptDone";
 
 /** A4: kalıcı en iyi puanları oku (bozuk kayıt/erişim engelinde sıfırlara düş). */
 export function loadBestScore(storage: StoragePort): { practice: number; assessment: number } {
@@ -101,6 +103,24 @@ export function loadBestScore(storage: StoragePort): { practice: number; assessm
 export function saveBestScore(storage: StoragePort, bestScore: { practice: number; assessment: number }): void {
   try {
     storage.set(BEST_SCORE_KEY, JSON.stringify(bestScore));
+  } catch {
+    /* yut */
+  }
+}
+
+/** Tam ekran istemi tamamlandı mı (bozuk kayıt/erişim engelinde false). */
+export function loadFsPromptDone(storage: StoragePort): boolean {
+  try {
+    return storage.get(FS_PROMPT_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
+
+/** "Tekrar sorma" işaretliyse tam ekran istemini kalıcı yaz (erişim engelinde sessizce yut). */
+export function saveFsPromptDone(storage: StoragePort): void {
+  try {
+    storage.set(FS_PROMPT_KEY, "1");
   } catch {
     /* yut */
   }
