@@ -278,3 +278,23 @@ export function reducer(s: AppState, a: Action, seam: ReducerSeam = noopSeam): A
       return s;
   }
 }
+
+/** Suspend yükü — yalnız AKTİF modun oturum listesi yazılır (K3). Kaynak: `buildSuspend`
+ *  (`store.tsx`); çalışma zamanının `getSuspend` sınırı ve `saveProgress` girdisidir. */
+export function buildSuspend(state: AppState): SuspendPayload {
+  return {
+    v: 1,
+    mode: state.mode,
+    caseIndex: state.caseIndex,
+    step: state.step,
+    answers: state.answers,
+    hintsUsed: state.hintsUsed,
+    caseResults: state.caseResults,
+    tutorialDone: state.tutorialDone,
+    visits: state.telemetry.visits,
+    order: state.telemetry.order,
+    attempts: state.attempts,
+    sessionIds: state.mode === "assessment" ? state.session.assessmentIds : state.session.practiceIds,
+    sessionSeed: state.session.seed,
+  };
+}

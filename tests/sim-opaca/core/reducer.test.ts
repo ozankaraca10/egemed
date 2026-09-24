@@ -1,28 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { ALL_CASES, computeCaseResult, initialState, initialTelemetry, reducer } from "../../../packages/sim-opaca/src/index";
-import type { AppState, SuspendPayload } from "../../../packages/sim-opaca/src/index";
+import { ALL_CASES, buildSuspend, computeCaseResult, initialState, initialTelemetry, reducer } from "../../../packages/sim-opaca/src/index";
+import type { AppState } from "../../../packages/sim-opaca/src/index";
 
 /** Reducer grubu — kaynak egemed-opaca tests/core.test.ts `describe('reducer')` portu (7 test).
- *  Beklentiler kaynakla birebir aynıdır. Tek yapısal fark: kaynak test yükü `buildSuspend` ile
- *  üretir; portta `buildSuspend` S7 (provider) diliminde olduğundan `restore` testi eşdeğer
- *  `SuspendPayload` değerini elle kurar (kaynak buildSuspend çıktısıyla alan alan aynı). */
-
-const payloadFor = (over: Partial<SuspendPayload> = {}): SuspendPayload => ({
-  v: 1,
-  mode: "assessment",
-  caseIndex: 0,
-  step: 0,
-  answers: {},
-  hintsUsed: 0,
-  caseResults: [],
-  tutorialDone: false,
-  visits: {},
-  order: [],
-  attempts: 0,
-  sessionIds: [],
-  sessionSeed: 0,
-  ...over,
-});
+ *  Beklentiler kaynakla birebir aynıdır; `restore` testinin yükü kaynak gibi `buildSuspend` ile
+ *  üretilir (S7 ile geldi). */
 
 describe("reducer (kaynak davranışı)", () => {
   const s0: AppState = { ...initialState };
@@ -55,7 +37,11 @@ describe("reducer (kaynak davranışı)", () => {
 
   it("restore yalnız aktif modun listesine yazar (K3)", () => {
     const start: AppState = { ...s0, session: { practiceIds: ["p1"], assessmentIds: ["a1"], seed: 1 } };
-    const payload = payloadFor({ mode: "assessment", sessionIds: ["a9", "a8"], sessionSeed: 7 });
+    const payload = buildSuspend({
+      ...start,
+      mode: "assessment",
+      session: { practiceIds: ["x"], assessmentIds: ["a9", "a8"], seed: 7 },
+    });
     const s = reducer(start, { type: "restore", payload });
     expect(s.session).toEqual({ practiceIds: ["p1"], assessmentIds: ["a9", "a8"], seed: 7 });
     expect(s.screen).toBe("simulation");
