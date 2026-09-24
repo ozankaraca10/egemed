@@ -295,3 +295,5 @@ export type {
   SimulationPopoverEvent,
   SimulationScreenProps,
 } from "./screens/SimulationScreen";
+export { SourcesScreen } from "./screens/SourcesScreen";
+export type { SourcesScreenProps } from "./screens/SourcesScreen";
