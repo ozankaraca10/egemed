@@ -35,7 +35,19 @@ export {
 } from "./core/geometry";
 export type { Point } from "./core/geometry";
 export { IMAGES, datasetCounts, examplesFor, expertPositive, getImage, isExpertSource } from "./core/images";
-export { BEST_SCORE_KEY, buildSuspend, computeCaseResult, initialState, initialTelemetry, loadBestScore, reducer, saveBestScore } from "./core/reducer";
+export {
+  BEST_SCORE_KEY,
+  FS_PROMPT_KEY,
+  buildSuspend,
+  computeCaseResult,
+  initialState,
+  initialTelemetry,
+  loadBestScore,
+  loadFsPromptDone,
+  reducer,
+  saveBestScore,
+  saveFsPromptDone,
+} from "./core/reducer";
 export type { Action, AppState, ReducerSeam, StoragePort } from "./core/reducer";
 export { createFlushHandlers, createLifecycle } from "./core/lifecycle";
 export type { FlushTarget, Lifecycle, LifecycleHandlers, WindowLike } from "./core/lifecycle";
@@ -248,3 +260,9 @@ export type {
   UcepMapping,
 } from "./data/terminology";
 export { STEP_TITLES, ZONES, ZONE_IDS, zoneById } from "./data/zones";
+export { StartScreen, createNoopStartScreenEnv } from "./screens/StartScreen";
+export type { StartScreenEnv, StartScreenProps } from "./screens/StartScreen";
+export { ModeCard, ModeSelectScreen, Stepper } from "./screens/ModeSelectScreen";
+export type { ModeSelectScreenProps } from "./screens/ModeSelectScreen";
+export { TutorialScreen } from "./screens/TutorialScreen";
+export type { TutorialScreenProps } from "./screens/TutorialScreen";
