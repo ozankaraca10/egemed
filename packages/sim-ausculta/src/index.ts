@@ -225,6 +225,8 @@ export { playVolumeCheckTone } from "./screens/tone";
 export type { VolumeCheckAudio, VolumeToneContext } from "./screens/tone";
 export { TutorialScreen, createNoopTutorialAudio } from "./screens/TutorialScreen";
 export type { TutorialAudio, TutorialScreenProps } from "./screens/TutorialScreen";
+export { LearnAudioProvider, LearnScreen, createNoopLearnAudio, createNoopLearnScreenEnv } from "./screens/LearnScreen";
+export type { LearnAudio, LearnScreenEnv, LearnScreenProps } from "./screens/LearnScreen";
 export { AUDIO_CONFIG } from "./audio/config";
 export { createAudioEngine } from "./audio/engine";
 export type { AudioEngine, AudioEngineDeps, EngineState } from "./audio/engine";

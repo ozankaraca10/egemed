@@ -1,0 +1,94 @@
+import { createElement, type ReactNode } from "react";
+import { renderToStaticMarkup } from "react-dom/server";
+import { describe, expect, it } from "vitest";
+import {
+  LearnScreen,
+  StoreProvider,
+  createMemoryRuntimeAdapter,
+  createNoopLearnAudio,
+  createNoopLearnScreenEnv,
+  initialState,
+  libraryTitle,
+} from "../../packages/sim-ausculta/src/index";
+import type { StoragePort, WindowLike } from "../../packages/sim-ausculta/src/index";
+
+/** Öğrenme ekranı — statik işaretleme. DOM kütüphanesi yok. */
+
+const inertWindow: WindowLike = {
+  addEventListener: () => undefined,
+  removeEventListener: () => undefined,
+  setTimeout: () => 0,
+  clearTimeout: () => undefined,
+  visibilityState: "visible",
+};
+
+const storage: StoragePort = {
+  get: () => null,
+  set: () => undefined,
+};
+
+/** renderToStaticMarkup kesme işaretini &#x27; yazar; beklenen metin aynı biçime çevrilir. */
+const esc = (text: string): string =>
+  text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#x27;");
+
+const EARLY_SYSTOLIC =
+  "Erken sistolik üfürüm, S1'den hemen sonra başlayıp sistolün ilk yarısında söner.";
+
+function renderInStore(node: ReactNode, learnFocusKey: string | null = null): string {
+  return renderToStaticMarkup(
+    createElement(StoreProvider, {
+      children: node,
+      env: inertWindow,
+      initialState: { ...initialState, learnFocusKey },
+      now: () => 1_728_000_000_000,
+      runtime: createMemoryRuntimeAdapter(),
+      storage,
+    }),
+  );
+}
+
+describe("LearnScreen", () => {
+  it("kalp kütüphanesini, açıklamayı ve sahneyi çizer", () => {
+    const html = renderInStore(createElement(LearnScreen));
+    expect(html).toContain("learn-grid");
+    expect(html).toContain("<h2");
+    expect(html).toContain("Kalp Sesleri");
+    expect(html).toContain("Dinle, tanı, öğren.");
+    expect(html).toContain("Normal S1–S2");
+    expect(html).toContain(esc(libraryTitle("heart.normal")));
+    expect(html).toContain("Açıklama");
+    expect(html).toContain("Dalga Formu");
+    expect(html).toContain("Klinik Bilgi");
+    expect(html).toContain("Pediatrik referans");
+    expect(html).toContain('role="tablist"');
+    expect(html).toContain('role="toolbar"');
+    expect(html).toContain("stage-card");
+    expect(html).toContain("<footer");
+    expect(html).not.toContain("<header");
+    expect(html).toContain("min-width:44px");
+    expect(html).not.toContain("DevPanel");
+  });
+
+  it("kesme işaretli açıklamayı HTML kaçışıyla karşılaştırır", () => {
+    const html = renderInStore(createElement(LearnScreen), "heart.murmur.early_systolic");
+    expect(html).toContain("Üfürüm");
+    expect(html).toContain(esc(EARLY_SYSTOLIC));
+    expect(html).not.toContain("S1'den");
+  });
+
+  it("gömülü modda footer ve arka plan çizilmez", () => {
+    const html = renderInStore(createElement(LearnScreen, { embedded: true }));
+    expect(html).not.toContain("<footer");
+    expect(html).not.toContain('class="app-bg"');
+    expect(html).toContain("Dinle, tanı, öğren.");
+  });
+
+  it("kaydırma ve ses sınırları no-op ile güvenli çalışır", () => {
+    const env = createNoopLearnScreenEnv();
+    const audio = createNoopLearnAudio();
+    expect(() => env.scrollActiveLibraryItem()).not.toThrow();
+    expect(() => audio.stop()).not.toThrow();
+    const html = renderInStore(createElement(LearnScreen, { env, audio }));
+    expect(html).toContain("learn-grid");
+  });
+});
