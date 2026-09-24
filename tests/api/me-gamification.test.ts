@@ -5,7 +5,8 @@ import {
   gamiSummaryResponseSchema,
   type SimId,
 } from "../../packages/contracts/src/index";
-import { WEEKLY_XP_TARGET } from "../../apps/api/src/me/gamification";
+import { WEEKLY_XP_TARGET, levelForXpClosedForm, nextStreak } from "../../apps/api/src/me/gamification";
+import { DEFAULT_RULES, levelForXp } from "../../packages/gamification-core/src/index";
 import {
   ALI_ID,
   FIXED_NOW,
@@ -69,6 +70,7 @@ const GAMIFICATION_SEED = {
       score: 80,
       maxScore: 100,
       passed: true,
+      xp: 120,
       summary: { xp: 120, ritim: 80 },
     },
     {
@@ -81,6 +83,7 @@ const GAMIFICATION_SEED = {
       score: 60,
       maxScore: 100,
       passed: false,
+      xp: 100,
       summary: { xp: 100, ritim: 60 },
     },
     {
@@ -93,6 +96,7 @@ const GAMIFICATION_SEED = {
       score: 95,
       maxScore: 100,
       passed: true,
+      xp: 200,
       summary: { xp: 200, ritim: 95 },
     },
   ],
@@ -436,5 +440,50 @@ describe("sim erişim yetkisi ve deneme kapsamı (API-03/API-04)", () => {
       });
     expect((await post(ali.headers)).status).toBe(201);
     expect((await post(mert.headers)).status).toBe(409);
+  });
+});
+
+describe("sunucu yetkili XP, düzey ve seri (API-05)", () => {
+  it("kapalı biçim düzey formülü levelForXp ile her XP'de aynıdır", () => {
+    for (let xp = 0; xp <= 60_000; xp += 7) {
+      expect(levelForXpClosedForm(xp), String(xp)).toBe(levelForXp(xp, DEFAULT_RULES).level);
+    }
+    for (let level = 1; level <= 40; level += 1) {
+      const start = (DEFAULT_RULES.level.unitXp * (level - 1) * level) / 2;
+      expect(levelForXpClosedForm(start), `sınır ${start}`).toBe(level);
+      if (start > 0) expect(levelForXpClosedForm(start - 1), `sınır-1 ${start}`).toBe(level - 1);
+    }
+  });
+
+  it("seri: aynı gün değişmez, ertesi gün artar, boşlukta 1'e döner, geç gelen eski gün etkisiz", () => {
+    const start = { current: 0, best: 0, lastDate: null };
+    const d1 = nextStreak(start, "2026-09-20");
+    expect(d1).toEqual({ current: 1, best: 1, lastDate: "2026-09-20" });
+    expect(nextStreak(d1, "2026-09-20")).toEqual(d1);
+    const d2 = nextStreak(d1, "2026-09-21");
+    expect(d2).toEqual({ current: 2, best: 2, lastDate: "2026-09-21" });
+    expect(nextStreak(d2, "2026-09-19")).toEqual(d2);
+    expect(nextStreak(d2, "2026-09-24")).toEqual({ current: 1, best: 2, lastDate: "2026-09-24" });
+  });
+
+  it("XP istemci özetinden değil sunucu kuralından gelir; profil oluşur, tekrar XP'yi çoğaltmaz", async () => {
+    const testHarness = harness({ [ALI_ID]: ["pulse", "opaca"] });
+    const ali = await login(testHarness, "ali.veli");
+    const post = () =>
+      testHarness.app.request("/me/gamification/opaca/attempts", {
+        method: "POST",
+        headers: { ...ali.headers, "content-type": "application/json" },
+        body: JSON.stringify(
+          attemptBody({ caseCount: 10, maxScore: 100, mode: "assessment", score: 80, summary: { xp: 999_999, ritim: 80 } }),
+        ),
+      });
+    expect((await post()).status).toBe(201);
+    expect((await post()).status).toBe(200);
+    const summary = await testHarness.app.request("/me/gamification/opaca", { headers: ali.headers });
+    const data = ((await summary.json()) as { data: { xp: number; level: number; streak: { current: number } } }).data;
+    // assessment: 10 vaka × 10 XP + 80 eşiği bonusu 20 = 120 XP (özetteki 999999 yok sayılır).
+    expect(data.xp).toBe(120);
+    expect(data.level).toBe(levelForXp(120, DEFAULT_RULES).level);
+    expect(data.streak.current).toBe(1);
   });
 });
