@@ -1,13 +1,12 @@
 import { describe, expect, it } from "vitest";
 import { CardiacModel, MODES, pulseMetricSnapshot, systematicReadout } from "../../packages/sim-pulse/src/index";
-import { tr } from "../../packages/ui/i18n/tr";
 
 describe("Pulse metrik ve açıklama modeli", () => {
-  it("her mod için altı sistematik okuma adımı üretir ve chrome anahtarları çeviride bulunur", () => {
+  it("her mod için altı sistematik okuma adımı ve sözleşmeli çeviri anahtarları üretir", () => {
     for (const mode of MODES) {
       const findings = systematicReadout(mode);
       expect(findings).toHaveLength(6);
-      for (const finding of findings) expect(tr[finding.labelKey]).toBeTruthy();
+      for (const finding of findings) expect(finding.labelKey).toMatch(/^sim\.pulse\.systematic\./);
     }
   });
 
@@ -19,11 +18,11 @@ describe("Pulse metrik ve açıklama modeli", () => {
 
   it("faz etiketini çeviri anahtarına, null ölçümleri boş değere dönüştürür", () => {
     const normal = pulseMetricSnapshot(new CardiacModel("normal"), 3.271, "V2");
-    expect(tr[normal.phaseKey]).toBe("İzovolümetrik kasılma");
+    expect(normal.phaseKey).toBe("sim.pulse.phase.qrs");
     expect(normal.metrics.find((metric) => metric.id === "qrs")).toMatchObject({ value: "80", unit: "ms" });
 
     const vf = pulseMetricSnapshot(new CardiacModel("vf"), 3.271);
-    expect(tr[vf.phaseKey]).toBe("Kaotik etkinlik");
+    expect(vf.phaseKey).toBe("sim.pulse.phase.chaotic");
     expect(vf.metrics.every((metric) => metric.value === null)).toBe(true);
   });
 });
