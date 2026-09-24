@@ -1,4 +1,5 @@
 import type { SimDispose, SimModule, SimMountContext, SimMountTarget } from "@egemed/sim-host";
+import type { CohortFilter, Period } from "@egemed/gamification-core";
 import "@egemed/tokens/family-tokens.css";
 import "./styles/tokens.css";
 import "./styles/base.css";
@@ -15,9 +16,22 @@ import { CardiacModel } from "./engine/model";
 import { createSeededRandomInt } from "./engine/rng";
 import type { PulseSchedulerOptions } from "./engine/scheduler";
 import { blank, decode, encode } from "./engine/state";
-import type { PulseState, StateContext } from "./engine/state";
+import type { ActiveView, PulseState, StateContext } from "./engine/state";
 import { MODES } from "./engine/shapes";
-import type { Mode } from "./engine/shapes";
+import type { Lead, Mode } from "./engine/shapes";
+import { buildAttemptRecord, rhythmStreakAfter } from "./gamification/attempt";
+import { createStorageGamiRepo, emptyPulseGamiState, pulseLearnTopic } from "./gamification/repo";
+import type { PulseGamiRepo, PulseGamiState, PulseGamiWriteResult } from "./gamification/repo";
+import {
+  PULSE_PERIODS,
+  achievementsMarkup,
+  createPulseAchievementsView,
+  createPulseGainsView,
+  createPulseLeaderboardView,
+  gainsMarkup,
+  leaderboardMarkup,
+} from "./gamification/ui";
+import type { PulseGainsView, PulseLeaderboardTableView } from "./gamification/ui";
 import { createPulseEventEmitter } from "./host/events";
 import type { AbortControllerLike, EventListenerLike, ListenerTarget } from "./host/lifecycle";
 import { createPulseLifecycle } from "./host/lifecycle";
@@ -82,16 +96,26 @@ const stateCurriculum: StateContext["curriculum"] = {
   byId: curriculum.byId,
 };
 
-function appMarkup(state: PulseState, assetBase: string): string {
-  const nav = ["modes", "sim", "case", "quiz", "about"].map((view) =>
-    `<button type="button" class="eg-navbtn" data-pulse-view="${view}" aria-pressed="${state.activeView === view}">${
-      ({ modes: "Modlar", sim: "İnceleme", case: "Uygulama", quiz: "Değerlendirme", about: "Hakkında" } as const)[view as "modes"]
-    }</button>`,
-  ).join("");
-  return `<div class="app" data-mode="${state.mode}"><header class="topbar"><strong>EGEMED Pulse™</strong><nav aria-label="Pulse bölümleri">${nav}</nav></header><main>${screenMarkup(state, assetBase)}</main><footer class="eg-footer">Sinyaller sentetiktir · klinik tanı için kullanılmaz</footer></div>`;
+const NAV_ITEMS: readonly (readonly [ActiveView, string])[] = [
+  ["modes", "Modlar"], ["sim", "İnceleme"], ["case", "Uygulama"], ["quiz", "Değerlendirme"],
+  ["achievements", "Başarılarım"], ["leaderboard", "Liderlik"], ["about", "Hakkında"],
+];
+
+interface PulseGamiScreenData {
+  readonly state: PulseGamiState;
+  readonly now: Date;
+  readonly board: PulseLeaderboardTableView | null;
+  readonly gains: PulseGainsView;
 }
 
-function screenMarkup(state: PulseState, assetBase: string): string {
+function appMarkup(state: PulseState, assetBase: string, gami: PulseGamiScreenData): string {
+  const nav = NAV_ITEMS.map(([view, label]) =>
+    `<button type="button" class="eg-navbtn" data-pulse-view="${view}" aria-pressed="${state.activeView === view}">${label}</button>`,
+  ).join("");
+  return `<div class="app" data-mode="${state.mode}"><header class="topbar"><strong>EGEMED Pulse™</strong><nav aria-label="Pulse bölümleri">${nav}</nav></header><main>${screenMarkup(state, assetBase, gami)}</main><footer class="eg-footer">Sinyaller sentetiktir · klinik tanı için kullanılmaz</footer></div>`;
+}
+
+function screenMarkup(state: PulseState, assetBase: string, gami: PulseGamiScreenData): string {
   if (state.activeView === "modes") {
     const cards = MODE_CARDS.map((card) => `<article class="mode-card ${card.id}"><h3>${card.title}</h3><p class="desc">${card.description}</p><ul>${card.features.map((feature) => `<li><span class="ck">✓</span>${feature}</li>`).join("")}</ul><button class="btn" type="button" data-pulse-view="${card.view}">${card.title}</button></article>`).join("");
     return `<section class="view secondary-view modes-view"><h1>Çalışma Modunu Seçin</h1><p class="honesty-banner">Tüm sinyaller sentetik öğretim şemalarıdır.</p><div class="mode-cards">${cards}</div></section>`;
@@ -115,11 +139,18 @@ function screenMarkup(state: PulseState, assetBase: string): string {
     const about = createPulseAboutView({ curriculumLimitations: curriculum.limitations, assetBase });
     return `<section class="view secondary-view about-view"><h1>EGEMED Pulse™ Hakkında</h1>${renderPulseAboutMarkup(about)}</section>`;
   }
+  if (state.activeView === "achievements") {
+    return `<section class="view secondary-view"><div class="results-wrap-v2">${achievementsMarkup(createPulseAchievementsView(gami.state, gami.now))}</div></section>`;
+  }
+  if (state.activeView === "leaderboard") {
+    const body = gami.board === null ? `<p class="mt-12">Liderlik tablosu yükleniyor…</p>` : leaderboardMarkup(gami.board);
+    return `<section class="view secondary-view"><div class="results-wrap-v2">${body}</div></section>`;
+  }
   if (state.activeView === "tutorial") {
     const steps = createTutorialStepViews(0).map((step) => `<li data-status="${step.status}"><h2>${escapeHtml(step.title)}</h2><p>${escapeHtml(step.description)}</p></li>`).join("");
     return `<section class="view secondary-view tutorial-view"><h1>Simülatörü tanıyalım</h1><ol>${steps}</ol></section>`;
   }
-  return `<section class="view secondary-view results-view"><h1>Değerlendirme Sonuçları</h1><p>Puan: ${state.score ?? 0}</p></section>`;
+  return `<section class="view secondary-view results-view"><div class="results-wrap-v2"><h1 class="results-title-v2">Değerlendirme Sonuçları</h1><p>Puan: ${state.score ?? 0}</p>${gainsMarkup(gami.gains)}</div></section>`;
 }
 
 function productionEnv(): PulseModuleEnv {
@@ -175,11 +206,106 @@ export function createPulseModule(deps?: PulseModuleDeps): SimModule {
       let activeModel: CardiacModel | null = null;
       let screenObserver: EcgResizeObserver | null = null;
       let disposed = false;
+      const nowDate = (): Date => new Date(context.now());
+      const gamiRepo: PulseGamiRepo = createStorageGamiRepo(env.storage);
+      let gamiState: PulseGamiState = emptyPulseGamiState();
+      let gamiBoard: PulseLeaderboardTableView | null = null;
+      let gamiGains: PulseGainsView | null = null;
+      let gamiWrote = false;
+      let gamiPeriod: Period = "week";
+      let gamiCohort: CohortFilter = "all";
+      const studied = new Set<Mode>();
+      const sessionStarts = new Map<string, number>();
+
+      const gamiScreen = (): PulseGamiScreenData => ({
+        state: gamiState,
+        now: nowDate(),
+        board: gamiBoard,
+        gains: gamiGains ?? createPulseGainsView(gamiState, [], nowDate()),
+      });
+      const markSessionStart = (sessionId: string): void => {
+        if (!sessionStarts.has(sessionId)) sessionStarts.set(sessionId, context.now());
+      };
+      const sessionDuration = (sessionId: string): number => {
+        const startedAt = sessionStarts.get(sessionId);
+        return startedAt === undefined ? 0 : Math.max(0, context.now() - startedAt);
+      };
+      const correctness = (session: { ids: readonly string[]; answers: ReadonlyArray<number | null>; submitted: readonly boolean[] }): boolean[] =>
+        session.ids.map((id, index) =>
+          session.submitted[index] === true && session.answers[index] === stateCurriculum.byId[id]?.correct);
+      const previousRhythmStreak = (): number => {
+        let streak = 0;
+        for (const attempt of gamiState.attempts) {
+          if (attempt.mode === "assessment") streak = attempt.extra.rhythmRecognitionStreak;
+        }
+        return streak;
+      };
+      const applyWrite = (result: PulseGamiWriteResult, withGains: boolean): void => {
+        if (disposed) return;
+        gamiWrote = true;
+        gamiState = result.state;
+        if (withGains) gamiGains = createPulseGainsView(result.state, result.earnedIds, nowDate());
+        render();
+      };
+      const recordQuizAttempt = (): void => {
+        const session = state.quizSession;
+        if (!session.submitted.every(Boolean)) return;
+        const totalQuestions = session.ids.length;
+        const flags = correctness(session);
+        const correctAnswers = flags.filter(Boolean).length;
+        const record = buildAttemptRecord({
+          sessionId: session.id, mode: "assessment", ecgMode: state.mode,
+          score: Math.round((correctAnswers * 100) / totalQuestions), correctAnswers, totalQuestions,
+          hintsUsed: 0, durationMs: sessionDuration(session.id), finishedAt: nowDate(),
+          rhythmRecognitionStreak: rhythmStreakAfter(previousRhythmStreak(), flags),
+        });
+        if (!record) return;
+        void gamiRepo.recordAttempt(record, nowDate()).then((result) => applyWrite(result, true));
+      };
+      const recordCaseAttempt = (): void => {
+        const session = state.caseSession;
+        if (!session.submitted.every(Boolean)) return;
+        const totalQuestions = session.ids.length;
+        const flags = correctness(session);
+        const correctAnswers = flags.filter(Boolean).length;
+        const leads = new Set<Lead>();
+        flags.forEach((correct, index) => {
+          if (correct) for (const lead of session.leadSelections[index] ?? []) leads.add(lead);
+        });
+        const record = buildAttemptRecord({
+          sessionId: session.id, mode: "practice", ecgMode: state.mode,
+          score: Math.round((correctAnswers * 100) / totalQuestions), correctAnswers, totalQuestions,
+          hintsUsed: 0, durationMs: sessionDuration(session.id), finishedAt: nowDate(),
+          correctlyReadLeads: [...leads],
+        });
+        if (!record) return;
+        void gamiRepo.recordAttempt(record, nowDate()).then((result) => applyWrite(result, false));
+      };
+      const noteStudied = (): void => {
+        if (state.viewed[state.mode] < 16 || studied.has(state.mode)) return;
+        studied.add(state.mode);
+        void gamiRepo.recordLearn(pulseLearnTopic(state.mode), nowDate()).then((result) => {
+          if (!disposed) { gamiWrote = true; gamiState = result.state; }
+        });
+      };
+      const refreshBoard = (): void => {
+        void gamiRepo.getLeaderboard(gamiPeriod, gamiCohort, nowDate()).then((board) => {
+          if (disposed) return;
+          gamiBoard = createPulseLeaderboardView(board);
+          render();
+        });
+      };
+      void gamiRepo.load().then((stored) => {
+        if (disposed || gamiWrote) return;
+        gamiState = stored;
+        render();
+      });
 
       const drawCurrent = (): void => {
         if (!activeModel) return;
         const snapshot = activeModel.snapshot(state.time);
         root.dataset.phase = snapshot.phase;
+        noteStudied();
         const status = root.querySelector("[data-pulse-status]") as { textContent: string } | null;
         if (status) status.textContent = `${snapshot.electrical} · ${snapshot.mechanical}`;
         const canvas = root.querySelector("[data-pulse-ecg]") as PulseCanvas | null;
@@ -192,7 +318,7 @@ export function createPulseModule(deps?: PulseModuleDeps): SimModule {
       };
       const render = (): void => {
         screenObserver?.disconnect(); screenObserver = null;
-        root.innerHTML = appMarkup(state, root.dataset.assetBase ?? DEFAULT_PULSE_ASSET_BASE);
+        root.innerHTML = appMarkup(state, root.dataset.assetBase ?? DEFAULT_PULSE_ASSET_BASE, gamiScreen());
         const canvas = root.querySelector("[data-pulse-ecg]");
         if (canvas && env.createResizeObserver) {
           screenObserver = env.createResizeObserver();
@@ -218,24 +344,38 @@ export function createPulseModule(deps?: PulseModuleDeps): SimModule {
         const index = state.currentCase;
         if (action === "check" && state.caseAnswers[index] !== null) state.caseSession.submitted[index] = true;
         if (action === "continue") state.currentCase = index === 9 ? 0 : index + 1;
+        recordCaseAttempt();
       };
       const answerQuiz = (action: string): void => {
         const index = state.quizPage;
         if (action === "submit" && state.answers[index] !== null) state.quizSession.submitted[index] = true;
         if (action === "next") state.quizPage = Math.min(9, index + 1);
         if (action === "prev") state.quizPage = Math.max(0, index - 1);
-        if (action === "results") state.activeView = "results";
+        if (action === "results") {
+          state.activeView = "results";
+          recordQuizAttempt();
+        }
       };
       const onClick = ((event: PulseClickEvent): void => {
         const view = event.target?.dataset?.pulseView;
         const mode = event.target?.dataset?.pulseMode;
         const caseAction = event.target?.dataset?.caseAction;
         const quizAction = event.target?.dataset?.quizAction;
+        const period = event.target?.dataset?.pulseGamiPeriod;
         if (view !== undefined) {
           event.preventDefault();
           const active = showView(state, { events, ...(controller ? { controller } : {}) }, view);
           if (active === "sim") startController();
+          if (active === "quiz") markSessionStart(state.quizSession.id);
+          if (active === "case") markSessionStart(state.caseSession.id);
+          if (active === "leaderboard") { gamiBoard = null; refreshBoard(); }
           render(); persist();
+        } else if (period !== undefined) {
+          event.preventDefault();
+          if ((PULSE_PERIODS as readonly string[]).includes(period)) {
+            gamiPeriod = period as Period;
+            gamiBoard = null; refreshBoard(); render();
+          }
         } else if (mode !== undefined && (MODES as readonly string[]).includes(mode)) {
           event.preventDefault();
           applyMode(state, mode as Mode, { events });
@@ -247,6 +387,15 @@ export function createPulseModule(deps?: PulseModuleDeps): SimModule {
         }
       }) as unknown as EventListenerLike;
       const onChange = ((event: PulseChangeEvent): void => {
+        if (event.target?.name === "gamiCohort") {
+          const raw = event.target.value ?? "all";
+          const numeric = Number(raw);
+          gamiCohort = raw === "all" || !Number.isInteger(numeric) || numeric < 1 || numeric > 6
+            ? "all"
+            : numeric as CohortFilter;
+          gamiBoard = null; refreshBoard(); render();
+          return;
+        }
         const value = Number(event.target?.value);
         if (!Number.isInteger(value) || value < 0 || value > 4) return;
         if (event.target?.name === "activeCase") state.caseSession.answers[state.currentCase] = value;

@@ -32,6 +32,13 @@ export interface PulseAttemptInput {
   rhythmRecognitionStreak?: number;
 }
 
+/** Doğru yanıtlar seriyi sürdürür, yanlış sıfırlar; geçersiz önceki değer 0 sayılır. */
+export function rhythmStreakAfter(previous: number, correctness: readonly boolean[]): number {
+  let streak = Number.isInteger(previous) && previous > 0 ? previous : 0;
+  for (const correct of correctness) streak = correct ? streak + 1 : 0;
+  return streak;
+}
+
 /** Geçerli, tamamlanmış oturumları dönüştürür; boş/bozuk oturumlar kayda alınmaz. */
 export function buildAttemptRecord(input: PulseAttemptInput): PulseAttemptRecord | null {
   const { score, correctAnswers, totalQuestions, hintsUsed, durationMs } = input;
