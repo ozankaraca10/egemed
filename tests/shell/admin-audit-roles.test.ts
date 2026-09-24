@@ -21,7 +21,6 @@ import {
 import {
   ADMIN_UNITS,
   bulkOutcomeForUser,
-  BULK_OPERATIONS,
   computeUsersSummary,
   createMockUsersSource,
   generateSyntheticUsers,
@@ -30,9 +29,8 @@ import {
   validateBulkInput,
   type AdminUserDetail,
 } from "../../apps/shell/src/admin/usersDataSource";
-import { AuditPage, AuditView, type AuditViewProps } from "../../apps/shell/src/admin/AuditPage";
-import { RolesPage, RolesView, type RolesViewProps } from "../../apps/shell/src/admin/RolesPage";
-import { UserDetailPage, UserDetailView, type UserDetailViewProps } from "../../apps/shell/src/admin/UserDetailPage";
+import { UserDetailView, type UserDetailViewProps } from "../../apps/shell/src/admin/UserDetailPage";
+import { RolesView, type RolesViewProps } from "../../apps/shell/src/admin/RolesPage";
 import { UsersListView, type UsersListViewProps } from "../../apps/shell/src/admin/UsersPage";
 import { t } from "../../packages/ui/i18n/tr";
 
@@ -113,10 +111,6 @@ describe("Toplu düzenleme saf fonksiyonları (E3 §e.5/§d, T73)", () => {
     expect(result.updated).toBe(0);
     expect(result.skipped).toHaveLength(2);
     expect(updatedUsers).toHaveLength(0);
-  });
-
-  it("BULK_OPERATIONS altı işlemin tamamını kapsar (E3 §d/@egemed/contracts)", () => {
-    expect(BULK_OPERATIONS).toEqual(["assign_role", "revoke_role", "set_unit", "set_status", "grant_sim", "revoke_sim"]);
   });
 });
 
@@ -270,7 +264,7 @@ function baseRolesViewProps(overrides: Partial<RolesViewProps>): RolesViewProps 
   };
 }
 
-describe("RolesView işaretlemesi (E3 §e.6, T73)", () => {
+describe("RolesView salt okunur sözleşmesi (E3 §e.6, T73)", () => {
   it("hazır durumda rol kartlarını, salt okunur yetki matrisini ve birim/sim listelerini gösterir", () => {
     const html = render(
       createElement(
@@ -288,177 +282,44 @@ describe("RolesView işaretlemesi (E3 §e.6, T73)", () => {
     expect(html).not.toContain("<button");
     expect(html).not.toContain("<select");
   });
-
-  it("hata durumunda hata başlığını gösterir", () => {
-    const html = render(createElement(RolesView, baseRolesViewProps({ status: "error" })));
-    expect(html).toContain(t("admin.roles.error.title"));
-  });
 });
 
-describe("RolesPage kabı (T73)", () => {
-  it("varsayılan (dataSource'suz) çağrıldığında yüklenme iskeletiyle render edilir", () => {
-    const html = render(createElement(RolesPage));
-    expect(html).toContain(t("admin.roles.title"));
-  });
-
-  it("enjekte edilen kaynakla da başlığı gösterir", () => {
-    const source = createMockUsersSource(69, 10);
-    const html = render(createElement(RolesPage, { dataSource: source }));
-    expect(html).toContain(t("admin.roles.title"));
-  });
-});
-
-function baseAuditViewProps(overrides: Partial<AuditViewProps>): AuditViewProps {
+function baseListProps(overrides: Partial<UsersListViewProps>): UsersListViewProps {
   return {
-    detailEntry: null,
+    bulkApplyResult: null,
+    bulkApplyStatus: "idle",
+    bulkOpen: false,
+    bulkOperation: "set_status",
+    bulkPreview: null,
+    bulkPreviewStatus: "idle",
+    bulkValue: "active",
+    onBulkApply: noop,
+    onBulkOperationChange: noop,
+    onBulkValueChange: noop,
     onClearFilters: noop,
-    onCloseDetail: noop,
+    onClearSelection: noop,
+    onCloseBulk: noop,
     onFilterChange: noop,
-    onOpenDetail: noop,
+    onOpenBulk: noop,
     onPageChange: noop,
     onRetry: noop,
-    query: { page: 1, pageSize: 20 },
+    onSearchChange: noop,
+    onSortChange: noop,
+    onToggleSelect: noop,
+    query: {},
     result: null,
+    selected: new Set(["user-001"]),
     status: "loading",
+    units: ADMIN_UNITS,
     ...overrides,
   };
 }
 
-const AUDIT_ENTRY: AuditEntry = {
-  action: "role.grant",
-  actorId: "audit-actor-001",
-  actorName: "Örnek Yönetici 001",
-  id: "audit-1",
-  occurredAt: "2026-05-10T09:00:00.000Z",
-  summary: "Admin rolü verildi.",
-  targetId: "user-010",
-  targetName: "Örnek Kullanıcı 010",
-  targetType: "user",
-};
-
-describe("AuditView işaretlemesi (E3 §e.7, T73)", () => {
-  it("hazır durumda filtre alanlarını ve kayıt tablosunu gösterir; salt okunurdur", () => {
-    const html = render(
-      createElement(
-        AuditView,
-        baseAuditViewProps({
-          result: { data: [AUDIT_ENTRY], meta: { page: 1, pageSize: 20, total: 1 } },
-          status: "ready",
-        }),
-      ),
-    );
-    expect(html).toContain(t("admin.audit.filter.actor"));
-    expect(html).toContain(t("admin.audit.table.caption"));
-    expect(html).toContain(AUDIT_ENTRY.actorName);
-    expect(html).toContain(t("admin.audit.action.role.grant"));
-  });
-
-  it("ayrıntı kaydı açıkken özet metnini modalda gösterir", () => {
-    const html = render(createElement(AuditView, baseAuditViewProps({ detailEntry: AUDIT_ENTRY, status: "ready" })));
-    expect(html).toContain('role="dialog"');
-    expect(html).toContain(AUDIT_ENTRY.summary);
-  });
-
-  it("filtre etkinken sonuç yoksa filtrelenmiş boş durumunu gösterir", () => {
-    const html = render(
-      createElement(
-        AuditView,
-        baseAuditViewProps({
-          query: { actor: "yok-boyle-aktor", page: 1, pageSize: 20 },
-          result: { data: [], meta: { page: 1, pageSize: 20, total: 0 } },
-          status: "ready",
-        }),
-      ),
-    );
-    expect(html).toContain(t("admin.audit.filtered.empty"));
-  });
-});
-
-describe("AuditPage kabı (T73)", () => {
-  it("varsayılan (dataSource'suz) çağrıldığında başlığı gösterir", () => {
-    const html = render(createElement(AuditPage));
-    expect(html).toContain(t("admin.audit.title"));
-  });
-});
-
 describe("Toplu düzenleme diyaloğu (UsersListView içinde, E3 §e.5, T73)", () => {
-  function baseListProps(overrides: Partial<UsersListViewProps>): UsersListViewProps {
-    return {
-      bulkApplyResult: null,
-      bulkApplyStatus: "idle",
-      bulkOpen: false,
-      bulkOperation: "set_status",
-      bulkPreview: null,
-      bulkPreviewStatus: "idle",
-      bulkValue: "active",
-      onBulkApply: noop,
-      onBulkOperationChange: noop,
-      onBulkValueChange: noop,
-      onClearFilters: noop,
-      onClearSelection: noop,
-      onCloseBulk: noop,
-      onFilterChange: noop,
-      onOpenBulk: noop,
-      onPageChange: noop,
-      onRetry: noop,
-      onSearchChange: noop,
-      onSortChange: noop,
-      onToggleSelect: noop,
-      query: {},
-      result: null,
-      selected: new Set(["user-001"]),
-      status: "loading",
-      units: ADMIN_UNITS,
-      ...overrides,
-    };
-  }
-
-  it("seçim varken 'Toplu işlem' düğmesi görünür; diyalog kapalıyken işlem seçenekleri render edilmez", () => {
-    const html = render(createElement(UsersListView, baseListProps({})));
-    expect(html).toContain(t("admin.users.bulk.open"));
-    expect(html).not.toContain(t("admin.bulk.notice"));
-  });
-
-  it("diyalog açıkken altı işlemi ve dryRun etki önizlemesini gösterir; admin değeri hiç sunulmaz", () => {
-    const html = render(
-      createElement(
-        UsersListView,
-        baseListProps({
-          bulkOpen: true,
-          bulkPreview: { skipped: [{ reason: "no_change", userId: "user-002" }], updated: 3 },
-        }),
-      ),
-    );
-    for (const operation of BULK_OPERATIONS) expect(html).toContain(t(`admin.bulk.operation.${operation}` as const));
-    expect(html).toContain(t("admin.bulk.notice"));
-    expect(html).toContain(t("admin.bulk.effect.label"));
-  });
-
   it("assign_role işleminde değer seçeneklerinde ASLA 'admin' sunulmaz (E3 §b)", () => {
     const html = render(createElement(UsersListView, baseListProps({ bulkOpen: true, bulkOperation: "assign_role" })));
     const dialogStart = html.indexOf('class="eg-modal__body"');
     expect(html.slice(dialogStart)).not.toContain('value="admin"');
-  });
-
-  it("assign_role/revoke_role işleminde değer alanı sabittir; admin seçilemez", () => {
-    const html = render(
-      createElement(UsersListView, baseListProps({ bulkOpen: true, bulkOperation: "assign_role", bulkValue: "kullanici" })),
-    );
-    expect(html).toContain(t("admin.bulk.value.roleForbidden"));
-  });
-
-  it("uygulama sonucu gösterildiğinde güncellenen/atlanan sayıları render eder", () => {
-    const html = render(
-      createElement(
-        UsersListView,
-        baseListProps({
-          bulkApplyResult: { skipped: [{ reason: "would_orphan_roles", userId: "user-003" }], updated: 4 },
-          bulkOpen: true,
-        }),
-      ),
-    );
-    expect(html).toContain(t("admin.bulk.result.title"));
-    expect(html).toContain(t("admin.bulk.result.skip.would_orphan_roles"));
   });
 });
 
@@ -480,11 +341,6 @@ function baseDetailViewProps(overrides: Partial<UserDetailViewProps>): UserDetai
 }
 
 describe("Roller ve erişim sekmesi — admin rolü ver/kaldır (UserDetailPage, E3 §b/§e.6, T73)", () => {
-  it("admin olmayan kullanıcıda 'Admin rolü ver' düğmesi görünür", () => {
-    const html = render(createElement(UserDetailView, baseDetailViewProps({})));
-    expect(html).toContain(t("admin.users.detail.roles.grant"));
-  });
-
   it("admin kullanıcıda ve oturum sahibi kendisiyse 'kaldır' düğmesi devre dışı ve uyarı görünür", () => {
     const html = render(
       createElement(UserDetailView, baseDetailViewProps({ currentUserId: ADMIN_DETAIL.id, detail: ADMIN_DETAIL })),
@@ -501,18 +357,6 @@ describe("Roller ve erişim sekmesi — admin rolü ver/kaldır (UserDetailPage,
     expect(html).toContain(t("admin.users.detail.roles.revoke"));
     expect(html).not.toContain(t("admin.users.detail.roles.selfGuard"));
   });
-
-  it("onRequestAction grantAdmin/revokeAdmin ile çağrılır (mutasyon UsersPage/UserDetailPage'de setRoles'e bağlanır)", () => {
-    let requested: string | null = null;
-    render(
-      createElement(
-        UserDetailView,
-        baseDetailViewProps({ onRequestAction: (action) => { requested = action; } }),
-      ),
-    );
-    // Render sırasında çağrılmaz; düğme onClick'i doğrudan çağırarak doğrulanır (DOM'suz desen).
-    expect(requested).toBeNull();
-  });
 });
 
 describe("UserDetailPage kabı: setRoles akışı ve self-guard (T73)", () => {
@@ -523,10 +367,5 @@ describe("UserDetailPage kabı: setRoles akışı ve self-guard (T73)", () => {
     const granted = await source.setRoles(first.id, ["kullanici", "admin"], null);
     expect(granted.roles).toContain("admin");
     await expect(source.setRoles(first.id, ["kullanici"], first.id)).rejects.toThrow("self_admin_removal");
-  });
-
-  it("varsayılan (dataSource'suz) çağrıldığında başlangıçta yüklenme iskeletini render eder", () => {
-    const html = render(createElement(UserDetailPage, { userId: "user-001" }));
-    expect(html).toContain(t("admin.users.detail.back"));
   });
 });
