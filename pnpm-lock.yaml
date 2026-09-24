@@ -82,6 +82,12 @@ importers:
         specifier: workspace:*
         version: link:../sim-host
 
+  packages/sim-pulse:
+    dependencies:
+      '@egemed/sim-host':
+        specifier: workspace:*
+        version: link:../sim-host
+
   packages/tokens: {}
 
   packages/ui:
