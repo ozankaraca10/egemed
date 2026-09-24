@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { SimMountContext, SimMountTarget } from "../../packages/sim-host/src/SimHost";
+import type { GamiRepository } from "../../packages/gamification-core/src/repository";
+import type { OpacaAttemptRecord } from "../../packages/sim-opaca/src/gamification/attempt";
 import {
   DEFAULT_ASSET_BASE,
   createMemoryRuntimeAdapter,
@@ -158,9 +160,32 @@ describe("createOpacaModule (SimHost adaptörü)", () => {
     });
     const dispose = createOpacaModule(deps).mount(fakeTarget(), CONTEXT);
     expect(rendered).toHaveLength(1);
-    const provider = rendered[0] as { type: unknown; props: { children: { props: { embedded: boolean } } } };
-    expect(provider.props.children.props.embedded).toBe(true);
+    const provider = rendered[0] as { type: unknown; props: { children: { props: { children: { props: { embedded: boolean } } } } } };
+    expect(provider.props.children.props.children.props.embedded).toBe(true);
     dispose();
     expect(rendered).toHaveLength(0);
+  });
+
+  it("gamiRepository enjekte edilince mount/dispose ile bağlanır", () => {
+    const apiRepo: GamiRepository<OpacaAttemptRecord> = {
+      getMe: async () => ({ id: "me", displayName: null, public: true, cohort: null }),
+      updateMe: async () => undefined,
+      recordAttempt: async () => undefined,
+      recordLearn: async () => undefined,
+      listAttempts: async () => [],
+      getLeaderboard: async (_period, _cohort, now) => ({
+        period: "week" as const,
+        cohort: "all" as const,
+        generatedAt: now.toISOString(),
+        isDemo: false,
+        rows: [],
+      }),
+      getMonthlyReward: async () => null,
+      getRewardWinners: async () => [],
+    };
+    const deps = createTestDeps({ gamiRepository: apiRepo });
+    const dispose = createOpacaModule(deps).mount(fakeTarget(), CONTEXT);
+    dispose();
+    expect(createOpacaModule(deps).id).toBe("opaca");
   });
 });
