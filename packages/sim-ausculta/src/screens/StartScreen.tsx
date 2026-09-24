@@ -3,6 +3,7 @@ import { useStore } from "../core/StoreProvider";
 import { computeMetrics } from "../data/metrics";
 import sourcesData from "../data/sources.json";
 import { Footer, touchTarget } from "../ui/chrome";
+import { ScreenHeading } from "../ui/ScreenHeading";
 import { IconArrowRight, IconHeadphones, IconInfo } from "../ui/icons";
 import { playVolumeCheckTone, type VolumeCheckAudio } from "./tone";
 
@@ -62,7 +63,7 @@ export function StartScreen({ embedded = false, audio }: StartScreenProps): JSX.
           src="brand/logo-horizontal-web.png"
           alt="EGEMED Ausculta — Kardiyopulmoner Oskültasyon Simülatörü"
         />
-        <h1 className="hero-title">Gerçek kayıtlarla kalp ve akciğer sesini keşfedin.</h1>
+        <ScreenHeading className="hero-title">Gerçek kayıtlarla kalp ve akciğer sesini keşfedin.</ScreenHeading>
         <p className="hero-sub">
           {M.soundClasses} ses sınıfı, yetişkin ve pediatrik gövde üzerinde sistematik oskültasyon;{" "}
           {embedded ? "ölçme ve değerlendirme" : "SCORM uyumlu ölçme ve değerlendirme"}.

@@ -12,7 +12,8 @@
     "typecheck": "tsc --noEmit"
   },
   "peerDependencies": {
-    "react": "^19"
+    "react": "^19",
+    "react-dom": "19.3.0"
   },
   "dependencies": {
     "@egemed/sim-host": "workspace:*",
@@ -20,6 +21,8 @@
   },
   "devDependencies": {
     "@types/react": "19.3.0",
-    "react": "19.3.0"
+    "@types/react-dom": "19.3.0",
+    "react": "19.3.0",
+    "react-dom": "19.3.0"
   }
 }

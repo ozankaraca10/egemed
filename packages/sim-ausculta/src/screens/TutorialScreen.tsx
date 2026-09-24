@@ -9,6 +9,7 @@ import type { StageAudio } from "../ui/PatientStage";
 import { PatientStage, type StageHandle } from "../ui/PatientStage";
 import { Toolbar, type ToolbarAudio } from "../ui/Toolbar";
 import { EcgDeco, Footer, touchTarget } from "../ui/chrome";
+import { ScreenHeading } from "../ui/ScreenHeading";
 import { IconArrowRight, IconCheck } from "../ui/icons";
 
 const STEP_TEXT = [
@@ -76,7 +77,7 @@ export function TutorialScreen({
         <div className="container screen-body">
           <div className="tutorial-wrap">
             <div className="tut-text-col">
-              <h1 className="tut-title">Nasıl Kullanılır?</h1>
+              <ScreenHeading className="tut-title">Nasıl Kullanılır?</ScreenHeading>
               <p className="tut-lead">Aşağıdaki 3 adımı sağdaki hasta üzerinde bizzat deneyerek geçin.</p>
               <p className="tut-sub">Her adımı tamamladığınızda işaretlenir — sırayla yapmak zorunlu değildir.</p>
               <div className="tut-steps tut-steps-live">
