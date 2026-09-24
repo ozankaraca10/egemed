@@ -1,10 +1,11 @@
 import { useEffect, useRef, type JSX, type ReactNode } from "react";
 import { t, type TrKey } from "@egemed/ui/i18n";
 import { AdminPage } from "./AdminPage";
+import { UsersPage } from "./admin/UsersPage";
 import { createSessionStore, sessionWhenEnabled, type DevSession } from "./devAuth";
 import { EntryPage } from "./EntryPage";
 import { NotFoundPage, pageFor } from "./pages";
-import { adminGuardHref, entryHref, type ResolvedRoute } from "./routes";
+import { adminGuardHref, entryHref, isAdminProtected, type ResolvedRoute } from "./routes";
 import { ShellLayout } from "./ShellLayout";
 import { SimRoute } from "./SimRoute";
 import { useHashRoute } from "./useHashRoute";
@@ -29,6 +30,7 @@ function titleKeyFor(route: ResolvedRoute): TrKey {
 function contentFor(route: ResolvedRoute, session: DevSession | null): ReactNode {
   if (route.kind === "page") return pageFor(route.route.id, session);
   if (route.kind === "admin") return <AdminPage />;
+  if (route.kind === "adminUsers") return <UsersPage />;
   if (route.kind === "sim") return <SimRoute simId={route.simId} />;
   return <NotFoundPage />;
 }
@@ -46,7 +48,7 @@ export function App(): JSX.Element | null {
   const session = import.meta.env.DEV ? readDevSession() : null;
   const titleKey = titleKeyFor(route);
   const isFirstRender = useRef(true);
-  const guardHref = route.kind === "admin" ? adminGuardHref(session) : null;
+  const guardHref = isAdminProtected(route) ? adminGuardHref(session) : null;
   useEffect(() => {
     document.title = `${t(titleKey)} · ${t("shell.brand")}`;
     // İlk render'da odak taşınmaz; açılışta odak belgede kalır ve kullanıcı
@@ -68,7 +70,7 @@ export function App(): JSX.Element | null {
   if (route.kind === "entry") {
     return <EntryPage devEnabled={devEnabled} key={route.role} role={route.role} />;
   }
-  if (route.kind === "admin" && guardHref !== null) return null;
+  if (isAdminProtected(route) && guardHref !== null) return null;
   return (
     <ShellLayout onLogout={logout} route={route} session={session}>
       {contentFor(route, session)}
