@@ -1,5 +1,10 @@
 import { existsSync, readFileSync } from "node:fs";
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it } from "vitest";
+import {
+  DEFAULT_ASSET_BASE,
+  assetUrl,
+  setAssetBase,
+} from "../../packages/sim-opaca/src/index";
 
 const PACKAGE_DIR = "packages/sim-opaca";
 const PUBLIC_DIR = `${PACKAGE_DIR}/public`;
@@ -94,5 +99,27 @@ describe.skipIf(!xrayCopied)(xraySuiteName, () => {
   it("her xray çalışma zamanı yolu diskte vardır", () => {
     expect(xrayPaths.length).toBeGreaterThan(0);
     expect(missingPaths(xrayPaths)).toEqual([]);
+  });
+});
+
+describe("assetUrl (marka ve görüntü yolları)", () => {
+  afterEach(() => {
+    setAssetBase(DEFAULT_ASSET_BASE);
+  });
+
+  it("göreli marka yolunu assetBase üzerinden çözümler", () => {
+    setAssetBase("/sims/opaca/");
+    expect(assetUrl("brand/logo-horizontal-web.png")).toBe("/sims/opaca/brand/logo-horizontal-web.png");
+    expect(assetUrl("brand/logo-icon-white-web.png")).toBe("/sims/opaca/brand/logo-icon-white-web.png");
+  });
+
+  it("mutlak yol önekini kaldırıp assetBase ile birleştirir", () => {
+    setAssetBase("/custom/base/");
+    expect(assetUrl("/assets/brand/logo.png")).toBe("/custom/base/assets/brand/logo.png");
+  });
+
+  it("https URL'lerini olduğu gibi döndürür", () => {
+    const url = "https://example.test/logo.png";
+    expect(assetUrl(url)).toBe(url);
   });
 });

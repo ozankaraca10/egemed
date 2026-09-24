@@ -4,6 +4,7 @@ import type { SimDispose, SimModule, SimMountContext, SimMountTarget } from "@eg
 import { App } from "./App";
 import { StoreProvider } from "./core/StoreProvider";
 import { DEFAULT_ASSET_BASE, resetAssetBase, setAssetBase } from "./core/images";
+import { initialState } from "./core/reducer";
 import type { WindowLike } from "./core/lifecycle";
 import type { StoragePort } from "./core/reducer";
 import type { RuntimeAdapter } from "./core/runtime";
@@ -130,6 +131,7 @@ export function createOpacaModule(deps?: OpacaModuleDeps): SimModule {
           storage: resolved.storage,
           runtime: resolved.runtime ?? createNoopRuntimeAdapter(),
           env: resolved.env,
+          initialState: { ...initialState, screen: "modes" },
           children: createElement(App, appProps),
         }),
       );

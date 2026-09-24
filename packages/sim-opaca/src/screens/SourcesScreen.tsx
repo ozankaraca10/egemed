@@ -3,7 +3,7 @@ import { useStore } from '../core/StoreProvider'
 import { Footer, EcgDeco } from '../ui/chrome'
 import sourcesData from '../data/sources.json'
 import { IconInfo, IconBook, IconHeart, IconDoc } from '../ui/icons'
-import { datasetCounts } from '../core/images'
+import { datasetCounts, assetUrl } from '../core/images'
 
 /** Kaynaklar ve Katkıda Bulunanlar (§33). Tüm metinler makine okunur `sources.json`'dan gelir:
  *  geliştiriciler (`credits`, Ünisis bağlantılı), kurum (`module`), veri setleri (`datasets`),
@@ -134,7 +134,7 @@ export function SourcesScreen({ embedded = false }: SourcesScreenProps): JSX.Ele
           <section className="src-section" aria-labelledby="inst-h">
             <h2 id="inst-h"><IconDoc /> Kurum</h2>
             <div className="inst-card">
-              <img src="brand/ege-tip-logo.png" alt="Ege Üniversitesi Tıp Fakültesi amblemi" />
+              <img src={assetUrl('brand/ege-tip-logo.png')} alt="Ege Üniversitesi Tıp Fakültesi amblemi" />
               <div>
                 <h3>
                   {data.module.product}<sup className="tm">™</sup> — {data.module.subtitle}
