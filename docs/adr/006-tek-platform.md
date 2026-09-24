@@ -1,5 +1,7 @@
 # ADR-006: Tek platform — simülatörler iç modül (hibrit)
 
+> Ad değişikliği (24 Eyl 2026): platform adı EGEMED.
+
 Durum: Kabul
 Kabul eden: depo sahibi (canlı oturum "c yapalım"), 2026-09-23
 
@@ -12,7 +14,7 @@ Mevcut simülatörler çalışan vanilla JS/TS uygulamalardır (Opaca 119 testli
 Vite+TS; Ausculta Vite+TS; Pulse düz JS, ~30 bin satır toplam).
 
 ## Öneri
-- EGEMED CLIX tek React ürünü; üç simülatör üç rota/modül. Kabuk çerçevesi (üst
+- EGEMED tek React ürünü; üç simülatör üç rota/modül. Kabuk çerçevesi (üst
   bar/alt sekme, yönlendirme, i18n, erişilebilirlik) React + @egemed/ui ile yazılır.
 - Simülatör motorları (EKG üretimi, oskültasyon ses mantığı, görüntü işaretleme)
   davranış değişmeden vanilla/TS modül olarak korunur; React host bileşenlerinden

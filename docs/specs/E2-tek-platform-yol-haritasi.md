@@ -6,14 +6,14 @@ Durum: Uygulama planı. ADR-006 kabul edildi; kimlik kararı ADR-007 (Önerildi)
 
 - Tek React kabuğu; Pulse, Ausculta ve Opaca ayrı rotalar, ayrı durum ve ayrı lazy modüllerdir. Motorları davranışları korunarak taşınır. Simler kendi başlarına başlatılıp sonlandırılabilir; bir simin durumu diğerine aktarılmaz.
 - Kabuk, sim ekranları ve admin ekranları `@egemed/ui` ile `@egemed/tokens` ailesini kullanır. Simülatörün klinik etkileşimleri kendine özgü kalabilir; tipografi, navigasyon, kart, diyalog, odak ve erişilebilirlik kuralları ortaktır. Referans: `egemed-sim-ui-ux-framework`.
-- Öğrenci deneyimi kurum Moodle/LTI bağlamında çalışır. Not, ödev ve ders yönetimi Moodle'da kalır. xAPI ifadesi tek `SimulatorId` taşır ve kurum LRS'sine gider; CLIX ifade depolamaz.
+- Öğrenci deneyimi kurum Moodle/LTI bağlamında çalışır. Not, ödev ve ders yönetimi Moodle'da kalır. xAPI ifadesi tek `SimulatorId` taşır ve kurum LRS'sine gider; EGEMED ifade depolamaz.
 - Admin alanı öğrenci simlerinden ayrıdır. Yetki sunucuda doğrulanır; arayüzde menü gizleme güvenlik sınırı sayılmaz. Kurum kimliği ve rol kaynağı ADR-007 (Önerildi) ile yeniden tanımlanır; ayrıntı `docs/specs/E3-kullanici-yonetimi.md`.
 
 ## Karar kapıları
 
-1. **K1 Kimlik ve admin verisi:** **ADR-007 ile yeniden tanımlandı** (Önerildi). CLIX kendi kullanıcı kaydını tutar; kullanıcılar admin tarafından tek tek ve toplu kaydedilir; üretim girişi kurum SSO'sudur ve CLIX parola saklamaz. Rol modeli yalnız `admin` ve `kullanici`'dir; ek roller ve kurum/birim kapsamlı yetki park edildi (E3 §b). Oyunlaştırma verisi kullanıcı+sim başına CLIX veritabanındadır ve üç simde de vardır (Opaca, Pulse, Ausculta); rozet kataloğu ve hedefler sim başına farklıdır. Kullanıcı ilerlemesini modül içinden ve platform dashboard'undan sim sekmeleriyle görür; simler arası toplam yoktur. xAPI ifadeleri kurum LRS'sine gitmeye devam eder ve aktör opak kalır (ADR-005'in xAPI kısmı geçerli). Ayrıntı ve açık insan kararları: `docs/specs/E3-kullanici-yonetimi.md`. ADR-007 kabul edilmeden kimlik uygulama görevleri Running'e alınmaz.
+1. **K1 Kimlik ve admin verisi:** **ADR-007 ile yeniden tanımlandı** (Önerildi). EGEMED kendi kullanıcı kaydını tutar; kullanıcılar admin tarafından tek tek ve toplu kaydedilir; üretim girişi kurum SSO'sudur ve EGEMED parola saklamaz. Rol modeli yalnız `admin` ve `kullanici`'dir; ek roller ve kurum/birim kapsamlı yetki park edildi (E3 §b). Oyunlaştırma verisi kullanıcı+sim başına EGEMED veritabanındadır ve üç simde de vardır (Opaca, Pulse, Ausculta); rozet kataloğu ve hedefler sim başına farklıdır. Kullanıcı ilerlemesini modül içinden ve platform dashboard'undan sim sekmeleriyle görür; simler arası toplam yoktur. xAPI ifadeleri kurum LRS'sine gitmeye devam eder ve aktör opak kalır (ADR-005'in xAPI kısmı geçerli). Ayrıntı ve açık insan kararları: `docs/specs/E3-kullanici-yonetimi.md`. ADR-007 kabul edilmeden kimlik uygulama görevleri Running'e alınmaz.
 2. **K2 xAPI profili:** `PROFILE_IRI`, activity base, `terminated` fiili, opak aktör kaynağı ve olay sözlüğü insan tarafından kabul edilir. K2 geçmeden üretim xAPI istemcisi/sim olay eşlemesi Running'e alınmaz.
-3. **K3 LRS yolu:** tarayıcıdan doğrudan iletim veya API vekili; sır dağıtımı, token süresi, CORS ve kurum LRS yetkileri kararlaştırılır. Öneri: kısa ömürlü kurum yetkisiyle API vekili; CLIX veritabanında ifade/yeniden deneme kuyruğu yok.
+3. **K3 LRS yolu:** tarayıcıdan doğrudan iletim veya API vekili; sır dağıtımı, token süresi, CORS ve kurum LRS yetkileri kararlaştırılır. Öneri: kısa ömürlü kurum yetkisiyle API vekili; EGEMED veritabanında ifade/yeniden deneme kuyruğu yok.
 4. **K4 Admin yetkileri:** iki rollü yetki matrisi (`admin`, `kullanici`) E3 §b'dedir; kimlerin kullanıcı rolü atayacağı ve ilk `admin` kurulum tohumu kurumca onaylanır. `platform_admin`, `kurum_admin`, `egitmen`, `denetci` ve içerik yöneticisi rolleri ile kurum/birim kapsamlı yetki park edildi; şemada/API'de/ekranda uygulanmaz.
 
 ## Alınan kararlar (23 Eylül 2026)
@@ -55,7 +55,7 @@ Her kod görevi tek paket/uygulama ve yaklaşık 400 satır diff hedefler. Sözl
 | 3 | T18a… Pulse portu | EKG motoru, animasyon/zamanlayıcı temizliği, test iskeleti; çalışan rota; oyunlaştırma dilimi Opaca sonrası (`packages/gamification-core` tüketicisi, kendi rozet/hedefleri) | T14b, T20 |
 | 4 | T22 xAPI istemcisi | Yapılandırılmış endpoint/kimlik, gönderim, ağ hatası ve tekrar deneme politikası; sır sızdırma testi | K2, K3 |
 | 4 | T23 Sim xAPI adaptörleri | Her simin olaylarını profildeki fiillere ayrı eşle; kodlu yanıt, opak aktör, tek `SimulatorId` | T21, T22, çalışan simler |
-| 4 | T24 LRS entegrasyon testi | Geliştirme LRS'sine gerçek ifade; başarılı ve hatalı iletim; CLIX'te kayıt tutulmadığını doğrula | T23 |
+| 4 | T24 LRS entegrasyon testi | Geliştirme LRS'sine gerçek ifade; başarılı ve hatalı iletim; EGEMED'de kayıt tutulmadığını doğrula | T23 |
 | 5 | T25 Kimlik ve yetki sözleşmesi | İki rollü (`admin`, `kullanici`) kimlik/yetki sözleşmesi, API kontrolü; rol değişimi ve erişim reddi testleri. Ayrıntı: E3 §a–§b, §d; dilim T60 | K1, K4 |
 | 5 | T33a Giriş metinleri | Admin ve test öğrenci girişinin Türkçe i18n anahtarları; ortak hata/yardım metni | T20 |
 | 5 | T33b Giriş ekranları | Masaüstü 50/50 sol logo/marka/slogan, sağ form; mobil dikey, 360/768/1440 ve klavye; gerçek auth iddiası yok | T33a merge |
@@ -92,7 +92,7 @@ Opaca kaynağı zaten React+TS'tir. T15 ekranları yeniden React'e yazmaz; mevcu
 ## Admin ekran haritası
 
 - **Özet:** kurum/sim erişilebilirliği, son entegrasyon hataları, bekleyen yönetim işleri; bireysel öğrenci puanı yok.
-- **Kullanıcılar:** CLIX kullanıcı kaydında arama/filtreleme, rol görüntüleme, davet/etkinleştirme, toplu içe aktarma; ayrıntı E3 §e.
+- **Kullanıcılar:** EGEMED kullanıcı kaydında arama/filtreleme, rol görüntüleme, davet/etkinleştirme, toplu içe aktarma; ayrıntı E3 §e.
 - **Roller ve erişim:** iki rollü matris (`admin`, `kullanici`), kişi bazlı sim erişimi, birim sınıflandırması (dönem/grup), yetki değişikliği onayı.
 - **Simülatörler ve içerik:** modül durumu, sürüm, görünürlük, içerik ataması.
 - **Entegrasyonlar:** Moodle/LTI ve LRS bağlantı sağlığı, anahtarların yalnız durumu; sır değeri ekranda gösterilmez.
@@ -101,7 +101,7 @@ Opaca kaynağı zaten React+TS'tir. T15 ekranları yeniden React'e yazmaz; mevcu
 
 ## Yetki matrisi (ADR-007 ile güncellendi)
 
-Bu matris K4 insan onayına dek uygulama yetkisi değildir. Tam matris ve kurallar `docs/specs/E3-kullanici-yonetimi.md` §b'dedir. CLIX'te yerel parola ve ifade okuma API'si yoktur; kullanıcı listesi CLIX kullanıcı kaydındadır (ADR-007).
+Bu matris K4 insan onayına dek uygulama yetkisi değildir. Tam matris ve kurallar `docs/specs/E3-kullanici-yonetimi.md` §b'dedir. EGEMED'de yerel parola ve ifade okuma API'si yoktur; kullanıcı listesi EGEMED kullanıcı kaydındadır (ADR-007).
 
 | Rol | Görür / yapar | Göremez |
 |---|---|---|
@@ -110,7 +110,7 @@ Bu matris K4 insan onayına dek uygulama yetkisi değildir. Tam matris ve kurall
 
 `platform_admin`, `kurum_admin`, `egitmen`, `denetci`, içerik yöneticisi, platform operasyonu ve destek rolleri ile kurum/birim kapsamlı yetki park edildi (E3 §b "Park edilenler"); şemada/API'de/ekranda uygulanmaz. `institutions`/`units` yalnız sınıflandırma/filtredir (dönem/grup); tek kurum varsayımı geçerlidir.
 
-Admin UI rolü yalnız sunum için kullanır; her API isteği rolü sunucuda yeniden doğrular. Kimlik/kullanıcı API taslağı E3 §d'dedir. Entegrasyon odaklı API taslağı: `GET /admin/health`, `GET/PUT /admin/integrations/:id`, `GET/PUT /admin/modules/:simId`, `GET/PUT /admin/role-mappings`, `GET /admin/audit`. Gizli değerler yalnız yazılır, okuma yanıtında dönmez. Kurum dizini vekâleti isteğe bağlı entegrasyondur; kullanıcı kaydı CLIX'tedir (ADR-007).
+Admin UI rolü yalnız sunum için kullanır; her API isteği rolü sunucuda yeniden doğrular. Kimlik/kullanıcı API taslağı E3 §d'dedir. Entegrasyon odaklı API taslağı: `GET /admin/health`, `GET/PUT /admin/integrations/:id`, `GET/PUT /admin/modules/:simId`, `GET/PUT /admin/role-mappings`, `GET /admin/audit`. Gizli değerler yalnız yazılır, okuma yanıtında dönmez. Kurum dizini vekâleti isteğe bağlı entegrasyondur; kullanıcı kaydı EGEMED'dedir (ADR-007).
 
 ## Doğrulama ve denetim
 

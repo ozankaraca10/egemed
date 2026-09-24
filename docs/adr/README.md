@@ -1,6 +1,6 @@
 # Mimari karar kayıtları (ADR)
 
-Bu dizin EGEMED CLIX mimari kararlarının taslaklarını barındırır. Taslaklar
+Bu dizin EGEMED mimari kararlarının taslaklarını barındırır. Taslaklar
 insan onayına sunulur; öneri metni karar değildir.
 
 | ADR | Konu | Durum |

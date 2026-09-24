@@ -5,7 +5,7 @@ Kabul eden: depo sahibi (canlı oturum), 2026-09-23
 Tarih: 2026-09-23
 
 ## Bağlam
-EGEMED CLIX; web kabuğu, API, paylaşılan paketler ve üç bağımsız simülatörden
+EGEMED; web kabuğu, API, paylaşılan paketler ve üç bağımsız simülatörden
 oluşur. T01 iskeleti pnpm + Turborepo monorepo kurdu. Simülatörlerin veri ve
 sunum bağımsızlığı korunmalı; buna karşın kabuk, API ve paylaşılan paketler tek
 sürüm çizgisinde ilerlemelidir.

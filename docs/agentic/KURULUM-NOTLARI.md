@@ -89,7 +89,7 @@ Kullanıcının açık yönlendirmesiyle Claude Code kotası bitince `[agents].p
 
 ## 23 Eylül 2026 — OpenCode manuel orkestrasyon (Codex kotası sonrası)
 Kullanıcı yönlendirmesi: Codex kotası bitince planlama, ajan koşturma ve review EGEMED
-CLIX ana OpenCode oturumunda yürür. Bu oturumda uygulanan geçici işletim biçimi:
+ana OpenCode oturumunda yürür. Bu oturumda uygulanan geçici işletim biçimi:
 - Faz geçişleri AGTX kuyruğu yerine doğrudan görev veritabanında (`tasks.status`) güncellendi;
   tmux ajan doğurulmadı. Neden: tmux sunucusu ölüydü, T02'nin yetim OpenCode süreci
   (PID 30493) kapatıldı; T02 insan tarafından zaten merge edilmişti (f264644), veritabanı

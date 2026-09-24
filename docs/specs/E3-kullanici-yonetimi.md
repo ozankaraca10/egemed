@@ -11,15 +11,15 @@ platform), ADR-007 (kimlik ve kullanıcı verisi), E2 K1/K4,
 
 Kapsam notu: Simülatör verileri birleştirilmez; her oyunlaştırma kaydı tek
 `sim_id` taşır. Ders, ödev ve not Moodle'da kalır. xAPI ifadeleri kurum
-LRS'sine gider; CLIX ifade saklamaz (ADR-004).
+LRS'sine gider; EGEMED ifade saklamaz (ADR-004).
 
 ## a. Kimlik akışı
 
 ### İlkeler
 
-- CLIX kendi kullanıcı kaydını tutar; kullanıcı **admin tarafından** tek tek
+- EGEMED kendi kullanıcı kaydını tutar; kullanıcı **admin tarafından** tek tek
   veya toplu kaydedilir. Kendi kendine kayıt (self-signup) yoktur.
-- Üretimde giriş tipi **SSO**'dur (kurum kimlik sağlayıcısı). CLIX parola
+- Üretimde giriş tipi **SSO**'dur (kurum kimlik sağlayıcısı). EGEMED parola
   saklamaz, parola sıfırlama akışı sunmaz.
 - Tasarım sağlayıcıdan bağımsızdır: SSO protokolü (OIDC / SAML 2.0 / CAS) açık
   insan kararıdır (§i). Akış, protokol adaptörünün arkasında aynıdır.
@@ -815,7 +815,7 @@ bileşeni" satırı bunu yazar.
 ```
 360 px (tek sütun)                        768/1440 px
 ┌──────────────────────────────┐          ┌─────────────────────────────────────────────┐
-│ EGEMED CLIX           [☰]    │          │ EGEMED CLIX                    [Örnek Öğr.] │
+│ EGEMED                [☰]    │          │ EGEMED                         [Örnek Öğr.] │
 │ [Opaca][Pulse][Ausculta]     │          │ [Opaca] [Pulse] [Ausculta]                  │
 │ ┌──────────────────────────┐ │          │ ┌───────────────────┐ ┌───────────────────┐ │
 │ │ XP 1450                  │ │          │ │ XP 1450           │ │ Seviye 4          │ │

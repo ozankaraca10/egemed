@@ -1,4 +1,4 @@
-# EGEMED CLIX — Codex devir teslim notu (23 Eylül 2026, akşam)
+# EGEMED — Codex devir teslim notu (23 Eylül 2026, akşam)
 
 > Bu belge süreci **Codex (gpt-6-astra)**'e devrediyor. Görev: ADR-006 hibrit
 > modelini hayata geçirmek — tek React platformu, içinde üç simülatör modülü;

@@ -1,6 +1,6 @@
-# EGEMED CLIX ajan kuralları
+# EGEMED ajan kuralları
 
-EGEMED CLIX, Pulse, Ausculta ve Opaca simülatörlerini tek React platformu içinde ayrı modüller olarak sunan mobil uyumlu klinik öğrenme platformudur (ADR-006; eski SCORM/iframe modelinin yerine geçer). Simülatör verileri hiçbir yüzeyde birleştirilmez; öğrenci verisi kurum altyapısında kalır; ders, ödev ve not defteri Moodle'dadır.
+EGEMED, Pulse, Ausculta ve Opaca simülatörlerini tek React platformu içinde ayrı modüller olarak sunan mobil uyumlu klinik öğrenme platformudur (ADR-006; eski SCORM/iframe modelinin yerine geçer). Simülatör verileri hiçbir yüzeyde birleştirilmez; öğrenci verisi kurum altyapısında kalır; ders, ödev ve not defteri Moodle'dadır.
 
 ## Harita
 `apps/shell` web kabuğu; `apps/api` API; `sims/` bağımsız simülatörler; `packages/tokens`, `ui`, `xapi-client`, `xapi-profile`, `gamification-core`, `contracts`; `infra/`; `docs/adr`, `specs`, `agentic`, `legacy`.
