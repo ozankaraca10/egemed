@@ -63,6 +63,10 @@ export type { ModeCard, ModeCardId } from "./ui/modes";
 export { HEART_PHASES, HEART_REGIONS, highlightedHeartRegions, isHeartRegionActive } from "./ui/sim/heart";
 export type { HeartPhase, HeartRegion } from "./ui/sim/heart";
 export { heartMarkup } from "./ui/sim/heartMarkup";
+export { coronaryParticlePositions, drawHeartCanvas, observeHeartCanvas } from "./ui/sim/heartCanvas";
+export type {
+  CoronaryParticle, HeartCanvasContext, HeartCanvasOptions, HeartCanvasSize, HeartResizeObserver,
+} from "./ui/sim/heartCanvas";
 export { createMemoryPersistence } from "./persistence/memory";
 export { MAX_PERSISTENCE_BYTES, utf8ByteLength } from "./persistence/policy";
 export { PULSE_LEGACY_STORAGE_KEYS, PULSE_STORAGE_KEY } from "./persistence/types";
