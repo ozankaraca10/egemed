@@ -152,7 +152,7 @@ width: 190px; flex-shrink: 0;
 .eg-sim-opaca .brand-card p {
 margin: 0; font-size: var(--fs-sm); color: var(--ink-700); line-height: 1.5;
 }
-@media (max-width: 767px) {
+@media (max-width: 720px) {
 .eg-sim-opaca .brand-card {
 flex-direction: column; text-align: center;
 }
@@ -348,7 +348,7 @@ display: block; font-size: var(--fs-lg); color: var(--navy-800); line-height: 1.
 .eg-sim-opaca .why-box span {
 font-size: var(--fs-xs); color: var(--ink-600); line-height: 1.3; display: block; margin-top: 2px;
 }
-@media (max-width: 767px) {
+@media (max-width: 720px) {
 .eg-sim-opaca .why-grid {
 grid-template-columns: 1fr;
 }
@@ -365,7 +365,7 @@ position: relative; z-index: 1; margin: auto; width: 100%; max-width: 1020px; pa
 .eg-sim-opaca .hero-logo {
 width: min(640px, 86vw); height: auto; margin-bottom: 0; filter: drop-shadow(0 12px 26px rgba(18,58,107,.13));
 }
-@media (max-width: 767px) {
+@media (max-width: 720px) {
 .eg-sim-opaca .hero-logo {
 width: min(480px, 86vw);
 }
@@ -680,7 +680,7 @@ width: auto; flex: 1; min-width: 0; padding: 0 2px;
 font-size: var(--fs-xs); text-align: center;
 }
 }
-@media (max-width: 767px) {
+@media (max-width: 720px) {
 .eg-sim-opaca .footer-copy {
 display: none;
 }
@@ -816,7 +816,7 @@ display: none;
 display: none;
 }
 }
-@media (max-width: 767px) {
+@media (max-width: 720px) {
 .eg-sim-opaca .why-grid {
 grid-template-columns: 1fr;
 }
@@ -827,7 +827,7 @@ flex-direction: column; text-align: center;
 width: 220px;
 }
 }
-@media (max-width: 767px) {
+@media (max-width: 720px) {
 .eg-sim-opaca .hero-logo {
 width: min(480px, 86vw);
 }
@@ -837,7 +837,7 @@ width: min(480px, 86vw);
 width: min(380px, 86vw);
 }
 }
-@media (max-height: 820px) and (min-width: 768px) {
+@media (max-height: 820px) and (min-width: 721px) {
 .eg-sim-opaca .hero-logo {
 width: min(360px, 52vw);
 }
@@ -946,7 +946,7 @@ display: none;
 display: none;
 }
 }
-@media (max-width: 767px) {
+@media (max-width: 720px) {
 .eg-sim-opaca .footer-sub {
 display: none;
 }
@@ -959,7 +959,7 @@ position: relative; z-index: 1; width: min(880px, 94vw);
 .eg-sim-opaca .start-card-inner {
 position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; width: 100%;
 }
-@media (max-height: 820px) and (min-width: 768px) {
+@media (max-height: 820px) and (min-width: 721px) {
 .eg-sim-opaca .hero-logo {
 width: min(360px, 52vw);
 }
@@ -1020,6 +1020,6 @@ flex: 0 1 auto;
 }
 .eg-sim-opaca .eg-sim-toolbar__spacer { flex: 1; }
 .eg-sim-opaca .eg-sim-toolbar .eg-header-chip { color: var(--blue-100); }
-@media (max-width: 767px) {
+@media (max-width: 720px) {
   .eg-sim-opaca .eg-sim-toolbar { padding: 6px 10px; gap: 6px; }
 }

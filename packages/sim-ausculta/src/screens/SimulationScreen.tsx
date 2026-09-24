@@ -11,7 +11,7 @@ import { RegionChipList } from "../ui/RegionChips";
 import { ConfirmModal } from "../ui/ConfirmModal";
 import { FeedbackCard, QuestionCard } from "../ui/Questions";
 import { Toolbar, ToolbarAudioProvider, type ToolbarAudio } from "../ui/Toolbar";
-import { EcgDeco, fillScale, Footer, touchTarget } from "../ui/chrome";
+import { EcgDeco, Footer, touchTarget } from "../ui/chrome";
 import { IconArrowRight, IconChevronRight, IconDoc, IconInfo } from "../ui/icons";
 import { NOOP_MODAL_ENV, type ModalEnv } from "../ui/modal-env";
 import {
@@ -559,7 +559,7 @@ function CaseEndCard({
           return (
             <div className="ce-bar-row" key={row.key}>
               <span>{row.label}</span>
-              <span className="ce-bar"><i style={fillScale(pct)} /></span>
+              <span className="ce-bar"><i style={{ width: `${pct}%` }} /></span>
               <span className="ce-pct">%{pct}</span>
             </div>
           );

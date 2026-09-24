@@ -3,7 +3,7 @@
 EGEMED, Pulse, Ausculta ve Opaca simülatörlerini tek React platformu içinde ayrı modüller olarak sunan mobil uyumlu klinik öğrenme platformudur (ADR-006; eski SCORM/iframe modelinin yerine geçer). Simülatör verileri hiçbir yüzeyde birleştirilmez; öğrenci verisi kurum altyapısında kalır; ders, ödev ve not defteri Moodle'dadır.
 
 ## Harita
-`apps/shell` React web kabuğu; `apps/api` Hono + PostgreSQL API (migrations); `packages/sim-opaca`, `sim-pulse`, `sim-ausculta` simülatörleri; `packages/sim-host`, `gamification-core`, `contracts`, `api-client`, `tokens`, `ui`, `xapi-client`, `xapi-profile`; `e2e/` testleri ve `e2e-artifacts/` çıktıları; `infra/` geliştirme, `infra/prod/` üretim; `docs/adr`, `specs`, `agentic`, `ops`, `audits`, `legacy`; `DESIGN.md` / `PRODUCT.md` ürün ve tasarım bağlamı; `.claude/`, `.agents/`, `.opencode/` Impeccable beceri dosyaları.
+`apps/shell` React web kabuğu; `apps/api` Hono + PostgreSQL API (migrations); `packages/sim-opaca`, `sim-pulse`, `sim-ausculta` simülatörleri; `packages/sim-host`, `gamification-core`, `contracts`, `api-client`, `tokens`, `ui`, `xapi-client`, `xapi-profile`; `e2e/` testleri ve `e2e-artifacts/` çıktıları; `infra/` geliştirme, `infra/prod/` üretim; `docs/adr`, `specs`, `agentic`, `ops`, `audits`, `legacy`.
 
 ## Komutlar
 `pnpm i`; `pnpm turbo lint typecheck test`; `pnpm e2e:mobile` (tekrarlanabilir özet ve ekran görüntüleri `e2e-artifacts/<run-id>/` altına yazılır); `pnpm dev`; `pnpm --filter @egemed/api migrate:up`; `pnpm --filter @egemed/api seed:admin`; `pnpm --filter @egemed/sim-opaca sync:xray`; `pnpm --filter @egemed/sim-ausculta sync:audio`.
@@ -24,9 +24,3 @@ Her görev tek paket/uygulama ve yaklaşık en fazla 400 satır diff hedefler. A
 Uzun bağlam ve yüksek token gerektiren istisna görevlerde, insan triage sonrası Cursor CLI Grok 4.7 `high` kullanılabilir. AGTX faz ajanı proje düzeyinde olduğu için bu görevler ayrı worktree içinde `scripts/agtx/cursor-grok.sh` ile elle yürütülür; varsayılan Running OpenCode DeepSeek V4.1 Flash `max` kalır.
 
 Claude Code kotası doluyken AGTX Planning Cursor CLI Grok 4.7 `high` ile yürür. Kritik ADR, xAPI profili, güvenlik/KVKK ve paketler arası sözleşme kararlarında Codex GPT-6 Astra ikinci görüş verir; bulgular karar kaydında görünür ve insan onayı bekler. Review fazı Codex Astra ile yürür; Astra kendi bulgularını raporlar, merge etmez.
-
-## Test kuralları (depo sahibi, 24 Eylül 2026)
-- Kodu yazdıktan sonra birim testi yazma.
-- Tek test mekanizması olarak E2E testlerini güçlü biçimde tercih et. Karmaşık özelliklerin çalıştığını onlarla doğrula. E2E testlerinin sonunda doğrulanabilir ve tekrarlanabilir bir artefakt üret (ör. ekran görüntüleri, axe raporu, JSON sonuç özeti).
-- Bir sistemi yalıtılmış test etmen gerekiyorsa önce başarısız olabileceği tüm yolları yaz, sonra kodu yaz.
-- Mevcut istisnalar (silinmez): simülatör motorlarının kaynakla birebirliğini kanıtlayan altın/diferansiyel testler, kaynak depolardan taşınan regresyon testleri, güvenlik/yetki, veritabanı migration ve sözleşme (şema) doğrulama testleri, yaşam döngüsü/sızıntı testleri.

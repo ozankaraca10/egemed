@@ -18,7 +18,7 @@ export interface ModeSelectScreenProps {
   readonly embedded?: boolean;
 }
 
-/** Mod seçimi: İnceleme / Uygulama / Değerlendirme. Öneri kilidi gönderimi kapatmaz. */
+/** Mod seçimi: Öğrenme / Uygulama / Değerlendirme. Öneri kilidi gönderimi kapatmaz. */
 export function ModeSelectScreen({ embedded = false }: ModeSelectScreenProps): JSX.Element {
   const { state, dispatch, now } = useStore();
   const pick = (mode: Mode) => {
@@ -58,7 +58,7 @@ export function ModeSelectScreen({ embedded = false }: ModeSelectScreenProps): J
             <ModeCard
               kind="learn"
               icon={<IconGraduation />}
-              title="İnceleme Modu"
+              title="Öğrenme Modu"
               text={`${libraryCount} ses sınıfını metafor, dalga formu ve klinik bilgiyle sınırsız dinleyerek keşfedin.`}
               items={["Rehberli öğrenme", "Ses metaforları", "Sınırsız dinleme"]}
               cta="Öğrenmeye başla"
@@ -158,7 +158,7 @@ export function ModeCard({
       <div className="ic">{icon}</div>
       {recommendLocked ? (
         <p className="mode-lock-hint" role="status">
-          <IconLock width={14} height={14} aria-hidden="true" /> Önce inceleme modunda dinleme sırasını oturtmanız önerilir.
+          <IconLock width={14} height={14} aria-hidden="true" /> Önce öğrenme modunda dinleme sırasını oturtmanız önerilir.
         </p>
       ) : null}
       <h3>{title}</h3>

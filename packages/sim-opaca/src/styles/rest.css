@@ -431,7 +431,7 @@
 .eg-sim-opaca .modal-card{ background: var(--card); color: var(--ink-900); border-radius: var(--r-lg); box-shadow: 0 24px 60px rgba(9,26,52,.28); width: min(680px, 100%); max-height: min(78vh, 640px); display: flex; flex-direction: column; overflow: hidden; }
 .eg-sim-opaca .modal-head{ display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 14px 16px; border-bottom: 1px solid var(--border); }
 .eg-sim-opaca .modal-head h3{ margin: 0; font-size: var(--fs-lg); color: var(--navy-800); }
-.eg-sim-opaca .modal-close{ min-width: 44px; min-height: 44px; width: 44px; height: 44px; border-radius: var(--r-md); border: 1px solid var(--border-strong); background: var(--card); color: var(--ink-600); display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; }
+.eg-sim-opaca .modal-close{ width: 34px; height: 34px; border-radius: var(--r-md); border: 1px solid var(--border-strong); background: var(--card); color: var(--ink-600); display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; }
 .eg-sim-opaca .modal-close:hover{ background: var(--card-soft); color: var(--ink-900); }
 .eg-sim-opaca .modal-close svg{ width: 18px; height: 18px; }
 .eg-sim-opaca .modal-body{ padding: 14px 16px var(--sp-4); overflow-y: auto; }
@@ -490,7 +490,7 @@
 .eg-sim-opaca .credit-group .credit-people{ flex-direction: column; align-items: stretch; }
 .eg-sim-opaca .credit-group .credit-person{ justify-content: flex-start; }
 .eg-sim-opaca .link-btn{ background: none; border: 0; padding: 0; color: inherit; text-decoration: underline; cursor: pointer; font: inherit; font-weight: 600; }
-.eg-sim-opaca .icon-btn{ display: inline-flex; align-items: center; justify-content: center; min-width: 44px; min-height: 44px; width: 44px; height: 44px; border-radius: var(--r-sm); border: 1px solid var(--border); background: var(--card); color: var(--ink-700); cursor: pointer; }
+.eg-sim-opaca .icon-btn{ display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: var(--r-sm); border: 1px solid var(--border); background: var(--card); color: var(--ink-700); cursor: pointer; }
 .eg-sim-opaca .icon-btn:disabled{ opacity: .4; cursor: not-allowed; }
 .eg-sim-opaca .example-nav{ display: inline-flex; align-items: center; gap: 8px; }
 .eg-sim-opaca .example-count{ font-size: var(--fs-sm); font-weight: 600; color: var(--ink-700); min-width: 11ch; text-align: center; font-variant-numeric: tabular-nums; }

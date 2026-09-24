@@ -3,8 +3,6 @@ import "@egemed/tokens/ausculta.css";
 import "./styles/tokens.css";
 import "./styles/base.css";
 import "./styles/components.css";
-import "./styles/responsive.css";
-import "./styles/progress.css";
 import "./styles/progress.css";
 
 import type { SimulatorId } from "@egemed/sim-host";
