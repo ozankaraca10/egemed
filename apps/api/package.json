@@ -8,6 +8,8 @@
     "start": "node --import ./ts-register.mjs src/server.ts",
     "migrate:up": "node-pg-migrate up --migrations-dir migrations",
     "migrate:down": "node-pg-migrate down --migrations-dir migrations",
+    "seed:admin": "node --import ./ts-register.mjs src/seed/main.ts admin",
+    "seed:dev": "node --import ./ts-register.mjs src/seed/main.ts dev",
     "test:db": "vitest run --config vitest.db.config.ts",
     "typecheck": "tsc --noEmit"
   },

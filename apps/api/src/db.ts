@@ -18,7 +18,7 @@ export interface Db {
   transaction<T>(work: (query: Db["query"]) => Promise<T>): Promise<T>;
 }
 
-export function createDb(connectionString: string): Db {
+export function createDb(connectionString: string): Db & { close(): Promise<void> } {
   const pool = new pg.Pool({ connectionString });
   const query: Db["query"] = async (text, params = []) => {
     const result = await pool.query(text, params);
@@ -26,6 +26,10 @@ export function createDb(connectionString: string): Db {
   };
   return {
     query,
+    /** T68 — kısa ömürlü tohum CLI'ı iş bitince havuzu kapatır. */
+    async close() {
+      await pool.end();
+    },
     async transaction(work) {
       const client = await pool.connect();
       try {
