@@ -205,6 +205,8 @@ const simErrorKeys: TrKey[] = [
   "sims.error.body",
   "sims.error.retry",
   "sims.loading",
+  "sims.access.none",
+  "sims.access.denied",
 ];
 
 const homeProgressKeys: TrKey[] = [
@@ -220,6 +222,9 @@ const homeProgressKeys: TrKey[] = [
   "home.progress.error.title",
   "home.progress.error.body",
   "home.progress.error.retry",
+  "home.progress.leaderboardVisible",
+  "home.progress.leaderboardVisible.hint",
+  "home.progress.leaderboardVisible.error",
 ];
 
 const howKeys: TrKey[] = [

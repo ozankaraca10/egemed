@@ -423,10 +423,23 @@ export function createApiShellDataSources(client: ApiClient): ShellDataSources {
     },
   };
 
+  const apiPreferences = {
+    async getVisible(): Promise<boolean> {
+      return (await client.preferences.getPreferences()).data.leaderboardVisible;
+    },
+    async setVisible(visible: boolean): Promise<boolean> {
+      return (await client.preferences.setPreferences({ leaderboardVisible: visible })).data.leaderboardVisible;
+    },
+  };
+
   return {
     audit,
     gamification(session: ShellSession | null) {
       return session === null ? emptyProgress : apiProgress;
+    },
+    leaderboardPreferences(session: ShellSession | null) {
+      if (session === null || session.simAccess === null) return null;
+      return apiPreferences;
     },
     imports,
     users,
@@ -470,6 +483,7 @@ export function createBrowserShellDataSources(baseUrl: string): ShellDataSources
     return {
       audit: { list: fail },
       gamification: () => empty,
+      leaderboardPreferences: () => null,
       imports: { apply: fail, template: fail, upload: fail, validate: fail },
       users,
     };

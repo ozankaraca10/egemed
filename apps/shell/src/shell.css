@@ -426,6 +426,7 @@ html, body { margin: 0; }
 .eg-shell-sim--large .eg-shell-sim__logo { height: 8rem; }
 .eg-shell-sim__tagline { margin: 0; color: var(--navy-800); font-weight: 600; }
 .eg-shell-sim__body { margin: 0; color: var(--muted); }
+.eg-shell-sim__noaccess { margin: 0; color: var(--red-600); font-size: var(--fs-sm); font-weight: 700; }
 .eg-shell-sim__link {
   justify-self: start; display: inline-flex; align-items: center; box-sizing: border-box;
   min-height: var(--eg-shell-touch-min); margin-top: var(--sp-1); padding: 0 var(--sp-4);
@@ -476,6 +477,10 @@ html, body { margin: 0; }
   border: 1px solid var(--red-500); border-radius: var(--radius);
 }
 .eg-shell-sim-page__error-title { margin: 0; color: var(--red-600); font-weight: 700; }
+.eg-shell-sim-page__denied {
+  box-sizing: border-box; margin: 0; padding: var(--sp-4); background: var(--red-100);
+  border: 1px solid var(--red-500); border-radius: var(--radius); color: var(--red-600); font-weight: 700;
+}
 .eg-shell-sim-page__retry {
   box-sizing: border-box; display: inline-flex; align-items: center; justify-content: center;
   min-height: var(--eg-shell-touch-min); padding: 0 var(--sp-4);
@@ -526,6 +531,14 @@ html, body { margin: 0; }
 .eg-shell-progress__badges { display: grid; gap: var(--sp-2); }
 .eg-shell-progress__badgesTitle { margin: 0; color: var(--navy-800); font-weight: 700; }
 .eg-shell-progress__badgeList { display: flex; flex-wrap: wrap; gap: var(--sp-2); margin: 0; padding: 0; list-style: none; }
+.eg-shell-progress__optout { display: grid; gap: var(--sp-2); margin-bottom: var(--sp-3); }
+.eg-shell-progress__optoutLabel {
+  display: inline-flex; align-items: center; gap: var(--sp-2); min-height: var(--eg-shell-touch-min);
+  color: var(--navy-900); font-weight: 700;
+}
+.eg-shell-progress__optoutLabel input { width: 1.25rem; height: 1.25rem; }
+.eg-shell-progress__optoutHint { margin: 0; color: var(--muted); font-size: var(--fs-sm); }
+.eg-shell-progress__optoutError { margin: 0; color: var(--red-600); font-size: var(--fs-sm); font-weight: 700; }
 .eg-shell-trust { display: grid; gap: var(--sp-3); margin: 0; padding: 0; list-style: none; }
 .eg-shell-trust__item {
   box-sizing: border-box; padding: var(--sp-4); background: var(--card);

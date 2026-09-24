@@ -24,6 +24,24 @@ export interface SimRouteProps {
    * Sahte geliştirme oturumunda verilmez.
    */
   readonly apiBaseUrl?: string | null;
+  /** API oturumunda sim `simAccess` dışında ise modül mount edilmez. */
+  readonly allowed?: boolean;
+}
+
+function SimAccessDenied({ simId }: { readonly simId: SimulatorId }): JSX.Element {
+  return (
+    <section className="eg-shell-sim-page">
+      <div className="eg-shell-sim-page__bar">
+        <h1 className="eg-shell-sim-page__title">{t(simTitleKey(simId))}</h1>
+        <a className="eg-shell-sim-page__exit" href={routeHref("simulators")}>
+          {t("shell.nav.simulators")}
+        </a>
+      </div>
+      <p className="eg-shell-sim-page__denied" role="status">
+        {t("sims.access.denied")}
+      </p>
+    </section>
+  );
 }
 
 /**
@@ -60,7 +78,12 @@ const SIMS_WITH_OWN_HEADING: ReadonlySet<SimulatorId> = new Set([]);
  * kutusu host'un kardeşidir; yükleniyor/hata sırasında host gizlenmez, boş
  * kalır ve aşama ızgarasında aynı hücreyi paylaşır.
  */
-export function SimRoute({ actorId, apiBaseUrl = null, simId }: SimRouteProps): JSX.Element {
+export function SimRoute({ actorId, allowed = true, apiBaseUrl = null, simId }: SimRouteProps): JSX.Element {
+  if (!allowed) return <SimAccessDenied simId={simId} />;
+  return <SimRouteHost actorId={actorId} apiBaseUrl={apiBaseUrl} simId={simId} />;
+}
+
+function SimRouteHost({ actorId, apiBaseUrl = null, simId }: Omit<SimRouteProps, "allowed">): JSX.Element {
   const containerRef = useRef<SimContainer | null>(null);
   const hostRef = useRef<SimHost | null>(null);
   const [status, setStatus] = useState<SimRouteStatus>("loading");

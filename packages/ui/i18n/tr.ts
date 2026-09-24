@@ -403,6 +403,10 @@ export const tr = {
   "home.progress.error.title": "İlerleme yüklenemedi",
   "home.progress.error.body": "internal_error — ilerlemeniz getirilemedi.",
   "home.progress.error.retry": "Yeniden dene",
+  "home.progress.leaderboardVisible": "Liderlik tablosunda görün",
+  "home.progress.leaderboardVisible.hint":
+    "Kapalıyken diğer öğrencilerin listelerinde görünmezsiniz; kendi sıranızı görmeye devam edersiniz.",
+  "home.progress.leaderboardVisible.error": "Tercih kaydedilemedi.",
   "home.trust.title": "Neden güvenilir?",
   "home.trust.data.title": "Açık ve atıflı veri",
   "home.trust.data.body":
@@ -423,6 +427,8 @@ export const tr = {
   "sims.opaca.tagline": "Radyolojik Görüntüleme Simülatörü",
   "sims.opaca.body": "Akciğer grafisi ve toraks BT'yi sistematik okumayı öğrenin.",
   "sims.open": "Simülatörü aç",
+  "sims.access.none": "Erişim yok",
+  "sims.access.denied": "Bu simülatöre erişiminiz yok",
   "sims.loading": "Simülatör yükleniyor…",
   "sims.error.title": "Simülatör açılamadı",
   "sims.error.body":
