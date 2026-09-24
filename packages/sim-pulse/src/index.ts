@@ -2,6 +2,26 @@ import type { SimulatorId } from "@egemed/sim-host";
 
 export const SIM_ID = "pulse" satisfies SimulatorId;
 
+export { getRootFlag, query, setRootFlag } from "./host/dom";
+export type { PulseRoot } from "./host/dom";
+export { createPulseEventEmitter, PULSE_EVENT_NAMES } from "./host/events";
+export type {
+  PulseEventEmitter,
+  PulseEventListener,
+  PulseEventName,
+  PulseEventPayloads,
+  PulseUnsubscribe,
+} from "./host/events";
+export { createPulseLifecycle } from "./host/lifecycle";
+export type {
+  AbortControllerLike,
+  AbortSignalLike,
+  Disconnectable,
+  EventListenerLike,
+  ListenerTarget,
+  PulseLifecycle,
+} from "./host/lifecycle";
+
 export { BeatEngine } from "./engine/beats";
 export type { AfProfile, Beat, BeatOptions, Checkpoint } from "./engine/beats";
 export { CardiacModel } from "./engine/model";
