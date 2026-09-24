@@ -4,6 +4,9 @@ Durum: **Envanter / öneri.** Ürün kodu değiştirmez; T15b port dilimlerinin 
 girdisidir. Kaynak: ADR-006 (kabul), E2 yol haritası (T19 worktree'si), E1-sim-port, kaynak depo
 `/Users/ozankaraca/Documents/EGEMED CLIX/egemed-opaca` (yerel çalışma kopyası, 2026-09-23).
 
+> **Durum (24 Eyl 2026):** Port tamamlandı ve modül kabukta canlı (`#/sims/opaca`): S1–S24, oyunlaştırma G1–G2 ve
+> CSS dilimleri bitti.
+
 > Not: Görev metninde geçen `docs/specs/E2-tek-platform-yol-haritasi.md` bu worktree'de yoktu;
 > dosya `.agtx/worktrees/T19-platform-roadmap/docs/specs/` altında bulundu ve okundu. E2 tablosuna
 > göre T15a → T14b'ye, T15b → T15a+T20'ye bağlıdır.

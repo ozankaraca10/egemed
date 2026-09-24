@@ -4,6 +4,9 @@ Durum: Envanter, uygulama planına girdi. Kaynak: `/Users/ozankaraca/Documents/E
 @ `3f94259` (ağaç temiz, ölçüm 23 Eylül 2026). İlgili: ADR-006, `docs/specs/E1-sim-port.md`,
 `E2-tek-platform-yol-haritası.md` (T18 satırı), `docs/agentic/CODEX-DEVIR.md` §5–6.
 
+> **Durum (24 Eyl 2026):** Motor, durum, müfredat, kalıcılık, host, controller, çizim, ekranlar ve CSS dilimleri tamam;
+> SimHost adaptörü (S15a) sürüyor. `nextEvent` yığın taşması portta düzeltildi (kaynağa uygulanması insan kararı).
+
 Okuma sınırı korundu: `public/assets/**`, `**/dist/**`, `*.lock`, büyük veri JSON'ları topluca
 okunmadı; `curriculum.js` yalnız uçlar ve sayımlarla incelendi. Kaynak repoya yazılmadı; testler
 geçici kopyada koşuldu.

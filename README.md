@@ -34,13 +34,14 @@ yönetici `#/giris/admin` → `admin` / `egemed`; test öğrencisi `#/giris/test
 | Yol | Ne | Not |
 |---|---|---|
 | `apps/shell` | React 19 + Vite 8 **web kabuğu**: üst bar/alt sekme, hash yönlendirici, ana sayfa (dashboard), simülatörler sayfası, giriş ekranları, `/admin` taslağı, sim rotaları (`#/sims/<id>`) | Metinler `packages/ui/i18n/tr.ts`'ten; renkler `packages/tokens` |
-| `apps/api` | Sunucu (Hono, ADR-002) — **inşa ediliyor**: PostgreSQL migration'ları (T61), sonra oturum/kimlik ve admin API'leri | E3 dilimleri T60–T76 |
+| `apps/api` | Sunucu (Hono, ADR-002): PostgreSQL migration'ları (`migrations/`; append-only denetim tetikleyicisi), oturum/CSRF, admin uçları (`/admin/users`, toplu işlem, CSV içe aktarma, rol, `/admin/audit`), `/me/gamification`, tohumlama, SSO adaptör iskeleti | E3 dilimleri T60–T76 |
 | `packages/sim-host` | **SimHost sözleşmesi**: `mount(target, context) → dispose`, lazy yükleme, epoch iptali, tek etkin oturum | Tüm simler bu sözleşmeyle bağlanır |
 | `packages/sim-opaca` | Opaca modülü (portlanıyor): çekirdek (tipler, geometri, skor, akış, oturum, suspend, reducer, runtime), veri JSON + BT/marka varlıkları, UI (chrome, sorular, modaller, film çekirdeği/bilgi paneli) | Röntgen `public/assets/xray/runtime/` **git dışı** (lisans incelemesi) |
 | `packages/sim-pulse` | Pulse modülü (portlanıyor): EKG motoru (`engine/shapes`, `beats`, `model`) | Kaynak düz JS/yoğun satır; biçimlendirilerek taşınır |
 | `packages/sim-ausculta` | Ausculta modülü (portlanıyor): çekirdek tipler, suspend, puanlama… | Ses motoru sonraki dilimlerde |
 | `packages/gamification-core` | **Sim-bağımsız oyunlaştırma çekirdeği**: XP, seviye, seri, haftalık hedef, zaman (Europe/Istanbul), jenerik rozet motoru, sıralama, ödül, grafik | Rozet kataloğu ve kurallar her simde ayrı (parametre) |
 | `packages/contracts` | Paylaşılan sözleşmeler (zod): kimlik, kullanıcı, CSV içe aktarma, oyunlaştırma, hata kodları | API ve UI aynı şemayı kullanır |
+| `packages/api-client` | Tipli API istemcisi: `contracts` şemalarıyla yanıt doğrulama, CSRF başlığı, oturum/admin/içe aktarma/oyunlaştırma uçları | Kabuk veri kaynakları (admin, dashboard) buradan beslenir |
 | `packages/ui` | Ortak bileşenler (Card, Badge, Tabs, Table, Modal, ModeCard) + **Türkçe sözlük** `i18n/tr.ts` | Tüm arayüz metni buradan |
 | `packages/tokens` | Aile tasarım token'ları (`family-tokens.css`, `opaca.css`) | `egemed-sim-ui-ux-framework` ile birebir |
 | `packages/xapi-profile` | xAPI profili v0 (fiiller, IRI, opak aktör) — **Önerildi**, insan onayı (K2) bekliyor | |
@@ -138,16 +139,23 @@ uygulanması.
 
 ---
 
-## 7. Durum (24 Eylül 2026)
+## 7. Durum (24 Eylül 2026, öğleden sonra)
 
-- **Kabuk:** premium görünüm (lacivert üst bar, kahraman alan, "Nasıl çalışır?", sim kartları, "İlerlemem" sekmeleri, footer),
-  sahte giriş, `/admin` taslağı, üç sim rotası (şimdilik yer tutucu modül). e2e: 77/77 (axe 0 ihlal).
-- **Opaca:** veri + varlıklar; çekirdek S1–S7; UI S8–S11 tamam. Sırada FilmViewer (S12), ekranlar, CSS, SimHost adaptörü, oyunlaştırma.
-- **Pulse:** EKG motoru tamam (şekil, atım, sinyal/snapshot — kaynakla binlerce örnekte birebir). Sırada `nextEvent` hata düzeltmesi,
-  durum/müfredat, kalıcılık, çizim ve ekranlar.
-- **Ausculta:** paket, tipler, suspend tamam; puanlama sürüyor; ses motoru ve ekranlar sırada.
-- **Platform API:** sözleşmeler (T60) tamam; migration'lar (T61) sürüyor; oturum/kimlik, admin API ve ekranları sırada.
-- Bilinen hata: Pulse'ta "Adım" düğmesi ~30 basıştan sonra yığın taşmasıyla donuyor (kaynakta da var); düzeltme portta yapılıyor.
+- **Opaca:** port **tamam** ve kabukta canlı (`#/sims/opaca`): S1–S24 dilimleri, oyunlaştırma G1–G2, kapsamlı CSS; röntgen
+  görselleri git dışı yerel kopyadan sunulur.
+- **Pulse:** motor (şekil, atım, sinyal/snapshot), durum/göç, müfredat, kalıcılık, host, controller, çizim, ekranlar ve CSS
+  tamam; SimHost adaptörü (S15a) sürüyor, ardından kabuk rotası (S15b) gelecek. Müfredattaki T04 kaynak bulgusu testte
+  `it.fails` ile işaretli (insan kararı bekliyor).
+- **Ausculta:** çekirdek, veri/ses, ses motoru (singleton/iptal/sızıntı düzeltmeleri), store/runtime, UI ve ekranlar büyük
+  ölçüde tamam; Sonuç/Kaynaklar (S16), CSS (S17) ve SimHost adaptörü (S18) sırada.
+- **Platform API:** sözleşmeler, migration'lar (append-only denetim tetikleyicisi dahil), Hono iskeleti, oturum/CSRF,
+  `/admin/users` + toplu işlem + CSV içe aktarma + rol ucu, `/admin/audit`, `/me/gamification` ve tohumlama tamam; SSO adaptör
+  iskeleti hazır, protokol kararı bekliyor.
+- **Kabuk:** premium görünüm, EGEMED logosu, giriş görseli, dashboard sekmeleri, admin kullanıcı listesi/formu/içe aktarma;
+  `packages/api-client`; e2e 80 kontrolün 77'si geçiyor.
+- **Bilinenler:** Pulse `nextEvent` hatası portta düzeltildi (kaynağa uygulanması insan kararı). Opaca gömülü rotada intro
+  atlandığı için (S24) e2e'deki `.start-hero-screen` beklentisi güncel değil; üç koşu bu nedenle başarısız (test güncellemesi
+  sırada).
 
 ## CI
 

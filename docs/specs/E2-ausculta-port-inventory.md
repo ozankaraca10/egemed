@@ -5,6 +5,9 @@ Kaynak: `/Users/ozankaraca/Documents/EGEMED CLIX/egemed-ausculta` @ `3d60ef7` (t
 İlişkili: ADR-006 (kabul), `docs/specs/E1-sim-port.md`, T19 `E2-tek-platform-yol-haritasi.md` §Ausculta.
 Bu belgede **[K]** kanıt (okunan dosya:satır), **[V]** varsayım/doğrulanacak bilgi anlamına gelir.
 
+> **Durum (24 Eyl 2026):** Çekirdek, veri/ses, ses motoru (singleton/iptal/sızıntı düzeltmeleri), store/runtime, UI ve
+> ekranlar büyük ölçüde tamam; S16 Sonuç/Kaynaklar, S17 CSS ve S18 SimHost adaptörü sırada.
+
 ## 1. Yöntem ve okuma sınırı
 
 - `public/assets`, `dist`, veri JSON'ları ve lock dosyaları topluca okunmadı; yalnız sayım, boyut ve
