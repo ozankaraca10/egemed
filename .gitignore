@@ -9,4 +9,6 @@ reports/
 coverage/
 *.tsbuildinfo
 
+packages/sim-opaca/public/assets/xray/runtime/
+
 work/

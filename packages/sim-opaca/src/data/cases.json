@@ -1,0 +1,5 @@
+{
+  "version": 1,
+  "note": "Elle yazılmış çekirdek vakalar. Buraya eklenen bir vakanın imageId'si generate-cases.mjs tarafından atlanır (elle yazılan vaka otomatik vakanın yerini alır). Şema: src/core/types.ts CaseDef.",
+  "cases": []
+}

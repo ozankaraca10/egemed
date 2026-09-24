@@ -195,6 +195,14 @@ Dilimler sıralıdır; aynı pakette paralel Running açılmaz.
   taşınır veya `scripts/import-*` hattıyla yeniden üretilir (karar insan).
 - Kabul: `tests/sim-opaca/assets.test.ts` — `images.json`'daki her `runtimeUrl` ve `stack[].frames[]`
   yolu ile `brand` referansları diskte var; eksikse test kırmızı (xray taşınmadan port "bitti" sayılmaz).
+- **Sonuç (T15b-0, 24 Eyl 2026):** Kaynak yerel kopyadan `cp`/`rsync` ile taşındı; içerik okunmadı.
+  `src/data/*.json` 7 dosya/1.714.077 B; `public/brand` 13 dosya/679.055 B; `public/assets/ct`
+  144 dosya/4.000.304 B; `public/assets/xray/runtime` 621 dosya/19.929.040 B (git-dışı, kök
+  `.gitignore` girdisi eklendi). `tools/sync-xray.mjs` (`pnpm --filter @egemed/sim-opaca sync:xray`,
+  `OPACA_SOURCE_DIR` ile kaynak kökü, hedefte silme yok) yeniden kopyalar; `tools/check-assets.mjs`
+  (`check:assets`) 739 benzersiz çalışma zamanı yolu + 4 marka referansını zorunlu doğrular (yerelde
+  **0 eksik**). Kabul testi: 5 test — xray klasörü yokken ilgili grup açık mesajla `skipIf` ile atlanır
+  (4 geçti/1 atlandı), CT ve marka yolları her koşulda kırmızıdır.
 
 ### Zorunlu dilimler (ilk çalışan rota)
 
