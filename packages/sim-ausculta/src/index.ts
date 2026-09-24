@@ -62,6 +62,18 @@ export {
   TERMINOLOGY,
 } from "./data/terminology";
 export type { HeartFindingKey, LungFindingKey } from "./data/terminology";
+export { LOG_LIMIT, LOG_TRIM, createBus } from "./core/events";
+export type { EventBus, SimEventDraft } from "./core/events";
+export {
+  BEST_SCORE_KEY,
+  buildSuspend,
+  initialState,
+  initialTelemetry,
+  loadBestScore,
+  reducer,
+  saveBestScore,
+} from "./core/reducer";
+export type { Action, AppState, BodySex, ReducerSeam, StoragePort } from "./core/reducer";
 export { AUDIO_CONFIG } from "./audio/config";
 export { createAudioEngine } from "./audio/engine";
 export type { AudioEngine, AudioEngineDeps, EngineState } from "./audio/engine";
