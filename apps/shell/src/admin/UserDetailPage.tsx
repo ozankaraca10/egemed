@@ -1,6 +1,7 @@
-import { useEffect, useRef, useState, type JSX } from "react";
+import { useEffect, useState, type JSX } from "react";
 import { Badge, Modal, Tabs, type BadgeTone, type TabItem } from "@egemed/ui";
 import { t, type TrKey } from "@egemed/ui/i18n";
+import { useShellSource } from "../dataSources";
 import { adminUsersHref } from "../routes";
 import { formatTrDateTime } from "./trFormat";
 import {
@@ -290,10 +291,6 @@ export function UserDetailView({
   );
 }
 
-function defaultSource(): UsersDataSource {
-  return createMockUsersSource(DEFAULT_MOCK_SEED);
-}
-
 export interface UserDetailPageProps {
   readonly userId: string;
   /** Geçerli oturumun kimliği; kendi admin rolünü kaldırma engeli için (T73, `App.tsx` `session.actorId` geçirir). */
@@ -314,8 +311,7 @@ const ACTION_TO_STATUS: Partial<Record<UserDetailAction, UserStatus>> = {
  * `UsersDataSource.get`/`update` üzerinden enjekte edilir; çizim `UserDetailView`'dedir.
  */
 export function UserDetailPage({ userId, currentUserId = null, dataSource }: UserDetailPageProps): JSX.Element {
-  const sourceRef = useRef<UsersDataSource | null>(null);
-  if (sourceRef.current === null) sourceRef.current = dataSource ?? defaultSource();
+  const source = useShellSource(dataSource, (sources) => sources.users, () => createMockUsersSource(DEFAULT_MOCK_SEED));
 
   const [status, setStatus] = useState<UserDetailLoadStatus>("loading");
   const [detail, setDetail] = useState<AdminUserDetail | null>(null);
@@ -327,7 +323,7 @@ export function UserDetailPage({ userId, currentUserId = null, dataSource }: Use
   useEffect(() => {
     let active = true;
     setStatus("loading");
-    sourceRef.current?.get(userId).then(
+    source.get(userId).then(
       (found) => {
         if (!active) return;
         if (found === null) {
@@ -364,12 +360,12 @@ export function UserDetailPage({ userId, currentUserId = null, dataSource }: Use
       setActionError(true);
     }
     if (pendingAction === "grantAdmin" || pendingAction === "revokeAdmin") {
-      sourceRef.current?.setRoles(detail.id, toggleRole(detail.roles, "admin"), currentUserId).then(onSuccess, onError);
+      source.setRoles(detail.id, toggleRole(detail.roles, "admin"), currentUserId).then(onSuccess, onError);
       return;
     }
     const status = ACTION_TO_STATUS[pendingAction];
     if (status === undefined) return;
-    sourceRef.current?.update(detail.id, { status }).then(onSuccess, onError);
+    source.update(detail.id, { status }).then(onSuccess, onError);
   }
 
   return (

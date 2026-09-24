@@ -104,4 +104,48 @@ test.describe("API oturumu (dev sağlayıcı)", () => {
     await expect(page).toHaveURL(/#\/giris\/admin$/);
     await expect(page.getByRole("heading", { name: "Yönetici paneli" })).toHaveCount(0);
   });
+
+  test("oluşturulan kullanıcı listede kalır ve yenilemede durur", async ({ page }) => {
+    const username = `t89.${crypto.randomUUID().slice(0, 8)}`;
+    const displayName = "T89 Kalici Kullanici";
+    await page.goto(ADMIN_ENTRY);
+    await signIn(page, "admin");
+    await expect(page).toHaveURL(/#\/admin$/);
+    await page.goto("/#/admin/kullanicilar/yeni");
+    const dialog = page.getByRole("dialog");
+    const textInputs = dialog.locator('input[type="text"]');
+    await textInputs.nth(0).fill(username);
+    await textInputs.nth(1).fill(displayName);
+    await dialog.getByLabel("Birim").selectOption("unit-3");
+    const created = page.waitForResponse(
+      (response) => response.url().includes("/admin/users") && response.request().method() === "POST" && response.ok(),
+    );
+    await dialog.getByRole("button", { name: "Kaydet" }).click();
+    await dialog.getByRole("button", { name: "Onayla" }).click();
+    await created;
+    await expect(page).toHaveURL(/#\/admin\/kullanicilar$/);
+    await page.getByLabel("Ara").fill(username);
+    await expect(page.getByRole("link", { name: displayName }).filter({ visible: true })).toBeVisible();
+    await page.reload();
+    await page.getByLabel("Ara").fill(username);
+    await expect(page.getByRole("link", { name: displayName }).filter({ visible: true })).toBeVisible();
+  });
+
+  test("dashboard gerçek oturumda demo 1450 XP göstermez", async ({ page }) => {
+    const summary = page.waitForResponse(
+      (response) => response.url().includes("/me/gamification") && response.request().method() === "GET" && response.ok(),
+    );
+    await page.goto(STUDENT_ENTRY);
+    await signIn(page, "ogrenci");
+    await expect(page).toHaveURL(/#\/$/);
+    const payload = (await (await summary).json()) as {
+      data?: { sims?: readonly { simId?: string; xp?: number }[] };
+    };
+    const pulseXp = payload.data?.sims?.find((sim) => sim.simId === "pulse")?.xp;
+    expect(pulseXp).not.toBe(1450);
+    expect(JSON.stringify(payload)).not.toContain("1450");
+    await expect(page.getByRole("heading", { name: "İlerlemem" })).toBeVisible();
+    await expect(page.getByText("1450", { exact: true })).toHaveCount(0);
+    await expect(page.locator(".eg-shell-progress__num").first()).toHaveText(String(pulseXp));
+  });
 });

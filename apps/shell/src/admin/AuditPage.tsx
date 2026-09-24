@@ -1,6 +1,7 @@
-import { useEffect, useRef, useState, type JSX } from "react";
+import { useEffect, useState, type JSX } from "react";
 import { Modal } from "@egemed/ui";
 import { t, type TrKey } from "@egemed/ui/i18n";
+import { useShellSource } from "../dataSources";
 import { formatTrDateTime } from "./trFormat";
 import {
   AUDIT_ACTIONS,
@@ -258,10 +259,6 @@ export function AuditView({
   );
 }
 
-function defaultSource(): AuditDataSource {
-  return createMockAuditSource();
-}
-
 export interface AuditPageProps {
   /** Testte/gelecekte gerçek API kaynağıyla değiştirmek için enjekte edilir. */
   readonly dataSource?: AuditDataSource;
@@ -272,8 +269,7 @@ export interface AuditPageProps {
  * `AuditDataSource` üzerinden enjekte edilir; çizim `AuditView`'dedir.
  */
 export function AuditPage({ dataSource }: AuditPageProps): JSX.Element {
-  const sourceRef = useRef<AuditDataSource | null>(null);
-  if (sourceRef.current === null) sourceRef.current = dataSource ?? defaultSource();
+  const source = useShellSource(dataSource, (sources) => sources.audit, () => createMockAuditSource());
 
   const [query, setQuery] = useState<AuditListQuery>(DEFAULT_QUERY);
   const [status, setStatus] = useState<AuditLoadStatus>("loading");
@@ -284,7 +280,7 @@ export function AuditPage({ dataSource }: AuditPageProps): JSX.Element {
   useEffect(() => {
     let active = true;
     setStatus("loading");
-    sourceRef.current?.list(query).then(
+    source.list(query).then(
       (next) => {
         if (!active) return;
         setResult(next);

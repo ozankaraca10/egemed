@@ -1,6 +1,7 @@
-import { useEffect, useRef, useState, type JSX } from "react";
+import { useEffect, useState, type JSX } from "react";
 import { Badge, Tabs, type TabItem } from "@egemed/ui";
 import { t } from "@egemed/ui/i18n";
+import { useShellDataSources } from "../dataSources";
 import type { ShellSession } from "../session";
 import { simHref } from "../routes";
 import { SIM_IDS, type SimId } from "../SimCard";
@@ -146,17 +147,18 @@ function defaultSource(session: ShellSession | null): GamificationSource {
  * (yükleniyor/hazır/hata) yönetir, çizim `ProgressSectionView`'dedir.
  */
 export function ProgressSection({ session = null, dataSource }: ProgressSectionProps): JSX.Element {
-  const sourceRef = useRef<GamificationSource | null>(null);
-  if (sourceRef.current === null) sourceRef.current = dataSource ?? defaultSource(session);
-
+  const sources = useShellDataSources();
+  const actorId = session?.actorId ?? "";
   const [status, setStatus] = useState<ProgressLoadStatus>("loading");
   const [summaries, setSummaries] = useState<readonly GamiSimSummary[]>([]);
   const [attempt, setAttempt] = useState(0);
 
   useEffect(() => {
+    const activeSession = actorId.length > 0 ? session : null;
+    const source = dataSource ?? sources?.gamification(activeSession) ?? defaultSource(activeSession);
     let active = true;
     setStatus("loading");
-    sourceRef.current?.getSummaries().then(
+    source.getSummaries().then(
       (next) => {
         if (!active) return;
         setSummaries(next);
@@ -169,7 +171,7 @@ export function ProgressSection({ session = null, dataSource }: ProgressSectionP
     return () => {
       active = false;
     };
-  }, [attempt]);
+  }, [actorId, attempt, dataSource, sources]);
 
   return (
     <ProgressSectionView onRetry={() => setAttempt((value) => value + 1)} status={status} summaries={summaries} />

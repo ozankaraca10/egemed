@@ -1,6 +1,7 @@
-import { useEffect, useRef, useState, type JSX } from "react";
+import { useEffect, useState, type JSX } from "react";
 import { Card, Table } from "@egemed/ui";
 import { t, type TrKey } from "@egemed/ui/i18n";
+import { useShellSource } from "../dataSources";
 import { adminUsersHref } from "../routes";
 import { ADMIN_UNITS, createMockUsersSource, DEFAULT_MOCK_SEED, SIM_IDS, type UsersDataSource, type UsersSummary } from "./usersDataSource";
 
@@ -100,10 +101,6 @@ export function RolesView({ status, summary }: RolesViewProps): JSX.Element {
   );
 }
 
-function defaultSource(): UsersDataSource {
-  return createMockUsersSource(DEFAULT_MOCK_SEED);
-}
-
 export interface RolesPageProps {
   /** Testte/gelecekte gerçek API kaynağıyla değiştirmek için enjekte edilir. */
   readonly dataSource?: UsersDataSource;
@@ -114,8 +111,7 @@ export interface RolesPageProps {
  * `UsersDataSource.summary()` üzerinden enjekte edilir; çizim `RolesView`'dedir.
  */
 export function RolesPage({ dataSource }: RolesPageProps): JSX.Element {
-  const sourceRef = useRef<UsersDataSource | null>(null);
-  if (sourceRef.current === null) sourceRef.current = dataSource ?? defaultSource();
+  const source = useShellSource(dataSource, (sources) => sources.users, () => createMockUsersSource(DEFAULT_MOCK_SEED));
 
   const [status, setStatus] = useState<RolesLoadStatus>("loading");
   const [summary, setSummary] = useState<UsersSummary | null>(null);
@@ -123,7 +119,7 @@ export function RolesPage({ dataSource }: RolesPageProps): JSX.Element {
   useEffect(() => {
     let active = true;
     setStatus("loading");
-    sourceRef.current?.summary().then(
+    source.summary().then(
       (next) => {
         if (!active) return;
         setSummary(next);
