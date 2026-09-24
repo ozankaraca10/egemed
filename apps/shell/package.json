@@ -9,6 +9,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@egemed/sim-host": "workspace:*",
     "@egemed/tokens": "workspace:*",
     "@egemed/ui": "workspace:*",
     "react": "19.3.0",

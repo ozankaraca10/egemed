@@ -23,8 +23,8 @@ export interface SimCardProps {
   /** Başlık düzeyi; ana sayfada bölüm altında 3, simülatörler sayfasında 2. */
   readonly headingLevel?: 2 | 3;
   /**
-   * Henüz sim rotası yokken gösterilen bağlantı; simülatörler sayfasında
-   * kartın kendine bağlanmaması için verilmez.
+   * "Simülatörü aç" bağlantısı; her iki sayfada da sim rotasına
+   * (`simHref`) gider, verilmezse bağlantı çizilmez.
    */
   readonly href?: `#${string}`;
 }
