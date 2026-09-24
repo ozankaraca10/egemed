@@ -96,6 +96,7 @@ export {
   saveBestScore,
 } from "./core/reducer";
 export type { Action, AppState, BodySex, ReducerSeam, StoragePort } from "./core/reducer";
+export { auscultaStorageNamespace, gamiStoragePort, namespacedStoragePort } from "./core/storage";
 export { createFlushHandlers, createLifecycle } from "./core/lifecycle";
 export type { FlushTarget, Lifecycle, LifecycleHandlers, WindowLike } from "./core/lifecycle";
 export { StoreProvider, useStore } from "./core/StoreProvider";

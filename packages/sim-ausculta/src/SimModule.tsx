@@ -6,6 +6,7 @@ import { createAudioEngine, type AudioBufferLike, type AudioContextLike, type Au
 import type { WindowLike } from "./core/lifecycle";
 import { initialState, type StoragePort } from "./core/reducer";
 import { createNoopRuntimeAdapter, type RuntimeAdapter } from "./core/runtime";
+import { auscultaStorageNamespace, namespacedStoragePort } from "./core/storage";
 import { StoreProvider } from "./core/StoreProvider";
 import type { LearnScreenEnv } from "./screens/LearnScreen";
 import type { ResultsScreenEnv } from "./screens/ResultsScreen";
@@ -166,6 +167,7 @@ export function createAuscultaModule(deps?: AuscultaModuleDeps): SimModule {
     mount(target: SimMountTarget, context: SimMountContext): SimDispose {
       const resolved = deps ?? defaultProductionDeps();
       const assetBase = resolved.assetBase ?? DEFAULT_AUSCULTA_ASSET_BASE;
+      const storage = namespacedStoragePort(resolved.storage, auscultaStorageNamespace(context.actorId));
       const engine = resolved.createEngine?.({ assetBase, now: context.now }) ?? productionEngine(assetBase, context.now);
       const container = resolved.createContainer();
       target.appendChild(container.node);
@@ -184,7 +186,7 @@ export function createAuscultaModule(deps?: AuscultaModuleDeps): SimModule {
       root.render(
         createElement(StoreProvider, {
           now: context.now,
-          storage: resolved.storage,
+          storage,
           runtime: resolved.runtime ?? createNoopRuntimeAdapter(),
           env: resolved.env,
           initialState: { ...initialState, screen: "modes" },
