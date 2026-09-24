@@ -4,88 +4,28 @@ import { shellNow } from "../../apps/shell/src/now";
 import { routeHref } from "../../apps/shell/src/routes";
 import { SimRoute } from "../../apps/shell/src/SimRoute";
 import { loadSimModule } from "../../apps/shell/src/sims/loaders";
-import { createPlaceholderModule } from "../../apps/shell/src/sims/placeholder";
-import { SIMULATOR_IDS, type SimMountTarget } from "../../packages/sim-host/src/SimHost";
+import { SIMULATOR_IDS } from "../../packages/sim-host/src/SimHost";
+import { auscultaModule } from "../../packages/sim-ausculta/src/index";
 import { opacaModule } from "../../packages/sim-opaca/src/index";
 import { pulseModule } from "../../packages/sim-pulse/src/index";
 import { t } from "../../packages/ui/i18n/tr";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 
-/** Yer tutucu modülün DOM yüzeyini karşılayan bellek içi sahte eleman. */
-class FakeElement {
-  attributes: Record<string, string> = {};
-  children: FakeElement[] = [];
-  className = "";
-  removed = 0;
-  textContent = "";
-  appendChild = (node: unknown): unknown => {
-    this.children.push(node as FakeElement);
-    return node;
-  };
-  remove = (): void => {
-    this.removed += 1;
-  };
-  setAttribute = (name: string, value: string): void => {
-    this.attributes[name] = value;
-  };
-}
-
-describe("yer tutucu sim modülü", () => {
-  afterEach(() => {
-    vi.unstubAllGlobals();
-  });
-
-  it("kökü hedefe ekler; metin ve geri dön bağlantısı i18n'den gelir", () => {
-    vi.stubGlobal("document", { createElement: (): FakeElement => new FakeElement() });
-    const appended: FakeElement[] = [];
-    const target: SimMountTarget = {
-      appendChild: (node) => {
-        appended.push(node as FakeElement);
-        return node;
-      },
-    };
-    const module = createPlaceholderModule("opaca");
-    const dispose = module.mount(target, { simId: "opaca", now: shellNow });
-
-    expect(module.id).toBe("opaca");
-    expect(appended).toHaveLength(1);
-    const root = appended[0];
-    expect(root?.className).toBe("eg-shell-sim-placeholder");
-    const [text, back] = root?.children ?? [];
-    expect(text?.textContent).toBe(`${t("sims.opaca.name")} · ${t("sims.soon")}`);
-    expect(back?.attributes["href"]).toBe(routeHref("simulators"));
-    expect(back?.textContent).toBe(t("shell.nav.simulators"));
-
-    dispose();
-    expect(root?.removed).toBe(1);
-    dispose();
-    expect(root?.removed).toBe(1);
-  });
-
-  it("her sim kimliği için eşleşen modül üretir; yükleyici de aynı kimliği döndürür", async () => {
+describe("sim modülü yükleyici", () => {
+  it("her sim kimliği kendi gerçek modülünü döndürür (T14e: üçü de canlı, yer tutucu yok)", async () => {
+    expect(await loadSimModule("ausculta")).toBe(auscultaModule);
+    expect(await loadSimModule("opaca")).toBe(opacaModule);
+    expect(await loadSimModule("pulse")).toBe(pulseModule);
     for (const simId of SIMULATOR_IDS) {
-      expect(createPlaceholderModule(simId).id, simId).toBe(simId);
       expect((await loadSimModule(simId)).id, simId).toBe(simId);
     }
   });
 
-  it("opaca yükleyicisi @egemed/sim-opaca'nın gerçek modülünü döndürür (yer tutucu değil)", async () => {
-    const loaded = await loadSimModule("opaca");
-    expect(loaded).toBe(opacaModule);
-    expect(loaded).not.toEqual(createPlaceholderModule("opaca"));
-  });
-
-  it("pulse yükleyicisi @egemed/sim-pulse'ın gerçek modülünü döndürür (T14d, yer tutucu değil)", async () => {
-    const loaded = await loadSimModule("pulse");
-    expect(loaded).toBe(pulseModule);
-    expect(loaded).not.toEqual(createPlaceholderModule("pulse"));
-  });
-
-  it("ausculta yükleyicisi hâlâ yer tutucu modül döndürür (S18a'ya dek)", async () => {
+  it("ausculta yükleyicisi @egemed/sim-ausculta'nın gerçek modülünü döndürür, diğerlerinden ayrıdır (T14e)", async () => {
     const loaded = await loadSimModule("ausculta");
-    expect(loaded.id).toBe("ausculta");
     expect(loaded).not.toBe(opacaModule);
     expect(loaded).not.toBe(pulseModule);
+    expect(loaded.id).toBe("ausculta");
   });
 });
 
@@ -111,13 +51,15 @@ describe("SimRoute yükleniyor durumu", () => {
     expect(html).toContain("eg-shell-sim-page__stage");
   });
 
-  it("opaca için de çubuk tek h1'i korur (S25: gömülü ekranlar h2)", () => {
-    // SSR effect çalıştırmaz; durum hep "loading" kalır. Opaca gömülü modda
-    // `ScreenHeading` ile h2 kullandığı için kabuk hazır durumda da `<h1>`i
-    // korur (bkz. e2e/sims.spec.ts).
-    const html = renderToStaticMarkup(createElement(SimRoute, { simId: "opaca" }));
-    expect((html.match(/<h1\b/g) ?? []).length).toBe(1);
-    expect(html).toContain(`<h1 class="eg-shell-sim-page__title">${t("sims.opaca.name")}</h1>`);
+  it("opaca ve ausculta için de çubuk tek h1'i korur (S25/T14e: gömülü ekranlar h2)", () => {
+    // SSR effect çalıştırmaz; durum hep "loading" kalır. Opaca ve Ausculta
+    // gömülü modda `ScreenHeading` ile h2 kullandığı için kabuk hazır durumda
+    // da `<h1>`i korur (bkz. e2e/sims.spec.ts).
+    for (const simId of ["opaca", "ausculta"] as const) {
+      const html = renderToStaticMarkup(createElement(SimRoute, { simId }));
+      expect((html.match(/<h1\b/g) ?? []).length, simId).toBe(1);
+      expect(html).toContain(`<h1 class="eg-shell-sim-page__title">${t(`sims.${simId}.name`)}</h1>`);
+    }
   });
 });
 

@@ -29,11 +29,11 @@ export function simErrorTitle(simId: SimulatorId): string {
 /**
  * Gömülü modda sayfa `<h1>`ini taşıyan sim modülleri. Hazır olduklarında
  * kabuk çubuğu aynı metni `<h1>` yerine düz metin çizer; sayfada tek `<h1>`
- * kalır (WCAG 2.4.6/1.3.1). Opaca (T15b-S25) gömülü modda ekran başlıklarını
- * `h2` olarak çizdiği için kabuk `<h1>`i korur — bu kümeye girmez. Pulse
- * (T14d) her ekranında (modlar/inceleme/uygulama/değerlendirme/hakkında) tek
- * bir `<h1>` çizer; kabuk çubuğu bu kümede olduğu için hazır durumda kendi
- * `<h1>`ini bırakır.
+ * kalır (WCAG 2.4.6/1.3.1). Opaca (T15b-S25) ve Ausculta (T14e) gömülü modda
+ * ekran başlıklarını `h2` olarak çizdiği için kabuk `<h1>`i korur — bu
+ * kümeye girmez. Pulse (T14d) her ekranında (modlar/inceleme/uygulama/
+ * değerlendirme/hakkında) tek bir `<h1>` çizer; kabuk çubuğu bu kümede
+ * olduğu için hazır durumda kendi `<h1>`ini bırakır.
  */
 const SIMS_WITH_OWN_HEADING: ReadonlySet<SimulatorId> = new Set(["pulse"]);
 

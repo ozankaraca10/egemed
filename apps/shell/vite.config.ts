@@ -30,6 +30,27 @@ const OPACA_XRAY_RUNTIME_DIR = resolve(OPACA_PUBLIC_DIR, "assets/xray/runtime");
 const PULSE_PUBLIC_DIR = resolve(SHELL_ROOT, "../../packages/sim-pulse/public");
 const PULSE_ROUTE_PREFIX = "/sims/pulse/";
 
+/**
+ * `@egemed/sim-ausculta` paketinin genel klasörü (T14e). Ses kayıtları
+ * (git-dışı `assets/audio/runtime/`) ve gövde/marka görselleri buradan gelir;
+ * `/sims/ausculta/` öneki dev sunucusunda okunur, build çıktısında
+ * `dist/sims/ausculta/`ya kopyalanır.
+ */
+const AUSCULTA_PUBLIC_DIR = resolve(SHELL_ROOT, "../../packages/sim-ausculta/public");
+const AUSCULTA_ROUTE_PREFIX = "/sims/ausculta/";
+/** Git-dışı, `sync:audio` ile doldurulan ses klasörü (AGENTS.md okuma sınırı). */
+const AUSCULTA_AUDIO_RUNTIME_DIR = resolve(AUSCULTA_PUBLIC_DIR, "assets/audio/runtime");
+
+/**
+ * Kabuğun kendi genel klasörü ve Ausculta'nın KÖK-GÖRELİ istediği varlık
+ * önekleri (T14e). Gömülü modül gövde görsellerini (`assets/body/*.jpg`) ve
+ * marka görsellerini (`brand/*.png`) kaynak uygulamadaki gibi belge köküne
+ * göreli ister; kabuk altında bu istekler `/` köküne çözülür. Ses yolları
+ * kök-göreli değildir; onları `/sims/ausculta/` önekli eklenti karşılar.
+ */
+const SHELL_PUBLIC_DIR = resolve(SHELL_ROOT, "public");
+const AUSCULTA_ROOT_PREFIXES: readonly string[] = ["assets/body", "brand"];
+
 const MIME_TYPES: Readonly<Record<string, string>> = {
   ".css": "text/css; charset=utf-8",
   ".gif": "image/gif",
@@ -88,6 +109,38 @@ export function resolvePulseAssetPath(
   publicDir: string = PULSE_PUBLIC_DIR,
 ): string | null {
   return resolveScopedAssetPath(PULSE_ROUTE_PREFIX, publicDir, requestUrl);
+}
+
+/** Ausculta eşdeğeri (T14e); ses kayıtları bu önekten sunulur/kopyalanır. */
+export function resolveAuscultaAssetPath(
+  requestUrl: string,
+  publicDir: string = AUSCULTA_PUBLIC_DIR,
+): string | null {
+  return resolveScopedAssetPath(AUSCULTA_ROUTE_PREFIX, publicDir, requestUrl);
+}
+
+/**
+ * Kök-göreli (`/assets/body/**`, `/brand/**`) Ausculta isteğini paket genel
+ * klasörüne çözer. Dosya hem genel klasör içinde hem de eşleşen önekin
+ * dizininde kalmalıdır: `/assets/body/../brand/x.png` gibi normalizasyonla
+ * önek dışına taşan istekler `null` döner. Önek kümesi dışındaki yollar da
+ * `null`dur. Kabuğun kendi genel klasöründe aynı yol varsa kararı çağıran
+ * verir (kabuk kazanır).
+ */
+export function resolveAuscultaRootAssetPath(
+  requestUrl: string,
+  publicDir: string = AUSCULTA_PUBLIC_DIR,
+): string | null {
+  const withoutQuery = (requestUrl.split(/[?#]/)[0] ?? "").replace(/^\/+/, "");
+  const prefix = AUSCULTA_ROOT_PREFIXES.find((candidate) =>
+    withoutQuery.startsWith(`${candidate}/`),
+  );
+  if (prefix === undefined) return null;
+  const resolvedPath = resolveScopedAssetPath("/", publicDir, requestUrl);
+  if (resolvedPath === null) return null;
+  const relativePath = relative(resolve(publicDir, prefix), resolvedPath);
+  if (relativePath === ".." || relativePath.startsWith(`..${sep}`)) return null;
+  return resolvedPath;
 }
 
 /** Dev sunucusu orta katmanının en dar istek/yanıt yüzeyi (node:http'e bağımlı değil). */
@@ -198,8 +251,80 @@ function pulseAssetsPlugin(): Plugin {
   });
 }
 
+/** Ausculta varlık eklentisi (T14e); ses runtime git-dışıysa uyarır, derlemeyi kırmaz. */
+function auscultaAssetsPlugin(): Plugin {
+  return scopedAssetsPlugin({
+    missingDirWarning:
+      "Ausculta genel klasörü bulunamadı (packages/sim-ausculta/public); /sims/ausculta/ varlıkları kopyalanmadı.",
+    missingSubDir: {
+      path: AUSCULTA_AUDIO_RUNTIME_DIR,
+      warning:
+        "Ausculta ses çalışma zamanı klasörü git-dışıdır ve yerelde yok; derleme ses kayıtları olmadan sürer (bkz. `pnpm --filter @egemed/sim-ausculta sync:audio`).",
+    },
+    name: "egemed-ausculta-assets",
+    outSubdir: "sims/ausculta",
+    publicDir: AUSCULTA_PUBLIC_DIR,
+    routePrefix: AUSCULTA_ROUTE_PREFIX,
+  });
+}
+
+/**
+ * Ausculta kök-göreli varlık köprüsü (T14e). Dev sunucusunda kabuğun kendi
+ * genel klasöründe bulunmayan `/assets/body/**` ve `/brand/**` isteklerini
+ * Ausculta genel klasöründen karşılar; çakışmada kabuk kazanır (ör.
+ * `/brand/ege-tip-logo.png`). Build'de aynı dosyaları yalnız eksikse kopyalar
+ * (`force: false`), böylece kabuğun `public/` dosyaları ezilmez.
+ */
+function auscultaRootAssetsPlugin(): Plugin {
+  let outDir = resolve(SHELL_ROOT, "dist");
+  return {
+    name: "egemed-ausculta-root-assets",
+    configResolved(config) {
+      outDir = resolve(config.root, config.build.outDir);
+    },
+    configureServer(server) {
+      server.middlewares.use((req, res, next) => {
+        const request = req as unknown as SimAssetRequestLike;
+        const response = res as unknown as SimAssetResponseLike;
+        const requestUrl = request.url ?? "";
+        const shellPath = resolveScopedAssetPath("/", SHELL_PUBLIC_DIR, requestUrl);
+        if (shellPath !== null && existsSync(shellPath)) {
+          next();
+          return;
+        }
+        const filePath = resolveAuscultaRootAssetPath(requestUrl);
+        if (filePath === null || !existsSync(filePath) || !statSync(filePath).isFile()) {
+          next();
+          return;
+        }
+        response.setHeader("Content-Type", mimeTypeFor(filePath));
+        response.end(readFileSync(filePath));
+      });
+    },
+    closeBundle() {
+      if (!existsSync(AUSCULTA_PUBLIC_DIR)) {
+        this.warn(
+          "Ausculta genel klasörü bulunamadı (packages/sim-ausculta/public); kök-göreli varlıklar kopyalanmadı.",
+        );
+        return;
+      }
+      for (const prefix of AUSCULTA_ROOT_PREFIXES) {
+        const source = resolve(AUSCULTA_PUBLIC_DIR, prefix);
+        if (!existsSync(source)) continue;
+        cpSync(source, resolve(outDir, prefix), { force: false, recursive: true });
+      }
+    },
+  };
+}
+
 export default defineConfig(({ mode }) => ({
   base: "./",
-  plugins: [react(), opacaAssetsPlugin(), pulseAssetsPlugin()],
+  plugins: [
+    react(),
+    opacaAssetsPlugin(),
+    pulseAssetsPlugin(),
+    auscultaAssetsPlugin(),
+    auscultaRootAssetsPlugin(),
+  ],
   ...apiProxyConfig(loadEnv(mode, SHELL_ROOT, "VITE_")),
 }));

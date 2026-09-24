@@ -472,13 +472,6 @@ html, body { margin: 0; }
   background: var(--blue-700); border: 0; border-radius: var(--r-md);
   color: var(--card); font: inherit; font-weight: 600; cursor: pointer;
 }
-.eg-shell-sim-placeholder { display: grid; gap: var(--sp-3); justify-items: start; }
-.eg-shell-sim-placeholder__text { margin: 0; color: var(--navy-800); font-weight: 600; }
-.eg-shell-sim-placeholder__back {
-  display: inline-flex; align-items: center; box-sizing: border-box;
-  min-height: var(--eg-shell-touch-min); padding: 0 var(--sp-3);
-  color: var(--blue-700); font-weight: 600;
-}
 .eg-shell-progress__empty {
   box-sizing: border-box; margin: 0; padding: var(--sp-5) var(--sp-4);
   background: var(--card-soft); border: 1px dashed var(--border-strong);
