@@ -24,3 +24,5 @@ export {
   tShape,
 } from "./engine/shapes";
 export type { Fiducials, Lead, LeadShape, Limb, Mode, ShapeKey, WaveformPoint } from "./engine/shapes";
+export { ACTIVE_VIEWS, MAX_STATE_BYTES, SESSION_COUNT, STATE_VERSION, blank, decode, derive, encode } from "./engine/state";
+export type { ActiveView, CurriculumItem, PulseCurriculum, PulseState, Section, Session, StateContext } from "./engine/state";
