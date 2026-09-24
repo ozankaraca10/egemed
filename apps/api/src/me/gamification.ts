@@ -9,7 +9,7 @@ import {
   type GamiPeriod,
   type SimId,
 } from "@egemed/contracts";
-import type { Period } from "@egemed/gamification-core";
+import { DEFAULT_RULES, assessmentXp, practiceXp, type Period } from "@egemed/gamification-core";
 import {
   buildLeaderboardRows,
   paginateRows,
@@ -49,6 +49,56 @@ const ATTEMPT_LIMIT = 20;
 
 /** Türkiye sabit ofseti: 2016'dan beri UTC+3 (DST yok). */
 const TR_OFFSET_MS = 3 * 60 * 60 * 1000;
+
+/** Anın Türkiye takvim günü (`YYYY-MM-DD`); seri bu günlerle sayılır. */
+export function trDate(at: number): string {
+  return new Date(at + TR_OFFSET_MS).toISOString().slice(0, 10);
+}
+
+export type GamiAttemptMode = "practice" | "assessment";
+
+/**
+ * API-05: deneme XP'si sunucuda, üç simde ortak `DEFAULT_RULES.xp` ile
+ * hesaplanır; istemcinin özetindeki `xp` kodu yetkili değildir.
+ */
+export function serverAttemptXp(input: {
+  readonly mode: GamiAttemptMode;
+  readonly caseCount: number;
+  readonly hintsUsed: number;
+  readonly score: number | null;
+  readonly maxScore: number | null;
+  readonly passed: boolean | null;
+}): number {
+  const percent =
+    input.score !== null && input.maxScore !== null && input.maxScore > 0
+      ? Math.round((input.score * 100) / input.maxScore)
+      : 0;
+  return input.mode === "assessment"
+    ? assessmentXp({ caseCount: input.caseCount, score: percent }, DEFAULT_RULES)
+    : practiceXp({ caseCount: input.caseCount, hintsUsed: input.hintsUsed, mastery: input.passed === true }, DEFAULT_RULES);
+}
+
+/**
+ * `levelForXp`in kapalı biçimi: düzey k'nin başlangıcı `unit·k(k−1)/2`.
+ * SQL güncellemesi aynı formülü kullanır; test ikisinin eşitliğini doğrular.
+ */
+export function levelForXpClosedForm(xp: number, unitXp = DEFAULT_RULES.level.unitXp): number {
+  return Math.max(1, Math.floor((1 + Math.sqrt(1 + (8 * Math.max(0, xp)) / unitXp)) / 2));
+}
+
+/** Artımlı seri: aynı gün değişmez, ertesi gün +1, geç gelen eski gün etkisiz, boşluk 1'e döner. */
+export function nextStreak(previous: GamiStreakRecord, day: string): GamiStreakRecord {
+  const last = previous.lastDate;
+  let current: number;
+  if (last === null) current = 1;
+  else if (day === last || day < last) current = previous.current;
+  else current = Date.parse(`${day}T00:00:00Z`) - Date.parse(`${last}T00:00:00Z`) === 86_400_000 ? previous.current + 1 : 1;
+  return {
+    best: Math.max(previous.best, current),
+    current,
+    lastDate: last === null || day > last ? day : last,
+  };
+}
 
 /** Enjekte edilen anın içinde bulunduğu haftanın Pazartesi 00:00 (UTC+3) anı. */
 export function startOfWeekTr(at: number): number {
@@ -135,6 +185,10 @@ export interface GamiAttemptInput {
   readonly passed: boolean | null;
   readonly summary: Readonly<Record<string, number>>;
   readonly createdAt: number;
+  readonly institutionId: string;
+  readonly mode: GamiAttemptMode;
+  readonly caseCount: number;
+  readonly hintsUsed: number;
 }
 
 export interface GamiAttemptRecord {
@@ -241,9 +295,9 @@ export function createPgGamificationRepo(db: GamiDb): GamificationRepo {
           "select attempt_no, finished_at, score, max_score, passed from gami_attempts where user_id = $1 and sim_id = $2 order by attempt_no desc limit $3",
           [query.userId, query.simId, ATTEMPT_LIMIT],
         ),
-        // Haftalık XP: hafta içinde biten denemelerin kodlu özetindeki `xp` kodu.
+        // Haftalık XP: hafta içinde biten denemelerin sunucu XP'si (API-05).
         db.query(
-          `select coalesce(sum(case when jsonb_typeof(a.summary -> 'xp') = 'number' and (a.summary ->> 'xp') ~ '^-?[0-9]{1,9}$' then (a.summary ->> 'xp')::int else 0 end), 0)::int as current_xp from gami_attempts a where a.user_id = $1 and a.sim_id = $2 and a.finished_at >= $3`,
+          "select coalesce(sum(a.xp), 0)::int as current_xp from gami_attempts a where a.user_id = $1 and a.sim_id = $2 and a.finished_at >= $3",
           [query.userId, query.simId, new Date(startOfWeekTr(query.at))],
         ),
       ]);
@@ -279,8 +333,35 @@ export function createPgGamificationRepo(db: GamiDb): GamificationRepo {
       // 500 yerine doğrulama hatası olarak raporlamak için burada yakalanır.
       if (input.maxScore === 0) return { kind: "invalid" };
       try {
+        // API-05: deneme ve profil (XP, düzey, seri) tek ifadede yazılır; deneme
+        // zaten varsa (idempotent tekrar) profil CTE'si satır üretmez.
         const inserted = await db.query(
-          "insert into gami_attempts (id, user_id, sim_id, attempt_no, started_at, finished_at, score, max_score, passed, summary, created_at) values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10::jsonb, $11) on conflict (id) do nothing returning id, sim_id, attempt_no, started_at, finished_at, score, max_score, passed, summary",
+          `with ins as (
+             insert into gami_attempts (id, user_id, sim_id, attempt_no, started_at, finished_at, score, max_score, passed, summary, created_at, mode, case_count, hints_used, xp)
+             values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10::jsonb, $11, $12, $13, $14, $15)
+             on conflict (id) do nothing
+             returning id, sim_id, attempt_no, started_at, finished_at, score, max_score, passed, summary, xp
+           ), prof as (
+             insert into gami_profiles as p (user_id, sim_id, xp, level, streak_current, streak_best, streak_last_date, updated_at)
+             select $2, $3, ins.xp, greatest(1, floor((1 + sqrt(1 + 8.0 * ins.xp / $17)) / 2))::int, 1, 1, $16::date, $11 from ins
+             on conflict (user_id, sim_id) do update set
+               xp = p.xp + excluded.xp,
+               level = greatest(1, floor((1 + sqrt(1 + 8.0 * (p.xp + excluded.xp) / $17)) / 2))::int,
+               streak_current = case
+                 when p.streak_last_date is null then 1
+                 when excluded.streak_last_date <= p.streak_last_date then p.streak_current
+                 when excluded.streak_last_date = p.streak_last_date + 1 then p.streak_current + 1
+                 else 1 end,
+               streak_best = greatest(p.streak_best, case
+                 when p.streak_last_date is null then 1
+                 when excluded.streak_last_date <= p.streak_last_date then p.streak_current
+                 when excluded.streak_last_date = p.streak_last_date + 1 then p.streak_current + 1
+                 else 1 end),
+               streak_last_date = greatest(p.streak_last_date, excluded.streak_last_date),
+               updated_at = excluded.updated_at
+             returning 1
+           )
+           select ins.* from ins`,
           [
             input.id,
             input.userId,
@@ -293,6 +374,12 @@ export function createPgGamificationRepo(db: GamiDb): GamificationRepo {
             input.passed,
             JSON.stringify(input.summary),
             new Date(input.createdAt),
+            input.mode,
+            input.caseCount,
+            input.hintsUsed,
+            serverAttemptXp(input),
+            trDate(input.finishedAt),
+            DEFAULT_RULES.level.unitXp,
           ],
         );
         const row = inserted.rows[0] as GamiAttemptRow | undefined;
@@ -408,8 +495,10 @@ function canonicalSummary(summary: Readonly<Record<string, number>>): string {
   );
 }
 
+/** İdempotent tekrar yalnız aynı kullanıcı×sim×deneme için geçerlidir (API-04). */
 function sameAttempt(attempt: GamiAttemptRecord, input: GamiAttemptInput): boolean {
   return (
+    attempt.simId === input.simId &&
     attempt.attemptNo === input.attemptNo &&
     attempt.startedAt === input.startedAt &&
     attempt.finishedAt === input.finishedAt &&
@@ -452,6 +541,7 @@ export interface MemoryGamiAttemptSeed {
   readonly maxScore?: number | null;
   readonly passed?: boolean | null;
   readonly summary: Readonly<Record<string, number>>;
+  readonly xp?: number;
 }
 
 export interface MemoryGamificationSeed {
@@ -484,6 +574,8 @@ export interface MemoryGamiAttemptState {
   readonly maxScore: number | null;
   readonly passed: boolean | null;
   readonly summary: Readonly<Record<string, number>>;
+  /** Sunucu XP'si (API-05); tohum denemelerinde 0. */
+  readonly xp: number;
 }
 
 /** Testlerin durum okuduğu bellek deposu (DB gerekmez). */
@@ -543,6 +635,7 @@ export function createMemoryGamificationRepo(
       maxScore: attempt.maxScore ?? null,
       passed: attempt.passed ?? null,
       summary: { ...attempt.summary },
+      xp: attempt.xp ?? 0,
     });
   }
 
@@ -552,7 +645,7 @@ export function createMemoryGamificationRepo(
     for (const attempt of attempts.values()) {
       if (attempt.userId !== userId || attempt.simId !== simId) continue;
       if (attempt.finishedAt < weekStart) continue;
-      total += attempt.summary["xp"] ?? 0;
+      total += attempt.xp;
     }
     return total;
   }
@@ -622,8 +715,9 @@ export function createMemoryGamificationRepo(
       };
       const byId = attempts.get(input.id);
       if (byId !== undefined) {
-        return sameAttempt(byId, input)
-          ? { kind: "existing", attempt }
+        // Başka kullanıcının/simin kimliğiyle çakışma idempotent tekrar sayılmaz (API-04).
+        return byId.userId === input.userId && sameAttempt(byId, input)
+          ? { kind: "existing", attempt: { ...attempt, simId: byId.simId } }
           : { kind: "conflict" };
       }
       for (const candidate of attempts.values()) {
@@ -635,6 +729,7 @@ export function createMemoryGamificationRepo(
           return { kind: "conflict" };
         }
       }
+      const xp = serverAttemptXp(input);
       attempts.set(input.id, {
         id: input.id,
         userId: input.userId,
@@ -646,7 +741,28 @@ export function createMemoryGamificationRepo(
         maxScore: input.maxScore,
         passed: input.passed,
         summary: { ...input.summary },
+        xp,
       });
+      // PG ifadesiyle aynı kural: profil XP/düzey/seri deneme ile birlikte güncellenir.
+      const key = profileKey(input.userId, input.simId);
+      const existing = profiles.get(key);
+      const profile: MemoryGamiProfileState = existing ?? {
+        userId: input.userId,
+        institutionId: input.institutionId,
+        simId: input.simId,
+        xp: 0,
+        level: 1,
+        streak: { current: 0, best: 0, lastDate: null },
+        updatedAt: input.createdAt,
+        displayName: "Örnek Öğrenci",
+        unitCode: null,
+        public: true,
+      };
+      profile.xp += xp;
+      profile.level = levelForXpClosedForm(profile.xp);
+      profile.streak = nextStreak(profile.streak, trDate(input.finishedAt));
+      profile.updatedAt = input.createdAt;
+      profiles.set(key, profile);
       return { kind: "created", attempt };
     },
 
@@ -803,9 +919,12 @@ export function registerMeGamificationRoutes(
       await sessions.revoke(getCookie(c, SESSION_COOKIE));
       return jsonError(c, "unauthorized");
     }
-    c.set("meActor", { userId: context.id, institutionId: context.institution.id });
+    c.set("meActor", { userId: context.id, institutionId: context.institution.id, simAccess: context.simAccess });
     return next();
   };
+
+  /** Sim başına yetki (API-03): erişimi olmayan sim için okuma ve yazma reddedilir. */
+  const canUseSim = (c: Context<AppEnv>, simId: SimId): boolean => c.get("meActor").simAccess.includes(simId);
 
   // `/me/*` çerezle korunur: mutasyonlar double-submit CSRF ister (T63 kuralı);
   // kimlik her istekte sunucuda yeniden doğrulanır.
@@ -815,8 +934,9 @@ export function registerMeGamificationRoutes(
     const actor = c.get("meActor");
     const at = now();
     // Üç simin özeti AYRI tutulur; birleştirme veya toplam puan üretilmez.
+    // Yalnız erişim verilmiş simler döner (API-03).
     const summaries = await Promise.all(
-      SIM_IDS.map((simId) =>
+      SIM_IDS.filter((simId) => actor.simAccess.includes(simId)).map((simId) =>
         deps.gamification.getSummary({
           userId: actor.userId,
           institutionId: actor.institutionId,
@@ -833,6 +953,7 @@ export function registerMeGamificationRoutes(
     if (!parsedSim.success) return jsonError(c, "not_found");
     const parsedQuery = gamiLeaderboardQuerySchema.safeParse(c.req.query());
     if (!parsedQuery.success) return jsonError(c, "invalid_request", validationDetails(parsedQuery.error));
+    if (!canUseSim(c, parsedSim.data)) return jsonError(c, "forbidden");
     const actor = c.get("meActor");
     const board = await deps.gamification.getLeaderboard({
       userId: actor.userId,
@@ -853,6 +974,7 @@ export function registerMeGamificationRoutes(
   app.get("/me/gamification/:simId", async (c) => {
     const parsed = gamiSimIdParamSchema.safeParse(c.req.param("simId"));
     if (!parsed.success) return jsonError(c, "not_found");
+    if (!canUseSim(c, parsed.data)) return jsonError(c, "forbidden");
     const actor = c.get("meActor");
     const summary = await deps.gamification.getSummary({
       userId: actor.userId,
@@ -866,6 +988,7 @@ export function registerMeGamificationRoutes(
   app.post("/me/gamification/:simId/attempts", async (c) => {
     const parsedSim = gamiSimIdParamSchema.safeParse(c.req.param("simId"));
     if (!parsedSim.success) return jsonError(c, "not_found");
+    if (!canUseSim(c, parsedSim.data)) return jsonError(c, "forbidden");
     const parsed = attemptWriteRequestSchema.safeParse(await readJson(c));
     if (!parsed.success) {
       return isScoreIssue(parsed.error)
@@ -886,6 +1009,10 @@ export function registerMeGamificationRoutes(
       passed: parsed.data.passed ?? null,
       summary: parsed.data.summary,
       createdAt: now(),
+      institutionId: actor.institutionId,
+      mode: parsed.data.mode ?? "assessment",
+      caseCount: parsed.data.caseCount ?? 1,
+      hintsUsed: parsed.data.hintsUsed ?? 0,
     });
     if (result.kind === "conflict") return jsonError(c, "conflict");
     if (result.kind === "invalid") {

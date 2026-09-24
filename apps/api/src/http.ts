@@ -1,5 +1,5 @@
 import type { Context } from "hono";
-import { statusForErrorCode, type ErrorCode, type ErrorResponse } from "@egemed/contracts";
+import { statusForErrorCode, type ErrorCode, type ErrorResponse, type SimId } from "@egemed/contracts";
 import type { z } from "zod";
 
 /**
@@ -24,6 +24,8 @@ export interface AdminActor {
 export interface MeActor {
   readonly userId: string;
   readonly institutionId: string;
+  /** Oturumdaki kullanıcının erişebildiği simler; her istekte DB'den (API-03). */
+  readonly simAccess: readonly SimId[];
 }
 
 /** İstek bağlamı: ara katman üretilen/doğrulanan `request_id`yi ve aktör kimliğini buraya yazar. */

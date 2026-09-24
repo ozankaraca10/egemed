@@ -37,7 +37,7 @@ yönetici `#/giris/admin` → `admin` / `egemed`; test öğrencisi `#/giris/test
 | `apps/api` | Hono + PostgreSQL API (ADR-002): migration'lar (`migrations/`; append-only denetim tetikleyicisi), oturum/CSRF, admin uçları (`/admin/users`, toplu işlem, CSV içe aktarma, rol, `/admin/audit`), `/me/gamification`, `migrate:up` ve `seed:admin`; SSO adaptör iskeleti | SSO protokolü kararı bekliyor |
 | `packages/sim-host` | **SimHost sözleşmesi**: `mount(target, context) → dispose`, lazy yükleme, epoch iptali, tek etkin oturum | Tüm simler bu sözleşmeyle bağlanır |
 | `packages/sim-opaca` | Opaca modülü: çekirdek, veri, UI ve SimHost adaptörü | Kabukta canlı; röntgen `public/assets/xray/runtime/` git dışı, `sync:xray` ile yerel kaynaktan alınır |
-| `packages/sim-pulse` | Pulse modülü: EKG motoru, durum, müfredat, ekranlar ve SimHost adaptörü | Kabukta canlı |
+| `packages/sim-pulse` | Pulse modülü: kaynak runtime (`src/runtime/host.ts`, `module.ts`, `vendor/`) ile EKG motoru, durum ve müfredat; eski `src/mount.ts` + `ui/*` ekranları kabukta kullanılmıyor | Kabukta canlı; vendor dosyaları `pnpm --filter @egemed/sim-pulse sync:runtime` ile kaynaktan üretilir |
 | `packages/sim-ausculta` | Ausculta modülü: çekirdek, ses motoru, store/runtime, UI, ekranlar ve SimHost adaptörü | Adaptör hazır; ses varlıkları git dışı, `sync:audio` ile yerel kaynaktan alınır |
 | `packages/gamification-core` | **Sim-bağımsız oyunlaştırma çekirdeği**: XP, seviye, seri, haftalık hedef, zaman (Europe/Istanbul), jenerik rozet motoru, sıralama, ödül, grafik | Rozet kataloğu ve kurallar her simde ayrı (parametre) |
 | `packages/contracts` | Paylaşılan sözleşmeler (zod): kimlik, kullanıcı, CSV içe aktarma, oyunlaştırma, hata kodları | API ve UI aynı şemayı kullanır |
@@ -52,7 +52,7 @@ yönetici `#/giris/admin` → `admin` / `egemed`; test öğrencisi `#/giris/test
 | `docs/adr/` | Mimari karar kayıtları 001–007 | Durum: Önerildi / Kabul |
 | `docs/specs/` | Epik ve plan belgeleri (E0–E3) | Aşağıda §5 |
 | `docs/agentic/` | Ajan devir/kurulum notları (`CODEX-DEVIR.md`) | Tarihsel bağlam |
-| `docs/ops/` · `docs/audits/` | Üretim işletim kılavuzu ve güvenlik denetim raporları | Yayın hazırlığı ve denetim kaydı |
+| `docs/ops/` · `docs/audits/` | Üretim işletim kılavuzu ve denetim raporları (güvenlik, test bulguları) | Yayın hazırlığı ve denetim kaydı |
 | `sims/` | **Eski yer tutucu** — K-P1 kararıyla simler `packages/sim-<id>` altında; burası arşiv/boş | Lint ve workspace dışı |
 | `.agtx/` | Görev worktree'leri (`.agtx/worktrees/<görev>`) ve pano verisi — **git dışı** | Lint'ten hariç |
 
@@ -65,7 +65,8 @@ yönetici `#/giris/admin` → `admin` / `egemed`; test öğrencisi `#/giris/test
 
 - **Tek platform, hibrit modüller (ADR-006):** Kabuk React'tir; her simülatör `packages/sim-<id>` altında bağımsız bir modüldür ve
   kabuğa `SimHost` üzerinden `mount/dispose` ile lazy bağlanır. Motorlar (EKG üretimi, ses mantığı, görüntü işaretleme) davranış
-  değiştirmeden taşınır; Opaca ve Ausculta zaten React olduğundan ekranlar korunur, Pulse (düz JS) kademeli taşınır.
+  değiştirmeden taşınır; Opaca ve Ausculta zaten React olduğundan ekranlar korunur; Pulse'un kaynak uygulaması (EGEMED_PULSE/cardai)
+  betikleri değiştirilmeden gölge DOM'da çalıştırılır (PULSE-00/T88, §7).
 - **Veri izolasyonu:** Simler arası durum veya veri birleştirilmez; her kayıt/ifade tek `SimulatorId` taşır. Dashboard simleri
   **sekmelerle** ayrı gösterir, toplam puan üretmez.
 - **Gömülü mod:** Sim modülleri platform içinde kendi üst bar/footer'ını çizmez (tek üst bar kuralı); sim kapsayıcısı React çocuğu
@@ -108,6 +109,7 @@ kimliğinden tohumlanır; stem bulguyu anlatmaz, arayüz ipucu sızdırmaz; geri
 | `docs/specs/E2-ausculta-port-inventory.md` | Ausculta port dilimleri (S0a–S20) ve kabul testi matrisi |
 | `docs/specs/E2-pulse-port-inventory.md` | Pulse port dilimleri (S0a–S15b), bayt/40 boyut yöntemi |
 | `docs/specs/E3-kullanici-yonetimi.md` | Kimlik akışı, DB şeması, API, 8 ekran (dashboard dahil), CSV şablonu, uygulama dilimleri T60–T76 |
+| `docs/audits/2026-09-24-TEST-BULGULARI-VE-GOREVLER.md` | 24 Eylül test denetimi bulguları ve açık görev listesi (PULSE-00…11, PLATFORM-01…04, API-01…07, TEST-01, KAYNAK-01) |
 | `docs/adr/001…007` | Monorepo, yığın (Hono/Postgres), gömme (geçersiz), LRS, kimlik (007 ile güncellendi), tek platform, kullanıcı verisi |
 
 ### Alınan önemli kararlar (depo sahibi)
@@ -143,8 +145,13 @@ uygulanması.
 ## 7. Durum (24 Eylül 2026, akşam)
 
 - **Opaca:** port tamam ve kabukta canlı (`#/sims/opaca`); röntgen görselleri git dışı yerel kaynaktan `sync:xray` ile alınır.
-- **Pulse:** motor, durum, müfredat, ekranlar, CSS ve SimHost adaptörü tamam; kabukta canlı (`#/sims/pulse`). Müfredattaki T04
-  kaynak bulgusu testte `it.fails` olarak işaretli; insan kararı bekliyor.
+- **Pulse:** kabukta canlı (`#/sims/pulse`); platform kaynak runtime'ı EGEMED_PULSE/cardai betiklerini değiştirmeden gölge DOM'da
+  çalıştırır (`packages/sim-pulse/src/runtime/host.ts`, `module.ts`, `vendor/`). Vendor dosyaları
+  `pnpm --filter @egemed/sim-pulse sync:runtime` ile kaynaktan üretilir; kaynaktan bilinçli sapmalar yalnız
+  `vendor/manifest.json`'daki yamalardır. Kayıtlar kullanıcı×sim ad alanında tutulur (`egemed:u:<actorId>:pulse:`; anonimde
+  `egemed:anon:pulse:`) ve SimHost `release(token)` ertelenen temizliğin yeni mount'u iptal etmesini önler (PLATFORM-01).
+  Eski `src/mount.ts` ve `ui/*` ekranları kabukta kullanılmıyor; müfredattaki T04 kaynak bulgusu testte `it.fails`, insan kararı
+  bekliyor.
 - **Ausculta:** çekirdek, ses, store/runtime, UI ve ekranlar ile SimHost adaptörü hazır. Kabuk lazy rotasına henüz bağlanmadı;
   mevcut rota yer tutucu gösteriyor. Ses varlıkları `sync:audio` ile git-dışı yerel kaynaktan alınır.
 - **Platform API:** Hono/PostgreSQL, migration'lar, oturum/CSRF, admin kullanıcı ve denetim uçları, oyunlaştırma ve seed akışı
@@ -152,6 +159,10 @@ uygulanması.
   yayın hazırlığı sürüyor ve SSO protokolü kararı bekliyor.
 - **E2E:** Playwright + axe her koşuda JSON özeti ve ekran görüntülerini `e2e-artifacts/<run-id>/` altına yazar. README'deki
   önceki 77/80 sonucu tarihsel koşuya aittir; güncel yayın kapısı olarak değerlendirilmemelidir.
+- **24 Eylül geri almaları:** Impeccable beceri/referans paketi (T76) ve arayüz denetimi belgeleri (T77; `DESIGN.md`,
+  `PRODUCT.md`, `docs/audits/IMPECCABLE-2026-09-24.md`) geri alındı; T53a test temizliği geri alındı (T83) — emekli edilen
+  kabuk/UI testleri geri gelip canlı sime uyarlandı. Güncel bulgu ve görev listesi:
+  `docs/audits/2026-09-24-TEST-BULGULARI-VE-GOREVLER.md`.
 
 ## CI
 

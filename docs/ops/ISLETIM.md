@@ -16,11 +16,12 @@ Bu kılavuz, platformun tek sunucu dağıtımını (egemed.ege.edu.tr) kurmayı,
   aşamasından kopyalanır, `ts-register.mjs`/`ts-resolve.mjs` kancası,
   `apps/api/src` + `migrations` ve workspace paket kaynakları
   (`@egemed/contracts`, `@egemed/gamification-core`) imajdadır; derleme
-  makinesinin node_modules'ına bağımlı değildir. Sunucu
-  `--experimental-transform-types` ile başlar: gamification-core TypeScript
-  parametre property'si kullanır (src/repository.ts) ve Node'un strip-only
-  modu bu söz dizimini yürütemez (bkz. audit API-01/API-02). Derleme bağlamı
-  BuildKit altında `infra/prod/Dockerfile.dockerignore` ile budaılır.
+  makinesinin node_modules'ına bağımlı değildir. Sunucu Node 22'nin yerleşik
+  TypeScript desteğiyle bayraksız başlar (`CMD ["node", "--import",
+  "./ts-register.mjs", "src/server.ts"]`); API-01 düzeltmesiyle (T85)
+  gamification-core'daki parametre property'si kaldırıldı, strip-only kip
+  yeterlidir (bkz. audit API-01/API-02). Derleme bağlamı BuildKit altında
+  `infra/prod/Dockerfile.dockerignore` ile budaılır.
 - **PostgreSQL 18:** compose'da adlandırılmış `postgres-data` volume'ü ile.
 - **LRS:** kurum altyapısındadır; EGEMED hiçbir yüzeyde ifade saklamaz
   (ADR-004). Tarayıcı LRS'ye doğrudan bağlanır; nginx CSP `connect-src`
@@ -140,6 +141,19 @@ gerekiyorsa ayrı onaylı görevle açılır.
   rotasyonu compose'dadır (max-size 10m, max-file 5).
 
 ## 8. KVKK notu
+
+## 8. E2E API zorunluluk kapağı
+
+`playwright.config.ts`, API ayakta değilken `api-dev` Playwright projesini hiç
+tanımlamaz; bu testler koşum listesinden sessizce çıkar. API'nin çalışması
+zorunluyken sessiz atlanmayı engellemek için `E2E_REQUIRE_API=1` verin: API
+`/health` ucuna yanıt vermezse yapılandırma anlaşılır bir Türkçe hatayla
+açıkça durur. Bu koşum için kök betik: `pnpm e2e:api` (API'yi önce
+`pnpm --filter @egemed/api dev` gibi bir komutla ayakta tutun). Değişken
+verilmediğinde bugünkü davranış korunur; yalnız konsola "api-dev projesi
+atlandı" uyarısı basılır.
+
+## 9. KVKK notu
 
 Veri sorumluluğu ve hukuki dayanak insan/hukuk kararıdır (ADR-007); bu
 kılavuz hukuki tavsiye değildir. Uygulama notları:

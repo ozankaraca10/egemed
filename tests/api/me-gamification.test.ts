@@ -3,13 +3,16 @@ import {
   attemptWriteRequestSchema,
   gamiAllResponseSchema,
   gamiSummaryResponseSchema,
+  type SimId,
 } from "../../packages/contracts/src/index";
-import { WEEKLY_XP_TARGET } from "../../apps/api/src/me/gamification";
+import { WEEKLY_XP_TARGET, levelForXpClosedForm, nextStreak } from "../../apps/api/src/me/gamification";
+import { DEFAULT_RULES, levelForXp } from "../../packages/gamification-core/src/index";
 import {
   ALI_ID,
   FIXED_NOW,
   INSTITUTION_ID,
   MERT_ID,
+  DEFAULT_USERS,
   createAdminHarness,
   login,
   type AdminHarness,
@@ -67,6 +70,7 @@ const GAMIFICATION_SEED = {
       score: 80,
       maxScore: 100,
       passed: true,
+      xp: 120,
       summary: { xp: 120, ritim: 80 },
     },
     {
@@ -79,6 +83,7 @@ const GAMIFICATION_SEED = {
       score: 60,
       maxScore: 100,
       passed: false,
+      xp: 100,
       summary: { xp: 100, ritim: 60 },
     },
     {
@@ -91,13 +96,16 @@ const GAMIFICATION_SEED = {
       score: 95,
       maxScore: 100,
       passed: true,
+      xp: 200,
       summary: { xp: 200, ritim: 95 },
     },
   ],
 };
 
-function harness(): AdminHarness {
-  return createAdminHarness({ gamification: GAMIFICATION_SEED });
+/** `access` verilirse ilgili kullanıcıların sim erişimi değiştirilir (API-03). */
+function harness(access: Readonly<Record<string, readonly SimId[]>> = {}): AdminHarness {
+  const users = DEFAULT_USERS.map((entry) => (access[entry.id] === undefined ? entry : { ...entry, simAccess: access[entry.id] ?? [] }));
+  return createAdminHarness({ gamification: GAMIFICATION_SEED, users });
 }
 
 function attemptBody(overrides: Record<string, unknown> = {}) {
@@ -173,7 +181,7 @@ describe("yetki ve kendi verisi (E3 §d)", () => {
 });
 
 describe("GET /me/gamification", () => {
-  it("üç simin ayrı özetini döner; birleşik puan yok", async () => {
+  it("yalnız erişim verilen simlerin ayrı özetini döner; birleşik puan yok (API-03)", async () => {
     const testHarness = harness();
     const ali = await login(testHarness, "ali.veli");
     const response = await testHarness.app.request("/me/gamification", { headers: ali.headers });
@@ -183,10 +191,9 @@ describe("GET /me/gamification", () => {
     if (!parsed.success) expect.unreachable(JSON.stringify(parsed.error.issues));
     const sims = (body as { data: { sims: readonly { simId: string; xp: number; level: number }[] } })
       .data.sims;
-    expect(sims.map((sim) => sim.simId)).toEqual(["pulse", "ausculta", "opaca"]);
-    expect(sims.map((sim) => sim.xp)).toEqual([1450, 120, 0]);
-    // Profil satırı olmayan sim sıfırlanır; uydurma puan üretilmez.
-    expect(sims[2]?.level).toBe(1);
+    // ALI'nin yalnız Pulse erişimi var; diğer simlerin verisi (ör. Ausculta 120 XP) dönmez.
+    expect(sims.map((sim) => sim.simId)).toEqual(["pulse"]);
+    expect(sims.map((sim) => sim.xp)).toEqual([1450]);
     expect(Object.keys(body as object)).toEqual(["data"]);
   });
 });
@@ -228,7 +235,7 @@ describe("GET /me/gamification/:simId", () => {
   });
 
   it("her oturum yalnız kendi verisini görür", async () => {
-    const testHarness = harness();
+    const testHarness = harness({ [MERT_ID]: ["pulse"] });
     const mert = await login(testHarness, "mert.ikinci");
     const response = await testHarness.app.request("/me/gamification/pulse", {
       headers: mert.headers,
@@ -383,5 +390,100 @@ describe("POST /me/gamification/:simId/attempts", () => {
     for (const sim of parsedAll.data.data.sims) {
       expect(sim.weeklyGoal.currentXp).toBeGreaterThanOrEqual(0);
     }
+  });
+});
+
+describe("sim erişim yetkisi ve deneme kapsamı (API-03/API-04)", () => {
+  it("erişimi olmayan sim için okuma, liderlik ve yazma 403 forbidden döner", async () => {
+    const testHarness = harness();
+    const ali = await login(testHarness, "ali.veli");
+    for (const path of ["/me/gamification/opaca", "/me/gamification/opaca/leaderboard"]) {
+      const response = await testHarness.app.request(path, { headers: ali.headers });
+      expect(response.status, path).toBe(403);
+      expect(await response.json(), path).toMatchObject({ error: { code: "forbidden" } });
+    }
+    const write = await testHarness.app.request("/me/gamification/opaca/attempts", {
+      method: "POST",
+      headers: { ...ali.headers, "content-type": "application/json" },
+      body: JSON.stringify(attemptBody()),
+    });
+    expect(write.status).toBe(403);
+  });
+
+  it("aynı deneme kimliği başka sime yazılırsa 409; aynı sime tekrar 200 ve yol simId'si döner", async () => {
+    const testHarness = harness({ [ALI_ID]: ["pulse", "opaca"] });
+    const ali = await login(testHarness, "ali.veli");
+    const post = (simId: SimId) =>
+      testHarness.app.request(`/me/gamification/${simId}/attempts`, {
+        method: "POST",
+        headers: { ...ali.headers, "content-type": "application/json" },
+        body: JSON.stringify(attemptBody()),
+      });
+    expect((await post("pulse")).status).toBe(201);
+    const again = await post("pulse");
+    expect(again.status).toBe(200);
+    expect(await again.json()).toMatchObject({ data: { simId: "pulse" } });
+    const crossSim = await post("opaca");
+    expect(crossSim.status).toBe(409);
+    expect(await crossSim.json()).toMatchObject({ error: { code: "conflict" } });
+  });
+
+  it("başka kullanıcının deneme kimliği idempotent tekrar sayılmaz (409)", async () => {
+    const testHarness = harness({ [MERT_ID]: ["pulse"] });
+    const ali = await login(testHarness, "ali.veli");
+    const mert = await login(testHarness, "mert.ikinci");
+    const post = (headers: Record<string, string>) =>
+      testHarness.app.request("/me/gamification/pulse/attempts", {
+        method: "POST",
+        headers: { ...headers, "content-type": "application/json" },
+        body: JSON.stringify(attemptBody()),
+      });
+    expect((await post(ali.headers)).status).toBe(201);
+    expect((await post(mert.headers)).status).toBe(409);
+  });
+});
+
+describe("sunucu yetkili XP, düzey ve seri (API-05)", () => {
+  it("kapalı biçim düzey formülü levelForXp ile her XP'de aynıdır", () => {
+    for (let xp = 0; xp <= 60_000; xp += 7) {
+      expect(levelForXpClosedForm(xp), String(xp)).toBe(levelForXp(xp, DEFAULT_RULES).level);
+    }
+    for (let level = 1; level <= 40; level += 1) {
+      const start = (DEFAULT_RULES.level.unitXp * (level - 1) * level) / 2;
+      expect(levelForXpClosedForm(start), `sınır ${start}`).toBe(level);
+      if (start > 0) expect(levelForXpClosedForm(start - 1), `sınır-1 ${start}`).toBe(level - 1);
+    }
+  });
+
+  it("seri: aynı gün değişmez, ertesi gün artar, boşlukta 1'e döner, geç gelen eski gün etkisiz", () => {
+    const start = { current: 0, best: 0, lastDate: null };
+    const d1 = nextStreak(start, "2026-09-20");
+    expect(d1).toEqual({ current: 1, best: 1, lastDate: "2026-09-20" });
+    expect(nextStreak(d1, "2026-09-20")).toEqual(d1);
+    const d2 = nextStreak(d1, "2026-09-21");
+    expect(d2).toEqual({ current: 2, best: 2, lastDate: "2026-09-21" });
+    expect(nextStreak(d2, "2026-09-19")).toEqual(d2);
+    expect(nextStreak(d2, "2026-09-24")).toEqual({ current: 1, best: 2, lastDate: "2026-09-24" });
+  });
+
+  it("XP istemci özetinden değil sunucu kuralından gelir; profil oluşur, tekrar XP'yi çoğaltmaz", async () => {
+    const testHarness = harness({ [ALI_ID]: ["pulse", "opaca"] });
+    const ali = await login(testHarness, "ali.veli");
+    const post = () =>
+      testHarness.app.request("/me/gamification/opaca/attempts", {
+        method: "POST",
+        headers: { ...ali.headers, "content-type": "application/json" },
+        body: JSON.stringify(
+          attemptBody({ caseCount: 10, maxScore: 100, mode: "assessment", score: 80, summary: { xp: 999_999, ritim: 80 } }),
+        ),
+      });
+    expect((await post()).status).toBe(201);
+    expect((await post()).status).toBe(200);
+    const summary = await testHarness.app.request("/me/gamification/opaca", { headers: ali.headers });
+    const data = ((await summary.json()) as { data: { xp: number; level: number; streak: { current: number } } }).data;
+    // assessment: 10 vaka × 10 XP + 80 eşiği bonusu 20 = 120 XP (özetteki 999999 yok sayılır).
+    expect(data.xp).toBe(120);
+    expect(data.level).toBe(levelForXp(120, DEFAULT_RULES).level);
+    expect(data.streak.current).toBe(1);
   });
 });
