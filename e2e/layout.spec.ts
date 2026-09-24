@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { captureRouteScreenshot } from "./artifacts";
 import { openRoute, ROUTES, trackErrors } from "./helpers";
 
 interface LayoutAudit {
@@ -11,9 +12,10 @@ interface LayoutAudit {
 
 test.describe("yerleşim denetimi", () => {
   for (const route of ROUTES) {
-    test(`${route.label} (${route.hash})`, async ({ page }) => {
+    test(`${route.label} (${route.hash})`, async ({ page }, testInfo) => {
       const errors = trackErrors(page);
       await openRoute(page, route.hash);
+      await captureRouteScreenshot(page, testInfo.project.name, route.hash);
 
       const audit = await page.evaluate((): LayoutAudit => {
         const root = document.documentElement;
