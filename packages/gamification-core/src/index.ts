@@ -52,5 +52,12 @@ export type {
   RewardWinner,
   SimId,
 } from "./types";
+export type {
+  GamiLeaderboardRow,
+  GamiLeaderboardView,
+  GamiLearnActivityInput,
+  GamiRepository,
+} from "./repository";
+export { GamiRepositoryUnsupportedError } from "./repository";
 export { assessmentXp, attemptXp, learnXp, levelForXp, levelStartXp, practiceXp, totalXpFor } from "./xp";
 export type { LevelInfo } from "./xp";

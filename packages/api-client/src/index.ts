@@ -1187,3 +1187,10 @@ function toUsersSourceDetail(item: ApiAdminUserDetail): UsersSourceUserDetail {
     history: [],
   };
 }
+
+export {
+  createApiGamiRepository,
+  GamiRepositoryUnsupportedError,
+  type CreateApiGamiRepositoryOptions,
+  type EncodeAttemptInput,
+} from "./gamification-repo";
