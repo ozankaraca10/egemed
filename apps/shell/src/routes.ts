@@ -21,6 +21,7 @@ export type ResolvedRoute =
   | { kind: "adminUsers"; titleKey: TrKey }
   | { kind: "adminUserCreate"; titleKey: TrKey }
   | { kind: "adminUserDetail"; userId: string; titleKey: TrKey }
+  | { kind: "adminImport"; titleKey: TrKey }
   | { kind: "sim"; simId: SimulatorId; titleKey: TrKey }
   | { kind: "notFound"; path: string };
 
@@ -37,6 +38,9 @@ export const ADMIN_USERS_PATH = "/admin/kullanicilar" as const;
 
 /** Kullanıcı ekle alt yolu segmenti (T70, E3 §e.2): `#/admin/kullanicilar/yeni`. */
 export const ADMIN_USER_CREATE_SEGMENT = "yeni" as const;
+
+/** Toplu içe aktarma sihirbazı yolu (T71, E3 §e.4/§f). */
+export const ADMIN_IMPORT_PATH = "/admin/ice-aktar" as const;
 
 export const ROUTES: readonly RouteDef[] = [
   { id: "home", path: "/", labelKey: "shell.nav.home", titleKey: "shell.home.title" },
@@ -94,6 +98,7 @@ export function resolveRoute(hash: string): ResolvedRoute {
       return { kind: "adminUserDetail", titleKey: "admin.users.detail.routeTitle", userId };
     }
   }
+  if (path === ADMIN_IMPORT_PATH) return { kind: "adminImport", titleKey: "admin.import.title" };
   if (path === ADMIN_PATH) return { kind: "admin", titleKey: "admin.title" };
   if (path === ENTRY_PATHS.admin) return { kind: "entry", role: "admin", titleKey: "entry.admin.title" };
   if (path === ENTRY_PATHS.student) return { kind: "entry", role: "student", titleKey: "entry.student.title" };
@@ -143,13 +148,19 @@ export function adminUserCreateHref(): `#${string}` {
   return `#${ADMIN_USERS_PATH}/${ADMIN_USER_CREATE_SEGMENT}`;
 }
 
-/** Admin oturumu koruması yalnız yönetici rotalarında (panel + kullanıcılar + ekle/ayrıntı) uygulanır. */
+/** Toplu içe aktarma bağlantısı (T71, E3 §e.4); `AdminPage` "Toplu içe aktarma" kartı buraya gider. */
+export function adminImportHref(): `#${string}` {
+  return `#${ADMIN_IMPORT_PATH}`;
+}
+
+/** Admin oturumu koruması yalnız yönetici rotalarında (panel + kullanıcılar + ekle/ayrıntı + içe aktarma) uygulanır. */
 export function isAdminProtected(route: ResolvedRoute): boolean {
   return (
     route.kind === "admin" ||
     route.kind === "adminUsers" ||
     route.kind === "adminUserCreate" ||
-    route.kind === "adminUserDetail"
+    route.kind === "adminUserDetail" ||
+    route.kind === "adminImport"
   );
 }
 
