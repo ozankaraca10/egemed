@@ -27,6 +27,16 @@ export function simErrorTitle(simId: SimulatorId): string {
 }
 
 /**
+ * Kendi `<h1>`ini taşıyan gerçek sim modülleri (T14c: Opaca). Bu kimlikler
+ * hazır olduğunda kabuk çubuğu aynı metni `<h1>` yerine düz metin olarak
+ * çizer; sayfada tek `<h1>` kalır (WCAG 2.4.6/1.3.1). Yükleniyor/hata
+ * durumunda — modülün kendi başlığı henüz DOM'da değilken — çubuk `<h1>`i
+ * korur. Yer tutucu modüller (pulse/ausculta) kendi başlığını taşımadığı
+ * için bu kümeye girmez.
+ */
+const SIMS_WITH_OWN_HEADING: ReadonlySet<SimulatorId> = new Set(["opaca"]);
+
+/**
  * Sim rotası React host'u (ADR-006): `SimHost` bileşen ömrü boyunca tek
  * örnektir; modül `useEffect` içinde kapsayıcıya mount edilir, cleanup'ta
  * dispose edilir. Sim değişiminde yeni oturum kurulurken host önceki oturumu
@@ -62,13 +72,29 @@ export function SimRoute({ simId }: SimRouteProps): JSX.Element {
     const container = containerRef.current;
     if (host === null || container === null) return;
     host.mount(container, simId);
-    return () => host.dispose();
+    return () => {
+      // Gerçek React tabanlı modüller (Opaca) dispose'ta kendi kökünü
+      // `unmount()` eder; bu, kabuğun bu bileşeni kaldırdığı AYNI commit
+      // sırasında senkron çağrılırsa React "zaten render ediliyor" uyarısı
+      // verir (iç içe kök). Promise mikro görevine öteleme, çağrıyı geçerli
+      // commit tamamlandıktan sonraya taşır; host zaten idempotenttir.
+      // (`queueMicrotask` yerine `Promise.resolve().then` kullanılır: kök
+      // tsconfig programı DOM lib'i içermez ve `queueMicrotask` global'i
+      // orada çözümlenemez; `Promise` ES2022'nin bir parçasıdır.)
+      void Promise.resolve().then(() => host.dispose());
+    };
   }, [simId, attempt]);
 
+  const title = t(simTitleKey(simId));
+  const ownsHeading = status === "ready" && SIMS_WITH_OWN_HEADING.has(simId);
   return (
     <section aria-busy={status === "loading"} className="eg-shell-sim-page">
       <div className="eg-shell-sim-page__bar">
-        <h1 className="eg-shell-sim-page__title">{t(simTitleKey(simId))}</h1>
+        {ownsHeading ? (
+          <p className="eg-shell-sim-page__title">{title}</p>
+        ) : (
+          <h1 className="eg-shell-sim-page__title">{title}</h1>
+        )}
         <a className="eg-shell-sim-page__exit" href={routeHref("simulators")}>
           {t("shell.nav.simulators")}
         </a>

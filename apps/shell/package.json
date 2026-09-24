@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@egemed/sim-host": "workspace:*",
+    "@egemed/sim-opaca": "workspace:*",
     "@egemed/tokens": "workspace:*",
     "@egemed/ui": "workspace:*",
     "react": "19.3.0",

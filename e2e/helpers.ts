@@ -22,11 +22,21 @@ export function trackErrors(page: Page): string[] {
   return errors;
 }
 
-/** Hash rotasını açar; kabuk çizilene (sim rotasında yer tutucu gelene) dek bekler. */
+/**
+ * Hash rotasını açar; kabuk çizilene dek bekler. Opaca gerçek modüle
+ * bağlandı (T14c): kendi kökü (`.eg-sim-opaca`) beklenir. Pulse/ausculta
+ * S15a/S18a'ya dek yer tutucuda kaldığı için o kökü bekler.
+ */
 export async function openRoute(page: Page, hash: string): Promise<void> {
   await page.goto(`/${hash}`, { waitUntil: "networkidle" });
-  await expect(page.locator("main")).toBeVisible();
-  if (hash.startsWith("#/sims/")) {
+  // Opaca kendi `<main>` iskelesini kabuğun `<main id="icerik">`si içine
+  // gömer (iç içe, T14c); `.first()` her rotada kabuğun kendi bölgesini
+  // bekler.
+  await expect(page.locator("main").first()).toBeVisible();
+  if (hash === "#/sims/opaca") {
+    // Kaynak paket kapsayıcısı ve `App` kökü aynı sınıfı paylaşır (iç içe).
+    await expect(page.locator(".eg-sim-opaca").first()).toBeVisible();
+  } else if (hash.startsWith("#/sims/")) {
     await expect(page.locator(".eg-shell-sim-placeholder")).toBeVisible();
   }
 }

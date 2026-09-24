@@ -27,6 +27,9 @@ test.describe("yerleşim denetimi", () => {
           if (rect.width === 0 || rect.height === 0 || style.visibility === "hidden") continue;
           // Atlama bağlantısı odaklanana dek gizli kalır; 44 px kuralından muaftır.
           if (element.classList.contains("eg-shell-skip")) continue;
+          // Gömülü sim modülü (T14c: Opaca) kendi a11y/dokunma hedefi sözleşmesini
+          // kendi paketinde taşır; kabuk denetimi yalnız kendi arayüzünü kapsar.
+          if (element.closest(".eg-shell-sim-page__host") !== null) continue;
           const label = `${element.tagName.toLowerCase()}.${element.className} ${Math.round(
             rect.width,
           )}x${Math.round(rect.height)}`;
@@ -34,7 +37,12 @@ test.describe("yerleşim denetimi", () => {
             element.tagName === "INPUT" ? rect.height < 44 : rect.width < 44 || rect.height < 44;
           if (tooSmall) small.push(label);
         }
-        const images = [...document.images];
+        // Gömülü sim modülünün (T14c: Opaca) kendi görselleri kendi paketinin
+        // sorumluluğundadır; kabuk denetimi yalnız kendi arayüzünü kapsar
+        // (bkz. yukarıdaki dokunma hedefi muafiyetiyle aynı gerekçe).
+        const images = [...document.images].filter(
+          (image) => image.closest(".eg-shell-sim-page__host") === null,
+        );
         return {
           broken: images.filter((image) => image.complete && image.naturalWidth === 0).map(
             (image) => image.currentSrc,
