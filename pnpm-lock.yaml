@@ -130,6 +130,12 @@ importers:
         specifier: 4.6.5
         version: 4.6.5
 
+  packages/gami-catalogs:
+    dependencies:
+      '@egemed/gamification-core':
+        specifier: workspace:*
+        version: link:../gamification-core
+
   packages/gamification-core: {}
 
   packages/sim-ausculta:
@@ -186,6 +192,9 @@ importers:
 
   packages/sim-pulse:
     dependencies:
+      '@egemed/gami-catalogs':
+        specifier: workspace:*
+        version: link:../gami-catalogs
       '@egemed/gamification-core':
         specifier: workspace:*
         version: link:../gamification-core
