@@ -78,6 +78,33 @@ export { validateChallenge, scheduleChallengeCompletion } from "./ui/case/challe
 export type { ChallengeBeat, ChallengeGeometry, ChallengeTimerPort, ChallengeType } from "./ui/case/challenge";
 export { guideSteps, guideStepAt } from "./ui/case/guide";
 export type { GuidePhase, GuideStep } from "./ui/case/guide";
+export {
+  bindCaseActions,
+  buildCaseReport,
+  caseEndMarkup,
+  caseQuestionCardMarkup,
+  CASE_ACTIONS,
+  CASE_SESSION_SIZE,
+  caseStageMarkup,
+  createCaseFlowView,
+  createCaseQuestionView,
+  reviewCaseIndex,
+} from "./ui/case";
+export type {
+  BindCaseActionsOptions,
+  CaseAction,
+  CaseActionEvent,
+  CaseActionTarget,
+  CaseFeedbackView,
+  CaseFlowView,
+  CaseOptionView,
+  CaseQuestionMarkupOptions,
+  CaseQuestionView,
+  CaseReportRow,
+  CaseReportSource,
+  CaseReportView,
+  CaseStageMarkupOptions,
+} from "./ui/case";
 export { coronaryParticlePositions, drawHeartCanvas, observeHeartCanvas } from "./ui/sim/heartCanvas";
 export type {
   CoronaryParticle, HeartCanvasContext, HeartCanvasOptions, HeartCanvasSize, HeartResizeObserver,
