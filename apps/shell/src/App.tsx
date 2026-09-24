@@ -17,7 +17,7 @@ import { createSessionStore, sessionWhenEnabled } from "./devAuth";
 import { EntryPage } from "./EntryPage";
 import { NotFoundPage, pageFor } from "./pages";
 import { adminGuardHref, entryHref, isAdminProtected, type ResolvedRoute } from "./routes";
-import { shellSessionFromDev, type ShellSession } from "./session";
+import { sessionAllowsSim, shellSessionFromDev, type ShellSession } from "./session";
 import { ShellLayout } from "./ShellLayout";
 import { SimRoute } from "./SimRoute";
 import { useHashRoute } from "./useHashRoute";
@@ -50,7 +50,14 @@ function contentFor(route: ResolvedRoute, session: ShellSession | null, apiBaseU
   if (route.kind === "adminRoles") return <RolesPage />;
   if (route.kind === "adminAudit") return <AuditPage />;
   if (route.kind === "sim") {
-    return <SimRoute actorId={session?.actorId} apiBaseUrl={apiBaseUrl} simId={route.simId} />;
+    return (
+      <SimRoute
+        actorId={session?.actorId}
+        allowed={sessionAllowsSim(session, route.simId)}
+        apiBaseUrl={apiBaseUrl}
+        simId={route.simId}
+      />
+    );
   }
   return <NotFoundPage />;
 }
@@ -82,6 +89,9 @@ export function App(): JSX.Element | null {
       ? readDevSession()
       : null;
   const apiPending = apiEnabled && !apiReady;
+  const apiSessionRef = useRef(apiSession);
+  apiSessionRef.current = apiSession;
+  const routeKey = route.kind === "sim" ? `sim:${route.simId}` : route.kind === "page" ? route.route.id : route.kind;
   const guardHref = !apiPending && isAdminProtected(route) ? adminGuardHref(session) : null;
 
   useEffect(() => {
@@ -124,6 +134,22 @@ export function App(): JSX.Element | null {
       cancelled = true;
     };
   }, [apiBaseUrl]);
+
+  useEffect(() => {
+    // Oturum açıkken rota değişince `/auth/me` yenilenir; sim erişimi güncellenir.
+    if (apiBaseUrl === null || !import.meta.env.DEV || !apiReady || apiSessionRef.current === null) return undefined;
+    let cancelled = false;
+    void import("./apiAuth")
+      .then(async (module) => {
+        const auth = module.createShellApiAuth(apiBaseUrl);
+        const restored = auth === null ? null : await auth.restore();
+        if (!cancelled && restored !== null && apiSessionRef.current !== null) setApiSession(restored);
+      })
+      .catch(() => undefined);
+    return () => {
+      cancelled = true;
+    };
+  }, [apiBaseUrl, apiReady, routeKey]);
 
   useEffect(() => {
     document.title = `${t(titleKey)} · ${t("shell.brand")}`;

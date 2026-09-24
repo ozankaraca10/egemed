@@ -4,7 +4,12 @@ import { createApiShellDataSources } from "../../apps/shell/src/apiShellSources"
 import { createMockShellDataSources } from "../../apps/shell/src/dataSources";
 import type { ShellSession } from "../../apps/shell/src/session";
 
-const SESSION: ShellSession = { actorId: "00000000-0000-4000-8000-000000000001", displayName: "Ada", role: "student" };
+const SESSION: ShellSession = {
+  actorId: "00000000-0000-4000-8000-000000000001",
+  displayName: "Ada",
+  role: "student",
+  simAccess: ["pulse", "ausculta", "opaca"],
+};
 
 const ZERO_SIM = {
   attempts: [],

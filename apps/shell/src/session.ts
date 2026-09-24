@@ -1,14 +1,17 @@
 import type { EntryRole } from "./routes";
+import type { SimId } from "./SimCard";
 
 /**
  * T57 — kabuk oturumunun ortak görünümü. Sahte oturum (T35b) ve API oturumu
  * (`/auth/me`) aynı arayüzü taşır; `displayName` yalnız API oturumunda doludur,
  * sahte oturumda `null` kalır ve arayüz sentetik etiketi gösterir.
+ * `simAccess` yalnız API oturumunda doludur; sahte oturumda `null` (sınırsız).
  */
 export interface ShellSession {
   readonly role: EntryRole;
   readonly actorId: string;
   readonly displayName: string | null;
+  readonly simAccess: readonly SimId[] | null;
 }
 
 /** Sahte depodan okunan oturumun en dar yüzeyi (`devAuth.DevSession` yapısal olarak uyar). */
@@ -24,7 +27,13 @@ export interface ApiRoleLike {
 
 /** Sahte oturumu kabuk görünümüne çevirir; sentetik olduğu `displayName: null` ile bellidir. */
 export function shellSessionFromDev(session: DevSessionLike): ShellSession {
-  return { actorId: session.actorId, displayName: null, role: session.role };
+  return { actorId: session.actorId, displayName: null, role: session.role, simAccess: null };
+}
+
+/** Sahte oturum ve oturumsuz gezinme sınırsızdır; API oturumu listeye bakar. */
+export function sessionAllowsSim(session: ShellSession | null, simId: SimId): boolean {
+  if (session === null || session.simAccess === null) return true;
+  return session.simAccess.includes(simId);
 }
 
 /**
@@ -43,10 +52,12 @@ export function shellSessionFromMe(me: {
   readonly id: string;
   readonly displayName: string;
   readonly roles: readonly ApiRoleLike[];
+  readonly simAccess: readonly SimId[];
 }): ShellSession {
   return {
     actorId: me.id,
     displayName: me.displayName,
     role: shellRoleFromApiRoles(me.roles),
+    simAccess: [...me.simAccess],
   };
 }
