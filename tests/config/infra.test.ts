@@ -37,6 +37,10 @@ const EXPECTED_KEYS = [
   "LRS_ADMIN_PASS",
   "XAPI_ACTIVITY_BASE_IRI",
   "XAPI_ACTOR_HOMEPAGE",
+  // apps/api (T62) ortam sözleşmesi; değerler boş bırakılır.
+  "PORT",
+  "NODE_ENV",
+  "AUTH_DEV_ENABLED",
 ] as const;
 
 // Sır taraması: gizli anahtar, kimlik bilgisi taşıyan DSN ve AWS anahtarı.
