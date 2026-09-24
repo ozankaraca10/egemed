@@ -1,3 +1,6 @@
+import "@egemed/tokens/opaca.css";
+import "./styles/shell.css";
+
 import type { SimulatorId } from "@egemed/sim-host";
 
 export const SIM_ID = "opaca" satisfies SimulatorId;

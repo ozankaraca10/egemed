@@ -3,5 +3,8 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
-  "exports": { "./family-tokens.css": "./family-tokens.css" }
+  "exports": {
+    "./family-tokens.css": "./family-tokens.css",
+    "./opaca.css": "./opaca.css"
+  }
 }
