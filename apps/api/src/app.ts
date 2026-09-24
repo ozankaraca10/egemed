@@ -1,13 +1,16 @@
 import { Hono } from "hono";
 import type { Context } from "hono";
-import { statusForErrorCode, type ErrorCode, type ErrorResponse } from "@egemed/contracts";
+import { statusForErrorCode, type ErrorCode } from "@egemed/contracts";
 import { z } from "zod";
+import { registerAuthRoutes, type AuthDeps } from "./auth/routes";
+import { errorBody, validationDetails, type AppEnv } from "./http";
 
 /**
  * T62 — Hono iskeleti (E3 §d). Uygulama; veritabanı havuzuna ve saate yalnız
  * enjekte edilen dar arayüzlerle bağlanır, `Date.now()` kullanmaz. Tüm hatalar
  * `{ error: { code, details? } }` zarfını taşır; kodlar `@egemed/contracts`
- * kataloğundandır ve 500 yanıtı ayrıntı sızdırmaz.
+ * kataloğundandır ve 500 yanıtı ayrıntı sızdırmaz. T63 ile `/auth/*` uçları
+ * aynı bağlama (ve aynı `now` enjeksiyonuna) bağlanır.
  */
 
 /** Havuzun uygulamaya görünen dar yüzeyi; `db.ts` çıktısı bunu yapısal olarak karşılar. */
@@ -19,6 +22,7 @@ export interface DbHealth {
 export interface AppDeps {
   readonly db: DbHealth;
   readonly now: () => number;
+  readonly auth: AuthDeps;
 }
 
 /** Gelen `x-request-id` biçimi: başlık güvenli ASCII, 8–128 karakter. */
@@ -50,17 +54,6 @@ class ApiError extends Error {
   }
 }
 
-function errorBody(code: ErrorCode, details?: unknown): ErrorResponse {
-  return details === undefined ? { error: { code } } : { error: { code, details } };
-}
-
-/** Doğrulama ayrıntısı: yol ve kod raporlanır, gelen değer yanıta yazılmaz. */
-function validationDetails(error: z.ZodError): unknown {
-  return {
-    issues: error.issues.map((issue) => ({ code: issue.code, path: issue.path.map(String) })),
-  };
-}
-
 /** API yanıtlarının tamamına eklenen güvenlik başlıkları (E3 §d). */
 const SECURITY_HEADERS: Readonly<Record<string, string>> = {
   "Content-Security-Policy": "default-src 'none'; frame-ancestors 'none'",
@@ -75,8 +68,8 @@ function applySecurityHeaders(c: Context): void {
   }
 }
 
-export function createApp(deps: AppDeps): Hono {
-  const app = new Hono();
+export function createApp(deps: AppDeps): Hono<AppEnv> {
+  const app = new Hono<AppEnv>();
 
   app.use("*", async (c, next) => {
     applySecurityHeaders(c);
@@ -93,6 +86,7 @@ export function createApp(deps: AppDeps): Hono {
     // Geçersiz gelen kimlik yanıta yazılmaz; onun yerine yeni bir kimlik üretilir.
     const requestId = parsed !== null && parsed.success ? parsed.data : newRequestId(deps.now);
     c.header("x-request-id", requestId);
+    c.set("requestId", requestId);
     try {
       if (parsed !== null && !parsed.success) {
         throw new ApiError("invalid_request", validationDetails(parsed.error));
@@ -109,6 +103,8 @@ export function createApp(deps: AppDeps): Hono {
     await deps.db.query("select 1", []);
     return c.json({ status: "ok" });
   });
+
+  registerAuthRoutes(app, deps.auth, deps.now);
 
   app.notFound((c) => c.json(errorBody("not_found"), statusForErrorCode("not_found")));
 

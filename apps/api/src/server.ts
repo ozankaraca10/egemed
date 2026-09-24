@@ -1,6 +1,7 @@
 import { serve } from "@hono/node-server";
 import process from "node:process";
 import { createApp } from "./app.ts";
+import { createPgAuthRepos } from "./auth/repo.ts";
 import { createDb } from "./db.ts";
 import { loadEnv } from "./env.ts";
 
@@ -23,7 +24,18 @@ function serverNow(): number {
 }
 
 const env = loadEnv(process.env);
-const app = createApp({ db: createDb(env.DATABASE_URL), now: serverNow });
+const db = createDb(env.DATABASE_URL);
+const app = createApp({
+  db,
+  now: serverNow,
+  auth: {
+    ...createPgAuthRepos(db),
+    nodeEnv: env.NODE_ENV,
+    devEnabled: env.AUTH_DEV_ENABLED,
+    sessionIdleMs: env.SESSION_IDLE_MINUTES * 60_000,
+    sessionAbsoluteMs: env.SESSION_ABSOLUTE_HOURS * 3_600_000,
+  },
+});
 
 serve({ fetch: app.fetch, port: env.PORT });
 process.stdout.write(`egemed-api listening port=${env.PORT} env=${env.NODE_ENV}\n`);

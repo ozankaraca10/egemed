@@ -19,6 +19,9 @@ const envSchema = z.object({
     .enum(["true", "false"])
     .default("false")
     .transform((value) => value === "true"),
+  // Oturum süreleri (E3 §a): boşta kalma 30 dk, mutlak üst sınır 12 sa.
+  SESSION_IDLE_MINUTES: z.coerce.number().int().min(1).max(1440).default(30),
+  SESSION_ABSOLUTE_HOURS: z.coerce.number().int().min(1).max(168).default(12),
 });
 
 export type Env = z.infer<typeof envSchema>;
@@ -41,6 +44,8 @@ export function loadEnv(source: Record<string, string | undefined>): Env {
     PORT: emptyAsUndefined(source.PORT),
     NODE_ENV: emptyAsUndefined(source.NODE_ENV),
     AUTH_DEV_ENABLED: emptyAsUndefined(source.AUTH_DEV_ENABLED),
+    SESSION_IDLE_MINUTES: emptyAsUndefined(source.SESSION_IDLE_MINUTES),
+    SESSION_ABSOLUTE_HOURS: emptyAsUndefined(source.SESSION_ABSOLUTE_HOURS),
   });
   if (!parsed.success) {
     throw new EnvValidationError(
