@@ -216,3 +216,35 @@ describe("SimHost hata yolları", () => {
     expect([host.active, host.loading]).toEqual([null, null]);
   });
 });
+
+describe("SimHost release ve aktör bağlamı", () => {
+  it("eski mount'un ertelenmiş release'i yeni yüklemeyi iptal etmez (PLATFORM-01)", async () => {
+    const pulse = fake("pulse");
+    const opaca = fake("opaca");
+    const pending = deferred();
+    const { host, log, target } = harness((id) => (id === "pulse" ? Promise.resolve(pulse.module) : pending.promise));
+    const first = host.mount(target, "pulse");
+    await flush();
+    const second = host.mount(target, "opaca");
+    expect(pulse.disposeCount()).toBe(1);
+    host.release(first);
+    pending.resolve(opaca.module);
+    await flush();
+    expect(host.active).toBe("opaca");
+    expect(log.ready).toEqual(["pulse", "opaca"]);
+    host.release(second);
+    expect(host.active).toBeNull();
+    expect(opaca.disposeCount()).toBe(1);
+  });
+
+  it("actorId bağlama taşınır; verilmezse alan hiç yoktur", async () => {
+    const pulse = fake("pulse");
+    const { host, target } = harness(() => Promise.resolve(pulse.module));
+    host.mount(target, "pulse", { actorId: "dev-student-0001" });
+    await flush();
+    host.mount(target, "pulse");
+    await flush();
+    expect(pulse.contexts[0]?.actorId).toBe("dev-student-0001");
+    expect(pulse.contexts[1] !== undefined && "actorId" in pulse.contexts[1]).toBe(false);
+  });
+});

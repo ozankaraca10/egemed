@@ -22,7 +22,7 @@ export const ROUTES = [
 const LIVE_SIM_ROOT_SELECTORS: Readonly<Record<string, string>> = {
   "#/sims/ausculta": ".eg-sim-ausculta",
   "#/sims/opaca": ".eg-sim-opaca",
-  "#/sims/pulse": ".eg-sim-pulse",
+  "#/sims/pulse": ".egemed-pulse-runtime",
 };
 
 /** Konsol ve sayfa hatalarını toplar; testin sonunda boş olması beklenir. */

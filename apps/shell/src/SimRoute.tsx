@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type JSX } from "react";
 import { createSimHost, type SimHost, type SimulatorId } from "@egemed/sim-host";
+import { FULL_BLEED_SIMS } from "./sims/layout";
 import { t } from "@egemed/ui/i18n";
 import { shellNow } from "./now";
 import { routeHref, simTitleKey } from "./routes";
@@ -15,6 +16,8 @@ type SimRouteStatus = "loading" | "ready" | "error";
 
 export interface SimRouteProps {
   readonly simId: SimulatorId;
+  /** Oturumdaki kullanıcının takma kimliği; sim kayıtlarını kullanıcıya ayırır (PULSE-08). */
+  readonly actorId?: string | undefined;
 }
 
 /**
@@ -35,7 +38,8 @@ export function simErrorTitle(simId: SimulatorId): string {
  * değerlendirme/hakkında) tek bir `<h1>` çizer; kabuk çubuğu bu kümede
  * olduğu için hazır durumda kendi `<h1>`ini bırakır.
  */
-const SIMS_WITH_OWN_HEADING: ReadonlySet<SimulatorId> = new Set(["pulse"]);
+/** Hazır durumda kendi h1'ini veren simler; Pulse kaynak runtime'ı gölge DOM'da h2 kullanır (PULSE-00). */
+const SIMS_WITH_OWN_HEADING: ReadonlySet<SimulatorId> = new Set([]);
 
 /**
  * Sim rotası React host'u (ADR-006): `SimHost` bileşen ömrü boyunca tek
@@ -50,7 +54,7 @@ const SIMS_WITH_OWN_HEADING: ReadonlySet<SimulatorId> = new Set(["pulse"]);
  * kutusu host'un kardeşidir; yükleniyor/hata sırasında host gizlenmez, boş
  * kalır ve aşama ızgarasında aynı hücreyi paylaşır.
  */
-export function SimRoute({ simId }: SimRouteProps): JSX.Element {
+export function SimRoute({ actorId, simId }: SimRouteProps): JSX.Element {
   const containerRef = useRef<SimContainer | null>(null);
   const hostRef = useRef<SimHost | null>(null);
   const [status, setStatus] = useState<SimRouteStatus>("loading");
@@ -72,7 +76,12 @@ export function SimRoute({ simId }: SimRouteProps): JSX.Element {
     const host = hostRef.current;
     const container = containerRef.current;
     if (host === null || container === null) return;
-    host.mount(container, simId);
+    // Mount da mikro göreve ertelenir: önceki simin (ör. Opaca React kökü)
+    // kapanışı React render'ı sırasında değil, ondan sonra olur. Sıra korunur:
+    // önceki cleanup'ın `release`ı bu mount'tan önce kuyruğa girer.
+    const mounted = Promise.resolve().then(() =>
+      host.mount(container, simId, actorId === undefined ? undefined : { actorId }),
+    );
     return () => {
       // Gerçek React tabanlı modüller (Opaca) dispose'ta kendi kökünü
       // `unmount()` eder; bu, kabuğun bu bileşeni kaldırdığı AYNI commit
@@ -82,14 +91,19 @@ export function SimRoute({ simId }: SimRouteProps): JSX.Element {
       // (`queueMicrotask` yerine `Promise.resolve().then` kullanılır: kök
       // tsconfig programı DOM lib'i içermez ve `queueMicrotask` global'i
       // orada çözümlenemez; `Promise` ES2022'nin bir parçasıdır.)
-      void Promise.resolve().then(() => host.dispose());
+      // Ertelenmiş cleanup yalnız KENDİ mount'unu bırakır: sim doğrudan
+      // değiştirildiğinde yeni mount'u iptal etmez (PLATFORM-01).
+      void mounted.then((token) => host.release(token));
     };
-  }, [simId, attempt]);
+  }, [simId, actorId, attempt]);
 
   const title = t(simTitleKey(simId));
   const ownsHeading = status === "ready" && SIMS_WITH_OWN_HEADING.has(simId);
   return (
-    <section aria-busy={status === "loading"} className="eg-shell-sim-page">
+    <section
+      aria-busy={status === "loading"}
+      className={FULL_BLEED_SIMS.has(simId) ? "eg-shell-sim-page eg-shell-sim-page--bleed" : "eg-shell-sim-page"}
+    >
       <div className="eg-shell-sim-page__bar">
         {ownsHeading ? (
           <p className="eg-shell-sim-page__title">{title}</p>
