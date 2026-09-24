@@ -2,6 +2,8 @@
 .egemed-run/
 .env
 .env.local
+.env.prod
+infra/prod/.env.prod
 node_modules/
 dist/
 reports/

@@ -315,3 +315,210 @@ describe("depo sır taraması", () => {
     expect(readme).toMatch(/onay|veto/i);
   });
 });
+
+// --- T32: üretim dağıtım sözleşmesi (infra/prod) ----------------------------
+const dockerfilePath = "infra/prod/Dockerfile";
+const prodComposePath = "infra/prod/docker-compose.prod.yml";
+const prodEnvExamplePath = "infra/prod/.env.prod.example";
+const nginxPath = "infra/prod/nginx-egemed.conf";
+const gitignorePath = ".gitignore";
+
+const PROD_SERVICES = ["api", "postgres"] as const;
+// .env.prod.example'daki anahtar kümesi; değerler boştur (sır dosyada değildir).
+const PROD_ENV_KEYS = [
+  "DATABASE_URL",
+  "POSTGRES_USER",
+  "POSTGRES_PASSWORD",
+  "POSTGRES_DB",
+  "SSO_PROVIDER",
+  "SSO_STATE_SECRET",
+] as const;
+// Compose metninde DSN olarak birleşmemesi için DATABASE_URL ve şifre ayrı
+// interpolasyonlardan geçer; ikisi de zorunludur (:?).
+const PROD_SENSITIVE_KEYS = ["DATABASE_URL", "POSTGRES_PASSWORD"] as const;
+const PINNED_NODE_IMAGE_PATTERN = /^node:22\.\d+(\.\d+)?-alpine@sha256:[0-9a-f]{64}$/;
+
+const dockerfile = read(dockerfilePath);
+const prodCompose = read(prodComposePath);
+const prodEnvExample = read(prodEnvExamplePath);
+const nginx = read(nginxPath);
+const gitignore = read(gitignorePath);
+const prodBody = prodCompose.split(/^services:\s*$/m)[1] ?? "";
+// Servis adları yalnız services bölümünden okunur; sonraki üst düzey
+// `volumes:` bölümü servis listesine karışmasın.
+const prodServicesBody = prodBody.split(/^volumes:\s*$/m)[0] ?? prodBody;
+const prodServiceNames = prodServicesBody
+  .split("\n")
+  .filter((line) => /^ {2}\S/.test(line))
+  .map((line) => line.replace(/^ {2}/, "").replace(/:.*$/, ""));
+
+describe("üretim Dockerfile", () => {
+  it("taban imajı etiket ve digest ile sabitler, iki aşamada aynı imajı kullanır", () => {
+    const argValue = /^ARG NODE_IMAGE=(\S+)$/m.exec(dockerfile)?.[1] ?? "";
+    expect(argValue).toMatch(PINNED_NODE_IMAGE_PATTERN);
+    const fromLines = [...dockerfile.matchAll(/^FROM (.+)$/gm)].map((match) => match[1]!);
+    expect(fromLines).toHaveLength(2);
+    for (const line of fromLines) {
+      expect(line.startsWith("${NODE_IMAGE}"), line).toBe(true);
+    }
+    expect(dockerfile).not.toContain(":latest");
+  });
+
+  it("non-root çalışır: süreç node kullanıcısıdır, root izinli değildir", () => {
+    expect(dockerfile).toMatch(/^USER node$/m);
+    expect(dockerfile).not.toMatch(/^USER (root|0)\b/m);
+  });
+
+  it("yalnız prod bağımlılıklarını kilitli kurulumla alır", () => {
+    expect(dockerfile).toContain("install --prod --frozen-lockfile");
+  });
+
+  it("giriş noktası ts-register kancasıyla Node'dur", () => {
+    expect(dockerfile).toMatch(
+      /^CMD \["node", "--import", "\.\/ts-register\.mjs", "src\/server\.ts"\]$/m,
+    );
+  });
+
+  it("sır taşımaz", () => {
+    expect(SECRET_PATTERN.test(dockerfile)).toBe(false);
+  });
+});
+
+describe("üretim compose'u", () => {
+  it("tam olarak api ve postgres servislerini tanımlar", () => {
+    expect([...prodServiceNames].sort()).toEqual([...PROD_SERVICES].sort());
+  });
+
+  it("postgres imajını geliştirme compose'u ile aynı digest'te sabitler", () => {
+    const image = scalarValue(serviceBlock(prodBody, "postgres"), "image") ?? "";
+    expect(image).toMatch(/^postgres:\d+\.\d+-alpine@sha256:[0-9a-f]{64}$/);
+    expect(image).toBe(imageByService.postgres);
+  });
+
+  it("üretim verisini kalıcı kılar: adlandırılmış volume tanımlar", () => {
+    expect(prodBody).toContain("postgres-data:/var/lib/postgresql/data");
+    expect(prodCompose).toMatch(/^volumes:\s*$/m);
+  });
+
+  it("her servis sağlık kontrolü ve restart ilkesi taşır", () => {
+    for (const service of PROD_SERVICES) {
+      const block = serviceBlock(prodBody, service);
+      expect(block, service).toContain("healthcheck:");
+      expect(block, service).toContain("start_period:");
+      expect(block, service).toContain("restart: unless-stopped");
+    }
+  });
+
+  it("api, postgres'e yalnız service_healthy koşuluyla bağlıdır", () => {
+    expect(prodBody.split("depends_on:").length - 1).toBe(1);
+    const api = serviceBlock(prodBody, "api");
+    expect(api).toMatch(/depends_on:\n {6}postgres:\n {8}condition: service_healthy/);
+  });
+
+  it("hassas anahtarları yalnız ${VAR:?} interpolasyonuyla verir", () => {
+    for (const key of PROD_SENSITIVE_KEYS) {
+      const usages = [...prodCompose.matchAll(new RegExp(`\\$\\{(${key})(:\\?[^}]*)?\\}`, "g"))];
+      expect(usages, key).toHaveLength(1);
+      expect(usages[0]![2], key).toMatch(/^:\?/);
+    }
+    for (const match of prodCompose.matchAll(/^\s+([A-Z_]+): (.+)$/gm)) {
+      const [whole, name, value] = match;
+      if (name === "SSO_STATE_SECRET") {
+        // SSO seçilene dek boş varsayılan geçerli; env.ts açılışta zorlar.
+        expect(value, whole).toBe("${SSO_STATE_SECRET:-}");
+        continue;
+      }
+      if (!/PASSWORD|SECRET|_KEY|PASS$|TOKEN/.test(name!) || value === undefined) {
+        continue;
+      }
+      expect(value.trim(), whole).toMatch(/^\$\{[A-Z_]+:\?[^}]*\}$/);
+    }
+  });
+
+  it("interpolasyonlar ya zorunludur ya belgelenmiş boş varsayılan taşır", () => {
+    const interpolations = [...prodCompose.matchAll(/\$\{([A-Z_]+)(?:(:[-?])[^}]*)?\}/g)];
+    expect(interpolations.length).toBeGreaterThan(0);
+    for (const match of interpolations) {
+      const name = match[1]!;
+      if (["SSO_PROVIDER", "SSO_STATE_SECRET"].includes(name)) {
+        expect(match[2], name).toMatch(/^:-/);
+      } else {
+        expect(match[2], name).toBe(":?");
+      }
+    }
+  });
+
+  it("API'yi yalnız ana makineye yayınlar; ağa açık port yoktur", () => {
+    const ports = [...prodCompose.matchAll(/^ {6}- "(.+)"$/gm)].map((match) => match[1]!);
+    expect(ports).toEqual(["127.0.0.1:3000:3000"]);
+  });
+
+  it("AUTH_DEV_ENABLED kapalı ve NODE_ENV production sabitlenmiştir", () => {
+    expect(prodBody).toMatch(/^ {6}NODE_ENV: "production"$/m);
+    expect(prodBody).toMatch(/^ {6}AUTH_DEV_ENABLED: "false"$/m);
+    expect(prodBody).not.toMatch(/^ {6}AUTH_DEV_ENABLED: "true"$/m);
+  });
+
+  it("DSN ve parola metni compose'da görünmez", () => {
+    expect(prodCompose).not.toContain("postgres://");
+    expect(SECRET_PATTERN.test(prodCompose)).toBe(false);
+  });
+});
+
+describe(".env.prod.example", () => {
+  it("her satırı yorum ya da boş değerli anahtardır (değer yok)", () => {
+    for (const line of prodEnvExample.split("\n")) {
+      const trimmed = line.trim();
+      if (trimmed === "" || trimmed.startsWith("#")) {
+        continue;
+      }
+      expect(line).toMatch(/^[A-Z][A-Z0-9_]*=$/);
+    }
+  });
+
+  it("anahtar kümesi compose sözleşmesiyle birebir eşleşir", () => {
+    const keys = [...prodEnvExample.matchAll(/^([A-Z][A-Z0-9_]*)=$/gm)].map((match) => match[1]!);
+    expect([...keys].sort()).toEqual([...PROD_ENV_KEYS].sort());
+  });
+
+  it("sır taşımaz", () => {
+    expect(SECRET_PATTERN.test(prodEnvExample)).toBe(false);
+  });
+});
+
+describe("nginx-egemed.conf", () => {
+  it("kabuk statik, API vekil ve güvenlik başlıklarını taşır", () => {
+    expect(nginx).toContain("server_name egemed.ege.edu.tr");
+    expect(nginx).toContain("root /srv/egemed/shell-dist");
+    expect(nginx).toContain("proxy_pass http://127.0.0.1:3000/");
+    expect(nginx).toMatch(/Strict-Transport-Security/);
+    expect(nginx).toMatch(/X-Content-Type-Options "nosniff"/);
+    expect(nginx).toMatch(/Referrer-Policy "no-referrer"/);
+    expect(nginx).toMatch(/Content-Security-Policy/);
+    expect(nginx).toMatch(/frame-ancestors 'none'/);
+  });
+
+  it("önbellek sözleşmesini uygular: index no-cache, hash'li varlık uzun", () => {
+    expect(nginx).toMatch(/^ {4}location = \/index\.html \{$/m);
+    expect(nginx).toMatch(/Cache-Control "no-cache"/);
+    expect(nginx).toMatch(/^ {4}location \/assets\/ \{$/m);
+    expect(nginx).toContain("max-age=31536000, immutable");
+  });
+
+  it("gzip'i açar ve brotli çağrısını taşır", () => {
+    expect(nginx).toMatch(/^ {4}gzip on;$/m);
+    expect(nginx).toContain("brotli");
+  });
+
+  it("sır taşımaz", () => {
+    expect(SECRET_PATTERN.test(nginx)).toBe(false);
+  });
+});
+
+describe(".gitignore (T32)", () => {
+  it("gerçek üretim sır dosyasını izlemez, örneğini dışlamaz", () => {
+    expect(gitignore).toMatch(/^\.env\.prod$/m);
+    expect(gitignore).toMatch(/^infra\/prod\/\.env\.prod$/m);
+    expect(gitignore).not.toMatch(/^\.env\.prod\.example$/m);
+  });
+});
