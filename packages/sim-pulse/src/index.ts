@@ -2,6 +2,8 @@ import type { SimulatorId } from "@egemed/sim-host";
 
 export const SIM_ID = "pulse" satisfies SimulatorId;
 
+export { BeatEngine } from "./engine/beats";
+export type { AfProfile, Beat, BeatOptions, Checkpoint } from "./engine/beats";
 export {
   LEADS,
   MODES,
