@@ -334,6 +334,25 @@ html, body { margin: 0; }
 .eg-shell-import__mapTable th, .eg-shell-import__mapTable td { padding: var(--sp-2); border-bottom: 1px solid var(--border); text-align: left; }
 .eg-shell-import__errorList, .eg-shell-import__previewList { display: grid; gap: var(--sp-1); margin: 0; padding: 0; list-style: none; }
 
+/* --- Roller ve erişim (T73, E3 §e.6): framework mode-card (rol kartları)/
+   results-summary (sayı kutuları)/feedback (boş durum) bileşenlerinden
+   türetilir; matris `@egemed/ui` `Table` ile (salt okunur, mutasyon yok). --- */
+.eg-shell-roles__cards { display: flex; flex-wrap: wrap; gap: var(--sp-3); margin: var(--sp-3) 0; }
+.eg-shell-roles__count { margin: 0; color: var(--navy-900); font-size: var(--fs-xl); font-weight: 800; }
+.eg-shell-roles__sectionTitle { margin: var(--sp-4) 0 var(--sp-2); color: var(--navy-900); font-size: var(--fs-lg); }
+.eg-shell-roles__unitList, .eg-shell-roles__simList {
+  display: grid; gap: var(--sp-1); margin: 0; padding: 0; list-style: none; color: var(--text);
+}
+
+/* --- Denetim günlüğü (T73, E3 §e.7): `eg-shell-users__*` tablo/kart/filtre/
+   sayfalama sınıflarını yeniden kullanır (salt okunur ekran); yalnız "Ayrıntı"
+   düğmesi kendi sınıfını ister (44 px dokunma hedefi). --- */
+.eg-shell-audit__detail {
+  box-sizing: border-box; min-height: var(--eg-shell-touch-min); padding: 0 var(--sp-3);
+  background: var(--card); border: 1px solid var(--border-strong); border-radius: var(--r-md);
+  color: var(--blue-700); font: inherit; font-weight: 600; cursor: pointer;
+}
+
 .eg-shell-link {
   display: inline-flex; align-items: center; justify-content: center;
   min-height: 44px; padding: 0 var(--sp-4);

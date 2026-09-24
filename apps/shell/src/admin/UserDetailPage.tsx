@@ -15,6 +15,11 @@ import {
   type UsersDataSource,
 } from "./usersDataSource";
 
+/** Rolü ekler/çıkarır; kümeyi değiştirmeden yeni bir dizi döndürür (E3 §b: aynı kullanıcıda birden çok rol olabilir). */
+function toggleRole(roles: readonly UserRole[], role: UserRole): UserRole[] {
+  return roles.includes(role) ? roles.filter((candidate) => candidate !== role) : [...roles, role];
+}
+
 /** Kök tsconfig DOM lib'i taşımadığı için değişim olayı en dar arayüzle okunur (UsersPage.tsx deseni). */
 interface ChangeLike { target: unknown }
 function changeValue(event: ChangeLike): string {
@@ -22,7 +27,8 @@ function changeValue(event: ChangeLike): string {
 }
 
 export type UserDetailLoadStatus = "loading" | "ready" | "notFound" | "error";
-export type UserDetailAction = "suspend" | "activate" | "delete";
+/** `grantAdmin`/`revokeAdmin` (T73, E3 §b/§e.6): admin rolünü elle ver/kaldır; kendi rolünü kaldırma engellenir. */
+export type UserDetailAction = "suspend" | "activate" | "delete" | "grantAdmin" | "revokeAdmin";
 
 const ROLE_KEYS: Record<UserRole, TrKey> = {
   admin: "admin.users.role.admin",
@@ -47,16 +53,22 @@ const AUTH_KEYS: Record<UserAuthMethod, TrKey> = {
 const CONFIRM_TITLE_KEYS: Record<UserDetailAction, TrKey> = {
   activate: "admin.users.detail.confirm.activate.title",
   delete: "admin.users.detail.confirm.delete.title",
+  grantAdmin: "admin.users.detail.confirm.grantAdmin.title",
+  revokeAdmin: "admin.users.detail.confirm.revokeAdmin.title",
   suspend: "admin.users.detail.confirm.suspend.title",
 };
 const CONFIRM_BODY_KEYS: Record<UserDetailAction, TrKey> = {
   activate: "admin.users.detail.confirm.activate.body",
   delete: "admin.users.detail.confirm.delete.body",
+  grantAdmin: "admin.users.detail.confirm.grantAdmin.body",
+  revokeAdmin: "admin.users.detail.confirm.revokeAdmin.body",
   suspend: "admin.users.detail.confirm.suspend.body",
 };
 const CONFIRM_APPLY_ACTION_KEYS: Record<UserDetailAction, TrKey> = {
   activate: "admin.users.detail.action.activate",
   delete: "admin.users.detail.action.delete",
+  grantAdmin: "admin.users.detail.action.grantAdmin",
+  revokeAdmin: "admin.users.detail.action.revokeAdmin",
   suspend: "admin.users.detail.action.suspend",
 };
 
@@ -81,13 +93,35 @@ function GeneralPanel({ detail }: { readonly detail: AdminUserDetail }): JSX.Ele
   );
 }
 
-function RolesPanel({ detail }: { readonly detail: AdminUserDetail }): JSX.Element {
+/**
+ * Roller ve erişim sekmesi (E3 §b/§e.6): admin rolü burada elle
+ * ver/kaldırılır (T73, `PUT /admin/users/:id/roles`); kendi admin rolünü
+ * kaldırma girişimi engellenir (`isSelfAdmin`).
+ */
+function RolesPanel({
+  detail,
+  isSelfAdmin,
+  onRequestAction,
+}: {
+  readonly detail: AdminUserDetail;
+  readonly isSelfAdmin: boolean;
+  readonly onRequestAction: (action: UserDetailAction) => void;
+}): JSX.Element {
+  const isAdmin = detail.roles.includes("admin");
   return (
     <div className="eg-shell-userdetail__roles">
       <p className="eg-shell-userdetail__rolesTitle">{t("admin.users.detail.roles.title")}</p>
       <ul className="eg-shell-userdetail__badgeList">
         {detail.roles.map((role) => <li key={role}><Badge>{t(ROLE_KEYS[role])}</Badge></li>)}
       </ul>
+      <button
+        disabled={isAdmin && isSelfAdmin}
+        onClick={() => onRequestAction(isAdmin ? "revokeAdmin" : "grantAdmin")}
+        type="button"
+      >
+        {t(isAdmin ? "admin.users.detail.roles.revoke" : "admin.users.detail.roles.grant")}
+      </button>
+      {isAdmin && isSelfAdmin && <p role="alert">{t("admin.users.detail.roles.selfGuard")}</p>}
       <p className="eg-shell-userdetail__rolesTitle">{t("admin.users.detail.roles.access")}</p>
       {detail.simAccess.length === 0 ? (
         <p>{t("admin.users.detail.roles.access.empty")}</p>
@@ -131,6 +165,8 @@ function HistoryPanel({ detail }: { readonly detail: AdminUserDetail }): JSX.Ele
 export interface UserDetailViewProps {
   readonly status: UserDetailLoadStatus;
   readonly detail: AdminUserDetail | null;
+  /** Geçerli oturumun kimliği; kendi admin rolünü kaldırma düğmesini devre dışı bırakmak için (T73). */
+  readonly currentUserId: string | null;
   readonly pendingAction: UserDetailAction | null;
   readonly deleteConfirmText: string;
   readonly actionError: boolean;
@@ -149,6 +185,7 @@ export interface UserDetailViewProps {
 export function UserDetailView({
   status,
   detail,
+  currentUserId,
   pendingAction,
   deleteConfirmText,
   actionError,
@@ -204,7 +241,13 @@ export function UserDetailView({
           <Tabs
             items={[
               { id: "general", label: t("admin.users.detail.tab.general"), panel: <GeneralPanel detail={detail} /> },
-              { id: "roles", label: t("admin.users.detail.tab.roles"), panel: <RolesPanel detail={detail} /> },
+              {
+                id: "roles",
+                label: t("admin.users.detail.tab.roles"),
+                panel: (
+                  <RolesPanel detail={detail} isSelfAdmin={detail.id === currentUserId} onRequestAction={onRequestAction} />
+                ),
+              },
               { id: "gamification", label: t("admin.users.detail.tab.gamification"), panel: <GamificationPanel detail={detail} /> },
               { id: "history", label: t("admin.users.detail.tab.history"), panel: <HistoryPanel detail={detail} /> },
             ] satisfies readonly TabItem[]}
@@ -253,11 +296,14 @@ function defaultSource(): UsersDataSource {
 
 export interface UserDetailPageProps {
   readonly userId: string;
+  /** Geçerli oturumun kimliği; kendi admin rolünü kaldırma engeli için (T73, `App.tsx` `session.actorId` geçirir). */
+  readonly currentUserId?: string | null;
   /** Testte/gelecekte gerçek API kaynağıyla değiştirmek için enjekte edilir. */
   readonly dataSource?: UsersDataSource;
 }
 
-const ACTION_TO_STATUS: Record<UserDetailAction, UserStatus> = {
+/** `grantAdmin`/`revokeAdmin` `ACTION_TO_STATUS`te yoktur; `confirmAction` bunları `setRoles` ile ayrı işler. */
+const ACTION_TO_STATUS: Partial<Record<UserDetailAction, UserStatus>> = {
   activate: "active",
   delete: "deleted",
   suspend: "suspended",
@@ -267,7 +313,7 @@ const ACTION_TO_STATUS: Record<UserDetailAction, UserStatus> = {
  * Kullanıcı ayrıntı/düzenle kabuk rotası (`#/admin/kullanicilar/:id`, T70). Veri
  * `UsersDataSource.get`/`update` üzerinden enjekte edilir; çizim `UserDetailView`'dedir.
  */
-export function UserDetailPage({ userId, dataSource }: UserDetailPageProps): JSX.Element {
+export function UserDetailPage({ userId, currentUserId = null, dataSource }: UserDetailPageProps): JSX.Element {
   const sourceRef = useRef<UsersDataSource | null>(null);
   if (sourceRef.current === null) sourceRef.current = dataSource ?? defaultSource();
 
@@ -309,19 +355,27 @@ export function UserDetailPage({ userId, dataSource }: UserDetailPageProps): JSX
   function confirmAction(): void {
     if (pendingAction === null || detail === null) return;
     setActionError(false);
-    sourceRef.current?.update(detail.id, { status: ACTION_TO_STATUS[pendingAction] }).then(
-      (updated) => {
-        setDetail(updated);
-        setPendingAction(null);
-        setDeleteConfirmText("");
-      },
-      () => setActionError(true),
-    );
+    function onSuccess(updated: AdminUserDetail): void {
+      setDetail(updated);
+      setPendingAction(null);
+      setDeleteConfirmText("");
+    }
+    function onError(): void {
+      setActionError(true);
+    }
+    if (pendingAction === "grantAdmin" || pendingAction === "revokeAdmin") {
+      sourceRef.current?.setRoles(detail.id, toggleRole(detail.roles, "admin"), currentUserId).then(onSuccess, onError);
+      return;
+    }
+    const status = ACTION_TO_STATUS[pendingAction];
+    if (status === undefined) return;
+    sourceRef.current?.update(detail.id, { status }).then(onSuccess, onError);
   }
 
   return (
     <UserDetailView
       actionError={actionError}
+      currentUserId={currentUserId}
       deleteConfirmText={deleteConfirmText}
       detail={detail}
       onCancelAction={cancelAction}

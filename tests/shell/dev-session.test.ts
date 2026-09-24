@@ -14,9 +14,11 @@ import {
 import { EntryPage, submitDevEntry, type DevSubmitHandlers } from "../../apps/shell/src/EntryPage";
 import {
   ADMIN_PATH,
+  adminAuditHref,
   adminGuardHref,
   adminHref,
   adminImportHref,
+  adminRolesHref,
   adminUsersHref,
   entryRedirectHref,
   ROUTES,
@@ -141,15 +143,16 @@ describe("#/admin rotası ve AdminPage", () => {
     );
     expect(nav).not.toContain('href="#/admin"');
   });
-  it("tek h1, giriş metni, altı bölüm gösterir; 'Kullanıcılar'/'Toplu içe aktarma' bağlanır, kalanı 'Yakında' rozetlidir", () => {
+  it("tek h1, giriş metni, yedi bölüm gösterir; 'Kullanıcılar'/'Roller ve erişim'/'Toplu içe aktarma'/'Denetim günlüğü' bağlanır, kalanı 'Yakında' rozetlidir", () => {
     const html = renderToStaticMarkup(createElement(AdminPage));
     expect((html.match(/<h1\b/g) ?? []).length).toBe(1);
     expect(html).toContain(t("admin.title"));
     expect(html).toContain(t("admin.intro"));
-    expect((html.match(/class="eg-card"/g) ?? []).length).toBe(6);
+    expect((html.match(/class="eg-card"/g) ?? []).length).toBe(7);
     for (const key of [
       "admin.section.overview",
       "admin.section.users",
+      "admin.section.rolesAccess",
       "admin.section.roles",
       "admin.section.sims",
       "admin.section.integrations",
@@ -157,12 +160,15 @@ describe("#/admin rotası ve AdminPage", () => {
     ] as const) {
       expect(html).toContain(t(key));
     }
-    // Dört bölüm hâlâ "Yakında"; "Kullanıcılar" ve "Toplu içe aktarma" (T71) gerçek bağlantıya sahiptir.
-    expect(html.split(t("admin.soon")).length - 1).toBe(4);
+    // Üç bölüm hâlâ "Yakında"; "Kullanıcılar", "Roller ve erişim", "Toplu içe aktarma" (T71) ve
+    // "Denetim günlüğü" (T73) gerçek bağlantıya sahiptir.
+    expect(html.split(t("admin.soon")).length - 1).toBe(3);
     expect(html).not.toContain("<button");
-    expect((html.match(/<a\b/g) ?? []).length).toBe(2);
+    expect((html.match(/<a\b/g) ?? []).length).toBe(4);
     expect(html).toContain(`<a class="eg-shell-admin__link" href="${adminUsersHref()}">${t("admin.users.open")}</a>`);
+    expect(html).toContain(`<a class="eg-shell-admin__link" href="${adminRolesHref()}">${t("admin.roles.open")}</a>`);
     expect(html).toContain(`<a class="eg-shell-admin__link" href="${adminImportHref()}">${t("admin.import.open")}</a>`);
+    expect(html).toContain(`<a class="eg-shell-admin__link" href="${adminAuditHref()}">${t("admin.audit.open")}</a>`);
   });
 });
 

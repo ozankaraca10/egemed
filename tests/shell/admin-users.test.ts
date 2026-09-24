@@ -95,9 +95,21 @@ function findAllCheckboxProps(tree: ReactElement): { onChange: () => void }[] {
 
 function baseViewProps(overrides: Partial<UsersListViewProps>): UsersListViewProps {
   return {
+    bulkApplyResult: null,
+    bulkApplyStatus: "idle",
+    bulkOpen: false,
+    bulkOperation: "set_status",
+    bulkPreview: null,
+    bulkPreviewStatus: "idle",
+    bulkValue: "active",
+    onBulkApply: noop,
+    onBulkOperationChange: noop,
+    onBulkValueChange: noop,
     onClearFilters: noop,
     onClearSelection: noop,
+    onCloseBulk: noop,
     onFilterChange: noop,
+    onOpenBulk: noop,
     onPageChange: noop,
     onRetry: noop,
     onSearchChange: noop,
@@ -370,8 +382,7 @@ describe("UsersListView işaretlemesi", () => {
     );
     expect(two).toContain(`<p aria-live="polite" class="eg-visually-hidden">2 ${t("admin.users.selection.suffix")}</p>`);
     expect(two).toContain("eg-shell-users__bulkbar");
-    expect(two).toContain(t("admin.users.bulk.activate"));
-    expect(two).toContain(t("admin.users.bulk.suspend"));
+    expect(two).toContain(t("admin.users.bulk.open"));
   });
 
   it("Escape tuşu seçim temizleme geri çağrısını tetikler (klavye sözleşmesi)", () => {

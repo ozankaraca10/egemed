@@ -22,6 +22,8 @@ export type ResolvedRoute =
   | { kind: "adminUserCreate"; titleKey: TrKey }
   | { kind: "adminUserDetail"; userId: string; titleKey: TrKey }
   | { kind: "adminImport"; titleKey: TrKey }
+  | { kind: "adminRoles"; titleKey: TrKey }
+  | { kind: "adminAudit"; titleKey: TrKey }
   | { kind: "sim"; simId: SimulatorId; titleKey: TrKey }
   | { kind: "notFound"; path: string };
 
@@ -41,6 +43,12 @@ export const ADMIN_USER_CREATE_SEGMENT = "yeni" as const;
 
 /** Toplu içe aktarma sihirbazı yolu (T71, E3 §e.4/§f). */
 export const ADMIN_IMPORT_PATH = "/admin/ice-aktar" as const;
+
+/** Roller ve erişim yolu (T73, E3 §e.6); salt okunur özet + yetki matrisi. */
+export const ADMIN_ROLES_PATH = "/admin/roller" as const;
+
+/** Denetim günlüğü yolu (T73, E3 §e.7); salt okunur, filtre + sayfalama. */
+export const ADMIN_AUDIT_PATH = "/admin/denetim" as const;
 
 export const ROUTES: readonly RouteDef[] = [
   { id: "home", path: "/", labelKey: "shell.nav.home", titleKey: "shell.home.title" },
@@ -99,6 +107,8 @@ export function resolveRoute(hash: string): ResolvedRoute {
     }
   }
   if (path === ADMIN_IMPORT_PATH) return { kind: "adminImport", titleKey: "admin.import.title" };
+  if (path === ADMIN_ROLES_PATH) return { kind: "adminRoles", titleKey: "admin.roles.title" };
+  if (path === ADMIN_AUDIT_PATH) return { kind: "adminAudit", titleKey: "admin.audit.title" };
   if (path === ADMIN_PATH) return { kind: "admin", titleKey: "admin.title" };
   if (path === ENTRY_PATHS.admin) return { kind: "entry", role: "admin", titleKey: "entry.admin.title" };
   if (path === ENTRY_PATHS.student) return { kind: "entry", role: "student", titleKey: "entry.student.title" };
@@ -153,14 +163,26 @@ export function adminImportHref(): `#${string}` {
   return `#${ADMIN_IMPORT_PATH}`;
 }
 
-/** Admin oturumu koruması yalnız yönetici rotalarında (panel + kullanıcılar + ekle/ayrıntı + içe aktarma) uygulanır. */
+/** Roller ve erişim bağlantısı (T73, E3 §e.6); `AdminPage` "Roller ve erişim" kartı buraya gider. */
+export function adminRolesHref(): `#${string}` {
+  return `#${ADMIN_ROLES_PATH}`;
+}
+
+/** Denetim günlüğü bağlantısı (T73, E3 §e.7); `AdminPage` "Denetim günlüğü" kartı buraya gider. */
+export function adminAuditHref(): `#${string}` {
+  return `#${ADMIN_AUDIT_PATH}`;
+}
+
+/** Admin oturumu koruması yalnız yönetici rotalarında (panel + kullanıcılar + ekle/ayrıntı + içe aktarma + roller + denetim) uygulanır. */
 export function isAdminProtected(route: ResolvedRoute): boolean {
   return (
     route.kind === "admin" ||
     route.kind === "adminUsers" ||
     route.kind === "adminUserCreate" ||
     route.kind === "adminUserDetail" ||
-    route.kind === "adminImport"
+    route.kind === "adminImport" ||
+    route.kind === "adminRoles" ||
+    route.kind === "adminAudit"
   );
 }
 
