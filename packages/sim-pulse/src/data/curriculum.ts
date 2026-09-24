@@ -1,0 +1,23638 @@
+import type { Lead, Mode } from "../engine/shapes";
+
+export interface PulseCurriculumVital {
+  readonly k: string;
+  readonly v: string;
+}
+
+export interface PulseCurriculumEcgOptions {
+  readonly afProfile?: "rapid" | "controlled";
+}
+
+export interface PulseCurriculumEcg {
+  readonly mode: Mode;
+  readonly options: PulseCurriculumEcgOptions;
+  readonly leads: readonly Lead[];
+  readonly start: number;
+  readonly seconds: number;
+}
+
+export interface PulseCurriculumItem {
+  readonly id: string;
+  readonly mode: Mode;
+  readonly title: string;
+  readonly ariaLabel: string;
+  readonly stem: string;
+  readonly question: string;
+  readonly text: string;
+  readonly vitals: readonly PulseCurriculumVital[];
+  readonly options: readonly [string, string, string, string, string];
+  readonly correct: number;
+  readonly explanations: readonly [string, string, string, string, string];
+  readonly feedback: string;
+  readonly objectiveIds: readonly string[];
+  readonly sourceIds: readonly string[];
+  readonly decisionId: string;
+  readonly note: string;
+  readonly ecg: PulseCurriculumEcg;
+}
+
+interface AuthoredCurriculumData {
+  readonly version: number;
+  readonly sessionSize: number;
+  readonly labels: Readonly<Record<Mode, string>>;
+  readonly cases: readonly PulseCurriculumItem[];
+  readonly questions: readonly PulseCurriculumItem[];
+  readonly limitations: string;
+}
+
+export interface PulseCurriculumData extends AuthoredCurriculumData {
+  readonly byId: Readonly<Record<string, PulseCurriculumItem | undefined>>;
+}
+
+const authoredCurriculum = {
+  "version": 8,
+  "sessionSize": 10,
+  "labels": {
+    "normal": "Normal sinüs ritmi",
+    "af": "Atriyal fibrilasyon",
+    "stemi": "Anterior ST yükselmesi örneği",
+    "pvc": "Ventriküler erken atım",
+    "svt": "Düzenli dar kompleks taşikardi",
+    "inferior": "İnferior ST yükselmesi örneği",
+    "vt": "Monomorfik VT örneği",
+    "vf": "VF elektriksel örneği",
+    "pat": "Fokal atriyal taşikardi",
+    "flutter": "2:1 flutter örneği",
+    "sintach": "Sinüs taşikardisi",
+    "lbbb": "LBBB örneği",
+    "rbbb": "RBBB örneği"
+  },
+  "cases": [
+    {
+      "id": "C001",
+      "mode": "normal",
+      "title": "Sentetik vaka C001",
+      "ariaLabel": "C001 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "22 yaşında kadın hasta. Başvuru: üniversite sağlık taramasında yakınması yok. Monitörde düzenli, dar QRS’li bir ritim izleniyor; her kompleksten önce aynı yönlü bir P dalgası var.",
+      "question": "Bu bulgularla en uyumlu örüntü hangisidir?",
+      "text": "Bu bulgularla en uyumlu örüntü hangisidir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "AV düğüm taşikardisi",
+        "Normal sinüs ritmi",
+        "Atriyal fibrilasyon",
+        "Fokal atriyal taşikardi",
+        "Atriyal flutter"
+      ],
+      "correct": 1,
+      "explanations": [
+        "Bu tanı hızlı ritimde düşünülür; burada hız normal.",
+        "Düzenli QRS ve her atımda aynı P: sinüs ritmi.",
+        "AF'de P yok ve R-R düzensizdir; burada ikisi de yok.",
+        "Fokal AT'de P ekseni sinüsten farklıdır; burada normal.",
+        "Flutter'da sürekli hızlı taban dalgası olur; burada yok."
+      ],
+      "feedback": "Düzenli QRS ve her atımda aynı P: sinüs ritmi.",
+      "objectiveIds": [
+        "O2"
+      ],
+      "sourceIds": [
+        "ECG",
+        "CYCLE"
+      ],
+      "decisionId": "sinus",
+      "note": "",
+      "ecg": {
+        "mode": "normal",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V3"
+        ],
+        "start": 0.5,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C002",
+      "mode": "normal",
+      "title": "Sentetik vaka C002",
+      "ariaLabel": "C002 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "35 yaşında erkek hasta. Başvuru: iş yeri periyodik muayenesinde yakınması yok. Düzenli dar kompleksli ritimde P dalgasının yönü ayrıca değerlendiriliyor.",
+      "question": "Bu P dalgası için hangi yön dağılımı destekleyicidir?",
+      "text": "Bu P dalgası için hangi yön dağılımı destekleyicidir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "Düzensiz ince dalga: AF",
+        "Geniş S: dal bloğu bulgusu",
+        "II pozitif, aVR negatif P: sinüs ekseni",
+        "Sürekli taban dalgası: flutter",
+        "İnferior ters P: ektopik eksen"
+      ],
+      "correct": 2,
+      "explanations": [
+        "Burada düzenli tek P var, AF değil.",
+        "Bu P ekseni sorusu, QRS şekli değil.",
+        "Bu yön sinüs kaynaklı P ile uyumludur.",
+        "Burada ayrı P var, sürekli dalga yok.",
+        "Bu örnekte P ekseni normal, ters değil."
+      ],
+      "feedback": "Bu yön sinüs kaynaklı P ile uyumludur.",
+      "objectiveIds": [
+        "O1"
+      ],
+      "sourceIds": [
+        "ECG",
+        "CYCLE"
+      ],
+      "decisionId": "sinusAxis",
+      "note": "",
+      "ecg": {
+        "mode": "normal",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V3"
+        ],
+        "start": 0.58,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C003",
+      "mode": "normal",
+      "title": "Sentetik vaka C003",
+      "ariaLabel": "C003 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "58 yaşında kadın hasta. Başvuru: ameliyat öncesi rutin değerlendirmede. Yakınması yok; muayene ve vitaller normal.",
+      "question": "Bu klinik tabloda hangi yaklaşım uygundur?",
+      "text": "Bu klinik tabloda hangi yaklaşım uygundur?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "Asemptomatik normal EKG: rutin değerlendirme ve izlem",
+        "Önce kesin mekanizma sonra hasta bakılır",
+        "Semptomla acil değerlendirme gerekir",
+        "Normal EKG gelecekteki hastalığı dışlar",
+        "Tek derivasyon kesinlik verir"
+      ],
+      "correct": 0,
+      "explanations": [
+        "Yakınmasız hastada normal sinüs ritmi acil işlem gerektirmez; klinik bağlamla rutin izlem sürer.",
+        "Hasta durumu mekanizmadan önce değerlendirilir.",
+        "Tabloda acil semptom yok; aciliyet bulgu ve belirtiye bağlanır.",
+        "Tek normal EKG ileride gelişecek hastalığı dışlamaz.",
+        "Değerlendirme tek derivasyonla tamamlanmaz."
+      ],
+      "feedback": "Yakınmasız hastada normal sinüs ritmi acil işlem gerektirmez; klinik bağlamla rutin izlem sürer.",
+      "objectiveIds": [
+        "O5"
+      ],
+      "sourceIds": [
+        "ECG",
+        "CYCLE"
+      ],
+      "decisionId": "routineNormal",
+      "note": "",
+      "ecg": {
+        "mode": "normal",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V3"
+        ],
+        "start": 0.66,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C004",
+      "mode": "normal",
+      "title": "Sentetik vaka C004",
+      "ariaLabel": "C004 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "41 yaşında erkek hasta. Başvuru: ehliyet sağlık raporu için başvuruyor. İki ardışık R tepesi arası 800 ms ölçülüyor.",
+      "question": "Bu döngü süresiyle elektriksel hız yaklaşık kaçtır?",
+      "text": "Bu döngü süresiyle elektriksel hız yaklaşık kaçtır?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "120/dk",
+        "60/dk",
+        "150/dk",
+        "90/dk",
+        "75/dk"
+      ],
+      "correct": 4,
+      "explanations": [
+        "120/dk 500 ms gerektirir.",
+        "60/dk 1000 ms gerektirir;800 ms değil.",
+        "150/dk 400 ms gerektirir.",
+        "90/dk yaklaşık 667 ms gerektirir.",
+        "R–R 800 ms ise 60/0,8=75/dk elektriksel hızdır."
+      ],
+      "feedback": "R–R 800 ms ise 60/0,8=75/dk elektriksel hızdır.",
+      "objectiveIds": [
+        "O6"
+      ],
+      "sourceIds": [
+        "ECG",
+        "CYCLE"
+      ],
+      "decisionId": "rr800",
+      "note": "",
+      "ecg": {
+        "mode": "normal",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V3"
+        ],
+        "start": 0.74,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C005",
+      "mode": "normal",
+      "title": "Sentetik vaka C005",
+      "ariaLabel": "C005 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "29 yaşında kadın hasta. Başvuru: gebelik öncesi danışmanlıkta rutin kontrol. Kaliperle P’nin ilk sapması QRS’den 215 ms önce, QRS’in ilk sapması 40 ms önce işaretleniyor.",
+      "question": "Bu ölçümlerle PR aralığı kaç milisaniyedir?",
+      "text": "Bu ölçümlerle PR aralığı kaç milisaniyedir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "255 ms",
+        "215 ms",
+        "130 ms",
+        "155 ms",
+        "175 ms"
+      ],
+      "correct": 4,
+      "explanations": [
+        "255 ms P başlangıcından QRS sonuna ölçüm hatasıdır.",
+        "215 ms P başlangıcından R tepesine ölçüm hatasıdır.",
+        "130 ms P merkezinden QRS başlangıcına gitme hatasıdır.",
+        "155 ms verilen iki başlangıcın farkı değildir.",
+        "P ilk sapması−215 ms, QRS ilk sapması−40 ms: fark 175 ms."
+      ],
+      "feedback": "P ilk sapması−215 ms, QRS ilk sapması−40 ms: fark 175 ms.",
+      "objectiveIds": [
+        "O6"
+      ],
+      "sourceIds": [
+        "ECG",
+        "CYCLE"
+      ],
+      "decisionId": "pr175",
+      "note": "",
+      "ecg": {
+        "mode": "normal",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V3"
+        ],
+        "start": 0.8200000000000001,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C006",
+      "mode": "normal",
+      "title": "Sentetik vaka C006",
+      "ariaLabel": "C006 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "63 yaşında erkek hasta. Başvuru: huzurevi yıllık sağlık taramasında. Dar bir kompleksin ilk sapması 40 ms önce, son dönüşü 40 ms sonra işaretleniyor.",
+      "question": "Bu ölçümlerle QRS süresi kaç milisaniyedir?",
+      "text": "Bu ölçümlerle QRS süresi kaç milisaniyedir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "140 ms",
+        "40 ms",
+        "100 ms",
+        "60 ms",
+        "80 ms"
+      ],
+      "correct": 4,
+      "explanations": [
+        "140 ms geniş PVC/RBBB örneğiyle karıştırır.",
+        "40 ms yalnız R’den son dönüşe yarı desteği sayar.",
+        "100 ms iki sınırın verilen farkından fazladır.",
+        "60 ms başlangıç veya terminal bileşenin bir kısmını dışlar.",
+        "−40 ms ile+40 ms arasındaki QRS desteği 80 ms’dir."
+      ],
+      "feedback": "−40 ms ile+40 ms arasındaki QRS desteği 80 ms’dir.",
+      "objectiveIds": [
+        "O6"
+      ],
+      "sourceIds": [
+        "ECG",
+        "CYCLE"
+      ],
+      "decisionId": "q80",
+      "note": "",
+      "ecg": {
+        "mode": "normal",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V3"
+        ],
+        "start": 0.5,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C007",
+      "mode": "normal",
+      "title": "Sentetik vaka C007",
+      "ariaLabel": "C007 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "19 yaşında erkek hasta. Başvuru: spor lisansı için sağlık raporu isteniyor. P dalgası ile QRS arasındaki ilişki kaliperle işaretleniyor.",
+      "question": "PR aralığı hangi iki sınır arasında ölçülür?",
+      "text": "PR aralığı hangi iki sınır arasında ölçülür?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "Bir R'den sonrakine",
+        "P tepesinden R tepesine",
+        "P sonundan QRS sonuna",
+        "QRS sonundan T sonuna",
+        "P başlangıcından QRS başlangıcına"
+      ],
+      "correct": 4,
+      "explanations": [
+        "Bu R–R aralığıdır, PR değildir.",
+        "Bu ölçüm PR tanımına uymaz.",
+        "Bu, PR segmentini QRS ile karıştırır.",
+        "Bu aralık PR değil, repolarizasyon bölgesidir.",
+        "PR aralığı bu iki noktayla ölçülür."
+      ],
+      "feedback": "PR aralığı bu iki noktayla ölçülür.",
+      "objectiveIds": [
+        "O6"
+      ],
+      "sourceIds": [
+        "ECG",
+        "CYCLE"
+      ],
+      "decisionId": "pr",
+      "note": "",
+      "ecg": {
+        "mode": "normal",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V3"
+        ],
+        "start": 0.58,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C008",
+      "mode": "normal",
+      "title": "Sentetik vaka C008",
+      "ariaLabel": "C008 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "47 yaşında kadın hasta. Başvuru: aile hekimliği yıllık kontrolünde. İzlemde giriş kapaklarının açık, çıkış kapaklarının kapalı olduğu bir an gösteriliyor.",
+      "question": "Bu kapak ve hacim düzeni hangi mekanik evreyi gösterir?",
+      "text": "Bu kapak ve hacim düzeni hangi mekanik evreyi gösterir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "AV kapaklar açık: ventrikül doluşu",
+        "Çıkış kapakları açık: ejeksiyon",
+        "Tüm kapaklar kapalı: kasılma",
+        "Tüm kapaklar kapalı: gevşeme",
+        "AV kapaklar kapalı: atriyal sistol"
+      ],
+      "correct": 0,
+      "explanations": [
+        "Kan diyastolde ventriküle geçer.",
+        "Bu ileri pompalama fazıdır, doluş değil.",
+        "Kasılmada hacim sabittir, doluş yoktur.",
+        "Gevşemede AV henüz açılmamıştır.",
+        "Bu doluş fazı AV açıkken olur."
+      ],
+      "feedback": "Kan diyastolde ventriküle geçer.",
+      "objectiveIds": [
+        "O4"
+      ],
+      "sourceIds": [
+        "ECG",
+        "CYCLE"
+      ],
+      "decisionId": "fill",
+      "note": "",
+      "ecg": {
+        "mode": "normal",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V3"
+        ],
+        "start": 0.66,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C009",
+      "mode": "normal",
+      "title": "Sentetik vaka C009",
+      "ariaLabel": "C009 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "52 yaşında erkek hasta. Başvuru: sigorta başvurusu için sağlık taramasında. Yakınma yok; bulgu rutin değerlendirmede saptanıyor.",
+      "question": "Bu hastada ilk yaklaşım ne olmalıdır?",
+      "text": "Bu hastada ilk yaklaşım ne olmalıdır?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "Bulgu yoksa rutin izlem yeterlidir",
+        "Hemen taburcu edilir",
+        "Yalnızca gözlem yeterlidir",
+        "Yalnız görüntüleme istenir",
+        "Karar tamamen hastaya bırakılır"
+      ],
+      "correct": 0,
+      "explanations": [
+        "Belirti ve ek risk yoksa acil işlem gerekmez.",
+        "Bulgu ciddi olabilir; taburcu öncesi değerlendirme gerekir.",
+        "Bu bulgu daha aktif bir yaklaşım gerektirebilir; yalnız izlem yetmez.",
+        "İlk adım görüntülemeden önce klinik değerlendirmedir.",
+        "İlk yaklaşım klinik ekip tarafından yönlendirilir."
+      ],
+      "feedback": "Belirti ve ek risk yoksa acil işlem gerekmez.",
+      "objectiveIds": [
+        "O5"
+      ],
+      "sourceIds": [
+        "ECG",
+        "CYCLE"
+      ],
+      "decisionId": "firstStep_normal",
+      "note": "",
+      "ecg": {
+        "mode": "normal",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V3"
+        ],
+        "start": 0.74,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C010",
+      "mode": "normal",
+      "title": "Sentetik vaka C010",
+      "ariaLabel": "C010 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "26 yaşında kadın hasta. Başvuru: iş başvurusu sağlık kontrolünde. Eşzamanlı üç derivasyonlu kayıt aşağıda gösteriliyor.",
+      "question": "Bu EKG'de öncelikle hangi tanı düşünülmelidir?",
+      "text": "Bu EKG'de öncelikle hangi tanı düşünülmelidir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "Normal sinüs ritmi",
+        "Supraventriküler taşikardi",
+        "Ventriküler taşikardi",
+        "Anterior ST yükselmeli iskemi",
+        "Fokal atriyal taşikardi"
+      ],
+      "correct": 0,
+      "explanations": [
+        "Tarif edilen bulgular Normal sinüs ritmi ile uyumludur.",
+        "Supraventriküler taşikardi için beklenen bulgular burada yok.",
+        "Ventriküler taşikardi için beklenen bulgular burada yok.",
+        "Anterior ST yükselmeli iskemi için beklenen bulgular burada yok.",
+        "Fokal atriyal taşikardi için beklenen bulgular burada yok."
+      ],
+      "feedback": "Tarif edilen bulgular Normal sinüs ritmi ile uyumludur.",
+      "objectiveIds": [
+        "O2"
+      ],
+      "sourceIds": [
+        "ECG",
+        "CYCLE"
+      ],
+      "decisionId": "ddx_normal",
+      "note": "",
+      "ecg": {
+        "mode": "normal",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V3"
+        ],
+        "start": 0.8200000000000001,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C011",
+      "mode": "normal",
+      "title": "Sentetik vaka C011",
+      "ariaLabel": "C011 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "70 yaşında erkek hasta. Başvuru: rutin geriatri polikliniği kontrolünde. Ventriküler kompleksten sonra gelen dalganın anlamı soruluyor.",
+      "question": "T dalgasının temel elektriksel karşılığı nedir?",
+      "text": "T dalgasının temel elektriksel karşılığı nedir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "T: yeni bir atriyal uyarı",
+        "T: gecikmiş sağ ventrikül uyarısı",
+        "T: ventriküler depolarizasyon",
+        "T: atriyal repolarizasyon",
+        "T: ventriküler repolarizasyon"
+      ],
+      "correct": 4,
+      "explanations": [
+        "Yeni P ayrı bir dalga olarak görülür.",
+        "Bu bileşen QRS içinde yer alır.",
+        "Bu olay QRS ile kaydedilir.",
+        "Bu olay genelde QRS altında gizlenir.",
+        "T dalgası ventrikülün elektriksel toparlanmasıdır."
+      ],
+      "feedback": "T dalgası ventrikülün elektriksel toparlanmasıdır.",
+      "objectiveIds": [
+        "O1"
+      ],
+      "sourceIds": [
+        "ECG",
+        "CYCLE"
+      ],
+      "decisionId": "t",
+      "note": "",
+      "ecg": {
+        "mode": "normal",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V3"
+        ],
+        "start": 0.5,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C012",
+      "mode": "normal",
+      "title": "Sentetik vaka C012",
+      "ariaLabel": "C012 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "33 yaşında kadın hasta. Başvuru: maraton öncesi sağlık değerlendirmesinde. QRS’den kısa süre önce ayrı bir dalga seçiliyor.",
+      "question": "P dalgasının temel elektriksel karşılığı nedir?",
+      "text": "P dalgasının temel elektriksel karşılığı nedir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "P: atriyal depolarizasyon",
+        "P: ventriküler depolarizasyon",
+        "P: atriyal repolarizasyon",
+        "P: yalnız AV düğüm iletimi",
+        "P: ventriküler repolarizasyon"
+      ],
+      "correct": 0,
+      "explanations": [
+        "P dalgası atriyumun elektriksel uyarılmasıdır.",
+        "Bu olay QRS ile kaydedilir.",
+        "Atriyal repolarizasyon genelde QRS altında gizlenir.",
+        "AV düğüm gecikmesi PR aralığında değerlendirilir.",
+        "Bu olay T dalgası ile kaydedilir."
+      ],
+      "feedback": "P dalgası atriyumun elektriksel uyarılmasıdır.",
+      "objectiveIds": [
+        "O1"
+      ],
+      "sourceIds": [
+        "ECG",
+        "CYCLE"
+      ],
+      "decisionId": "p",
+      "note": "",
+      "ecg": {
+        "mode": "normal",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V3"
+        ],
+        "start": 0.58,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C013",
+      "mode": "normal",
+      "title": "Sentetik vaka C013",
+      "ariaLabel": "C013 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "45 yaşında erkek hasta. Başvuru: şoförlük ehliyeti yenileme muayenesinde. Ventriküler kompleksin izde temsil ettiği olay ayrıca soruluyor.",
+      "question": "QRS kompleksinin temel elektriksel karşılığı nedir?",
+      "text": "QRS kompleksinin temel elektriksel karşılığı nedir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "QRS: ventriküler repolarizasyon",
+        "QRS: ventriküler depolarizasyon",
+        "QRS: yalnız AV düğüm gecikmesi",
+        "QRS: atriyal depolarizasyon",
+        "QRS: yalnız atriyal repolarizasyon"
+      ],
+      "correct": 1,
+      "explanations": [
+        "Bu olay T dalgasıyla kaydedilir.",
+        "QRS ventrikül kasının elektriksel uyarılmasıdır.",
+        "AV gecikmesi PR aralığında değerlendirilir.",
+        "Bu olay P dalgasıyla kaydedilir.",
+        "QRS'in ana kaynağı ventrikül kasıdır."
+      ],
+      "feedback": "QRS ventrikül kasının elektriksel uyarılmasıdır.",
+      "objectiveIds": [
+        "O1"
+      ],
+      "sourceIds": [
+        "ECG",
+        "CYCLE"
+      ],
+      "decisionId": "qrs",
+      "note": "",
+      "ecg": {
+        "mode": "normal",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V3"
+        ],
+        "start": 0.66,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C014",
+      "mode": "normal",
+      "title": "Sentetik vaka C014",
+      "ariaLabel": "C014 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "38 yaşında kadın hasta. Başvuru: check-up paketinde rutin EKG çekiliyor. Eşzamanlı üç derivasyonlu kayıt aşağıda gösteriliyor.",
+      "question": "Bu ritim hangi sınıfa girer?",
+      "text": "Bu ritim hangi sınıfa girer?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "Düzenli dar kompleks, normal hız",
+        "Düzensiz dar kompleks",
+        "Kaotik, organize değil",
+        "Düzenli geniş kompleks",
+        "Düzenli dar kompleks, hızlı"
+      ],
+      "correct": 0,
+      "explanations": [
+        "Hız yaklaşık 75/dk, ritim düzenli ve QRS dar.",
+        "Bu örnekte ritim düzenli, düzensiz değil.",
+        "Bu örnekte düzenli bir kompleks seçilebiliyor, kaotik değil.",
+        "Bu örnekte QRS dar, bu kadar geniş değil.",
+        "Bu örnekte hız bu kadar yüksek değil."
+      ],
+      "feedback": "Hız yaklaşık 75/dk, ritim düzenli ve QRS dar.",
+      "objectiveIds": [
+        "O2"
+      ],
+      "sourceIds": [
+        "ECG",
+        "CYCLE"
+      ],
+      "decisionId": "rhythmClass_normal",
+      "note": "",
+      "ecg": {
+        "mode": "normal",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V3"
+        ],
+        "start": 0.74,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C015",
+      "mode": "normal",
+      "title": "Sentetik vaka C015",
+      "ariaLabel": "C015 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "60 yaşında erkek hasta. Başvuru: emeklilik öncesi sağlık taramasında. Kısa süreli bir kayıt elde ediliyor; önceki öykü ve ek testler henüz yok.",
+      "question": "Bu bulgudan etiyoloji ve risk için hangi genel sınır çıkarılabilir?",
+      "text": "Bu bulgudan etiyoloji ve risk için hangi genel sınır çıkarılabilir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "P ekseni kesin odağı belirler",
+        "Hız tek başına dolaşımı gösterir",
+        "QRS genişliği tek başına riski verir",
+        "Kısa kayıt başlangıç zamanını verir",
+        "Örüntü desteklenir, neden ayrıca sorulur"
+      ],
+      "correct": 4,
+      "explanations": [
+        "P ekseni ipucudur, kesin yer vermez.",
+        "Nabız ve basınç ayrıca değerlendirilir.",
+        "Risk için klinik bağlam da gerekir.",
+        "Bir pencere toplam süreyi göstermez.",
+        "EKG bulgusu tanı verir, nedeni klinik öykü belirler."
+      ],
+      "feedback": "EKG bulgusu tanı verir, nedeni klinik öykü belirler.",
+      "objectiveIds": [
+        "O5"
+      ],
+      "sourceIds": [
+        "ECG",
+        "CYCLE"
+      ],
+      "decisionId": "limits",
+      "note": "",
+      "ecg": {
+        "mode": "normal",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V3"
+        ],
+        "start": 0.8200000000000001,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C016",
+      "mode": "af",
+      "title": "Sentetik vaka C016",
+      "ariaLabel": "C016 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "72 yaşında kadın hasta. Başvuru: çarpıntı ve düzensiz nabız yakınmasıyla. Nabız düzensiz alınıyor; monitörde dar QRS’ler arasında değişken aralıklar ve seçilemeyen bir atriyal dalga görülüyor.",
+      "question": "Bu EKG bulgularıyla en uyumlu ritim örüntüsü hangisidir?",
+      "text": "Bu EKG bulgularıyla en uyumlu ritim örüntüsü hangisidir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "78/dk düzensiz"
+        },
+        {
+          "k": "TA",
+          "v": "126/80 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%97"
+        }
+      ],
+      "options": [
+        "Atriyal flutter",
+        "Sık PVC",
+        "Atriyal fibrilasyon",
+        "Sinüs aritmisi",
+        "Fokal atriyal taşikardi"
+      ],
+      "correct": 2,
+      "explanations": [
+        "Flutter'da düzenli iletim olur; burada düzensiz.",
+        "PVC'de tek erken geniş atım olur; burada tüm atımlar dar ve düzensiz.",
+        "P yok ve R–R düzensiz: AF.",
+        "Sinüs aritmisinde her atımda P vardır; burada yok.",
+        "Fokal AT'de düzenli P-QRS ilişkisi olur; burada yok."
+      ],
+      "feedback": "P yok ve R–R düzensiz: AF.",
+      "objectiveIds": [
+        "O2"
+      ],
+      "sourceIds": [
+        "AF2024"
+      ],
+      "decisionId": "af",
+      "note": "",
+      "ecg": {
+        "mode": "af",
+        "options": {
+          "afProfile": "controlled"
+        },
+        "leads": [
+          "II",
+          "aVF",
+          "V1"
+        ],
+        "start": 0.5,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C017",
+      "mode": "af",
+      "title": "Sentetik vaka C017",
+      "ariaLabel": "C017 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "66 yaşında erkek hasta. Başvuru: ara sıra çarpıntı hissiyle aile hekimine başvuruyor. Kaydın genelinde değişken aralıklı dar kompleksler var; yalnızca bir yerde erken ve geniş, farklı görünümlü tek bir kompleks seçiliyor.",
+      "question": "Bu düzensizlik izole bir erken atımdan nasıl ayrılır?",
+      "text": "Bu düzensizlik izole bir erken atımdan nasıl ayrılır?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "78/dk düzensiz"
+        },
+        {
+          "k": "TA",
+          "v": "126/80 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%97"
+        }
+      ],
+      "options": [
+        "Düzensizlik ventrikül kaynaklıdır",
+        "AF'de düzensizlik tüm kayıt boyunca sürer; PVC izole, erken ve geniş tek komplekstir",
+        "Her uzun R–R kompansatuvar duraklamadır",
+        "Dar QRS düzenli sinüs demektir",
+        "Her kısa R–R PVC'dir"
+      ],
+      "correct": 1,
+      "explanations": [
+        "Düzensizlik burada atriyal kaynaklıdır.",
+        "Sürekli düzensiz R–R ve organize P yokluğu AF'yi; tek erken geniş kompleks PVC'yi tanımlar.",
+        "AF'de uzun aralık da düzensizliğin parçasıdır.",
+        "AF'de QRS dar olsa da ritim düzensizdir.",
+        "AF'de kısa aralıklar normal düzensizliktir."
+      ],
+      "feedback": "Sürekli düzensiz R–R ve organize P yokluğu AF'yi; tek erken geniş kompleks PVC'yi tanımlar.",
+      "objectiveIds": [
+        "O2"
+      ],
+      "sourceIds": [
+        "AF2024"
+      ],
+      "decisionId": "afEarly",
+      "note": "",
+      "ecg": {
+        "mode": "af",
+        "options": {
+          "afProfile": "controlled"
+        },
+        "leads": [
+          "II",
+          "aVF",
+          "V1"
+        ],
+        "start": 0.58,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C018",
+      "mode": "af",
+      "title": "Sentetik vaka C018",
+      "ariaLabel": "C018 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "58 yaşında kadın hasta. Başvuru: egzersiz sırasında düzensiz nabız fark ediyor. Aynı izlem şeridinde ardışık R–R aralıkları 620, 870 ve 710 ms olarak ölçülüyor.",
+      "question": "Bu ritmin hızı en uygun şekilde nasıl değerlendirilir?",
+      "text": "Bu ritmin hızı en uygun şekilde nasıl değerlendirilir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "78/dk düzensiz"
+        },
+        {
+          "k": "TA",
+          "v": "126/80 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%97"
+        }
+      ],
+      "options": [
+        "Önceki hız geçerli sayılır",
+        "Taban dalgası sayısı hızdır",
+        "En uzun R–R ortalamadır",
+        "En kısa R–R ortalamadır",
+        "Birden fazla R–R birlikte incelenir"
+      ],
+      "correct": 4,
+      "explanations": [
+        "Ritim değişince yeni hız yeniden ölçülmeli.",
+        "Taban dalgaları atriyaldir, ventrikül hızını vermez.",
+        "En uzun aralık yalnız o anki en düşük hızdır.",
+        "En kısa aralık yalnız o anki en yüksek hızdır.",
+        "Tek aralık yanıltır; birkaç atım karşılaştırılmalı."
+      ],
+      "feedback": "Tek aralık yanıltır; birkaç atım karşılaştırılmalı.",
+      "objectiveIds": [
+        "O1"
+      ],
+      "sourceIds": [
+        "AF2024"
+      ],
+      "decisionId": "afRR",
+      "note": "",
+      "ecg": {
+        "mode": "af",
+        "options": {
+          "afProfile": "controlled"
+        },
+        "leads": [
+          "II",
+          "aVF",
+          "V1"
+        ],
+        "start": 0.66,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C019",
+      "mode": "af",
+      "title": "Sentetik vaka C019",
+      "ariaLabel": "C019 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "81 yaşında erkek hasta. Başvuru: huzurevinde rutin muayenede nabız düzensiz alınıyor. Nabız düzensiz; monitör hem yavaş hem hızlı seyreden düzensiz dar kompleks dönemleri kaydediyor.",
+      "question": "Ventrikül hız profili ile atriyal köken birlikte nasıl yorumlanır?",
+      "text": "Ventrikül hız profili ile atriyal köken birlikte nasıl yorumlanır?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "78/dk düzensiz"
+        },
+        {
+          "k": "TA",
+          "v": "126/80 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%97"
+        }
+      ],
+      "options": [
+        "Kontrollüde PR yeniden ölçülür",
+        "Düzensizlik sürer, hızlı profilde R–R kısalır",
+        "Hızlı profil VT gerektirir",
+        "Kontrollü profil AF'yi ortadan kaldırır",
+        "Hızlı profilde sinüs P döner"
+      ],
+      "correct": 1,
+      "explanations": [
+        "AF'de PR hiçbir profilde ölçülmez.",
+        "Her iki profil de düzensiz, yalnız hız farklı.",
+        "İkisinde de QRS dar kalır, VT değildir.",
+        "Hız yavaşlasa da düzensizlik sürer.",
+        "Hız artsa da ayrı P oluşmaz."
+      ],
+      "feedback": "Her iki profil de düzensiz, yalnız hız farklı.",
+      "objectiveIds": [
+        "O1"
+      ],
+      "sourceIds": [
+        "AF2024"
+      ],
+      "decisionId": "afProfile",
+      "note": "",
+      "ecg": {
+        "mode": "af",
+        "options": {
+          "afProfile": "controlled"
+        },
+        "leads": [
+          "II",
+          "aVF",
+          "V1"
+        ],
+        "start": 0.74,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C020",
+      "mode": "af",
+      "title": "Sentetik vaka C020",
+      "ariaLabel": "C020 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "63 yaşında kadın hasta. Başvuru: yorgunluk ve çarpıntı ile acil servise başvuruyor. Monitörde ayrık, tekrarlayan bir dalganın seçilip seçilemediği sorgulanıyor.",
+      "question": "Bu ritimde ayrık bir P dalgası seçilebiliyor mu?",
+      "text": "Bu ritimde ayrık bir P dalgası seçilebiliyor mu?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "78/dk düzensiz"
+        },
+        {
+          "k": "TA",
+          "v": "126/80 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%97"
+        }
+      ],
+      "options": [
+        "Hayır, seçilemiyor",
+        "Yalnızca ara sıra var",
+        "Evet, her QRS öncesinde var",
+        "Evet ama QRS'den sonra",
+        "Yalnızca aVR'de var"
+      ],
+      "correct": 0,
+      "explanations": [
+        "AF'de taban hattı ince f dalgalarıyla doludur; ayrık, tekrarlayan bir P seçilemez ve R–R düzensizdir.",
+        "f dalgaları süreklidir; ara sıra beliren sinüs P'si yoktur.",
+        "AF'de organize P dalgası yoktur.",
+        "AF'de QRS sonrası da organize P yoktur.",
+        "P varsa tüm derivasyonlarda aynı zamanlamada görülür; burada hiçbirinde ayrık P yok."
+      ],
+      "feedback": "AF'de taban hattı ince f dalgalarıyla doludur; ayrık, tekrarlayan bir P seçilemez ve R–R düzensizdir.",
+      "objectiveIds": [
+        "O6"
+      ],
+      "sourceIds": [
+        "AF2024",
+        "ECG"
+      ],
+      "decisionId": "pWaveVisibleNoAf",
+      "note": "",
+      "ecg": {
+        "mode": "af",
+        "options": {
+          "afProfile": "controlled"
+        },
+        "leads": [
+          "II",
+          "aVF",
+          "V1"
+        ],
+        "start": 0.8200000000000001,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C021",
+      "mode": "af",
+      "title": "Sentetik vaka C021",
+      "ariaLabel": "C021 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "75 yaşında erkek hasta. Başvuru: hipertansiyon izlem vizitinde düzensiz nabız saptanıyor. Göğüs ağrısı, senkop veya nefes darlığı yok; TA 126/80 mmHg.",
+      "question": "Bu klinik tabloda öncelikli değerlendirme ilkesi nedir?",
+      "text": "Bu klinik tabloda öncelikli değerlendirme ilkesi nedir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "78/dk düzensiz"
+        },
+        {
+          "k": "TA",
+          "v": "126/80 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%97"
+        }
+      ],
+      "options": [
+        "Önce kesin mekanizma sonra hasta bakılır",
+        "Önce hemodinamik stabilite, semptom süresi/başlangıcı ve tromboemboli riski değerlendirilir",
+        "Düzensiz nabız rutin kontrole bırakılır",
+        "Her AF acil kardiyoversiyon gerektirir",
+        "Tek derivasyon kesinlik verir"
+      ],
+      "correct": 1,
+      "explanations": [
+        "Hasta durumu mekanizmadan önce değerlendirilir.",
+        "Stabil AF'de yaklaşım bireyselleştirilir; acil kardiyoversiyon yalnız instabilitede öne çıkar (ESC AF 2024).",
+        "AF inme riski taşır; değerlendirilmeden bırakılmaz.",
+        "Kardiyoversiyon endikasyonu instabilite ve süreye bağlıdır; rutin değildir.",
+        "AF tanısı ve risk değerlendirmesi tek derivasyonla tamamlanmaz."
+      ],
+      "feedback": "Stabil AF'de yaklaşım bireyselleştirilir; acil kardiyoversiyon yalnız instabilitede öne çıkar (ESC AF 2024).",
+      "objectiveIds": [
+        "O5"
+      ],
+      "sourceIds": [
+        "AF2024"
+      ],
+      "decisionId": "stableAf",
+      "note": "",
+      "ecg": {
+        "mode": "af",
+        "options": {
+          "afProfile": "controlled"
+        },
+        "leads": [
+          "II",
+          "aVF",
+          "V1"
+        ],
+        "start": 0.5,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C022",
+      "mode": "af",
+      "title": "Sentetik vaka C022",
+      "ariaLabel": "C022 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "54 yaşında kadın hasta. Başvuru: tiroid fazlalığı öyküsüyle çarpıntı tarif ediyor. Ekokardiyografi beklenirken monitörde atriyal duvarda organize kasılma yerine titreşim benzeri hareket tanımlanıyor.",
+      "question": "Atriyumun organize kasılma katkısına ne olur?",
+      "text": "Atriyumun organize kasılma katkısına ne olur?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "78/dk düzensiz"
+        },
+        {
+          "k": "TA",
+          "v": "126/80 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%97"
+        }
+      ],
+      "options": [
+        "Organize atriyal katkı kaybolur",
+        "Sinüs P dizisi korunur",
+        "Her f dalgası güçlü kasılmadır",
+        "Her QRS nabzı kanıtlar",
+        "Ventrikül doluşu tamamen durur"
+      ],
+      "correct": 0,
+      "explanations": [
+        "AF'de atriyum düzenli kasılmaz.",
+        "AF'de ayrı sinüs P yoktur.",
+        "Düzensiz f dalgaları etkili kasılma değildir.",
+        "QRS elektriksel olaydır, nabzı garanti etmez.",
+        "Pasif doluş sürebilir; tamamen durmaz."
+      ],
+      "feedback": "AF'de atriyum düzenli kasılmaz.",
+      "objectiveIds": [
+        "O4"
+      ],
+      "sourceIds": [
+        "AF2024",
+        "CYCLE"
+      ],
+      "decisionId": "afAtrial",
+      "note": "",
+      "ecg": {
+        "mode": "af",
+        "options": {
+          "afProfile": "controlled"
+        },
+        "leads": [
+          "II",
+          "aVF",
+          "V1"
+        ],
+        "start": 0.58,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C023",
+      "mode": "af",
+      "title": "Sentetik vaka C023",
+      "ariaLabel": "C023 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "69 yaşında erkek hasta. Başvuru: nefes darlığı ve düzensiz nabızla başvuruyor. Eşzamanlı üç derivasyonlu kayıt aşağıda gösteriliyor.",
+      "question": "Bu EKG'de öncelikle hangi tanı düşünülmelidir?",
+      "text": "Bu EKG'de öncelikle hangi tanı düşünülmelidir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "78/dk düzensiz"
+        },
+        {
+          "k": "TA",
+          "v": "126/80 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%97"
+        }
+      ],
+      "options": [
+        "Sinüs taşikardisi",
+        "Ventriküler taşikardi",
+        "Atriyal fibrilasyon",
+        "Supraventriküler taşikardi",
+        "Fokal atriyal taşikardi"
+      ],
+      "correct": 2,
+      "explanations": [
+        "Sinüs taşikardisi için beklenen bulgular burada yok.",
+        "Ventriküler taşikardi için beklenen bulgular burada yok.",
+        "Tarif edilen bulgular Atriyal fibrilasyon ile uyumludur.",
+        "Supraventriküler taşikardi için beklenen bulgular burada yok.",
+        "Fokal atriyal taşikardi için beklenen bulgular burada yok."
+      ],
+      "feedback": "Tarif edilen bulgular Atriyal fibrilasyon ile uyumludur.",
+      "objectiveIds": [
+        "O2"
+      ],
+      "sourceIds": [
+        "AF2024"
+      ],
+      "decisionId": "ddx_af",
+      "note": "",
+      "ecg": {
+        "mode": "af",
+        "options": {
+          "afProfile": "controlled"
+        },
+        "leads": [
+          "II",
+          "aVF",
+          "V1"
+        ],
+        "start": 0.66,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C024",
+      "mode": "af",
+      "title": "Sentetik vaka C024",
+      "ariaLabel": "C024 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "60 yaşında kadın hasta. Başvuru: ameliyat öncesi değerlendirmede düzensiz nabız fark ediliyor. Uzun süredir bilinen bir ritim bozukluğu ile hipertansiyon öyküsü birlikte değerlendiriliyor.",
+      "question": "Tromboemboli riski nasıl değerlendirilmelidir?",
+      "text": "Tromboemboli riski nasıl değerlendirilmelidir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "78/dk düzensiz"
+        },
+        {
+          "k": "TA",
+          "v": "126/80 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%97"
+        }
+      ],
+      "options": [
+        "Kısa kayıt AF süresini verir",
+        "Dar QRS riski dışlar",
+        "Klinik risk verileriyle değerlendirilir",
+        "Yalnız atriyal hızdan hesaplanır",
+        "Hız kontrolü riski sıfırlar"
+      ],
+      "correct": 2,
+      "explanations": [
+        "Kısa şerit toplam AF süresini göstermez.",
+        "QRS genişliği tromboemboli riskini göstermez.",
+        "Tromboemboli riski yaş ve komorbiditeyle birlikte hesaplanır.",
+        "Şerit tek başına risk puanı vermez.",
+        "Hız kontrolü antikoagülasyon ihtiyacını kaldırmaz."
+      ],
+      "feedback": "Tromboemboli riski yaş ve komorbiditeyle birlikte hesaplanır.",
+      "objectiveIds": [
+        "O5"
+      ],
+      "sourceIds": [
+        "AF2024"
+      ],
+      "decisionId": "afRisk",
+      "note": "",
+      "ecg": {
+        "mode": "af",
+        "options": {
+          "afProfile": "controlled"
+        },
+        "leads": [
+          "II",
+          "aVF",
+          "V1"
+        ],
+        "start": 0.74,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C025",
+      "mode": "af",
+      "title": "Sentetik vaka C025",
+      "ariaLabel": "C025 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "77 yaşında erkek hasta. Başvuru: baş dönmesi ve çarpıntı yakınmasıyla polikliniğe geliyor. Kısa süreli bir kayıt elde ediliyor; önceki öykü ve ek testler henüz yok.",
+      "question": "Bu bulgudan etiyoloji ve risk için hangi genel sınır çıkarılabilir?",
+      "text": "Bu bulgudan etiyoloji ve risk için hangi genel sınır çıkarılabilir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "78/dk düzensiz"
+        },
+        {
+          "k": "TA",
+          "v": "126/80 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%97"
+        }
+      ],
+      "options": [
+        "Örüntü desteklenir, neden ayrıca sorulur",
+        "Kısa kayıt başlangıç zamanını verir",
+        "QRS genişliği tek başına riski verir",
+        "Hız tek başına dolaşımı gösterir",
+        "P ekseni kesin odağı belirler"
+      ],
+      "correct": 0,
+      "explanations": [
+        "EKG bulgusu tanı verir, nedeni klinik öykü belirler.",
+        "Bir pencere toplam süreyi göstermez.",
+        "Risk için klinik bağlam da gerekir.",
+        "Nabız ve basınç ayrıca değerlendirilir.",
+        "P ekseni ipucudur, kesin yer vermez."
+      ],
+      "feedback": "EKG bulgusu tanı verir, nedeni klinik öykü belirler.",
+      "objectiveIds": [
+        "O5"
+      ],
+      "sourceIds": [
+        "AF2024"
+      ],
+      "decisionId": "limits",
+      "note": "",
+      "ecg": {
+        "mode": "af",
+        "options": {
+          "afProfile": "controlled"
+        },
+        "leads": [
+          "II",
+          "aVF",
+          "V1"
+        ],
+        "start": 0.8200000000000001,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C026",
+      "mode": "af",
+      "title": "Sentetik vaka C026",
+      "ariaLabel": "C026 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "57 yaşında kadın hasta. Başvuru: uykusuzluk sonrası ani çarpıntı tarif ediyor. Dar bir kompleksin ilk sapması 40 ms önce, son dönüşü 40 ms sonra işaretleniyor.",
+      "question": "Bu ölçümlerle QRS süresi kaç milisaniyedir?",
+      "text": "Bu ölçümlerle QRS süresi kaç milisaniyedir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "78/dk düzensiz"
+        },
+        {
+          "k": "TA",
+          "v": "126/80 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%97"
+        }
+      ],
+      "options": [
+        "40 ms",
+        "60 ms",
+        "140 ms",
+        "100 ms",
+        "80 ms"
+      ],
+      "correct": 4,
+      "explanations": [
+        "40 ms yalnız R’den son dönüşe yarı desteği sayar.",
+        "60 ms başlangıç veya terminal bileşenin bir kısmını dışlar.",
+        "140 ms geniş PVC/RBBB örneğiyle karıştırır.",
+        "100 ms iki sınırın verilen farkından fazladır.",
+        "−40 ms ile+40 ms arasındaki QRS desteği 80 ms’dir."
+      ],
+      "feedback": "−40 ms ile+40 ms arasındaki QRS desteği 80 ms’dir.",
+      "objectiveIds": [
+        "O6"
+      ],
+      "sourceIds": [
+        "AF2024",
+        "ECG"
+      ],
+      "decisionId": "q80",
+      "note": "",
+      "ecg": {
+        "mode": "af",
+        "options": {
+          "afProfile": "controlled"
+        },
+        "leads": [
+          "II",
+          "aVF",
+          "V1"
+        ],
+        "start": 0.5,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C027",
+      "mode": "af",
+      "title": "Sentetik vaka C027",
+      "ariaLabel": "C027 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "64 yaşında erkek hasta. Başvuru: alkol alımı sonrası çarpıntı ile acile başvuruyor. Ventriküler kompleksin izde temsil ettiği olay ayrıca soruluyor.",
+      "question": "QRS kompleksinin temel elektriksel karşılığı nedir?",
+      "text": "QRS kompleksinin temel elektriksel karşılığı nedir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "78/dk düzensiz"
+        },
+        {
+          "k": "TA",
+          "v": "126/80 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%97"
+        }
+      ],
+      "options": [
+        "QRS: ventriküler repolarizasyon",
+        "QRS: ventriküler depolarizasyon",
+        "QRS: atriyal depolarizasyon",
+        "QRS: yalnız AV düğüm gecikmesi",
+        "QRS: yalnız atriyal repolarizasyon"
+      ],
+      "correct": 1,
+      "explanations": [
+        "Bu olay T dalgasıyla kaydedilir.",
+        "QRS ventrikül kasının elektriksel uyarılmasıdır.",
+        "Bu olay P dalgasıyla kaydedilir.",
+        "AV gecikmesi PR aralığında değerlendirilir.",
+        "QRS'in ana kaynağı ventrikül kasıdır."
+      ],
+      "feedback": "QRS ventrikül kasının elektriksel uyarılmasıdır.",
+      "objectiveIds": [
+        "O1"
+      ],
+      "sourceIds": [
+        "AF2024"
+      ],
+      "decisionId": "qrs",
+      "note": "",
+      "ecg": {
+        "mode": "af",
+        "options": {
+          "afProfile": "controlled"
+        },
+        "leads": [
+          "II",
+          "aVF",
+          "V1"
+        ],
+        "start": 0.58,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C028",
+      "mode": "af",
+      "title": "Sentetik vaka C028",
+      "ariaLabel": "C028 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "71 yaşında kadın hasta. Başvuru: kronik akciğer hastalığı izleminde düzensiz nabız saptanıyor. Eşzamanlı üç derivasyonlu kayıt aşağıda gösteriliyor.",
+      "question": "Bu ritim hangi sınıfa girer?",
+      "text": "Bu ritim hangi sınıfa girer?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "78/dk düzensiz"
+        },
+        {
+          "k": "TA",
+          "v": "126/80 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%97"
+        }
+      ],
+      "options": [
+        "Düzenli dar kompleks, hızlı",
+        "Düzensiz dar kompleks",
+        "Kaotik, organize değil",
+        "Düzenli geniş kompleks",
+        "Düzenli dar kompleks, normal hız"
+      ],
+      "correct": 1,
+      "explanations": [
+        "Bu örnekte hız bu kadar yüksek değil.",
+        "Ardışık R–R aralıkları düzensiz; QRS dar.",
+        "Bu örnekte düzenli bir kompleks seçilebiliyor, kaotik değil.",
+        "Bu örnekte QRS dar, bu kadar geniş değil.",
+        "Bu örnekte hız veya düzen normal aralığa uymuyor."
+      ],
+      "feedback": "Ardışık R–R aralıkları düzensiz; QRS dar.",
+      "objectiveIds": [
+        "O2"
+      ],
+      "sourceIds": [
+        "AF2024"
+      ],
+      "decisionId": "rhythmClass_af",
+      "note": "",
+      "ecg": {
+        "mode": "af",
+        "options": {
+          "afProfile": "controlled"
+        },
+        "leads": [
+          "II",
+          "aVF",
+          "V1"
+        ],
+        "start": 0.66,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C029",
+      "mode": "af",
+      "title": "Sentetik vaka C029",
+      "ariaLabel": "C029 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "68 yaşında erkek hasta. Başvuru: kalp yetersizliği izlem vizitinde nabız düzensiz alınıyor. Nabız düzensiz; ritim ve hız kontrolü seçenekleri değerlendiriliyor.",
+      "question": "Bu hastada ilk yaklaşım ne olmalıdır?",
+      "text": "Bu hastada ilk yaklaşım ne olmalıdır?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "78/dk düzensiz"
+        },
+        {
+          "k": "TA",
+          "v": "126/80 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%97"
+        }
+      ],
+      "options": [
+        "Yalnız görüntüleme istenir",
+        "Yalnızca gözlem yeterlidir",
+        "Hemen taburcu edilir",
+        "Hemodinamik stabilite, semptom/süre ve tromboemboli riski değerlendirilir; hız/ritim stratejisi bireyselleştirilir",
+        "Karar tamamen hastaya bırakılır"
+      ],
+      "correct": 3,
+      "explanations": [
+        "İlk adım görüntülemeden önce klinik değerlendirmedir.",
+        "Bu bulgu daha aktif bir yaklaşım gerektirebilir; yalnız izlem yetmez.",
+        "Bulgu ciddi olabilir; taburcu öncesi değerlendirme gerekir.",
+        "Stabil AF'de ilk adım stabilite ve inme riski değerlendirmesidir; hız veya ritim kontrolü hastaya göre seçilir (ESC AF 2024).",
+        "İlk yaklaşım klinik ekip tarafından yönlendirilir."
+      ],
+      "feedback": "Stabil AF'de ilk adım stabilite ve inme riski değerlendirmesidir; hız veya ritim kontrolü hastaya göre seçilir (ESC AF 2024).",
+      "objectiveIds": [
+        "O5"
+      ],
+      "sourceIds": [
+        "AF2024"
+      ],
+      "decisionId": "firstStep_af",
+      "note": "",
+      "ecg": {
+        "mode": "af",
+        "options": {
+          "afProfile": "controlled"
+        },
+        "leads": [
+          "II",
+          "aVF",
+          "V1"
+        ],
+        "start": 0.74,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C030",
+      "mode": "af",
+      "title": "Sentetik vaka C030",
+      "ariaLabel": "C030 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "73 yaşında kadın hasta. Başvuru: yıllık kontrolde tesadüfen düzensiz nabız fark ediliyor. Aynı kayıt üzerinde farklı bir derivasyon grubuna geçildiğinde görünüm değişiyor.",
+      "question": "Derivasyon seçimini değiştirmenin bulguya etkisi nedir?",
+      "text": "Derivasyon seçimini değiştirmenin bulguya etkisi nedir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "78/dk düzensiz"
+        },
+        {
+          "k": "TA",
+          "v": "126/80 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%97"
+        }
+      ],
+      "options": [
+        "Lead değiştirmek ritmi değiştirir",
+        "Derivasyon aynı kaynağın farklı görünümüdür",
+        "Tüm lead'ler aynı şekli gösterir",
+        "Tek lead 12 derivasyona eşittir",
+        "Negatif QRS ventrikül kaynağını kanıtlar"
+      ],
+      "correct": 1,
+      "explanations": [
+        "Görünüm değişir, kaynak aynı kalır.",
+        "Lead değiştirmek şekli değiştirir, ritmi değiştirmez.",
+        "Her derivasyon farklı açıdan bakar.",
+        "Diğer derivasyonlar ek bilgi taşır.",
+        "Polarite yön farkından da olabilir."
+      ],
+      "feedback": "Lead değiştirmek şekli değiştirir, ritmi değiştirmez.",
+      "objectiveIds": [
+        "O3"
+      ],
+      "sourceIds": [
+        "AF2024",
+        "ECG"
+      ],
+      "decisionId": "leadAll",
+      "note": "",
+      "ecg": {
+        "mode": "af",
+        "options": {
+          "afProfile": "controlled"
+        },
+        "leads": [
+          "II",
+          "aVF",
+          "V1"
+        ],
+        "start": 0.8200000000000001,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C031",
+      "mode": "stemi",
+      "title": "Sentetik vaka C031",
+      "ariaLabel": "C031 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "58 yaşında erkek hasta. Başvuru: 30 dakikadır süren baskı tarzı göğüs ağrısıyla acile geliyor. Ağrı sırasında alınan EKG’de komşu ön duvar derivasyonlarında ST yükselmesi izleniyor.",
+      "question": "ST değişiminin dağılımı hangi bölgeyi işaret eder?",
+      "text": "ST değişiminin dağılımı hangi bölgeyi işaret eder?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "Tek erken atım bulgusu",
+        "Flutter tabanı",
+        "İnferior dağılım",
+        "Sağ dal bloğu bulgusu",
+        "Anterior (ön duvar) dağılım"
+      ],
+      "correct": 4,
+      "explanations": [
+        "PVC ayrı bir olaydır; burada düzenli ST değişimi var.",
+        "Flutter sürekli dalga yapar; burada ayrı ST yüksekliği var.",
+        "İnferior için II, III, aVF gerekir; burada prekordiyal.",
+        "Bu QRS şekli değil, ST yüksekliği bulgusu.",
+        "V1–V4 birlikte yükselmiş: ön duvar."
+      ],
+      "feedback": "V1–V4 birlikte yükselmiş: ön duvar.",
+      "objectiveIds": [
+        "O3"
+      ],
+      "sourceIds": [
+        "ACS2023",
+        "ECG"
+      ],
+      "decisionId": "anterior",
+      "note": "",
+      "ecg": {
+        "mode": "stemi",
+        "options": {},
+        "leads": [
+          "V2",
+          "V3",
+          "V4"
+        ],
+        "start": 0.5,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C032",
+      "mode": "stemi",
+      "title": "Sentetik vaka C032",
+      "ariaLabel": "C032 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "64 yaşında kadın hasta. Başvuru: terleme ve göğüs ağrısıyla 112 ile getiriliyor. Birden çok komşu derivasyondaki değişim birlikte değerlendiriliyor.",
+      "question": "Bölgesel ST değişimi yorumlanırken hangi yöntem uygundur?",
+      "text": "Bölgesel ST değişimi yorumlanırken hangi yöntem uygundur?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "aVR her zaman anterior bölgeyi verir",
+        "En yüksek tek R bölgeyi belirler",
+        "ST mV değeri yalnız hızdır",
+        "Komşu derivasyonlar birlikte incelenir",
+        "Derivasyon adı damarın kesin adıdır"
+      ],
+      "correct": 3,
+      "explanations": [
+        "Tek derivasyon tüm anterior grubun yerini tutmaz.",
+        "R genliği bölgesel ST yorumunu tek başına vermez.",
+        "ST voltajı ve hız farklı ölçümlerdir.",
+        "Bölgesel yorum tek derivasyona değil komşu gruba bakar.",
+        "Derivasyon bölgesi damar anatomisini birebir vermez."
+      ],
+      "feedback": "Bölgesel yorum tek derivasyona değil komşu gruba bakar.",
+      "objectiveIds": [
+        "O3"
+      ],
+      "sourceIds": [
+        "ACS2023",
+        "ECG"
+      ],
+      "decisionId": "stContiguous",
+      "note": "",
+      "ecg": {
+        "mode": "stemi",
+        "options": {},
+        "leads": [
+          "V2",
+          "V3",
+          "V4"
+        ],
+        "start": 0.58,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C033",
+      "mode": "stemi",
+      "title": "Sentetik vaka C033",
+      "ariaLabel": "C033 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "52 yaşında erkek hasta. Başvuru: egzersiz sırasında başlayan göğüs ağrısıyla başvuruyor. Bulgu düzenli görünse de eşlik eden semptomlar ayrıca değerlendiriliyor.",
+      "question": "Bu klinik tabloda hangi değerlendirme ilkesi önceliklidir?",
+      "text": "Bu klinik tabloda hangi değerlendirme ilkesi önceliklidir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "Semptomla acil değerlendirme gerekir",
+        "Önce kesin mekanizma sonra hasta bakılır",
+        "Tek derivasyon kesinlik verir",
+        "Animasyon akımı varsa acil değildir",
+        "Düzenli ritimde yalnız rutin kontrol"
+      ],
+      "correct": 0,
+      "explanations": [
+        "Süren belirtiler acil klinik değerlendirme ister.",
+        "Hasta durumu mekanizmadan önce değerlendirilir.",
+        "Aciliyet tek derivasyonla belirlenmez.",
+        "Şematik akış gerçek durumu göstermez.",
+        "Düzenlilik ciddi belirtileri rutine çevirmez."
+      ],
+      "feedback": "Süren belirtiler acil klinik değerlendirme ister.",
+      "objectiveIds": [
+        "O5"
+      ],
+      "sourceIds": [
+        "ACS2023"
+      ],
+      "decisionId": "urgent",
+      "note": "",
+      "ecg": {
+        "mode": "stemi",
+        "options": {},
+        "leads": [
+          "V2",
+          "V3",
+          "V4"
+        ],
+        "start": 0.66,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C034",
+      "mode": "stemi",
+      "title": "Sentetik vaka C034",
+      "ariaLabel": "C034 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "71 yaşında kadın hasta. Başvuru: bulantı ve göğüs sıkışmasıyla acile geliyor. ST değişimi saptanıyor; anjiyografi veya ileri görüntüleme henüz yapılmamış.",
+      "question": "Bu bulgudan sorumlu damar hakkında hangi sınır geçerlidir?",
+      "text": "Bu bulgudan sorumlu damar hakkında hangi sınır geçerlidir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "Düzenli ritim iskemiyi dışlar",
+        "EKG bölgeyi düşündürür; sorumlu damar klinik bağlam, seri EKG ve koroner görüntülemeyle kesinleşir",
+        "Animasyon gerçek EF ölçer",
+        "Karşılıklı çökme yoksa iskemi yoktur",
+        "Tek ST değeri damarı kesinleştirir"
+      ],
+      "correct": 1,
+      "explanations": [
+        "Ritim düzenli olsa da iskemi sürebilir.",
+        "ST dağılımı bölge ipucu verir; sorumlu (culprit) damar tek başına EKG'den kesinleşmez, anjiyografi ile doğrulanır (ACS 2025).",
+        "Şematik hareket EF ölçümü değildir.",
+        "Karşılıklı değişim olmaması iskemiyi dışlamaz.",
+        "ST bölgesi ipucu verir, kesin tanı vermez."
+      ],
+      "feedback": "ST dağılımı bölge ipucu verir; sorumlu (culprit) damar tek başına EKG'den kesinleşmez, anjiyografi ile doğrulanır (ACS 2025).",
+      "objectiveIds": [
+        "O5"
+      ],
+      "sourceIds": [
+        "ACS2023"
+      ],
+      "decisionId": "ischemiaLimits",
+      "note": "",
+      "ecg": {
+        "mode": "stemi",
+        "options": {},
+        "leads": [
+          "V2",
+          "V3",
+          "V4"
+        ],
+        "start": 0.74,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C035",
+      "mode": "stemi",
+      "title": "Sentetik vaka C035",
+      "ariaLabel": "C035 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "49 yaşında erkek hasta. Başvuru: sol kola yayılan göğüs ağrısı tarif ediyor. V3 derivasyonunda J noktasından 20 ms sonrası +0,32 mV olarak ölçülüyor (sentetik ölçüm egzersizi; kılavuz tanı eşikleri J noktasında değerlendirilir).",
+      "question": "Bu ölçümle J+20 ms ST düzeyi kaç mV’tur?",
+      "text": "Bu ölçümle J+20 ms ST düzeyi kaç mV’tur?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "+3,2 mV",
+        "0 mV",
+        "−0,32 mV",
+        "+0,032 mV",
+        "+0,32 mV"
+      ],
+      "correct": 4,
+      "explanations": [
+        "Ondalık kayması yüksekliği 10 kat büyütür.",
+        "Yükselmiş ST platosunu izoelektrik kabul eder.",
+        "Polarite yükselmeden çökmeye çevrilmiştir.",
+        "Ondalık kayması yüksekliği 10 kat küçültür.",
+        "V3’te J+20 ms sentetik ST düzeyi+0,32 mV’dir. J+20 ms bu modelin ölçüm noktasıdır; kılavuz tanı eşikleri J noktasındaki sapmaya göre tanımlanır."
+      ],
+      "feedback": "V3’te J+20 ms sentetik ST düzeyi+0,32 mV’dir. J+20 ms bu modelin ölçüm noktasıdır; kılavuz tanı eşikleri J noktasındaki sapmaya göre tanımlanır.",
+      "objectiveIds": [
+        "O6"
+      ],
+      "sourceIds": [
+        "ACS2023",
+        "ECG"
+      ],
+      "decisionId": "st32",
+      "note": "",
+      "ecg": {
+        "mode": "stemi",
+        "options": {},
+        "leads": [
+          "V2",
+          "V3",
+          "V4"
+        ],
+        "start": 0.8200000000000001,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C036",
+      "mode": "stemi",
+      "title": "Sentetik vaka C036",
+      "ariaLabel": "C036 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "60 yaşında kadın hasta. Başvuru: diyabetik hastada atipik göğüs rahatsızlığı ile başvuruyor. Eşzamanlı üç derivasyonlu kayıt aşağıda gösteriliyor.",
+      "question": "Bu ritim hangi sınıfa girer?",
+      "text": "Bu ritim hangi sınıfa girer?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "Düzenli geniş kompleks",
+        "Kaotik, organize değil",
+        "Düzensiz dar kompleks",
+        "Düzenli dar kompleks, normal hız",
+        "Düzenli dar kompleks, hızlı"
+      ],
+      "correct": 3,
+      "explanations": [
+        "Bu örnekte QRS dar, bu kadar geniş değil.",
+        "Bu örnekte düzenli bir kompleks seçilebiliyor, kaotik değil.",
+        "Bu örnekte ritim düzenli, düzensiz değil.",
+        "Hız yaklaşık 75/dk, ritim düzenli ve QRS dar.",
+        "Bu örnekte hız bu kadar yüksek değil."
+      ],
+      "feedback": "Hız yaklaşık 75/dk, ritim düzenli ve QRS dar.",
+      "objectiveIds": [
+        "O2"
+      ],
+      "sourceIds": [
+        "ACS2023"
+      ],
+      "decisionId": "rhythmClass_stemi",
+      "note": "",
+      "ecg": {
+        "mode": "stemi",
+        "options": {},
+        "leads": [
+          "V2",
+          "V3",
+          "V4"
+        ],
+        "start": 0.5,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C037",
+      "mode": "stemi",
+      "title": "Sentetik vaka C037",
+      "ariaLabel": "C037 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "55 yaşında erkek hasta. Başvuru: sabah uyanınca başlayan göğüs ağrısıyla geliyor. Animasyonda bir duvar bölgesinin hareketi azalırken ana damardaki akışın sürdüğü gösteriliyor.",
+      "question": "Bölgesel bulgu ile global dolaşım arasındaki ayrım nasıl yapılmalıdır?",
+      "text": "Bölgesel bulgu ile global dolaşım arasındaki ayrım nasıl yapılmalıdır?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "Düzenli QRS normal debiyi kanıtlar",
+        "ST yükselmesi VF ile aynı akımsızlıktır",
+        "Her ST mV'u sabit EF kaybıdır",
+        "Renk koyuluğu gerçek stenoz yüzdesidir",
+        "Bölgesel azalma şematik, global akım sürebilir"
+      ],
+      "correct": 4,
+      "explanations": [
+        "Elektriksel düzen debiyi ölçmez.",
+        "Bölgesel iskemi VF'deki tam pompa kaybı değildir.",
+        "ST voltajı EF kaybına dönüştürülemez.",
+        "Renk şematiktir, stenoz oranı vermez.",
+        "Bir bölge zayıf gösterilir, tüm pompa durmaz."
+      ],
+      "feedback": "Bir bölge zayıf gösterilir, tüm pompa durmaz.",
+      "objectiveIds": [
+        "O4"
+      ],
+      "sourceIds": [
+        "ACS2023",
+        "CYCLE"
+      ],
+      "decisionId": "ischemiaFlow",
+      "note": "",
+      "ecg": {
+        "mode": "stemi",
+        "options": {},
+        "leads": [
+          "V2",
+          "V3",
+          "V4"
+        ],
+        "start": 0.58,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C038",
+      "mode": "stemi",
+      "title": "Sentetik vaka C038",
+      "ariaLabel": "C038 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "67 yaşında kadın hasta. Başvuru: nefes darlığı eşlik eden göğüs ağrısıyla başvuruyor. Aynı kayıt üzerinde farklı bir derivasyon grubuna geçildiğinde görünüm değişiyor.",
+      "question": "Derivasyon seçimini değiştirmenin bulguya etkisi nedir?",
+      "text": "Derivasyon seçimini değiştirmenin bulguya etkisi nedir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "Tek lead 12 derivasyona eşittir",
+        "Tüm lead'ler aynı şekli gösterir",
+        "Negatif QRS ventrikül kaynağını kanıtlar",
+        "Derivasyon aynı kaynağın farklı görünümüdür",
+        "Lead değiştirmek ritmi değiştirir"
+      ],
+      "correct": 3,
+      "explanations": [
+        "Diğer derivasyonlar ek bilgi taşır.",
+        "Her derivasyon farklı açıdan bakar.",
+        "Polarite yön farkından da olabilir.",
+        "Lead değiştirmek şekli değiştirir, ritmi değiştirmez.",
+        "Görünüm değişir, kaynak aynı kalır."
+      ],
+      "feedback": "Lead değiştirmek şekli değiştirir, ritmi değiştirmez.",
+      "objectiveIds": [
+        "O3"
+      ],
+      "sourceIds": [
+        "ACS2023",
+        "ECG"
+      ],
+      "decisionId": "leadAll",
+      "note": "",
+      "ecg": {
+        "mode": "stemi",
+        "options": {},
+        "leads": [
+          "V2",
+          "V3",
+          "V4"
+        ],
+        "start": 0.66,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C039",
+      "mode": "stemi",
+      "title": "Sentetik vaka C039",
+      "ariaLabel": "C039 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "46 yaşında erkek hasta. Başvuru: sigara içen hastada yeni başlayan göğüs ağrısı. Elektriksel kayıt sürerken nabız muayenesi ayrıca planlanıyor.",
+      "question": "EKG bulgusu ile mekanik nabız arasındaki ilişki için hangi değerlendirme gerekir?",
+      "text": "EKG bulgusu ile mekanik nabız arasındaki ilişki için hangi değerlendirme gerekir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "T genliği atım hacmini verir",
+        "QRS genişliği nabız basıncını verir",
+        "Elektriksel hız nabza birebir eşittir",
+        "PR süresi debiyi verir",
+        "Nabız ayrıca klinik olarak bakılır"
+      ],
+      "correct": 4,
+      "explanations": [
+        "T genliği repolarizasyon voltajıdır.",
+        "Genişlik zaman ölçüsüdür, basınç değildir.",
+        "Nabız açığı olabilir; eşitlik varsayılamaz.",
+        "PR iletim süresidir, debi ölçmez.",
+        "EKG elektrik gösterir, nabzı kanıtlamaz."
+      ],
+      "feedback": "EKG elektrik gösterir, nabzı kanıtlamaz.",
+      "objectiveIds": [
+        "O4"
+      ],
+      "sourceIds": [
+        "ACS2023",
+        "CYCLE"
+      ],
+      "decisionId": "pulse",
+      "note": "",
+      "ecg": {
+        "mode": "stemi",
+        "options": {},
+        "leads": [
+          "V2",
+          "V3",
+          "V4"
+        ],
+        "start": 0.74,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C040",
+      "mode": "stemi",
+      "title": "Sentetik vaka C040",
+      "ariaLabel": "C040 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "73 yaşında kadın hasta. Başvuru: huzurevinde ani göğüs ağrısı sonrası 112 çağrılıyor. Kaliperle P’nin ilk sapması QRS’den 215 ms önce, QRS’in ilk sapması 40 ms önce işaretleniyor.",
+      "question": "Bu ölçümlerle PR aralığı kaç milisaniyedir?",
+      "text": "Bu ölçümlerle PR aralığı kaç milisaniyedir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "215 ms",
+        "130 ms",
+        "155 ms",
+        "255 ms",
+        "175 ms"
+      ],
+      "correct": 4,
+      "explanations": [
+        "215 ms P başlangıcından R tepesine ölçüm hatasıdır.",
+        "130 ms P merkezinden QRS başlangıcına gitme hatasıdır.",
+        "155 ms verilen iki başlangıcın farkı değildir.",
+        "255 ms P başlangıcından QRS sonuna ölçüm hatasıdır.",
+        "P ilk sapması−215 ms, QRS ilk sapması−40 ms: fark 175 ms."
+      ],
+      "feedback": "P ilk sapması−215 ms, QRS ilk sapması−40 ms: fark 175 ms.",
+      "objectiveIds": [
+        "O6"
+      ],
+      "sourceIds": [
+        "ACS2023",
+        "ECG"
+      ],
+      "decisionId": "pr175",
+      "note": "",
+      "ecg": {
+        "mode": "stemi",
+        "options": {},
+        "leads": [
+          "V2",
+          "V3",
+          "V4"
+        ],
+        "start": 0.8200000000000001,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C041",
+      "mode": "stemi",
+      "title": "Sentetik vaka C041",
+      "ariaLabel": "C041 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "61 yaşında erkek hasta. Başvuru: iş yerinde göğüs ağrısı ile fenalaşıyor. Dar bir kompleksin ilk sapması 40 ms önce, son dönüşü 40 ms sonra işaretleniyor.",
+      "question": "Bu ölçümlerle QRS süresi kaç milisaniyedir?",
+      "text": "Bu ölçümlerle QRS süresi kaç milisaniyedir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "60 ms",
+        "100 ms",
+        "40 ms",
+        "80 ms",
+        "140 ms"
+      ],
+      "correct": 3,
+      "explanations": [
+        "60 ms başlangıç veya terminal bileşenin bir kısmını dışlar.",
+        "100 ms iki sınırın verilen farkından fazladır.",
+        "40 ms yalnız R’den son dönüşe yarı desteği sayar.",
+        "−40 ms ile+40 ms arasındaki QRS desteği 80 ms’dir.",
+        "140 ms geniş PVC/RBBB örneğiyle karıştırır."
+      ],
+      "feedback": "−40 ms ile+40 ms arasındaki QRS desteği 80 ms’dir.",
+      "objectiveIds": [
+        "O6"
+      ],
+      "sourceIds": [
+        "ACS2023",
+        "ECG"
+      ],
+      "decisionId": "q80",
+      "note": "",
+      "ecg": {
+        "mode": "stemi",
+        "options": {},
+        "leads": [
+          "V2",
+          "V3",
+          "V4"
+        ],
+        "start": 0.5,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C042",
+      "mode": "stemi",
+      "title": "Sentetik vaka C042",
+      "ariaLabel": "C042 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "54 yaşında kadın hasta. Başvuru: çene ağrısı ile birlikte göğüs sıkışması tarif ediyor. Ventriküler kompleksten sonra gelen dalganın anlamı soruluyor.",
+      "question": "T dalgasının temel elektriksel karşılığı nedir?",
+      "text": "T dalgasının temel elektriksel karşılığı nedir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "T: gecikmiş sağ ventrikül uyarısı",
+        "T: ventriküler depolarizasyon",
+        "T: atriyal repolarizasyon",
+        "T: ventriküler repolarizasyon",
+        "T: yeni bir atriyal uyarı"
+      ],
+      "correct": 3,
+      "explanations": [
+        "Bu bileşen QRS içinde yer alır.",
+        "Bu olay QRS ile kaydedilir.",
+        "Bu olay genelde QRS altında gizlenir.",
+        "T dalgası ventrikülün elektriksel toparlanmasıdır.",
+        "Yeni P ayrı bir dalga olarak görülür."
+      ],
+      "feedback": "T dalgası ventrikülün elektriksel toparlanmasıdır.",
+      "objectiveIds": [
+        "O1"
+      ],
+      "sourceIds": [
+        "ACS2023"
+      ],
+      "decisionId": "t",
+      "note": "",
+      "ecg": {
+        "mode": "stemi",
+        "options": {},
+        "leads": [
+          "V2",
+          "V3",
+          "V4"
+        ],
+        "start": 0.58,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C043",
+      "mode": "stemi",
+      "title": "Sentetik vaka C043",
+      "ariaLabel": "C043 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "68 yaşında erkek hasta. Başvuru: önceki MI öyküsüyle tekrar göğüs ağrısı ile geliyor. Kısa süreli bir kayıt elde ediliyor; önceki öykü ve ek testler henüz yok.",
+      "question": "Bu bulgudan etiyoloji ve risk için hangi genel sınır çıkarılabilir?",
+      "text": "Bu bulgudan etiyoloji ve risk için hangi genel sınır çıkarılabilir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "QRS genişliği tek başına riski verir",
+        "Kısa kayıt başlangıç zamanını verir",
+        "Hız tek başına dolaşımı gösterir",
+        "Örüntü desteklenir, neden ayrıca sorulur",
+        "P ekseni kesin odağı belirler"
+      ],
+      "correct": 3,
+      "explanations": [
+        "Risk için klinik bağlam da gerekir.",
+        "Bir pencere toplam süreyi göstermez.",
+        "Nabız ve basınç ayrıca değerlendirilir.",
+        "EKG bulgusu tanı verir, nedeni klinik öykü belirler.",
+        "P ekseni ipucudur, kesin yer vermez."
+      ],
+      "feedback": "EKG bulgusu tanı verir, nedeni klinik öykü belirler.",
+      "objectiveIds": [
+        "O5"
+      ],
+      "sourceIds": [
+        "ACS2023"
+      ],
+      "decisionId": "limits",
+      "note": "",
+      "ecg": {
+        "mode": "stemi",
+        "options": {},
+        "leads": [
+          "V2",
+          "V3",
+          "V4"
+        ],
+        "start": 0.66,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C044",
+      "mode": "stemi",
+      "title": "Sentetik vaka C044",
+      "ariaLabel": "C044 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "50 yaşında kadın hasta. Başvuru: stres testi sırasında göğüs ağrısı gelişiyor. Eşzamanlı üç derivasyonlu kayıt aşağıda gösteriliyor.",
+      "question": "Bu EKG'de öncelikle hangi tanı düşünülmelidir?",
+      "text": "Bu EKG'de öncelikle hangi tanı düşünülmelidir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "Ventriküler taşikardi",
+        "Sağ dal bloğu",
+        "Anterior ST yükselmeli iskemi",
+        "Fokal atriyal taşikardi",
+        "Sinüs taşikardisi"
+      ],
+      "correct": 2,
+      "explanations": [
+        "Ventriküler taşikardi için beklenen bulgular burada yok.",
+        "Sağ dal bloğu için beklenen bulgular burada yok.",
+        "Tarif edilen bulgular Anterior ST yükselmeli iskemi ile uyumludur.",
+        "Fokal atriyal taşikardi için beklenen bulgular burada yok.",
+        "Sinüs taşikardisi için beklenen bulgular burada yok."
+      ],
+      "feedback": "Tarif edilen bulgular Anterior ST yükselmeli iskemi ile uyumludur.",
+      "objectiveIds": [
+        "O2"
+      ],
+      "sourceIds": [
+        "ACS2023"
+      ],
+      "decisionId": "ddx_stemi",
+      "note": "",
+      "ecg": {
+        "mode": "stemi",
+        "options": {},
+        "leads": [
+          "V2",
+          "V3",
+          "V4"
+        ],
+        "start": 0.74,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C045",
+      "mode": "stemi",
+      "title": "Sentetik vaka C045",
+      "ariaLabel": "C045 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "63 yaşında erkek hasta. Başvuru: soğuk terleme ve göğüs ağrısıyla acile başvuruyor. Sistematik okumada hangi derivasyonların inferior duvarı temsil ettiği gözden geçiriliyor.",
+      "question": "Hangi derivasyon grubu inferior duvarı gösterir?",
+      "text": "Hangi derivasyon grubu inferior duvarı gösterir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "II, III, aVF — inferior duvar",
+        "V3, V4 — anterior duvar",
+        "aVR tek başına — sağ üst köşe",
+        "I, aVL, V5–V6 — lateral duvar",
+        "V1, V2 — septal bölge"
+      ],
+      "correct": 0,
+      "explanations": [
+        "Bu üç derivasyon kalbin inferior (alt) duvarını gösterir.",
+        "V3–V4 anterior duvarı gösterir, inferior duvarı değil.",
+        "aVR tek başına sağ üst yönü gösterir; inferior grup değildir.",
+        "Bu grup lateral duvarı gösterir, inferior duvarı değil.",
+        "V1–V2 septal bölgeyi gösterir, inferior duvarı değil."
+      ],
+      "feedback": "Bu üç derivasyon kalbin inferior (alt) duvarını gösterir.",
+      "objectiveIds": [
+        "O3"
+      ],
+      "sourceIds": [
+        "ACS2023",
+        "ECG"
+      ],
+      "decisionId": "inferiorLeadGroup",
+      "note": "",
+      "ecg": {
+        "mode": "stemi",
+        "options": {},
+        "leads": [
+          "V2",
+          "V3",
+          "V4"
+        ],
+        "start": 0.8200000000000001,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C046",
+      "mode": "pvc",
+      "title": "Sentetik vaka C046",
+      "ariaLabel": "C046 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "45 yaşında erkek hasta. Başvuru: ara sıra tekleme hissiyle aile hekimine başvuruyor. Temel düzenli ritim sırasında, öncesinde ilişkili bir dalga olmayan erken ve geniş tek bir kompleks dikkati çekiyor.",
+      "question": "Bu erken atımın en uygun sınıflaması hangisidir?",
+      "text": "Bu erken atımın en uygun sınıflaması hangisidir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "Dal bloğu atımı",
+        "Flutter atımı",
+        "AF atımı",
+        "Ventriküler erken atım (PVC)",
+        "Normal sinüs atımı"
+      ],
+      "correct": 3,
+      "explanations": [
+        "Dal bloğunda her atım geniştir; burada tek atım geniş.",
+        "Flutter düzenli taban ister; burada yok.",
+        "AF'de tüm ritim düzensizdir; burada tek atım farklı.",
+        "Erken, geniş, öncesinde P yok: PVC.",
+        "Sinüs atımı zamanında gelir; bu atım erken."
+      ],
+      "feedback": "Erken, geniş, öncesinde P yok: PVC.",
+      "objectiveIds": [
+        "O2"
+      ],
+      "sourceIds": [
+        "VA2022"
+      ],
+      "decisionId": "pvc",
+      "note": "",
+      "ecg": {
+        "mode": "pvc",
+        "options": {},
+        "leads": [
+          "II",
+          "aVR",
+          "V1"
+        ],
+        "start": 1.1,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C047",
+      "mode": "pvc",
+      "title": "Sentetik vaka C047",
+      "ariaLabel": "C047 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "38 yaşında kadın hasta. Başvuru: çarpıntı sırasında \"kalp duruyor gibi\" hissi tarif ediyor. Kompleks genişliği tek başına değerlendirilerek kökeni hakkında yorum yapılmak isteniyor.",
+      "question": "QRS genişliğini tek başına yorumlarken hangi sınır geçerlidir?",
+      "text": "QRS genişliğini tek başına yorumlarken hangi sınır geçerlidir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "Genişlik ve klinik bulgu birlikte yorumlanır",
+        "140 ms her QRS kesin RBBB'dir",
+        "Genişlik tek başına debiyi hesaplar",
+        "120 ms üstü her QRS VT'dir",
+        "160 ms her QRS kesin LBBB'dir"
+      ],
+      "correct": 0,
+      "explanations": [
+        "Tek genişlik VT ile bloğu kesin ayırmaz.",
+        "PVC de bu genişlikte olabilir.",
+        "Genişlik zaman ölçüsüdür, debi değildir.",
+        "Dal bloğu da geniş QRS yapabilir.",
+        "Genişlik tek başına LBBB'yi kanıtlamaz."
+      ],
+      "feedback": "Tek genişlik VT ile bloğu kesin ayırmaz.",
+      "objectiveIds": [
+        "O5"
+      ],
+      "sourceIds": [
+        "VA2022"
+      ],
+      "decisionId": "qrsWidthCause",
+      "note": "",
+      "ecg": {
+        "mode": "pvc",
+        "options": {},
+        "leads": [
+          "II",
+          "aVR",
+          "V1"
+        ],
+        "start": 2.5,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C048",
+      "mode": "pvc",
+      "title": "Sentetik vaka C048",
+      "ariaLabel": "C048 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "52 yaşında erkek hasta. Başvuru: egzersiz sırasında tekleme hissiyle geliyor. Erken ve geniş tek bir kompleksten hemen önce ilişkili bir dalga seçilemiyor.",
+      "question": "Bu erken atımın kaynağı nasıl açıklanır?",
+      "text": "Bu erken atımın kaynağı nasıl açıklanır?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "Sabit sol dal gecikmesi",
+        "Sinüs hızının artışı",
+        "Hızlı atriyal devre",
+        "Ventrikülden erken uyarı",
+        "Sabit sağ dal gecikmesi"
+      ],
+      "correct": 3,
+      "explanations": [
+        "Sabit blokta her atım geniştir; burada tek atım.",
+        "Sinüs hızlanması ayrı erken geniş atım yapmaz.",
+        "Atriyal kaynak dar QRS yapar; burada geniş.",
+        "Öncül P yok, QRS geniş: ventrikül kaynaklı.",
+        "Sabit blokta her atım geniştir; burada tek atım."
+      ],
+      "feedback": "Öncül P yok, QRS geniş: ventrikül kaynaklı.",
+      "objectiveIds": [
+        "O2"
+      ],
+      "sourceIds": [
+        "VA2022"
+      ],
+      "decisionId": "pvcOrigin",
+      "note": "",
+      "ecg": {
+        "mode": "pvc",
+        "options": {},
+        "leads": [
+          "II",
+          "aVR",
+          "V1"
+        ],
+        "start": 2.7,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C049",
+      "mode": "pvc",
+      "title": "Sentetik vaka C049",
+      "ariaLabel": "C049 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "60 yaşında kadın hasta. Başvuru: kafein alımı sonrası tekleme hissi tarif ediyor. Erken atımın öncesindeki ve sonrasındaki aralıklar 480 ms ve 1120 ms olarak ölçülüyor.",
+      "question": "Bu duraklamanın süresi ve yorumu hangisidir?",
+      "text": "Bu duraklamanın süresi ve yorumu hangisidir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "İki temel döngü toplamı",
+        "Her PVC bu duraklamayı yapar",
+        "1600 ms bir PR aralığıdır",
+        "Yalnız 480 ms temel döngüdür",
+        "Yalnız 1120 ms geçerlidir"
+      ],
+      "correct": 0,
+      "explanations": [
+        "480+1120=1600 ms, iki 800 ms döngüye eşit.",
+        "Kompansatuvar duraklama her olguda aynı değildir.",
+        "Bu iki R–R döngüsüdür, PR değildir.",
+        "Erken aralık temel hızı göstermez.",
+        "Duraklama tek başına döngüyü tanımlamaz."
+      ],
+      "feedback": "480+1120=1600 ms, iki 800 ms döngüye eşit.",
+      "objectiveIds": [
+        "O1"
+      ],
+      "sourceIds": [
+        "VA2022"
+      ],
+      "decisionId": "pvcPause",
+      "note": "",
+      "ecg": {
+        "mode": "pvc",
+        "options": {},
+        "leads": [
+          "II",
+          "aVR",
+          "V1"
+        ],
+        "start": 2.9,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C050",
+      "mode": "pvc",
+      "title": "Sentetik vaka C050",
+      "ariaLabel": "C050 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "33 yaşında erkek hasta. Başvuru: stresli dönemde ara sıra çarpıntı fark ediyor. Geniş bir kompleksin ilk sapması 60 ms önce, son dönüşü 80 ms sonra işaretleniyor.",
+      "question": "Bu ölçümlerle QRS süresi kaç milisaniyedir?",
+      "text": "Bu ölçümlerle QRS süresi kaç milisaniyedir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "200 ms",
+        "160 ms",
+        "110 ms",
+        "140 ms",
+        "80 ms"
+      ],
+      "correct": 3,
+      "explanations": [
+        "200 ms verilen ilk/son sapma farkından 60 ms uzundur.",
+        "160 ms LBBB öğretim genişliğidir.",
+        "110 ms terminal desteğin bir kısmını dışlar.",
+        "−60 ms ile+80 ms arasındaki geniş QRS desteği 140 ms’dir.",
+        "80 ms normal dar QRS örneğidir."
+      ],
+      "feedback": "−60 ms ile+80 ms arasındaki geniş QRS desteği 140 ms’dir.",
+      "objectiveIds": [
+        "O6"
+      ],
+      "sourceIds": [
+        "VA2022",
+        "ECG"
+      ],
+      "decisionId": "q140",
+      "note": "",
+      "ecg": {
+        "mode": "pvc",
+        "options": {},
+        "leads": [
+          "II",
+          "aVR",
+          "V1"
+        ],
+        "start": 0.3,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C051",
+      "mode": "pvc",
+      "title": "Sentetik vaka C051",
+      "ariaLabel": "C051 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "48 yaşında kadın hasta. Başvuru: uykuya dalarken tekleme hissiyle uyanıyor. Erken ve geniş kompleksin hemen ardından ana yöne ters bir T dalgası izleniyor.",
+      "question": "Bu erken atım sonrası T değişikliği nasıl yorumlanır?",
+      "text": "Bu erken atım sonrası T değişikliği nasıl yorumlanır?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "Geniş QRS sonrası ters T",
+        "Bu nabız yönünü gösterir",
+        "Her ters T akut oklüzyondur",
+        "T değişimi yeni P dizisidir",
+        "Bu ayrı bir atriyal taşikardidir"
+      ],
+      "correct": 0,
+      "explanations": [
+        "Farklı aktivasyon yolu ters repolarizasyon yapar.",
+        "EKG yönü mekanik akım yönü değildir.",
+        "Geniş QRS sonrası ters T tek başına oklüzyon değildir.",
+        "T ventrikül olayıdır, P değildir.",
+        "Bu tek atımın repolarizasyonudur, yeni ritim değil."
+      ],
+      "feedback": "Farklı aktivasyon yolu ters repolarizasyon yapar.",
+      "objectiveIds": [
+        "O1"
+      ],
+      "sourceIds": [
+        "VA2022"
+      ],
+      "decisionId": "pvcT",
+      "note": "",
+      "ecg": {
+        "mode": "pvc",
+        "options": {},
+        "leads": [
+          "II",
+          "aVR",
+          "V1"
+        ],
+        "start": 0.6,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C052",
+      "mode": "pvc",
+      "title": "Sentetik vaka C052",
+      "ariaLabel": "C052 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "55 yaşında erkek hasta. Başvuru: yıllık kontrolde tesadüfen erken atım saptanıyor. Elektriksel kayıt sürerken nabız muayenesi ayrıca planlanıyor.",
+      "question": "EKG bulgusu ile mekanik nabız arasındaki ilişki için hangi değerlendirme gerekir?",
+      "text": "EKG bulgusu ile mekanik nabız arasındaki ilişki için hangi değerlendirme gerekir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "Elektriksel hız nabza birebir eşittir",
+        "QRS genişliği nabız basıncını verir",
+        "Nabız ayrıca klinik olarak bakılır",
+        "T genliği atım hacmini verir",
+        "PR süresi debiyi verir"
+      ],
+      "correct": 2,
+      "explanations": [
+        "Nabız açığı olabilir; eşitlik varsayılamaz.",
+        "Genişlik zaman ölçüsüdür, basınç değildir.",
+        "EKG elektrik gösterir, nabzı kanıtlamaz.",
+        "T genliği repolarizasyon voltajıdır.",
+        "PR iletim süresidir, debi ölçmez."
+      ],
+      "feedback": "EKG elektrik gösterir, nabzı kanıtlamaz.",
+      "objectiveIds": [
+        "O4"
+      ],
+      "sourceIds": [
+        "VA2022",
+        "CYCLE"
+      ],
+      "decisionId": "pulse",
+      "note": "",
+      "ecg": {
+        "mode": "pvc",
+        "options": {},
+        "leads": [
+          "II",
+          "aVR",
+          "V1"
+        ],
+        "start": 0.9,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C053",
+      "mode": "pvc",
+      "title": "Sentetik vaka C053",
+      "ariaLabel": "C053 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "41 yaşında kadın hasta. Başvuru: egzersiz testi sırasında izole erken atım gözleniyor. Kısa süreli bir kayıt elde ediliyor; önceki öykü ve ek testler henüz yok.",
+      "question": "Bu bulgudan etiyoloji ve risk için hangi genel sınır çıkarılabilir?",
+      "text": "Bu bulgudan etiyoloji ve risk için hangi genel sınır çıkarılabilir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "Hız tek başına dolaşımı gösterir",
+        "P ekseni kesin odağı belirler",
+        "Örüntü desteklenir, neden ayrıca sorulur",
+        "Kısa kayıt başlangıç zamanını verir",
+        "QRS genişliği tek başına riski verir"
+      ],
+      "correct": 2,
+      "explanations": [
+        "Nabız ve basınç ayrıca değerlendirilir.",
+        "P ekseni ipucudur, kesin yer vermez.",
+        "EKG bulgusu tanı verir, nedeni klinik öykü belirler.",
+        "Bir pencere toplam süreyi göstermez.",
+        "Risk için klinik bağlam da gerekir."
+      ],
+      "feedback": "EKG bulgusu tanı verir, nedeni klinik öykü belirler.",
+      "objectiveIds": [
+        "O5"
+      ],
+      "sourceIds": [
+        "VA2022"
+      ],
+      "decisionId": "limits",
+      "note": "",
+      "ecg": {
+        "mode": "pvc",
+        "options": {},
+        "leads": [
+          "II",
+          "aVR",
+          "V1"
+        ],
+        "start": 1.1,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C054",
+      "mode": "pvc",
+      "title": "Sentetik vaka C054",
+      "ariaLabel": "C054 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "63 yaşında erkek hasta. Başvuru: yorgunluk sonrası ara sıra çarpıntı tarif ediyor. Kaliperle P’nin ilk sapması QRS’den 215 ms önce, QRS’in ilk sapması 40 ms önce işaretleniyor.",
+      "question": "Bu ölçümlerle PR aralığı kaç milisaniyedir?",
+      "text": "Bu ölçümlerle PR aralığı kaç milisaniyedir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "215 ms",
+        "155 ms",
+        "130 ms",
+        "175 ms",
+        "255 ms"
+      ],
+      "correct": 3,
+      "explanations": [
+        "215 ms P başlangıcından R tepesine ölçüm hatasıdır.",
+        "155 ms verilen iki başlangıcın farkı değildir.",
+        "130 ms P merkezinden QRS başlangıcına gitme hatasıdır.",
+        "P ilk sapması−215 ms, QRS ilk sapması−40 ms: fark 175 ms.",
+        "255 ms P başlangıcından QRS sonuna ölçüm hatasıdır."
+      ],
+      "feedback": "P ilk sapması−215 ms, QRS ilk sapması−40 ms: fark 175 ms.",
+      "objectiveIds": [
+        "O6"
+      ],
+      "sourceIds": [
+        "VA2022",
+        "ECG"
+      ],
+      "decisionId": "pr175",
+      "note": "",
+      "ecg": {
+        "mode": "pvc",
+        "options": {},
+        "leads": [
+          "II",
+          "aVR",
+          "V1"
+        ],
+        "start": 2.5,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C055",
+      "mode": "pvc",
+      "title": "Sentetik vaka C055",
+      "ariaLabel": "C055 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "36 yaşında kadın hasta. Başvuru: anksiyete öyküsüyle çarpıntı yakınmasıyla başvuruyor. QRS’den kısa süre önce ayrı bir dalga seçiliyor.",
+      "question": "P dalgasının temel elektriksel karşılığı nedir?",
+      "text": "P dalgasının temel elektriksel karşılığı nedir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "P: yalnız AV düğüm iletimi",
+        "P: atriyal depolarizasyon",
+        "P: ventriküler repolarizasyon",
+        "P: atriyal repolarizasyon",
+        "P: ventriküler depolarizasyon"
+      ],
+      "correct": 1,
+      "explanations": [
+        "AV düğüm gecikmesi PR aralığında değerlendirilir.",
+        "P dalgası atriyumun elektriksel uyarılmasıdır.",
+        "Bu olay T dalgası ile kaydedilir.",
+        "Atriyal repolarizasyon genelde QRS altında gizlenir.",
+        "Bu olay QRS ile kaydedilir."
+      ],
+      "feedback": "P dalgası atriyumun elektriksel uyarılmasıdır.",
+      "objectiveIds": [
+        "O1"
+      ],
+      "sourceIds": [
+        "VA2022"
+      ],
+      "decisionId": "p",
+      "note": "",
+      "ecg": {
+        "mode": "pvc",
+        "options": {},
+        "leads": [
+          "II",
+          "aVR",
+          "V1"
+        ],
+        "start": 2.7,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C056",
+      "mode": "pvc",
+      "title": "Sentetik vaka C056",
+      "ariaLabel": "C056 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "58 yaşında erkek hasta. Başvuru: holter takılan hastada tekrarlayan tekleme kaydediliyor. Dar bir kompleksin ilk sapması 40 ms önce, son dönüşü 40 ms sonra işaretleniyor.",
+      "question": "Bu ölçümlerle QRS süresi kaç milisaniyedir?",
+      "text": "Bu ölçümlerle QRS süresi kaç milisaniyedir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "140 ms",
+        "40 ms",
+        "80 ms",
+        "60 ms",
+        "100 ms"
+      ],
+      "correct": 2,
+      "explanations": [
+        "140 ms geniş PVC/RBBB örneğiyle karıştırır.",
+        "40 ms yalnız R’den son dönüşe yarı desteği sayar.",
+        "−40 ms ile+40 ms arasındaki QRS desteği 80 ms’dir.",
+        "60 ms başlangıç veya terminal bileşenin bir kısmını dışlar.",
+        "100 ms iki sınırın verilen farkından fazladır."
+      ],
+      "feedback": "−40 ms ile+40 ms arasındaki QRS desteği 80 ms’dir.",
+      "objectiveIds": [
+        "O6"
+      ],
+      "sourceIds": [
+        "VA2022",
+        "ECG"
+      ],
+      "decisionId": "q80",
+      "note": "",
+      "ecg": {
+        "mode": "pvc",
+        "options": {},
+        "leads": [
+          "II",
+          "aVR",
+          "V1"
+        ],
+        "start": 2.9,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C057",
+      "mode": "pvc",
+      "title": "Sentetik vaka C057",
+      "ariaLabel": "C057 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "44 yaşında kadın hasta. Başvuru: alkol alımı sonrası çarpıntı hissi tarif ediyor. Standart 12 derivasyonluk kayıt üzerinde derivasyon grupları gözden geçiriliyor.",
+      "question": "aVR, aVL ve aVF birlikte hangi derivasyon grubunu oluşturur?",
+      "text": "aVR, aVL ve aVF birlikte hangi derivasyon grubunu oluşturur?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "Yalnız sağ göğüs derivasyonları",
+        "Artırılmış ekstremite derivasyonları",
+        "Bipolar ekstremite derivasyonları",
+        "Prekordiyal derivasyonlar",
+        "Özefagus derivasyonları"
+      ],
+      "correct": 1,
+      "explanations": [
+        "Sağ göğüs derivasyonları ayrı bir prekordiyal settir; aVR/aVL/aVF değildir.",
+        "aVR, aVL ve aVF birlikte artırılmış (unipolar) ekstremite derivasyon grubunu oluşturur.",
+        "Bipolar ekstremite derivasyonları I, II, III'tür; aVR/aVL/aVF unipolardır.",
+        "Prekordiyal grup V1–V6'dır; aVR/aVL/aVF bu gruba girmez.",
+        "Özefagus derivasyonu standart 12 derivasyonluk sette yer almaz."
+      ],
+      "feedback": "aVR, aVL ve aVF birlikte artırılmış (unipolar) ekstremite derivasyon grubunu oluşturur.",
+      "objectiveIds": [
+        "O3"
+      ],
+      "sourceIds": [
+        "VA2022",
+        "ECG"
+      ],
+      "decisionId": "augmentedGroup",
+      "note": "",
+      "ecg": {
+        "mode": "pvc",
+        "options": {},
+        "leads": [
+          "II",
+          "aVR",
+          "V1"
+        ],
+        "start": 0.3,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C058",
+      "mode": "pvc",
+      "title": "Sentetik vaka C058",
+      "ariaLabel": "C058 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "50 yaşında erkek hasta. Başvuru: düzenli spor yapan hastada ara sıra tekleme. Eşzamanlı üç derivasyonlu kayıt aşağıda gösteriliyor.",
+      "question": "Bu ritim hangi sınıfa girer?",
+      "text": "Bu ritim hangi sınıfa girer?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "Kaotik, organize değil",
+        "Düzenli geniş kompleks taşikardi",
+        "Düzensiz dar kompleks (AF)",
+        "Düzenli dar kompleks, hızlı",
+        "Sinüs ritmi + izole erken geniş QRS (PVC)"
+      ],
+      "correct": 4,
+      "explanations": [
+        "Düzenli sinüs kompleksleri seçilebiliyor; kaotik değil.",
+        "Geniş kompleks tek atımdır; sürekli taşikardi yok.",
+        "AF'de düzensizlik tüm kayıt boyunca sürer; tanımlayıcı olay erken geniş kompleks değildir.",
+        "Hız normal aralıkta; tanımlayıcı olay erken geniş komplekstir.",
+        "Temel ritim düzenli sinüs; tek bir erken, geniş, farklı morfolojili kompleks ve ardından duraklama: PVC."
+      ],
+      "feedback": "Temel ritim düzenli sinüs; tek bir erken, geniş, farklı morfolojili kompleks ve ardından duraklama: PVC.",
+      "objectiveIds": [
+        "O2"
+      ],
+      "sourceIds": [
+        "VA2022"
+      ],
+      "decisionId": "rhythmClass_pvc",
+      "note": "",
+      "ecg": {
+        "mode": "pvc",
+        "options": {},
+        "leads": [
+          "II",
+          "aVR",
+          "V1"
+        ],
+        "start": 0.6,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C059",
+      "mode": "pvc",
+      "title": "Sentetik vaka C059",
+      "ariaLabel": "C059 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "29 yaşında kadın hasta. Başvuru: sınav stresi sonrası çarpıntı yakınmasıyla geliyor. İzlemde giriş kapaklarının açık, çıkış kapaklarının kapalı olduğu bir an gösteriliyor.",
+      "question": "Bu kapak ve hacim düzeni hangi mekanik evreyi gösterir?",
+      "text": "Bu kapak ve hacim düzeni hangi mekanik evreyi gösterir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "Tüm kapaklar kapalı: gevşeme",
+        "Çıkış kapakları açık: ejeksiyon",
+        "Tüm kapaklar kapalı: kasılma",
+        "AV kapaklar kapalı: atriyal sistol",
+        "AV kapaklar açık: ventrikül doluşu"
+      ],
+      "correct": 4,
+      "explanations": [
+        "Gevşemede AV henüz açılmamıştır.",
+        "Bu ileri pompalama fazıdır, doluş değil.",
+        "Kasılmada hacim sabittir, doluş yoktur.",
+        "Bu doluş fazı AV açıkken olur.",
+        "Kan diyastolde ventriküle geçer."
+      ],
+      "feedback": "Kan diyastolde ventriküle geçer.",
+      "objectiveIds": [
+        "O4"
+      ],
+      "sourceIds": [
+        "VA2022",
+        "CYCLE"
+      ],
+      "decisionId": "fill",
+      "note": "",
+      "ecg": {
+        "mode": "pvc",
+        "options": {},
+        "leads": [
+          "II",
+          "aVR",
+          "V1"
+        ],
+        "start": 0.9,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C060",
+      "mode": "pvc",
+      "title": "Sentetik vaka C060",
+      "ariaLabel": "C060 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "66 yaşında erkek hasta. Başvuru: kalp yetersizliği izleminde ara sıra erken atım saptanıyor. Sistematik okumada hangi derivasyonların yan duvarı temsil ettiği gözden geçiriliyor.",
+      "question": "Hangi derivasyonlar lateral duvarı gösterir?",
+      "text": "Hangi derivasyonlar lateral duvarı gösterir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "I, aVL, V5–V6 — lateral duvar",
+        "II, III, aVF — inferior duvar",
+        "V1–V6 tümü — tüm prekordiyum",
+        "V1, V2 — septal bölge",
+        "V3, V4 — anterior duvar"
+      ],
+      "correct": 0,
+      "explanations": [
+        "Bu üç derivasyon grubu kalbin lateral duvarını gösterir.",
+        "Bu grup inferior duvarı gösterir, lateral duvarı değil.",
+        "Tüm prekordiyal grup tek başına lateral duvarı özgül olarak göstermez.",
+        "V1–V2 septal bölgeyi gösterir, lateral duvarı değil.",
+        "V3–V4 anterior duvarı gösterir, lateral duvarı değil."
+      ],
+      "feedback": "Bu üç derivasyon grubu kalbin lateral duvarını gösterir.",
+      "objectiveIds": [
+        "O3"
+      ],
+      "sourceIds": [
+        "VA2022",
+        "ECG"
+      ],
+      "decisionId": "lateralLeadGroup",
+      "note": "",
+      "ecg": {
+        "mode": "pvc",
+        "options": {},
+        "leads": [
+          "II",
+          "aVR",
+          "V1"
+        ],
+        "start": 1.1,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C061",
+      "mode": "svt",
+      "title": "Sentetik vaka C061",
+      "ariaLabel": "C061 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "24 yaşında kadın hasta. Başvuru: aniden başlayan hızlı çarpıntı ile acile geliyor. Ani başlayan hızlı, düzenli ve dar kompleksli bir ritim izleniyor; ayrı bir atriyal dalga seçilemiyor.",
+      "question": "Bu bulgularla en uygun kapsamlı sınıflama hangisidir?",
+      "text": "Bu bulgularla en uygun kapsamlı sınıflama hangisidir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "165/dk"
+        },
+        {
+          "k": "TA",
+          "v": "100/66 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%96"
+        }
+      ],
+      "options": [
+        "Dar kompleks SVT",
+        "Monomorfik VT",
+        "Fokal atriyal taşikardi",
+        "Atriyal fibrilasyon",
+        "Sinüs taşikardisi"
+      ],
+      "correct": 0,
+      "explanations": [
+        "Hızlı, düzenli, dar QRS; P seçilemiyor: SVT.",
+        "VT'de QRS geniştir; burada dar.",
+        "Bunun için ayrı bir P kanıtı gerekir; burada yok.",
+        "AF'de R–R düzensizdir; burada düzenli.",
+        "Sinüs taşikardisinde P görülür; burada görülmüyor."
+      ],
+      "feedback": "Hızlı, düzenli, dar QRS; P seçilemiyor: SVT.",
+      "objectiveIds": [
+        "O2"
+      ],
+      "sourceIds": [
+        "SVT2019"
+      ],
+      "decisionId": "svt",
+      "note": "",
+      "ecg": {
+        "mode": "svt",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V1"
+        ],
+        "start": 0.5,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C062",
+      "mode": "svt",
+      "title": "Sentetik vaka C062",
+      "ariaLabel": "C062 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "31 yaşında erkek hasta. Başvuru: egzersiz sırasında ani başlayan çarpıntı tarif ediyor. Aynı kayıt üzerinde farklı bir derivasyon grubuna geçildiğinde görünüm değişiyor.",
+      "question": "Derivasyon seçimini değiştirmenin bulguya etkisi nedir?",
+      "text": "Derivasyon seçimini değiştirmenin bulguya etkisi nedir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "165/dk"
+        },
+        {
+          "k": "TA",
+          "v": "100/66 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%96"
+        }
+      ],
+      "options": [
+        "Tüm lead'ler aynı şekli gösterir",
+        "Derivasyon aynı kaynağın farklı görünümüdür",
+        "Negatif QRS ventrikül kaynağını kanıtlar",
+        "Tek lead 12 derivasyona eşittir",
+        "Lead değiştirmek ritmi değiştirir"
+      ],
+      "correct": 1,
+      "explanations": [
+        "Her derivasyon farklı açıdan bakar.",
+        "Lead değiştirmek şekli değiştirir, ritmi değiştirmez.",
+        "Polarite yön farkından da olabilir.",
+        "Diğer derivasyonlar ek bilgi taşır.",
+        "Görünüm değişir, kaynak aynı kalır."
+      ],
+      "feedback": "Lead değiştirmek şekli değiştirir, ritmi değiştirmez.",
+      "objectiveIds": [
+        "O3"
+      ],
+      "sourceIds": [
+        "SVT2019",
+        "ECG"
+      ],
+      "decisionId": "leadAll",
+      "note": "",
+      "ecg": {
+        "mode": "svt",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V1"
+        ],
+        "start": 0.58,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C063",
+      "mode": "svt",
+      "title": "Sentetik vaka C063",
+      "ariaLabel": "C063 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "27 yaşında kadın hasta. Başvuru: kahve içtikten sonra ani çarpıntı ile başvuruyor. İki ardışık R tepesi arası 360 ms ölçülüyor.",
+      "question": "Bu döngü süresiyle elektriksel hız yaklaşık kaçtır?",
+      "text": "Bu döngü süresiyle elektriksel hız yaklaşık kaçtır?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "165/dk"
+        },
+        {
+          "k": "TA",
+          "v": "100/66 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%96"
+        }
+      ],
+      "options": [
+        "Yaklaşık 167/dk",
+        "200/dk",
+        "180/dk",
+        "120/dk",
+        "150/dk"
+      ],
+      "correct": 0,
+      "explanations": [
+        "60/0,36 yaklaşık 166,7/dk elektriksel hızdır.",
+        "200/dk 300 ms gerektirir.",
+        "180/dk yaklaşık 333 ms gerektirir.",
+        "120/dk 500 ms gerektirir.",
+        "150/dk 400 ms gerektirir."
+      ],
+      "feedback": "60/0,36 yaklaşık 166,7/dk elektriksel hızdır.",
+      "objectiveIds": [
+        "O6"
+      ],
+      "sourceIds": [
+        "SVT2019",
+        "ECG"
+      ],
+      "decisionId": "rr360",
+      "note": "",
+      "ecg": {
+        "mode": "svt",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V1"
+        ],
+        "start": 0.66,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C064",
+      "mode": "svt",
+      "title": "Sentetik vaka C064",
+      "ariaLabel": "C064 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "45 yaşında erkek hasta. Başvuru: stresli toplantı sırasında ani çarpıntı gelişiyor. Dar kompleksli hızlı ritimde P dalgası QRS veya T ile örtüşüyor olabilir.",
+      "question": "Kesin mekanizma için hangi sınır geçerlidir?",
+      "text": "Kesin mekanizma için hangi sınır geçerlidir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "165/dk"
+        },
+        {
+          "k": "TA",
+          "v": "100/66 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%96"
+        }
+      ],
+      "options": [
+        "Düzenli hızda değerlendirme gerekmez",
+        "Kesin mekanizma için ek veri gerekir",
+        "Dar QRS varsa kesin fokal AT vardır",
+        "Hız 167 ise kesin AVRT vardır",
+        "P yoksa kesin AVNRT vardır"
+      ],
+      "correct": 1,
+      "explanations": [
+        "Düzenlilik klinik değerlendirmeyi gereksiz kılmaz.",
+        "Tek şerit AVNRT, AVRT veya AT'yi kesin ayırmaz.",
+        "Dar QRS için ayrı atriyal kanıt gerekir.",
+        "Hız aralığı mekanizmalar arasında örtüşür.",
+        "P görünmemesi tek başına özgül değildir."
+      ],
+      "feedback": "Tek şerit AVNRT, AVRT veya AT'yi kesin ayırmaz.",
+      "objectiveIds": [
+        "O5"
+      ],
+      "sourceIds": [
+        "SVT2019"
+      ],
+      "decisionId": "svtLimits",
+      "note": "",
+      "ecg": {
+        "mode": "svt",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V1"
+        ],
+        "start": 0.74,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C065",
+      "mode": "svt",
+      "title": "Sentetik vaka C065",
+      "ariaLabel": "C065 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "19 yaşında kadın hasta. Başvuru: sınav öncesi ani başlayan hızlı çarpıntı tarif ediyor. Sistematik okumada V1–V2’nin hangi bölgeyi yansıttığı gözden geçiriliyor.",
+      "question": "V1 ve V2 derivasyonları hangi bölgeyi yansıtır?",
+      "text": "V1 ve V2 derivasyonları hangi bölgeyi yansıtır?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "165/dk"
+        },
+        {
+          "k": "TA",
+          "v": "100/66 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%96"
+        }
+      ],
+      "options": [
+        "Yüksek lateral duvar",
+        "İnferior duvar",
+        "Sadece sağ atriyum",
+        "Sol lateral duvar",
+        "Septum ve sağ ventrikül yakını"
+      ],
+      "correct": 4,
+      "explanations": [
+        "Yüksek lateral duvar aVL ile değerlendirilir.",
+        "İnferior duvar II, III, aVF ile değerlendirilir.",
+        "Sağ atriyum tek başına V1–V2 ile özgül olarak tanımlanmaz.",
+        "Sol lateral duvar V5–V6 ve I, aVL ile değerlendirilir.",
+        "V1–V2 septal bölgeyi ve sağ ventrikülün yakınını yansıtır."
+      ],
+      "feedback": "V1–V2 septal bölgeyi ve sağ ventrikülün yakınını yansıtır.",
+      "objectiveIds": [
+        "O3"
+      ],
+      "sourceIds": [
+        "SVT2019",
+        "ECG"
+      ],
+      "decisionId": "precordialSeptal",
+      "note": "",
+      "ecg": {
+        "mode": "svt",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V1"
+        ],
+        "start": 0.8200000000000001,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C066",
+      "mode": "svt",
+      "title": "Sentetik vaka C066",
+      "ariaLabel": "C066 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "52 yaşında erkek hasta. Başvuru: ani başlayan çarpıntı presenkopla birlikte geliyor. Kısa süreli bir kayıt elde ediliyor; önceki öykü ve ek testler henüz yok.",
+      "question": "Bu bulgudan etiyoloji ve risk için hangi genel sınır çıkarılabilir?",
+      "text": "Bu bulgudan etiyoloji ve risk için hangi genel sınır çıkarılabilir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "165/dk"
+        },
+        {
+          "k": "TA",
+          "v": "100/66 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%96"
+        }
+      ],
+      "options": [
+        "Kısa kayıt başlangıç zamanını verir",
+        "Örüntü desteklenir, neden ayrıca sorulur",
+        "Hız tek başına dolaşımı gösterir",
+        "QRS genişliği tek başına riski verir",
+        "P ekseni kesin odağı belirler"
+      ],
+      "correct": 1,
+      "explanations": [
+        "Bir pencere toplam süreyi göstermez.",
+        "EKG bulgusu tanı verir, nedeni klinik öykü belirler.",
+        "Nabız ve basınç ayrıca değerlendirilir.",
+        "Risk için klinik bağlam da gerekir.",
+        "P ekseni ipucudur, kesin yer vermez."
+      ],
+      "feedback": "EKG bulgusu tanı verir, nedeni klinik öykü belirler.",
+      "objectiveIds": [
+        "O5"
+      ],
+      "sourceIds": [
+        "SVT2019"
+      ],
+      "decisionId": "limits",
+      "note": "",
+      "ecg": {
+        "mode": "svt",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V1"
+        ],
+        "start": 0.5,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C067",
+      "mode": "svt",
+      "title": "Sentetik vaka C067",
+      "ariaLabel": "C067 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "36 yaşında kadın hasta. Başvuru: öksürme ile kendiliğinden geçen çarpıntı öyküsü tarif ediyor. Başvuru anında ritim sürüyor; TA 100/66 mmHg, bilinç açık.",
+      "question": "Bu klinik tabloda öncelikli yaklaşım nedir?",
+      "text": "Bu klinik tabloda öncelikli yaklaşım nedir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "165/dk"
+        },
+        {
+          "k": "TA",
+          "v": "100/66 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%96"
+        }
+      ],
+      "options": [
+        "Her SVT atağında acil kardiyoversiyon",
+        "Stabil hastada vagal manevra ve monitörizasyon; instabilite varsa senkronize kardiyoversiyon",
+        "Önce kesin mekanizma sonra hasta bakılır",
+        "Kendiliğinden geçtiği için değerlendirme gerekmez",
+        "Tek derivasyon kesinlik verir"
+      ],
+      "correct": 1,
+      "explanations": [
+        "Stabil SVT'de önce vagal manevra/adenozin; kardiyoversiyon instabilite içindir.",
+        "Düzenli dar kompleks taşikardide yaklaşım hemodinamik duruma göre ayrılır (ESC SVT 2019, AHA ALS 2025).",
+        "Hasta durumu mekanizmadan önce değerlendirilir.",
+        "Tekrarlayan ataklar mekanizma ve tedavi seçenekleri için değerlendirilir.",
+        "Mekanizma ve yönetim tek derivasyonla belirlenmez."
+      ],
+      "feedback": "Düzenli dar kompleks taşikardide yaklaşım hemodinamik duruma göre ayrılır (ESC SVT 2019, AHA ALS 2025).",
+      "objectiveIds": [
+        "O5"
+      ],
+      "sourceIds": [
+        "SVT2019"
+      ],
+      "decisionId": "stableSvt",
+      "note": "",
+      "ecg": {
+        "mode": "svt",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V1"
+        ],
+        "start": 0.58,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C068",
+      "mode": "svt",
+      "title": "Sentetik vaka C068",
+      "ariaLabel": "C068 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "29 yaşında erkek hasta. Başvuru: gece ani çarpıntı ile uyanıp acile başvuruyor. Hızlı seyreden nabızda diyastolik dolum süresinin kısaldığı düşünülüyor.",
+      "question": "Yüksek hızın ventrikül dolusuna etkisi için hangi ifade doğrudur?",
+      "text": "Yüksek hızın ventrikül dolusuna etkisi için hangi ifade doğrudur?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "165/dk"
+        },
+        {
+          "k": "TA",
+          "v": "100/66 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%96"
+        }
+      ],
+      "options": [
+        "P varsa doluş hızdan bağımsızdır",
+        "Kısa R–R kan basıncı değeridir",
+        "Kısa döngü doluşu kısaltabilir",
+        "Dar QRS kısalan doluşu telafi eder",
+        "Hız artışı atım hacmini sabit artırır"
+      ],
+      "correct": 2,
+      "explanations": [
+        "Kısa döngü doluşu yine de kısaltabilir.",
+        "R–R zaman ölçüsüdür, basınç değildir.",
+        "Hız artınca diyastol kısalır.",
+        "QRS genişliği doluş süresini değiştirmez.",
+        "Atım hacmi doluş ve yüke bağlıdır."
+      ],
+      "feedback": "Hız artınca diyastol kısalır.",
+      "objectiveIds": [
+        "O4"
+      ],
+      "sourceIds": [
+        "SVT2019",
+        "CYCLE"
+      ],
+      "decisionId": "fastFill",
+      "note": "",
+      "ecg": {
+        "mode": "svt",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V1"
+        ],
+        "start": 0.66,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C069",
+      "mode": "svt",
+      "title": "Sentetik vaka C069",
+      "ariaLabel": "C069 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "41 yaşında kadın hasta. Başvuru: tekrarlayan ani başlangıçlı çarpıntı atakları tarif ediyor. Eşzamanlı üç derivasyonlu kayıt aşağıda gösteriliyor.",
+      "question": "Bu EKG'de öncelikle hangi tanı düşünülmelidir?",
+      "text": "Bu EKG'de öncelikle hangi tanı düşünülmelidir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "165/dk"
+        },
+        {
+          "k": "TA",
+          "v": "100/66 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%96"
+        }
+      ],
+      "options": [
+        "Supraventriküler taşikardi",
+        "Sinüs taşikardisi",
+        "Ventriküler erken atım",
+        "Atriyal fibrilasyon",
+        "Sağ dal bloğu"
+      ],
+      "correct": 0,
+      "explanations": [
+        "Tarif edilen bulgular Supraventriküler taşikardi ile uyumludur.",
+        "Sinüs taşikardisi için beklenen bulgular burada yok.",
+        "Ventriküler erken atım için beklenen bulgular burada yok.",
+        "Atriyal fibrilasyon için beklenen bulgular burada yok.",
+        "Sağ dal bloğu için beklenen bulgular burada yok."
+      ],
+      "feedback": "Tarif edilen bulgular Supraventriküler taşikardi ile uyumludur.",
+      "objectiveIds": [
+        "O2"
+      ],
+      "sourceIds": [
+        "SVT2019"
+      ],
+      "decisionId": "ddx_svt",
+      "note": "",
+      "ecg": {
+        "mode": "svt",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V1"
+        ],
+        "start": 0.74,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C070",
+      "mode": "svt",
+      "title": "Sentetik vaka C070",
+      "ariaLabel": "C070 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "23 yaşında erkek hasta. Başvuru: enerji içeceği sonrası ani hızlı çarpıntı geliyor. Hızlı dar kompleksler arasında ayrı bir P dalgası seçilemiyor.",
+      "question": "Bu ritimde ayrı bir P dalgası neden seçilemiyor?",
+      "text": "Bu ritimde ayrı bir P dalgası neden seçilemiyor?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "165/dk"
+        },
+        {
+          "k": "TA",
+          "v": "100/66 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%96"
+        }
+      ],
+      "options": [
+        "Hızlı ritimde atriyal etkinlik QRS/T içine gömülür veya retrograd olarak gizlenir",
+        "T dalgası P'nin başka adıdır",
+        "P dalgası yalnız VT'de görülür",
+        "Kayıt hızı yavaş olduğu için",
+        "Atriyumlar hiç uyarılmaz"
+      ],
+      "correct": 0,
+      "explanations": [
+        "AV düğüm re-entry gibi SVT'lerde P, QRS ile eşzamanlı ya da hemen ardındadır; ayrı seçilmez (ESC SVT 2019).",
+        "T ventriküler repolarizasyondur; P atriyal depolarizasyon.",
+        "P atriyal depolarizasyonu gösterir; ritimden bağımsız bir kavramdır.",
+        "25 mm/sn standart hızdır; P görünmemesi kayıt hızıyla ilgili değildir.",
+        "SVT'de atriyumlar da aktive olur; görünmemesi zamanlama nedeniyledir."
+      ],
+      "feedback": "AV düğüm re-entry gibi SVT'lerde P, QRS ile eşzamanlı ya da hemen ardındadır; ayrı seçilmez (ESC SVT 2019).",
+      "objectiveIds": [
+        "O1"
+      ],
+      "sourceIds": [
+        "SVT2019"
+      ],
+      "decisionId": "pHiddenSvt",
+      "note": "",
+      "ecg": {
+        "mode": "svt",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V1"
+        ],
+        "start": 0.8200000000000001,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C071",
+      "mode": "svt",
+      "title": "Sentetik vaka C071",
+      "ariaLabel": "C071 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "48 yaşında kadın hasta. Başvuru: ani çarpıntı sırasında baş dönmesi de tarif ediyor. İzlemde QRS’den kısa süre sonra basıncın yükseldiği, ancak çıkış kapaklarının henüz açılmadığı bir an inceleniyor.",
+      "question": "Bu andaki kapak durumu hangi mekanik evreyi tanımlar?",
+      "text": "Bu andaki kapak durumu hangi mekanik evreyi tanımlar?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "165/dk"
+        },
+        {
+          "k": "TA",
+          "v": "100/66 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%96"
+        }
+      ],
+      "options": [
+        "Tüm kapaklar kapalı: izovolümetrik kasılma",
+        "AV kapaklar açık: pasif doluş",
+        "Tüm kapaklar kapalı: gevşeme",
+        "AV kapaklar açık: atriyal sistol",
+        "Çıkış kapakları açık: ejeksiyon"
+      ],
+      "correct": 0,
+      "explanations": [
+        "Basınç yükselirken hacim henüz sabittir.",
+        "Bu kasılma başlangıcı, doluş değildir.",
+        "Gevşeme ejeksiyon sonrasıdır.",
+        "Bu anda AV kapak kapalıdır.",
+        "Bu erken evrede çıkış henüz kapalıdır."
+      ],
+      "feedback": "Basınç yükselirken hacim henüz sabittir.",
+      "objectiveIds": [
+        "O4"
+      ],
+      "sourceIds": [
+        "SVT2019",
+        "CYCLE"
+      ],
+      "decisionId": "mechanic",
+      "note": "",
+      "ecg": {
+        "mode": "svt",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V1"
+        ],
+        "start": 0.5,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C072",
+      "mode": "svt",
+      "title": "Sentetik vaka C072",
+      "ariaLabel": "C072 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "33 yaşında erkek hasta. Başvuru: egzersiz testi sırasında ani hızlı çarpıntı gelişiyor. Hasta hemodinamik olarak stabil; ilk yaklaşım seçenekleri değerlendiriliyor.",
+      "question": "Bu hastada ilk yaklaşım ne olmalıdır?",
+      "text": "Bu hastada ilk yaklaşım ne olmalıdır?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "165/dk"
+        },
+        {
+          "k": "TA",
+          "v": "100/66 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%96"
+        }
+      ],
+      "options": [
+        "Karar tamamen hastaya bırakılır",
+        "Hemen taburcu edilir",
+        "Yalnızca gözlem yeterlidir",
+        "Yalnız görüntüleme istenir",
+        "Stabilse vagal manevra ve monitörizasyon"
+      ],
+      "correct": 4,
+      "explanations": [
+        "İlk yaklaşım klinik ekip tarafından yönlendirilir.",
+        "Bulgu ciddi olabilir; taburcu öncesi değerlendirme gerekir.",
+        "Bu bulgu daha aktif bir yaklaşım gerektirebilir; yalnız izlem yetmez.",
+        "İlk adım görüntülemeden önce klinik değerlendirmedir.",
+        "Hemodinamisi stabil dar kompleks taşikardide ilk adım budur."
+      ],
+      "feedback": "Hemodinamisi stabil dar kompleks taşikardide ilk adım budur.",
+      "objectiveIds": [
+        "O5"
+      ],
+      "sourceIds": [
+        "SVT2019"
+      ],
+      "decisionId": "firstStep_svt",
+      "note": "",
+      "ecg": {
+        "mode": "svt",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V1"
+        ],
+        "start": 0.58,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C073",
+      "mode": "svt",
+      "title": "Sentetik vaka C073",
+      "ariaLabel": "C073 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "26 yaşında kadın hasta. Başvuru: ani başlayan çarpıntı kendiliğinden sonlanıyor. Ventriküler kompleksten sonra gelen dalganın anlamı soruluyor.",
+      "question": "T dalgasının temel elektriksel karşılığı nedir?",
+      "text": "T dalgasının temel elektriksel karşılığı nedir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "165/dk"
+        },
+        {
+          "k": "TA",
+          "v": "100/66 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%96"
+        }
+      ],
+      "options": [
+        "T: gecikmiş sağ ventrikül uyarısı",
+        "T: ventriküler depolarizasyon",
+        "T: atriyal repolarizasyon",
+        "T: yeni bir atriyal uyarı",
+        "T: ventriküler repolarizasyon"
+      ],
+      "correct": 4,
+      "explanations": [
+        "Bu bileşen QRS içinde yer alır.",
+        "Bu olay QRS ile kaydedilir.",
+        "Bu olay genelde QRS altında gizlenir.",
+        "Yeni P ayrı bir dalga olarak görülür.",
+        "T dalgası ventrikülün elektriksel toparlanmasıdır."
+      ],
+      "feedback": "T dalgası ventrikülün elektriksel toparlanmasıdır.",
+      "objectiveIds": [
+        "O1"
+      ],
+      "sourceIds": [
+        "SVT2019"
+      ],
+      "decisionId": "t",
+      "note": "",
+      "ecg": {
+        "mode": "svt",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V1"
+        ],
+        "start": 0.66,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C074",
+      "mode": "svt",
+      "title": "Sentetik vaka C074",
+      "ariaLabel": "C074 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "55 yaşında erkek hasta. Başvuru: ilk kez ani çarpıntı yakınmasıyla acile başvuruyor. Sistematik okumada hangi derivasyonların yan duvarı temsil ettiği gözden geçiriliyor.",
+      "question": "Hangi derivasyonlar lateral duvarı gösterir?",
+      "text": "Hangi derivasyonlar lateral duvarı gösterir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "165/dk"
+        },
+        {
+          "k": "TA",
+          "v": "100/66 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%96"
+        }
+      ],
+      "options": [
+        "V1, V2 — septal bölge",
+        "V1–V6 tümü — tüm prekordiyum",
+        "I, aVL, V5–V6 — lateral duvar",
+        "V3, V4 — anterior duvar",
+        "II, III, aVF — inferior duvar"
+      ],
+      "correct": 2,
+      "explanations": [
+        "V1–V2 septal bölgeyi gösterir, lateral duvarı değil.",
+        "Tüm prekordiyal grup tek başına lateral duvarı özgül olarak göstermez.",
+        "Bu üç derivasyon grubu kalbin lateral duvarını gösterir.",
+        "V3–V4 anterior duvarı gösterir, lateral duvarı değil.",
+        "Bu grup inferior duvarı gösterir, lateral duvarı değil."
+      ],
+      "feedback": "Bu üç derivasyon grubu kalbin lateral duvarını gösterir.",
+      "objectiveIds": [
+        "O3"
+      ],
+      "sourceIds": [
+        "SVT2019",
+        "ECG"
+      ],
+      "decisionId": "lateralLeadGroup",
+      "note": "",
+      "ecg": {
+        "mode": "svt",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V1"
+        ],
+        "start": 0.74,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C075",
+      "mode": "svt",
+      "title": "Sentetik vaka C075",
+      "ariaLabel": "C075 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "38 yaşında kadın hasta. Başvuru: gerginlik sonrası ani hızlı çarpıntı tarif ediyor. Eşzamanlı üç derivasyonlu kayıt aşağıda gösteriliyor.",
+      "question": "Bu ritim hangi sınıfa girer?",
+      "text": "Bu ritim hangi sınıfa girer?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "165/dk"
+        },
+        {
+          "k": "TA",
+          "v": "100/66 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%96"
+        }
+      ],
+      "options": [
+        "Düzensiz dar kompleks",
+        "Düzenli dar kompleks, hızlı",
+        "Düzenli dar kompleks, normal hız",
+        "Kaotik, organize değil",
+        "Düzenli geniş kompleks"
+      ],
+      "correct": 1,
+      "explanations": [
+        "Bu örnekte ritim düzenli, düzensiz değil.",
+        "Hız belirgin yüksek; ritim düzenli ve QRS dar.",
+        "Bu örnekte hız veya düzen normal aralığa uymuyor.",
+        "Bu örnekte düzenli bir kompleks seçilebiliyor, kaotik değil.",
+        "Bu örnekte QRS dar, bu kadar geniş değil."
+      ],
+      "feedback": "Hız belirgin yüksek; ritim düzenli ve QRS dar.",
+      "objectiveIds": [
+        "O2"
+      ],
+      "sourceIds": [
+        "SVT2019"
+      ],
+      "decisionId": "rhythmClass_svt",
+      "note": "",
+      "ecg": {
+        "mode": "svt",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V1"
+        ],
+        "start": 0.8200000000000001,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C076",
+      "mode": "inferior",
+      "title": "Sentetik vaka C076",
+      "ariaLabel": "C076 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "61 yaşında erkek hasta. Başvuru: göğüs ağrısı ve bulantı ile acile geliyor. Ağrı sırasında alınan EKG’de II, III, aVF derivasyonlarında ST yükselmesi izleniyor.",
+      "question": "Bu ST değişiminin dağılımı hangi bölgeyi işaret eder?",
+      "text": "Bu ST değişiminin dağılımı hangi bölgeyi işaret eder?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "İnferior dağılım (II, III, aVF)",
+        "Flutter tabanı",
+        "Anterior dağılım",
+        "Sağ dal bloğu bulgusu",
+        "Normal ST örüntüsü"
+      ],
+      "correct": 0,
+      "explanations": [
+        "II, III, aVF yükselmiş, I ve aVL çökmüş: inferior.",
+        "Flutter sürekli dalga yapar; burada ayrı ST yüksekliği var.",
+        "Anterior için V1–V4 gerekir; burada ekstremite grubu etkilenmiş.",
+        "Bu ST yüksekliği, QRS şekli değil.",
+        "ST burada belirgin değişmiş, normal değil."
+      ],
+      "feedback": "II, III, aVF yükselmiş, I ve aVL çökmüş: inferior.",
+      "objectiveIds": [
+        "O3"
+      ],
+      "sourceIds": [
+        "ACS2023",
+        "ECG"
+      ],
+      "decisionId": "inferior",
+      "note": "",
+      "ecg": {
+        "mode": "inferior",
+        "options": {},
+        "leads": [
+          "II",
+          "III",
+          "aVF"
+        ],
+        "start": 0.5,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C077",
+      "mode": "inferior",
+      "title": "Sentetik vaka C077",
+      "ariaLabel": "C077 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "68 yaşında kadın hasta. Başvuru: terleme ve göğüs ağrısıyla 112 ile getiriliyor. Birden çok komşu derivasyondaki değişim birlikte değerlendiriliyor.",
+      "question": "Bölgesel ST değişimi yorumlanırken hangi yöntem uygundur?",
+      "text": "Bölgesel ST değişimi yorumlanırken hangi yöntem uygundur?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "ST mV değeri yalnız hızdır",
+        "Derivasyon adı damarın kesin adıdır",
+        "Komşu derivasyonlar birlikte incelenir",
+        "aVR her zaman anterior bölgeyi verir",
+        "En yüksek tek R bölgeyi belirler"
+      ],
+      "correct": 2,
+      "explanations": [
+        "ST voltajı ve hız farklı ölçümlerdir.",
+        "Derivasyon bölgesi damar anatomisini birebir vermez.",
+        "Bölgesel yorum tek derivasyona değil komşu gruba bakar.",
+        "Tek derivasyon tüm anterior grubun yerini tutmaz.",
+        "R genliği bölgesel ST yorumunu tek başına vermez."
+      ],
+      "feedback": "Bölgesel yorum tek derivasyona değil komşu gruba bakar.",
+      "objectiveIds": [
+        "O3"
+      ],
+      "sourceIds": [
+        "ACS2023",
+        "ECG"
+      ],
+      "decisionId": "stContiguous",
+      "note": "",
+      "ecg": {
+        "mode": "inferior",
+        "options": {},
+        "leads": [
+          "II",
+          "III",
+          "aVF"
+        ],
+        "start": 0.58,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C078",
+      "mode": "inferior",
+      "title": "Sentetik vaka C078",
+      "ariaLabel": "C078 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "55 yaşında erkek hasta. Başvuru: sırta yayılan göğüs ağrısı tarif ediyor. Bulgu düzenli görünse de eşlik eden semptomlar ayrıca değerlendiriliyor.",
+      "question": "Bu klinik tabloda hangi değerlendirme ilkesi önceliklidir?",
+      "text": "Bu klinik tabloda hangi değerlendirme ilkesi önceliklidir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "Düzenli ritimde yalnız rutin kontrol",
+        "Animasyon akımı varsa acil değildir",
+        "Semptomla acil değerlendirme gerekir",
+        "Tek derivasyon kesinlik verir",
+        "Önce kesin mekanizma sonra hasta bakılır"
+      ],
+      "correct": 2,
+      "explanations": [
+        "Düzenlilik ciddi belirtileri rutine çevirmez.",
+        "Şematik akış gerçek durumu göstermez.",
+        "Süren belirtiler acil klinik değerlendirme ister.",
+        "Aciliyet tek derivasyonla belirlenmez.",
+        "Hasta durumu mekanizmadan önce değerlendirilir."
+      ],
+      "feedback": "Süren belirtiler acil klinik değerlendirme ister.",
+      "objectiveIds": [
+        "O5"
+      ],
+      "sourceIds": [
+        "ACS2023"
+      ],
+      "decisionId": "urgent",
+      "note": "",
+      "ecg": {
+        "mode": "inferior",
+        "options": {},
+        "leads": [
+          "II",
+          "III",
+          "aVF"
+        ],
+        "start": 0.66,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C079",
+      "mode": "inferior",
+      "title": "Sentetik vaka C079",
+      "ariaLabel": "C079 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "72 yaşında kadın hasta. Başvuru: bulantı ve kusma eşlik eden göğüs ağrısıyla başvuruyor. ST değişimi saptanıyor; anjiyografi veya ileri görüntüleme henüz yapılmamış.",
+      "question": "Bu bulgudan sorumlu damar hakkında hangi sınır geçerlidir?",
+      "text": "Bu bulgudan sorumlu damar hakkında hangi sınır geçerlidir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "EKG bölgeyi düşündürür; sorumlu damar klinik bağlam, seri EKG ve koroner görüntülemeyle kesinleşir",
+        "Düzenli ritim iskemiyi dışlar",
+        "Karşılıklı çökme yoksa iskemi yoktur",
+        "Tek ST değeri damarı kesinleştirir",
+        "Animasyon gerçek EF ölçer"
+      ],
+      "correct": 0,
+      "explanations": [
+        "ST dağılımı bölge ipucu verir; sorumlu (culprit) damar tek başına EKG'den kesinleşmez, anjiyografi ile doğrulanır (ACS 2025).",
+        "Ritim düzenli olsa da iskemi sürebilir.",
+        "Karşılıklı değişim olmaması iskemiyi dışlamaz.",
+        "ST bölgesi ipucu verir, kesin tanı vermez.",
+        "Şematik hareket EF ölçümü değildir."
+      ],
+      "feedback": "ST dağılımı bölge ipucu verir; sorumlu (culprit) damar tek başına EKG'den kesinleşmez, anjiyografi ile doğrulanır (ACS 2025).",
+      "objectiveIds": [
+        "O5"
+      ],
+      "sourceIds": [
+        "ACS2023"
+      ],
+      "decisionId": "ischemiaLimits",
+      "note": "",
+      "ecg": {
+        "mode": "inferior",
+        "options": {},
+        "leads": [
+          "II",
+          "III",
+          "aVF"
+        ],
+        "start": 0.74,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C080",
+      "mode": "inferior",
+      "title": "Sentetik vaka C080",
+      "ariaLabel": "C080 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "49 yaşında erkek hasta. Başvuru: egzersiz sırasında başlayan göğüs ağrısıyla geliyor. II derivasyonunda J noktasından 20 ms sonrası +0,20 mV olarak ölçülüyor (sentetik ölçüm egzersizi; kılavuz tanı eşikleri J noktasında değerlendirilir).",
+      "question": "Bu ölçümle J+20 ms ST düzeyi kaç mV’tur?",
+      "text": "Bu ölçümle J+20 ms ST düzeyi kaç mV’tur?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "+2,0 mV",
+        "+0,20 mV",
+        "−0,20 mV",
+        "+0,02 mV",
+        "0 mV"
+      ],
+      "correct": 1,
+      "explanations": [
+        "Ondalık kayması 10 kat büyütür.",
+        "II’de J+20 ms sentetik inferior ST düzeyi+0,20 mV’dir. J+20 ms bu modelin ölçüm noktasıdır; kılavuz tanı eşikleri J noktasındaki sapmaya göre tanımlanır.",
+        "Polarite ters çevrilmiştir; II’de yükselme vardır.",
+        "Ondalık kayması 10 kat küçültür.",
+        "Pozitif ST platosu sıfır değildir."
+      ],
+      "feedback": "II’de J+20 ms sentetik inferior ST düzeyi+0,20 mV’dir. J+20 ms bu modelin ölçüm noktasıdır; kılavuz tanı eşikleri J noktasındaki sapmaya göre tanımlanır.",
+      "objectiveIds": [
+        "O6"
+      ],
+      "sourceIds": [
+        "ACS2023",
+        "ECG"
+      ],
+      "decisionId": "st20",
+      "note": "",
+      "ecg": {
+        "mode": "inferior",
+        "options": {},
+        "leads": [
+          "II",
+          "III",
+          "aVF"
+        ],
+        "start": 0.8200000000000001,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C081",
+      "mode": "inferior",
+      "title": "Sentetik vaka C081",
+      "ariaLabel": "C081 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "64 yaşında kadın hasta. Başvuru: diyabetik hastada atipik göğüs rahatsızlığı tarif ediyor. Sistematik okumada hangi derivasyonların ön duvarı temsil ettiği gözden geçiriliyor.",
+      "question": "V3 ve V4 derivasyonları hangi bölgeyi yansıtır?",
+      "text": "V3 ve V4 derivasyonları hangi bölgeyi yansıtır?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "Sağ ventrikül yalnızca",
+        "İnferior duvar",
+        "Lateral duvar",
+        "Anterior duvar",
+        "Atriyum yalnızca"
+      ],
+      "correct": 3,
+      "explanations": [
+        "Sağ ventrikül daha çok V1 ve sağ prekordiyal derivasyonlarla ilişkilidir.",
+        "İnferior duvar II, III, aVF ile değerlendirilir, V3–V4 ile değil.",
+        "Lateral duvar I, aVL, V5–V6 ile değerlendirilir.",
+        "V3–V4 kalbin ön (anterior) duvarını yansıtır.",
+        "Atriyal etkinlik tek bir prekordiyal çiftle özgül olarak gösterilmez."
+      ],
+      "feedback": "V3–V4 kalbin ön (anterior) duvarını yansıtır.",
+      "objectiveIds": [
+        "O3"
+      ],
+      "sourceIds": [
+        "ACS2023",
+        "ECG"
+      ],
+      "decisionId": "anteriorLeadGroup",
+      "note": "",
+      "ecg": {
+        "mode": "inferior",
+        "options": {},
+        "leads": [
+          "II",
+          "III",
+          "aVF"
+        ],
+        "start": 0.5,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C082",
+      "mode": "inferior",
+      "title": "Sentetik vaka C082",
+      "ariaLabel": "C082 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "58 yaşında erkek hasta. Başvuru: sabah uyanınca başlayan göğüs ağrısıyla acile başvuruyor. İzlemde giriş kapaklarının açık, çıkış kapaklarının kapalı olduğu bir an gösteriliyor.",
+      "question": "Bu kapak ve hacim düzeni hangi mekanik evreyi gösterir?",
+      "text": "Bu kapak ve hacim düzeni hangi mekanik evreyi gösterir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "AV kapaklar açık: ventrikül doluşu",
+        "Çıkış kapakları açık: ejeksiyon",
+        "AV kapaklar kapalı: atriyal sistol",
+        "Tüm kapaklar kapalı: gevşeme",
+        "Tüm kapaklar kapalı: kasılma"
+      ],
+      "correct": 0,
+      "explanations": [
+        "Kan diyastolde ventriküle geçer.",
+        "Bu ileri pompalama fazıdır, doluş değil.",
+        "Bu doluş fazı AV açıkken olur.",
+        "Gevşemede AV henüz açılmamıştır.",
+        "Kasılmada hacim sabittir, doluş yoktur."
+      ],
+      "feedback": "Kan diyastolde ventriküle geçer.",
+      "objectiveIds": [
+        "O4"
+      ],
+      "sourceIds": [
+        "ACS2023",
+        "CYCLE"
+      ],
+      "decisionId": "fill",
+      "note": "",
+      "ecg": {
+        "mode": "inferior",
+        "options": {},
+        "leads": [
+          "II",
+          "III",
+          "aVF"
+        ],
+        "start": 0.58,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C083",
+      "mode": "inferior",
+      "title": "Sentetik vaka C083",
+      "ariaLabel": "C083 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "70 yaşında kadın hasta. Başvuru: baş dönmesi eşlik eden göğüs ağrısı tarif ediyor. Sistematik okumada V1–V2’nin hangi bölgeyi yansıttığı gözden geçiriliyor.",
+      "question": "V1 ve V2 derivasyonları hangi bölgeyi yansıtır?",
+      "text": "V1 ve V2 derivasyonları hangi bölgeyi yansıtır?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "Sadece sağ atriyum",
+        "İnferior duvar",
+        "Septum ve sağ ventrikül yakını",
+        "Sol lateral duvar",
+        "Yüksek lateral duvar"
+      ],
+      "correct": 2,
+      "explanations": [
+        "Sağ atriyum tek başına V1–V2 ile özgül olarak tanımlanmaz.",
+        "İnferior duvar II, III, aVF ile değerlendirilir.",
+        "V1–V2 septal bölgeyi ve sağ ventrikülün yakınını yansıtır.",
+        "Sol lateral duvar V5–V6 ve I, aVL ile değerlendirilir.",
+        "Yüksek lateral duvar aVL ile değerlendirilir."
+      ],
+      "feedback": "V1–V2 septal bölgeyi ve sağ ventrikülün yakınını yansıtır.",
+      "objectiveIds": [
+        "O3"
+      ],
+      "sourceIds": [
+        "ACS2023",
+        "ECG"
+      ],
+      "decisionId": "precordialSeptal",
+      "note": "",
+      "ecg": {
+        "mode": "inferior",
+        "options": {},
+        "leads": [
+          "II",
+          "III",
+          "aVF"
+        ],
+        "start": 0.66,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C084",
+      "mode": "inferior",
+      "title": "Sentetik vaka C084",
+      "ariaLabel": "C084 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "53 yaşında erkek hasta. Başvuru: sigara içen hastada yeni göğüs ağrısı gelişiyor. Animasyonda bir duvar bölgesinin hareketi azalırken ana damardaki akışın sürdüğü gösteriliyor.",
+      "question": "Bölgesel bulgu ile global dolaşım arasındaki ayrım nasıl yapılmalıdır?",
+      "text": "Bölgesel bulgu ile global dolaşım arasındaki ayrım nasıl yapılmalıdır?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "Bölgesel azalma şematik, global akım sürebilir",
+        "Her ST mV'u sabit EF kaybıdır",
+        "ST yükselmesi VF ile aynı akımsızlıktır",
+        "Renk koyuluğu gerçek stenoz yüzdesidir",
+        "Düzenli QRS normal debiyi kanıtlar"
+      ],
+      "correct": 0,
+      "explanations": [
+        "Bir bölge zayıf gösterilir, tüm pompa durmaz.",
+        "ST voltajı EF kaybına dönüştürülemez.",
+        "Bölgesel iskemi VF'deki tam pompa kaybı değildir.",
+        "Renk şematiktir, stenoz oranı vermez.",
+        "Elektriksel düzen debiyi ölçmez."
+      ],
+      "feedback": "Bir bölge zayıf gösterilir, tüm pompa durmaz.",
+      "objectiveIds": [
+        "O4"
+      ],
+      "sourceIds": [
+        "ACS2023",
+        "CYCLE"
+      ],
+      "decisionId": "ischemiaFlow",
+      "note": "",
+      "ecg": {
+        "mode": "inferior",
+        "options": {},
+        "leads": [
+          "II",
+          "III",
+          "aVF"
+        ],
+        "start": 0.74,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C085",
+      "mode": "inferior",
+      "title": "Sentetik vaka C085",
+      "ariaLabel": "C085 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "66 yaşında kadın hasta. Başvuru: huzurevinde ani göğüs ağrısı sonrası 112 çağrılıyor. Standart 12 derivasyonluk kayıt üzerinde derivasyon grupları gözden geçiriliyor.",
+      "question": "aVR, aVL ve aVF birlikte hangi derivasyon grubunu oluşturur?",
+      "text": "aVR, aVL ve aVF birlikte hangi derivasyon grubunu oluşturur?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "Özefagus derivasyonları",
+        "Bipolar ekstremite derivasyonları",
+        "Artırılmış ekstremite derivasyonları",
+        "Prekordiyal derivasyonlar",
+        "Yalnız sağ göğüs derivasyonları"
+      ],
+      "correct": 2,
+      "explanations": [
+        "Özefagus derivasyonu standart 12 derivasyonluk sette yer almaz.",
+        "Bipolar ekstremite derivasyonları I, II, III'tür; aVR/aVL/aVF unipolardır.",
+        "aVR, aVL ve aVF birlikte artırılmış (unipolar) ekstremite derivasyon grubunu oluşturur.",
+        "Prekordiyal grup V1–V6'dır; aVR/aVL/aVF bu gruba girmez.",
+        "Sağ göğüs derivasyonları ayrı bir prekordiyal settir; aVR/aVL/aVF değildir."
+      ],
+      "feedback": "aVR, aVL ve aVF birlikte artırılmış (unipolar) ekstremite derivasyon grubunu oluşturur.",
+      "objectiveIds": [
+        "O3"
+      ],
+      "sourceIds": [
+        "ACS2023",
+        "ECG"
+      ],
+      "decisionId": "augmentedGroup",
+      "note": "",
+      "ecg": {
+        "mode": "inferior",
+        "options": {},
+        "leads": [
+          "II",
+          "III",
+          "aVF"
+        ],
+        "start": 0.8200000000000001,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C086",
+      "mode": "inferior",
+      "title": "Sentetik vaka C086",
+      "ariaLabel": "C086 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "47 yaşında erkek hasta. Başvuru: iş yerinde göğüs ağrısıyla fenalaşıyor. Eşzamanlı üç derivasyonlu kayıt aşağıda gösteriliyor.",
+      "question": "Bu EKG'de öncelikle hangi tanı düşünülmelidir?",
+      "text": "Bu EKG'de öncelikle hangi tanı düşünülmelidir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "Ventriküler taşikardi",
+        "İnferior ST yükselmeli iskemi",
+        "Ventriküler erken atım",
+        "Atriyal fibrilasyon",
+        "Sağ dal bloğu"
+      ],
+      "correct": 1,
+      "explanations": [
+        "Ventriküler taşikardi için beklenen bulgular burada yok.",
+        "Tarif edilen bulgular İnferior ST yükselmeli iskemi ile uyumludur.",
+        "Ventriküler erken atım için beklenen bulgular burada yok.",
+        "Atriyal fibrilasyon için beklenen bulgular burada yok.",
+        "Sağ dal bloğu için beklenen bulgular burada yok."
+      ],
+      "feedback": "Tarif edilen bulgular İnferior ST yükselmeli iskemi ile uyumludur.",
+      "objectiveIds": [
+        "O2"
+      ],
+      "sourceIds": [
+        "ACS2023"
+      ],
+      "decisionId": "ddx_inferior",
+      "note": "",
+      "ecg": {
+        "mode": "inferior",
+        "options": {},
+        "leads": [
+          "II",
+          "III",
+          "aVF"
+        ],
+        "start": 0.5,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C087",
+      "mode": "inferior",
+      "title": "Sentetik vaka C087",
+      "ariaLabel": "C087 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "60 yaşında kadın hasta. Başvuru: çene ve boyuna yayılan ağrı tarif ediyor. Devam eden göğüs ağrısı ve inferior ST yükselmesi birlikte değerlendiriliyor.",
+      "question": "Bu hastada ilk yaklaşım ne olmalıdır?",
+      "text": "Bu hastada ilk yaklaşım ne olmalıdır?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "Hemen taburcu edilir",
+        "Yalnız görüntüleme istenir",
+        "Karar tamamen hastaya bırakılır",
+        "Acil reperfüzyon değerlendirmesi",
+        "Yalnızca gözlem yeterlidir"
+      ],
+      "correct": 3,
+      "explanations": [
+        "Bulgu ciddi olabilir; taburcu öncesi değerlendirme gerekir.",
+        "İlk adım görüntülemeden önce klinik değerlendirmedir.",
+        "İlk yaklaşım klinik ekip tarafından yönlendirilir.",
+        "İnferior ST yükselmesi de acil değerlendirme gerektirir.",
+        "Bu bulgu daha aktif bir yaklaşım gerektirebilir; yalnız izlem yetmez."
+      ],
+      "feedback": "İnferior ST yükselmesi de acil değerlendirme gerektirir.",
+      "objectiveIds": [
+        "O5"
+      ],
+      "sourceIds": [
+        "ACS2023"
+      ],
+      "decisionId": "firstStep_inferior",
+      "note": "",
+      "ecg": {
+        "mode": "inferior",
+        "options": {},
+        "leads": [
+          "II",
+          "III",
+          "aVF"
+        ],
+        "start": 0.58,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C088",
+      "mode": "inferior",
+      "title": "Sentetik vaka C088",
+      "ariaLabel": "C088 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "73 yaşında erkek hasta. Başvuru: önceki MI öyküsüyle tekrar göğüs ağrısı ile geliyor. Kaliperle P’nin ilk sapması QRS’den 215 ms önce, QRS’in ilk sapması 40 ms önce işaretleniyor.",
+      "question": "Bu ölçümlerle PR aralığı kaç milisaniyedir?",
+      "text": "Bu ölçümlerle PR aralığı kaç milisaniyedir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "155 ms",
+        "255 ms",
+        "130 ms",
+        "175 ms",
+        "215 ms"
+      ],
+      "correct": 3,
+      "explanations": [
+        "155 ms verilen iki başlangıcın farkı değildir.",
+        "255 ms P başlangıcından QRS sonuna ölçüm hatasıdır.",
+        "130 ms P merkezinden QRS başlangıcına gitme hatasıdır.",
+        "P ilk sapması−215 ms, QRS ilk sapması−40 ms: fark 175 ms.",
+        "215 ms P başlangıcından R tepesine ölçüm hatasıdır."
+      ],
+      "feedback": "P ilk sapması−215 ms, QRS ilk sapması−40 ms: fark 175 ms.",
+      "objectiveIds": [
+        "O6"
+      ],
+      "sourceIds": [
+        "ACS2023",
+        "ECG"
+      ],
+      "decisionId": "pr175",
+      "note": "",
+      "ecg": {
+        "mode": "inferior",
+        "options": {},
+        "leads": [
+          "II",
+          "III",
+          "aVF"
+        ],
+        "start": 0.66,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C089",
+      "mode": "inferior",
+      "title": "Sentetik vaka C089",
+      "ariaLabel": "C089 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "52 yaşında kadın hasta. Başvuru: soğuk terlemeyle birlikte göğüs ağrısı tarif ediyor. Dar bir kompleksin ilk sapması 40 ms önce, son dönüşü 40 ms sonra işaretleniyor.",
+      "question": "Bu ölçümlerle QRS süresi kaç milisaniyedir?",
+      "text": "Bu ölçümlerle QRS süresi kaç milisaniyedir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "100 ms",
+        "60 ms",
+        "80 ms",
+        "140 ms",
+        "40 ms"
+      ],
+      "correct": 2,
+      "explanations": [
+        "100 ms iki sınırın verilen farkından fazladır.",
+        "60 ms başlangıç veya terminal bileşenin bir kısmını dışlar.",
+        "−40 ms ile+40 ms arasındaki QRS desteği 80 ms’dir.",
+        "140 ms geniş PVC/RBBB örneğiyle karıştırır.",
+        "40 ms yalnız R’den son dönüşe yarı desteği sayar."
+      ],
+      "feedback": "−40 ms ile+40 ms arasındaki QRS desteği 80 ms’dir.",
+      "objectiveIds": [
+        "O6"
+      ],
+      "sourceIds": [
+        "ACS2023",
+        "ECG"
+      ],
+      "decisionId": "q80",
+      "note": "",
+      "ecg": {
+        "mode": "inferior",
+        "options": {},
+        "leads": [
+          "II",
+          "III",
+          "aVF"
+        ],
+        "start": 0.74,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C090",
+      "mode": "inferior",
+      "title": "Sentetik vaka C090",
+      "ariaLabel": "C090 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "65 yaşında erkek hasta. Başvuru: uzun yolculuk sonrası göğüs ağrısıyla geliyor. Eşzamanlı üç derivasyonlu kayıt aşağıda gösteriliyor.",
+      "question": "Bu ritim hangi sınıfa girer?",
+      "text": "Bu ritim hangi sınıfa girer?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "Düzensiz dar kompleks",
+        "Düzenli geniş kompleks",
+        "Düzenli dar kompleks, hızlı",
+        "Kaotik, organize değil",
+        "Düzenli dar kompleks, normal hız"
+      ],
+      "correct": 4,
+      "explanations": [
+        "Bu örnekte ritim düzenli, düzensiz değil.",
+        "Bu örnekte QRS dar, bu kadar geniş değil.",
+        "Bu örnekte hız bu kadar yüksek değil.",
+        "Bu örnekte düzenli bir kompleks seçilebiliyor, kaotik değil.",
+        "Hız yaklaşık 75/dk, ritim düzenli ve QRS dar."
+      ],
+      "feedback": "Hız yaklaşık 75/dk, ritim düzenli ve QRS dar.",
+      "objectiveIds": [
+        "O2"
+      ],
+      "sourceIds": [
+        "ACS2023"
+      ],
+      "decisionId": "rhythmClass_inferior",
+      "note": "",
+      "ecg": {
+        "mode": "inferior",
+        "options": {},
+        "leads": [
+          "II",
+          "III",
+          "aVF"
+        ],
+        "start": 0.8200000000000001,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C091",
+      "mode": "vt",
+      "title": "Sentetik vaka C091",
+      "ariaLabel": "C091 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "67 yaşında erkek hasta. Başvuru: önceki kalp krizi öyküsüyle ani çarpıntı ve baş dönmesiyle geliyor. Düzenli, geniş kompleksli hızlı bir ritim izleniyor; komplekslerle sabit ilişkili bir dalga seçilemiyor.",
+      "question": "Bu bulgularla öncelikli elektriksel sınıflama hangisidir?",
+      "text": "Bu bulgularla öncelikli elektriksel sınıflama hangisidir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "160/dk"
+        },
+        {
+          "k": "TA",
+          "v": "88/58 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%94"
+        }
+      ],
+      "options": [
+        "Sinüs taşikardisi",
+        "Normal sinüs ritmi",
+        "Ventriküler fibrilasyon",
+        "İzole PVC",
+        "Monomorfik VT"
+      ],
+      "correct": 4,
+      "explanations": [
+        "Sinüs taşikardisinde QRS dardır; burada geniş.",
+        "Sinüste QRS dardır; burada geniş.",
+        "VF'de düzenli kompleks yoktur; burada var.",
+        "PVC tek atımdır; burada ardışık hızlı seri var.",
+        "Düzenli, geniş, hızlı, tekdüze: VT."
+      ],
+      "feedback": "Düzenli, geniş, hızlı, tekdüze: VT.",
+      "objectiveIds": [
+        "O2"
+      ],
+      "sourceIds": [
+        "VA2022",
+        "ALS2025"
+      ],
+      "decisionId": "vt",
+      "note": "",
+      "ecg": {
+        "mode": "vt",
+        "options": {},
+        "leads": [
+          "II",
+          "aVR",
+          "V1"
+        ],
+        "start": 0.5,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C092",
+      "mode": "vt",
+      "title": "Sentetik vaka C092",
+      "ariaLabel": "C092 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "72 yaşında kadın hasta. Başvuru: kalp yetersizliği izleminde ani çarpıntı ile başvuruyor. Kompleks genişliği tek başına değerlendirilerek kökeni hakkında yorum yapılmak isteniyor.",
+      "question": "QRS genişliğini tek başına yorumlarken hangi sınır geçerlidir?",
+      "text": "QRS genişliğini tek başına yorumlarken hangi sınır geçerlidir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "160/dk"
+        },
+        {
+          "k": "TA",
+          "v": "88/58 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%94"
+        }
+      ],
+      "options": [
+        "140 ms her QRS kesin RBBB'dir",
+        "160 ms her QRS kesin LBBB'dir",
+        "Genişlik ve klinik bulgu birlikte yorumlanır",
+        "Genişlik tek başına debiyi hesaplar",
+        "120 ms üstü her QRS VT'dir"
+      ],
+      "correct": 2,
+      "explanations": [
+        "PVC de bu genişlikte olabilir.",
+        "Genişlik tek başına LBBB'yi kanıtlamaz.",
+        "Tek genişlik VT ile bloğu kesin ayırmaz.",
+        "Genişlik zaman ölçüsüdür, debi değildir.",
+        "Dal bloğu da geniş QRS yapabilir."
+      ],
+      "feedback": "Tek genişlik VT ile bloğu kesin ayırmaz.",
+      "objectiveIds": [
+        "O5"
+      ],
+      "sourceIds": [
+        "VA2022",
+        "ALS2025"
+      ],
+      "decisionId": "qrsWidthCause",
+      "note": "Retrospektif eğitim analizi: gerçek zamanlı öncelik hemodinamik değerlendirme ve instabil hastada senkronize kardiyoversiyondur.",
+      "ecg": {
+        "mode": "vt",
+        "options": {},
+        "leads": [
+          "II",
+          "aVR",
+          "V1"
+        ],
+        "start": 0.58,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C093",
+      "mode": "vt",
+      "title": "Sentetik vaka C093",
+      "ariaLabel": "C093 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "58 yaşında erkek hasta. Başvuru: egzersiz sırasında ani baş dönmesi ve çarpıntı gelişiyor. İki ardışık R tepesi arası 380 ms ölçülüyor.",
+      "question": "Bu döngü süresiyle elektriksel hız yaklaşık kaçtır?",
+      "text": "Bu döngü süresiyle elektriksel hız yaklaşık kaçtır?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "160/dk"
+        },
+        {
+          "k": "TA",
+          "v": "88/58 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%94"
+        }
+      ],
+      "options": [
+        "Yaklaşık 158/dk",
+        "120/dk",
+        "200/dk",
+        "140/dk",
+        "180/dk"
+      ],
+      "correct": 0,
+      "explanations": [
+        "60/0,38 yaklaşık 157,9/dk elektriksel hızdır.",
+        "120/dk 500 ms gerektirir.",
+        "200/dk 300 ms gerektirir.",
+        "140/dk yaklaşık 429 ms gerektirir.",
+        "180/dk yaklaşık 333 ms gerektirir."
+      ],
+      "feedback": "60/0,38 yaklaşık 157,9/dk elektriksel hızdır.",
+      "objectiveIds": [
+        "O6"
+      ],
+      "sourceIds": [
+        "VA2022",
+        "ALS2025",
+        "ECG"
+      ],
+      "decisionId": "rr380",
+      "note": "Retrospektif eğitim analizi: gerçek zamanlı öncelik hemodinamik değerlendirme ve instabil hastada senkronize kardiyoversiyondur.",
+      "ecg": {
+        "mode": "vt",
+        "options": {},
+        "leads": [
+          "II",
+          "aVR",
+          "V1"
+        ],
+        "start": 0.66,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C094",
+      "mode": "vt",
+      "title": "Sentetik vaka C094",
+      "ariaLabel": "C094 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "64 yaşında kadın hasta. Başvuru: geniş kompleks kaydıyla acile sevk ediliyor. Geniş bir kompleksin ilk sapması 70 ms önce, son dönüşü 110 ms sonra işaretleniyor.",
+      "question": "Bu ölçümlerle QRS süresi kaç milisaniyedir?",
+      "text": "Bu ölçümlerle QRS süresi kaç milisaniyedir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "160/dk"
+        },
+        {
+          "k": "TA",
+          "v": "88/58 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%94"
+        }
+      ],
+      "options": [
+        "220 ms",
+        "180 ms",
+        "140 ms",
+        "270 ms",
+        "80 ms"
+      ],
+      "correct": 1,
+      "explanations": [
+        "220 ms verilen sınırların farkından uzundur.",
+        "−70 ms ile+110 ms arasındaki VT QRS desteği 180 ms’dir.",
+        "140 ms PVC/RBBB örneğinin genişliğidir.",
+        "270 ms verilen 180 ms destekten 90 ms uzundur.",
+        "80 ms normal dar QRS örneğidir."
+      ],
+      "feedback": "−70 ms ile+110 ms arasındaki VT QRS desteği 180 ms’dir.",
+      "objectiveIds": [
+        "O6"
+      ],
+      "sourceIds": [
+        "VA2022",
+        "ALS2025",
+        "ECG"
+      ],
+      "decisionId": "q180",
+      "note": "Retrospektif eğitim analizi: gerçek zamanlı öncelik hemodinamik değerlendirme ve instabil hastada senkronize kardiyoversiyondur.",
+      "ecg": {
+        "mode": "vt",
+        "options": {},
+        "leads": [
+          "II",
+          "aVR",
+          "V1"
+        ],
+        "start": 0.74,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C095",
+      "mode": "vt",
+      "title": "Sentetik vaka C095",
+      "ariaLabel": "C095 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "70 yaşında erkek hasta. Başvuru: yapısal kalp hastalığı öyküsüyle ani fenalaşma tarif ediyor. Geniş kompleksli hızlı ritim saptanıyor; nabız ve bilinç durumu ayrıca değerlendirilecek.",
+      "question": "Klinik nabız ve hemodinamik durumu ayırt eden veri hangisidir?",
+      "text": "Klinik nabız ve hemodinamik durumu ayırt eden veri hangisidir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "160/dk"
+        },
+        {
+          "k": "TA",
+          "v": "88/58 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%94"
+        }
+      ],
+      "options": [
+        "Düzenli QRS her VT'yi stabil yapar",
+        "Animasyon gerçek perfüzyon ölçer",
+        "Geniş QRS her VT'yi nabızsız yapar",
+        "Nabız ve hemodinami ayrıca bakılır",
+        "T yönü kan basıncı değeridir"
+      ],
+      "correct": 3,
+      "explanations": [
+        "Düzenlilik dolaşım kararlılığı anlamına gelmez.",
+        "Şematik akış gerçek debi değildir.",
+        "QRS genişliği nabzın varlığını göstermez.",
+        "VT nabızlı veya nabızsız olabilir.",
+        "T yönü elektriksel bir bulgudur."
+      ],
+      "feedback": "VT nabızlı veya nabızsız olabilir.",
+      "objectiveIds": [
+        "O5"
+      ],
+      "sourceIds": [
+        "VA2022",
+        "ALS2025"
+      ],
+      "decisionId": "vtContext",
+      "note": "",
+      "ecg": {
+        "mode": "vt",
+        "options": {},
+        "leads": [
+          "II",
+          "aVR",
+          "V1"
+        ],
+        "start": 0.8200000000000001,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C096",
+      "mode": "vt",
+      "title": "Sentetik vaka C096",
+      "ariaLabel": "C096 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "55 yaşında kadın hasta. Başvuru: ani çarpıntı sonrası bilinç bulanıklığı ile başvuruyor. Kısa süreli bir kayıt elde ediliyor; önceki öykü ve ek testler henüz yok.",
+      "question": "Bu bulgudan etiyoloji ve risk için hangi genel sınır çıkarılabilir?",
+      "text": "Bu bulgudan etiyoloji ve risk için hangi genel sınır çıkarılabilir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "160/dk"
+        },
+        {
+          "k": "TA",
+          "v": "88/58 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%94"
+        }
+      ],
+      "options": [
+        "Hız tek başına dolaşımı gösterir",
+        "QRS genişliği tek başına riski verir",
+        "Kısa kayıt başlangıç zamanını verir",
+        "P ekseni kesin odağı belirler",
+        "Örüntü desteklenir, neden ayrıca sorulur"
+      ],
+      "correct": 4,
+      "explanations": [
+        "Nabız ve basınç ayrıca değerlendirilir.",
+        "Risk için klinik bağlam da gerekir.",
+        "Bir pencere toplam süreyi göstermez.",
+        "P ekseni ipucudur, kesin yer vermez.",
+        "EKG bulgusu tanı verir, nedeni klinik öykü belirler."
+      ],
+      "feedback": "EKG bulgusu tanı verir, nedeni klinik öykü belirler.",
+      "objectiveIds": [
+        "O5"
+      ],
+      "sourceIds": [
+        "VA2022",
+        "ALS2025"
+      ],
+      "decisionId": "limits",
+      "note": "",
+      "ecg": {
+        "mode": "vt",
+        "options": {},
+        "leads": [
+          "II",
+          "aVR",
+          "V1"
+        ],
+        "start": 0.5,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C097",
+      "mode": "vt",
+      "title": "Sentetik vaka C097",
+      "ariaLabel": "C097 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "61 yaşında erkek hasta. Başvuru: önceki stent öyküsüyle ani çarpıntı ve terleme tarif ediyor. Nabız alınıyor; TA 88/58 mmHg, hasta soğuk terli.",
+      "question": "Bu hastada öncelikli yaklaşım nedir?",
+      "text": "Bu hastada öncelikli yaklaşım nedir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "160/dk"
+        },
+        {
+          "k": "TA",
+          "v": "88/58 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%94"
+        }
+      ],
+      "options": [
+        "Senkronize olmayan defibrilasyon uygulanır",
+        "Semptomla acil değerlendirme yeterlidir",
+        "Vagal manevra ile beklenir",
+        "Nabızlı, hemodinamik olarak instabil VT: acil senkronize kardiyoversiyon",
+        "Ayaktan Holter planlanır"
+      ],
+      "correct": 3,
+      "explanations": [
+        "Nabızlı VT'de senkronize kardiyoversiyon yapılır; defibrilasyon nabızsız VT/VF içindir.",
+        "Hasta zaten instabil; yalnız 'değerlendirme' ifadesi tedaviyi geciktirir.",
+        "Vagal manevra stabil dar kompleks SVT içindir.",
+        "Hipotansiyon ve semptomla seyreden nabızlı geniş kompleks taşikardide senkronize kardiyoversiyon önceliklidir (AHA ALS 2025).",
+        "İnstabil taşikardide ayaktan izlem uygun değildir."
+      ],
+      "feedback": "Hipotansiyon ve semptomla seyreden nabızlı geniş kompleks taşikardide senkronize kardiyoversiyon önceliklidir (AHA ALS 2025).",
+      "objectiveIds": [
+        "O5"
+      ],
+      "sourceIds": [
+        "VA2022",
+        "ALS2025"
+      ],
+      "decisionId": "unstableVt",
+      "note": "",
+      "ecg": {
+        "mode": "vt",
+        "options": {},
+        "leads": [
+          "II",
+          "aVR",
+          "V1"
+        ],
+        "start": 0.58,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C098",
+      "mode": "vt",
+      "title": "Sentetik vaka C098",
+      "ariaLabel": "C098 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "66 yaşında kadın hasta. Başvuru: ani başlayan hızlı çarpıntı ile fenalaşıyor. Hızlı seyreden nabızda diyastolik dolum süresinin kısaldığı düşünülüyor.",
+      "question": "Yüksek hızın ventrikül dolusuna etkisi için hangi ifade doğrudur?",
+      "text": "Yüksek hızın ventrikül dolusuna etkisi için hangi ifade doğrudur?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "160/dk"
+        },
+        {
+          "k": "TA",
+          "v": "88/58 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%94"
+        }
+      ],
+      "options": [
+        "P varsa doluş hızdan bağımsızdır",
+        "Hız artışı atım hacmini sabit artırır",
+        "Kısa R–R kan basıncı değeridir",
+        "Dar QRS kısalan doluşu telafi eder",
+        "Kısa döngü doluşu kısaltabilir"
+      ],
+      "correct": 4,
+      "explanations": [
+        "Kısa döngü doluşu yine de kısaltabilir.",
+        "Atım hacmi doluş ve yüke bağlıdır.",
+        "R–R zaman ölçüsüdür, basınç değildir.",
+        "QRS genişliği doluş süresini değiştirmez.",
+        "Hız artınca diyastol kısalır."
+      ],
+      "feedback": "Hız artınca diyastol kısalır.",
+      "objectiveIds": [
+        "O4"
+      ],
+      "sourceIds": [
+        "VA2022",
+        "ALS2025",
+        "CYCLE"
+      ],
+      "decisionId": "fastFill",
+      "note": "Retrospektif eğitim analizi: gerçek zamanlı öncelik hemodinamik değerlendirme ve instabil hastada senkronize kardiyoversiyondur.",
+      "ecg": {
+        "mode": "vt",
+        "options": {},
+        "leads": [
+          "II",
+          "aVR",
+          "V1"
+        ],
+        "start": 0.66,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C099",
+      "mode": "vt",
+      "title": "Sentetik vaka C099",
+      "ariaLabel": "C099 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "73 yaşında erkek hasta. Başvuru: kalp pili takılı hastada ani çarpıntı tarif ediyor. Ventriküler kompleksten sonra gelen dalganın anlamı soruluyor.",
+      "question": "T dalgasının temel elektriksel karşılığı nedir?",
+      "text": "T dalgasının temel elektriksel karşılığı nedir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "160/dk"
+        },
+        {
+          "k": "TA",
+          "v": "88/58 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%94"
+        }
+      ],
+      "options": [
+        "T: gecikmiş sağ ventrikül uyarısı",
+        "T: atriyal repolarizasyon",
+        "T: yeni bir atriyal uyarı",
+        "T: ventriküler repolarizasyon",
+        "T: ventriküler depolarizasyon"
+      ],
+      "correct": 3,
+      "explanations": [
+        "Bu bileşen QRS içinde yer alır.",
+        "Bu olay genelde QRS altında gizlenir.",
+        "Yeni P ayrı bir dalga olarak görülür.",
+        "T dalgası ventrikülün elektriksel toparlanmasıdır.",
+        "Bu olay QRS ile kaydedilir."
+      ],
+      "feedback": "T dalgası ventrikülün elektriksel toparlanmasıdır.",
+      "objectiveIds": [
+        "O1"
+      ],
+      "sourceIds": [
+        "VA2022",
+        "ALS2025"
+      ],
+      "decisionId": "t",
+      "note": "Retrospektif eğitim analizi: gerçek zamanlı öncelik hemodinamik değerlendirme ve instabil hastada senkronize kardiyoversiyondur.",
+      "ecg": {
+        "mode": "vt",
+        "options": {},
+        "leads": [
+          "II",
+          "aVR",
+          "V1"
+        ],
+        "start": 0.74,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C100",
+      "mode": "vt",
+      "title": "Sentetik vaka C100",
+      "ariaLabel": "C100 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "59 yaşında kadın hasta. Başvuru: ani çarpıntı sırasında göğüste sıkışma tarif ediyor. Nabız alınıyor; hasta hipotansif ve semptomatik.",
+      "question": "Bu hastada ilk yaklaşım ne olmalıdır?",
+      "text": "Bu hastada ilk yaklaşım ne olmalıdır?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "160/dk"
+        },
+        {
+          "k": "TA",
+          "v": "88/58 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%94"
+        }
+      ],
+      "options": [
+        "Yalnız görüntüleme istenir",
+        "Hemen taburcu edilir",
+        "Yalnızca gözlem yeterlidir",
+        "Nabız var ve instabil: acil senkronize kardiyoversiyon; nabız yoksa KPR ve defibrilasyon",
+        "Karar tamamen hastaya bırakılır"
+      ],
+      "correct": 3,
+      "explanations": [
+        "İlk adım görüntülemeden önce hemodinamik değerlendirme ve tedavidir.",
+        "Bulgu hayati risk taşır; taburcu düşünülmez.",
+        "İnstabil VT'de yalnız izlem hayati risk taşır.",
+        "Hipotansif, semptomlu nabızlı VT'de senkronize kardiyoversiyon önceliklidir; nabızsız VT arrest algoritmasıyla yönetilir (AHA ALS 2025).",
+        "İlk yaklaşım klinik ekip tarafından yönlendirilir."
+      ],
+      "feedback": "Hipotansif, semptomlu nabızlı VT'de senkronize kardiyoversiyon önceliklidir; nabızsız VT arrest algoritmasıyla yönetilir (AHA ALS 2025).",
+      "objectiveIds": [
+        "O5"
+      ],
+      "sourceIds": [
+        "VA2022",
+        "ALS2025"
+      ],
+      "decisionId": "firstStep_vt",
+      "note": "",
+      "ecg": {
+        "mode": "vt",
+        "options": {},
+        "leads": [
+          "II",
+          "aVR",
+          "V1"
+        ],
+        "start": 0.8200000000000001,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C101",
+      "mode": "vt",
+      "title": "Sentetik vaka C101",
+      "ariaLabel": "C101 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "68 yaşında erkek hasta. Başvuru: geniş kompleksli hızlı ritimle 112 ile getiriliyor. Monitörde QRS ile sabit ilişkili bir dalganın seçilip seçilemediği sorgulanıyor.",
+      "question": "Bu ritimde QRS ile sabit ilişkili bir P dalgası seçilebiliyor mu?",
+      "text": "Bu ritimde QRS ile sabit ilişkili bir P dalgası seçilebiliyor mu?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "160/dk"
+        },
+        {
+          "k": "TA",
+          "v": "88/58 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%94"
+        }
+      ],
+      "options": [
+        "P dalgaları QRS'leri tetikliyor",
+        "Yalnızca aVR'de var",
+        "Hayır, QRS ile sabit ilişkili bir P seçilemiyor",
+        "Evet, her atımda QRS'den sonra",
+        "Evet, her QRS öncesinde var"
+      ],
+      "correct": 2,
+      "explanations": [
+        "VT'de QRS'ler ventrikül kaynaklıdır; P onları tetiklemez.",
+        "P varsa tek derivasyona özgü olmaz.",
+        "VT'de atriyum ve ventrikül bağımsız çalışabilir (AV disosiyasyon); QRS ile sabit ilişkili P görülmez.",
+        "Sabit retrograd P her VT'de görülmez; bu örnekte seçilemiyor.",
+        "Her QRS öncesinde sabit P, sinüs kaynaklı iletiyi düşündürür; VT ile uyumsuzdur."
+      ],
+      "feedback": "VT'de atriyum ve ventrikül bağımsız çalışabilir (AV disosiyasyon); QRS ile sabit ilişkili P görülmez.",
+      "objectiveIds": [
+        "O6"
+      ],
+      "sourceIds": [
+        "VA2022",
+        "ALS2025",
+        "ECG"
+      ],
+      "decisionId": "pWaveVisibleNoVt",
+      "note": "Retrospektif eğitim analizi: gerçek zamanlı öncelik hemodinamik değerlendirme ve instabil hastada senkronize kardiyoversiyondur.",
+      "ecg": {
+        "mode": "vt",
+        "options": {},
+        "leads": [
+          "II",
+          "aVR",
+          "V1"
+        ],
+        "start": 0.5,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C102",
+      "mode": "vt",
+      "title": "Sentetik vaka C102",
+      "ariaLabel": "C102 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "52 yaşında kadın hasta. Başvuru: ani baş dönmesi ve terleme ile başvuruyor. İzlemde QRS’den kısa süre sonra basıncın yükseldiği, ancak çıkış kapaklarının henüz açılmadığı bir an inceleniyor.",
+      "question": "Bu andaki kapak durumu hangi mekanik evreyi tanımlar?",
+      "text": "Bu andaki kapak durumu hangi mekanik evreyi tanımlar?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "160/dk"
+        },
+        {
+          "k": "TA",
+          "v": "88/58 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%94"
+        }
+      ],
+      "options": [
+        "AV kapaklar açık: atriyal sistol",
+        "AV kapaklar açık: pasif doluş",
+        "Tüm kapaklar kapalı: izovolümetrik kasılma",
+        "Tüm kapaklar kapalı: gevşeme",
+        "Çıkış kapakları açık: ejeksiyon"
+      ],
+      "correct": 2,
+      "explanations": [
+        "Bu anda AV kapak kapalıdır.",
+        "Bu kasılma başlangıcı, doluş değildir.",
+        "Basınç yükselirken hacim henüz sabittir.",
+        "Gevşeme ejeksiyon sonrasıdır.",
+        "Bu erken evrede çıkış henüz kapalıdır."
+      ],
+      "feedback": "Basınç yükselirken hacim henüz sabittir.",
+      "objectiveIds": [
+        "O4"
+      ],
+      "sourceIds": [
+        "VA2022",
+        "ALS2025",
+        "CYCLE"
+      ],
+      "decisionId": "mechanic",
+      "note": "Retrospektif eğitim analizi: gerçek zamanlı öncelik hemodinamik değerlendirme ve instabil hastada senkronize kardiyoversiyondur.",
+      "ecg": {
+        "mode": "vt",
+        "options": {},
+        "leads": [
+          "II",
+          "aVR",
+          "V1"
+        ],
+        "start": 0.58,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C103",
+      "mode": "vt",
+      "title": "Sentetik vaka C103",
+      "ariaLabel": "C103 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "75 yaşında erkek hasta. Başvuru: önceki miyokard enfarktüsü öyküsüyle ani fenalaşma tarif ediyor. Eşzamanlı üç derivasyonlu kayıt aşağıda gösteriliyor.",
+      "question": "Bu EKG'de öncelikle hangi tanı düşünülmelidir?",
+      "text": "Bu EKG'de öncelikle hangi tanı düşünülmelidir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "160/dk"
+        },
+        {
+          "k": "TA",
+          "v": "88/58 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%94"
+        }
+      ],
+      "options": [
+        "Ventriküler taşikardi",
+        "İnferior ST yükselmeli iskemi",
+        "Atriyal fibrilasyon",
+        "Ventriküler erken atım",
+        "Fokal atriyal taşikardi"
+      ],
+      "correct": 0,
+      "explanations": [
+        "Tarif edilen bulgular Ventriküler taşikardi ile uyumludur.",
+        "İnferior ST yükselmeli iskemi için beklenen bulgular burada yok.",
+        "Atriyal fibrilasyon için beklenen bulgular burada yok.",
+        "Ventriküler erken atım için beklenen bulgular burada yok.",
+        "Fokal atriyal taşikardi için beklenen bulgular burada yok."
+      ],
+      "feedback": "Tarif edilen bulgular Ventriküler taşikardi ile uyumludur.",
+      "objectiveIds": [
+        "O2"
+      ],
+      "sourceIds": [
+        "VA2022",
+        "ALS2025"
+      ],
+      "decisionId": "ddx_vt",
+      "note": "",
+      "ecg": {
+        "mode": "vt",
+        "options": {},
+        "leads": [
+          "II",
+          "aVR",
+          "V1"
+        ],
+        "start": 0.66,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C104",
+      "mode": "vt",
+      "title": "Sentetik vaka C104",
+      "ariaLabel": "C104 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "63 yaşında kadın hasta. Başvuru: ani çarpıntı sonrası kısa süreli bilinç kaybı tarif ediyor. Eşzamanlı üç derivasyonlu kayıt aşağıda gösteriliyor.",
+      "question": "Bu ritim hangi sınıfa girer?",
+      "text": "Bu ritim hangi sınıfa girer?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "160/dk"
+        },
+        {
+          "k": "TA",
+          "v": "88/58 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%94"
+        }
+      ],
+      "options": [
+        "Düzenli geniş kompleks",
+        "Düzenli dar kompleks, normal hız",
+        "Düzenli dar kompleks, hızlı",
+        "Kaotik, organize değil",
+        "Düzensiz dar kompleks"
+      ],
+      "correct": 0,
+      "explanations": [
+        "QRS geniş; ritim düzenli aralıklarla tekrarlıyor.",
+        "Bu örnekte hız veya düzen normal aralığa uymuyor.",
+        "Bu örnekte hız bu kadar yüksek değil.",
+        "Bu örnekte düzenli bir kompleks seçilebiliyor, kaotik değil.",
+        "Bu örnekte ritim düzenli, düzensiz değil."
+      ],
+      "feedback": "QRS geniş; ritim düzenli aralıklarla tekrarlıyor.",
+      "objectiveIds": [
+        "O2"
+      ],
+      "sourceIds": [
+        "VA2022",
+        "ALS2025"
+      ],
+      "decisionId": "rhythmClass_vt",
+      "note": "",
+      "ecg": {
+        "mode": "vt",
+        "options": {},
+        "leads": [
+          "II",
+          "aVR",
+          "V1"
+        ],
+        "start": 0.74,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C105",
+      "mode": "vt",
+      "title": "Sentetik vaka C105",
+      "ariaLabel": "C105 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "57 yaşında erkek hasta. Başvuru: egzersiz testi sırasında ani geniş kompleks taşikardi gelişiyor. Sistematik okumada hangi derivasyonların yan duvarı temsil ettiği gözden geçiriliyor.",
+      "question": "Hangi derivasyonlar lateral duvarı gösterir?",
+      "text": "Hangi derivasyonlar lateral duvarı gösterir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "160/dk"
+        },
+        {
+          "k": "TA",
+          "v": "88/58 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%94"
+        }
+      ],
+      "options": [
+        "V1, V2 — septal bölge",
+        "I, aVL, V5–V6 — lateral duvar",
+        "V1–V6 tümü — tüm prekordiyum",
+        "II, III, aVF — inferior duvar",
+        "V3, V4 — anterior duvar"
+      ],
+      "correct": 1,
+      "explanations": [
+        "V1–V2 septal bölgeyi gösterir, lateral duvarı değil.",
+        "Bu üç derivasyon grubu kalbin lateral duvarını gösterir.",
+        "Tüm prekordiyal grup tek başına lateral duvarı özgül olarak göstermez.",
+        "Bu grup inferior duvarı gösterir, lateral duvarı değil.",
+        "V3–V4 anterior duvarı gösterir, lateral duvarı değil."
+      ],
+      "feedback": "Bu üç derivasyon grubu kalbin lateral duvarını gösterir.",
+      "objectiveIds": [
+        "O3"
+      ],
+      "sourceIds": [
+        "VA2022",
+        "ALS2025",
+        "ECG"
+      ],
+      "decisionId": "lateralLeadGroup",
+      "note": "Retrospektif eğitim analizi: gerçek zamanlı öncelik hemodinamik değerlendirme ve instabil hastada senkronize kardiyoversiyondur.",
+      "ecg": {
+        "mode": "vt",
+        "options": {},
+        "leads": [
+          "II",
+          "aVR",
+          "V1"
+        ],
+        "start": 0.8200000000000001,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C106",
+      "mode": "vf",
+      "title": "Sentetik vaka C106",
+      "ariaLabel": "C106 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "62 yaşında erkek hasta. Başvuru: iş yerinde aniden yere yığılıyor, yanıtsız bulunuyor. Monitörde düzenli bir kompleks seçilemiyor; genliği ve şekli sürekli değişen kaotik bir dalga izleniyor.",
+      "question": "Bu elektriksel görünümle en uyumlu örüntü hangisidir?",
+      "text": "Bu elektriksel görünümle en uyumlu örüntü hangisidir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "alınamıyor"
+        },
+        {
+          "k": "TA",
+          "v": "ölçülemiyor"
+        },
+        {
+          "k": "Bilinç",
+          "v": "kapalı"
+        }
+      ],
+      "options": [
+        "Monomorfik VT",
+        "Atriyal fibrilasyon",
+        "Asistoli",
+        "Ventriküler fibrilasyon",
+        "Atriyal flutter"
+      ],
+      "correct": 3,
+      "explanations": [
+        "VT'de düzenli tekdüze QRS olur; burada yok.",
+        "AF'de QRS genelde seçilebilir; burada seçilemiyor.",
+        "Asistolide düz çizgi olur; burada kaotik dalga var.",
+        "Kaotik, düzensiz, QRS seçilemiyor: VF.",
+        "Flutter'da düzenli QRS olur; burada yok."
+      ],
+      "feedback": "Kaotik, düzensiz, QRS seçilemiyor: VF.",
+      "objectiveIds": [
+        "O2"
+      ],
+      "sourceIds": [
+        "VA2022",
+        "ALS2025"
+      ],
+      "decisionId": "vf",
+      "note": "",
+      "ecg": {
+        "mode": "vf",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V1"
+        ],
+        "start": 0.5,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C107",
+      "mode": "vf",
+      "title": "Sentetik vaka C107",
+      "ariaLabel": "C107 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "58 yaşında kadın hasta. Başvuru: evde aniden bilinci kapanıyor, 112 çağrılıyor. Aynı kayıt üzerinde farklı bir derivasyon grubuna geçildiğinde görünüm değişiyor.",
+      "question": "Derivasyon seçimini değiştirmenin bulguya etkisi nedir?",
+      "text": "Derivasyon seçimini değiştirmenin bulguya etkisi nedir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "alınamıyor"
+        },
+        {
+          "k": "TA",
+          "v": "ölçülemiyor"
+        },
+        {
+          "k": "Bilinç",
+          "v": "kapalı"
+        }
+      ],
+      "options": [
+        "Lead değiştirmek ritmi değiştirir",
+        "Tüm lead'ler aynı şekli gösterir",
+        "Tek lead 12 derivasyona eşittir",
+        "Negatif QRS ventrikül kaynağını kanıtlar",
+        "Derivasyon aynı kaynağın farklı görünümüdür"
+      ],
+      "correct": 4,
+      "explanations": [
+        "Görünüm değişir, kaynak aynı kalır.",
+        "Her derivasyon farklı açıdan bakar.",
+        "Diğer derivasyonlar ek bilgi taşır.",
+        "Polarite yön farkından da olabilir.",
+        "Lead değiştirmek şekli değiştirir, ritmi değiştirmez."
+      ],
+      "feedback": "Lead değiştirmek şekli değiştirir, ritmi değiştirmez.",
+      "objectiveIds": [
+        "O3"
+      ],
+      "sourceIds": [
+        "VA2022",
+        "ALS2025",
+        "ECG"
+      ],
+      "decisionId": "leadAll",
+      "note": "Retrospektif eğitim analizi: gerçek zamanlı öncelik arresti tanıyıp KPR ve erken defibrilasyondur.",
+      "ecg": {
+        "mode": "vf",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V1"
+        ],
+        "start": 0.58,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C108",
+      "mode": "vf",
+      "title": "Sentetik vaka C108",
+      "ariaLabel": "C108 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "67 yaşında erkek hasta. Başvuru: egzersiz sırasında aniden yığılıp yanıtsız kalıyor. Hasta yanıtsız ve nabız alınamıyor.",
+      "question": "Bu hastada ilk yaklaşım ne olmalıdır?",
+      "text": "Bu hastada ilk yaklaşım ne olmalıdır?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "alınamıyor"
+        },
+        {
+          "k": "TA",
+          "v": "ölçülemiyor"
+        },
+        {
+          "k": "Bilinç",
+          "v": "kapalı"
+        }
+      ],
+      "options": [
+        "Yalnızca gözlem yeterlidir",
+        "Karar tamamen hastaya bırakılır",
+        "Hemen taburcu edilir",
+        "Yalnız görüntüleme istenir",
+        "Nabız yok: KPR başlat ve defibrilasyona hazırlan"
+      ],
+      "correct": 4,
+      "explanations": [
+        "Bu bulgu daha aktif bir yaklaşım gerektirebilir; yalnız izlem yetmez.",
+        "İlk yaklaşım klinik ekip tarafından yönlendirilir.",
+        "Bulgu ciddi olabilir; taburcu öncesi değerlendirme gerekir.",
+        "İlk adım görüntülemeden önce klinik değerlendirmedir.",
+        "VF nabızsız arrest ritmidir; acil resüsitasyon gerekir."
+      ],
+      "feedback": "VF nabızsız arrest ritmidir; acil resüsitasyon gerekir.",
+      "objectiveIds": [
+        "O5"
+      ],
+      "sourceIds": [
+        "VA2022",
+        "ALS2025"
+      ],
+      "decisionId": "firstStep_vf",
+      "note": "",
+      "ecg": {
+        "mode": "vf",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V1"
+        ],
+        "start": 0.66,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C109",
+      "mode": "vf",
+      "title": "Sentetik vaka C109",
+      "ariaLabel": "C109 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "54 yaşında kadın hasta. Başvuru: restoranda aniden fenalaşıp yanıtsız bulunuyor. Sistematik okumada V1–V2’nin hangi bölgeyi yansıttığı gözden geçiriliyor.",
+      "question": "V1 ve V2 derivasyonları hangi bölgeyi yansıtır?",
+      "text": "V1 ve V2 derivasyonları hangi bölgeyi yansıtır?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "alınamıyor"
+        },
+        {
+          "k": "TA",
+          "v": "ölçülemiyor"
+        },
+        {
+          "k": "Bilinç",
+          "v": "kapalı"
+        }
+      ],
+      "options": [
+        "Yüksek lateral duvar",
+        "İnferior duvar",
+        "Septum ve sağ ventrikül yakını",
+        "Sadece sağ atriyum",
+        "Sol lateral duvar"
+      ],
+      "correct": 2,
+      "explanations": [
+        "Yüksek lateral duvar aVL ile değerlendirilir.",
+        "İnferior duvar II, III, aVF ile değerlendirilir.",
+        "V1–V2 septal bölgeyi ve sağ ventrikülün yakınını yansıtır.",
+        "Sağ atriyum tek başına V1–V2 ile özgül olarak tanımlanmaz.",
+        "Sol lateral duvar V5–V6 ve I, aVL ile değerlendirilir."
+      ],
+      "feedback": "V1–V2 septal bölgeyi ve sağ ventrikülün yakınını yansıtır.",
+      "objectiveIds": [
+        "O3"
+      ],
+      "sourceIds": [
+        "VA2022",
+        "ALS2025",
+        "ECG"
+      ],
+      "decisionId": "precordialSeptal",
+      "note": "Retrospektif eğitim analizi: gerçek zamanlı öncelik arresti tanıyıp KPR ve erken defibrilasyondur.",
+      "ecg": {
+        "mode": "vf",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V1"
+        ],
+        "start": 0.74,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C110",
+      "mode": "vf",
+      "title": "Sentetik vaka C110",
+      "ariaLabel": "C110 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "70 yaşında erkek hasta. Başvuru: önceki kalp krizi öyküsüyle aniden bilinci kapanıyor. İzlemde tüm ileri akım parçacıklarının durduğu bir an gösteriliyor.",
+      "question": "Bu ritimde dolaşım ve pompa durumu için hangi ifade doğrudur?",
+      "text": "Bu ritimde dolaşım ve pompa durumu için hangi ifade doğrudur?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "alınamıyor"
+        },
+        {
+          "k": "TA",
+          "v": "ölçülemiyor"
+        },
+        {
+          "k": "Bilinç",
+          "v": "kapalı"
+        }
+      ],
+      "options": [
+        "Kaotik sinyal düzenli nabız verir",
+        "Yalnız pulmoner akım korunur",
+        "Etkili ileri akım yok",
+        "Düşük ama düzenli akım sürer",
+        "Yalnız koroner akım korunur"
+      ],
+      "correct": 2,
+      "explanations": [
+        "Kaotik elektrik düzenli nabza dönüşmez.",
+        "Organize ejeksiyon olmadan bu akım sürmez.",
+        "Kaotik etkinlik organize pompa oluşturmaz.",
+        "VF'de organize ejeksiyon yoktur.",
+        "Koroner akım da bu modelde durur."
+      ],
+      "feedback": "Kaotik etkinlik organize pompa oluşturmaz.",
+      "objectiveIds": [
+        "O4"
+      ],
+      "sourceIds": [
+        "VA2022",
+        "ALS2025",
+        "CYCLE"
+      ],
+      "decisionId": "vfFlow",
+      "note": "",
+      "ecg": {
+        "mode": "vf",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V1"
+        ],
+        "start": 0.8200000000000001,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C111",
+      "mode": "vf",
+      "title": "Sentetik vaka C111",
+      "ariaLabel": "C111 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "49 yaşında kadın hasta. Başvuru: sokakta aniden düşüp yanıtsız bulunuyor. Sistematik okumada hangi derivasyonların inferior duvarı temsil ettiği gözden geçiriliyor.",
+      "question": "Hangi derivasyon grubu inferior duvarı gösterir?",
+      "text": "Hangi derivasyon grubu inferior duvarı gösterir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "alınamıyor"
+        },
+        {
+          "k": "TA",
+          "v": "ölçülemiyor"
+        },
+        {
+          "k": "Bilinç",
+          "v": "kapalı"
+        }
+      ],
+      "options": [
+        "II, III, aVF — inferior duvar",
+        "V1, V2 — septal bölge",
+        "I, aVL, V5–V6 — lateral duvar",
+        "aVR tek başına — sağ üst köşe",
+        "V3, V4 — anterior duvar"
+      ],
+      "correct": 0,
+      "explanations": [
+        "Bu üç derivasyon kalbin inferior (alt) duvarını gösterir.",
+        "V1–V2 septal bölgeyi gösterir, inferior duvarı değil.",
+        "Bu grup lateral duvarı gösterir, inferior duvarı değil.",
+        "aVR tek başına sağ üst yönü gösterir; inferior grup değildir.",
+        "V3–V4 anterior duvarı gösterir, inferior duvarı değil."
+      ],
+      "feedback": "Bu üç derivasyon kalbin inferior (alt) duvarını gösterir.",
+      "objectiveIds": [
+        "O3"
+      ],
+      "sourceIds": [
+        "VA2022",
+        "ALS2025",
+        "ECG"
+      ],
+      "decisionId": "inferiorLeadGroup",
+      "note": "Retrospektif eğitim analizi: gerçek zamanlı öncelik arresti tanıyıp KPR ve erken defibrilasyondur.",
+      "ecg": {
+        "mode": "vf",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V1"
+        ],
+        "start": 0.5,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C112",
+      "mode": "vf",
+      "title": "Sentetik vaka C112",
+      "ariaLabel": "C112 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "65 yaşında erkek hasta. Başvuru: spor salonunda aniden yığılıp yanıt vermiyor. Kaotik dalga üzerinde bir öğrenci QRS sınırlarını işaretlemeye çalışıyor.",
+      "question": "Bu kayıtta QRS genişliği hakkında hangi ifade doğrudur?",
+      "text": "Bu kayıtta QRS genişliği hakkında hangi ifade doğrudur?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "alınamıyor"
+        },
+        {
+          "k": "TA",
+          "v": "ölçülemiyor"
+        },
+        {
+          "k": "Bilinç",
+          "v": "kapalı"
+        }
+      ],
+      "options": [
+        "Organize QRS sınırı yok",
+        "Her pozitif tepe QRS sayılır",
+        "Eski VT süresi buraya uygulanır",
+        "F süresi QRS yerine yazılır",
+        "İki çukur arası QRS genişliğidir"
+      ],
+      "correct": 0,
+      "explanations": [
+        "Kaotik dalgada ayrık kompleks tanımlanamaz.",
+        "Tek tepe kompleks sınırını vermez.",
+        "Ritim değişince eski süre geçerli değildir.",
+        "F atriyal bir dalgadır, QRS değildir.",
+        "Çukur aralığı kompleks süresi değildir."
+      ],
+      "feedback": "Kaotik dalgada ayrık kompleks tanımlanamaz.",
+      "objectiveIds": [
+        "O1"
+      ],
+      "sourceIds": [
+        "VA2022",
+        "ALS2025"
+      ],
+      "decisionId": "noQrs",
+      "note": "",
+      "ecg": {
+        "mode": "vf",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V1"
+        ],
+        "start": 0.58,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C113",
+      "mode": "vf",
+      "title": "Sentetik vaka C113",
+      "ariaLabel": "C113 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "60 yaşında kadın hasta. Başvuru: evde aniden solunumu durup yanıtsız kalıyor. Nabız alınamıyor; monitörde kaotik elektriksel etkinlik sürüyor.",
+      "question": "Bu hastada öncelikli yaklaşım nedir?",
+      "text": "Bu hastada öncelikli yaklaşım nedir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "alınamıyor"
+        },
+        {
+          "k": "TA",
+          "v": "ölçülemiyor"
+        },
+        {
+          "k": "Bilinç",
+          "v": "kapalı"
+        }
+      ],
+      "options": [
+        "Önce ritmin mekanizması belirlenir",
+        "Senkronize kardiyoversiyon uygulanır",
+        "Arresti tanı: hemen KPR başlat, defibrilatör gelir gelmez şoklanabilir ritmi defibrile et",
+        "Semptomlar için ayrıntılı öykü alınır",
+        "12 derivasyonlu EKG çekilip kardiyoloji beklenir"
+      ],
+      "correct": 2,
+      "explanations": [
+        "Mekanizma analizi arrest yönetiminden sonra gelir.",
+        "VF'de senkronizasyon yapılamaz; senkronize olmayan defibrilasyon gerekir.",
+        "VF nabızsız kardiyak arresttir; yüksek kaliteli KPR ve erken defibrilasyon sağkalımı belirler (AHA ALS 2025).",
+        "Yanıtsız ve nabızsız hastada öykü almak resüsitasyonu geciktirir.",
+        "Tanı monitörde konur; defibrilasyon 12 derivasyon beklenmeden yapılır."
+      ],
+      "feedback": "VF nabızsız kardiyak arresttir; yüksek kaliteli KPR ve erken defibrilasyon sağkalımı belirler (AHA ALS 2025).",
+      "objectiveIds": [
+        "O5"
+      ],
+      "sourceIds": [
+        "VA2022",
+        "ALS2025"
+      ],
+      "decisionId": "arrestVf",
+      "note": "",
+      "ecg": {
+        "mode": "vf",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V1"
+        ],
+        "start": 0.66,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C114",
+      "mode": "vf",
+      "title": "Sentetik vaka C114",
+      "ariaLabel": "C114 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "73 yaşında erkek hasta. Başvuru: huzurevinde aniden yanıtsız bulunup 112 çağrılıyor. Monitörde kaotik bir görünüm varken hasta konuşabiliyor ve bilinci açık görünüyor.",
+      "question": "Bu çelişkili görünüm için öncelikli değerlendirme hangisidir?",
+      "text": "Bu çelişkili görünüm için öncelikli değerlendirme hangisidir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "alınamıyor"
+        },
+        {
+          "k": "TA",
+          "v": "ölçülemiyor"
+        },
+        {
+          "k": "Bilinç",
+          "v": "kapalı"
+        }
+      ],
+      "options": [
+        "Klinik durum ve bağlantı doğrulanır",
+        "Son normal hız kaydedilip geçilir",
+        "Ekrandan kesin nabızsız VF denir",
+        "Uyanıklık tüm ritimleri dışlar",
+        "Dalga genliği damarı gösterir"
+      ],
+      "correct": 0,
+      "explanations": [
+        "Uyanık, konuşan hastada VF görünümü şüphe uyandırır.",
+        "Yeni görünüm mutlaka değerlendirilmeli.",
+        "Klinikle çelişen görünüm önce doğrulanmalı.",
+        "Uyanıklık başka sorunları ekarte etmez.",
+        "Artefakt genliği anatomik bilgi vermez."
+      ],
+      "feedback": "Uyanık, konuşan hastada VF görünümü şüphe uyandırır.",
+      "objectiveIds": [
+        "O5"
+      ],
+      "sourceIds": [
+        "VA2022",
+        "ALS2025"
+      ],
+      "decisionId": "vfArtifact",
+      "note": "",
+      "ecg": {
+        "mode": "vf",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V1"
+        ],
+        "start": 0.74,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C115",
+      "mode": "vf",
+      "title": "Sentetik vaka C115",
+      "ariaLabel": "C115 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "56 yaşında kadın hasta. Başvuru: iş toplantısında aniden yere yığılıyor. Monitördeki kaotik dalgada kompleks sınırı aranıyor.",
+      "question": "Bu kayıtta QRS kompleksi nasıl değerlendirilir?",
+      "text": "Bu kayıtta QRS kompleksi nasıl değerlendirilir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "alınamıyor"
+        },
+        {
+          "k": "TA",
+          "v": "ölçülemiyor"
+        },
+        {
+          "k": "Bilinç",
+          "v": "kapalı"
+        }
+      ],
+      "options": [
+        "Her pozitif tepe QRS sayılır",
+        "Eski VT süresi buraya uygulanır",
+        "Organize QRS sınırı yok",
+        "F süresi QRS yerine yazılır",
+        "İki çukur arası QRS genişliğidir"
+      ],
+      "correct": 2,
+      "explanations": [
+        "Tek tepe kompleks sınırını vermez.",
+        "Ritim değişince eski süre geçerli değildir.",
+        "Kaotik dalgada ayrık kompleks tanımlanamaz.",
+        "F atriyal bir dalgadır, QRS değildir.",
+        "Çukur aralığı kompleks süresi değildir."
+      ],
+      "feedback": "Kaotik dalgada ayrık kompleks tanımlanamaz.",
+      "objectiveIds": [
+        "O1"
+      ],
+      "sourceIds": [
+        "VA2022",
+        "ALS2025"
+      ],
+      "decisionId": "noQrs",
+      "note": "",
+      "ecg": {
+        "mode": "vf",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V1"
+        ],
+        "start": 0.8200000000000001,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C116",
+      "mode": "vf",
+      "title": "Sentetik vaka C116",
+      "ariaLabel": "C116 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "68 yaşında erkek hasta. Başvuru: yapısal kalp hastalığı öyküsüyle aniden yanıtsız kalıyor. Kaotik elektriksel etkinlik sürerken mekanik akım durumu soruluyor.",
+      "question": "Bu kayıtta ileri akım için ne söylenebilir?",
+      "text": "Bu kayıtta ileri akım için ne söylenebilir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "alınamıyor"
+        },
+        {
+          "k": "TA",
+          "v": "ölçülemiyor"
+        },
+        {
+          "k": "Bilinç",
+          "v": "kapalı"
+        }
+      ],
+      "options": [
+        "Yalnız pulmoner akım korunur",
+        "Düşük ama düzenli akım sürer",
+        "Kaotik sinyal düzenli nabız verir",
+        "Etkili ileri akım yok",
+        "Yalnız koroner akım korunur"
+      ],
+      "correct": 3,
+      "explanations": [
+        "Organize ejeksiyon olmadan bu akım sürmez.",
+        "VF'de organize ejeksiyon yoktur.",
+        "Kaotik elektrik düzenli nabza dönüşmez.",
+        "Kaotik etkinlik organize pompa oluşturmaz.",
+        "Koroner akım da bu modelde durur."
+      ],
+      "feedback": "Kaotik etkinlik organize pompa oluşturmaz.",
+      "objectiveIds": [
+        "O4"
+      ],
+      "sourceIds": [
+        "VA2022",
+        "ALS2025",
+        "CYCLE"
+      ],
+      "decisionId": "vfFlow",
+      "note": "",
+      "ecg": {
+        "mode": "vf",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V1"
+        ],
+        "start": 0.5,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C117",
+      "mode": "vf",
+      "title": "Sentetik vaka C117",
+      "ariaLabel": "C117 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "52 yaşında kadın hasta. Başvuru: alışveriş merkezinde aniden fenalaşıp yanıt vermiyor. Monitörde kaotik taban etkinliği izleniyor.",
+      "question": "Bu kayıtta P dalgası için ne söylenebilir?",
+      "text": "Bu kayıtta P dalgası için ne söylenebilir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "alınamıyor"
+        },
+        {
+          "k": "TA",
+          "v": "ölçülemiyor"
+        },
+        {
+          "k": "Bilinç",
+          "v": "kapalı"
+        }
+      ],
+      "options": [
+        "P dalgası QRS'den sonra gelir",
+        "Organize atriyal depolarizasyon (P) seçilemez; taban kaotiktir",
+        "Her kaotik tepe bir P dalgasıdır",
+        "P yalnız V1'de görülür",
+        "P dalgası düzenli ve normaldir"
+      ],
+      "correct": 1,
+      "explanations": [
+        "VF'de organize QRS de yoktur; P–QRS ilişkisi tanımlanamaz.",
+        "VF'de organize atriyal ya da ventriküler kompleks yoktur; ayrık P aranmaz.",
+        "Kaotik dalgalanma ventriküler kaynaklıdır, P değildir.",
+        "Hiçbir derivasyonda ayrık P yoktur.",
+        "VF'de düzenli sinüs P'si görülmez."
+      ],
+      "feedback": "VF'de organize atriyal ya da ventriküler kompleks yoktur; ayrık P aranmaz.",
+      "objectiveIds": [
+        "O1"
+      ],
+      "sourceIds": [
+        "VA2022",
+        "ALS2025"
+      ],
+      "decisionId": "vfNoP",
+      "note": "",
+      "ecg": {
+        "mode": "vf",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V1"
+        ],
+        "start": 0.58,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C118",
+      "mode": "vf",
+      "title": "Sentetik vaka C118",
+      "ariaLabel": "C118 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "64 yaşında erkek hasta. Başvuru: ameliyat sonrası serviste aniden yanıtsız bulunuyor. Eşzamanlı üç derivasyonlu kayıt aşağıda gösteriliyor.",
+      "question": "Bu EKG'de öncelikle hangi tanı düşünülmelidir?",
+      "text": "Bu EKG'de öncelikle hangi tanı düşünülmelidir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "alınamıyor"
+        },
+        {
+          "k": "TA",
+          "v": "ölçülemiyor"
+        },
+        {
+          "k": "Bilinç",
+          "v": "kapalı"
+        }
+      ],
+      "options": [
+        "Fokal atriyal taşikardi",
+        "İnferior ST yükselmeli iskemi",
+        "Ventriküler erken atım",
+        "Ventriküler fibrilasyon",
+        "Sinüs taşikardisi"
+      ],
+      "correct": 3,
+      "explanations": [
+        "Fokal atriyal taşikardi için beklenen bulgular burada yok.",
+        "İnferior ST yükselmeli iskemi için beklenen bulgular burada yok.",
+        "Ventriküler erken atım için beklenen bulgular burada yok.",
+        "Tarif edilen bulgular Ventriküler fibrilasyon ile uyumludur.",
+        "Sinüs taşikardisi için beklenen bulgular burada yok."
+      ],
+      "feedback": "Tarif edilen bulgular Ventriküler fibrilasyon ile uyumludur.",
+      "objectiveIds": [
+        "O2"
+      ],
+      "sourceIds": [
+        "VA2022",
+        "ALS2025"
+      ],
+      "decisionId": "ddx_vf",
+      "note": "",
+      "ecg": {
+        "mode": "vf",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V1"
+        ],
+        "start": 0.66,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C119",
+      "mode": "vf",
+      "title": "Sentetik vaka C119",
+      "ariaLabel": "C119 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "59 yaşında kadın hasta. Başvuru: otobüs durağında aniden yığılıp yanıtsız kalıyor. Eşzamanlı üç derivasyonlu kayıt aşağıda gösteriliyor.",
+      "question": "Bu ritim hangi sınıfa girer?",
+      "text": "Bu ritim hangi sınıfa girer?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "alınamıyor"
+        },
+        {
+          "k": "TA",
+          "v": "ölçülemiyor"
+        },
+        {
+          "k": "Bilinç",
+          "v": "kapalı"
+        }
+      ],
+      "options": [
+        "Düzenli geniş kompleks",
+        "Düzenli dar kompleks, normal hız",
+        "Düzensiz dar kompleks",
+        "Düzenli dar kompleks, hızlı",
+        "Kaotik, organize değil"
+      ],
+      "correct": 4,
+      "explanations": [
+        "Bu örnekte QRS dar, bu kadar geniş değil.",
+        "Bu örnekte hız veya düzen normal aralığa uymuyor.",
+        "Bu örnekte ritim düzenli, düzensiz değil.",
+        "Bu örnekte hız bu kadar yüksek değil.",
+        "Tekrarlayan, organize bir kompleks seçilemiyor."
+      ],
+      "feedback": "Tekrarlayan, organize bir kompleks seçilemiyor.",
+      "objectiveIds": [
+        "O2"
+      ],
+      "sourceIds": [
+        "VA2022",
+        "ALS2025"
+      ],
+      "decisionId": "rhythmClass_vf",
+      "note": "",
+      "ecg": {
+        "mode": "vf",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V1"
+        ],
+        "start": 0.74,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C120",
+      "mode": "vf",
+      "title": "Sentetik vaka C120",
+      "ariaLabel": "C120 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "71 yaşında erkek hasta. Başvuru: önceki VT öyküsüyle aniden bilinci kapanıyor. Kısa süreli bir kayıt elde ediliyor; önceki öykü ve ek testler henüz yok.",
+      "question": "Bu bulgudan etiyoloji ve risk için hangi genel sınır çıkarılabilir?",
+      "text": "Bu bulgudan etiyoloji ve risk için hangi genel sınır çıkarılabilir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "alınamıyor"
+        },
+        {
+          "k": "TA",
+          "v": "ölçülemiyor"
+        },
+        {
+          "k": "Bilinç",
+          "v": "kapalı"
+        }
+      ],
+      "options": [
+        "Kısa kayıt başlangıç zamanını verir",
+        "Hız tek başına dolaşımı gösterir",
+        "Örüntü desteklenir, neden ayrıca sorulur",
+        "P ekseni kesin odağı belirler",
+        "QRS genişliği tek başına riski verir"
+      ],
+      "correct": 2,
+      "explanations": [
+        "Bir pencere toplam süreyi göstermez.",
+        "Nabız ve basınç ayrıca değerlendirilir.",
+        "EKG bulgusu tanı verir, nedeni klinik öykü belirler.",
+        "P ekseni ipucudur, kesin yer vermez.",
+        "Risk için klinik bağlam da gerekir."
+      ],
+      "feedback": "EKG bulgusu tanı verir, nedeni klinik öykü belirler.",
+      "objectiveIds": [
+        "O5"
+      ],
+      "sourceIds": [
+        "VA2022",
+        "ALS2025"
+      ],
+      "decisionId": "limits",
+      "note": "",
+      "ecg": {
+        "mode": "vf",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V1"
+        ],
+        "start": 0.8200000000000001,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C121",
+      "mode": "pat",
+      "title": "Sentetik vaka C121",
+      "ariaLabel": "C121 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "34 yaşında kadın hasta. Başvuru: tekrarlayan ani başlayan çarpıntı atakları tarif ediyor. Düzenli, dar kompleksli hızlı bir ritimde, QRS öncesinde sinüsten farklı yönde bir dalga dikkati çekiyor.",
+      "question": "Bu bulgularla en uyumlu örüntü hangisidir?",
+      "text": "Bu bulgularla en uyumlu örüntü hangisidir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "150/dk"
+        },
+        {
+          "k": "TA",
+          "v": "108/70 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%97"
+        }
+      ],
+      "options": [
+        "Atriyal flutter",
+        "Atriyal fibrilasyon",
+        "Fokal atriyal taşikardi",
+        "Sinüs taşikardisi",
+        "PVC dizisi"
+      ],
+      "correct": 2,
+      "explanations": [
+        "Flutter'da sürekli taban dalgası olur; burada ayrı P var.",
+        "AF düzenli P üretmez; burada düzenli.",
+        "Sinüsten farklı P, sabit ilişki: fokal AT.",
+        "Sinüs taşikardisinde P ekseni normaldir; burada değişmiş.",
+        "PVC geniş ve erken tek atımdır; burada sürekli dar ritim var."
+      ],
+      "feedback": "Sinüsten farklı P, sabit ilişki: fokal AT.",
+      "objectiveIds": [
+        "O2"
+      ],
+      "sourceIds": [
+        "SVT2019"
+      ],
+      "decisionId": "at",
+      "note": "",
+      "ecg": {
+        "mode": "pat",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V1"
+        ],
+        "start": 0.5,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C122",
+      "mode": "pat",
+      "title": "Sentetik vaka C122",
+      "ariaLabel": "C122 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "41 yaşında erkek hasta. Başvuru: stresli dönemde sık çarpıntı hissiyle başvuruyor. Düzenli dar kompleksli hızlı ritimde P dalgasının ekseni sinüs örneğine göre farklı görünüyor.",
+      "question": "Bu P dalgası için hangi yorum uygundur?",
+      "text": "Bu P dalgası için hangi yorum uygundur?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "150/dk"
+        },
+        {
+          "k": "TA",
+          "v": "108/70 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%97"
+        }
+      ],
+      "options": [
+        "Sürekli taban dalgası: flutter",
+        "II pozitif, aVR negatif: sinüs ekseni",
+        "İnferior ters P: ektopik eksen",
+        "Düzensiz ince dalga: AF",
+        "Ters P: mekanik yön göstergesi"
+      ],
+      "correct": 2,
+      "explanations": [
+        "Burada ayrı P var, sürekli dalga yok.",
+        "Burada P ekseni sinüsten farklı.",
+        "Sinüsten farklı yön: odak atriyumda başka yerde.",
+        "Burada düzenli tek P var, AF değil.",
+        "P ekseni elektriksel yöndür, mekanik yön değil."
+      ],
+      "feedback": "Sinüsten farklı yön: odak atriyumda başka yerde.",
+      "objectiveIds": [
+        "O1"
+      ],
+      "sourceIds": [
+        "SVT2019"
+      ],
+      "decisionId": "atAxis",
+      "note": "",
+      "ecg": {
+        "mode": "pat",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V1"
+        ],
+        "start": 0.58,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C123",
+      "mode": "pat",
+      "title": "Sentetik vaka C123",
+      "ariaLabel": "C123 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "27 yaşında kadın hasta. Başvuru: egzersiz sırasında hızlı çarpıntı fark ediyor. Aynı kayıt üzerinde farklı bir derivasyon grubuna geçildiğinde görünüm değişiyor.",
+      "question": "Derivasyon seçimini değiştirmenin bulguya etkisi nedir?",
+      "text": "Derivasyon seçimini değiştirmenin bulguya etkisi nedir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "150/dk"
+        },
+        {
+          "k": "TA",
+          "v": "108/70 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%97"
+        }
+      ],
+      "options": [
+        "Negatif QRS ventrikül kaynağını kanıtlar",
+        "Derivasyon aynı kaynağın farklı görünümüdür",
+        "Tüm lead'ler aynı şekli gösterir",
+        "Lead değiştirmek ritmi değiştirir",
+        "Tek lead 12 derivasyona eşittir"
+      ],
+      "correct": 1,
+      "explanations": [
+        "Polarite yön farkından da olabilir.",
+        "Lead değiştirmek şekli değiştirir, ritmi değiştirmez.",
+        "Her derivasyon farklı açıdan bakar.",
+        "Görünüm değişir, kaynak aynı kalır.",
+        "Diğer derivasyonlar ek bilgi taşır."
+      ],
+      "feedback": "Lead değiştirmek şekli değiştirir, ritmi değiştirmez.",
+      "objectiveIds": [
+        "O3"
+      ],
+      "sourceIds": [
+        "SVT2019",
+        "ECG"
+      ],
+      "decisionId": "leadAll",
+      "note": "",
+      "ecg": {
+        "mode": "pat",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V1"
+        ],
+        "start": 0.66,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C124",
+      "mode": "pat",
+      "title": "Sentetik vaka C124",
+      "ariaLabel": "C124 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "48 yaşında erkek hasta. Başvuru: kahve tüketimi sonrası tekrarlayan çarpıntı tarif ediyor. Üç saniyelik kısa bir kayıt elde ediliyor; atağın başlangıcı ve sonu kayıtta yer almıyor.",
+      "question": "Bu kısa kayıttan hangi sınırlı yorum çıkarılabilir?",
+      "text": "Bu kısa kayıttan hangi sınırlı yorum çıkarılabilir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "150/dk"
+        },
+        {
+          "k": "TA",
+          "v": "108/70 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%97"
+        }
+      ],
+      "options": [
+        "Fokal AT desteklenir, başlangıç bilinmez",
+        "Ters P kesin anatomik odağı verir",
+        "Kayıt toplam atak süresini verir",
+        "Kayıt atağın ani başladığını kanıtlar",
+        "Fokal AT, SVT dışındadır"
+      ],
+      "correct": 0,
+      "explanations": [
+        "Kısa kayıt atağın başlangıcını göstermez.",
+        "P ekseni ipucu verir, kesin yer vermez.",
+        "Pencere toplam süreyi kapsamaz.",
+        "Başlangıç görülmeden bu iddia edilemez.",
+        "Fokal AT, SVT grubunun bir alt türüdür."
+      ],
+      "feedback": "Kısa kayıt atağın başlangıcını göstermez.",
+      "objectiveIds": [
+        "O5"
+      ],
+      "sourceIds": [
+        "SVT2019"
+      ],
+      "decisionId": "atLimits",
+      "note": "",
+      "ecg": {
+        "mode": "pat",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V1"
+        ],
+        "start": 0.74,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C125",
+      "mode": "pat",
+      "title": "Sentetik vaka C125",
+      "ariaLabel": "C125 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "30 yaşında kadın hasta. Başvuru: sabahları sık görülen çarpıntı atakları tarif ediyor. Eşzamanlı üç derivasyonlu kayıt aşağıda gösteriliyor.",
+      "question": "Bu ritim hangi sınıfa girer?",
+      "text": "Bu ritim hangi sınıfa girer?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "150/dk"
+        },
+        {
+          "k": "TA",
+          "v": "108/70 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%97"
+        }
+      ],
+      "options": [
+        "Düzensiz dar kompleks",
+        "Düzenli geniş kompleks",
+        "Düzenli dar kompleks, normal hız",
+        "Kaotik, organize değil",
+        "Düzenli dar kompleks, hızlı"
+      ],
+      "correct": 4,
+      "explanations": [
+        "Bu örnekte ritim düzenli, düzensiz değil.",
+        "Bu örnekte QRS dar, bu kadar geniş değil.",
+        "Bu örnekte hız veya düzen normal aralığa uymuyor.",
+        "Bu örnekte düzenli bir kompleks seçilebiliyor, kaotik değil.",
+        "Hız belirgin yüksek; ritim düzenli ve QRS dar."
+      ],
+      "feedback": "Hız belirgin yüksek; ritim düzenli ve QRS dar.",
+      "objectiveIds": [
+        "O2"
+      ],
+      "sourceIds": [
+        "SVT2019"
+      ],
+      "decisionId": "rhythmClass_pat",
+      "note": "",
+      "ecg": {
+        "mode": "pat",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V1"
+        ],
+        "start": 0.8200000000000001,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C126",
+      "mode": "pat",
+      "title": "Sentetik vaka C126",
+      "ariaLabel": "C126 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "55 yaşında erkek hasta. Başvuru: tiroid izleminde çarpıntı yakınmasıyla başvuruyor. İki ardışık R tepesi arası 400 ms ölçülüyor.",
+      "question": "Bu döngü süresiyle elektriksel hız yaklaşık kaçtır?",
+      "text": "Bu döngü süresiyle elektriksel hız yaklaşık kaçtır?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "150/dk"
+        },
+        {
+          "k": "TA",
+          "v": "108/70 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%97"
+        }
+      ],
+      "options": [
+        "150/dk",
+        "75/dk",
+        "100/dk",
+        "120/dk",
+        "300/dk"
+      ],
+      "correct": 0,
+      "explanations": [
+        "60/0,4=150/dk ventriküler elektriksel hızdır.",
+        "75/dk 800 ms döngüdür.",
+        "100/dk 600 ms döngüdür.",
+        "120/dk 500 ms döngüdür.",
+        "300/dk 200 ms; flutter atriyal hızını ventrikülle karıştırır."
+      ],
+      "feedback": "60/0,4=150/dk ventriküler elektriksel hızdır.",
+      "objectiveIds": [
+        "O6"
+      ],
+      "sourceIds": [
+        "SVT2019",
+        "ECG"
+      ],
+      "decisionId": "rr400",
+      "note": "",
+      "ecg": {
+        "mode": "pat",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V1"
+        ],
+        "start": 0.5,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C127",
+      "mode": "pat",
+      "title": "Sentetik vaka C127",
+      "ariaLabel": "C127 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "38 yaşında kadın hasta. Başvuru: uykusuzluk sonrası tekrarlayan çarpıntı tarif ediyor. Kaliperle P’nin ilk sapması QRS’den 180 ms önce, QRS’in ilk sapması 40 ms önce işaretleniyor.",
+      "question": "Bu ölçümlerle PR aralığı kaç milisaniyedir?",
+      "text": "Bu ölçümlerle PR aralığı kaç milisaniyedir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "150/dk"
+        },
+        {
+          "k": "TA",
+          "v": "108/70 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%97"
+        }
+      ],
+      "options": [
+        "180 ms",
+        "120 ms",
+        "220 ms",
+        "140 ms",
+        "95 ms"
+      ],
+      "correct": 3,
+      "explanations": [
+        "180 ms R tepesini QRS başlangıcı yerine alma hatasıdır.",
+        "120 ms verilen ilk sapmaların farkı değildir.",
+        "220 ms QRS sonunu PR sınırı alma hatasıdır.",
+        "Ektopik P başlangıcı−180 ms, QRS başlangıcı−40 ms: fark 140 ms.",
+        "95 ms P tepesinden QRS başlangıcına ölçüm hatasıdır."
+      ],
+      "feedback": "Ektopik P başlangıcı−180 ms, QRS başlangıcı−40 ms: fark 140 ms.",
+      "objectiveIds": [
+        "O6"
+      ],
+      "sourceIds": [
+        "SVT2019",
+        "ECG"
+      ],
+      "decisionId": "pr140",
+      "note": "",
+      "ecg": {
+        "mode": "pat",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V1"
+        ],
+        "start": 0.58,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C128",
+      "mode": "pat",
+      "title": "Sentetik vaka C128",
+      "ariaLabel": "C128 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "44 yaşında erkek hasta. Başvuru: holter takılan hastada tekrarlayan hızlı atım kaydediliyor. Eşzamanlı üç derivasyonlu kayıt aşağıda gösteriliyor.",
+      "question": "Bu EKG'de öncelikle hangi tanı düşünülmelidir?",
+      "text": "Bu EKG'de öncelikle hangi tanı düşünülmelidir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "150/dk"
+        },
+        {
+          "k": "TA",
+          "v": "108/70 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%97"
+        }
+      ],
+      "options": [
+        "Fokal atriyal taşikardi",
+        "Sağ dal bloğu",
+        "Ventriküler fibrilasyon",
+        "Sinüs taşikardisi",
+        "İnferior ST yükselmeli iskemi"
+      ],
+      "correct": 0,
+      "explanations": [
+        "Tarif edilen bulgular Fokal atriyal taşikardi ile uyumludur.",
+        "Sağ dal bloğu için beklenen bulgular burada yok.",
+        "Ventriküler fibrilasyon için beklenen bulgular burada yok.",
+        "Sinüs taşikardisi için beklenen bulgular burada yok.",
+        "İnferior ST yükselmeli iskemi için beklenen bulgular burada yok."
+      ],
+      "feedback": "Tarif edilen bulgular Fokal atriyal taşikardi ile uyumludur.",
+      "objectiveIds": [
+        "O2"
+      ],
+      "sourceIds": [
+        "SVT2019"
+      ],
+      "decisionId": "ddx_pat",
+      "note": "",
+      "ecg": {
+        "mode": "pat",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V1"
+        ],
+        "start": 0.66,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C129",
+      "mode": "pat",
+      "title": "Sentetik vaka C129",
+      "ariaLabel": "C129 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "29 yaşında kadın hasta. Başvuru: sınav döneminde sık çarpıntı hissiyle geliyor. Dar bir kompleksin ilk sapması 40 ms önce, son dönüşü 40 ms sonra işaretleniyor.",
+      "question": "Bu ölçümlerle QRS süresi kaç milisaniyedir?",
+      "text": "Bu ölçümlerle QRS süresi kaç milisaniyedir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "150/dk"
+        },
+        {
+          "k": "TA",
+          "v": "108/70 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%97"
+        }
+      ],
+      "options": [
+        "140 ms",
+        "40 ms",
+        "80 ms",
+        "60 ms",
+        "100 ms"
+      ],
+      "correct": 2,
+      "explanations": [
+        "140 ms geniş PVC/RBBB örneğiyle karıştırır.",
+        "40 ms yalnız R’den son dönüşe yarı desteği sayar.",
+        "−40 ms ile+40 ms arasındaki QRS desteği 80 ms’dir.",
+        "60 ms başlangıç veya terminal bileşenin bir kısmını dışlar.",
+        "100 ms iki sınırın verilen farkından fazladır."
+      ],
+      "feedback": "−40 ms ile+40 ms arasındaki QRS desteği 80 ms’dir.",
+      "objectiveIds": [
+        "O6"
+      ],
+      "sourceIds": [
+        "SVT2019",
+        "ECG"
+      ],
+      "decisionId": "q80",
+      "note": "",
+      "ecg": {
+        "mode": "pat",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V1"
+        ],
+        "start": 0.74,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C130",
+      "mode": "pat",
+      "title": "Sentetik vaka C130",
+      "ariaLabel": "C130 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "52 yaşında erkek hasta. Başvuru: iş stresiyle birlikte tekrarlayan çarpıntı tarif ediyor. TA 108/70 mmHg; senkop yok, bilinç açık.",
+      "question": "Bu klinik tabloda öncelikli değerlendirme ilkesi nedir?",
+      "text": "Bu klinik tabloda öncelikli değerlendirme ilkesi nedir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "150/dk"
+        },
+        {
+          "k": "TA",
+          "v": "108/70 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%97"
+        }
+      ],
+      "options": [
+        "Semptomla acil değerlendirme zorunludur",
+        "Düzenli ritimde yalnız rutin kontrol",
+        "Önce kesin mekanizma sonra hasta bakılır",
+        "Hemodinamik durum, semptom yükü ve altta yatan nedenler değerlendirilir; acil yaklaşım yalnız instabil hastada",
+        "Tek derivasyon kesinlik verir"
+      ],
+      "correct": 3,
+      "explanations": [
+        "Stabil ve tekrarlayan çarpıntıda aciliyet instabilite bulgularına bağlıdır.",
+        "Tekrarlayan taşikardi nedeni araştırılmadan rutine bırakılmaz.",
+        "Hasta durumu mekanizmadan önce değerlendirilir.",
+        "Fokal atriyal taşikardide stabil hastada tetikleyiciler ve semptom yükü ele alınır (ESC SVT 2019).",
+        "P morfolojisi ve mekanizma tek derivasyonla belirlenmez."
+      ],
+      "feedback": "Fokal atriyal taşikardide stabil hastada tetikleyiciler ve semptom yükü ele alınır (ESC SVT 2019).",
+      "objectiveIds": [
+        "O5"
+      ],
+      "sourceIds": [
+        "SVT2019"
+      ],
+      "decisionId": "stableAt",
+      "note": "",
+      "ecg": {
+        "mode": "pat",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V1"
+        ],
+        "start": 0.8200000000000001,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C131",
+      "mode": "pat",
+      "title": "Sentetik vaka C131",
+      "ariaLabel": "C131 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "36 yaşında kadın hasta. Başvuru: egzersiz sonrası tekrarlayan hızlı çarpıntı fark ediyor. QRS’den kısa süre önce ayrı bir dalga seçiliyor.",
+      "question": "P dalgasının temel elektriksel karşılığı nedir?",
+      "text": "P dalgasının temel elektriksel karşılığı nedir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "150/dk"
+        },
+        {
+          "k": "TA",
+          "v": "108/70 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%97"
+        }
+      ],
+      "options": [
+        "P: yalnız AV düğüm iletimi",
+        "P: atriyal depolarizasyon",
+        "P: ventriküler repolarizasyon",
+        "P: atriyal repolarizasyon",
+        "P: ventriküler depolarizasyon"
+      ],
+      "correct": 1,
+      "explanations": [
+        "AV düğüm gecikmesi PR aralığında değerlendirilir.",
+        "P dalgası atriyumun elektriksel uyarılmasıdır.",
+        "Bu olay T dalgası ile kaydedilir.",
+        "Atriyal repolarizasyon genelde QRS altında gizlenir.",
+        "Bu olay QRS ile kaydedilir."
+      ],
+      "feedback": "P dalgası atriyumun elektriksel uyarılmasıdır.",
+      "objectiveIds": [
+        "O1"
+      ],
+      "sourceIds": [
+        "SVT2019"
+      ],
+      "decisionId": "p",
+      "note": "",
+      "ecg": {
+        "mode": "pat",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V1"
+        ],
+        "start": 0.5,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C132",
+      "mode": "pat",
+      "title": "Sentetik vaka C132",
+      "ariaLabel": "C132 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "46 yaşında erkek hasta. Başvuru: kafeinli içecek sonrası sık çarpıntı tarif ediyor. Kısa süreli bir kayıt elde ediliyor; önceki öykü ve ek testler henüz yok.",
+      "question": "Bu bulgudan etiyoloji ve risk için hangi genel sınır çıkarılabilir?",
+      "text": "Bu bulgudan etiyoloji ve risk için hangi genel sınır çıkarılabilir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "150/dk"
+        },
+        {
+          "k": "TA",
+          "v": "108/70 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%97"
+        }
+      ],
+      "options": [
+        "Kısa kayıt başlangıç zamanını verir",
+        "QRS genişliği tek başına riski verir",
+        "Örüntü desteklenir, neden ayrıca sorulur",
+        "Hız tek başına dolaşımı gösterir",
+        "P ekseni kesin odağı belirler"
+      ],
+      "correct": 2,
+      "explanations": [
+        "Bir pencere toplam süreyi göstermez.",
+        "Risk için klinik bağlam da gerekir.",
+        "EKG bulgusu tanı verir, nedeni klinik öykü belirler.",
+        "Nabız ve basınç ayrıca değerlendirilir.",
+        "P ekseni ipucudur, kesin yer vermez."
+      ],
+      "feedback": "EKG bulgusu tanı verir, nedeni klinik öykü belirler.",
+      "objectiveIds": [
+        "O5"
+      ],
+      "sourceIds": [
+        "SVT2019"
+      ],
+      "decisionId": "limits",
+      "note": "",
+      "ecg": {
+        "mode": "pat",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V1"
+        ],
+        "start": 0.58,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C133",
+      "mode": "pat",
+      "title": "Sentetik vaka C133",
+      "ariaLabel": "C133 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "33 yaşında kadın hasta. Başvuru: gebelik döneminde tekrarlayan çarpıntı yakınmasıyla başvuruyor. Elektriksel kayıt sürerken nabız muayenesi ayrıca planlanıyor.",
+      "question": "EKG bulgusu ile mekanik nabız arasındaki ilişki için hangi değerlendirme gerekir?",
+      "text": "EKG bulgusu ile mekanik nabız arasındaki ilişki için hangi değerlendirme gerekir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "150/dk"
+        },
+        {
+          "k": "TA",
+          "v": "108/70 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%97"
+        }
+      ],
+      "options": [
+        "T genliği atım hacmini verir",
+        "Elektriksel hız nabza birebir eşittir",
+        "QRS genişliği nabız basıncını verir",
+        "Nabız ayrıca klinik olarak bakılır",
+        "PR süresi debiyi verir"
+      ],
+      "correct": 3,
+      "explanations": [
+        "T genliği repolarizasyon voltajıdır.",
+        "Nabız açığı olabilir; eşitlik varsayılamaz.",
+        "Genişlik zaman ölçüsüdür, basınç değildir.",
+        "EKG elektrik gösterir, nabzı kanıtlamaz.",
+        "PR iletim süresidir, debi ölçmez."
+      ],
+      "feedback": "EKG elektrik gösterir, nabzı kanıtlamaz.",
+      "objectiveIds": [
+        "O4"
+      ],
+      "sourceIds": [
+        "SVT2019",
+        "CYCLE"
+      ],
+      "decisionId": "pulse",
+      "note": "",
+      "ecg": {
+        "mode": "pat",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V1"
+        ],
+        "start": 0.66,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C134",
+      "mode": "pat",
+      "title": "Sentetik vaka C134",
+      "ariaLabel": "C134 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "58 yaşında erkek hasta. Başvuru: yıllık kontrolde tesadüfen hızlı atriyal ritim saptanıyor. Tekrarlayan çarpıntı atakları ve olası nedenler birlikte değerlendiriliyor.",
+      "question": "Bu hastada ilk yaklaşım ne olmalıdır?",
+      "text": "Bu hastada ilk yaklaşım ne olmalıdır?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "150/dk"
+        },
+        {
+          "k": "TA",
+          "v": "108/70 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%97"
+        }
+      ],
+      "options": [
+        "Yalnızca gözlem yeterlidir",
+        "Yalnız görüntüleme istenir",
+        "Karar tamamen hastaya bırakılır",
+        "Altta yatan neden ve semptomla birlikte değerlendirme",
+        "Hemen taburcu edilir"
+      ],
+      "correct": 3,
+      "explanations": [
+        "Bu bulgu daha aktif bir yaklaşım gerektirebilir; yalnız izlem yetmez.",
+        "İlk adım görüntülemeden önce klinik değerlendirmedir.",
+        "İlk yaklaşım klinik ekip tarafından yönlendirilir.",
+        "Tekrarlayan atriyal taşikardide neden araştırması önemlidir.",
+        "Bulgu ciddi olabilir; taburcu öncesi değerlendirme gerekir."
+      ],
+      "feedback": "Tekrarlayan atriyal taşikardide neden araştırması önemlidir.",
+      "objectiveIds": [
+        "O5"
+      ],
+      "sourceIds": [
+        "SVT2019"
+      ],
+      "decisionId": "firstStep_pat",
+      "note": "",
+      "ecg": {
+        "mode": "pat",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V1"
+        ],
+        "start": 0.74,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C135",
+      "mode": "pat",
+      "title": "Sentetik vaka C135",
+      "ariaLabel": "C135 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "40 yaşında kadın hasta. Başvuru: tekrarlayan kısa süreli çarpıntı atakları tarif ediyor. İzlemde giriş kapaklarının açık, çıkış kapaklarının kapalı olduğu bir an gösteriliyor.",
+      "question": "Bu kapak ve hacim düzeni hangi mekanik evreyi gösterir?",
+      "text": "Bu kapak ve hacim düzeni hangi mekanik evreyi gösterir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "150/dk"
+        },
+        {
+          "k": "TA",
+          "v": "108/70 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%97"
+        }
+      ],
+      "options": [
+        "AV kapaklar kapalı: atriyal sistol",
+        "Çıkış kapakları açık: ejeksiyon",
+        "Tüm kapaklar kapalı: kasılma",
+        "Tüm kapaklar kapalı: gevşeme",
+        "AV kapaklar açık: ventrikül doluşu"
+      ],
+      "correct": 4,
+      "explanations": [
+        "Bu doluş fazı AV açıkken olur.",
+        "Bu ileri pompalama fazıdır, doluş değil.",
+        "Kasılmada hacim sabittir, doluş yoktur.",
+        "Gevşemede AV henüz açılmamıştır.",
+        "Kan diyastolde ventriküle geçer."
+      ],
+      "feedback": "Kan diyastolde ventriküle geçer.",
+      "objectiveIds": [
+        "O4"
+      ],
+      "sourceIds": [
+        "SVT2019",
+        "CYCLE"
+      ],
+      "decisionId": "fill",
+      "note": "",
+      "ecg": {
+        "mode": "pat",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V1"
+        ],
+        "start": 0.8200000000000001,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C136",
+      "mode": "flutter",
+      "title": "Sentetik vaka C136",
+      "ariaLabel": "C136 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "65 yaşında erkek hasta. Başvuru: düzenli hızlı çarpıntı yakınmasıyla acile geliyor. Düzenli dar kompleksler arasında sürekli, testere dişi görünümlü bir taban etkinliği izleniyor.",
+      "question": "Bu atriyal ve ventriküler bulgularla en uyumlu örüntü hangisidir?",
+      "text": "Bu atriyal ve ventriküler bulgularla en uyumlu örüntü hangisidir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "150/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "104/68 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%96"
+        }
+      ],
+      "options": [
+        "Sabit 2:1 atriyal flutter",
+        "Sinüs taşikardisi",
+        "PVC dizisi",
+        "Fokal atriyal taşikardi",
+        "Atriyal fibrilasyon"
+      ],
+      "correct": 0,
+      "explanations": [
+        "Testere dişi taban ve 2:1 iletim: flutter.",
+        "Sinüs P–QRS ilişkisi 1:1'dir; burada 2:1.",
+        "PVC tek erken geniş atımdır; burada sürekli düzenli ritim var.",
+        "Fokal AT'de ayrı P ve düz taban olur; burada sürekli dalga var.",
+        "AF'de düzensiz taban olur; burada düzenli."
+      ],
+      "feedback": "Testere dişi taban ve 2:1 iletim: flutter.",
+      "objectiveIds": [
+        "O2"
+      ],
+      "sourceIds": [
+        "SVT2019"
+      ],
+      "decisionId": "flutter",
+      "note": "",
+      "ecg": {
+        "mode": "flutter",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V1"
+        ],
+        "start": 0.5,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C137",
+      "mode": "flutter",
+      "title": "Sentetik vaka C137",
+      "ariaLabel": "C137 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "58 yaşında kadın hasta. Başvuru: egzersiz kapasitesinde azalma ve çarpıntı tarif ediyor. Taban hattında sürekli dalgalı bir etkinlik var; bir öğrenci bunu ayrık bir P dalgası sanıyor.",
+      "question": "Bu sürekli taban etkinliği ile ayrık P dalgası arasındaki fark nedir?",
+      "text": "Bu sürekli taban etkinliği ile ayrık P dalgası arasındaki fark nedir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "150/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "104/68 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%96"
+        }
+      ],
+      "options": [
+        "F varlığı normal atriyal katkı gösterir",
+        "Her F bir QRS'dir",
+        "F, T dalgasının başka adıdır",
+        "Ters F sinüs P ile aynıdır",
+        "Sürekli F, ayrı sinüs P değildir"
+      ],
+      "correct": 4,
+      "explanations": [
+        "Sürekli F koordineli katkıyı göstermez.",
+        "F atriyum, QRS ventrikül olayıdır; sayıları farklıdır.",
+        "F atriyal, T ventriküler bir olaydır.",
+        "F sürekli devre etkinliğidir, sinüs P değildir.",
+        "Flutter tabanı düzenli ve süreklidir, tek P değildir."
+      ],
+      "feedback": "Flutter tabanı düzenli ve süreklidir, tek P değildir.",
+      "objectiveIds": [
+        "O1"
+      ],
+      "sourceIds": [
+        "SVT2019"
+      ],
+      "decisionId": "fNotP",
+      "note": "",
+      "ecg": {
+        "mode": "flutter",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V1"
+        ],
+        "start": 0.58,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C138",
+      "mode": "flutter",
+      "title": "Sentetik vaka C138",
+      "ariaLabel": "C138 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "71 yaşında erkek hasta. Başvuru: kronik akciğer hastalığı izleminde çarpıntı saptanıyor. Atriyal ve ventriküler hızlar arasındaki oran ayrıca hesaplanıyor.",
+      "question": "Atriyal ve ventriküler hız ile iletim oranı arasındaki ilişki hangisidir?",
+      "text": "Atriyal ve ventriküler hız ile iletim oranı arasındaki ilişki hangisidir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "150/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "104/68 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%96"
+        }
+      ],
+      "options": [
+        "300 atriyal, 100 ventrikül: 2:1",
+        "300/dk atriyal, 150/dk ventrikül: 2:1",
+        "300 atriyal, 75 ventrikül: 2:1",
+        "300 atriyal, 300 ventrikül: 2:1",
+        "150 atriyal, 300 ventrikül: 2:1"
+      ],
+      "correct": 1,
+      "explanations": [
+        "Bu oran 3:1'dir, 2:1 değil.",
+        "İki F dalgasından biri QRS ile iletilir.",
+        "Bu oran 4:1'dir, 2:1 değil.",
+        "Eşit hız 1:1 iletim demektir.",
+        "Hızlar burada ters çevrilmiş."
+      ],
+      "feedback": "İki F dalgasından biri QRS ile iletilir.",
+      "objectiveIds": [
+        "O1"
+      ],
+      "sourceIds": [
+        "SVT2019"
+      ],
+      "decisionId": "flutterRatio",
+      "note": "",
+      "ecg": {
+        "mode": "flutter",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V1"
+        ],
+        "start": 0.66,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C139",
+      "mode": "flutter",
+      "title": "Sentetik vaka C139",
+      "ariaLabel": "C139 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "60 yaşında kadın hasta. Başvuru: yorgunluk ve düzenli hızlı nabızla başvuruyor. Aynı kayıt üzerinde farklı bir derivasyon grubuna geçildiğinde görünüm değişiyor.",
+      "question": "Derivasyon seçimini değiştirmenin bulguya etkisi nedir?",
+      "text": "Derivasyon seçimini değiştirmenin bulguya etkisi nedir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "150/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "104/68 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%96"
+        }
+      ],
+      "options": [
+        "Tüm lead'ler aynı şekli gösterir",
+        "Negatif QRS ventrikül kaynağını kanıtlar",
+        "Derivasyon aynı kaynağın farklı görünümüdür",
+        "Lead değiştirmek ritmi değiştirir",
+        "Tek lead 12 derivasyona eşittir"
+      ],
+      "correct": 2,
+      "explanations": [
+        "Her derivasyon farklı açıdan bakar.",
+        "Polarite yön farkından da olabilir.",
+        "Lead değiştirmek şekli değiştirir, ritmi değiştirmez.",
+        "Görünüm değişir, kaynak aynı kalır.",
+        "Diğer derivasyonlar ek bilgi taşır."
+      ],
+      "feedback": "Lead değiştirmek şekli değiştirir, ritmi değiştirmez.",
+      "objectiveIds": [
+        "O3"
+      ],
+      "sourceIds": [
+        "SVT2019",
+        "ECG"
+      ],
+      "decisionId": "leadAll",
+      "note": "",
+      "ecg": {
+        "mode": "flutter",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V1"
+        ],
+        "start": 0.74,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C140",
+      "mode": "flutter",
+      "title": "Sentetik vaka C140",
+      "ariaLabel": "C140 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "54 yaşında erkek hasta. Başvuru: hipertiroidi öyküsüyle çarpıntı tarif ediyor. İnferior ve V1 derivasyonlarında taban dalgasının yönü karşılaştırılıyor.",
+      "question": "Bu derivasyonlardaki taban dalgası polaritesi hangi seçenekle uyumludur?",
+      "text": "Bu derivasyonlardaki taban dalgası polaritesi hangi seçenekle uyumludur?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "150/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "104/68 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%96"
+        }
+      ],
+      "options": [
+        "F yalnız QRS içinde görünür",
+        "F bir basınç dalgasıdır",
+        "İnferior negatif, V1 pozitif F",
+        "Her derivasyonda eşit F",
+        "İnferior pozitif, V1 negatif F"
+      ],
+      "correct": 2,
+      "explanations": [
+        "F sürekli, QRS'den bağımsız sürer.",
+        "F elektriksel bir atriyal dalgadır.",
+        "Tipik flutter yönü budur.",
+        "F dalgası derivasyona göre farklı görünür.",
+        "Bu ters yön tipik örneğe uymaz."
+      ],
+      "feedback": "Tipik flutter yönü budur.",
+      "objectiveIds": [
+        "O3"
+      ],
+      "sourceIds": [
+        "SVT2019",
+        "ECG"
+      ],
+      "decisionId": "flutterPolarity",
+      "note": "",
+      "ecg": {
+        "mode": "flutter",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V1"
+        ],
+        "start": 0.8200000000000001,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C141",
+      "mode": "flutter",
+      "title": "Sentetik vaka C141",
+      "ariaLabel": "C141 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "68 yaşında kadın hasta. Başvuru: nefes darlığı ve düzenli hızlı nabızla geliyor. Eşzamanlı üç derivasyonlu kayıt aşağıda gösteriliyor.",
+      "question": "Bu ritim hangi sınıfa girer?",
+      "text": "Bu ritim hangi sınıfa girer?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "150/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "104/68 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%96"
+        }
+      ],
+      "options": [
+        "Kaotik, organize değil",
+        "Düzenli dar kompleks, hızlı",
+        "Düzensiz dar kompleks",
+        "Düzenli dar kompleks, normal hız",
+        "Düzenli geniş kompleks"
+      ],
+      "correct": 1,
+      "explanations": [
+        "Bu örnekte düzenli bir kompleks seçilebiliyor, kaotik değil.",
+        "Hız belirgin yüksek; ritim düzenli ve QRS dar.",
+        "Bu örnekte ritim düzenli, düzensiz değil.",
+        "Bu örnekte hız veya düzen normal aralığa uymuyor.",
+        "Bu örnekte QRS dar, bu kadar geniş değil."
+      ],
+      "feedback": "Hız belirgin yüksek; ritim düzenli ve QRS dar.",
+      "objectiveIds": [
+        "O2"
+      ],
+      "sourceIds": [
+        "SVT2019"
+      ],
+      "decisionId": "rhythmClass_flutter",
+      "note": "",
+      "ecg": {
+        "mode": "flutter",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V1"
+        ],
+        "start": 0.5,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C142",
+      "mode": "flutter",
+      "title": "Sentetik vaka C142",
+      "ariaLabel": "C142 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "49 yaşında erkek hasta. Başvuru: ameliyat sonrası serviste düzenli hızlı nabız saptanıyor. İki ardışık R tepesi arası 400 ms ölçülüyor.",
+      "question": "Bu döngü süresiyle elektriksel hız yaklaşık kaçtır?",
+      "text": "Bu döngü süresiyle elektriksel hız yaklaşık kaçtır?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "150/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "104/68 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%96"
+        }
+      ],
+      "options": [
+        "100/dk",
+        "300/dk",
+        "120/dk",
+        "75/dk",
+        "150/dk"
+      ],
+      "correct": 4,
+      "explanations": [
+        "100/dk 600 ms döngüdür.",
+        "300/dk 200 ms; flutter atriyal hızını ventrikülle karıştırır.",
+        "120/dk 500 ms döngüdür.",
+        "75/dk 800 ms döngüdür.",
+        "60/0,4=150/dk ventriküler elektriksel hızdır."
+      ],
+      "feedback": "60/0,4=150/dk ventriküler elektriksel hızdır.",
+      "objectiveIds": [
+        "O6"
+      ],
+      "sourceIds": [
+        "SVT2019",
+        "ECG"
+      ],
+      "decisionId": "rr400",
+      "note": "",
+      "ecg": {
+        "mode": "flutter",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V1"
+        ],
+        "start": 0.58,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C143",
+      "mode": "flutter",
+      "title": "Sentetik vaka C143",
+      "ariaLabel": "C143 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "73 yaşında kadın hasta. Başvuru: huzurevi kontrolünde düzenli hızlı nabız fark ediliyor. Eşzamanlı üç derivasyonlu kayıt aşağıda gösteriliyor.",
+      "question": "Bu EKG'de öncelikle hangi tanı düşünülmelidir?",
+      "text": "Bu EKG'de öncelikle hangi tanı düşünülmelidir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "150/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "104/68 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%96"
+        }
+      ],
+      "options": [
+        "Atriyal fibrilasyon",
+        "Sinüs taşikardisi",
+        "Atriyal flutter (2:1)",
+        "Ventriküler fibrilasyon",
+        "Sağ dal bloğu"
+      ],
+      "correct": 2,
+      "explanations": [
+        "Atriyal fibrilasyon için beklenen bulgular burada yok.",
+        "Sinüs taşikardisi için beklenen bulgular burada yok.",
+        "Tarif edilen bulgular Atriyal flutter (2:1) ile uyumludur.",
+        "Ventriküler fibrilasyon için beklenen bulgular burada yok.",
+        "Sağ dal bloğu için beklenen bulgular burada yok."
+      ],
+      "feedback": "Tarif edilen bulgular Atriyal flutter (2:1) ile uyumludur.",
+      "objectiveIds": [
+        "O2"
+      ],
+      "sourceIds": [
+        "SVT2019"
+      ],
+      "decisionId": "ddx_flutter",
+      "note": "",
+      "ecg": {
+        "mode": "flutter",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V1"
+        ],
+        "start": 0.66,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C144",
+      "mode": "flutter",
+      "title": "Sentetik vaka C144",
+      "ariaLabel": "C144 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "57 yaşında erkek hasta. Başvuru: kalp yetersizliği izleminde çarpıntı ile başvuruyor. Dar bir kompleksin ilk sapması 40 ms önce, son dönüşü 40 ms sonra işaretleniyor.",
+      "question": "Bu ölçümlerle QRS süresi kaç milisaniyedir?",
+      "text": "Bu ölçümlerle QRS süresi kaç milisaniyedir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "150/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "104/68 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%96"
+        }
+      ],
+      "options": [
+        "40 ms",
+        "60 ms",
+        "100 ms",
+        "80 ms",
+        "140 ms"
+      ],
+      "correct": 3,
+      "explanations": [
+        "40 ms yalnız R’den son dönüşe yarı desteği sayar.",
+        "60 ms başlangıç veya terminal bileşenin bir kısmını dışlar.",
+        "100 ms iki sınırın verilen farkından fazladır.",
+        "−40 ms ile+40 ms arasındaki QRS desteği 80 ms’dir.",
+        "140 ms geniş PVC/RBBB örneğiyle karıştırır."
+      ],
+      "feedback": "−40 ms ile+40 ms arasındaki QRS desteği 80 ms’dir.",
+      "objectiveIds": [
+        "O6"
+      ],
+      "sourceIds": [
+        "SVT2019",
+        "ECG"
+      ],
+      "decisionId": "q80",
+      "note": "",
+      "ecg": {
+        "mode": "flutter",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V1"
+        ],
+        "start": 0.74,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C145",
+      "mode": "flutter",
+      "title": "Sentetik vaka C145",
+      "ariaLabel": "C145 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "62 yaşında kadın hasta. Başvuru: yıllık kontrolde tesadüfen düzenli hızlı nabız saptanıyor. Elektriksel kayıt sürerken nabız muayenesi ayrıca planlanıyor.",
+      "question": "EKG bulgusu ile mekanik nabız arasındaki ilişki için hangi değerlendirme gerekir?",
+      "text": "EKG bulgusu ile mekanik nabız arasındaki ilişki için hangi değerlendirme gerekir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "150/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "104/68 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%96"
+        }
+      ],
+      "options": [
+        "PR süresi debiyi verir",
+        "QRS genişliği nabız basıncını verir",
+        "Nabız ayrıca klinik olarak bakılır",
+        "Elektriksel hız nabza birebir eşittir",
+        "T genliği atım hacmini verir"
+      ],
+      "correct": 2,
+      "explanations": [
+        "PR iletim süresidir, debi ölçmez.",
+        "Genişlik zaman ölçüsüdür, basınç değildir.",
+        "EKG elektrik gösterir, nabzı kanıtlamaz.",
+        "Nabız açığı olabilir; eşitlik varsayılamaz.",
+        "T genliği repolarizasyon voltajıdır."
+      ],
+      "feedback": "EKG elektrik gösterir, nabzı kanıtlamaz.",
+      "objectiveIds": [
+        "O4"
+      ],
+      "sourceIds": [
+        "SVT2019",
+        "CYCLE"
+      ],
+      "decisionId": "pulse",
+      "note": "",
+      "ecg": {
+        "mode": "flutter",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V1"
+        ],
+        "start": 0.8200000000000001,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C146",
+      "mode": "flutter",
+      "title": "Sentetik vaka C146",
+      "ariaLabel": "C146 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "66 yaşında erkek hasta. Başvuru: egzersiz sırasında düzenli hızlı çarpıntı tarif ediyor. Hızlı seyreden nabızda diyastolik dolum süresinin kısaldığı düşünülüyor.",
+      "question": "Yüksek hızın ventrikül dolusuna etkisi için hangi ifade doğrudur?",
+      "text": "Yüksek hızın ventrikül dolusuna etkisi için hangi ifade doğrudur?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "150/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "104/68 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%96"
+        }
+      ],
+      "options": [
+        "Kısa R–R kan basıncı değeridir",
+        "Kısa döngü doluşu kısaltabilir",
+        "Dar QRS kısalan doluşu telafi eder",
+        "P varsa doluş hızdan bağımsızdır",
+        "Hız artışı atım hacmini sabit artırır"
+      ],
+      "correct": 1,
+      "explanations": [
+        "R–R zaman ölçüsüdür, basınç değildir.",
+        "Hız artınca diyastol kısalır.",
+        "QRS genişliği doluş süresini değiştirmez.",
+        "Kısa döngü doluşu yine de kısaltabilir.",
+        "Atım hacmi doluş ve yüke bağlıdır."
+      ],
+      "feedback": "Hız artınca diyastol kısalır.",
+      "objectiveIds": [
+        "O4"
+      ],
+      "sourceIds": [
+        "SVT2019",
+        "CYCLE"
+      ],
+      "decisionId": "fastFill",
+      "note": "",
+      "ecg": {
+        "mode": "flutter",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V1"
+        ],
+        "start": 0.5,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C147",
+      "mode": "flutter",
+      "title": "Sentetik vaka C147",
+      "ariaLabel": "C147 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "52 yaşında kadın hasta. Başvuru: tiroid izleminde çarpıntı yakınmasıyla geliyor. Ventrikül hızı ve ritim seçenekleri birlikte değerlendiriliyor.",
+      "question": "Bu hastada ilk yaklaşım ne olmalıdır?",
+      "text": "Bu hastada ilk yaklaşım ne olmalıdır?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "150/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "104/68 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%96"
+        }
+      ],
+      "options": [
+        "Yalnız görüntüleme istenir",
+        "Karar tamamen hastaya bırakılır",
+        "Stabil hastada hız/ritim kontrolü ve antikoagülasyon değerlendirmesi; instabilde senkronize kardiyoversiyon",
+        "Yalnızca gözlem yeterlidir",
+        "Hemen taburcu edilir"
+      ],
+      "correct": 2,
+      "explanations": [
+        "İlk adım görüntülemeden önce klinik değerlendirmedir.",
+        "İlk yaklaşım klinik ekip tarafından yönlendirilir.",
+        "Flutter yönetimi AF ilkelerini izler; hemodinamik instabilitede senkronize kardiyoversiyon önceliklidir (ESC SVT 2019, AHA ALS 2025).",
+        "Bu bulgu daha aktif bir yaklaşım gerektirebilir; yalnız izlem yetmez.",
+        "Bulgu ciddi olabilir; taburcu öncesi değerlendirme gerekir."
+      ],
+      "feedback": "Flutter yönetimi AF ilkelerini izler; hemodinamik instabilitede senkronize kardiyoversiyon önceliklidir (ESC SVT 2019, AHA ALS 2025).",
+      "objectiveIds": [
+        "O5"
+      ],
+      "sourceIds": [
+        "SVT2019"
+      ],
+      "decisionId": "firstStep_flutter",
+      "note": "",
+      "ecg": {
+        "mode": "flutter",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V1"
+        ],
+        "start": 0.58,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C148",
+      "mode": "flutter",
+      "title": "Sentetik vaka C148",
+      "ariaLabel": "C148 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "70 yaşında erkek hasta. Başvuru: kronik böbrek hastalığı izleminde çarpıntı saptanıyor. Kısa süreli bir kayıt elde ediliyor; önceki öykü ve ek testler henüz yok.",
+      "question": "Bu bulgudan etiyoloji ve risk için hangi genel sınır çıkarılabilir?",
+      "text": "Bu bulgudan etiyoloji ve risk için hangi genel sınır çıkarılabilir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "150/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "104/68 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%96"
+        }
+      ],
+      "options": [
+        "Hız tek başına dolaşımı gösterir",
+        "Kısa kayıt başlangıç zamanını verir",
+        "Örüntü desteklenir, neden ayrıca sorulur",
+        "P ekseni kesin odağı belirler",
+        "QRS genişliği tek başına riski verir"
+      ],
+      "correct": 2,
+      "explanations": [
+        "Nabız ve basınç ayrıca değerlendirilir.",
+        "Bir pencere toplam süreyi göstermez.",
+        "EKG bulgusu tanı verir, nedeni klinik öykü belirler.",
+        "P ekseni ipucudur, kesin yer vermez.",
+        "Risk için klinik bağlam da gerekir."
+      ],
+      "feedback": "EKG bulgusu tanı verir, nedeni klinik öykü belirler.",
+      "objectiveIds": [
+        "O5"
+      ],
+      "sourceIds": [
+        "SVT2019"
+      ],
+      "decisionId": "limits",
+      "note": "",
+      "ecg": {
+        "mode": "flutter",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V1"
+        ],
+        "start": 0.66,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C149",
+      "mode": "flutter",
+      "title": "Sentetik vaka C149",
+      "ariaLabel": "C149 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "55 yaşında kadın hasta. Başvuru: uzun yolculuk sonrası düzenli hızlı nabız fark ediyor. Sistematik okumada hangi derivasyonların yan duvarı temsil ettiği gözden geçiriliyor.",
+      "question": "Hangi derivasyonlar lateral duvarı gösterir?",
+      "text": "Hangi derivasyonlar lateral duvarı gösterir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "150/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "104/68 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%96"
+        }
+      ],
+      "options": [
+        "V3, V4 — anterior duvar",
+        "I, aVL, V5–V6 — lateral duvar",
+        "II, III, aVF — inferior duvar",
+        "V1–V6 tümü — tüm prekordiyum",
+        "V1, V2 — septal bölge"
+      ],
+      "correct": 1,
+      "explanations": [
+        "V3–V4 anterior duvarı gösterir, lateral duvarı değil.",
+        "Bu üç derivasyon grubu kalbin lateral duvarını gösterir.",
+        "Bu grup inferior duvarı gösterir, lateral duvarı değil.",
+        "Tüm prekordiyal grup tek başına lateral duvarı özgül olarak göstermez.",
+        "V1–V2 septal bölgeyi gösterir, lateral duvarı değil."
+      ],
+      "feedback": "Bu üç derivasyon grubu kalbin lateral duvarını gösterir.",
+      "objectiveIds": [
+        "O3"
+      ],
+      "sourceIds": [
+        "SVT2019",
+        "ECG"
+      ],
+      "decisionId": "lateralLeadGroup",
+      "note": "",
+      "ecg": {
+        "mode": "flutter",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V1"
+        ],
+        "start": 0.74,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C150",
+      "mode": "flutter",
+      "title": "Sentetik vaka C150",
+      "ariaLabel": "C150 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "63 yaşında erkek hasta. Başvuru: solunum yolu enfeksiyonu sonrası çarpıntı tarif ediyor. Ventriküler kompleksten sonra gelen dalganın anlamı soruluyor.",
+      "question": "T dalgasının temel elektriksel karşılığı nedir?",
+      "text": "T dalgasının temel elektriksel karşılığı nedir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "150/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "104/68 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%96"
+        }
+      ],
+      "options": [
+        "T: ventriküler repolarizasyon",
+        "T: yeni bir atriyal uyarı",
+        "T: ventriküler depolarizasyon",
+        "T: gecikmiş sağ ventrikül uyarısı",
+        "T: atriyal repolarizasyon"
+      ],
+      "correct": 0,
+      "explanations": [
+        "T dalgası ventrikülün elektriksel toparlanmasıdır.",
+        "Yeni P ayrı bir dalga olarak görülür.",
+        "Bu olay QRS ile kaydedilir.",
+        "Bu bileşen QRS içinde yer alır.",
+        "Bu olay genelde QRS altında gizlenir."
+      ],
+      "feedback": "T dalgası ventrikülün elektriksel toparlanmasıdır.",
+      "objectiveIds": [
+        "O1"
+      ],
+      "sourceIds": [
+        "SVT2019"
+      ],
+      "decisionId": "t",
+      "note": "",
+      "ecg": {
+        "mode": "flutter",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V1"
+        ],
+        "start": 0.8200000000000001,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C151",
+      "mode": "sintach",
+      "title": "Sentetik vaka C151",
+      "ariaLabel": "C151 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "28 yaşında kadın hasta. Başvuru: ateş ve halsizlik ile hızlı nabız saptanıyor. Düzenli, dar kompleksli hızlı bir ritimde her kompleksten önce aynı yönlü bir dalga korunuyor.",
+      "question": "Bu bulgularla en uyumlu örüntü hangisidir?",
+      "text": "Bu bulgularla en uyumlu örüntü hangisidir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "120/dk"
+        },
+        {
+          "k": "TA",
+          "v": "112/74 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%97"
+        }
+      ],
+      "options": [
+        "AVNRT/AVRT olasılığı",
+        "Fokal atriyal taşikardi",
+        "Sabit 2:1 flutter",
+        "Atriyal fibrilasyon",
+        "Sinüs taşikardisi"
+      ],
+      "correct": 4,
+      "explanations": [
+        "Bunlarda P genelde seçilemez; burada P açık.",
+        "P ekseni burada normal; fokal AT'de farklı olurdu.",
+        "Flutter'da sürekli taban dalgası olur; burada yok.",
+        "AF'de P yoktur; burada var.",
+        "Hızlı ama normal P–QRS ilişkisi: sinüs taşikardisi."
+      ],
+      "feedback": "Hızlı ama normal P–QRS ilişkisi: sinüs taşikardisi.",
+      "objectiveIds": [
+        "O2"
+      ],
+      "sourceIds": [
+        "SVT2019",
+        "ECG"
+      ],
+      "decisionId": "tach",
+      "note": "",
+      "ecg": {
+        "mode": "sintach",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V3"
+        ],
+        "start": 0.5,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C152",
+      "mode": "sintach",
+      "title": "Sentetik vaka C152",
+      "ariaLabel": "C152 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "35 yaşında erkek hasta. Başvuru: egzersiz sonrası beklenenden hızlı nabız devam ediyor. Düzenli dar kompleksli ritimde P dalgasının yönü ayrıca değerlendiriliyor.",
+      "question": "Bu P dalgası için hangi yön dağılımı destekleyicidir?",
+      "text": "Bu P dalgası için hangi yön dağılımı destekleyicidir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "120/dk"
+        },
+        {
+          "k": "TA",
+          "v": "112/74 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%97"
+        }
+      ],
+      "options": [
+        "İnferior ters P: ektopik eksen",
+        "Geniş S: dal bloğu bulgusu",
+        "II pozitif, aVR negatif P: sinüs ekseni",
+        "Düzensiz ince dalga: AF",
+        "Sürekli taban dalgası: flutter"
+      ],
+      "correct": 2,
+      "explanations": [
+        "Bu örnekte P ekseni normal, ters değil.",
+        "Bu P ekseni sorusu, QRS şekli değil.",
+        "Bu yön sinüs kaynaklı P ile uyumludur.",
+        "Burada düzenli tek P var, AF değil.",
+        "Burada ayrı P var, sürekli dalga yok."
+      ],
+      "feedback": "Bu yön sinüs kaynaklı P ile uyumludur.",
+      "objectiveIds": [
+        "O1"
+      ],
+      "sourceIds": [
+        "SVT2019",
+        "ECG"
+      ],
+      "decisionId": "sinusAxis",
+      "note": "",
+      "ecg": {
+        "mode": "sintach",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V3"
+        ],
+        "start": 0.58,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C153",
+      "mode": "sintach",
+      "title": "Sentetik vaka C153",
+      "ariaLabel": "C153 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "42 yaşında kadın hasta. Başvuru: ağrı nedeniyle hızlı nabızla acile başvuruyor. Hızlı sinüs ritmi saptanıyor; ateş ve ağrı gibi olası nedenler sorgulanıyor.",
+      "question": "Hız artışının nedeni için hangi yaklaşım uygundur?",
+      "text": "Hız artışının nedeni için hangi yaklaşım uygundur?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "120/dk"
+        },
+        {
+          "k": "TA",
+          "v": "112/74 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%97"
+        }
+      ],
+      "options": [
+        "Dar QRS hacim kaybını dışlar",
+        "120/dk hız AVNRT'yi kanıtlar",
+        "Çarpıntı tarifi P kanıtını geçersiz kılar",
+        "Neden klinik olarak araştırılır",
+        "Sinüs P olması nedeni dışlar"
+      ],
+      "correct": 3,
+      "explanations": [
+        "QRS genişliği hacim durumunu göstermez.",
+        "Hızlar örtüşür; tek başına kanıt değildir.",
+        "Öykü ve EKG birlikte değerlendirilir.",
+        "Ateş, ağrı, hacim kaybı gibi nedenler sorgulanır.",
+        "Sinüs kökeni olsa da neden araştırılmalıdır."
+      ],
+      "feedback": "Ateş, ağrı, hacim kaybı gibi nedenler sorgulanır.",
+      "objectiveIds": [
+        "O5"
+      ],
+      "sourceIds": [
+        "SVT2019",
+        "ECG"
+      ],
+      "decisionId": "tachCause",
+      "note": "",
+      "ecg": {
+        "mode": "sintach",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V3"
+        ],
+        "start": 0.66,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C154",
+      "mode": "sintach",
+      "title": "Sentetik vaka C154",
+      "ariaLabel": "C154 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "50 yaşında erkek hasta. Başvuru: anksiyete atağı sırasında hızlı nabız saptanıyor. Kısa süreli bir kayıt elde ediliyor; önceki öykü ve ek testler henüz yok.",
+      "question": "Bu bulgudan etiyoloji ve risk için hangi genel sınır çıkarılabilir?",
+      "text": "Bu bulgudan etiyoloji ve risk için hangi genel sınır çıkarılabilir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "120/dk"
+        },
+        {
+          "k": "TA",
+          "v": "112/74 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%97"
+        }
+      ],
+      "options": [
+        "Kısa kayıt başlangıç zamanını verir",
+        "P ekseni kesin odağı belirler",
+        "QRS genişliği tek başına riski verir",
+        "Hız tek başına dolaşımı gösterir",
+        "Örüntü desteklenir, neden ayrıca sorulur"
+      ],
+      "correct": 4,
+      "explanations": [
+        "Bir pencere toplam süreyi göstermez.",
+        "P ekseni ipucudur, kesin yer vermez.",
+        "Risk için klinik bağlam da gerekir.",
+        "Nabız ve basınç ayrıca değerlendirilir.",
+        "EKG bulgusu tanı verir, nedeni klinik öykü belirler."
+      ],
+      "feedback": "EKG bulgusu tanı verir, nedeni klinik öykü belirler.",
+      "objectiveIds": [
+        "O5"
+      ],
+      "sourceIds": [
+        "SVT2019",
+        "ECG"
+      ],
+      "decisionId": "limits",
+      "note": "",
+      "ecg": {
+        "mode": "sintach",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V3"
+        ],
+        "start": 0.74,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C155",
+      "mode": "sintach",
+      "title": "Sentetik vaka C155",
+      "ariaLabel": "C155 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "24 yaşında kadın hasta. Başvuru: solunum yolu enfeksiyonu ile ateş ve hızlı nabız. İki ardışık R tepesi arası 500 ms ölçülüyor.",
+      "question": "Bu döngü süresiyle elektriksel hız yaklaşık kaçtır?",
+      "text": "Bu döngü süresiyle elektriksel hız yaklaşık kaçtır?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "120/dk"
+        },
+        {
+          "k": "TA",
+          "v": "112/74 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%97"
+        }
+      ],
+      "options": [
+        "120/dk",
+        "150/dk",
+        "167/dk",
+        "100/dk",
+        "75/dk"
+      ],
+      "correct": 0,
+      "explanations": [
+        "60/0,5=120/dk; uygun sinüs P ile sinüs taşikardisi örneğidir.",
+        "150/dk 400 ms döngüdür.",
+        "167/dk yaklaşık 360 ms döngüdür.",
+        "100/dk 600 ms döngüdür.",
+        "75/dk 800 ms döngüdür."
+      ],
+      "feedback": "60/0,5=120/dk; uygun sinüs P ile sinüs taşikardisi örneğidir.",
+      "objectiveIds": [
+        "O6"
+      ],
+      "sourceIds": [
+        "SVT2019",
+        "ECG"
+      ],
+      "decisionId": "rr500",
+      "note": "",
+      "ecg": {
+        "mode": "sintach",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V3"
+        ],
+        "start": 0.8200000000000001,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C156",
+      "mode": "sintach",
+      "title": "Sentetik vaka C156",
+      "ariaLabel": "C156 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "60 yaşında erkek hasta. Başvuru: kan kaybı şüphesiyle hızlı nabızla değerlendiriliyor. Sistematik okumada hangi derivasyonların yan duvarı temsil ettiği gözden geçiriliyor.",
+      "question": "Hangi derivasyonlar lateral duvarı gösterir?",
+      "text": "Hangi derivasyonlar lateral duvarı gösterir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "120/dk"
+        },
+        {
+          "k": "TA",
+          "v": "112/74 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%97"
+        }
+      ],
+      "options": [
+        "V3, V4 — anterior duvar",
+        "V1–V6 tümü — tüm prekordiyum",
+        "I, aVL, V5–V6 — lateral duvar",
+        "II, III, aVF — inferior duvar",
+        "V1, V2 — septal bölge"
+      ],
+      "correct": 2,
+      "explanations": [
+        "V3–V4 anterior duvarı gösterir, lateral duvarı değil.",
+        "Tüm prekordiyal grup tek başına lateral duvarı özgül olarak göstermez.",
+        "Bu üç derivasyon grubu kalbin lateral duvarını gösterir.",
+        "Bu grup inferior duvarı gösterir, lateral duvarı değil.",
+        "V1–V2 septal bölgeyi gösterir, lateral duvarı değil."
+      ],
+      "feedback": "Bu üç derivasyon grubu kalbin lateral duvarını gösterir.",
+      "objectiveIds": [
+        "O3"
+      ],
+      "sourceIds": [
+        "SVT2019",
+        "ECG"
+      ],
+      "decisionId": "lateralLeadGroup",
+      "note": "",
+      "ecg": {
+        "mode": "sintach",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V3"
+        ],
+        "start": 0.5,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C157",
+      "mode": "sintach",
+      "title": "Sentetik vaka C157",
+      "ariaLabel": "C157 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "33 yaşında kadın hasta. Başvuru: susuzluk ve sıcak çarpması sonrası hızlı nabız saptanıyor. Hızlı seyreden nabızda diyastolik dolum süresinin kısaldığı düşünülüyor.",
+      "question": "Yüksek hızın ventrikül dolusuna etkisi için hangi ifade doğrudur?",
+      "text": "Yüksek hızın ventrikül dolusuna etkisi için hangi ifade doğrudur?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "120/dk"
+        },
+        {
+          "k": "TA",
+          "v": "112/74 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%97"
+        }
+      ],
+      "options": [
+        "Hız artışı atım hacmini sabit artırır",
+        "Kısa döngü doluşu kısaltabilir",
+        "Kısa R–R kan basıncı değeridir",
+        "P varsa doluş hızdan bağımsızdır",
+        "Dar QRS kısalan doluşu telafi eder"
+      ],
+      "correct": 1,
+      "explanations": [
+        "Atım hacmi doluş ve yüke bağlıdır.",
+        "Hız artınca diyastol kısalır.",
+        "R–R zaman ölçüsüdür, basınç değildir.",
+        "Kısa döngü doluşu yine de kısaltabilir.",
+        "QRS genişliği doluş süresini değiştirmez."
+      ],
+      "feedback": "Hız artınca diyastol kısalır.",
+      "objectiveIds": [
+        "O4"
+      ],
+      "sourceIds": [
+        "SVT2019",
+        "ECG",
+        "CYCLE"
+      ],
+      "decisionId": "fastFill",
+      "note": "",
+      "ecg": {
+        "mode": "sintach",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V3"
+        ],
+        "start": 0.58,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C158",
+      "mode": "sintach",
+      "title": "Sentetik vaka C158",
+      "ariaLabel": "C158 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "46 yaşında erkek hasta. Başvuru: ağrı kesici öncesi hızlı nabız fark ediliyor. Kaliperle P’nin ilk sapması QRS’den 215 ms önce, QRS’in ilk sapması 40 ms önce işaretleniyor.",
+      "question": "Bu ölçümlerle PR aralığı kaç milisaniyedir?",
+      "text": "Bu ölçümlerle PR aralığı kaç milisaniyedir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "120/dk"
+        },
+        {
+          "k": "TA",
+          "v": "112/74 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%97"
+        }
+      ],
+      "options": [
+        "215 ms",
+        "130 ms",
+        "175 ms",
+        "255 ms",
+        "155 ms"
+      ],
+      "correct": 2,
+      "explanations": [
+        "215 ms P başlangıcından R tepesine ölçüm hatasıdır.",
+        "130 ms P merkezinden QRS başlangıcına gitme hatasıdır.",
+        "P ilk sapması−215 ms, QRS ilk sapması−40 ms: fark 175 ms.",
+        "255 ms P başlangıcından QRS sonuna ölçüm hatasıdır.",
+        "155 ms verilen iki başlangıcın farkı değildir."
+      ],
+      "feedback": "P ilk sapması−215 ms, QRS ilk sapması−40 ms: fark 175 ms.",
+      "objectiveIds": [
+        "O6"
+      ],
+      "sourceIds": [
+        "SVT2019",
+        "ECG"
+      ],
+      "decisionId": "pr175",
+      "note": "",
+      "ecg": {
+        "mode": "sintach",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V3"
+        ],
+        "start": 0.66,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C159",
+      "mode": "sintach",
+      "title": "Sentetik vaka C159",
+      "ariaLabel": "C159 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "29 yaşında kadın hasta. Başvuru: panik atak sırasında hızlı nabız ile başvuruyor. Dar bir kompleksin ilk sapması 40 ms önce, son dönüşü 40 ms sonra işaretleniyor.",
+      "question": "Bu ölçümlerle QRS süresi kaç milisaniyedir?",
+      "text": "Bu ölçümlerle QRS süresi kaç milisaniyedir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "120/dk"
+        },
+        {
+          "k": "TA",
+          "v": "112/74 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%97"
+        }
+      ],
+      "options": [
+        "100 ms",
+        "40 ms",
+        "140 ms",
+        "60 ms",
+        "80 ms"
+      ],
+      "correct": 4,
+      "explanations": [
+        "100 ms iki sınırın verilen farkından fazladır.",
+        "40 ms yalnız R’den son dönüşe yarı desteği sayar.",
+        "140 ms geniş PVC/RBBB örneğiyle karıştırır.",
+        "60 ms başlangıç veya terminal bileşenin bir kısmını dışlar.",
+        "−40 ms ile+40 ms arasındaki QRS desteği 80 ms’dir."
+      ],
+      "feedback": "−40 ms ile+40 ms arasındaki QRS desteği 80 ms’dir.",
+      "objectiveIds": [
+        "O6"
+      ],
+      "sourceIds": [
+        "SVT2019",
+        "ECG"
+      ],
+      "decisionId": "q80",
+      "note": "",
+      "ecg": {
+        "mode": "sintach",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V3"
+        ],
+        "start": 0.74,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C160",
+      "mode": "sintach",
+      "title": "Sentetik vaka C160",
+      "ariaLabel": "C160 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "55 yaşında erkek hasta. Başvuru: ateşli hastalık sırasında çarpıntı yakınması var. Eşzamanlı üç derivasyonlu kayıt aşağıda gösteriliyor.",
+      "question": "Bu ritim hangi sınıfa girer?",
+      "text": "Bu ritim hangi sınıfa girer?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "120/dk"
+        },
+        {
+          "k": "TA",
+          "v": "112/74 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%97"
+        }
+      ],
+      "options": [
+        "Düzensiz dar kompleks",
+        "Düzenli dar kompleks, hızlı",
+        "Kaotik, organize değil",
+        "Düzenli geniş kompleks",
+        "Düzenli dar kompleks, normal hız"
+      ],
+      "correct": 1,
+      "explanations": [
+        "Bu örnekte ritim düzenli, düzensiz değil.",
+        "Hız belirgin yüksek; ritim düzenli ve QRS dar.",
+        "Bu örnekte düzenli bir kompleks seçilebiliyor, kaotik değil.",
+        "Bu örnekte QRS dar, bu kadar geniş değil.",
+        "Bu örnekte hız veya düzen normal aralığa uymuyor."
+      ],
+      "feedback": "Hız belirgin yüksek; ritim düzenli ve QRS dar.",
+      "objectiveIds": [
+        "O2"
+      ],
+      "sourceIds": [
+        "SVT2019",
+        "ECG"
+      ],
+      "decisionId": "rhythmClass_sintach",
+      "note": "",
+      "ecg": {
+        "mode": "sintach",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V3"
+        ],
+        "start": 0.8200000000000001,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C161",
+      "mode": "sintach",
+      "title": "Sentetik vaka C161",
+      "ariaLabel": "C161 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "37 yaşında kadın hasta. Başvuru: egzersiz testi sırasında beklenen hızlanma gözleniyor. QRS’den kısa süre önce ayrı bir dalga seçiliyor.",
+      "question": "P dalgasının temel elektriksel karşılığı nedir?",
+      "text": "P dalgasının temel elektriksel karşılığı nedir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "120/dk"
+        },
+        {
+          "k": "TA",
+          "v": "112/74 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%97"
+        }
+      ],
+      "options": [
+        "P: ventriküler depolarizasyon",
+        "P: atriyal depolarizasyon",
+        "P: yalnız AV düğüm iletimi",
+        "P: atriyal repolarizasyon",
+        "P: ventriküler repolarizasyon"
+      ],
+      "correct": 1,
+      "explanations": [
+        "Bu olay QRS ile kaydedilir.",
+        "P dalgası atriyumun elektriksel uyarılmasıdır.",
+        "AV düğüm gecikmesi PR aralığında değerlendirilir.",
+        "Atriyal repolarizasyon genelde QRS altında gizlenir.",
+        "Bu olay T dalgası ile kaydedilir."
+      ],
+      "feedback": "P dalgası atriyumun elektriksel uyarılmasıdır.",
+      "objectiveIds": [
+        "O1"
+      ],
+      "sourceIds": [
+        "SVT2019",
+        "ECG"
+      ],
+      "decisionId": "p",
+      "note": "",
+      "ecg": {
+        "mode": "sintach",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V3"
+        ],
+        "start": 0.5,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C162",
+      "mode": "sintach",
+      "title": "Sentetik vaka C162",
+      "ariaLabel": "C162 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "48 yaşında erkek hasta. Başvuru: kafein alımı sonrası hızlı nabız fark ediyor. Eşzamanlı üç derivasyonlu kayıt aşağıda gösteriliyor.",
+      "question": "Bu EKG'de öncelikle hangi tanı düşünülmelidir?",
+      "text": "Bu EKG'de öncelikle hangi tanı düşünülmelidir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "120/dk"
+        },
+        {
+          "k": "TA",
+          "v": "112/74 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%97"
+        }
+      ],
+      "options": [
+        "Atriyal fibrilasyon",
+        "Ventriküler erken atım",
+        "Sağ dal bloğu",
+        "Sinüs taşikardisi",
+        "Atriyal flutter (2:1)"
+      ],
+      "correct": 3,
+      "explanations": [
+        "Atriyal fibrilasyon için beklenen bulgular burada yok.",
+        "Ventriküler erken atım için beklenen bulgular burada yok.",
+        "Sağ dal bloğu için beklenen bulgular burada yok.",
+        "Tarif edilen bulgular Sinüs taşikardisi ile uyumludur.",
+        "Atriyal flutter (2:1) için beklenen bulgular burada yok."
+      ],
+      "feedback": "Tarif edilen bulgular Sinüs taşikardisi ile uyumludur.",
+      "objectiveIds": [
+        "O2"
+      ],
+      "sourceIds": [
+        "SVT2019",
+        "ECG"
+      ],
+      "decisionId": "ddx_sintach",
+      "note": "",
+      "ecg": {
+        "mode": "sintach",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V3"
+        ],
+        "start": 0.58,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C163",
+      "mode": "sintach",
+      "title": "Sentetik vaka C163",
+      "ariaLabel": "C163 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "31 yaşında kadın hasta. Başvuru: gebelikte fizyolojik hızlı nabız saptanıyor. İzlemde bir anda çıkış kapaklarının açık, giriş kapaklarının kapalı olduğu gösteriliyor.",
+      "question": "Bu andaki kapak ve akım durumu hangi mekanik evreyi tanımlar?",
+      "text": "Bu andaki kapak ve akım durumu hangi mekanik evreyi tanımlar?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "120/dk"
+        },
+        {
+          "k": "TA",
+          "v": "112/74 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%97"
+        }
+      ],
+      "options": [
+        "Tüm kapaklar kapalı: izovolümetrik kasılma",
+        "AV kapaklar açık: atriyal sistol",
+        "AV kapaklar açık: pasif doluş",
+        "Tüm kapaklar kapalı: gevşeme",
+        "Çıkış kapakları açık: ejeksiyon"
+      ],
+      "correct": 4,
+      "explanations": [
+        "Bu erken evre, çıkış henüz kapalıdır.",
+        "Bu doluşun son parçasıdır, ejeksiyon değil.",
+        "Bu giriş fazıdır, ejeksiyon değildir.",
+        "Gevşeme ejeksiyondan sonra gelir.",
+        "Basınç yeterince yükselince kan dışarı pompalanır."
+      ],
+      "feedback": "Basınç yeterince yükselince kan dışarı pompalanır.",
+      "objectiveIds": [
+        "O4"
+      ],
+      "sourceIds": [
+        "SVT2019",
+        "ECG",
+        "CYCLE"
+      ],
+      "decisionId": "eject",
+      "note": "",
+      "ecg": {
+        "mode": "sintach",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V3"
+        ],
+        "start": 0.66,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C164",
+      "mode": "sintach",
+      "title": "Sentetik vaka C164",
+      "ariaLabel": "C164 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "58 yaşında erkek hasta. Başvuru: enfeksiyon sonrası ateşle birlikte hızlı nabız. Hızlı nabzın altında yatan neden araştırılıyor.",
+      "question": "Bu hastada ilk yaklaşım ne olmalıdır?",
+      "text": "Bu hastada ilk yaklaşım ne olmalıdır?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "120/dk"
+        },
+        {
+          "k": "TA",
+          "v": "112/74 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%97"
+        }
+      ],
+      "options": [
+        "Yalnız görüntüleme istenir",
+        "Altta yatan nedeni bulup tedavi etmek",
+        "Karar tamamen hastaya bırakılır",
+        "Hemen taburcu edilir",
+        "Yalnızca gözlem yeterlidir"
+      ],
+      "correct": 1,
+      "explanations": [
+        "İlk adım görüntülemeden önce klinik değerlendirmedir.",
+        "Sinüs taşikardisi çoğunlukla ikincildir; asıl neden tedavi edilir.",
+        "İlk yaklaşım klinik ekip tarafından yönlendirilir.",
+        "Bulgu ciddi olabilir; taburcu öncesi değerlendirme gerekir.",
+        "Bu bulgu daha aktif bir yaklaşım gerektirebilir; yalnız izlem yetmez."
+      ],
+      "feedback": "Sinüs taşikardisi çoğunlukla ikincildir; asıl neden tedavi edilir.",
+      "objectiveIds": [
+        "O5"
+      ],
+      "sourceIds": [
+        "SVT2019",
+        "ECG"
+      ],
+      "decisionId": "firstStep_sintach",
+      "note": "",
+      "ecg": {
+        "mode": "sintach",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V3"
+        ],
+        "start": 0.74,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C165",
+      "mode": "sintach",
+      "title": "Sentetik vaka C165",
+      "ariaLabel": "C165 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "26 yaşında kadın hasta. Başvuru: sınav stresiyle hızlı nabız fark ediyor. TA 112/74 mmHg; ateş, anemi veya göğüs ağrısı bulgusu yok.",
+      "question": "Bu klinik tabloda öncelikli yaklaşım nedir?",
+      "text": "Bu klinik tabloda öncelikli yaklaşım nedir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "120/dk"
+        },
+        {
+          "k": "TA",
+          "v": "112/74 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%97"
+        }
+      ],
+      "options": [
+        "Hız kontrolü için hemen ilaç başlanır",
+        "Önce kesin mekanizma sonra hasta bakılır",
+        "Semptomla acil değerlendirme zorunludur",
+        "Altta yatan fizyolojik/patolojik neden değerlendirilir; aciliyet kırmızı bayraklara bağlıdır",
+        "Tek derivasyon kesinlik verir"
+      ],
+      "correct": 3,
+      "explanations": [
+        "Nedeni tedavi etmeden hızı baskılamak uygun değildir.",
+        "Hasta durumu mekanizmadan önce değerlendirilir.",
+        "Stresle ilişkili stabil sinüs taşikardisi tek başına acil değildir.",
+        "Sinüs taşikardisi bir bulgudur; ateş, anemi, hipovolemi, ağrı, anksiyete gibi nedenler aranır.",
+        "Sinüs P ve neden değerlendirmesi tek derivasyonla tamamlanmaz."
+      ],
+      "feedback": "Sinüs taşikardisi bir bulgudur; ateş, anemi, hipovolemi, ağrı, anksiyete gibi nedenler aranır.",
+      "objectiveIds": [
+        "O5"
+      ],
+      "sourceIds": [
+        "SVT2019",
+        "ECG"
+      ],
+      "decisionId": "sinusTachApproach",
+      "note": "",
+      "ecg": {
+        "mode": "sintach",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V3"
+        ],
+        "start": 0.8200000000000001,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C166",
+      "mode": "lbbb",
+      "title": "Sentetik vaka C166",
+      "ariaLabel": "C166 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "68 yaşında erkek hasta. Başvuru: rutin kontrolde tesadüfen geniş QRS saptanıyor. Düzenli sinüs ritmi sırasında QRS belirgin genişlemiş; sağ göğüs derivasyonunda derin negatif, sol yan derivasyonlarda geniş ve çentikli pozitif bir kompleks var.",
+      "question": "Bu ileti örüntüsü için en uygun sınıflama hangisidir?",
+      "text": "Bu ileti örüntüsü için en uygun sınıflama hangisidir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "Sağ dal bloğu (RBBB)",
+        "Dar QRS iletisi",
+        "Sol dal bloğu (LBBB)",
+        "İzole PVC",
+        "Ventriküler fibrilasyon"
+      ],
+      "correct": 2,
+      "explanations": [
+        "RBBB'de V1'de pozitif çıkıntı olur; burada negatif.",
+        "QRS burada geniş, dar değil.",
+        "Geniş QRS, V1 negatif, yanda geniş R: LBBB.",
+        "PVC tek atımdır; burada her atım aynı geniş.",
+        "VF'de düzenli QRS yoktur; burada düzenli."
+      ],
+      "feedback": "Geniş QRS, V1 negatif, yanda geniş R: LBBB.",
+      "objectiveIds": [
+        "O2"
+      ],
+      "sourceIds": [
+        "BBB2009"
+      ],
+      "decisionId": "lbbb",
+      "note": "",
+      "ecg": {
+        "mode": "lbbb",
+        "options": {},
+        "leads": [
+          "I",
+          "V1",
+          "V6"
+        ],
+        "start": 0.5,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C167",
+      "mode": "lbbb",
+      "title": "Sentetik vaka C167",
+      "ariaLabel": "C167 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "72 yaşında kadın hasta. Başvuru: ameliyat öncesi değerlendirmede geniş QRS fark ediliyor. Kompleks genişliği tek başına değerlendirilerek kökeni hakkında yorum yapılmak isteniyor.",
+      "question": "QRS genişliğini tek başına yorumlarken hangi sınır geçerlidir?",
+      "text": "QRS genişliğini tek başına yorumlarken hangi sınır geçerlidir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "140 ms her QRS kesin RBBB'dir",
+        "Genişlik tek başına debiyi hesaplar",
+        "160 ms her QRS kesin LBBB'dir",
+        "Genişlik ve klinik bulgu birlikte yorumlanır",
+        "120 ms üstü her QRS VT'dir"
+      ],
+      "correct": 3,
+      "explanations": [
+        "PVC de bu genişlikte olabilir.",
+        "Genişlik zaman ölçüsüdür, debi değildir.",
+        "Genişlik tek başına LBBB'yi kanıtlamaz.",
+        "Tek genişlik VT ile bloğu kesin ayırmaz.",
+        "Dal bloğu da geniş QRS yapabilir."
+      ],
+      "feedback": "Tek genişlik VT ile bloğu kesin ayırmaz.",
+      "objectiveIds": [
+        "O5"
+      ],
+      "sourceIds": [
+        "BBB2009"
+      ],
+      "decisionId": "qrsWidthCause",
+      "note": "",
+      "ecg": {
+        "mode": "lbbb",
+        "options": {},
+        "leads": [
+          "I",
+          "V1",
+          "V6"
+        ],
+        "start": 0.58,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C168",
+      "mode": "lbbb",
+      "title": "Sentetik vaka C168",
+      "ariaLabel": "C168 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "60 yaşında erkek hasta. Başvuru: hipertansiyon izleminde rutin EKG’de geniş kompleks saptanıyor. Sağ göğüs ve sol yan derivasyonlar birlikte incelenerek QRS yönü karşılaştırılıyor.",
+      "question": "Bu derivasyonlardaki morfoloji bileşimi hangisidir?",
+      "text": "Bu derivasyonlardaki morfoloji bileşimi hangisidir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "V1 negatif, yan derivasyonlarda geniş R",
+        "V1 çift çıkıntı, yanda geniş S",
+        "Organize QRS yok",
+        "Tüm derivasyonlar aynı yönde",
+        "Sürekli taban dalgası"
+      ],
+      "correct": 0,
+      "explanations": [
+        "LBBB'de sağ ve sol taraf zıt yönde etkilenir.",
+        "Bu RBBB örüntüsüdür, LBBB değildir.",
+        "Burada düzenli geniş QRS var, VF değil.",
+        "Sağ ve sol taraf burada zıt yönlüdür.",
+        "Bu QRS şekli sorusu, taban dalgası değil."
+      ],
+      "feedback": "LBBB'de sağ ve sol taraf zıt yönde etkilenir.",
+      "objectiveIds": [
+        "O3"
+      ],
+      "sourceIds": [
+        "BBB2009",
+        "ECG"
+      ],
+      "decisionId": "lMorph",
+      "note": "",
+      "ecg": {
+        "mode": "lbbb",
+        "options": {},
+        "leads": [
+          "I",
+          "V1",
+          "V6"
+        ],
+        "start": 0.66,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C169",
+      "mode": "lbbb",
+      "title": "Sentetik vaka C169",
+      "ariaLabel": "C169 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "65 yaşında kadın hasta. Başvuru: efor dispnesi ile kardiyoloji polikliniğine başvuruyor. Geniş kompleksli bir atımda P’nin ilk sapması 245 ms önce, QRS’in ilk sapması 70 ms önce işaretleniyor.",
+      "question": "Bu geniş kompleksli atımda PR aralığı kaç milisaniyedir?",
+      "text": "Bu geniş kompleksli atımda PR aralığı kaç milisaniyedir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "160 ms",
+        "130 ms",
+        "245 ms",
+        "175 ms",
+        "335 ms"
+      ],
+      "correct": 3,
+      "explanations": [
+        "QRS 160 ms süresi PR yerine yazılmıştır.",
+        "P tepesinden ölçme ilk 45 ms’yi dışlar.",
+        "P’den R referansına gitme 70 ms fazlalık ekler.",
+        "P−245 ms, QRS−70 ms:175 ms; geniş QRS PR sınırını değiştirmez.",
+        "P’den QRS sonuna gitme QRS 160 ms’yi de içerir."
+      ],
+      "feedback": "P−245 ms, QRS−70 ms:175 ms; geniş QRS PR sınırını değiştirmez.",
+      "objectiveIds": [
+        "O6"
+      ],
+      "sourceIds": [
+        "BBB2009",
+        "ECG"
+      ],
+      "decisionId": "prL175",
+      "note": "",
+      "ecg": {
+        "mode": "lbbb",
+        "options": {},
+        "leads": [
+          "I",
+          "V1",
+          "V6"
+        ],
+        "start": 0.74,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C170",
+      "mode": "lbbb",
+      "title": "Sentetik vaka C170",
+      "ariaLabel": "C170 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "57 yaşında erkek hasta. Başvuru: yıllık check-up sırasında geniş QRS saptanıyor. Geniş bir kompleksin ilk sapması 70 ms önce, son dönüşü 90 ms sonra işaretleniyor.",
+      "question": "Bu ölçümlerle QRS süresi kaç milisaniyedir?",
+      "text": "Bu ölçümlerle QRS süresi kaç milisaniyedir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "240 ms",
+        "180 ms",
+        "80 ms",
+        "120 ms",
+        "160 ms"
+      ],
+      "correct": 4,
+      "explanations": [
+        "240 ms verilen 160 ms destekten 80 ms uzundur.",
+        "180 ms VT örneğinin genişliğidir.",
+        "80 ms normal dar aktivasyondur.",
+        "120 ms bu sinyalin son terminal bölümünü dışlar.",
+        "−70 ms ile+90 ms arasındaki geniş QRS desteği 160 ms’dir."
+      ],
+      "feedback": "−70 ms ile+90 ms arasındaki geniş QRS desteği 160 ms’dir.",
+      "objectiveIds": [
+        "O6"
+      ],
+      "sourceIds": [
+        "BBB2009",
+        "ECG"
+      ],
+      "decisionId": "q160",
+      "note": "",
+      "ecg": {
+        "mode": "lbbb",
+        "options": {},
+        "leads": [
+          "I",
+          "V1",
+          "V6"
+        ],
+        "start": 0.8200000000000001,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C171",
+      "mode": "lbbb",
+      "title": "Sentetik vaka C171",
+      "ariaLabel": "C171 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "74 yaşında kadın hasta. Başvuru: kalp yetersizliği izleminde kontrol EKG'si çekiliyor. Eşzamanlı üç derivasyonlu kayıt aşağıda gösteriliyor.",
+      "question": "Bu ritim hangi sınıfa girer?",
+      "text": "Bu ritim hangi sınıfa girer?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "Düzenli geniş kompleks",
+        "Kaotik, organize değil",
+        "Düzenli dar kompleks, hızlı",
+        "Düzensiz dar kompleks",
+        "Düzenli dar kompleks, normal hız"
+      ],
+      "correct": 0,
+      "explanations": [
+        "QRS geniş; ritim düzenli aralıklarla tekrarlıyor.",
+        "Bu örnekte düzenli bir kompleks seçilebiliyor, kaotik değil.",
+        "Bu örnekte hız bu kadar yüksek değil.",
+        "Bu örnekte ritim düzenli, düzensiz değil.",
+        "Bu örnekte hız veya düzen normal aralığa uymuyor."
+      ],
+      "feedback": "QRS geniş; ritim düzenli aralıklarla tekrarlıyor.",
+      "objectiveIds": [
+        "O2"
+      ],
+      "sourceIds": [
+        "BBB2009"
+      ],
+      "decisionId": "rhythmClass_lbbb",
+      "note": "",
+      "ecg": {
+        "mode": "lbbb",
+        "options": {},
+        "leads": [
+          "I",
+          "V1",
+          "V6"
+        ],
+        "start": 0.5,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C172",
+      "mode": "lbbb",
+      "title": "Sentetik vaka C172",
+      "ariaLabel": "C172 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "63 yaşında erkek hasta. Başvuru: göğüs ağrısı olmayan hastada rutin EKG’de geniş QRS. Ventriküler kompleksin izde temsil ettiği olay ayrıca soruluyor.",
+      "question": "QRS kompleksinin temel elektriksel karşılığı nedir?",
+      "text": "QRS kompleksinin temel elektriksel karşılığı nedir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "QRS: ventriküler depolarizasyon",
+        "QRS: yalnız AV düğüm gecikmesi",
+        "QRS: ventriküler repolarizasyon",
+        "QRS: atriyal depolarizasyon",
+        "QRS: yalnız atriyal repolarizasyon"
+      ],
+      "correct": 0,
+      "explanations": [
+        "QRS ventrikül kasının elektriksel uyarılmasıdır.",
+        "AV gecikmesi PR aralığında değerlendirilir.",
+        "Bu olay T dalgasıyla kaydedilir.",
+        "Bu olay P dalgasıyla kaydedilir.",
+        "QRS'in ana kaynağı ventrikül kasıdır."
+      ],
+      "feedback": "QRS ventrikül kasının elektriksel uyarılmasıdır.",
+      "objectiveIds": [
+        "O1"
+      ],
+      "sourceIds": [
+        "BBB2009"
+      ],
+      "decisionId": "qrs",
+      "note": "",
+      "ecg": {
+        "mode": "lbbb",
+        "options": {},
+        "leads": [
+          "I",
+          "V1",
+          "V6"
+        ],
+        "start": 0.58,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C173",
+      "mode": "lbbb",
+      "title": "Sentetik vaka C173",
+      "ariaLabel": "C173 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "70 yaşında kadın hasta. Başvuru: huzurevi kontrolünde tesadüfen geniş kompleks saptanıyor. Kalp animasyonunda bir ventrikülün aktivasyonu diğerine göre gecikmiş gösteriliyor.",
+      "question": "Bu ileti gecikmesi animasyonu nasıl yorumlanmalıdır?",
+      "text": "Bu ileti gecikmesi animasyonu nasıl yorumlanmalıdır?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "Terminal yön ejeksiyon hacmidir",
+        "Ventriküler etkinlik tamamen kaybolur",
+        "Animasyon gecikmesi hastaya özeldir",
+        "Gecikme atriyal hızdır",
+        "Gecikme eşzamanlılığı azaltabilir"
+      ],
+      "correct": 4,
+      "explanations": [
+        "QRS yönü hacim ölçmez.",
+        "Geniş QRS etkinliğin sürdüğünü gösterir.",
+        "Bu sabit bir öğretim gecikmesidir.",
+        "Dal bloğu ventrikül içi iletimdir, atriyal değildir.",
+        "Animasyon şematiktir, gerçek basınç ölçmez."
+      ],
+      "feedback": "Animasyon şematiktir, gerçek basınç ölçmez.",
+      "objectiveIds": [
+        "O4"
+      ],
+      "sourceIds": [
+        "BBB2009",
+        "CYCLE"
+      ],
+      "decisionId": "bbbDelay",
+      "note": "",
+      "ecg": {
+        "mode": "lbbb",
+        "options": {},
+        "leads": [
+          "I",
+          "V1",
+          "V6"
+        ],
+        "start": 0.66,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C174",
+      "mode": "lbbb",
+      "title": "Sentetik vaka C174",
+      "ariaLabel": "C174 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "55 yaşında erkek hasta. Başvuru: diyabet izleminde rutin EKG’de geniş QRS fark ediliyor. Aynı ileti bozukluğu önceki bir kayıtta da görülmüş; yeni bir semptom eşlik etmiyor.",
+      "question": "Bu ileti bozukluğunun klinik yorumu için hangi ilke geçerlidir?",
+      "text": "Bu ileti bozukluğunun klinik yorumu için hangi ilke geçerlidir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "Tek başına akut MI kanıtıdır",
+        "Her atım nabızsız demektir",
+        "Güvenli eve dönüş ölçütüdür",
+        "Klinik bağlam ve eski EKG ile yorumlanır",
+        "Hangi ilaç gerektiğini gösterir"
+      ],
+      "correct": 3,
+      "explanations": [
+        "Dal bloğu MI'yı kesinleştirmez.",
+        "Geniş QRS mekanik nabzı ekarte etmez.",
+        "Klinik bulgular değerlendirilmeden bu karar verilmez.",
+        "Dal bloğu tek başına yeni/eski veya iskemi ayırt etmez.",
+        "İleti örüntüsü tedavi kararını tek başına vermez."
+      ],
+      "feedback": "Dal bloğu tek başına yeni/eski veya iskemi ayırt etmez.",
+      "objectiveIds": [
+        "O5"
+      ],
+      "sourceIds": [
+        "BBB2009"
+      ],
+      "decisionId": "bbbLimits",
+      "note": "",
+      "ecg": {
+        "mode": "lbbb",
+        "options": {},
+        "leads": [
+          "I",
+          "V1",
+          "V6"
+        ],
+        "start": 0.74,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C175",
+      "mode": "lbbb",
+      "title": "Sentetik vaka C175",
+      "ariaLabel": "C175 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "67 yaşında kadın hasta. Başvuru: ameliyat sonrası serviste rutin EKG çekiliyor. Eşzamanlı üç derivasyonlu kayıt aşağıda gösteriliyor.",
+      "question": "Bu EKG'de öncelikle hangi tanı düşünülmelidir?",
+      "text": "Bu EKG'de öncelikle hangi tanı düşünülmelidir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "İnferior ST yükselmeli iskemi",
+        "Sağ dal bloğu",
+        "Atriyal fibrilasyon",
+        "Ventriküler erken atım",
+        "Sol dal bloğu"
+      ],
+      "correct": 4,
+      "explanations": [
+        "İnferior ST yükselmeli iskemi için beklenen bulgular burada yok.",
+        "Sağ dal bloğu için beklenen bulgular burada yok.",
+        "Atriyal fibrilasyon için beklenen bulgular burada yok.",
+        "Ventriküler erken atım için beklenen bulgular burada yok.",
+        "Tarif edilen bulgular Sol dal bloğu ile uyumludur."
+      ],
+      "feedback": "Tarif edilen bulgular Sol dal bloğu ile uyumludur.",
+      "objectiveIds": [
+        "O2"
+      ],
+      "sourceIds": [
+        "BBB2009"
+      ],
+      "decisionId": "ddx_lbbb",
+      "note": "",
+      "ecg": {
+        "mode": "lbbb",
+        "options": {},
+        "leads": [
+          "I",
+          "V1",
+          "V6"
+        ],
+        "start": 0.8200000000000001,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C176",
+      "mode": "lbbb",
+      "title": "Sentetik vaka C176",
+      "ariaLabel": "C176 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "61 yaşında erkek hasta. Başvuru: sigorta muayenesinde tesadüfen geniş QRS saptanıyor. Ventriküler kompleksten sonra gelen dalganın anlamı soruluyor.",
+      "question": "T dalgasının temel elektriksel karşılığı nedir?",
+      "text": "T dalgasının temel elektriksel karşılığı nedir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "T: ventriküler depolarizasyon",
+        "T: atriyal repolarizasyon",
+        "T: yeni bir atriyal uyarı",
+        "T: ventriküler repolarizasyon",
+        "T: gecikmiş sağ ventrikül uyarısı"
+      ],
+      "correct": 3,
+      "explanations": [
+        "Bu olay QRS ile kaydedilir.",
+        "Bu olay genelde QRS altında gizlenir.",
+        "Yeni P ayrı bir dalga olarak görülür.",
+        "T dalgası ventrikülün elektriksel toparlanmasıdır.",
+        "Bu bileşen QRS içinde yer alır."
+      ],
+      "feedback": "T dalgası ventrikülün elektriksel toparlanmasıdır.",
+      "objectiveIds": [
+        "O1"
+      ],
+      "sourceIds": [
+        "BBB2009"
+      ],
+      "decisionId": "t",
+      "note": "",
+      "ecg": {
+        "mode": "lbbb",
+        "options": {},
+        "leads": [
+          "I",
+          "V1",
+          "V6"
+        ],
+        "start": 0.5,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C177",
+      "mode": "lbbb",
+      "title": "Sentetik vaka C177",
+      "ariaLabel": "C177 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "73 yaşında kadın hasta. Başvuru: kronik böbrek hastalığı izleminde geniş kompleks izleniyor. Elektriksel kayıt sürerken nabız muayenesi ayrıca planlanıyor.",
+      "question": "EKG bulgusu ile mekanik nabız arasındaki ilişki için hangi değerlendirme gerekir?",
+      "text": "EKG bulgusu ile mekanik nabız arasındaki ilişki için hangi değerlendirme gerekir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "Elektriksel hız nabza birebir eşittir",
+        "QRS genişliği nabız basıncını verir",
+        "T genliği atım hacmini verir",
+        "PR süresi debiyi verir",
+        "Nabız ayrıca klinik olarak bakılır"
+      ],
+      "correct": 4,
+      "explanations": [
+        "Nabız açığı olabilir; eşitlik varsayılamaz.",
+        "Genişlik zaman ölçüsüdür, basınç değildir.",
+        "T genliği repolarizasyon voltajıdır.",
+        "PR iletim süresidir, debi ölçmez.",
+        "EKG elektrik gösterir, nabzı kanıtlamaz."
+      ],
+      "feedback": "EKG elektrik gösterir, nabzı kanıtlamaz.",
+      "objectiveIds": [
+        "O4"
+      ],
+      "sourceIds": [
+        "BBB2009",
+        "CYCLE"
+      ],
+      "decisionId": "pulse",
+      "note": "",
+      "ecg": {
+        "mode": "lbbb",
+        "options": {},
+        "leads": [
+          "I",
+          "V1",
+          "V6"
+        ],
+        "start": 0.58,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C178",
+      "mode": "lbbb",
+      "title": "Sentetik vaka C178",
+      "ariaLabel": "C178 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "58 yaşında erkek hasta. Başvuru: efor kapasitesinde azalma ile başvuruyor. Geniş QRS kaydı klinik bağlamla birlikte değerlendiriliyor.",
+      "question": "Bu hastada ilk yaklaşım ne olmalıdır?",
+      "text": "Bu hastada ilk yaklaşım ne olmalıdır?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "Hemen taburcu edilir",
+        "Yalnız görüntüleme istenir",
+        "Yalnızca gözlem yeterlidir",
+        "Karar tamamen hastaya bırakılır",
+        "Klinik bağlamla birlikte değerlendirme"
+      ],
+      "correct": 4,
+      "explanations": [
+        "Bulgu ciddi olabilir; taburcu öncesi değerlendirme gerekir.",
+        "İlk adım görüntülemeden önce klinik değerlendirmedir.",
+        "Bu bulgu daha aktif bir yaklaşım gerektirebilir; yalnız izlem yetmez.",
+        "İlk yaklaşım klinik ekip tarafından yönlendirilir.",
+        "Dal bloğu tek başına acil işlem gerektirmez; bağlam önemlidir."
+      ],
+      "feedback": "Dal bloğu tek başına acil işlem gerektirmez; bağlam önemlidir.",
+      "objectiveIds": [
+        "O5"
+      ],
+      "sourceIds": [
+        "BBB2009"
+      ],
+      "decisionId": "firstStep_lbbb",
+      "note": "",
+      "ecg": {
+        "mode": "lbbb",
+        "options": {},
+        "leads": [
+          "I",
+          "V1",
+          "V6"
+        ],
+        "start": 0.66,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C179",
+      "mode": "lbbb",
+      "title": "Sentetik vaka C179",
+      "ariaLabel": "C179 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "66 yaşında kadın hasta. Başvuru: yıllık kontrolde önceki EKG ile karşılaştırma yapılıyor. Geniş QRS önceki EKG'de de mevcut; yakınması yok.",
+      "question": "Bu klinik tabloda hangi yaklaşım uygundur?",
+      "text": "Bu klinik tabloda hangi yaklaşım uygundur?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "Önce kesin mekanizma sonra hasta bakılır",
+        "Geniş QRS rutin kontrole bırakılır, değerlendirilmez",
+        "Tek derivasyon kesinlik verir",
+        "Her dal bloğu acil servise sevk gerektirir",
+        "Yeni/eski ayrımı, semptomlar ve klinik bağlam belirleyicidir; asemptomatik tesadüfi blok otomatik acil değildir"
+      ],
+      "correct": 4,
+      "explanations": [
+        "Hasta durumu mekanizmadan önce değerlendirilir.",
+        "Yeni geniş QRS iskemi veya yapısal hastalık açısından değerlendirilir.",
+        "Blok tipi ve bağlam tek derivasyonla belirlenmez.",
+        "Asemptomatik, eski blok acil sevk gerektirmez.",
+        "Dal bloğunda aciliyet yeni gelişim, iskemi semptomu veya kalp yetersizliği bulgularıyla belirlenir (ACC/AHA/HRS 2018)."
+      ],
+      "feedback": "Dal bloğunda aciliyet yeni gelişim, iskemi semptomu veya kalp yetersizliği bulgularıyla belirlenir (ACC/AHA/HRS 2018).",
+      "objectiveIds": [
+        "O5"
+      ],
+      "sourceIds": [
+        "BBB2009"
+      ],
+      "decisionId": "incidentalBbb",
+      "note": "",
+      "ecg": {
+        "mode": "lbbb",
+        "options": {},
+        "leads": [
+          "I",
+          "V1",
+          "V6"
+        ],
+        "start": 0.74,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C180",
+      "mode": "lbbb",
+      "title": "Sentetik vaka C180",
+      "ariaLabel": "C180 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "64 yaşında erkek hasta. Başvuru: anestezi değerlendirmesinde geniş QRS fark ediliyor. Sistematik okumada hangi derivasyonların ön duvarı temsil ettiği gözden geçiriliyor.",
+      "question": "V3 ve V4 derivasyonları hangi bölgeyi yansıtır?",
+      "text": "V3 ve V4 derivasyonları hangi bölgeyi yansıtır?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "Anterior duvar",
+        "Lateral duvar",
+        "Sağ ventrikül yalnızca",
+        "İnferior duvar",
+        "Atriyum yalnızca"
+      ],
+      "correct": 0,
+      "explanations": [
+        "V3–V4 kalbin ön (anterior) duvarını yansıtır.",
+        "Lateral duvar I, aVL, V5–V6 ile değerlendirilir.",
+        "Sağ ventrikül daha çok V1 ve sağ prekordiyal derivasyonlarla ilişkilidir.",
+        "İnferior duvar II, III, aVF ile değerlendirilir, V3–V4 ile değil.",
+        "Atriyal etkinlik tek bir prekordiyal çiftle özgül olarak gösterilmez."
+      ],
+      "feedback": "V3–V4 kalbin ön (anterior) duvarını yansıtır.",
+      "objectiveIds": [
+        "O3"
+      ],
+      "sourceIds": [
+        "BBB2009",
+        "ECG"
+      ],
+      "decisionId": "anteriorLeadGroup",
+      "note": "",
+      "ecg": {
+        "mode": "lbbb",
+        "options": {},
+        "leads": [
+          "I",
+          "V1",
+          "V6"
+        ],
+        "start": 0.8200000000000001,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C181",
+      "mode": "rbbb",
+      "title": "Sentetik vaka C181",
+      "ariaLabel": "C181 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "55 yaşında erkek hasta. Başvuru: rutin kontrolde tesadüfen geniş QRS saptanıyor. Düzenli sinüs ritmi sırasında QRS belirgin genişlemiş; sağ göğüs derivasyonunda geç bir ikinci pozitif çıkıntı, sol yan derivasyonlarda geniş bir son negatif dalga var.",
+      "question": "Bu ileti örüntüsü için en uygun sınıflama hangisidir?",
+      "text": "Bu ileti örüntüsü için en uygun sınıflama hangisidir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "Sağ dal bloğu (RBBB)",
+        "Sol dal bloğu (LBBB)",
+        "Atriyal flutter",
+        "Dar QRS iletisi",
+        "İzole PVC"
+      ],
+      "correct": 0,
+      "explanations": [
+        "Geniş QRS, V1 çift çıkıntı, yanda geniş S: RBBB.",
+        "LBBB'de V1 negatiftir; burada pozitif çıkıntı var.",
+        "Flutter taban dalgasıyla tanınır; burada QRS şekli önemli.",
+        "QRS burada geniş, dar değil.",
+        "PVC tek atımdır; burada her atım aynı geniş."
+      ],
+      "feedback": "Geniş QRS, V1 çift çıkıntı, yanda geniş S: RBBB.",
+      "objectiveIds": [
+        "O2"
+      ],
+      "sourceIds": [
+        "BBB2009"
+      ],
+      "decisionId": "rbbb",
+      "note": "",
+      "ecg": {
+        "mode": "rbbb",
+        "options": {},
+        "leads": [
+          "I",
+          "aVR",
+          "V1"
+        ],
+        "start": 0.5,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C182",
+      "mode": "rbbb",
+      "title": "Sentetik vaka C182",
+      "ariaLabel": "C182 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "48 yaşında kadın hasta. Başvuru: ameliyat öncesi değerlendirmede geniş QRS fark ediliyor. Kompleks genişliği tek başına değerlendirilerek kökeni hakkında yorum yapılmak isteniyor.",
+      "question": "QRS genişliğini tek başına yorumlarken hangi sınır geçerlidir?",
+      "text": "QRS genişliğini tek başına yorumlarken hangi sınır geçerlidir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "140 ms her QRS kesin RBBB'dir",
+        "160 ms her QRS kesin LBBB'dir",
+        "Genişlik tek başına debiyi hesaplar",
+        "120 ms üstü her QRS VT'dir",
+        "Genişlik ve klinik bulgu birlikte yorumlanır"
+      ],
+      "correct": 4,
+      "explanations": [
+        "PVC de bu genişlikte olabilir.",
+        "Genişlik tek başına LBBB'yi kanıtlamaz.",
+        "Genişlik zaman ölçüsüdür, debi değildir.",
+        "Dal bloğu da geniş QRS yapabilir.",
+        "Tek genişlik VT ile bloğu kesin ayırmaz."
+      ],
+      "feedback": "Tek genişlik VT ile bloğu kesin ayırmaz.",
+      "objectiveIds": [
+        "O5"
+      ],
+      "sourceIds": [
+        "BBB2009"
+      ],
+      "decisionId": "qrsWidthCause",
+      "note": "",
+      "ecg": {
+        "mode": "rbbb",
+        "options": {},
+        "leads": [
+          "I",
+          "aVR",
+          "V1"
+        ],
+        "start": 0.58,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C183",
+      "mode": "rbbb",
+      "title": "Sentetik vaka C183",
+      "ariaLabel": "C183 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "62 yaşında erkek hasta. Başvuru: yıllık check-up sırasında geniş kompleks saptanıyor. Sağ göğüs ve sol yan derivasyonlar birlikte incelenerek terminal QRS yönü karşılaştırılıyor.",
+      "question": "Bu derivasyonlardaki morfoloji bileşimi hangisidir?",
+      "text": "Bu derivasyonlardaki morfoloji bileşimi hangisidir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "Her T yeni çıkıntıdır",
+        "V1 çift çıkıntı, yanda geniş S",
+        "V1 negatif, yanda geniş R",
+        "Tüm derivasyonlar dar ve aynı",
+        "Taban dalgası çıkıntının yerine geçer"
+      ],
+      "correct": 1,
+      "explanations": [
+        "Çıkıntı QRS içindedir, T ayrı bir dalgadır.",
+        "RBBB'de sağ taraf geç aktive olur.",
+        "Bu LBBB örüntüsüdür, RBBB değildir.",
+        "RBBB'de QRS geniş ve derivasyona göre farklıdır.",
+        "Taban dalgası atriyaldir, QRS çıkıntısı değildir."
+      ],
+      "feedback": "RBBB'de sağ taraf geç aktive olur.",
+      "objectiveIds": [
+        "O3"
+      ],
+      "sourceIds": [
+        "BBB2009",
+        "ECG"
+      ],
+      "decisionId": "rMorph",
+      "note": "",
+      "ecg": {
+        "mode": "rbbb",
+        "options": {},
+        "leads": [
+          "I",
+          "aVR",
+          "V1"
+        ],
+        "start": 0.66,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C184",
+      "mode": "rbbb",
+      "title": "Sentetik vaka C184",
+      "ariaLabel": "C184 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "58 yaşında kadın hasta. Başvuru: efor dispnesi ile kardiyoloji polikliniğine başvuruyor. Geniş kompleksli bir atımda P’nin ilk sapması 235 ms önce, QRS’in ilk sapması 60 ms önce işaretleniyor.",
+      "question": "Bu geniş kompleksli atımda PR aralığı kaç milisaniyedir?",
+      "text": "Bu geniş kompleksli atımda PR aralığı kaç milisaniyedir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "175 ms",
+        "130 ms",
+        "140 ms",
+        "235 ms",
+        "315 ms"
+      ],
+      "correct": 0,
+      "explanations": [
+        "P−235 ms, QRS−60 ms:175 ms; terminal sağ gecikme QRS içindedir.",
+        "P merkezinden ölçme ilk 45 ms’yi dışlar.",
+        "QRS 140 ms süresi PR yerine kullanılmıştır.",
+        "P’den R referansına ölçme 60 ms fazlalık ekler.",
+        "QRS sonu kullanılarak 140 ms kompleks de eklenmiştir."
+      ],
+      "feedback": "P−235 ms, QRS−60 ms:175 ms; terminal sağ gecikme QRS içindedir.",
+      "objectiveIds": [
+        "O6"
+      ],
+      "sourceIds": [
+        "BBB2009",
+        "ECG"
+      ],
+      "decisionId": "prR175",
+      "note": "",
+      "ecg": {
+        "mode": "rbbb",
+        "options": {},
+        "leads": [
+          "I",
+          "aVR",
+          "V1"
+        ],
+        "start": 0.74,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C185",
+      "mode": "rbbb",
+      "title": "Sentetik vaka C185",
+      "ariaLabel": "C185 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "67 yaşında erkek hasta. Başvuru: hipertansiyon izleminde rutin EKG’de geniş QRS saptanıyor. Geniş bir kompleksin ilk sapması 60 ms önce, son dönüşü 80 ms sonra işaretleniyor.",
+      "question": "Bu ölçümlerle QRS süresi kaç milisaniyedir?",
+      "text": "Bu ölçümlerle QRS süresi kaç milisaniyedir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "140 ms",
+        "110 ms",
+        "200 ms",
+        "160 ms",
+        "80 ms"
+      ],
+      "correct": 0,
+      "explanations": [
+        "−60 ms ile+80 ms arasındaki geniş QRS desteği 140 ms’dir.",
+        "110 ms terminal desteğin bir kısmını dışlar.",
+        "200 ms verilen ilk/son sapma farkından 60 ms uzundur.",
+        "160 ms LBBB öğretim genişliğidir.",
+        "80 ms normal dar QRS örneğidir."
+      ],
+      "feedback": "−60 ms ile+80 ms arasındaki geniş QRS desteği 140 ms’dir.",
+      "objectiveIds": [
+        "O6"
+      ],
+      "sourceIds": [
+        "BBB2009",
+        "ECG"
+      ],
+      "decisionId": "q140",
+      "note": "",
+      "ecg": {
+        "mode": "rbbb",
+        "options": {},
+        "leads": [
+          "I",
+          "aVR",
+          "V1"
+        ],
+        "start": 0.8200000000000001,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C186",
+      "mode": "rbbb",
+      "title": "Sentetik vaka C186",
+      "ariaLabel": "C186 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "52 yaşında kadın hasta. Başvuru: iş yeri sağlık taramasında rutin EKG çekiliyor. Eşzamanlı üç derivasyonlu kayıt aşağıda gösteriliyor.",
+      "question": "Bu ritim hangi sınıfa girer?",
+      "text": "Bu ritim hangi sınıfa girer?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "Düzenli geniş kompleks",
+        "Kaotik, organize değil",
+        "Düzensiz dar kompleks",
+        "Düzenli dar kompleks, normal hız",
+        "Düzenli dar kompleks, hızlı"
+      ],
+      "correct": 0,
+      "explanations": [
+        "QRS geniş; ritim düzenli aralıklarla tekrarlıyor.",
+        "Bu örnekte düzenli bir kompleks seçilebiliyor, kaotik değil.",
+        "Bu örnekte ritim düzenli, düzensiz değil.",
+        "Bu örnekte hız veya düzen normal aralığa uymuyor.",
+        "Bu örnekte hız bu kadar yüksek değil."
+      ],
+      "feedback": "QRS geniş; ritim düzenli aralıklarla tekrarlıyor.",
+      "objectiveIds": [
+        "O2"
+      ],
+      "sourceIds": [
+        "BBB2009"
+      ],
+      "decisionId": "rhythmClass_rbbb",
+      "note": "",
+      "ecg": {
+        "mode": "rbbb",
+        "options": {},
+        "leads": [
+          "I",
+          "aVR",
+          "V1"
+        ],
+        "start": 0.5,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C187",
+      "mode": "rbbb",
+      "title": "Sentetik vaka C187",
+      "ariaLabel": "C187 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "70 yaşında erkek hasta. Başvuru: kronik akciğer hastalığı izleminde geniş QRS izleniyor. Kalp animasyonunda bir ventrikülün aktivasyonu diğerine göre gecikmiş gösteriliyor.",
+      "question": "Bu ileti gecikmesi animasyonu nasıl yorumlanmalıdır?",
+      "text": "Bu ileti gecikmesi animasyonu nasıl yorumlanmalıdır?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "Gecikme eşzamanlılığı azaltabilir",
+        "Terminal yön ejeksiyon hacmidir",
+        "Ventriküler etkinlik tamamen kaybolur",
+        "Animasyon gecikmesi hastaya özeldir",
+        "Gecikme atriyal hızdır"
+      ],
+      "correct": 0,
+      "explanations": [
+        "Animasyon şematiktir, gerçek basınç ölçmez.",
+        "QRS yönü hacim ölçmez.",
+        "Geniş QRS etkinliğin sürdüğünü gösterir.",
+        "Bu sabit bir öğretim gecikmesidir.",
+        "Dal bloğu ventrikül içi iletimdir, atriyal değildir."
+      ],
+      "feedback": "Animasyon şematiktir, gerçek basınç ölçmez.",
+      "objectiveIds": [
+        "O4"
+      ],
+      "sourceIds": [
+        "BBB2009",
+        "CYCLE"
+      ],
+      "decisionId": "bbbDelay",
+      "note": "",
+      "ecg": {
+        "mode": "rbbb",
+        "options": {},
+        "leads": [
+          "I",
+          "aVR",
+          "V1"
+        ],
+        "start": 0.58,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C188",
+      "mode": "rbbb",
+      "title": "Sentetik vaka C188",
+      "ariaLabel": "C188 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "46 yaşında kadın hasta. Başvuru: sigorta muayenesinde tesadüfen geniş kompleks saptanıyor. Aynı ileti bozukluğu önceki bir kayıtta da görülmüş; yeni bir semptom eşlik etmiyor.",
+      "question": "Bu ileti bozukluğunun klinik yorumu için hangi ilke geçerlidir?",
+      "text": "Bu ileti bozukluğunun klinik yorumu için hangi ilke geçerlidir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "Tek başına akut MI kanıtıdır",
+        "Her atım nabızsız demektir",
+        "Klinik bağlam ve eski EKG ile yorumlanır",
+        "Hangi ilaç gerektiğini gösterir",
+        "Güvenli eve dönüş ölçütüdür"
+      ],
+      "correct": 2,
+      "explanations": [
+        "Dal bloğu MI'yı kesinleştirmez.",
+        "Geniş QRS mekanik nabzı ekarte etmez.",
+        "Dal bloğu tek başına yeni/eski veya iskemi ayırt etmez.",
+        "İleti örüntüsü tedavi kararını tek başına vermez.",
+        "Klinik bulgular değerlendirilmeden bu karar verilmez."
+      ],
+      "feedback": "Dal bloğu tek başına yeni/eski veya iskemi ayırt etmez.",
+      "objectiveIds": [
+        "O5"
+      ],
+      "sourceIds": [
+        "BBB2009"
+      ],
+      "decisionId": "bbbLimits",
+      "note": "",
+      "ecg": {
+        "mode": "rbbb",
+        "options": {},
+        "leads": [
+          "I",
+          "aVR",
+          "V1"
+        ],
+        "start": 0.66,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C189",
+      "mode": "rbbb",
+      "title": "Sentetik vaka C189",
+      "ariaLabel": "C189 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "63 yaşında erkek hasta. Başvuru: diyabet izleminde rutin EKG’de geniş QRS fark ediliyor. Geniş bir kompleksin ilk sapması 60 ms önce, T dalgasının son sınırı 350 ms sonra işaretleniyor.",
+      "question": "Bu ölçümlerle ham sentetik QT değeri kaçtır?",
+      "text": "Bu ölçümlerle ham sentetik QT değeri kaçtır?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "470 ms",
+        "350 ms",
+        "800 ms",
+        "140 ms",
+        "410 ms"
+      ],
+      "correct": 4,
+      "explanations": [
+        "Başlangıç 60 ms iki kez eklenmiştir.",
+        "R tepesini başlangıç alarak 60 ms dışlar.",
+        "R–R döngüsü QT yerine kullanılmıştır.",
+        "Bu yalnız QRS süresidir.",
+        "QRS−60 ms, T sonu 350 ms: toplam 410 ms sentetik geniş kompleks QT."
+      ],
+      "feedback": "QRS−60 ms, T sonu 350 ms: toplam 410 ms sentetik geniş kompleks QT.",
+      "objectiveIds": [
+        "O6"
+      ],
+      "sourceIds": [
+        "BBB2009",
+        "ECG"
+      ],
+      "decisionId": "qt410",
+      "note": "",
+      "ecg": {
+        "mode": "rbbb",
+        "options": {},
+        "leads": [
+          "I",
+          "aVR",
+          "V1"
+        ],
+        "start": 0.74,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C190",
+      "mode": "rbbb",
+      "title": "Sentetik vaka C190",
+      "ariaLabel": "C190 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "57 yaşında kadın hasta. Başvuru: ameliyat sonrası serviste geniş kompleks saptanıyor. Ventriküler kompleksten sonra gelen dalganın anlamı soruluyor.",
+      "question": "T dalgasının temel elektriksel karşılığı nedir?",
+      "text": "T dalgasının temel elektriksel karşılığı nedir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "T: yeni bir atriyal uyarı",
+        "T: atriyal repolarizasyon",
+        "T: gecikmiş sağ ventrikül uyarısı",
+        "T: ventriküler depolarizasyon",
+        "T: ventriküler repolarizasyon"
+      ],
+      "correct": 4,
+      "explanations": [
+        "Yeni P ayrı bir dalga olarak görülür.",
+        "Bu olay genelde QRS altında gizlenir.",
+        "Bu bileşen QRS içinde yer alır.",
+        "Bu olay QRS ile kaydedilir.",
+        "T dalgası ventrikülün elektriksel toparlanmasıdır."
+      ],
+      "feedback": "T dalgası ventrikülün elektriksel toparlanmasıdır.",
+      "objectiveIds": [
+        "O1"
+      ],
+      "sourceIds": [
+        "BBB2009"
+      ],
+      "decisionId": "t",
+      "note": "",
+      "ecg": {
+        "mode": "rbbb",
+        "options": {},
+        "leads": [
+          "I",
+          "aVR",
+          "V1"
+        ],
+        "start": 0.8200000000000001,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C191",
+      "mode": "rbbb",
+      "title": "Sentetik vaka C191",
+      "ariaLabel": "C191 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "72 yaşında erkek hasta. Başvuru: huzurevi kontrolünde tesadüfen geniş QRS saptanıyor. Elektriksel kayıt sürerken nabız muayenesi ayrıca planlanıyor.",
+      "question": "EKG bulgusu ile mekanik nabız arasındaki ilişki için hangi değerlendirme gerekir?",
+      "text": "EKG bulgusu ile mekanik nabız arasındaki ilişki için hangi değerlendirme gerekir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "T genliği atım hacmini verir",
+        "Elektriksel hız nabza birebir eşittir",
+        "Nabız ayrıca klinik olarak bakılır",
+        "PR süresi debiyi verir",
+        "QRS genişliği nabız basıncını verir"
+      ],
+      "correct": 2,
+      "explanations": [
+        "T genliği repolarizasyon voltajıdır.",
+        "Nabız açığı olabilir; eşitlik varsayılamaz.",
+        "EKG elektrik gösterir, nabzı kanıtlamaz.",
+        "PR iletim süresidir, debi ölçmez.",
+        "Genişlik zaman ölçüsüdür, basınç değildir."
+      ],
+      "feedback": "EKG elektrik gösterir, nabzı kanıtlamaz.",
+      "objectiveIds": [
+        "O4"
+      ],
+      "sourceIds": [
+        "BBB2009",
+        "CYCLE"
+      ],
+      "decisionId": "pulse",
+      "note": "",
+      "ecg": {
+        "mode": "rbbb",
+        "options": {},
+        "leads": [
+          "I",
+          "aVR",
+          "V1"
+        ],
+        "start": 0.5,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C192",
+      "mode": "rbbb",
+      "title": "Sentetik vaka C192",
+      "ariaLabel": "C192 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "49 yaşında kadın hasta. Başvuru: yıllık kontrolde önceki EKG ile karşılaştırma yapılıyor. Geniş QRS kaydı klinik bağlamla birlikte değerlendiriliyor.",
+      "question": "Bu hastada ilk yaklaşım ne olmalıdır?",
+      "text": "Bu hastada ilk yaklaşım ne olmalıdır?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "Yalnız görüntüleme istenir",
+        "Karar tamamen hastaya bırakılır",
+        "Yalnızca gözlem yeterlidir",
+        "Klinik bağlamla birlikte değerlendirme",
+        "Hemen taburcu edilir"
+      ],
+      "correct": 3,
+      "explanations": [
+        "İlk adım görüntülemeden önce klinik değerlendirmedir.",
+        "İlk yaklaşım klinik ekip tarafından yönlendirilir.",
+        "Bu bulgu daha aktif bir yaklaşım gerektirebilir; yalnız izlem yetmez.",
+        "Dal bloğu tek başına acil işlem gerektirmez; bağlam önemlidir.",
+        "Bulgu ciddi olabilir; taburcu öncesi değerlendirme gerekir."
+      ],
+      "feedback": "Dal bloğu tek başına acil işlem gerektirmez; bağlam önemlidir.",
+      "objectiveIds": [
+        "O5"
+      ],
+      "sourceIds": [
+        "BBB2009"
+      ],
+      "decisionId": "firstStep_rbbb",
+      "note": "",
+      "ecg": {
+        "mode": "rbbb",
+        "options": {},
+        "leads": [
+          "I",
+          "aVR",
+          "V1"
+        ],
+        "start": 0.58,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C193",
+      "mode": "rbbb",
+      "title": "Sentetik vaka C193",
+      "ariaLabel": "C193 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "65 yaşında erkek hasta. Başvuru: anestezi değerlendirmesinde geniş kompleks fark ediliyor. Ventriküler kompleksin izde temsil ettiği olay ayrıca soruluyor.",
+      "question": "QRS kompleksinin temel elektriksel karşılığı nedir?",
+      "text": "QRS kompleksinin temel elektriksel karşılığı nedir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "QRS: ventriküler repolarizasyon",
+        "QRS: yalnız atriyal repolarizasyon",
+        "QRS: yalnız AV düğüm gecikmesi",
+        "QRS: atriyal depolarizasyon",
+        "QRS: ventriküler depolarizasyon"
+      ],
+      "correct": 4,
+      "explanations": [
+        "Bu olay T dalgasıyla kaydedilir.",
+        "QRS'in ana kaynağı ventrikül kasıdır.",
+        "AV gecikmesi PR aralığında değerlendirilir.",
+        "Bu olay P dalgasıyla kaydedilir.",
+        "QRS ventrikül kasının elektriksel uyarılmasıdır."
+      ],
+      "feedback": "QRS ventrikül kasının elektriksel uyarılmasıdır.",
+      "objectiveIds": [
+        "O1"
+      ],
+      "sourceIds": [
+        "BBB2009"
+      ],
+      "decisionId": "qrs",
+      "note": "",
+      "ecg": {
+        "mode": "rbbb",
+        "options": {},
+        "leads": [
+          "I",
+          "aVR",
+          "V1"
+        ],
+        "start": 0.66,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C194",
+      "mode": "rbbb",
+      "title": "Sentetik vaka C194",
+      "ariaLabel": "C194 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "54 yaşında kadın hasta. Başvuru: check-up paketinde tesadüfen geniş QRS saptanıyor. Yakınması yok; TA 120/78 mmHg.",
+      "question": "Bu klinik tabloda hangi yaklaşım uygundur?",
+      "text": "Bu klinik tabloda hangi yaklaşım uygundur?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "Geniş QRS rutin kontrole bırakılır, değerlendirilmez",
+        "Önce kesin mekanizma sonra hasta bakılır",
+        "Tek derivasyon kesinlik verir",
+        "Her dal bloğu acil servise sevk gerektirir",
+        "Yeni/eski ayrımı, semptomlar ve klinik bağlam belirleyicidir; asemptomatik tesadüfi blok otomatik acil değildir"
+      ],
+      "correct": 4,
+      "explanations": [
+        "Yeni geniş QRS iskemi veya yapısal hastalık açısından değerlendirilir.",
+        "Hasta durumu mekanizmadan önce değerlendirilir.",
+        "Blok tipi ve bağlam tek derivasyonla belirlenmez.",
+        "Asemptomatik, eski blok acil sevk gerektirmez.",
+        "Dal bloğunda aciliyet yeni gelişim, iskemi semptomu veya kalp yetersizliği bulgularıyla belirlenir (ACC/AHA/HRS 2018)."
+      ],
+      "feedback": "Dal bloğunda aciliyet yeni gelişim, iskemi semptomu veya kalp yetersizliği bulgularıyla belirlenir (ACC/AHA/HRS 2018).",
+      "objectiveIds": [
+        "O5"
+      ],
+      "sourceIds": [
+        "BBB2009"
+      ],
+      "decisionId": "incidentalBbb",
+      "note": "",
+      "ecg": {
+        "mode": "rbbb",
+        "options": {},
+        "leads": [
+          "I",
+          "aVR",
+          "V1"
+        ],
+        "start": 0.74,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C195",
+      "mode": "rbbb",
+      "title": "Sentetik vaka C195",
+      "ariaLabel": "C195 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "68 yaşında erkek hasta. Başvuru: kalp yetersizliği izleminde rutin EKG çekiliyor. Eşzamanlı üç derivasyonlu kayıt aşağıda gösteriliyor.",
+      "question": "Bu EKG'de öncelikle hangi tanı düşünülmelidir?",
+      "text": "Bu EKG'de öncelikle hangi tanı düşünülmelidir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "Ventriküler fibrilasyon",
+        "Sağ dal bloğu",
+        "Atriyal fibrilasyon",
+        "Ventriküler erken atım",
+        "İnferior ST yükselmeli iskemi"
+      ],
+      "correct": 1,
+      "explanations": [
+        "Ventriküler fibrilasyon için beklenen bulgular burada yok.",
+        "Tarif edilen bulgular Sağ dal bloğu ile uyumludur.",
+        "Atriyal fibrilasyon için beklenen bulgular burada yok.",
+        "Ventriküler erken atım için beklenen bulgular burada yok.",
+        "İnferior ST yükselmeli iskemi için beklenen bulgular burada yok."
+      ],
+      "feedback": "Tarif edilen bulgular Sağ dal bloğu ile uyumludur.",
+      "objectiveIds": [
+        "O2"
+      ],
+      "sourceIds": [
+        "BBB2009"
+      ],
+      "decisionId": "ddx_rbbb",
+      "note": "",
+      "ecg": {
+        "mode": "rbbb",
+        "options": {},
+        "leads": [
+          "I",
+          "aVR",
+          "V1"
+        ],
+        "start": 0.8200000000000001,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C196",
+      "mode": "normal",
+      "title": "Sentetik vaka C196",
+      "ariaLabel": "C196 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "26 yaşında kadın hasta. Başvuru: kalibrasyon eğitimi amaçlı örnek kayıtta. ST segmentinin hangi noktadan ölçüldüğü ayrıca soruluyor.",
+      "question": "ST yüksekliği hangi ölçüm noktasından değerlendirilir?",
+      "text": "ST yüksekliği hangi ölçüm noktasından değerlendirilir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "R tepe voltajı ST sayılır",
+        "R–R süresi ST sayılır",
+        "T tepesi J noktası sayılır",
+        "J noktasından uygun taban ile ölçülür",
+        "P tepe voltajı ST sayılır"
+      ],
+      "correct": 3,
+      "explanations": [
+        "R genliği depolarizasyondur, ST değildir.",
+        "R–R zaman ölçüsüdür, voltaj değildir.",
+        "J, QRS'in bittiği yerdir; T daha sonradır.",
+        "ST yüksekliği J sonrası bir noktadan alınır.",
+        "P atriyal bir dalgadır, ST değildir."
+      ],
+      "feedback": "ST yüksekliği J sonrası bir noktadan alınır.",
+      "objectiveIds": [
+        "O6"
+      ],
+      "sourceIds": [
+        "ECG",
+        "CYCLE"
+      ],
+      "decisionId": "st",
+      "note": "",
+      "ecg": {
+        "mode": "normal",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V3"
+        ],
+        "start": 0.5,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C197",
+      "mode": "pvc",
+      "title": "Sentetik vaka C197",
+      "ariaLabel": "C197 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "50 yaşında erkek hasta. Başvuru: holter değerlendirmesinde ortalama hız hesaplanıyor. Ventriküler kompleksin izde temsil ettiği olay ayrıca soruluyor.",
+      "question": "QRS kompleksinin temel elektriksel karşılığı nedir?",
+      "text": "QRS kompleksinin temel elektriksel karşılığı nedir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "QRS: yalnız atriyal repolarizasyon",
+        "QRS: ventriküler repolarizasyon",
+        "QRS: atriyal depolarizasyon",
+        "QRS: ventriküler depolarizasyon",
+        "QRS: yalnız AV düğüm gecikmesi"
+      ],
+      "correct": 3,
+      "explanations": [
+        "QRS'in ana kaynağı ventrikül kasıdır.",
+        "Bu olay T dalgasıyla kaydedilir.",
+        "Bu olay P dalgasıyla kaydedilir.",
+        "QRS ventrikül kasının elektriksel uyarılmasıdır.",
+        "AV gecikmesi PR aralığında değerlendirilir."
+      ],
+      "feedback": "QRS ventrikül kasının elektriksel uyarılmasıdır.",
+      "objectiveIds": [
+        "O1"
+      ],
+      "sourceIds": [
+        "VA2022"
+      ],
+      "decisionId": "qrs",
+      "note": "",
+      "ecg": {
+        "mode": "pvc",
+        "options": {},
+        "leads": [
+          "II",
+          "aVR",
+          "V1"
+        ],
+        "start": 0.3,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C198",
+      "mode": "stemi",
+      "title": "Sentetik vaka C198",
+      "ariaLabel": "C198 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "55 yaşında kadın hasta. Başvuru: komşu derivasyonlar birlikte değerlendiriliyor. QRS’den kısa süre önce ayrı bir dalga seçiliyor.",
+      "question": "P dalgasının temel elektriksel karşılığı nedir?",
+      "text": "P dalgasının temel elektriksel karşılığı nedir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "P: atriyal depolarizasyon",
+        "P: atriyal repolarizasyon",
+        "P: yalnız AV düğüm iletimi",
+        "P: ventriküler depolarizasyon",
+        "P: ventriküler repolarizasyon"
+      ],
+      "correct": 0,
+      "explanations": [
+        "P dalgası atriyumun elektriksel uyarılmasıdır.",
+        "Atriyal repolarizasyon genelde QRS altında gizlenir.",
+        "AV düğüm gecikmesi PR aralığında değerlendirilir.",
+        "Bu olay QRS ile kaydedilir.",
+        "Bu olay T dalgası ile kaydedilir."
+      ],
+      "feedback": "P dalgası atriyumun elektriksel uyarılmasıdır.",
+      "objectiveIds": [
+        "O1"
+      ],
+      "sourceIds": [
+        "ACS2023"
+      ],
+      "decisionId": "p",
+      "note": "",
+      "ecg": {
+        "mode": "stemi",
+        "options": {},
+        "leads": [
+          "V2",
+          "V3",
+          "V4"
+        ],
+        "start": 0.66,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C199",
+      "mode": "flutter",
+      "title": "Sentetik vaka C199",
+      "ariaLabel": "C199 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "63 yaşında erkek hasta. Başvuru: altı saniyelik izlem penceresi değerlendiriliyor. Altı saniyelik bir izlem penceresinde atriyal ve ventriküler döngüler ayrı ayrı sayılıyor.",
+      "question": "Bu izlem penceresinde kaç atriyal ve ventriküler döngü beklenir?",
+      "text": "Bu izlem penceresinde kaç atriyal ve ventriküler döngü beklenir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "150/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "104/68 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%96"
+        }
+      ],
+      "options": [
+        "60 F ve 15 QRS",
+        "15 F ve 15 QRS",
+        "15 F ve 30 QRS",
+        "30 F ve 30 QRS",
+        "30 F ve 15 QRS"
+      ],
+      "correct": 4,
+      "explanations": [
+        "Atriyal frekans yanlışlıkla iki katına çıkarılmıştır.",
+        "Atriyal sayım 300/dk yerine 150/dk alınmıştır.",
+        "Atriyal ve ventriküler kaynak sayıları ters çevrilmiştir.",
+        "Ventriküler sayıyı atriyal sayıya eşitlemek 1:1 varsayımıdır.",
+        "300/dk=5 F/s ve 150/dk=2,5 QRS/s:6 s’de 30 F ve 15 QRS."
+      ],
+      "feedback": "300/dk=5 F/s ve 150/dk=2,5 QRS/s:6 s’de 30 F ve 15 QRS.",
+      "objectiveIds": [
+        "O6"
+      ],
+      "sourceIds": [
+        "SVT2019",
+        "ECG"
+      ],
+      "decisionId": "flutterCount",
+      "note": "",
+      "ecg": {
+        "mode": "flutter",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V1"
+        ],
+        "start": 0.74,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "C200",
+      "mode": "rbbb",
+      "title": "Sentetik vaka C200",
+      "ariaLabel": "C200 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "58 yaşında kadın hasta. Başvuru: PR ve QRS birlikte ölçülüyor. QRS’den kısa süre önce ayrı bir dalga seçiliyor.",
+      "question": "P dalgasının temel elektriksel karşılığı nedir?",
+      "text": "P dalgasının temel elektriksel karşılığı nedir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "P: atriyal depolarizasyon",
+        "P: atriyal repolarizasyon",
+        "P: ventriküler depolarizasyon",
+        "P: ventriküler repolarizasyon",
+        "P: yalnız AV düğüm iletimi"
+      ],
+      "correct": 0,
+      "explanations": [
+        "P dalgası atriyumun elektriksel uyarılmasıdır.",
+        "Atriyal repolarizasyon genelde QRS altında gizlenir.",
+        "Bu olay QRS ile kaydedilir.",
+        "Bu olay T dalgası ile kaydedilir.",
+        "AV düğüm gecikmesi PR aralığında değerlendirilir."
+      ],
+      "feedback": "P dalgası atriyumun elektriksel uyarılmasıdır.",
+      "objectiveIds": [
+        "O1"
+      ],
+      "sourceIds": [
+        "BBB2009"
+      ],
+      "decisionId": "p",
+      "note": "",
+      "ecg": {
+        "mode": "rbbb",
+        "options": {},
+        "leads": [
+          "I",
+          "aVR",
+          "V1"
+        ],
+        "start": 0.8200000000000001,
+        "seconds": 3.2
+      }
+    }
+  ],
+  "questions": [
+    {
+      "id": "Q001",
+      "mode": "normal",
+      "title": "Sentetik değerlendirme Q001",
+      "ariaLabel": "Q001 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "24 yaşında erkek hasta. Başvuru: askerlik sağlık kurulu muayenesinde. İki ardışık R tepesi arası 800 ms ölçülüyor.",
+      "question": "Bu döngü süresiyle elektriksel hız yaklaşık kaçtır?",
+      "text": "Bu döngü süresiyle elektriksel hız yaklaşık kaçtır?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "75/dk",
+        "60/dk",
+        "150/dk",
+        "120/dk",
+        "90/dk"
+      ],
+      "correct": 0,
+      "explanations": [
+        "R–R 800 ms ise 60/0,8=75/dk elektriksel hızdır.",
+        "60/dk 1000 ms gerektirir;800 ms değil.",
+        "150/dk 400 ms gerektirir.",
+        "120/dk 500 ms gerektirir.",
+        "90/dk yaklaşık 667 ms gerektirir."
+      ],
+      "feedback": "R–R 800 ms ise 60/0,8=75/dk elektriksel hızdır.",
+      "objectiveIds": [
+        "O6"
+      ],
+      "sourceIds": [
+        "ECG",
+        "CYCLE"
+      ],
+      "decisionId": "rr800",
+      "note": "",
+      "ecg": {
+        "mode": "normal",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V3"
+        ],
+        "start": 0.5,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q002",
+      "mode": "normal",
+      "title": "Sentetik değerlendirme Q002",
+      "ariaLabel": "Q002 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "55 yaşında kadın hasta. Başvuru: menopoz sonrası rutin kardiyoloji kontrolünde. Kaliperle P’nin ilk sapması QRS’den 215 ms önce, QRS’in ilk sapması 40 ms önce işaretleniyor.",
+      "question": "Bu ölçümlerle PR aralığı kaç milisaniyedir?",
+      "text": "Bu ölçümlerle PR aralığı kaç milisaniyedir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "130 ms",
+        "255 ms",
+        "175 ms",
+        "155 ms",
+        "215 ms"
+      ],
+      "correct": 2,
+      "explanations": [
+        "130 ms P merkezinden QRS başlangıcına gitme hatasıdır.",
+        "255 ms P başlangıcından QRS sonuna ölçüm hatasıdır.",
+        "P ilk sapması−215 ms, QRS ilk sapması−40 ms: fark 175 ms.",
+        "155 ms verilen iki başlangıcın farkı değildir.",
+        "215 ms P başlangıcından R tepesine ölçüm hatasıdır."
+      ],
+      "feedback": "P ilk sapması−215 ms, QRS ilk sapması−40 ms: fark 175 ms.",
+      "objectiveIds": [
+        "O6"
+      ],
+      "sourceIds": [
+        "ECG",
+        "CYCLE"
+      ],
+      "decisionId": "pr175",
+      "note": "",
+      "ecg": {
+        "mode": "normal",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V3"
+        ],
+        "start": 0.58,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q003",
+      "mode": "normal",
+      "title": "Sentetik değerlendirme Q003",
+      "ariaLabel": "Q003 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "31 yaşında erkek hasta. Başvuru: pilotluk sağlık raporu için başvuruyor. Sistematik okumada hangi derivasyonların ön duvarı temsil ettiği gözden geçiriliyor.",
+      "question": "V3 ve V4 derivasyonları hangi bölgeyi yansıtır?",
+      "text": "V3 ve V4 derivasyonları hangi bölgeyi yansıtır?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "Anterior duvar",
+        "Sağ ventrikül yalnızca",
+        "İnferior duvar",
+        "Lateral duvar",
+        "Atriyum yalnızca"
+      ],
+      "correct": 0,
+      "explanations": [
+        "V3–V4 kalbin ön (anterior) duvarını yansıtır.",
+        "Sağ ventrikül daha çok V1 ve sağ prekordiyal derivasyonlarla ilişkilidir.",
+        "İnferior duvar II, III, aVF ile değerlendirilir, V3–V4 ile değil.",
+        "Lateral duvar I, aVL, V5–V6 ile değerlendirilir.",
+        "Atriyal etkinlik tek bir prekordiyal çiftle özgül olarak gösterilmez."
+      ],
+      "feedback": "V3–V4 kalbin ön (anterior) duvarını yansıtır.",
+      "objectiveIds": [
+        "O3"
+      ],
+      "sourceIds": [
+        "ECG",
+        "CYCLE"
+      ],
+      "decisionId": "anteriorLeadGroup",
+      "note": "",
+      "ecg": {
+        "mode": "normal",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V3"
+        ],
+        "start": 0.66,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q004",
+      "mode": "normal",
+      "title": "Sentetik değerlendirme Q004",
+      "ariaLabel": "Q004 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "49 yaşında kadın hasta. Başvuru: diyabet izleminde rutin EKG isteniyor. Monitörde ayrık, tekrarlayan bir dalganın seçilip seçilemediği sorgulanıyor.",
+      "question": "Bu ritimde ayrık bir P dalgası seçilebiliyor mu?",
+      "text": "Bu ritimde ayrık bir P dalgası seçilebiliyor mu?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "Hayır, seçilemiyor",
+        "Evet, her QRS öncesinde var",
+        "Yalnızca ara sıra var",
+        "Yalnızca aVR'de var",
+        "Evet ama QRS'den sonra"
+      ],
+      "correct": 1,
+      "explanations": [
+        "Bu örnekte ayrık P dalgası seçilebiliyor.",
+        "Bu örnekte her QRS'den önce ayrık bir P dalgası seçilebiliyor.",
+        "Bu örnekte P dalgası her atımda düzenli biçimde bulunur.",
+        "P dalgası tüm derivasyonlarda aynı zamanlamada oluşur; tek derivasyona özgü değildir.",
+        "P dalgası bu örnekte QRS'den önce gelir."
+      ],
+      "feedback": "Bu örnekte her QRS'den önce ayrık bir P dalgası seçilebiliyor.",
+      "objectiveIds": [
+        "O6"
+      ],
+      "sourceIds": [
+        "ECG",
+        "CYCLE"
+      ],
+      "decisionId": "pWaveVisibleYesBank",
+      "note": "",
+      "ecg": {
+        "mode": "normal",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V3"
+        ],
+        "start": 0.74,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q005",
+      "mode": "normal",
+      "title": "Sentetik değerlendirme Q005",
+      "ariaLabel": "Q005 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "67 yaşında erkek hasta. Başvuru: katarakt ameliyatı öncesi anestezi değerlendirmesinde. P dalgası ile QRS arasındaki ilişki kaliperle işaretleniyor.",
+      "question": "PR aralığı hangi iki sınır arasında ölçülür?",
+      "text": "PR aralığı hangi iki sınır arasında ölçülür?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "QRS sonundan T sonuna",
+        "P sonundan QRS sonuna",
+        "P başlangıcından QRS başlangıcına",
+        "P tepesinden R tepesine",
+        "Bir R'den sonrakine"
+      ],
+      "correct": 2,
+      "explanations": [
+        "Bu aralık PR değil, repolarizasyon bölgesidir.",
+        "Bu, PR segmentini QRS ile karıştırır.",
+        "PR aralığı bu iki noktayla ölçülür.",
+        "Bu ölçüm PR tanımına uymaz.",
+        "Bu R–R aralığıdır, PR değildir."
+      ],
+      "feedback": "PR aralığı bu iki noktayla ölçülür.",
+      "objectiveIds": [
+        "O6"
+      ],
+      "sourceIds": [
+        "ECG",
+        "CYCLE"
+      ],
+      "decisionId": "pr",
+      "note": "",
+      "ecg": {
+        "mode": "normal",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V3"
+        ],
+        "start": 0.8200000000000001,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q006",
+      "mode": "normal",
+      "title": "Sentetik değerlendirme Q006",
+      "ariaLabel": "Q006 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "28 yaşında kadın hasta. Başvuru: doğum sonrası rutin kontrolde. Kısa süreli bir kayıt elde ediliyor; önceki öykü ve ek testler henüz yok.",
+      "question": "Bu bulgudan etiyoloji ve risk için hangi genel sınır çıkarılabilir?",
+      "text": "Bu bulgudan etiyoloji ve risk için hangi genel sınır çıkarılabilir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "Hız tek başına dolaşımı gösterir",
+        "Kısa kayıt başlangıç zamanını verir",
+        "QRS genişliği tek başına riski verir",
+        "Örüntü desteklenir, neden ayrıca sorulur",
+        "P ekseni kesin odağı belirler"
+      ],
+      "correct": 3,
+      "explanations": [
+        "Nabız ve basınç ayrıca değerlendirilir.",
+        "Bir pencere toplam süreyi göstermez.",
+        "Risk için klinik bağlam da gerekir.",
+        "EKG bulgusu tanı verir, nedeni klinik öykü belirler.",
+        "P ekseni ipucudur, kesin yer vermez."
+      ],
+      "feedback": "EKG bulgusu tanı verir, nedeni klinik öykü belirler.",
+      "objectiveIds": [
+        "O5"
+      ],
+      "sourceIds": [
+        "ECG",
+        "CYCLE"
+      ],
+      "decisionId": "limits",
+      "note": "",
+      "ecg": {
+        "mode": "normal",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V3"
+        ],
+        "start": 0.5,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q007",
+      "mode": "normal",
+      "title": "Sentetik değerlendirme Q007",
+      "ariaLabel": "Q007 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "43 yaşında erkek hasta. Başvuru: yıllık iş sağlığı taramasında. Standart 12 derivasyonluk kayıt üzerinde derivasyon grupları gözden geçiriliyor.",
+      "question": "aVR, aVL ve aVF birlikte hangi derivasyon grubunu oluşturur?",
+      "text": "aVR, aVL ve aVF birlikte hangi derivasyon grubunu oluşturur?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "Artırılmış ekstremite derivasyonları",
+        "Yalnız sağ göğüs derivasyonları",
+        "Bipolar ekstremite derivasyonları",
+        "Özefagus derivasyonları",
+        "Prekordiyal derivasyonlar"
+      ],
+      "correct": 0,
+      "explanations": [
+        "aVR, aVL ve aVF birlikte artırılmış (unipolar) ekstremite derivasyon grubunu oluşturur.",
+        "Sağ göğüs derivasyonları ayrı bir prekordiyal settir; aVR/aVL/aVF değildir.",
+        "Bipolar ekstremite derivasyonları I, II, III'tür; aVR/aVL/aVF unipolardır.",
+        "Özefagus derivasyonu standart 12 derivasyonluk sette yer almaz.",
+        "Prekordiyal grup V1–V6'dır; aVR/aVL/aVF bu gruba girmez."
+      ],
+      "feedback": "aVR, aVL ve aVF birlikte artırılmış (unipolar) ekstremite derivasyon grubunu oluşturur.",
+      "objectiveIds": [
+        "O3"
+      ],
+      "sourceIds": [
+        "ECG",
+        "CYCLE"
+      ],
+      "decisionId": "augmentedGroup",
+      "note": "",
+      "ecg": {
+        "mode": "normal",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V3"
+        ],
+        "start": 0.58,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q008",
+      "mode": "normal",
+      "title": "Sentetik değerlendirme Q008",
+      "ariaLabel": "Q008 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "36 yaşında kadın hasta. Başvuru: diş implantı öncesi genel değerlendirmede. Eşzamanlı üç derivasyonlu kayıt aşağıda gösteriliyor.",
+      "question": "Bu EKG'de öncelikle hangi tanı düşünülmelidir?",
+      "text": "Bu EKG'de öncelikle hangi tanı düşünülmelidir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "Supraventriküler taşikardi",
+        "Anterior ST yükselmeli iskemi",
+        "Ventriküler taşikardi",
+        "Fokal atriyal taşikardi",
+        "Normal sinüs ritmi"
+      ],
+      "correct": 4,
+      "explanations": [
+        "Supraventriküler taşikardi için beklenen bulgular burada yok.",
+        "Anterior ST yükselmeli iskemi için beklenen bulgular burada yok.",
+        "Ventriküler taşikardi için beklenen bulgular burada yok.",
+        "Fokal atriyal taşikardi için beklenen bulgular burada yok.",
+        "Tarif edilen bulgular Normal sinüs ritmi ile uyumludur."
+      ],
+      "feedback": "Tarif edilen bulgular Normal sinüs ritmi ile uyumludur.",
+      "objectiveIds": [
+        "O2"
+      ],
+      "sourceIds": [
+        "ECG",
+        "CYCLE"
+      ],
+      "decisionId": "ddx_normal",
+      "note": "",
+      "ecg": {
+        "mode": "normal",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V3"
+        ],
+        "start": 0.66,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q009",
+      "mode": "normal",
+      "title": "Sentetik değerlendirme Q009",
+      "ariaLabel": "Q009 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "59 yaşında erkek hasta. Başvuru: hipertansiyon izleminde rutin EKG çekiliyor. Ventriküler kompleksten sonra gelen dalganın anlamı soruluyor.",
+      "question": "T dalgasının temel elektriksel karşılığı nedir?",
+      "text": "T dalgasının temel elektriksel karşılığı nedir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "T: yeni bir atriyal uyarı",
+        "T: gecikmiş sağ ventrikül uyarısı",
+        "T: ventriküler depolarizasyon",
+        "T: atriyal repolarizasyon",
+        "T: ventriküler repolarizasyon"
+      ],
+      "correct": 4,
+      "explanations": [
+        "Yeni P ayrı bir dalga olarak görülür.",
+        "Bu bileşen QRS içinde yer alır.",
+        "Bu olay QRS ile kaydedilir.",
+        "Bu olay genelde QRS altında gizlenir.",
+        "T dalgası ventrikülün elektriksel toparlanmasıdır."
+      ],
+      "feedback": "T dalgası ventrikülün elektriksel toparlanmasıdır.",
+      "objectiveIds": [
+        "O1"
+      ],
+      "sourceIds": [
+        "ECG",
+        "CYCLE"
+      ],
+      "decisionId": "t",
+      "note": "",
+      "ecg": {
+        "mode": "normal",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V3"
+        ],
+        "start": 0.74,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q010",
+      "mode": "normal",
+      "title": "Sentetik değerlendirme Q010",
+      "ariaLabel": "Q010 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "21 yaşında kadın hasta. Başvuru: üniversite spor takımı seçmelerinde. Yakınması yok; muayene ve vitaller normal.",
+      "question": "Bu klinik tabloda hangi yaklaşım uygundur?",
+      "text": "Bu klinik tabloda hangi yaklaşım uygundur?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "Tek derivasyon kesinlik verir",
+        "Normal EKG gelecekteki hastalığı dışlar",
+        "Semptomla acil değerlendirme gerekir",
+        "Önce kesin mekanizma sonra hasta bakılır",
+        "Asemptomatik normal EKG: rutin değerlendirme ve izlem"
+      ],
+      "correct": 4,
+      "explanations": [
+        "Değerlendirme tek derivasyonla tamamlanmaz.",
+        "Tek normal EKG ileride gelişecek hastalığı dışlamaz.",
+        "Tabloda acil semptom yok; aciliyet bulgu ve belirtiye bağlanır.",
+        "Hasta durumu mekanizmadan önce değerlendirilir.",
+        "Yakınmasız hastada normal sinüs ritmi acil işlem gerektirmez; klinik bağlamla rutin izlem sürer."
+      ],
+      "feedback": "Yakınmasız hastada normal sinüs ritmi acil işlem gerektirmez; klinik bağlamla rutin izlem sürer.",
+      "objectiveIds": [
+        "O5"
+      ],
+      "sourceIds": [
+        "ECG",
+        "CYCLE"
+      ],
+      "decisionId": "routineNormal",
+      "note": "",
+      "ecg": {
+        "mode": "normal",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V3"
+        ],
+        "start": 0.8200000000000001,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q011",
+      "mode": "normal",
+      "title": "Sentetik değerlendirme Q011",
+      "ariaLabel": "Q011 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "65 yaşında kadın hasta. Başvuru: kalça protezi öncesi anestezi değerlendirmesinde. Yakınma yok; bulgu rutin değerlendirmede saptanıyor.",
+      "question": "Bu hastada ilk yaklaşım ne olmalıdır?",
+      "text": "Bu hastada ilk yaklaşım ne olmalıdır?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "Yalnızca gözlem yeterlidir",
+        "Yalnız görüntüleme istenir",
+        "Hemen taburcu edilir",
+        "Bulgu yoksa rutin izlem yeterlidir",
+        "Karar tamamen hastaya bırakılır"
+      ],
+      "correct": 3,
+      "explanations": [
+        "Bu bulgu daha aktif bir yaklaşım gerektirebilir; yalnız izlem yetmez.",
+        "İlk adım görüntülemeden önce klinik değerlendirmedir.",
+        "Bulgu ciddi olabilir; taburcu öncesi değerlendirme gerekir.",
+        "Belirti ve ek risk yoksa acil işlem gerekmez.",
+        "İlk yaklaşım klinik ekip tarafından yönlendirilir."
+      ],
+      "feedback": "Belirti ve ek risk yoksa acil işlem gerekmez.",
+      "objectiveIds": [
+        "O5"
+      ],
+      "sourceIds": [
+        "ECG",
+        "CYCLE"
+      ],
+      "decisionId": "firstStep_normal",
+      "note": "",
+      "ecg": {
+        "mode": "normal",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V3"
+        ],
+        "start": 0.5,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q012",
+      "mode": "normal",
+      "title": "Sentetik değerlendirme Q012",
+      "ariaLabel": "Q012 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "30 yaşında erkek hasta. Başvuru: düzenli koşucu, yıllık sağlık kontrolünde. Elektriksel kayıt sürerken nabız muayenesi ayrıca planlanıyor.",
+      "question": "EKG bulgusu ile mekanik nabız arasındaki ilişki için hangi değerlendirme gerekir?",
+      "text": "EKG bulgusu ile mekanik nabız arasındaki ilişki için hangi değerlendirme gerekir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "T genliği atım hacmini verir",
+        "PR süresi debiyi verir",
+        "QRS genişliği nabız basıncını verir",
+        "Nabız ayrıca klinik olarak bakılır",
+        "Elektriksel hız nabza birebir eşittir"
+      ],
+      "correct": 3,
+      "explanations": [
+        "T genliği repolarizasyon voltajıdır.",
+        "PR iletim süresidir, debi ölçmez.",
+        "Genişlik zaman ölçüsüdür, basınç değildir.",
+        "EKG elektrik gösterir, nabzı kanıtlamaz.",
+        "Nabız açığı olabilir; eşitlik varsayılamaz."
+      ],
+      "feedback": "EKG elektrik gösterir, nabzı kanıtlamaz.",
+      "objectiveIds": [
+        "O4"
+      ],
+      "sourceIds": [
+        "ECG",
+        "CYCLE"
+      ],
+      "decisionId": "pulse",
+      "note": "",
+      "ecg": {
+        "mode": "normal",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V3"
+        ],
+        "start": 0.58,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q013",
+      "mode": "normal",
+      "title": "Sentetik değerlendirme Q013",
+      "ariaLabel": "Q013 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "54 yaşında kadın hasta. Başvuru: tiroid izleminde rutin EKG isteniyor. Eşzamanlı üç derivasyonlu kayıt aşağıda gösteriliyor.",
+      "question": "Bu ritim hangi sınıfa girer?",
+      "text": "Bu ritim hangi sınıfa girer?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "Kaotik, organize değil",
+        "Düzenli dar kompleks, hızlı",
+        "Düzensiz dar kompleks",
+        "Düzenli geniş kompleks",
+        "Düzenli dar kompleks, normal hız"
+      ],
+      "correct": 4,
+      "explanations": [
+        "Bu örnekte düzenli bir kompleks seçilebiliyor, kaotik değil.",
+        "Bu örnekte hız bu kadar yüksek değil.",
+        "Bu örnekte ritim düzenli, düzensiz değil.",
+        "Bu örnekte QRS dar, bu kadar geniş değil.",
+        "Hız yaklaşık 75/dk, ritim düzenli ve QRS dar."
+      ],
+      "feedback": "Hız yaklaşık 75/dk, ritim düzenli ve QRS dar.",
+      "objectiveIds": [
+        "O2"
+      ],
+      "sourceIds": [
+        "ECG",
+        "CYCLE"
+      ],
+      "decisionId": "rhythmClass_normal",
+      "note": "",
+      "ecg": {
+        "mode": "normal",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V3"
+        ],
+        "start": 0.66,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q014",
+      "mode": "normal",
+      "title": "Sentetik değerlendirme Q014",
+      "ariaLabel": "Q014 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "40 yaşında erkek hasta. Başvuru: uzun yol sürücü belgesi muayenesinde. Aynı kayıt üzerinde farklı bir derivasyon grubuna geçildiğinde görünüm değişiyor.",
+      "question": "Derivasyon seçimini değiştirmenin bulguya etkisi nedir?",
+      "text": "Derivasyon seçimini değiştirmenin bulguya etkisi nedir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "Derivasyon aynı kaynağın farklı görünümüdür",
+        "Tüm lead'ler aynı şekli gösterir",
+        "Tek lead 12 derivasyona eşittir",
+        "Negatif QRS ventrikül kaynağını kanıtlar",
+        "Lead değiştirmek ritmi değiştirir"
+      ],
+      "correct": 0,
+      "explanations": [
+        "Lead değiştirmek şekli değiştirir, ritmi değiştirmez.",
+        "Her derivasyon farklı açıdan bakar.",
+        "Diğer derivasyonlar ek bilgi taşır.",
+        "Polarite yön farkından da olabilir.",
+        "Görünüm değişir, kaynak aynı kalır."
+      ],
+      "feedback": "Lead değiştirmek şekli değiştirir, ritmi değiştirmez.",
+      "objectiveIds": [
+        "O3"
+      ],
+      "sourceIds": [
+        "ECG",
+        "CYCLE"
+      ],
+      "decisionId": "leadAll",
+      "note": "",
+      "ecg": {
+        "mode": "normal",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V3"
+        ],
+        "start": 0.74,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q015",
+      "mode": "normal",
+      "title": "Sentetik değerlendirme Q015",
+      "ariaLabel": "Q015 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "27 yaşında kadın hasta. Başvuru: yeni işe giriş sağlık muayenesinde. Sistematik okumada V1–V2’nin hangi bölgeyi yansıttığı gözden geçiriliyor.",
+      "question": "V1 ve V2 derivasyonları hangi bölgeyi yansıtır?",
+      "text": "V1 ve V2 derivasyonları hangi bölgeyi yansıtır?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "Septum ve sağ ventrikül yakını",
+        "Sadece sağ atriyum",
+        "Sol lateral duvar",
+        "İnferior duvar",
+        "Yüksek lateral duvar"
+      ],
+      "correct": 0,
+      "explanations": [
+        "V1–V2 septal bölgeyi ve sağ ventrikülün yakınını yansıtır.",
+        "Sağ atriyum tek başına V1–V2 ile özgül olarak tanımlanmaz.",
+        "Sol lateral duvar V5–V6 ve I, aVL ile değerlendirilir.",
+        "İnferior duvar II, III, aVF ile değerlendirilir.",
+        "Yüksek lateral duvar aVL ile değerlendirilir."
+      ],
+      "feedback": "V1–V2 septal bölgeyi ve sağ ventrikülün yakınını yansıtır.",
+      "objectiveIds": [
+        "O3"
+      ],
+      "sourceIds": [
+        "ECG",
+        "CYCLE"
+      ],
+      "decisionId": "precordialSeptal",
+      "note": "",
+      "ecg": {
+        "mode": "normal",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V3"
+        ],
+        "start": 0.8200000000000001,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q016",
+      "mode": "af",
+      "title": "Sentetik değerlendirme Q016",
+      "ariaLabel": "Q016 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "62 yaşında erkek hasta. Başvuru: iş stresi sonrası çarpıntı hissiyle başvuruyor. Nabız düzensiz alınıyor; monitörde dar QRS’ler arasında değişken aralıklar ve seçilemeyen bir atriyal dalga görülüyor.",
+      "question": "Bu EKG bulgularıyla en uyumlu ritim örüntüsü hangisidir?",
+      "text": "Bu EKG bulgularıyla en uyumlu ritim örüntüsü hangisidir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "78/dk düzensiz"
+        },
+        {
+          "k": "TA",
+          "v": "126/80 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%97"
+        }
+      ],
+      "options": [
+        "Atriyal flutter",
+        "Sık PVC",
+        "Fokal atriyal taşikardi",
+        "Atriyal fibrilasyon",
+        "Sinüs aritmisi"
+      ],
+      "correct": 3,
+      "explanations": [
+        "Flutter'da düzenli iletim olur; burada düzensiz.",
+        "PVC'de tek erken geniş atım olur; burada tüm atımlar dar ve düzensiz.",
+        "Fokal AT'de düzenli P-QRS ilişkisi olur; burada yok.",
+        "P yok ve R–R düzensiz: AF.",
+        "Sinüs aritmisinde her atımda P vardır; burada yok."
+      ],
+      "feedback": "P yok ve R–R düzensiz: AF.",
+      "objectiveIds": [
+        "O2"
+      ],
+      "sourceIds": [
+        "AF2024"
+      ],
+      "decisionId": "af",
+      "note": "",
+      "ecg": {
+        "mode": "af",
+        "options": {
+          "afProfile": "controlled"
+        },
+        "leads": [
+          "II",
+          "aVF",
+          "V1"
+        ],
+        "start": 0.5,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q017",
+      "mode": "af",
+      "title": "Sentetik değerlendirme Q017",
+      "ariaLabel": "Q017 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "59 yaşında kadın hasta. Başvuru: kafein alımı sonrası çarpıntı tarif ediyor. Aynı izlem şeridinde ardışık R–R aralıkları 620, 870 ve 710 ms olarak ölçülüyor.",
+      "question": "Bu ritmin hızı en uygun şekilde nasıl değerlendirilir?",
+      "text": "Bu ritmin hızı en uygun şekilde nasıl değerlendirilir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "78/dk düzensiz"
+        },
+        {
+          "k": "TA",
+          "v": "126/80 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%97"
+        }
+      ],
+      "options": [
+        "En uzun R–R ortalamadır",
+        "En kısa R–R ortalamadır",
+        "Taban dalgası sayısı hızdır",
+        "Önceki hız geçerli sayılır",
+        "Birden fazla R–R birlikte incelenir"
+      ],
+      "correct": 4,
+      "explanations": [
+        "En uzun aralık yalnız o anki en düşük hızdır.",
+        "En kısa aralık yalnız o anki en yüksek hızdır.",
+        "Taban dalgaları atriyaldir, ventrikül hızını vermez.",
+        "Ritim değişince yeni hız yeniden ölçülmeli.",
+        "Tek aralık yanıltır; birkaç atım karşılaştırılmalı."
+      ],
+      "feedback": "Tek aralık yanıltır; birkaç atım karşılaştırılmalı.",
+      "objectiveIds": [
+        "O1"
+      ],
+      "sourceIds": [
+        "AF2024"
+      ],
+      "decisionId": "afRR",
+      "note": "",
+      "ecg": {
+        "mode": "af",
+        "options": {
+          "afProfile": "controlled"
+        },
+        "leads": [
+          "II",
+          "aVF",
+          "V1"
+        ],
+        "start": 0.58,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q018",
+      "mode": "af",
+      "title": "Sentetik değerlendirme Q018",
+      "ariaLabel": "Q018 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "78 yaşında erkek hasta. Başvuru: düşme sonrası acil serviste nabzı düzensiz bulunuyor. Nabız düzensiz; monitör hem yavaş hem hızlı seyreden düzensiz dar kompleks dönemleri kaydediyor.",
+      "question": "Ventrikül hız profili ile atriyal köken birlikte nasıl yorumlanır?",
+      "text": "Ventrikül hız profili ile atriyal köken birlikte nasıl yorumlanır?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "78/dk düzensiz"
+        },
+        {
+          "k": "TA",
+          "v": "126/80 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%97"
+        }
+      ],
+      "options": [
+        "Kontrollü profil AF'yi ortadan kaldırır",
+        "Düzensizlik sürer, hızlı profilde R–R kısalır",
+        "Kontrollüde PR yeniden ölçülür",
+        "Hızlı profil VT gerektirir",
+        "Hızlı profilde sinüs P döner"
+      ],
+      "correct": 1,
+      "explanations": [
+        "Hız yavaşlasa da düzensizlik sürer.",
+        "Her iki profil de düzensiz, yalnız hız farklı.",
+        "AF'de PR hiçbir profilde ölçülmez.",
+        "İkisinde de QRS dar kalır, VT değildir.",
+        "Hız artsa da ayrı P oluşmaz."
+      ],
+      "feedback": "Her iki profil de düzensiz, yalnız hız farklı.",
+      "objectiveIds": [
+        "O1"
+      ],
+      "sourceIds": [
+        "AF2024"
+      ],
+      "decisionId": "afProfile",
+      "note": "",
+      "ecg": {
+        "mode": "af",
+        "options": {
+          "afProfile": "controlled"
+        },
+        "leads": [
+          "II",
+          "aVF",
+          "V1"
+        ],
+        "start": 0.66,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q019",
+      "mode": "af",
+      "title": "Sentetik değerlendirme Q019",
+      "ariaLabel": "Q019 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "55 yaşında kadın hasta. Başvuru: tiroid izlem polikliniğinde rutin EKG çekiliyor. Nabız düzensiz; ritim ve hız kontrolü seçenekleri değerlendiriliyor.",
+      "question": "Bu hastada ilk yaklaşım ne olmalıdır?",
+      "text": "Bu hastada ilk yaklaşım ne olmalıdır?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "78/dk düzensiz"
+        },
+        {
+          "k": "TA",
+          "v": "126/80 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%97"
+        }
+      ],
+      "options": [
+        "Yalnızca gözlem yeterlidir",
+        "Yalnız görüntüleme istenir",
+        "Karar tamamen hastaya bırakılır",
+        "Hemen taburcu edilir",
+        "Hemodinamik stabilite, semptom/süre ve tromboemboli riski değerlendirilir; hız/ritim stratejisi bireyselleştirilir"
+      ],
+      "correct": 4,
+      "explanations": [
+        "Bu bulgu daha aktif bir yaklaşım gerektirebilir; yalnız izlem yetmez.",
+        "İlk adım görüntülemeden önce klinik değerlendirmedir.",
+        "İlk yaklaşım klinik ekip tarafından yönlendirilir.",
+        "Bulgu ciddi olabilir; taburcu öncesi değerlendirme gerekir.",
+        "Stabil AF'de ilk adım stabilite ve inme riski değerlendirmesidir; hız veya ritim kontrolü hastaya göre seçilir (ESC AF 2024)."
+      ],
+      "feedback": "Stabil AF'de ilk adım stabilite ve inme riski değerlendirmesidir; hız veya ritim kontrolü hastaya göre seçilir (ESC AF 2024).",
+      "objectiveIds": [
+        "O5"
+      ],
+      "sourceIds": [
+        "AF2024"
+      ],
+      "decisionId": "firstStep_af",
+      "note": "",
+      "ecg": {
+        "mode": "af",
+        "options": {
+          "afProfile": "controlled"
+        },
+        "leads": [
+          "II",
+          "aVF",
+          "V1"
+        ],
+        "start": 0.74,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q020",
+      "mode": "af",
+      "title": "Sentetik değerlendirme Q020",
+      "ariaLabel": "Q020 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "66 yaşında erkek hasta. Başvuru: ameliyat sonrası serviste düzensiz nabız fark ediliyor. Dar bir kompleksin ilk sapması 40 ms önce, son dönüşü 40 ms sonra işaretleniyor.",
+      "question": "Bu ölçümlerle QRS süresi kaç milisaniyedir?",
+      "text": "Bu ölçümlerle QRS süresi kaç milisaniyedir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "78/dk düzensiz"
+        },
+        {
+          "k": "TA",
+          "v": "126/80 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%97"
+        }
+      ],
+      "options": [
+        "60 ms",
+        "100 ms",
+        "40 ms",
+        "80 ms",
+        "140 ms"
+      ],
+      "correct": 3,
+      "explanations": [
+        "60 ms başlangıç veya terminal bileşenin bir kısmını dışlar.",
+        "100 ms iki sınırın verilen farkından fazladır.",
+        "40 ms yalnız R’den son dönüşe yarı desteği sayar.",
+        "−40 ms ile+40 ms arasındaki QRS desteği 80 ms’dir.",
+        "140 ms geniş PVC/RBBB örneğiyle karıştırır."
+      ],
+      "feedback": "−40 ms ile+40 ms arasındaki QRS desteği 80 ms’dir.",
+      "objectiveIds": [
+        "O6"
+      ],
+      "sourceIds": [
+        "AF2024",
+        "ECG"
+      ],
+      "decisionId": "q80",
+      "note": "",
+      "ecg": {
+        "mode": "af",
+        "options": {
+          "afProfile": "controlled"
+        },
+        "leads": [
+          "II",
+          "aVF",
+          "V1"
+        ],
+        "start": 0.8200000000000001,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q021",
+      "mode": "af",
+      "title": "Sentetik değerlendirme Q021",
+      "ariaLabel": "Q021 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "70 yaşında kadın hasta. Başvuru: nefes darlığı ile solunum polikliniğine başvuruyor. Taban etkinliği devam ederken ventriküler kompleks sayımı ayrıca yapılıyor.",
+      "question": "Bu taban etkinliği kalp hızı hesabında nasıl ele alınmalıdır?",
+      "text": "Bu taban etkinliği kalp hızı hesabında nasıl ele alınmalıdır?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "78/dk düzensiz"
+        },
+        {
+          "k": "TA",
+          "v": "126/80 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%97"
+        }
+      ],
+      "options": [
+        "Her f tepesi bir atımdır",
+        "f varlığı geniş QRS kanıtıdır",
+        "En geniş f QRS süresidir",
+        "f, QRS sayımından ayrılır",
+        "f yoksa kesin sinüs vardır"
+      ],
+      "correct": 3,
+      "explanations": [
+        "f taban etkinliğidir, QRS değildir.",
+        "AF tabanı QRS genişliğini göstermez.",
+        "f genliği QRS süresine dönüşmez.",
+        "Ventrikül hızı ayrı QRS dizisinden bulunur.",
+        "İnce f görünmeyebilir; P ve düzen ayrıca bakılmalı."
+      ],
+      "feedback": "Ventrikül hızı ayrı QRS dizisinden bulunur.",
+      "objectiveIds": [
+        "O1"
+      ],
+      "sourceIds": [
+        "AF2024"
+      ],
+      "decisionId": "fNotQRS",
+      "note": "",
+      "ecg": {
+        "mode": "af",
+        "options": {
+          "afProfile": "controlled"
+        },
+        "leads": [
+          "II",
+          "aVF",
+          "V1"
+        ],
+        "start": 0.5,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q022",
+      "mode": "af",
+      "title": "Sentetik değerlendirme Q022",
+      "ariaLabel": "Q022 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "61 yaşında erkek hasta. Başvuru: egzersiz testi öncesi rutin EKG çekiliyor. Ekokardiyografi beklenirken monitörde atriyal duvarda organize kasılma yerine titreşim benzeri hareket tanımlanıyor.",
+      "question": "Atriyumun organize kasılma katkısına ne olur?",
+      "text": "Atriyumun organize kasılma katkısına ne olur?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "78/dk düzensiz"
+        },
+        {
+          "k": "TA",
+          "v": "126/80 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%97"
+        }
+      ],
+      "options": [
+        "Sinüs P dizisi korunur",
+        "Ventrikül doluşu tamamen durur",
+        "Organize atriyal katkı kaybolur",
+        "Her QRS nabzı kanıtlar",
+        "Her f dalgası güçlü kasılmadır"
+      ],
+      "correct": 2,
+      "explanations": [
+        "AF'de ayrı sinüs P yoktur.",
+        "Pasif doluş sürebilir; tamamen durmaz.",
+        "AF'de atriyum düzenli kasılmaz.",
+        "QRS elektriksel olaydır, nabzı garanti etmez.",
+        "Düzensiz f dalgaları etkili kasılma değildir."
+      ],
+      "feedback": "AF'de atriyum düzenli kasılmaz.",
+      "objectiveIds": [
+        "O4"
+      ],
+      "sourceIds": [
+        "AF2024",
+        "CYCLE"
+      ],
+      "decisionId": "afAtrial",
+      "note": "",
+      "ecg": {
+        "mode": "af",
+        "options": {
+          "afProfile": "controlled"
+        },
+        "leads": [
+          "II",
+          "aVF",
+          "V1"
+        ],
+        "start": 0.58,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q023",
+      "mode": "af",
+      "title": "Sentetik değerlendirme Q023",
+      "ariaLabel": "Q023 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "74 yaşında kadın hasta. Başvuru: gece çarpıntısıyla uyanma yakınmasıyla geliyor. Elektriksel kayıt sürerken nabız muayenesi ayrıca planlanıyor.",
+      "question": "EKG bulgusu ile mekanik nabız arasındaki ilişki için hangi değerlendirme gerekir?",
+      "text": "EKG bulgusu ile mekanik nabız arasındaki ilişki için hangi değerlendirme gerekir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "78/dk düzensiz"
+        },
+        {
+          "k": "TA",
+          "v": "126/80 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%97"
+        }
+      ],
+      "options": [
+        "PR süresi debiyi verir",
+        "T genliği atım hacmini verir",
+        "Elektriksel hız nabza birebir eşittir",
+        "Nabız ayrıca klinik olarak bakılır",
+        "QRS genişliği nabız basıncını verir"
+      ],
+      "correct": 3,
+      "explanations": [
+        "PR iletim süresidir, debi ölçmez.",
+        "T genliği repolarizasyon voltajıdır.",
+        "Nabız açığı olabilir; eşitlik varsayılamaz.",
+        "EKG elektrik gösterir, nabzı kanıtlamaz.",
+        "Genişlik zaman ölçüsüdür, basınç değildir."
+      ],
+      "feedback": "EKG elektrik gösterir, nabzı kanıtlamaz.",
+      "objectiveIds": [
+        "O4"
+      ],
+      "sourceIds": [
+        "AF2024",
+        "CYCLE"
+      ],
+      "decisionId": "pulse",
+      "note": "",
+      "ecg": {
+        "mode": "af",
+        "options": {
+          "afProfile": "controlled"
+        },
+        "leads": [
+          "II",
+          "aVF",
+          "V1"
+        ],
+        "start": 0.66,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q024",
+      "mode": "af",
+      "title": "Sentetik değerlendirme Q024",
+      "ariaLabel": "Q024 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "67 yaşında erkek hasta. Başvuru: diyabet izlem vizitinde düzensiz nabız saptanıyor. Uzun süredir bilinen bir ritim bozukluğu ile hipertansiyon öyküsü birlikte değerlendiriliyor.",
+      "question": "Tromboemboli riski nasıl değerlendirilmelidir?",
+      "text": "Tromboemboli riski nasıl değerlendirilmelidir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "78/dk düzensiz"
+        },
+        {
+          "k": "TA",
+          "v": "126/80 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%97"
+        }
+      ],
+      "options": [
+        "Yalnız atriyal hızdan hesaplanır",
+        "Klinik risk verileriyle değerlendirilir",
+        "Dar QRS riski dışlar",
+        "Kısa kayıt AF süresini verir",
+        "Hız kontrolü riski sıfırlar"
+      ],
+      "correct": 1,
+      "explanations": [
+        "Şerit tek başına risk puanı vermez.",
+        "Tromboemboli riski yaş ve komorbiditeyle birlikte hesaplanır.",
+        "QRS genişliği tromboemboli riskini göstermez.",
+        "Kısa şerit toplam AF süresini göstermez.",
+        "Hız kontrolü antikoagülasyon ihtiyacını kaldırmaz."
+      ],
+      "feedback": "Tromboemboli riski yaş ve komorbiditeyle birlikte hesaplanır.",
+      "objectiveIds": [
+        "O5"
+      ],
+      "sourceIds": [
+        "AF2024"
+      ],
+      "decisionId": "afRisk",
+      "note": "",
+      "ecg": {
+        "mode": "af",
+        "options": {
+          "afProfile": "controlled"
+        },
+        "leads": [
+          "II",
+          "aVF",
+          "V1"
+        ],
+        "start": 0.74,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q025",
+      "mode": "af",
+      "title": "Sentetik değerlendirme Q025",
+      "ariaLabel": "Q025 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "52 yaşında kadın hasta. Başvuru: ilk kez çarpıntı yakınmasıyla aile hekimine başvuruyor. Kaydın genelinde değişken aralıklı dar kompleksler var; yalnızca bir yerde erken ve geniş, farklı görünümlü tek bir kompleks seçiliyor.",
+      "question": "Bu düzensizlik izole bir erken atımdan nasıl ayrılır?",
+      "text": "Bu düzensizlik izole bir erken atımdan nasıl ayrılır?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "78/dk düzensiz"
+        },
+        {
+          "k": "TA",
+          "v": "126/80 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%97"
+        }
+      ],
+      "options": [
+        "Her kısa R–R PVC'dir",
+        "Dar QRS düzenli sinüs demektir",
+        "AF'de düzensizlik tüm kayıt boyunca sürer; PVC izole, erken ve geniş tek komplekstir",
+        "Her uzun R–R kompansatuvar duraklamadır",
+        "Düzensizlik ventrikül kaynaklıdır"
+      ],
+      "correct": 2,
+      "explanations": [
+        "AF'de kısa aralıklar normal düzensizliktir.",
+        "AF'de QRS dar olsa da ritim düzensizdir.",
+        "Sürekli düzensiz R–R ve organize P yokluğu AF'yi; tek erken geniş kompleks PVC'yi tanımlar.",
+        "AF'de uzun aralık da düzensizliğin parçasıdır.",
+        "Düzensizlik burada atriyal kaynaklıdır."
+      ],
+      "feedback": "Sürekli düzensiz R–R ve organize P yokluğu AF'yi; tek erken geniş kompleks PVC'yi tanımlar.",
+      "objectiveIds": [
+        "O2"
+      ],
+      "sourceIds": [
+        "AF2024"
+      ],
+      "decisionId": "afEarly",
+      "note": "",
+      "ecg": {
+        "mode": "af",
+        "options": {
+          "afProfile": "controlled"
+        },
+        "leads": [
+          "II",
+          "aVF",
+          "V1"
+        ],
+        "start": 0.8200000000000001,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q026",
+      "mode": "af",
+      "title": "Sentetik değerlendirme Q026",
+      "ariaLabel": "Q026 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "80 yaşında erkek hasta. Başvuru: bakımevi rutin muayenesinde düzensiz nabız fark ediliyor. Aynı kayıt üzerinde farklı bir derivasyon grubuna geçildiğinde görünüm değişiyor.",
+      "question": "Derivasyon seçimini değiştirmenin bulguya etkisi nedir?",
+      "text": "Derivasyon seçimini değiştirmenin bulguya etkisi nedir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "78/dk düzensiz"
+        },
+        {
+          "k": "TA",
+          "v": "126/80 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%97"
+        }
+      ],
+      "options": [
+        "Negatif QRS ventrikül kaynağını kanıtlar",
+        "Tek lead 12 derivasyona eşittir",
+        "Lead değiştirmek ritmi değiştirir",
+        "Derivasyon aynı kaynağın farklı görünümüdür",
+        "Tüm lead'ler aynı şekli gösterir"
+      ],
+      "correct": 3,
+      "explanations": [
+        "Polarite yön farkından da olabilir.",
+        "Diğer derivasyonlar ek bilgi taşır.",
+        "Görünüm değişir, kaynak aynı kalır.",
+        "Lead değiştirmek şekli değiştirir, ritmi değiştirmez.",
+        "Her derivasyon farklı açıdan bakar."
+      ],
+      "feedback": "Lead değiştirmek şekli değiştirir, ritmi değiştirmez.",
+      "objectiveIds": [
+        "O3"
+      ],
+      "sourceIds": [
+        "AF2024",
+        "ECG"
+      ],
+      "decisionId": "leadAll",
+      "note": "",
+      "ecg": {
+        "mode": "af",
+        "options": {
+          "afProfile": "controlled"
+        },
+        "leads": [
+          "II",
+          "aVF",
+          "V1"
+        ],
+        "start": 0.5,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q027",
+      "mode": "af",
+      "title": "Sentetik değerlendirme Q027",
+      "ariaLabel": "Q027 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "65 yaşında kadın hasta. Başvuru: solunum yolu enfeksiyonu sonrası çarpıntı tarif ediyor. Sistematik okumada hangi derivasyonların yan duvarı temsil ettiği gözden geçiriliyor.",
+      "question": "Hangi derivasyonlar lateral duvarı gösterir?",
+      "text": "Hangi derivasyonlar lateral duvarı gösterir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "78/dk düzensiz"
+        },
+        {
+          "k": "TA",
+          "v": "126/80 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%97"
+        }
+      ],
+      "options": [
+        "V3, V4 — anterior duvar",
+        "II, III, aVF — inferior duvar",
+        "I, aVL, V5–V6 — lateral duvar",
+        "V1, V2 — septal bölge",
+        "V1–V6 tümü — tüm prekordiyum"
+      ],
+      "correct": 2,
+      "explanations": [
+        "V3–V4 anterior duvarı gösterir, lateral duvarı değil.",
+        "Bu grup inferior duvarı gösterir, lateral duvarı değil.",
+        "Bu üç derivasyon grubu kalbin lateral duvarını gösterir.",
+        "V1–V2 septal bölgeyi gösterir, lateral duvarı değil.",
+        "Tüm prekordiyal grup tek başına lateral duvarı özgül olarak göstermez."
+      ],
+      "feedback": "Bu üç derivasyon grubu kalbin lateral duvarını gösterir.",
+      "objectiveIds": [
+        "O3"
+      ],
+      "sourceIds": [
+        "AF2024",
+        "ECG"
+      ],
+      "decisionId": "lateralLeadGroup",
+      "note": "",
+      "ecg": {
+        "mode": "af",
+        "options": {
+          "afProfile": "controlled"
+        },
+        "leads": [
+          "II",
+          "aVF",
+          "V1"
+        ],
+        "start": 0.58,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q028",
+      "mode": "af",
+      "title": "Sentetik değerlendirme Q028",
+      "ariaLabel": "Q028 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "76 yaşında erkek hasta. Başvuru: kronik böbrek hastalığı izleminde düzensiz nabız saptanıyor. Eşzamanlı üç derivasyonlu kayıt aşağıda gösteriliyor.",
+      "question": "Bu ritim hangi sınıfa girer?",
+      "text": "Bu ritim hangi sınıfa girer?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "78/dk düzensiz"
+        },
+        {
+          "k": "TA",
+          "v": "126/80 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%97"
+        }
+      ],
+      "options": [
+        "Kaotik, organize değil",
+        "Düzenli dar kompleks, normal hız",
+        "Düzensiz dar kompleks",
+        "Düzenli geniş kompleks",
+        "Düzenli dar kompleks, hızlı"
+      ],
+      "correct": 2,
+      "explanations": [
+        "Bu örnekte düzenli bir kompleks seçilebiliyor, kaotik değil.",
+        "Bu örnekte hız veya düzen normal aralığa uymuyor.",
+        "Ardışık R–R aralıkları düzensiz; QRS dar.",
+        "Bu örnekte QRS dar, bu kadar geniş değil.",
+        "Bu örnekte hız bu kadar yüksek değil."
+      ],
+      "feedback": "Ardışık R–R aralıkları düzensiz; QRS dar.",
+      "objectiveIds": [
+        "O2"
+      ],
+      "sourceIds": [
+        "AF2024"
+      ],
+      "decisionId": "rhythmClass_af",
+      "note": "",
+      "ecg": {
+        "mode": "af",
+        "options": {
+          "afProfile": "controlled"
+        },
+        "leads": [
+          "II",
+          "aVF",
+          "V1"
+        ],
+        "start": 0.66,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q029",
+      "mode": "af",
+      "title": "Sentetik değerlendirme Q029",
+      "ariaLabel": "Q029 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "63 yaşında kadın hasta. Başvuru: ameliyathane öncesi anestezi değerlendirmesinde. Eşzamanlı üç derivasyonlu kayıt aşağıda gösteriliyor.",
+      "question": "Bu EKG'de öncelikle hangi tanı düşünülmelidir?",
+      "text": "Bu EKG'de öncelikle hangi tanı düşünülmelidir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "78/dk düzensiz"
+        },
+        {
+          "k": "TA",
+          "v": "126/80 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%97"
+        }
+      ],
+      "options": [
+        "Supraventriküler taşikardi",
+        "Atriyal fibrilasyon",
+        "Sinüs taşikardisi",
+        "Ventriküler taşikardi",
+        "Fokal atriyal taşikardi"
+      ],
+      "correct": 1,
+      "explanations": [
+        "Supraventriküler taşikardi için beklenen bulgular burada yok.",
+        "Tarif edilen bulgular Atriyal fibrilasyon ile uyumludur.",
+        "Sinüs taşikardisi için beklenen bulgular burada yok.",
+        "Ventriküler taşikardi için beklenen bulgular burada yok.",
+        "Fokal atriyal taşikardi için beklenen bulgular burada yok."
+      ],
+      "feedback": "Tarif edilen bulgular Atriyal fibrilasyon ile uyumludur.",
+      "objectiveIds": [
+        "O2"
+      ],
+      "sourceIds": [
+        "AF2024"
+      ],
+      "decisionId": "ddx_af",
+      "note": "",
+      "ecg": {
+        "mode": "af",
+        "options": {
+          "afProfile": "controlled"
+        },
+        "leads": [
+          "II",
+          "aVF",
+          "V1"
+        ],
+        "start": 0.74,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q030",
+      "mode": "af",
+      "title": "Sentetik değerlendirme Q030",
+      "ariaLabel": "Q030 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "69 yaşında erkek hasta. Başvuru: yorgunluk ve efor kapasitesinde azalma ile başvuruyor. Göğüs ağrısı veya senkop yok; TA 126/80 mmHg, bilinç açık.",
+      "question": "Bu klinik tabloda öncelikli değerlendirme ilkesi nedir?",
+      "text": "Bu klinik tabloda öncelikli değerlendirme ilkesi nedir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "78/dk düzensiz"
+        },
+        {
+          "k": "TA",
+          "v": "126/80 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%97"
+        }
+      ],
+      "options": [
+        "Önce kesin mekanizma sonra hasta bakılır",
+        "Her AF acil kardiyoversiyon gerektirir",
+        "Önce hemodinamik stabilite, semptom süresi/başlangıcı ve tromboemboli riski değerlendirilir",
+        "Tek derivasyon kesinlik verir",
+        "Düzensiz nabız rutin kontrole bırakılır"
+      ],
+      "correct": 2,
+      "explanations": [
+        "Hasta durumu mekanizmadan önce değerlendirilir.",
+        "Kardiyoversiyon endikasyonu instabilite ve süreye bağlıdır; rutin değildir.",
+        "Stabil AF'de yaklaşım bireyselleştirilir; acil kardiyoversiyon yalnız instabilitede öne çıkar (ESC AF 2024).",
+        "AF tanısı ve risk değerlendirmesi tek derivasyonla tamamlanmaz.",
+        "AF inme riski taşır; değerlendirilmeden bırakılmaz."
+      ],
+      "feedback": "Stabil AF'de yaklaşım bireyselleştirilir; acil kardiyoversiyon yalnız instabilitede öne çıkar (ESC AF 2024).",
+      "objectiveIds": [
+        "O5"
+      ],
+      "sourceIds": [
+        "AF2024"
+      ],
+      "decisionId": "stableAf",
+      "note": "",
+      "ecg": {
+        "mode": "af",
+        "options": {
+          "afProfile": "controlled"
+        },
+        "leads": [
+          "II",
+          "aVF",
+          "V1"
+        ],
+        "start": 0.8200000000000001,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q031",
+      "mode": "stemi",
+      "title": "Sentetik değerlendirme Q031",
+      "ariaLabel": "Q031 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "57 yaşında kadın hasta. Başvuru: uzun yolculuk sonrası göğüs ağrısıyla geliyor. Ağrı sırasında alınan EKG’de komşu ön duvar derivasyonlarında ST yükselmesi izleniyor.",
+      "question": "ST değişiminin dağılımı hangi bölgeyi işaret eder?",
+      "text": "ST değişiminin dağılımı hangi bölgeyi işaret eder?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "Tek erken atım bulgusu",
+        "Anterior (ön duvar) dağılım",
+        "Flutter tabanı",
+        "İnferior dağılım",
+        "Sağ dal bloğu bulgusu"
+      ],
+      "correct": 1,
+      "explanations": [
+        "PVC ayrı bir olaydır; burada düzenli ST değişimi var.",
+        "V1–V4 birlikte yükselmiş: ön duvar.",
+        "Flutter sürekli dalga yapar; burada ayrı ST yüksekliği var.",
+        "İnferior için II, III, aVF gerekir; burada prekordiyal.",
+        "Bu QRS şekli değil, ST yüksekliği bulgusu."
+      ],
+      "feedback": "V1–V4 birlikte yükselmiş: ön duvar.",
+      "objectiveIds": [
+        "O3"
+      ],
+      "sourceIds": [
+        "ACS2023",
+        "ECG"
+      ],
+      "decisionId": "anterior",
+      "note": "",
+      "ecg": {
+        "mode": "stemi",
+        "options": {},
+        "leads": [
+          "V2",
+          "V3",
+          "V4"
+        ],
+        "start": 0.5,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q032",
+      "mode": "stemi",
+      "title": "Sentetik değerlendirme Q032",
+      "ariaLabel": "Q032 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "45 yaşında erkek hasta. Başvuru: ailesinde erken MI öyküsü olan hastada göğüs ağrısı. Birden çok komşu derivasyondaki değişim birlikte değerlendiriliyor.",
+      "question": "Bölgesel ST değişimi yorumlanırken hangi yöntem uygundur?",
+      "text": "Bölgesel ST değişimi yorumlanırken hangi yöntem uygundur?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "En yüksek tek R bölgeyi belirler",
+        "aVR her zaman anterior bölgeyi verir",
+        "Derivasyon adı damarın kesin adıdır",
+        "Komşu derivasyonlar birlikte incelenir",
+        "ST mV değeri yalnız hızdır"
+      ],
+      "correct": 3,
+      "explanations": [
+        "R genliği bölgesel ST yorumunu tek başına vermez.",
+        "Tek derivasyon tüm anterior grubun yerini tutmaz.",
+        "Derivasyon bölgesi damar anatomisini birebir vermez.",
+        "Bölgesel yorum tek derivasyona değil komşu gruba bakar.",
+        "ST voltajı ve hız farklı ölçümlerdir."
+      ],
+      "feedback": "Bölgesel yorum tek derivasyona değil komşu gruba bakar.",
+      "objectiveIds": [
+        "O3"
+      ],
+      "sourceIds": [
+        "ACS2023",
+        "ECG"
+      ],
+      "decisionId": "stContiguous",
+      "note": "",
+      "ecg": {
+        "mode": "stemi",
+        "options": {},
+        "leads": [
+          "V2",
+          "V3",
+          "V4"
+        ],
+        "start": 0.58,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q033",
+      "mode": "stemi",
+      "title": "Sentetik değerlendirme Q033",
+      "ariaLabel": "Q033 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "66 yaşında kadın hasta. Başvuru: hipertansiyon öyküsüyle ani göğüs ağrısı tarif ediyor. V3 derivasyonunda J noktasından 20 ms sonrası +0,32 mV olarak ölçülüyor (sentetik ölçüm egzersizi; kılavuz tanı eşikleri J noktasında değerlendirilir).",
+      "question": "Bu ölçümle J+20 ms ST düzeyi kaç mV’tur?",
+      "text": "Bu ölçümle J+20 ms ST düzeyi kaç mV’tur?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "−0,32 mV",
+        "+0,032 mV",
+        "0 mV",
+        "+3,2 mV",
+        "+0,32 mV"
+      ],
+      "correct": 4,
+      "explanations": [
+        "Polarite yükselmeden çökmeye çevrilmiştir.",
+        "Ondalık kayması yüksekliği 10 kat küçültür.",
+        "Yükselmiş ST platosunu izoelektrik kabul eder.",
+        "Ondalık kayması yüksekliği 10 kat büyütür.",
+        "V3’te J+20 ms sentetik ST düzeyi+0,32 mV’dir. J+20 ms bu modelin ölçüm noktasıdır; kılavuz tanı eşikleri J noktasındaki sapmaya göre tanımlanır."
+      ],
+      "feedback": "V3’te J+20 ms sentetik ST düzeyi+0,32 mV’dir. J+20 ms bu modelin ölçüm noktasıdır; kılavuz tanı eşikleri J noktasındaki sapmaya göre tanımlanır.",
+      "objectiveIds": [
+        "O6"
+      ],
+      "sourceIds": [
+        "ACS2023",
+        "ECG"
+      ],
+      "decisionId": "st32",
+      "note": "",
+      "ecg": {
+        "mode": "stemi",
+        "options": {},
+        "leads": [
+          "V2",
+          "V3",
+          "V4"
+        ],
+        "start": 0.66,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q034",
+      "mode": "stemi",
+      "title": "Sentetik değerlendirme Q034",
+      "ariaLabel": "Q034 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "59 yaşında erkek hasta. Başvuru: egzersiz sonrası dinmeyen göğüs ağrısıyla başvuruyor. Eşzamanlı üç derivasyonlu kayıt aşağıda gösteriliyor.",
+      "question": "Bu EKG'de öncelikle hangi tanı düşünülmelidir?",
+      "text": "Bu EKG'de öncelikle hangi tanı düşünülmelidir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "Sinüs taşikardisi",
+        "Ventriküler taşikardi",
+        "Anterior ST yükselmeli iskemi",
+        "Sağ dal bloğu",
+        "Fokal atriyal taşikardi"
+      ],
+      "correct": 2,
+      "explanations": [
+        "Sinüs taşikardisi için beklenen bulgular burada yok.",
+        "Ventriküler taşikardi için beklenen bulgular burada yok.",
+        "Tarif edilen bulgular Anterior ST yükselmeli iskemi ile uyumludur.",
+        "Sağ dal bloğu için beklenen bulgular burada yok.",
+        "Fokal atriyal taşikardi için beklenen bulgular burada yok."
+      ],
+      "feedback": "Tarif edilen bulgular Anterior ST yükselmeli iskemi ile uyumludur.",
+      "objectiveIds": [
+        "O2"
+      ],
+      "sourceIds": [
+        "ACS2023"
+      ],
+      "decisionId": "ddx_stemi",
+      "note": "",
+      "ecg": {
+        "mode": "stemi",
+        "options": {},
+        "leads": [
+          "V2",
+          "V3",
+          "V4"
+        ],
+        "start": 0.74,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q035",
+      "mode": "stemi",
+      "title": "Sentetik değerlendirme Q035",
+      "ariaLabel": "Q035 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "72 yaşında kadın hasta. Başvuru: nefes darlığı ve göğüs ağrısıyla ambulansla getiriliyor. QRS’den kısa süre önce ayrı bir dalga seçiliyor.",
+      "question": "P dalgasının temel elektriksel karşılığı nedir?",
+      "text": "P dalgasının temel elektriksel karşılığı nedir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "P: atriyal repolarizasyon",
+        "P: atriyal depolarizasyon",
+        "P: ventriküler depolarizasyon",
+        "P: ventriküler repolarizasyon",
+        "P: yalnız AV düğüm iletimi"
+      ],
+      "correct": 1,
+      "explanations": [
+        "Atriyal repolarizasyon genelde QRS altında gizlenir.",
+        "P dalgası atriyumun elektriksel uyarılmasıdır.",
+        "Bu olay QRS ile kaydedilir.",
+        "Bu olay T dalgası ile kaydedilir.",
+        "AV düğüm gecikmesi PR aralığında değerlendirilir."
+      ],
+      "feedback": "P dalgası atriyumun elektriksel uyarılmasıdır.",
+      "objectiveIds": [
+        "O1"
+      ],
+      "sourceIds": [
+        "ACS2023"
+      ],
+      "decisionId": "p",
+      "note": "",
+      "ecg": {
+        "mode": "stemi",
+        "options": {},
+        "leads": [
+          "V2",
+          "V3",
+          "V4"
+        ],
+        "start": 0.8200000000000001,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q036",
+      "mode": "stemi",
+      "title": "Sentetik değerlendirme Q036",
+      "ariaLabel": "Q036 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "48 yaşında erkek hasta. Başvuru: yoğun iş temposu sonrası göğüs ağrısı gelişiyor. İki ardışık R tepesi arası 800 ms ölçülüyor.",
+      "question": "Bu döngü süresiyle elektriksel hız yaklaşık kaçtır?",
+      "text": "Bu döngü süresiyle elektriksel hız yaklaşık kaçtır?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "90/dk",
+        "150/dk",
+        "60/dk",
+        "75/dk",
+        "120/dk"
+      ],
+      "correct": 3,
+      "explanations": [
+        "90/dk yaklaşık 667 ms gerektirir.",
+        "150/dk 400 ms gerektirir.",
+        "60/dk 1000 ms gerektirir;800 ms değil.",
+        "R–R 800 ms ise 60/0,8=75/dk elektriksel hızdır.",
+        "120/dk 500 ms gerektirir."
+      ],
+      "feedback": "R–R 800 ms ise 60/0,8=75/dk elektriksel hızdır.",
+      "objectiveIds": [
+        "O6"
+      ],
+      "sourceIds": [
+        "ACS2023",
+        "ECG"
+      ],
+      "decisionId": "rr800",
+      "note": "",
+      "ecg": {
+        "mode": "stemi",
+        "options": {},
+        "leads": [
+          "V2",
+          "V3",
+          "V4"
+        ],
+        "start": 0.5,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q037",
+      "mode": "stemi",
+      "title": "Sentetik değerlendirme Q037",
+      "ariaLabel": "Q037 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "53 yaşında kadın hasta. Başvuru: sabah sporunda göğüs ağrısıyla duruyor. İzlemde bir anda çıkış kapaklarının açık, giriş kapaklarının kapalı olduğu gösteriliyor.",
+      "question": "Bu andaki kapak ve akım durumu hangi mekanik evreyi tanımlar?",
+      "text": "Bu andaki kapak ve akım durumu hangi mekanik evreyi tanımlar?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "AV kapaklar açık: atriyal sistol",
+        "Tüm kapaklar kapalı: izovolümetrik kasılma",
+        "Çıkış kapakları açık: ejeksiyon",
+        "Tüm kapaklar kapalı: gevşeme",
+        "AV kapaklar açık: pasif doluş"
+      ],
+      "correct": 2,
+      "explanations": [
+        "Bu doluşun son parçasıdır, ejeksiyon değil.",
+        "Bu erken evre, çıkış henüz kapalıdır.",
+        "Basınç yeterince yükselince kan dışarı pompalanır.",
+        "Gevşeme ejeksiyondan sonra gelir.",
+        "Bu giriş fazıdır, ejeksiyon değildir."
+      ],
+      "feedback": "Basınç yeterince yükselince kan dışarı pompalanır.",
+      "objectiveIds": [
+        "O4"
+      ],
+      "sourceIds": [
+        "ACS2023",
+        "CYCLE"
+      ],
+      "decisionId": "eject",
+      "note": "",
+      "ecg": {
+        "mode": "stemi",
+        "options": {},
+        "leads": [
+          "V2",
+          "V3",
+          "V4"
+        ],
+        "start": 0.58,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q038",
+      "mode": "stemi",
+      "title": "Sentetik değerlendirme Q038",
+      "ariaLabel": "Q038 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "65 yaşında erkek hasta. Başvuru: geceleri tekrarlayan göğüs ağrısıyla başvuruyor. Standart 12 derivasyonluk kayıt üzerinde derivasyon grupları gözden geçiriliyor.",
+      "question": "aVR, aVL ve aVF birlikte hangi derivasyon grubunu oluşturur?",
+      "text": "aVR, aVL ve aVF birlikte hangi derivasyon grubunu oluşturur?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "Yalnız sağ göğüs derivasyonları",
+        "Bipolar ekstremite derivasyonları",
+        "Özefagus derivasyonları",
+        "Artırılmış ekstremite derivasyonları",
+        "Prekordiyal derivasyonlar"
+      ],
+      "correct": 3,
+      "explanations": [
+        "Sağ göğüs derivasyonları ayrı bir prekordiyal settir; aVR/aVL/aVF değildir.",
+        "Bipolar ekstremite derivasyonları I, II, III'tür; aVR/aVL/aVF unipolardır.",
+        "Özefagus derivasyonu standart 12 derivasyonluk sette yer almaz.",
+        "aVR, aVL ve aVF birlikte artırılmış (unipolar) ekstremite derivasyon grubunu oluşturur.",
+        "Prekordiyal grup V1–V6'dır; aVR/aVL/aVF bu gruba girmez."
+      ],
+      "feedback": "aVR, aVL ve aVF birlikte artırılmış (unipolar) ekstremite derivasyon grubunu oluşturur.",
+      "objectiveIds": [
+        "O3"
+      ],
+      "sourceIds": [
+        "ACS2023",
+        "ECG"
+      ],
+      "decisionId": "augmentedGroup",
+      "note": "",
+      "ecg": {
+        "mode": "stemi",
+        "options": {},
+        "leads": [
+          "V2",
+          "V3",
+          "V4"
+        ],
+        "start": 0.66,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q039",
+      "mode": "stemi",
+      "title": "Sentetik değerlendirme Q039",
+      "ariaLabel": "Q039 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "70 yaşında kadın hasta. Başvuru: önceki stent öyküsüyle tekrar göğüs ağrısı ile geliyor. Kısa süreli bir kayıt elde ediliyor; önceki öykü ve ek testler henüz yok.",
+      "question": "Bu bulgudan etiyoloji ve risk için hangi genel sınır çıkarılabilir?",
+      "text": "Bu bulgudan etiyoloji ve risk için hangi genel sınır çıkarılabilir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "Örüntü desteklenir, neden ayrıca sorulur",
+        "Hız tek başına dolaşımı gösterir",
+        "P ekseni kesin odağı belirler",
+        "QRS genişliği tek başına riski verir",
+        "Kısa kayıt başlangıç zamanını verir"
+      ],
+      "correct": 0,
+      "explanations": [
+        "EKG bulgusu tanı verir, nedeni klinik öykü belirler.",
+        "Nabız ve basınç ayrıca değerlendirilir.",
+        "P ekseni ipucudur, kesin yer vermez.",
+        "Risk için klinik bağlam da gerekir.",
+        "Bir pencere toplam süreyi göstermez."
+      ],
+      "feedback": "EKG bulgusu tanı verir, nedeni klinik öykü belirler.",
+      "objectiveIds": [
+        "O5"
+      ],
+      "sourceIds": [
+        "ACS2023"
+      ],
+      "decisionId": "limits",
+      "note": "",
+      "ecg": {
+        "mode": "stemi",
+        "options": {},
+        "leads": [
+          "V2",
+          "V3",
+          "V4"
+        ],
+        "start": 0.74,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q040",
+      "mode": "stemi",
+      "title": "Sentetik değerlendirme Q040",
+      "ariaLabel": "Q040 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "44 yaşında erkek hasta. Başvuru: ani başlayan şiddetli göğüs ağrısıyla acile geliyor. Animasyonda bir duvar bölgesinin hareketi azalırken ana damardaki akışın sürdüğü gösteriliyor.",
+      "question": "Bölgesel bulgu ile global dolaşım arasındaki ayrım nasıl yapılmalıdır?",
+      "text": "Bölgesel bulgu ile global dolaşım arasındaki ayrım nasıl yapılmalıdır?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "Düzenli QRS normal debiyi kanıtlar",
+        "Bölgesel azalma şematik, global akım sürebilir",
+        "Her ST mV'u sabit EF kaybıdır",
+        "Renk koyuluğu gerçek stenoz yüzdesidir",
+        "ST yükselmesi VF ile aynı akımsızlıktır"
+      ],
+      "correct": 1,
+      "explanations": [
+        "Elektriksel düzen debiyi ölçmez.",
+        "Bir bölge zayıf gösterilir, tüm pompa durmaz.",
+        "ST voltajı EF kaybına dönüştürülemez.",
+        "Renk şematiktir, stenoz oranı vermez.",
+        "Bölgesel iskemi VF'deki tam pompa kaybı değildir."
+      ],
+      "feedback": "Bir bölge zayıf gösterilir, tüm pompa durmaz.",
+      "objectiveIds": [
+        "O4"
+      ],
+      "sourceIds": [
+        "ACS2023",
+        "CYCLE"
+      ],
+      "decisionId": "ischemiaFlow",
+      "note": "",
+      "ecg": {
+        "mode": "stemi",
+        "options": {},
+        "leads": [
+          "V2",
+          "V3",
+          "V4"
+        ],
+        "start": 0.8200000000000001,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q041",
+      "mode": "stemi",
+      "title": "Sentetik değerlendirme Q041",
+      "ariaLabel": "Q041 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "62 yaşında kadın hasta. Başvuru: diyabet ve hipertansiyon öyküsüyle göğüs ağrısı tarif ediyor. ST değişimi saptanıyor; anjiyografi veya ileri görüntüleme henüz yapılmamış.",
+      "question": "Bu bulgudan sorumlu damar hakkında hangi sınır geçerlidir?",
+      "text": "Bu bulgudan sorumlu damar hakkında hangi sınır geçerlidir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "Karşılıklı çökme yoksa iskemi yoktur",
+        "EKG bölgeyi düşündürür; sorumlu damar klinik bağlam, seri EKG ve koroner görüntülemeyle kesinleşir",
+        "Düzenli ritim iskemiyi dışlar",
+        "Animasyon gerçek EF ölçer",
+        "Tek ST değeri damarı kesinleştirir"
+      ],
+      "correct": 1,
+      "explanations": [
+        "Karşılıklı değişim olmaması iskemiyi dışlamaz.",
+        "ST dağılımı bölge ipucu verir; sorumlu (culprit) damar tek başına EKG'den kesinleşmez, anjiyografi ile doğrulanır (ACS 2025).",
+        "Ritim düzenli olsa da iskemi sürebilir.",
+        "Şematik hareket EF ölçümü değildir.",
+        "ST bölgesi ipucu verir, kesin tanı vermez."
+      ],
+      "feedback": "ST dağılımı bölge ipucu verir; sorumlu (culprit) damar tek başına EKG'den kesinleşmez, anjiyografi ile doğrulanır (ACS 2025).",
+      "objectiveIds": [
+        "O5"
+      ],
+      "sourceIds": [
+        "ACS2023"
+      ],
+      "decisionId": "ischemiaLimits",
+      "note": "",
+      "ecg": {
+        "mode": "stemi",
+        "options": {},
+        "leads": [
+          "V2",
+          "V3",
+          "V4"
+        ],
+        "start": 0.5,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q042",
+      "mode": "stemi",
+      "title": "Sentetik değerlendirme Q042",
+      "ariaLabel": "Q042 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "56 yaşında erkek hasta. Başvuru: merdiven çıkarken başlayan göğüs ağrısıyla başvuruyor. Bulgu düzenli görünse de eşlik eden semptomlar ayrıca değerlendiriliyor.",
+      "question": "Bu klinik tabloda hangi değerlendirme ilkesi önceliklidir?",
+      "text": "Bu klinik tabloda hangi değerlendirme ilkesi önceliklidir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "Semptomla acil değerlendirme gerekir",
+        "Tek derivasyon kesinlik verir",
+        "Animasyon akımı varsa acil değildir",
+        "Düzenli ritimde yalnız rutin kontrol",
+        "Önce kesin mekanizma sonra hasta bakılır"
+      ],
+      "correct": 0,
+      "explanations": [
+        "Süren belirtiler acil klinik değerlendirme ister.",
+        "Aciliyet tek derivasyonla belirlenmez.",
+        "Şematik akış gerçek durumu göstermez.",
+        "Düzenlilik ciddi belirtileri rutine çevirmez.",
+        "Hasta durumu mekanizmadan önce değerlendirilir."
+      ],
+      "feedback": "Süren belirtiler acil klinik değerlendirme ister.",
+      "objectiveIds": [
+        "O5"
+      ],
+      "sourceIds": [
+        "ACS2023"
+      ],
+      "decisionId": "urgent",
+      "note": "",
+      "ecg": {
+        "mode": "stemi",
+        "options": {},
+        "leads": [
+          "V2",
+          "V3",
+          "V4"
+        ],
+        "start": 0.58,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q043",
+      "mode": "stemi",
+      "title": "Sentetik değerlendirme Q043",
+      "ariaLabel": "Q043 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "69 yaşında kadın hasta. Başvuru: uzun süredir sigara içen hastada göğüs ağrısı. Ventriküler kompleksin izde temsil ettiği olay ayrıca soruluyor.",
+      "question": "QRS kompleksinin temel elektriksel karşılığı nedir?",
+      "text": "QRS kompleksinin temel elektriksel karşılığı nedir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "QRS: atriyal depolarizasyon",
+        "QRS: yalnız AV düğüm gecikmesi",
+        "QRS: ventriküler depolarizasyon",
+        "QRS: yalnız atriyal repolarizasyon",
+        "QRS: ventriküler repolarizasyon"
+      ],
+      "correct": 2,
+      "explanations": [
+        "Bu olay P dalgasıyla kaydedilir.",
+        "AV gecikmesi PR aralığında değerlendirilir.",
+        "QRS ventrikül kasının elektriksel uyarılmasıdır.",
+        "QRS'in ana kaynağı ventrikül kasıdır.",
+        "Bu olay T dalgasıyla kaydedilir."
+      ],
+      "feedback": "QRS ventrikül kasının elektriksel uyarılmasıdır.",
+      "objectiveIds": [
+        "O1"
+      ],
+      "sourceIds": [
+        "ACS2023"
+      ],
+      "decisionId": "qrs",
+      "note": "",
+      "ecg": {
+        "mode": "stemi",
+        "options": {},
+        "leads": [
+          "V2",
+          "V3",
+          "V4"
+        ],
+        "start": 0.66,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q044",
+      "mode": "stemi",
+      "title": "Sentetik değerlendirme Q044",
+      "ariaLabel": "Q044 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "51 yaşında erkek hasta. Başvuru: iş stresiyle birlikte göğüs sıkışması tarif ediyor. Aynı kayıt üzerinde farklı bir derivasyon grubuna geçildiğinde görünüm değişiyor.",
+      "question": "Derivasyon seçimini değiştirmenin bulguya etkisi nedir?",
+      "text": "Derivasyon seçimini değiştirmenin bulguya etkisi nedir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "Lead değiştirmek ritmi değiştirir",
+        "Tüm lead'ler aynı şekli gösterir",
+        "Tek lead 12 derivasyona eşittir",
+        "Negatif QRS ventrikül kaynağını kanıtlar",
+        "Derivasyon aynı kaynağın farklı görünümüdür"
+      ],
+      "correct": 4,
+      "explanations": [
+        "Görünüm değişir, kaynak aynı kalır.",
+        "Her derivasyon farklı açıdan bakar.",
+        "Diğer derivasyonlar ek bilgi taşır.",
+        "Polarite yön farkından da olabilir.",
+        "Lead değiştirmek şekli değiştirir, ritmi değiştirmez."
+      ],
+      "feedback": "Lead değiştirmek şekli değiştirir, ritmi değiştirmez.",
+      "objectiveIds": [
+        "O3"
+      ],
+      "sourceIds": [
+        "ACS2023",
+        "ECG"
+      ],
+      "decisionId": "leadAll",
+      "note": "",
+      "ecg": {
+        "mode": "stemi",
+        "options": {},
+        "leads": [
+          "V2",
+          "V3",
+          "V4"
+        ],
+        "start": 0.74,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q045",
+      "mode": "stemi",
+      "title": "Sentetik değerlendirme Q045",
+      "ariaLabel": "Q045 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "74 yaşında kadın hasta. Başvuru: ani fenalaşma ve göğüs ağrısıyla 112 ile getiriliyor. Eşzamanlı üç derivasyonlu kayıt aşağıda gösteriliyor.",
+      "question": "Bu ritim hangi sınıfa girer?",
+      "text": "Bu ritim hangi sınıfa girer?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "Düzenli dar kompleks, normal hız",
+        "Düzensiz dar kompleks",
+        "Düzenli dar kompleks, hızlı",
+        "Düzenli geniş kompleks",
+        "Kaotik, organize değil"
+      ],
+      "correct": 0,
+      "explanations": [
+        "Hız yaklaşık 75/dk, ritim düzenli ve QRS dar.",
+        "Bu örnekte ritim düzenli, düzensiz değil.",
+        "Bu örnekte hız bu kadar yüksek değil.",
+        "Bu örnekte QRS dar, bu kadar geniş değil.",
+        "Bu örnekte düzenli bir kompleks seçilebiliyor, kaotik değil."
+      ],
+      "feedback": "Hız yaklaşık 75/dk, ritim düzenli ve QRS dar.",
+      "objectiveIds": [
+        "O2"
+      ],
+      "sourceIds": [
+        "ACS2023"
+      ],
+      "decisionId": "rhythmClass_stemi",
+      "note": "",
+      "ecg": {
+        "mode": "stemi",
+        "options": {},
+        "leads": [
+          "V2",
+          "V3",
+          "V4"
+        ],
+        "start": 0.8200000000000001,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q046",
+      "mode": "pvc",
+      "title": "Sentetik değerlendirme Q046",
+      "ariaLabel": "Q046 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "39 yaşında kadın hasta. Başvuru: iş yerinde ani tekleme hissiyle fark ediyor. Temel düzenli ritim sırasında, öncesinde ilişkili bir dalga olmayan erken ve geniş tek bir kompleks dikkati çekiyor.",
+      "question": "Bu erken atımın en uygun sınıflaması hangisidir?",
+      "text": "Bu erken atımın en uygun sınıflaması hangisidir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "Flutter atımı",
+        "AF atımı",
+        "Ventriküler erken atım (PVC)",
+        "Normal sinüs atımı",
+        "Dal bloğu atımı"
+      ],
+      "correct": 2,
+      "explanations": [
+        "Flutter düzenli taban ister; burada yok.",
+        "AF'de tüm ritim düzensizdir; burada tek atım farklı.",
+        "Erken, geniş, öncesinde P yok: PVC.",
+        "Sinüs atımı zamanında gelir; bu atım erken.",
+        "Dal bloğunda her atım geniştir; burada tek atım geniş."
+      ],
+      "feedback": "Erken, geniş, öncesinde P yok: PVC.",
+      "objectiveIds": [
+        "O2"
+      ],
+      "sourceIds": [
+        "VA2022"
+      ],
+      "decisionId": "pvc",
+      "note": "",
+      "ecg": {
+        "mode": "pvc",
+        "options": {},
+        "leads": [
+          "II",
+          "aVR",
+          "V1"
+        ],
+        "start": 1.1,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q047",
+      "mode": "pvc",
+      "title": "Sentetik değerlendirme Q047",
+      "ariaLabel": "Q047 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "47 yaşında erkek hasta. Başvuru: uykusuzluk sonrası çarpıntı tarif ediyor. Erken ve geniş tek bir kompleksten hemen önce ilişkili bir dalga seçilemiyor.",
+      "question": "Bu erken atımın kaynağı nasıl açıklanır?",
+      "text": "Bu erken atımın kaynağı nasıl açıklanır?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "Sinüs hızının artışı",
+        "Sabit sağ dal gecikmesi",
+        "Sabit sol dal gecikmesi",
+        "Hızlı atriyal devre",
+        "Ventrikülden erken uyarı"
+      ],
+      "correct": 4,
+      "explanations": [
+        "Sinüs hızlanması ayrı erken geniş atım yapmaz.",
+        "Sabit blokta her atım geniştir; burada tek atım.",
+        "Sabit blokta her atım geniştir; burada tek atım.",
+        "Atriyal kaynak dar QRS yapar; burada geniş.",
+        "Öncül P yok, QRS geniş: ventrikül kaynaklı."
+      ],
+      "feedback": "Öncül P yok, QRS geniş: ventrikül kaynaklı.",
+      "objectiveIds": [
+        "O2"
+      ],
+      "sourceIds": [
+        "VA2022"
+      ],
+      "decisionId": "pvcOrigin",
+      "note": "",
+      "ecg": {
+        "mode": "pvc",
+        "options": {},
+        "leads": [
+          "II",
+          "aVR",
+          "V1"
+        ],
+        "start": 2.5,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q048",
+      "mode": "pvc",
+      "title": "Sentetik değerlendirme Q048",
+      "ariaLabel": "Q048 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "61 yaşında kadın hasta. Başvuru: tiroid izleminde rutin EKG’de erken atım saptanıyor. Erken atımın öncesindeki ve sonrasındaki aralıklar 480 ms ve 1120 ms olarak ölçülüyor.",
+      "question": "Bu duraklamanın süresi ve yorumu hangisidir?",
+      "text": "Bu duraklamanın süresi ve yorumu hangisidir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "İki temel döngü toplamı",
+        "Yalnız 1120 ms geçerlidir",
+        "Her PVC bu duraklamayı yapar",
+        "Yalnız 480 ms temel döngüdür",
+        "1600 ms bir PR aralığıdır"
+      ],
+      "correct": 0,
+      "explanations": [
+        "480+1120=1600 ms, iki 800 ms döngüye eşit.",
+        "Duraklama tek başına döngüyü tanımlamaz.",
+        "Kompansatuvar duraklama her olguda aynı değildir.",
+        "Erken aralık temel hızı göstermez.",
+        "Bu iki R–R döngüsüdür, PR değildir."
+      ],
+      "feedback": "480+1120=1600 ms, iki 800 ms döngüye eşit.",
+      "objectiveIds": [
+        "O1"
+      ],
+      "sourceIds": [
+        "VA2022"
+      ],
+      "decisionId": "pvcPause",
+      "note": "",
+      "ecg": {
+        "mode": "pvc",
+        "options": {},
+        "leads": [
+          "II",
+          "aVR",
+          "V1"
+        ],
+        "start": 2.7,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q049",
+      "mode": "pvc",
+      "title": "Sentetik değerlendirme Q049",
+      "ariaLabel": "Q049 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "34 yaşında erkek hasta. Başvuru: enerji içeceği sonrası tekleme hissi tarif ediyor. Geniş bir kompleksin ilk sapması 60 ms önce, son dönüşü 80 ms sonra işaretleniyor.",
+      "question": "Bu ölçümlerle QRS süresi kaç milisaniyedir?",
+      "text": "Bu ölçümlerle QRS süresi kaç milisaniyedir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "80 ms",
+        "160 ms",
+        "200 ms",
+        "110 ms",
+        "140 ms"
+      ],
+      "correct": 4,
+      "explanations": [
+        "80 ms normal dar QRS örneğidir.",
+        "160 ms LBBB öğretim genişliğidir.",
+        "200 ms verilen ilk/son sapma farkından 60 ms uzundur.",
+        "110 ms terminal desteğin bir kısmını dışlar.",
+        "−60 ms ile+80 ms arasındaki geniş QRS desteği 140 ms’dir."
+      ],
+      "feedback": "−60 ms ile+80 ms arasındaki geniş QRS desteği 140 ms’dir.",
+      "objectiveIds": [
+        "O6"
+      ],
+      "sourceIds": [
+        "VA2022",
+        "ECG"
+      ],
+      "decisionId": "q140",
+      "note": "",
+      "ecg": {
+        "mode": "pvc",
+        "options": {},
+        "leads": [
+          "II",
+          "aVR",
+          "V1"
+        ],
+        "start": 2.9,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q050",
+      "mode": "pvc",
+      "title": "Sentetik değerlendirme Q050",
+      "ariaLabel": "Q050 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "53 yaşında kadın hasta. Başvuru: menopoz döneminde ara sıra çarpıntı fark ediyor. Eşzamanlı üç derivasyonlu kayıt aşağıda gösteriliyor.",
+      "question": "Bu EKG'de öncelikle hangi tanı düşünülmelidir?",
+      "text": "Bu EKG'de öncelikle hangi tanı düşünülmelidir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "Atriyal fibrilasyon",
+        "Sağ dal bloğu",
+        "Ventriküler erken atım",
+        "Sinüs taşikardisi",
+        "Fokal atriyal taşikardi"
+      ],
+      "correct": 2,
+      "explanations": [
+        "Atriyal fibrilasyon için beklenen bulgular burada yok.",
+        "Sağ dal bloğu için beklenen bulgular burada yok.",
+        "Tarif edilen bulgular Ventriküler erken atım ile uyumludur.",
+        "Sinüs taşikardisi için beklenen bulgular burada yok.",
+        "Fokal atriyal taşikardi için beklenen bulgular burada yok."
+      ],
+      "feedback": "Tarif edilen bulgular Ventriküler erken atım ile uyumludur.",
+      "objectiveIds": [
+        "O2"
+      ],
+      "sourceIds": [
+        "VA2022"
+      ],
+      "decisionId": "ddx_pvc",
+      "note": "",
+      "ecg": {
+        "mode": "pvc",
+        "options": {},
+        "leads": [
+          "II",
+          "aVR",
+          "V1"
+        ],
+        "start": 0.3,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q051",
+      "mode": "pvc",
+      "title": "Sentetik değerlendirme Q051",
+      "ariaLabel": "Q051 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "42 yaşında erkek hasta. Başvuru: maraton antrenmanı sonrası tekleme hissiyle geliyor. Erken ve geniş kompleksin hemen ardından ana yöne ters bir T dalgası izleniyor.",
+      "question": "Bu erken atım sonrası T değişikliği nasıl yorumlanır?",
+      "text": "Bu erken atım sonrası T değişikliği nasıl yorumlanır?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "Bu nabız yönünü gösterir",
+        "Bu ayrı bir atriyal taşikardidir",
+        "Her ters T akut oklüzyondur",
+        "T değişimi yeni P dizisidir",
+        "Geniş QRS sonrası ters T"
+      ],
+      "correct": 4,
+      "explanations": [
+        "EKG yönü mekanik akım yönü değildir.",
+        "Bu tek atımın repolarizasyonudur, yeni ritim değil.",
+        "Geniş QRS sonrası ters T tek başına oklüzyon değildir.",
+        "T ventrikül olayıdır, P değildir.",
+        "Farklı aktivasyon yolu ters repolarizasyon yapar."
+      ],
+      "feedback": "Farklı aktivasyon yolu ters repolarizasyon yapar.",
+      "objectiveIds": [
+        "O1"
+      ],
+      "sourceIds": [
+        "VA2022"
+      ],
+      "decisionId": "pvcT",
+      "note": "",
+      "ecg": {
+        "mode": "pvc",
+        "options": {},
+        "leads": [
+          "II",
+          "aVR",
+          "V1"
+        ],
+        "start": 0.6,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q052",
+      "mode": "pvc",
+      "title": "Sentetik değerlendirme Q052",
+      "ariaLabel": "Q052 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "57 yaşında kadın hasta. Başvuru: yorgunluk ve ara sıra çarpıntı ile başvuruyor. Kompleks genişliği tek başına değerlendirilerek kökeni hakkında yorum yapılmak isteniyor.",
+      "question": "QRS genişliğini tek başına yorumlarken hangi sınır geçerlidir?",
+      "text": "QRS genişliğini tek başına yorumlarken hangi sınır geçerlidir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "Genişlik ve klinik bulgu birlikte yorumlanır",
+        "160 ms her QRS kesin LBBB'dir",
+        "120 ms üstü her QRS VT'dir",
+        "140 ms her QRS kesin RBBB'dir",
+        "Genişlik tek başına debiyi hesaplar"
+      ],
+      "correct": 0,
+      "explanations": [
+        "Tek genişlik VT ile bloğu kesin ayırmaz.",
+        "Genişlik tek başına LBBB'yi kanıtlamaz.",
+        "Dal bloğu da geniş QRS yapabilir.",
+        "PVC de bu genişlikte olabilir.",
+        "Genişlik zaman ölçüsüdür, debi değildir."
+      ],
+      "feedback": "Tek genişlik VT ile bloğu kesin ayırmaz.",
+      "objectiveIds": [
+        "O5"
+      ],
+      "sourceIds": [
+        "VA2022"
+      ],
+      "decisionId": "qrsWidthCause",
+      "note": "",
+      "ecg": {
+        "mode": "pvc",
+        "options": {},
+        "leads": [
+          "II",
+          "aVR",
+          "V1"
+        ],
+        "start": 0.9,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q053",
+      "mode": "pvc",
+      "title": "Sentetik değerlendirme Q053",
+      "ariaLabel": "Q053 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "31 yaşında erkek hasta. Başvuru: gece nöbeti sonrası tekleme hissi tarif ediyor. Sistematik okumada hangi derivasyonların ön duvarı temsil ettiği gözden geçiriliyor.",
+      "question": "V3 ve V4 derivasyonları hangi bölgeyi yansıtır?",
+      "text": "V3 ve V4 derivasyonları hangi bölgeyi yansıtır?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "Anterior duvar",
+        "İnferior duvar",
+        "Atriyum yalnızca",
+        "Sağ ventrikül yalnızca",
+        "Lateral duvar"
+      ],
+      "correct": 0,
+      "explanations": [
+        "V3–V4 kalbin ön (anterior) duvarını yansıtır.",
+        "İnferior duvar II, III, aVF ile değerlendirilir, V3–V4 ile değil.",
+        "Atriyal etkinlik tek bir prekordiyal çiftle özgül olarak gösterilmez.",
+        "Sağ ventrikül daha çok V1 ve sağ prekordiyal derivasyonlarla ilişkilidir.",
+        "Lateral duvar I, aVL, V5–V6 ile değerlendirilir."
+      ],
+      "feedback": "V3–V4 kalbin ön (anterior) duvarını yansıtır.",
+      "objectiveIds": [
+        "O3"
+      ],
+      "sourceIds": [
+        "VA2022",
+        "ECG"
+      ],
+      "decisionId": "anteriorLeadGroup",
+      "note": "",
+      "ecg": {
+        "mode": "pvc",
+        "options": {},
+        "leads": [
+          "II",
+          "aVR",
+          "V1"
+        ],
+        "start": 1.1,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q054",
+      "mode": "pvc",
+      "title": "Sentetik değerlendirme Q054",
+      "ariaLabel": "Q054 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "49 yaşında kadın hasta. Başvuru: kahve tüketimi sonrası çarpıntı yakınmasıyla geliyor. Kaliperle P’nin ilk sapması QRS’den 215 ms önce, QRS’in ilk sapması 40 ms önce işaretleniyor.",
+      "question": "Bu ölçümlerle PR aralığı kaç milisaniyedir?",
+      "text": "Bu ölçümlerle PR aralığı kaç milisaniyedir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "255 ms",
+        "155 ms",
+        "215 ms",
+        "130 ms",
+        "175 ms"
+      ],
+      "correct": 4,
+      "explanations": [
+        "255 ms P başlangıcından QRS sonuna ölçüm hatasıdır.",
+        "155 ms verilen iki başlangıcın farkı değildir.",
+        "215 ms P başlangıcından R tepesine ölçüm hatasıdır.",
+        "130 ms P merkezinden QRS başlangıcına gitme hatasıdır.",
+        "P ilk sapması−215 ms, QRS ilk sapması−40 ms: fark 175 ms."
+      ],
+      "feedback": "P ilk sapması−215 ms, QRS ilk sapması−40 ms: fark 175 ms.",
+      "objectiveIds": [
+        "O6"
+      ],
+      "sourceIds": [
+        "VA2022",
+        "ECG"
+      ],
+      "decisionId": "pr175",
+      "note": "",
+      "ecg": {
+        "mode": "pvc",
+        "options": {},
+        "leads": [
+          "II",
+          "aVR",
+          "V1"
+        ],
+        "start": 2.5,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q055",
+      "mode": "pvc",
+      "title": "Sentetik değerlendirme Q055",
+      "ariaLabel": "Q055 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "64 yaşında erkek hasta. Başvuru: rutin check-up sırasında erken atım saptanıyor. Standart 12 derivasyonluk kayıt üzerinde derivasyon grupları gözden geçiriliyor.",
+      "question": "aVR, aVL ve aVF birlikte hangi derivasyon grubunu oluşturur?",
+      "text": "aVR, aVL ve aVF birlikte hangi derivasyon grubunu oluşturur?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "Bipolar ekstremite derivasyonları",
+        "Özefagus derivasyonları",
+        "Prekordiyal derivasyonlar",
+        "Yalnız sağ göğüs derivasyonları",
+        "Artırılmış ekstremite derivasyonları"
+      ],
+      "correct": 4,
+      "explanations": [
+        "Bipolar ekstremite derivasyonları I, II, III'tür; aVR/aVL/aVF unipolardır.",
+        "Özefagus derivasyonu standart 12 derivasyonluk sette yer almaz.",
+        "Prekordiyal grup V1–V6'dır; aVR/aVL/aVF bu gruba girmez.",
+        "Sağ göğüs derivasyonları ayrı bir prekordiyal settir; aVR/aVL/aVF değildir.",
+        "aVR, aVL ve aVF birlikte artırılmış (unipolar) ekstremite derivasyon grubunu oluşturur."
+      ],
+      "feedback": "aVR, aVL ve aVF birlikte artırılmış (unipolar) ekstremite derivasyon grubunu oluşturur.",
+      "objectiveIds": [
+        "O3"
+      ],
+      "sourceIds": [
+        "VA2022",
+        "ECG"
+      ],
+      "decisionId": "augmentedGroup",
+      "note": "",
+      "ecg": {
+        "mode": "pvc",
+        "options": {},
+        "leads": [
+          "II",
+          "aVR",
+          "V1"
+        ],
+        "start": 2.7,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q056",
+      "mode": "pvc",
+      "title": "Sentetik değerlendirme Q056",
+      "ariaLabel": "Q056 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "37 yaşında kadın hasta. Başvuru: egzersiz sonrası soğuma döneminde tekleme fark ediyor. Eşzamanlı üç derivasyonlu kayıt aşağıda gösteriliyor.",
+      "question": "Bu ritim hangi sınıfa girer?",
+      "text": "Bu ritim hangi sınıfa girer?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "Düzenli geniş kompleks taşikardi",
+        "Kaotik, organize değil",
+        "Düzensiz dar kompleks (AF)",
+        "Sinüs ritmi + izole erken geniş QRS (PVC)",
+        "Düzenli dar kompleks, hızlı"
+      ],
+      "correct": 3,
+      "explanations": [
+        "Geniş kompleks tek atımdır; sürekli taşikardi yok.",
+        "Düzenli sinüs kompleksleri seçilebiliyor; kaotik değil.",
+        "AF'de düzensizlik tüm kayıt boyunca sürer; tanımlayıcı olay erken geniş kompleks değildir.",
+        "Temel ritim düzenli sinüs; tek bir erken, geniş, farklı morfolojili kompleks ve ardından duraklama: PVC.",
+        "Hız normal aralıkta; tanımlayıcı olay erken geniş komplekstir."
+      ],
+      "feedback": "Temel ritim düzenli sinüs; tek bir erken, geniş, farklı morfolojili kompleks ve ardından duraklama: PVC.",
+      "objectiveIds": [
+        "O2"
+      ],
+      "sourceIds": [
+        "VA2022"
+      ],
+      "decisionId": "rhythmClass_pvc",
+      "note": "",
+      "ecg": {
+        "mode": "pvc",
+        "options": {},
+        "leads": [
+          "II",
+          "aVR",
+          "V1"
+        ],
+        "start": 2.9,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q057",
+      "mode": "pvc",
+      "title": "Sentetik değerlendirme Q057",
+      "ariaLabel": "Q057 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "46 yaşında erkek hasta. Başvuru: iş stresiyle birlikte ara sıra çarpıntı tarif ediyor. Kısa süreli bir kayıt elde ediliyor; önceki öykü ve ek testler henüz yok.",
+      "question": "Bu bulgudan etiyoloji ve risk için hangi genel sınır çıkarılabilir?",
+      "text": "Bu bulgudan etiyoloji ve risk için hangi genel sınır çıkarılabilir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "P ekseni kesin odağı belirler",
+        "QRS genişliği tek başına riski verir",
+        "Hız tek başına dolaşımı gösterir",
+        "Kısa kayıt başlangıç zamanını verir",
+        "Örüntü desteklenir, neden ayrıca sorulur"
+      ],
+      "correct": 4,
+      "explanations": [
+        "P ekseni ipucudur, kesin yer vermez.",
+        "Risk için klinik bağlam da gerekir.",
+        "Nabız ve basınç ayrıca değerlendirilir.",
+        "Bir pencere toplam süreyi göstermez.",
+        "EKG bulgusu tanı verir, nedeni klinik öykü belirler."
+      ],
+      "feedback": "EKG bulgusu tanı verir, nedeni klinik öykü belirler.",
+      "objectiveIds": [
+        "O5"
+      ],
+      "sourceIds": [
+        "VA2022"
+      ],
+      "decisionId": "limits",
+      "note": "",
+      "ecg": {
+        "mode": "pvc",
+        "options": {},
+        "leads": [
+          "II",
+          "aVR",
+          "V1"
+        ],
+        "start": 0.3,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q058",
+      "mode": "pvc",
+      "title": "Sentetik değerlendirme Q058",
+      "ariaLabel": "Q058 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "59 yaşında kadın hasta. Başvuru: holter raporunda izole erken atımlar bildiriliyor. Elektriksel kayıt sürerken nabız muayenesi ayrıca planlanıyor.",
+      "question": "EKG bulgusu ile mekanik nabız arasındaki ilişki için hangi değerlendirme gerekir?",
+      "text": "EKG bulgusu ile mekanik nabız arasındaki ilişki için hangi değerlendirme gerekir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "PR süresi debiyi verir",
+        "QRS genişliği nabız basıncını verir",
+        "Elektriksel hız nabza birebir eşittir",
+        "T genliği atım hacmini verir",
+        "Nabız ayrıca klinik olarak bakılır"
+      ],
+      "correct": 4,
+      "explanations": [
+        "PR iletim süresidir, debi ölçmez.",
+        "Genişlik zaman ölçüsüdür, basınç değildir.",
+        "Nabız açığı olabilir; eşitlik varsayılamaz.",
+        "T genliği repolarizasyon voltajıdır.",
+        "EKG elektrik gösterir, nabzı kanıtlamaz."
+      ],
+      "feedback": "EKG elektrik gösterir, nabzı kanıtlamaz.",
+      "objectiveIds": [
+        "O4"
+      ],
+      "sourceIds": [
+        "VA2022",
+        "CYCLE"
+      ],
+      "decisionId": "pulse",
+      "note": "",
+      "ecg": {
+        "mode": "pvc",
+        "options": {},
+        "leads": [
+          "II",
+          "aVR",
+          "V1"
+        ],
+        "start": 0.6,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q059",
+      "mode": "pvc",
+      "title": "Sentetik değerlendirme Q059",
+      "ariaLabel": "Q059 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "28 yaşında erkek hasta. Başvuru: spor müsabakası sonrası tekleme hissiyle geliyor. İzlemde giriş kapaklarının açık, çıkış kapaklarının kapalı olduğu bir an gösteriliyor.",
+      "question": "Bu kapak ve hacim düzeni hangi mekanik evreyi gösterir?",
+      "text": "Bu kapak ve hacim düzeni hangi mekanik evreyi gösterir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "Tüm kapaklar kapalı: gevşeme",
+        "Tüm kapaklar kapalı: kasılma",
+        "Çıkış kapakları açık: ejeksiyon",
+        "AV kapaklar açık: ventrikül doluşu",
+        "AV kapaklar kapalı: atriyal sistol"
+      ],
+      "correct": 3,
+      "explanations": [
+        "Gevşemede AV henüz açılmamıştır.",
+        "Kasılmada hacim sabittir, doluş yoktur.",
+        "Bu ileri pompalama fazıdır, doluş değil.",
+        "Kan diyastolde ventriküle geçer.",
+        "Bu doluş fazı AV açıkken olur."
+      ],
+      "feedback": "Kan diyastolde ventriküle geçer.",
+      "objectiveIds": [
+        "O4"
+      ],
+      "sourceIds": [
+        "VA2022",
+        "CYCLE"
+      ],
+      "decisionId": "fill",
+      "note": "",
+      "ecg": {
+        "mode": "pvc",
+        "options": {},
+        "leads": [
+          "II",
+          "aVR",
+          "V1"
+        ],
+        "start": 0.9,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q060",
+      "mode": "pvc",
+      "title": "Sentetik değerlendirme Q060",
+      "ariaLabel": "Q060 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "54 yaşında kadın hasta. Başvuru: uzun toplantı sonrası çarpıntı yakınmasıyla başvuruyor. Erken atımın sıklığı ve eşlik eden semptomlar birlikte değerlendiriliyor.",
+      "question": "Bu hastada ilk yaklaşım ne olmalıdır?",
+      "text": "Bu hastada ilk yaklaşım ne olmalıdır?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "Yalnız görüntüleme istenir",
+        "Karar tamamen hastaya bırakılır",
+        "Sıklık ve semptomla birlikte değerlendirme",
+        "Yalnızca gözlem yeterlidir",
+        "Hemen taburcu edilir"
+      ],
+      "correct": 2,
+      "explanations": [
+        "İlk adım görüntülemeden önce klinik değerlendirmedir.",
+        "İlk yaklaşım klinik ekip tarafından yönlendirilir.",
+        "PVC yükü/sıklığı, semptomlar, tetikleyiciler (kafein, stres, elektrolit) ve gerektiğinde yapısal kalp hastalığı değerlendirilir; izole asemptomatik PVC çoğu zaman yalnız izlem gerektirir.",
+        "Bu bulgu daha aktif bir yaklaşım gerektirebilir; yalnız izlem yetmez.",
+        "Bulgu ciddi olabilir; taburcu öncesi değerlendirme gerekir."
+      ],
+      "feedback": "PVC yükü/sıklığı, semptomlar, tetikleyiciler (kafein, stres, elektrolit) ve gerektiğinde yapısal kalp hastalığı değerlendirilir; izole asemptomatik PVC çoğu zaman yalnız izlem gerektirir.",
+      "objectiveIds": [
+        "O5"
+      ],
+      "sourceIds": [
+        "VA2022"
+      ],
+      "decisionId": "firstStep_pvc",
+      "note": "",
+      "ecg": {
+        "mode": "pvc",
+        "options": {},
+        "leads": [
+          "II",
+          "aVR",
+          "V1"
+        ],
+        "start": 1.1,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q061",
+      "mode": "svt",
+      "title": "Sentetik değerlendirme Q061",
+      "ariaLabel": "Q061 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "21 yaşında erkek hasta. Başvuru: spor müsabakası sırasında ani çarpıntı gelişiyor. Ani başlayan hızlı, düzenli ve dar kompleksli bir ritim izleniyor; ayrı bir atriyal dalga seçilemiyor.",
+      "question": "Bu bulgularla en uygun kapsamlı sınıflama hangisidir?",
+      "text": "Bu bulgularla en uygun kapsamlı sınıflama hangisidir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "165/dk"
+        },
+        {
+          "k": "TA",
+          "v": "100/66 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%96"
+        }
+      ],
+      "options": [
+        "Monomorfik VT",
+        "Sinüs taşikardisi",
+        "Fokal atriyal taşikardi",
+        "Atriyal fibrilasyon",
+        "Dar kompleks SVT"
+      ],
+      "correct": 4,
+      "explanations": [
+        "VT'de QRS geniştir; burada dar.",
+        "Sinüs taşikardisinde P görülür; burada görülmüyor.",
+        "Bunun için ayrı bir P kanıtı gerekir; burada yok.",
+        "AF'de R–R düzensizdir; burada düzenli.",
+        "Hızlı, düzenli, dar QRS; P seçilemiyor: SVT."
+      ],
+      "feedback": "Hızlı, düzenli, dar QRS; P seçilemiyor: SVT.",
+      "objectiveIds": [
+        "O2"
+      ],
+      "sourceIds": [
+        "SVT2019"
+      ],
+      "decisionId": "svt",
+      "note": "",
+      "ecg": {
+        "mode": "svt",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V1"
+        ],
+        "start": 0.5,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q062",
+      "mode": "svt",
+      "title": "Sentetik değerlendirme Q062",
+      "ariaLabel": "Q062 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "44 yaşında kadın hasta. Başvuru: ani başlayan çarpıntı ile göğüste sıkışma tarif ediyor. İki ardışık R tepesi arası 360 ms ölçülüyor.",
+      "question": "Bu döngü süresiyle elektriksel hız yaklaşık kaçtır?",
+      "text": "Bu döngü süresiyle elektriksel hız yaklaşık kaçtır?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "165/dk"
+        },
+        {
+          "k": "TA",
+          "v": "100/66 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%96"
+        }
+      ],
+      "options": [
+        "Yaklaşık 167/dk",
+        "180/dk",
+        "120/dk",
+        "200/dk",
+        "150/dk"
+      ],
+      "correct": 0,
+      "explanations": [
+        "60/0,36 yaklaşık 166,7/dk elektriksel hızdır.",
+        "180/dk yaklaşık 333 ms gerektirir.",
+        "120/dk 500 ms gerektirir.",
+        "200/dk 300 ms gerektirir.",
+        "150/dk 400 ms gerektirir."
+      ],
+      "feedback": "60/0,36 yaklaşık 166,7/dk elektriksel hızdır.",
+      "objectiveIds": [
+        "O6"
+      ],
+      "sourceIds": [
+        "SVT2019",
+        "ECG"
+      ],
+      "decisionId": "rr360",
+      "note": "",
+      "ecg": {
+        "mode": "svt",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V1"
+        ],
+        "start": 0.58,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q063",
+      "mode": "svt",
+      "title": "Sentetik değerlendirme Q063",
+      "ariaLabel": "Q063 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "30 yaşında erkek hasta. Başvuru: sabah kalkarken ani hızlı çarpıntı fark ediyor. Dar bir kompleksin ilk sapması 40 ms önce, son dönüşü 40 ms sonra işaretleniyor.",
+      "question": "Bu ölçümlerle QRS süresi kaç milisaniyedir?",
+      "text": "Bu ölçümlerle QRS süresi kaç milisaniyedir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "165/dk"
+        },
+        {
+          "k": "TA",
+          "v": "100/66 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%96"
+        }
+      ],
+      "options": [
+        "60 ms",
+        "80 ms",
+        "100 ms",
+        "40 ms",
+        "140 ms"
+      ],
+      "correct": 1,
+      "explanations": [
+        "60 ms başlangıç veya terminal bileşenin bir kısmını dışlar.",
+        "−40 ms ile+40 ms arasındaki QRS desteği 80 ms’dir.",
+        "100 ms iki sınırın verilen farkından fazladır.",
+        "40 ms yalnız R’den son dönüşe yarı desteği sayar.",
+        "140 ms geniş PVC/RBBB örneğiyle karıştırır."
+      ],
+      "feedback": "−40 ms ile+40 ms arasındaki QRS desteği 80 ms’dir.",
+      "objectiveIds": [
+        "O6"
+      ],
+      "sourceIds": [
+        "SVT2019",
+        "ECG"
+      ],
+      "decisionId": "q80",
+      "note": "",
+      "ecg": {
+        "mode": "svt",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V1"
+        ],
+        "start": 0.66,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q064",
+      "mode": "svt",
+      "title": "Sentetik değerlendirme Q064",
+      "ariaLabel": "Q064 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "25 yaşında kadın hasta. Başvuru: kafeinli içecek sonrası ani çarpıntı ile başvuruyor. Dar kompleksli hızlı ritimde P dalgası QRS veya T ile örtüşüyor olabilir.",
+      "question": "Kesin mekanizma için hangi sınır geçerlidir?",
+      "text": "Kesin mekanizma için hangi sınır geçerlidir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "165/dk"
+        },
+        {
+          "k": "TA",
+          "v": "100/66 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%96"
+        }
+      ],
+      "options": [
+        "P yoksa kesin AVNRT vardır",
+        "Kesin mekanizma için ek veri gerekir",
+        "Dar QRS varsa kesin fokal AT vardır",
+        "Düzenli hızda değerlendirme gerekmez",
+        "Hız 167 ise kesin AVRT vardır"
+      ],
+      "correct": 1,
+      "explanations": [
+        "P görünmemesi tek başına özgül değildir.",
+        "Tek şerit AVNRT, AVRT veya AT'yi kesin ayırmaz.",
+        "Dar QRS için ayrı atriyal kanıt gerekir.",
+        "Düzenlilik klinik değerlendirmeyi gereksiz kılmaz.",
+        "Hız aralığı mekanizmalar arasında örtüşür."
+      ],
+      "feedback": "Tek şerit AVNRT, AVRT veya AT'yi kesin ayırmaz.",
+      "objectiveIds": [
+        "O5"
+      ],
+      "sourceIds": [
+        "SVT2019"
+      ],
+      "decisionId": "svtLimits",
+      "note": "",
+      "ecg": {
+        "mode": "svt",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V1"
+        ],
+        "start": 0.74,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q065",
+      "mode": "svt",
+      "title": "Sentetik değerlendirme Q065",
+      "ariaLabel": "Q065 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "50 yaşında erkek hasta. Başvuru: ani başlayan çarpıntı presenkop olmadan geçiyor. Hızlı dar kompleksler arasında ayrı bir P dalgası seçilemiyor.",
+      "question": "Bu ritimde ayrı bir P dalgası neden seçilemiyor?",
+      "text": "Bu ritimde ayrı bir P dalgası neden seçilemiyor?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "165/dk"
+        },
+        {
+          "k": "TA",
+          "v": "100/66 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%96"
+        }
+      ],
+      "options": [
+        "Hızlı ritimde atriyal etkinlik QRS/T içine gömülür veya retrograd olarak gizlenir",
+        "T dalgası P'nin başka adıdır",
+        "P dalgası yalnız VT'de görülür",
+        "Kayıt hızı yavaş olduğu için",
+        "Atriyumlar hiç uyarılmaz"
+      ],
+      "correct": 0,
+      "explanations": [
+        "AV düğüm re-entry gibi SVT'lerde P, QRS ile eşzamanlı ya da hemen ardındadır; ayrı seçilmez (ESC SVT 2019).",
+        "T ventriküler repolarizasyondur; P atriyal depolarizasyon.",
+        "P atriyal depolarizasyonu gösterir; ritimden bağımsız bir kavramdır.",
+        "25 mm/sn standart hızdır; P görünmemesi kayıt hızıyla ilgili değildir.",
+        "SVT'de atriyumlar da aktive olur; görünmemesi zamanlama nedeniyledir."
+      ],
+      "feedback": "AV düğüm re-entry gibi SVT'lerde P, QRS ile eşzamanlı ya da hemen ardındadır; ayrı seçilmez (ESC SVT 2019).",
+      "objectiveIds": [
+        "O1"
+      ],
+      "sourceIds": [
+        "SVT2019"
+      ],
+      "decisionId": "pHiddenSvt",
+      "note": "",
+      "ecg": {
+        "mode": "svt",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V1"
+        ],
+        "start": 0.8200000000000001,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q066",
+      "mode": "svt",
+      "title": "Sentetik değerlendirme Q066",
+      "ariaLabel": "Q066 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "34 yaşında kadın hasta. Başvuru: uzun süredir tekrarlayan ani çarpıntı atakları tarif ediyor. Sistematik okumada hangi derivasyonların inferior duvarı temsil ettiği gözden geçiriliyor.",
+      "question": "Hangi derivasyon grubu inferior duvarı gösterir?",
+      "text": "Hangi derivasyon grubu inferior duvarı gösterir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "165/dk"
+        },
+        {
+          "k": "TA",
+          "v": "100/66 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%96"
+        }
+      ],
+      "options": [
+        "I, aVL, V5–V6 — lateral duvar",
+        "II, III, aVF — inferior duvar",
+        "V1, V2 — septal bölge",
+        "V3, V4 — anterior duvar",
+        "aVR tek başına — sağ üst köşe"
+      ],
+      "correct": 1,
+      "explanations": [
+        "Bu grup lateral duvarı gösterir, inferior duvarı değil.",
+        "Bu üç derivasyon kalbin inferior (alt) duvarını gösterir.",
+        "V1–V2 septal bölgeyi gösterir, inferior duvarı değil.",
+        "V3–V4 anterior duvarı gösterir, inferior duvarı değil.",
+        "aVR tek başına sağ üst yönü gösterir; inferior grup değildir."
+      ],
+      "feedback": "Bu üç derivasyon kalbin inferior (alt) duvarını gösterir.",
+      "objectiveIds": [
+        "O3"
+      ],
+      "sourceIds": [
+        "SVT2019",
+        "ECG"
+      ],
+      "decisionId": "inferiorLeadGroup",
+      "note": "",
+      "ecg": {
+        "mode": "svt",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V1"
+        ],
+        "start": 0.5,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q067",
+      "mode": "svt",
+      "title": "Sentetik değerlendirme Q067",
+      "ariaLabel": "Q067 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "28 yaşında erkek hasta. Başvuru: egzersiz sonrası ani hızlı çarpıntı ile başvuruyor. Ventriküler kompleksin izde temsil ettiği olay ayrıca soruluyor.",
+      "question": "QRS kompleksinin temel elektriksel karşılığı nedir?",
+      "text": "QRS kompleksinin temel elektriksel karşılığı nedir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "165/dk"
+        },
+        {
+          "k": "TA",
+          "v": "100/66 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%96"
+        }
+      ],
+      "options": [
+        "QRS: atriyal depolarizasyon",
+        "QRS: ventriküler depolarizasyon",
+        "QRS: yalnız atriyal repolarizasyon",
+        "QRS: ventriküler repolarizasyon",
+        "QRS: yalnız AV düğüm gecikmesi"
+      ],
+      "correct": 1,
+      "explanations": [
+        "Bu olay P dalgasıyla kaydedilir.",
+        "QRS ventrikül kasının elektriksel uyarılmasıdır.",
+        "QRS'in ana kaynağı ventrikül kasıdır.",
+        "Bu olay T dalgasıyla kaydedilir.",
+        "AV gecikmesi PR aralığında değerlendirilir."
+      ],
+      "feedback": "QRS ventrikül kasının elektriksel uyarılmasıdır.",
+      "objectiveIds": [
+        "O1"
+      ],
+      "sourceIds": [
+        "SVT2019"
+      ],
+      "decisionId": "qrs",
+      "note": "",
+      "ecg": {
+        "mode": "svt",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V1"
+        ],
+        "start": 0.58,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q068",
+      "mode": "svt",
+      "title": "Sentetik değerlendirme Q068",
+      "ariaLabel": "Q068 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "46 yaşında kadın hasta. Başvuru: ani çarpıntı sırasında nefes darlığı da tarif ediyor. İzlemde giriş kapaklarının açık, çıkış kapaklarının kapalı olduğu bir an gösteriliyor.",
+      "question": "Bu kapak ve hacim düzeni hangi mekanik evreyi gösterir?",
+      "text": "Bu kapak ve hacim düzeni hangi mekanik evreyi gösterir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "165/dk"
+        },
+        {
+          "k": "TA",
+          "v": "100/66 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%96"
+        }
+      ],
+      "options": [
+        "AV kapaklar açık: ventrikül doluşu",
+        "Tüm kapaklar kapalı: gevşeme",
+        "AV kapaklar kapalı: atriyal sistol",
+        "Çıkış kapakları açık: ejeksiyon",
+        "Tüm kapaklar kapalı: kasılma"
+      ],
+      "correct": 0,
+      "explanations": [
+        "Kan diyastolde ventriküle geçer.",
+        "Gevşemede AV henüz açılmamıştır.",
+        "Bu doluş fazı AV açıkken olur.",
+        "Bu ileri pompalama fazıdır, doluş değil.",
+        "Kasılmada hacim sabittir, doluş yoktur."
+      ],
+      "feedback": "Kan diyastolde ventriküle geçer.",
+      "objectiveIds": [
+        "O4"
+      ],
+      "sourceIds": [
+        "SVT2019",
+        "CYCLE"
+      ],
+      "decisionId": "fill",
+      "note": "",
+      "ecg": {
+        "mode": "svt",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V1"
+        ],
+        "start": 0.66,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q069",
+      "mode": "svt",
+      "title": "Sentetik değerlendirme Q069",
+      "ariaLabel": "Q069 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "22 yaşında erkek hasta. Başvuru: ilk kez yaşadığı ani çarpıntı ile acile geliyor. İzlemde QRS’den kısa süre sonra basıncın yükseldiği, ancak çıkış kapaklarının henüz açılmadığı bir an inceleniyor.",
+      "question": "Bu andaki kapak durumu hangi mekanik evreyi tanımlar?",
+      "text": "Bu andaki kapak durumu hangi mekanik evreyi tanımlar?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "165/dk"
+        },
+        {
+          "k": "TA",
+          "v": "100/66 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%96"
+        }
+      ],
+      "options": [
+        "Çıkış kapakları açık: ejeksiyon",
+        "AV kapaklar açık: atriyal sistol",
+        "Tüm kapaklar kapalı: gevşeme",
+        "AV kapaklar açık: pasif doluş",
+        "Tüm kapaklar kapalı: izovolümetrik kasılma"
+      ],
+      "correct": 4,
+      "explanations": [
+        "Bu erken evrede çıkış henüz kapalıdır.",
+        "Bu anda AV kapak kapalıdır.",
+        "Gevşeme ejeksiyon sonrasıdır.",
+        "Bu kasılma başlangıcı, doluş değildir.",
+        "Basınç yükselirken hacim henüz sabittir."
+      ],
+      "feedback": "Basınç yükselirken hacim henüz sabittir.",
+      "objectiveIds": [
+        "O4"
+      ],
+      "sourceIds": [
+        "SVT2019",
+        "CYCLE"
+      ],
+      "decisionId": "mechanic",
+      "note": "",
+      "ecg": {
+        "mode": "svt",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V1"
+        ],
+        "start": 0.74,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q070",
+      "mode": "svt",
+      "title": "Sentetik değerlendirme Q070",
+      "ariaLabel": "Q070 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "39 yaşında kadın hasta. Başvuru: manevrayla kendiliğinden geçen çarpıntı öyküsü tarif ediyor. Hasta hemodinamik olarak stabil; ilk yaklaşım seçenekleri değerlendiriliyor.",
+      "question": "Bu hastada ilk yaklaşım ne olmalıdır?",
+      "text": "Bu hastada ilk yaklaşım ne olmalıdır?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "165/dk"
+        },
+        {
+          "k": "TA",
+          "v": "100/66 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%96"
+        }
+      ],
+      "options": [
+        "Karar tamamen hastaya bırakılır",
+        "Yalnız görüntüleme istenir",
+        "Hemen taburcu edilir",
+        "Stabilse vagal manevra ve monitörizasyon",
+        "Yalnızca gözlem yeterlidir"
+      ],
+      "correct": 3,
+      "explanations": [
+        "İlk yaklaşım klinik ekip tarafından yönlendirilir.",
+        "İlk adım görüntülemeden önce klinik değerlendirmedir.",
+        "Bulgu ciddi olabilir; taburcu öncesi değerlendirme gerekir.",
+        "Hemodinamisi stabil dar kompleks taşikardide ilk adım budur.",
+        "Bu bulgu daha aktif bir yaklaşım gerektirebilir; yalnız izlem yetmez."
+      ],
+      "feedback": "Hemodinamisi stabil dar kompleks taşikardide ilk adım budur.",
+      "objectiveIds": [
+        "O5"
+      ],
+      "sourceIds": [
+        "SVT2019"
+      ],
+      "decisionId": "firstStep_svt",
+      "note": "",
+      "ecg": {
+        "mode": "svt",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V1"
+        ],
+        "start": 0.8200000000000001,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q071",
+      "mode": "svt",
+      "title": "Sentetik değerlendirme Q071",
+      "ariaLabel": "Q071 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "32 yaşında erkek hasta. Başvuru: stresli sınav döneminde ani çarpıntı gelişiyor. Eşzamanlı üç derivasyonlu kayıt aşağıda gösteriliyor.",
+      "question": "Bu ritim hangi sınıfa girer?",
+      "text": "Bu ritim hangi sınıfa girer?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "165/dk"
+        },
+        {
+          "k": "TA",
+          "v": "100/66 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%96"
+        }
+      ],
+      "options": [
+        "Düzenli dar kompleks, normal hız",
+        "Kaotik, organize değil",
+        "Düzenli geniş kompleks",
+        "Düzenli dar kompleks, hızlı",
+        "Düzensiz dar kompleks"
+      ],
+      "correct": 3,
+      "explanations": [
+        "Bu örnekte hız veya düzen normal aralığa uymuyor.",
+        "Bu örnekte düzenli bir kompleks seçilebiliyor, kaotik değil.",
+        "Bu örnekte QRS dar, bu kadar geniş değil.",
+        "Hız belirgin yüksek; ritim düzenli ve QRS dar.",
+        "Bu örnekte ritim düzenli, düzensiz değil."
+      ],
+      "feedback": "Hız belirgin yüksek; ritim düzenli ve QRS dar.",
+      "objectiveIds": [
+        "O2"
+      ],
+      "sourceIds": [
+        "SVT2019"
+      ],
+      "decisionId": "rhythmClass_svt",
+      "note": "",
+      "ecg": {
+        "mode": "svt",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V1"
+        ],
+        "start": 0.5,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q072",
+      "mode": "svt",
+      "title": "Sentetik değerlendirme Q072",
+      "ariaLabel": "Q072 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "43 yaşında kadın hasta. Başvuru: ani başlayan çarpıntı ile terleme tarif ediyor. Aynı kayıt üzerinde farklı bir derivasyon grubuna geçildiğinde görünüm değişiyor.",
+      "question": "Derivasyon seçimini değiştirmenin bulguya etkisi nedir?",
+      "text": "Derivasyon seçimini değiştirmenin bulguya etkisi nedir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "165/dk"
+        },
+        {
+          "k": "TA",
+          "v": "100/66 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%96"
+        }
+      ],
+      "options": [
+        "Lead değiştirmek ritmi değiştirir",
+        "Negatif QRS ventrikül kaynağını kanıtlar",
+        "Tüm lead'ler aynı şekli gösterir",
+        "Tek lead 12 derivasyona eşittir",
+        "Derivasyon aynı kaynağın farklı görünümüdür"
+      ],
+      "correct": 4,
+      "explanations": [
+        "Görünüm değişir, kaynak aynı kalır.",
+        "Polarite yön farkından da olabilir.",
+        "Her derivasyon farklı açıdan bakar.",
+        "Diğer derivasyonlar ek bilgi taşır.",
+        "Lead değiştirmek şekli değiştirir, ritmi değiştirmez."
+      ],
+      "feedback": "Lead değiştirmek şekli değiştirir, ritmi değiştirmez.",
+      "objectiveIds": [
+        "O3"
+      ],
+      "sourceIds": [
+        "SVT2019",
+        "ECG"
+      ],
+      "decisionId": "leadAll",
+      "note": "",
+      "ecg": {
+        "mode": "svt",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V1"
+        ],
+        "start": 0.58,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q073",
+      "mode": "svt",
+      "title": "Sentetik değerlendirme Q073",
+      "ariaLabel": "Q073 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "20 yaşında erkek hasta. Başvuru: gece parti sonrası ani hızlı çarpıntı fark ediyor. Sistematik okumada hangi derivasyonların yan duvarı temsil ettiği gözden geçiriliyor.",
+      "question": "Hangi derivasyonlar lateral duvarı gösterir?",
+      "text": "Hangi derivasyonlar lateral duvarı gösterir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "165/dk"
+        },
+        {
+          "k": "TA",
+          "v": "100/66 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%96"
+        }
+      ],
+      "options": [
+        "V3, V4 — anterior duvar",
+        "V1, V2 — septal bölge",
+        "II, III, aVF — inferior duvar",
+        "I, aVL, V5–V6 — lateral duvar",
+        "V1–V6 tümü — tüm prekordiyum"
+      ],
+      "correct": 3,
+      "explanations": [
+        "V3–V4 anterior duvarı gösterir, lateral duvarı değil.",
+        "V1–V2 septal bölgeyi gösterir, lateral duvarı değil.",
+        "Bu grup inferior duvarı gösterir, lateral duvarı değil.",
+        "Bu üç derivasyon grubu kalbin lateral duvarını gösterir.",
+        "Tüm prekordiyal grup tek başına lateral duvarı özgül olarak göstermez."
+      ],
+      "feedback": "Bu üç derivasyon grubu kalbin lateral duvarını gösterir.",
+      "objectiveIds": [
+        "O3"
+      ],
+      "sourceIds": [
+        "SVT2019",
+        "ECG"
+      ],
+      "decisionId": "lateralLeadGroup",
+      "note": "",
+      "ecg": {
+        "mode": "svt",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V1"
+        ],
+        "start": 0.66,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q074",
+      "mode": "svt",
+      "title": "Sentetik değerlendirme Q074",
+      "ariaLabel": "Q074 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "37 yaşında kadın hasta. Başvuru: ani çarpıntı ataklarının sıklığı arttığı için başvuruyor. Eşzamanlı üç derivasyonlu kayıt aşağıda gösteriliyor.",
+      "question": "Bu EKG'de öncelikle hangi tanı düşünülmelidir?",
+      "text": "Bu EKG'de öncelikle hangi tanı düşünülmelidir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "165/dk"
+        },
+        {
+          "k": "TA",
+          "v": "100/66 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%96"
+        }
+      ],
+      "options": [
+        "Supraventriküler taşikardi",
+        "Sinüs taşikardisi",
+        "Sağ dal bloğu",
+        "Ventriküler erken atım",
+        "Atriyal fibrilasyon"
+      ],
+      "correct": 0,
+      "explanations": [
+        "Tarif edilen bulgular Supraventriküler taşikardi ile uyumludur.",
+        "Sinüs taşikardisi için beklenen bulgular burada yok.",
+        "Sağ dal bloğu için beklenen bulgular burada yok.",
+        "Ventriküler erken atım için beklenen bulgular burada yok.",
+        "Atriyal fibrilasyon için beklenen bulgular burada yok."
+      ],
+      "feedback": "Tarif edilen bulgular Supraventriküler taşikardi ile uyumludur.",
+      "objectiveIds": [
+        "O2"
+      ],
+      "sourceIds": [
+        "SVT2019"
+      ],
+      "decisionId": "ddx_svt",
+      "note": "",
+      "ecg": {
+        "mode": "svt",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V1"
+        ],
+        "start": 0.74,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q075",
+      "mode": "svt",
+      "title": "Sentetik değerlendirme Q075",
+      "ariaLabel": "Q075 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "49 yaşında erkek hasta. Başvuru: egzersiz sırasında tekrarlayan ani çarpıntı tarif ediyor. Başvuru anında ritim sürüyor; TA 100/66 mmHg, bilinç açık.",
+      "question": "Bu klinik tabloda öncelikli yaklaşım nedir?",
+      "text": "Bu klinik tabloda öncelikli yaklaşım nedir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "165/dk"
+        },
+        {
+          "k": "TA",
+          "v": "100/66 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%96"
+        }
+      ],
+      "options": [
+        "Tek derivasyon kesinlik verir",
+        "Her SVT atağında acil kardiyoversiyon",
+        "Önce kesin mekanizma sonra hasta bakılır",
+        "Stabil hastada vagal manevra ve monitörizasyon; instabilite varsa senkronize kardiyoversiyon",
+        "Kendiliğinden geçtiği için değerlendirme gerekmez"
+      ],
+      "correct": 3,
+      "explanations": [
+        "Mekanizma ve yönetim tek derivasyonla belirlenmez.",
+        "Stabil SVT'de önce vagal manevra/adenozin; kardiyoversiyon instabilite içindir.",
+        "Hasta durumu mekanizmadan önce değerlendirilir.",
+        "Düzenli dar kompleks taşikardide yaklaşım hemodinamik duruma göre ayrılır (ESC SVT 2019, AHA ALS 2025).",
+        "Tekrarlayan ataklar mekanizma ve tedavi seçenekleri için değerlendirilir."
+      ],
+      "feedback": "Düzenli dar kompleks taşikardide yaklaşım hemodinamik duruma göre ayrılır (ESC SVT 2019, AHA ALS 2025).",
+      "objectiveIds": [
+        "O5"
+      ],
+      "sourceIds": [
+        "SVT2019"
+      ],
+      "decisionId": "stableSvt",
+      "note": "",
+      "ecg": {
+        "mode": "svt",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V1"
+        ],
+        "start": 0.8200000000000001,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q076",
+      "mode": "inferior",
+      "title": "Sentetik değerlendirme Q076",
+      "ariaLabel": "Q076 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "57 yaşında kadın hasta. Başvuru: hipertansiyon öyküsüyle ani göğüs ağrısı tarif ediyor. Ağrı sırasında alınan EKG’de II, III, aVF derivasyonlarında ST yükselmesi izleniyor.",
+      "question": "Bu ST değişiminin dağılımı hangi bölgeyi işaret eder?",
+      "text": "Bu ST değişiminin dağılımı hangi bölgeyi işaret eder?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "Anterior dağılım",
+        "İnferior dağılım (II, III, aVF)",
+        "Sağ dal bloğu bulgusu",
+        "Flutter tabanı",
+        "Normal ST örüntüsü"
+      ],
+      "correct": 1,
+      "explanations": [
+        "Anterior için V1–V4 gerekir; burada ekstremite grubu etkilenmiş.",
+        "II, III, aVF yükselmiş, I ve aVL çökmüş: inferior.",
+        "Bu ST yüksekliği, QRS şekli değil.",
+        "Flutter sürekli dalga yapar; burada ayrı ST yüksekliği var.",
+        "ST burada belirgin değişmiş, normal değil."
+      ],
+      "feedback": "II, III, aVF yükselmiş, I ve aVL çökmüş: inferior.",
+      "objectiveIds": [
+        "O3"
+      ],
+      "sourceIds": [
+        "ACS2023",
+        "ECG"
+      ],
+      "decisionId": "inferior",
+      "note": "",
+      "ecg": {
+        "mode": "inferior",
+        "options": {},
+        "leads": [
+          "II",
+          "III",
+          "aVF"
+        ],
+        "start": 0.5,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q077",
+      "mode": "inferior",
+      "title": "Sentetik değerlendirme Q077",
+      "ariaLabel": "Q077 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "44 yaşında erkek hasta. Başvuru: egzersiz sonrası dinmeyen göğüs ağrısıyla başvuruyor. II derivasyonunda J noktasından 20 ms sonrası +0,20 mV olarak ölçülüyor (sentetik ölçüm egzersizi; kılavuz tanı eşikleri J noktasında değerlendirilir).",
+      "question": "Bu ölçümle J+20 ms ST düzeyi kaç mV’tur?",
+      "text": "Bu ölçümle J+20 ms ST düzeyi kaç mV’tur?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "+2,0 mV",
+        "−0,20 mV",
+        "+0,02 mV",
+        "+0,20 mV",
+        "0 mV"
+      ],
+      "correct": 3,
+      "explanations": [
+        "Ondalık kayması 10 kat büyütür.",
+        "Polarite ters çevrilmiştir; II’de yükselme vardır.",
+        "Ondalık kayması 10 kat küçültür.",
+        "II’de J+20 ms sentetik inferior ST düzeyi+0,20 mV’dir. J+20 ms bu modelin ölçüm noktasıdır; kılavuz tanı eşikleri J noktasındaki sapmaya göre tanımlanır.",
+        "Pozitif ST platosu sıfır değildir."
+      ],
+      "feedback": "II’de J+20 ms sentetik inferior ST düzeyi+0,20 mV’dir. J+20 ms bu modelin ölçüm noktasıdır; kılavuz tanı eşikleri J noktasındaki sapmaya göre tanımlanır.",
+      "objectiveIds": [
+        "O6"
+      ],
+      "sourceIds": [
+        "ACS2023",
+        "ECG"
+      ],
+      "decisionId": "st20",
+      "note": "",
+      "ecg": {
+        "mode": "inferior",
+        "options": {},
+        "leads": [
+          "II",
+          "III",
+          "aVF"
+        ],
+        "start": 0.58,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q078",
+      "mode": "inferior",
+      "title": "Sentetik değerlendirme Q078",
+      "ariaLabel": "Q078 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "69 yaşında kadın hasta. Başvuru: nefes darlığı ve göğüs ağrısıyla ambulansla getiriliyor. Sistematik okumada hangi derivasyonların ön duvarı temsil ettiği gözden geçiriliyor.",
+      "question": "V3 ve V4 derivasyonları hangi bölgeyi yansıtır?",
+      "text": "V3 ve V4 derivasyonları hangi bölgeyi yansıtır?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "Anterior duvar",
+        "Atriyum yalnızca",
+        "İnferior duvar",
+        "Lateral duvar",
+        "Sağ ventrikül yalnızca"
+      ],
+      "correct": 0,
+      "explanations": [
+        "V3–V4 kalbin ön (anterior) duvarını yansıtır.",
+        "Atriyal etkinlik tek bir prekordiyal çiftle özgül olarak gösterilmez.",
+        "İnferior duvar II, III, aVF ile değerlendirilir, V3–V4 ile değil.",
+        "Lateral duvar I, aVL, V5–V6 ile değerlendirilir.",
+        "Sağ ventrikül daha çok V1 ve sağ prekordiyal derivasyonlarla ilişkilidir."
+      ],
+      "feedback": "V3–V4 kalbin ön (anterior) duvarını yansıtır.",
+      "objectiveIds": [
+        "O3"
+      ],
+      "sourceIds": [
+        "ACS2023",
+        "ECG"
+      ],
+      "decisionId": "anteriorLeadGroup",
+      "note": "",
+      "ecg": {
+        "mode": "inferior",
+        "options": {},
+        "leads": [
+          "II",
+          "III",
+          "aVF"
+        ],
+        "start": 0.66,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q079",
+      "mode": "inferior",
+      "title": "Sentetik değerlendirme Q079",
+      "ariaLabel": "Q079 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "51 yaşında erkek hasta. Başvuru: merdiven çıkarken başlayan göğüs ağrısıyla geliyor. Standart 12 derivasyonluk kayıt üzerinde derivasyon grupları gözden geçiriliyor.",
+      "question": "aVR, aVL ve aVF birlikte hangi derivasyon grubunu oluşturur?",
+      "text": "aVR, aVL ve aVF birlikte hangi derivasyon grubunu oluşturur?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "Bipolar ekstremite derivasyonları",
+        "Yalnız sağ göğüs derivasyonları",
+        "Prekordiyal derivasyonlar",
+        "Artırılmış ekstremite derivasyonları",
+        "Özefagus derivasyonları"
+      ],
+      "correct": 3,
+      "explanations": [
+        "Bipolar ekstremite derivasyonları I, II, III'tür; aVR/aVL/aVF unipolardır.",
+        "Sağ göğüs derivasyonları ayrı bir prekordiyal settir; aVR/aVL/aVF değildir.",
+        "Prekordiyal grup V1–V6'dır; aVR/aVL/aVF bu gruba girmez.",
+        "aVR, aVL ve aVF birlikte artırılmış (unipolar) ekstremite derivasyon grubunu oluşturur.",
+        "Özefagus derivasyonu standart 12 derivasyonluk sette yer almaz."
+      ],
+      "feedback": "aVR, aVL ve aVF birlikte artırılmış (unipolar) ekstremite derivasyon grubunu oluşturur.",
+      "objectiveIds": [
+        "O3"
+      ],
+      "sourceIds": [
+        "ACS2023",
+        "ECG"
+      ],
+      "decisionId": "augmentedGroup",
+      "note": "",
+      "ecg": {
+        "mode": "inferior",
+        "options": {},
+        "leads": [
+          "II",
+          "III",
+          "aVF"
+        ],
+        "start": 0.74,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q080",
+      "mode": "inferior",
+      "title": "Sentetik değerlendirme Q080",
+      "ariaLabel": "Q080 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "63 yaşında kadın hasta. Başvuru: geceleri tekrarlayan göğüs ağrısıyla başvuruyor. İzlemde giriş kapaklarının açık, çıkış kapaklarının kapalı olduğu bir an gösteriliyor.",
+      "question": "Bu kapak ve hacim düzeni hangi mekanik evreyi gösterir?",
+      "text": "Bu kapak ve hacim düzeni hangi mekanik evreyi gösterir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "AV kapaklar kapalı: atriyal sistol",
+        "Tüm kapaklar kapalı: kasılma",
+        "Tüm kapaklar kapalı: gevşeme",
+        "AV kapaklar açık: ventrikül doluşu",
+        "Çıkış kapakları açık: ejeksiyon"
+      ],
+      "correct": 3,
+      "explanations": [
+        "Bu doluş fazı AV açıkken olur.",
+        "Kasılmada hacim sabittir, doluş yoktur.",
+        "Gevşemede AV henüz açılmamıştır.",
+        "Kan diyastolde ventriküle geçer.",
+        "Bu ileri pompalama fazıdır, doluş değil."
+      ],
+      "feedback": "Kan diyastolde ventriküle geçer.",
+      "objectiveIds": [
+        "O4"
+      ],
+      "sourceIds": [
+        "ACS2023",
+        "CYCLE"
+      ],
+      "decisionId": "fill",
+      "note": "",
+      "ecg": {
+        "mode": "inferior",
+        "options": {},
+        "leads": [
+          "II",
+          "III",
+          "aVF"
+        ],
+        "start": 0.8200000000000001,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q081",
+      "mode": "inferior",
+      "title": "Sentetik değerlendirme Q081",
+      "ariaLabel": "Q081 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "46 yaşında erkek hasta. Başvuru: ailesinde erken MI öyküsü olan hastada göğüs ağrısı. Birden çok komşu derivasyondaki değişim birlikte değerlendiriliyor.",
+      "question": "Bölgesel ST değişimi yorumlanırken hangi yöntem uygundur?",
+      "text": "Bölgesel ST değişimi yorumlanırken hangi yöntem uygundur?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "En yüksek tek R bölgeyi belirler",
+        "Derivasyon adı damarın kesin adıdır",
+        "ST mV değeri yalnız hızdır",
+        "Komşu derivasyonlar birlikte incelenir",
+        "aVR her zaman anterior bölgeyi verir"
+      ],
+      "correct": 3,
+      "explanations": [
+        "R genliği bölgesel ST yorumunu tek başına vermez.",
+        "Derivasyon bölgesi damar anatomisini birebir vermez.",
+        "ST voltajı ve hız farklı ölçümlerdir.",
+        "Bölgesel yorum tek derivasyona değil komşu gruba bakar.",
+        "Tek derivasyon tüm anterior grubun yerini tutmaz."
+      ],
+      "feedback": "Bölgesel yorum tek derivasyona değil komşu gruba bakar.",
+      "objectiveIds": [
+        "O3"
+      ],
+      "sourceIds": [
+        "ACS2023",
+        "ECG"
+      ],
+      "decisionId": "stContiguous",
+      "note": "",
+      "ecg": {
+        "mode": "inferior",
+        "options": {},
+        "leads": [
+          "II",
+          "III",
+          "aVF"
+        ],
+        "start": 0.5,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q082",
+      "mode": "inferior",
+      "title": "Sentetik değerlendirme Q082",
+      "ariaLabel": "Q082 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "71 yaşında kadın hasta. Başvuru: diyabet ve hipertansiyon öyküsüyle göğüs ağrısı tarif ediyor. Eşzamanlı üç derivasyonlu kayıt aşağıda gösteriliyor.",
+      "question": "Bu ritim hangi sınıfa girer?",
+      "text": "Bu ritim hangi sınıfa girer?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "Düzensiz dar kompleks",
+        "Kaotik, organize değil",
+        "Düzenli dar kompleks, hızlı",
+        "Düzenli geniş kompleks",
+        "Düzenli dar kompleks, normal hız"
+      ],
+      "correct": 4,
+      "explanations": [
+        "Bu örnekte ritim düzenli, düzensiz değil.",
+        "Bu örnekte düzenli bir kompleks seçilebiliyor, kaotik değil.",
+        "Bu örnekte hız bu kadar yüksek değil.",
+        "Bu örnekte QRS dar, bu kadar geniş değil.",
+        "Hız yaklaşık 75/dk, ritim düzenli ve QRS dar."
+      ],
+      "feedback": "Hız yaklaşık 75/dk, ritim düzenli ve QRS dar.",
+      "objectiveIds": [
+        "O2"
+      ],
+      "sourceIds": [
+        "ACS2023"
+      ],
+      "decisionId": "rhythmClass_inferior",
+      "note": "",
+      "ecg": {
+        "mode": "inferior",
+        "options": {},
+        "leads": [
+          "II",
+          "III",
+          "aVF"
+        ],
+        "start": 0.58,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q083",
+      "mode": "inferior",
+      "title": "Sentetik değerlendirme Q083",
+      "ariaLabel": "Q083 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "54 yaşında erkek hasta. Başvuru: ani başlayan şiddetli göğüs ağrısıyla acile geliyor. Sistematik okumada V1–V2’nin hangi bölgeyi yansıttığı gözden geçiriliyor.",
+      "question": "V1 ve V2 derivasyonları hangi bölgeyi yansıtır?",
+      "text": "V1 ve V2 derivasyonları hangi bölgeyi yansıtır?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "Yüksek lateral duvar",
+        "Sol lateral duvar",
+        "İnferior duvar",
+        "Septum ve sağ ventrikül yakını",
+        "Sadece sağ atriyum"
+      ],
+      "correct": 3,
+      "explanations": [
+        "Yüksek lateral duvar aVL ile değerlendirilir.",
+        "Sol lateral duvar V5–V6 ve I, aVL ile değerlendirilir.",
+        "İnferior duvar II, III, aVF ile değerlendirilir.",
+        "V1–V2 septal bölgeyi ve sağ ventrikülün yakınını yansıtır.",
+        "Sağ atriyum tek başına V1–V2 ile özgül olarak tanımlanmaz."
+      ],
+      "feedback": "V1–V2 septal bölgeyi ve sağ ventrikülün yakınını yansıtır.",
+      "objectiveIds": [
+        "O3"
+      ],
+      "sourceIds": [
+        "ACS2023",
+        "ECG"
+      ],
+      "decisionId": "precordialSeptal",
+      "note": "",
+      "ecg": {
+        "mode": "inferior",
+        "options": {},
+        "leads": [
+          "II",
+          "III",
+          "aVF"
+        ],
+        "start": 0.66,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q084",
+      "mode": "inferior",
+      "title": "Sentetik değerlendirme Q084",
+      "ariaLabel": "Q084 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "67 yaşında kadın hasta. Başvuru: önceki stent öyküsüyle tekrar göğüs ağrısı ile geliyor. Bulgu düzenli görünse de eşlik eden semptomlar ayrıca değerlendiriliyor.",
+      "question": "Bu klinik tabloda hangi değerlendirme ilkesi önceliklidir?",
+      "text": "Bu klinik tabloda hangi değerlendirme ilkesi önceliklidir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "Önce kesin mekanizma sonra hasta bakılır",
+        "Semptomla acil değerlendirme gerekir",
+        "Tek derivasyon kesinlik verir",
+        "Düzenli ritimde yalnız rutin kontrol",
+        "Animasyon akımı varsa acil değildir"
+      ],
+      "correct": 1,
+      "explanations": [
+        "Hasta durumu mekanizmadan önce değerlendirilir.",
+        "Süren belirtiler acil klinik değerlendirme ister.",
+        "Aciliyet tek derivasyonla belirlenmez.",
+        "Düzenlilik ciddi belirtileri rutine çevirmez.",
+        "Şematik akış gerçek durumu göstermez."
+      ],
+      "feedback": "Süren belirtiler acil klinik değerlendirme ister.",
+      "objectiveIds": [
+        "O5"
+      ],
+      "sourceIds": [
+        "ACS2023"
+      ],
+      "decisionId": "urgent",
+      "note": "",
+      "ecg": {
+        "mode": "inferior",
+        "options": {},
+        "leads": [
+          "II",
+          "III",
+          "aVF"
+        ],
+        "start": 0.74,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q085",
+      "mode": "inferior",
+      "title": "Sentetik değerlendirme Q085",
+      "ariaLabel": "Q085 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "59 yaşında erkek hasta. Başvuru: yoğun iş temposu sonrası göğüs ağrısı gelişiyor. ST değişimi saptanıyor; anjiyografi veya ileri görüntüleme henüz yapılmamış.",
+      "question": "Bu bulgudan sorumlu damar hakkında hangi sınır geçerlidir?",
+      "text": "Bu bulgudan sorumlu damar hakkında hangi sınır geçerlidir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "Animasyon gerçek EF ölçer",
+        "EKG bölgeyi düşündürür; sorumlu damar klinik bağlam, seri EKG ve koroner görüntülemeyle kesinleşir",
+        "Düzenli ritim iskemiyi dışlar",
+        "Tek ST değeri damarı kesinleştirir",
+        "Karşılıklı çökme yoksa iskemi yoktur"
+      ],
+      "correct": 1,
+      "explanations": [
+        "Şematik hareket EF ölçümü değildir.",
+        "ST dağılımı bölge ipucu verir; sorumlu (culprit) damar tek başına EKG'den kesinleşmez, anjiyografi ile doğrulanır (ACS 2025).",
+        "Ritim düzenli olsa da iskemi sürebilir.",
+        "ST bölgesi ipucu verir, kesin tanı vermez.",
+        "Karşılıklı değişim olmaması iskemiyi dışlamaz."
+      ],
+      "feedback": "ST dağılımı bölge ipucu verir; sorumlu (culprit) damar tek başına EKG'den kesinleşmez, anjiyografi ile doğrulanır (ACS 2025).",
+      "objectiveIds": [
+        "O5"
+      ],
+      "sourceIds": [
+        "ACS2023"
+      ],
+      "decisionId": "ischemiaLimits",
+      "note": "",
+      "ecg": {
+        "mode": "inferior",
+        "options": {},
+        "leads": [
+          "II",
+          "III",
+          "aVF"
+        ],
+        "start": 0.8200000000000001,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q086",
+      "mode": "inferior",
+      "title": "Sentetik değerlendirme Q086",
+      "ariaLabel": "Q086 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "62 yaşında kadın hasta. Başvuru: sabah sporunda göğüs ağrısıyla duruyor. Animasyonda bir duvar bölgesinin hareketi azalırken ana damardaki akışın sürdüğü gösteriliyor.",
+      "question": "Bölgesel bulgu ile global dolaşım arasındaki ayrım nasıl yapılmalıdır?",
+      "text": "Bölgesel bulgu ile global dolaşım arasındaki ayrım nasıl yapılmalıdır?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "Her ST mV'u sabit EF kaybıdır",
+        "Renk koyuluğu gerçek stenoz yüzdesidir",
+        "Bölgesel azalma şematik, global akım sürebilir",
+        "ST yükselmesi VF ile aynı akımsızlıktır",
+        "Düzenli QRS normal debiyi kanıtlar"
+      ],
+      "correct": 2,
+      "explanations": [
+        "ST voltajı EF kaybına dönüştürülemez.",
+        "Renk şematiktir, stenoz oranı vermez.",
+        "Bir bölge zayıf gösterilir, tüm pompa durmaz.",
+        "Bölgesel iskemi VF'deki tam pompa kaybı değildir.",
+        "Elektriksel düzen debiyi ölçmez."
+      ],
+      "feedback": "Bir bölge zayıf gösterilir, tüm pompa durmaz.",
+      "objectiveIds": [
+        "O4"
+      ],
+      "sourceIds": [
+        "ACS2023",
+        "CYCLE"
+      ],
+      "decisionId": "ischemiaFlow",
+      "note": "",
+      "ecg": {
+        "mode": "inferior",
+        "options": {},
+        "leads": [
+          "II",
+          "III",
+          "aVF"
+        ],
+        "start": 0.5,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q087",
+      "mode": "inferior",
+      "title": "Sentetik değerlendirme Q087",
+      "ariaLabel": "Q087 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "48 yaşında erkek hasta. Başvuru: iş stresiyle birlikte göğüs sıkışması tarif ediyor. Kaliperle P’nin ilk sapması QRS’den 215 ms önce, QRS’in ilk sapması 40 ms önce işaretleniyor.",
+      "question": "Bu ölçümlerle PR aralığı kaç milisaniyedir?",
+      "text": "Bu ölçümlerle PR aralığı kaç milisaniyedir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "130 ms",
+        "155 ms",
+        "215 ms",
+        "255 ms",
+        "175 ms"
+      ],
+      "correct": 4,
+      "explanations": [
+        "130 ms P merkezinden QRS başlangıcına gitme hatasıdır.",
+        "155 ms verilen iki başlangıcın farkı değildir.",
+        "215 ms P başlangıcından R tepesine ölçüm hatasıdır.",
+        "255 ms P başlangıcından QRS sonuna ölçüm hatasıdır.",
+        "P ilk sapması−215 ms, QRS ilk sapması−40 ms: fark 175 ms."
+      ],
+      "feedback": "P ilk sapması−215 ms, QRS ilk sapması−40 ms: fark 175 ms.",
+      "objectiveIds": [
+        "O6"
+      ],
+      "sourceIds": [
+        "ACS2023",
+        "ECG"
+      ],
+      "decisionId": "pr175",
+      "note": "",
+      "ecg": {
+        "mode": "inferior",
+        "options": {},
+        "leads": [
+          "II",
+          "III",
+          "aVF"
+        ],
+        "start": 0.58,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q088",
+      "mode": "inferior",
+      "title": "Sentetik değerlendirme Q088",
+      "ariaLabel": "Q088 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "74 yaşında kadın hasta. Başvuru: ani fenalaşma ve göğüs ağrısıyla 112 ile getiriliyor. Dar bir kompleksin ilk sapması 40 ms önce, son dönüşü 40 ms sonra işaretleniyor.",
+      "question": "Bu ölçümlerle QRS süresi kaç milisaniyedir?",
+      "text": "Bu ölçümlerle QRS süresi kaç milisaniyedir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "80 ms",
+        "60 ms",
+        "100 ms",
+        "140 ms",
+        "40 ms"
+      ],
+      "correct": 0,
+      "explanations": [
+        "−40 ms ile+40 ms arasındaki QRS desteği 80 ms’dir.",
+        "60 ms başlangıç veya terminal bileşenin bir kısmını dışlar.",
+        "100 ms iki sınırın verilen farkından fazladır.",
+        "140 ms geniş PVC/RBBB örneğiyle karıştırır.",
+        "40 ms yalnız R’den son dönüşe yarı desteği sayar."
+      ],
+      "feedback": "−40 ms ile+40 ms arasındaki QRS desteği 80 ms’dir.",
+      "objectiveIds": [
+        "O6"
+      ],
+      "sourceIds": [
+        "ACS2023",
+        "ECG"
+      ],
+      "decisionId": "q80",
+      "note": "",
+      "ecg": {
+        "mode": "inferior",
+        "options": {},
+        "leads": [
+          "II",
+          "III",
+          "aVF"
+        ],
+        "start": 0.66,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q089",
+      "mode": "inferior",
+      "title": "Sentetik değerlendirme Q089",
+      "ariaLabel": "Q089 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "56 yaşında erkek hasta. Başvuru: bulantı ile birlikte göğüs ağrısı tarif ediyor. Aynı kayıt üzerinde farklı bir derivasyon grubuna geçildiğinde görünüm değişiyor.",
+      "question": "Derivasyon seçimini değiştirmenin bulguya etkisi nedir?",
+      "text": "Derivasyon seçimini değiştirmenin bulguya etkisi nedir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "Tüm lead'ler aynı şekli gösterir",
+        "Negatif QRS ventrikül kaynağını kanıtlar",
+        "Derivasyon aynı kaynağın farklı görünümüdür",
+        "Lead değiştirmek ritmi değiştirir",
+        "Tek lead 12 derivasyona eşittir"
+      ],
+      "correct": 2,
+      "explanations": [
+        "Her derivasyon farklı açıdan bakar.",
+        "Polarite yön farkından da olabilir.",
+        "Lead değiştirmek şekli değiştirir, ritmi değiştirmez.",
+        "Görünüm değişir, kaynak aynı kalır.",
+        "Diğer derivasyonlar ek bilgi taşır."
+      ],
+      "feedback": "Lead değiştirmek şekli değiştirir, ritmi değiştirmez.",
+      "objectiveIds": [
+        "O3"
+      ],
+      "sourceIds": [
+        "ACS2023",
+        "ECG"
+      ],
+      "decisionId": "leadAll",
+      "note": "",
+      "ecg": {
+        "mode": "inferior",
+        "options": {},
+        "leads": [
+          "II",
+          "III",
+          "aVF"
+        ],
+        "start": 0.74,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q090",
+      "mode": "inferior",
+      "title": "Sentetik değerlendirme Q090",
+      "ariaLabel": "Q090 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "50 yaşında kadın hasta. Başvuru: terleme ve bulantı eşlik eden göğüs ağrısı tarif ediyor. Eşzamanlı üç derivasyonlu kayıt aşağıda gösteriliyor.",
+      "question": "Bu EKG'de öncelikle hangi tanı düşünülmelidir?",
+      "text": "Bu EKG'de öncelikle hangi tanı düşünülmelidir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "Sağ dal bloğu",
+        "Ventriküler erken atım",
+        "Atriyal fibrilasyon",
+        "İnferior ST yükselmeli iskemi",
+        "Ventriküler taşikardi"
+      ],
+      "correct": 3,
+      "explanations": [
+        "Sağ dal bloğu için beklenen bulgular burada yok.",
+        "Ventriküler erken atım için beklenen bulgular burada yok.",
+        "Atriyal fibrilasyon için beklenen bulgular burada yok.",
+        "Tarif edilen bulgular İnferior ST yükselmeli iskemi ile uyumludur.",
+        "Ventriküler taşikardi için beklenen bulgular burada yok."
+      ],
+      "feedback": "Tarif edilen bulgular İnferior ST yükselmeli iskemi ile uyumludur.",
+      "objectiveIds": [
+        "O2"
+      ],
+      "sourceIds": [
+        "ACS2023"
+      ],
+      "decisionId": "ddx_inferior",
+      "note": "",
+      "ecg": {
+        "mode": "inferior",
+        "options": {},
+        "leads": [
+          "II",
+          "III",
+          "aVF"
+        ],
+        "start": 0.8200000000000001,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q091",
+      "mode": "vt",
+      "title": "Sentetik değerlendirme Q091",
+      "ariaLabel": "Q091 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "71 yaşında kadın hasta. Başvuru: kalp yetersizliği ile izlenen hastada ani fenalaşma. Düzenli, geniş kompleksli hızlı bir ritim izleniyor; komplekslerle sabit ilişkili bir dalga seçilemiyor.",
+      "question": "Bu bulgularla öncelikli elektriksel sınıflama hangisidir?",
+      "text": "Bu bulgularla öncelikli elektriksel sınıflama hangisidir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "160/dk"
+        },
+        {
+          "k": "TA",
+          "v": "88/58 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%94"
+        }
+      ],
+      "options": [
+        "İzole PVC",
+        "Ventriküler fibrilasyon",
+        "Normal sinüs ritmi",
+        "Sinüs taşikardisi",
+        "Monomorfik VT"
+      ],
+      "correct": 4,
+      "explanations": [
+        "PVC tek atımdır; burada ardışık hızlı seri var.",
+        "VF'de düzenli kompleks yoktur; burada var.",
+        "Sinüste QRS dardır; burada geniş.",
+        "Sinüs taşikardisinde QRS dardır; burada geniş.",
+        "Düzenli, geniş, hızlı, tekdüze: VT."
+      ],
+      "feedback": "Düzenli, geniş, hızlı, tekdüze: VT.",
+      "objectiveIds": [
+        "O2"
+      ],
+      "sourceIds": [
+        "VA2022",
+        "ALS2025"
+      ],
+      "decisionId": "vt",
+      "note": "",
+      "ecg": {
+        "mode": "vt",
+        "options": {},
+        "leads": [
+          "II",
+          "aVR",
+          "V1"
+        ],
+        "start": 0.5,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q092",
+      "mode": "vt",
+      "title": "Sentetik değerlendirme Q092",
+      "ariaLabel": "Q092 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "60 yaşında erkek hasta. Başvuru: ani çarpıntı ile birlikte nefes darlığı tarif ediyor. Standart 12 derivasyonluk kayıt üzerinde derivasyon grupları gözden geçiriliyor.",
+      "question": "aVR, aVL ve aVF birlikte hangi derivasyon grubunu oluşturur?",
+      "text": "aVR, aVL ve aVF birlikte hangi derivasyon grubunu oluşturur?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "160/dk"
+        },
+        {
+          "k": "TA",
+          "v": "88/58 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%94"
+        }
+      ],
+      "options": [
+        "Özefagus derivasyonları",
+        "Yalnız sağ göğüs derivasyonları",
+        "Artırılmış ekstremite derivasyonları",
+        "Prekordiyal derivasyonlar",
+        "Bipolar ekstremite derivasyonları"
+      ],
+      "correct": 2,
+      "explanations": [
+        "Özefagus derivasyonu standart 12 derivasyonluk sette yer almaz.",
+        "Sağ göğüs derivasyonları ayrı bir prekordiyal settir; aVR/aVL/aVF değildir.",
+        "aVR, aVL ve aVF birlikte artırılmış (unipolar) ekstremite derivasyon grubunu oluşturur.",
+        "Prekordiyal grup V1–V6'dır; aVR/aVL/aVF bu gruba girmez.",
+        "Bipolar ekstremite derivasyonları I, II, III'tür; aVR/aVL/aVF unipolardır."
+      ],
+      "feedback": "aVR, aVL ve aVF birlikte artırılmış (unipolar) ekstremite derivasyon grubunu oluşturur.",
+      "objectiveIds": [
+        "O3"
+      ],
+      "sourceIds": [
+        "VA2022",
+        "ALS2025",
+        "ECG"
+      ],
+      "decisionId": "augmentedGroup",
+      "note": "Retrospektif eğitim analizi: gerçek zamanlı öncelik hemodinamik değerlendirme ve instabil hastada senkronize kardiyoversiyondur.",
+      "ecg": {
+        "mode": "vt",
+        "options": {},
+        "leads": [
+          "II",
+          "aVR",
+          "V1"
+        ],
+        "start": 0.58,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q093",
+      "mode": "vt",
+      "title": "Sentetik değerlendirme Q093",
+      "ariaLabel": "Q093 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "65 yaşında kadın hasta. Başvuru: önceki defibrilatör öyküsüyle ani çarpıntı tarif ediyor. Geniş bir kompleksin ilk sapması 70 ms önce, son dönüşü 110 ms sonra işaretleniyor.",
+      "question": "Bu ölçümlerle QRS süresi kaç milisaniyedir?",
+      "text": "Bu ölçümlerle QRS süresi kaç milisaniyedir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "160/dk"
+        },
+        {
+          "k": "TA",
+          "v": "88/58 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%94"
+        }
+      ],
+      "options": [
+        "220 ms",
+        "80 ms",
+        "180 ms",
+        "270 ms",
+        "140 ms"
+      ],
+      "correct": 2,
+      "explanations": [
+        "220 ms verilen sınırların farkından uzundur.",
+        "80 ms normal dar QRS örneğidir.",
+        "−70 ms ile+110 ms arasındaki VT QRS desteği 180 ms’dir.",
+        "270 ms verilen 180 ms destekten 90 ms uzundur.",
+        "140 ms PVC/RBBB örneğinin genişliğidir."
+      ],
+      "feedback": "−70 ms ile+110 ms arasındaki VT QRS desteği 180 ms’dir.",
+      "objectiveIds": [
+        "O6"
+      ],
+      "sourceIds": [
+        "VA2022",
+        "ALS2025",
+        "ECG"
+      ],
+      "decisionId": "q180",
+      "note": "Retrospektif eğitim analizi: gerçek zamanlı öncelik hemodinamik değerlendirme ve instabil hastada senkronize kardiyoversiyondur.",
+      "ecg": {
+        "mode": "vt",
+        "options": {},
+        "leads": [
+          "II",
+          "aVR",
+          "V1"
+        ],
+        "start": 0.66,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q094",
+      "mode": "vt",
+      "title": "Sentetik değerlendirme Q094",
+      "ariaLabel": "Q094 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "54 yaşında erkek hasta. Başvuru: iş yerinde ani fenalaşma ve çarpıntı ile bulunuyor. Geniş bir kompleksin ilk sapması 70 ms önce, T dalgasının son sınırı 275 ms sonra işaretleniyor.",
+      "question": "Bu ölçümlerle ham sentetik QT değeri kaçtır?",
+      "text": "Bu ölçümlerle ham sentetik QT değeri kaçtır?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "160/dk"
+        },
+        {
+          "k": "TA",
+          "v": "88/58 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%94"
+        }
+      ],
+      "options": [
+        "415 ms",
+        "275 ms",
+        "180 ms",
+        "380 ms",
+        "345 ms"
+      ],
+      "correct": 4,
+      "explanations": [
+        "Başlangıç 70 ms iki kez eklenmiştir.",
+        "R referansı kullanılarak 70 ms başlangıç dışlanmıştır.",
+        "Bu QRS süresidir; T desteği eklenmemiştir.",
+        "VT R–R 380 ms döngüsü QT değildir.",
+        "QRS−70 ms, T sonu 275 ms: toplam 345 ms sentetik VT QT."
+      ],
+      "feedback": "QRS−70 ms, T sonu 275 ms: toplam 345 ms sentetik VT QT.",
+      "objectiveIds": [
+        "O6"
+      ],
+      "sourceIds": [
+        "VA2022",
+        "ALS2025",
+        "ECG"
+      ],
+      "decisionId": "qt345",
+      "note": "Retrospektif eğitim analizi: gerçek zamanlı öncelik hemodinamik değerlendirme ve instabil hastada senkronize kardiyoversiyondur.",
+      "ecg": {
+        "mode": "vt",
+        "options": {},
+        "leads": [
+          "II",
+          "aVR",
+          "V1"
+        ],
+        "start": 0.74,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q095",
+      "mode": "vt",
+      "title": "Sentetik değerlendirme Q095",
+      "ariaLabel": "Q095 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "69 yaşında kadın hasta. Başvuru: ani başlayan hızlı ve geniş kompleks kaydı alınıyor. Kompleks genişliği tek başına değerlendirilerek kökeni hakkında yorum yapılmak isteniyor.",
+      "question": "QRS genişliğini tek başına yorumlarken hangi sınır geçerlidir?",
+      "text": "QRS genişliğini tek başına yorumlarken hangi sınır geçerlidir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "160/dk"
+        },
+        {
+          "k": "TA",
+          "v": "88/58 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%94"
+        }
+      ],
+      "options": [
+        "Genişlik ve klinik bulgu birlikte yorumlanır",
+        "160 ms her QRS kesin LBBB'dir",
+        "140 ms her QRS kesin RBBB'dir",
+        "120 ms üstü her QRS VT'dir",
+        "Genişlik tek başına debiyi hesaplar"
+      ],
+      "correct": 0,
+      "explanations": [
+        "Tek genişlik VT ile bloğu kesin ayırmaz.",
+        "Genişlik tek başına LBBB'yi kanıtlamaz.",
+        "PVC de bu genişlikte olabilir.",
+        "Dal bloğu da geniş QRS yapabilir.",
+        "Genişlik zaman ölçüsüdür, debi değildir."
+      ],
+      "feedback": "Tek genişlik VT ile bloğu kesin ayırmaz.",
+      "objectiveIds": [
+        "O5"
+      ],
+      "sourceIds": [
+        "VA2022",
+        "ALS2025"
+      ],
+      "decisionId": "qrsWidthCause",
+      "note": "Retrospektif eğitim analizi: gerçek zamanlı öncelik hemodinamik değerlendirme ve instabil hastada senkronize kardiyoversiyondur.",
+      "ecg": {
+        "mode": "vt",
+        "options": {},
+        "leads": [
+          "II",
+          "aVR",
+          "V1"
+        ],
+        "start": 0.8200000000000001,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q096",
+      "mode": "vt",
+      "title": "Sentetik değerlendirme Q096",
+      "ariaLabel": "Q096 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "62 yaşında erkek hasta. Başvuru: ani çarpıntı sonrası terleme ve solukluk tarif ediyor. Geniş kompleksli hızlı ritim saptanıyor; nabız ve bilinç durumu ayrıca değerlendirilecek.",
+      "question": "Klinik nabız ve hemodinamik durumu ayırt eden veri hangisidir?",
+      "text": "Klinik nabız ve hemodinamik durumu ayırt eden veri hangisidir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "160/dk"
+        },
+        {
+          "k": "TA",
+          "v": "88/58 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%94"
+        }
+      ],
+      "options": [
+        "T yönü kan basıncı değeridir",
+        "Geniş QRS her VT'yi nabızsız yapar",
+        "Nabız ve hemodinami ayrıca bakılır",
+        "Düzenli QRS her VT'yi stabil yapar",
+        "Animasyon gerçek perfüzyon ölçer"
+      ],
+      "correct": 2,
+      "explanations": [
+        "T yönü elektriksel bir bulgudur.",
+        "QRS genişliği nabzın varlığını göstermez.",
+        "VT nabızlı veya nabızsız olabilir.",
+        "Düzenlilik dolaşım kararlılığı anlamına gelmez.",
+        "Şematik akış gerçek debi değildir."
+      ],
+      "feedback": "VT nabızlı veya nabızsız olabilir.",
+      "objectiveIds": [
+        "O5"
+      ],
+      "sourceIds": [
+        "VA2022",
+        "ALS2025"
+      ],
+      "decisionId": "vtContext",
+      "note": "",
+      "ecg": {
+        "mode": "vt",
+        "options": {},
+        "leads": [
+          "II",
+          "aVR",
+          "V1"
+        ],
+        "start": 0.5,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q097",
+      "mode": "vt",
+      "title": "Sentetik değerlendirme Q097",
+      "ariaLabel": "Q097 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "56 yaşında kadın hasta. Başvuru: yapısal kalp hastalığı öyküsüyle ani çarpıntı tarif ediyor. Eşzamanlı üç derivasyonlu kayıt aşağıda gösteriliyor.",
+      "question": "Bu EKG'de öncelikle hangi tanı düşünülmelidir?",
+      "text": "Bu EKG'de öncelikle hangi tanı düşünülmelidir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "160/dk"
+        },
+        {
+          "k": "TA",
+          "v": "88/58 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%94"
+        }
+      ],
+      "options": [
+        "Atriyal fibrilasyon",
+        "Fokal atriyal taşikardi",
+        "Ventriküler taşikardi",
+        "Ventriküler erken atım",
+        "İnferior ST yükselmeli iskemi"
+      ],
+      "correct": 2,
+      "explanations": [
+        "Atriyal fibrilasyon için beklenen bulgular burada yok.",
+        "Fokal atriyal taşikardi için beklenen bulgular burada yok.",
+        "Tarif edilen bulgular Ventriküler taşikardi ile uyumludur.",
+        "Ventriküler erken atım için beklenen bulgular burada yok.",
+        "İnferior ST yükselmeli iskemi için beklenen bulgular burada yok."
+      ],
+      "feedback": "Tarif edilen bulgular Ventriküler taşikardi ile uyumludur.",
+      "objectiveIds": [
+        "O2"
+      ],
+      "sourceIds": [
+        "VA2022",
+        "ALS2025"
+      ],
+      "decisionId": "ddx_vt",
+      "note": "",
+      "ecg": {
+        "mode": "vt",
+        "options": {},
+        "leads": [
+          "II",
+          "aVR",
+          "V1"
+        ],
+        "start": 0.58,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q098",
+      "mode": "vt",
+      "title": "Sentetik değerlendirme Q098",
+      "ariaLabel": "Q098 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "74 yaşında erkek hasta. Başvuru: huzurevinde ani fenalaşma sonrası 112 çağrılıyor. İzlemde QRS’den kısa süre sonra basıncın yükseldiği, ancak çıkış kapaklarının henüz açılmadığı bir an inceleniyor.",
+      "question": "Bu andaki kapak durumu hangi mekanik evreyi tanımlar?",
+      "text": "Bu andaki kapak durumu hangi mekanik evreyi tanımlar?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "160/dk"
+        },
+        {
+          "k": "TA",
+          "v": "88/58 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%94"
+        }
+      ],
+      "options": [
+        "Çıkış kapakları açık: ejeksiyon",
+        "AV kapaklar açık: atriyal sistol",
+        "Tüm kapaklar kapalı: gevşeme",
+        "Tüm kapaklar kapalı: izovolümetrik kasılma",
+        "AV kapaklar açık: pasif doluş"
+      ],
+      "correct": 3,
+      "explanations": [
+        "Bu erken evrede çıkış henüz kapalıdır.",
+        "Bu anda AV kapak kapalıdır.",
+        "Gevşeme ejeksiyon sonrasıdır.",
+        "Basınç yükselirken hacim henüz sabittir.",
+        "Bu kasılma başlangıcı, doluş değildir."
+      ],
+      "feedback": "Basınç yükselirken hacim henüz sabittir.",
+      "objectiveIds": [
+        "O4"
+      ],
+      "sourceIds": [
+        "VA2022",
+        "ALS2025",
+        "CYCLE"
+      ],
+      "decisionId": "mechanic",
+      "note": "Retrospektif eğitim analizi: gerçek zamanlı öncelik hemodinamik değerlendirme ve instabil hastada senkronize kardiyoversiyondur.",
+      "ecg": {
+        "mode": "vt",
+        "options": {},
+        "leads": [
+          "II",
+          "aVR",
+          "V1"
+        ],
+        "start": 0.66,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q099",
+      "mode": "vt",
+      "title": "Sentetik değerlendirme Q099",
+      "ariaLabel": "Q099 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "53 yaşında kadın hasta. Başvuru: ani çarpıntı ile birlikte göğüs ağrısı tarif ediyor. Kısa süreli bir kayıt elde ediliyor; önceki öykü ve ek testler henüz yok.",
+      "question": "Bu bulgudan etiyoloji ve risk için hangi genel sınır çıkarılabilir?",
+      "text": "Bu bulgudan etiyoloji ve risk için hangi genel sınır çıkarılabilir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "160/dk"
+        },
+        {
+          "k": "TA",
+          "v": "88/58 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%94"
+        }
+      ],
+      "options": [
+        "P ekseni kesin odağı belirler",
+        "Hız tek başına dolaşımı gösterir",
+        "QRS genişliği tek başına riski verir",
+        "Örüntü desteklenir, neden ayrıca sorulur",
+        "Kısa kayıt başlangıç zamanını verir"
+      ],
+      "correct": 3,
+      "explanations": [
+        "P ekseni ipucudur, kesin yer vermez.",
+        "Nabız ve basınç ayrıca değerlendirilir.",
+        "Risk için klinik bağlam da gerekir.",
+        "EKG bulgusu tanı verir, nedeni klinik öykü belirler.",
+        "Bir pencere toplam süreyi göstermez."
+      ],
+      "feedback": "EKG bulgusu tanı verir, nedeni klinik öykü belirler.",
+      "objectiveIds": [
+        "O5"
+      ],
+      "sourceIds": [
+        "VA2022",
+        "ALS2025"
+      ],
+      "decisionId": "limits",
+      "note": "",
+      "ecg": {
+        "mode": "vt",
+        "options": {},
+        "leads": [
+          "II",
+          "aVR",
+          "V1"
+        ],
+        "start": 0.74,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q100",
+      "mode": "vt",
+      "title": "Sentetik değerlendirme Q100",
+      "ariaLabel": "Q100 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "67 yaşında erkek hasta. Başvuru: önceki kalp ameliyatı öyküsüyle ani fenalaşma tarif ediyor. Hızlı seyreden nabızda diyastolik dolum süresinin kısaldığı düşünülüyor.",
+      "question": "Yüksek hızın ventrikül dolusuna etkisi için hangi ifade doğrudur?",
+      "text": "Yüksek hızın ventrikül dolusuna etkisi için hangi ifade doğrudur?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "160/dk"
+        },
+        {
+          "k": "TA",
+          "v": "88/58 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%94"
+        }
+      ],
+      "options": [
+        "P varsa doluş hızdan bağımsızdır",
+        "Dar QRS kısalan doluşu telafi eder",
+        "Hız artışı atım hacmini sabit artırır",
+        "Kısa R–R kan basıncı değeridir",
+        "Kısa döngü doluşu kısaltabilir"
+      ],
+      "correct": 4,
+      "explanations": [
+        "Kısa döngü doluşu yine de kısaltabilir.",
+        "QRS genişliği doluş süresini değiştirmez.",
+        "Atım hacmi doluş ve yüke bağlıdır.",
+        "R–R zaman ölçüsüdür, basınç değildir.",
+        "Hız artınca diyastol kısalır."
+      ],
+      "feedback": "Hız artınca diyastol kısalır.",
+      "objectiveIds": [
+        "O4"
+      ],
+      "sourceIds": [
+        "VA2022",
+        "ALS2025",
+        "CYCLE"
+      ],
+      "decisionId": "fastFill",
+      "note": "Retrospektif eğitim analizi: gerçek zamanlı öncelik hemodinamik değerlendirme ve instabil hastada senkronize kardiyoversiyondur.",
+      "ecg": {
+        "mode": "vt",
+        "options": {},
+        "leads": [
+          "II",
+          "aVR",
+          "V1"
+        ],
+        "start": 0.8200000000000001,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q101",
+      "mode": "vt",
+      "title": "Sentetik değerlendirme Q101",
+      "ariaLabel": "Q101 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "58 yaşında kadın hasta. Başvuru: ani başlayan çarpıntı ve baş dönmesiyle başvuruyor. Eşzamanlı üç derivasyonlu kayıt aşağıda gösteriliyor.",
+      "question": "Bu ritim hangi sınıfa girer?",
+      "text": "Bu ritim hangi sınıfa girer?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "160/dk"
+        },
+        {
+          "k": "TA",
+          "v": "88/58 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%94"
+        }
+      ],
+      "options": [
+        "Düzensiz dar kompleks",
+        "Düzenli dar kompleks, hızlı",
+        "Düzenli dar kompleks, normal hız",
+        "Düzenli geniş kompleks",
+        "Kaotik, organize değil"
+      ],
+      "correct": 3,
+      "explanations": [
+        "Bu örnekte ritim düzenli, düzensiz değil.",
+        "Bu örnekte hız bu kadar yüksek değil.",
+        "Bu örnekte hız veya düzen normal aralığa uymuyor.",
+        "QRS geniş; ritim düzenli aralıklarla tekrarlıyor.",
+        "Bu örnekte düzenli bir kompleks seçilebiliyor, kaotik değil."
+      ],
+      "feedback": "QRS geniş; ritim düzenli aralıklarla tekrarlıyor.",
+      "objectiveIds": [
+        "O2"
+      ],
+      "sourceIds": [
+        "VA2022",
+        "ALS2025"
+      ],
+      "decisionId": "rhythmClass_vt",
+      "note": "",
+      "ecg": {
+        "mode": "vt",
+        "options": {},
+        "leads": [
+          "II",
+          "aVR",
+          "V1"
+        ],
+        "start": 0.5,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q102",
+      "mode": "vt",
+      "title": "Sentetik değerlendirme Q102",
+      "ariaLabel": "Q102 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "64 yaşında erkek hasta. Başvuru: kalp yetersizliği kliniğinde ani çarpıntı ile geliyor. Ventriküler kompleksten sonra gelen dalganın anlamı soruluyor.",
+      "question": "T dalgasının temel elektriksel karşılığı nedir?",
+      "text": "T dalgasının temel elektriksel karşılığı nedir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "160/dk"
+        },
+        {
+          "k": "TA",
+          "v": "88/58 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%94"
+        }
+      ],
+      "options": [
+        "T: gecikmiş sağ ventrikül uyarısı",
+        "T: atriyal repolarizasyon",
+        "T: ventriküler repolarizasyon",
+        "T: ventriküler depolarizasyon",
+        "T: yeni bir atriyal uyarı"
+      ],
+      "correct": 2,
+      "explanations": [
+        "Bu bileşen QRS içinde yer alır.",
+        "Bu olay genelde QRS altında gizlenir.",
+        "T dalgası ventrikülün elektriksel toparlanmasıdır.",
+        "Bu olay QRS ile kaydedilir.",
+        "Yeni P ayrı bir dalga olarak görülür."
+      ],
+      "feedback": "T dalgası ventrikülün elektriksel toparlanmasıdır.",
+      "objectiveIds": [
+        "O1"
+      ],
+      "sourceIds": [
+        "VA2022",
+        "ALS2025"
+      ],
+      "decisionId": "t",
+      "note": "Retrospektif eğitim analizi: gerçek zamanlı öncelik hemodinamik değerlendirme ve instabil hastada senkronize kardiyoversiyondur.",
+      "ecg": {
+        "mode": "vt",
+        "options": {},
+        "leads": [
+          "II",
+          "aVR",
+          "V1"
+        ],
+        "start": 0.58,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q103",
+      "mode": "vt",
+      "title": "Sentetik değerlendirme Q103",
+      "ariaLabel": "Q103 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "70 yaşında kadın hasta. Başvuru: ani çarpıntı sonrası düşme öyküsüyle acile geliyor. Sistematik okumada hangi derivasyonların inferior duvarı temsil ettiği gözden geçiriliyor.",
+      "question": "Hangi derivasyon grubu inferior duvarı gösterir?",
+      "text": "Hangi derivasyon grubu inferior duvarı gösterir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "160/dk"
+        },
+        {
+          "k": "TA",
+          "v": "88/58 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%94"
+        }
+      ],
+      "options": [
+        "I, aVL, V5–V6 — lateral duvar",
+        "II, III, aVF — inferior duvar",
+        "V1, V2 — septal bölge",
+        "V3, V4 — anterior duvar",
+        "aVR tek başına — sağ üst köşe"
+      ],
+      "correct": 1,
+      "explanations": [
+        "Bu grup lateral duvarı gösterir, inferior duvarı değil.",
+        "Bu üç derivasyon kalbin inferior (alt) duvarını gösterir.",
+        "V1–V2 septal bölgeyi gösterir, inferior duvarı değil.",
+        "V3–V4 anterior duvarı gösterir, inferior duvarı değil.",
+        "aVR tek başına sağ üst yönü gösterir; inferior grup değildir."
+      ],
+      "feedback": "Bu üç derivasyon kalbin inferior (alt) duvarını gösterir.",
+      "objectiveIds": [
+        "O3"
+      ],
+      "sourceIds": [
+        "VA2022",
+        "ALS2025",
+        "ECG"
+      ],
+      "decisionId": "inferiorLeadGroup",
+      "note": "Retrospektif eğitim analizi: gerçek zamanlı öncelik hemodinamik değerlendirme ve instabil hastada senkronize kardiyoversiyondur.",
+      "ecg": {
+        "mode": "vt",
+        "options": {},
+        "leads": [
+          "II",
+          "aVR",
+          "V1"
+        ],
+        "start": 0.66,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q104",
+      "mode": "vt",
+      "title": "Sentetik değerlendirme Q104",
+      "ariaLabel": "Q104 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "61 yaşında erkek hasta. Başvuru: önceki VT öyküsüyle ani çarpıntı tekrarlıyor. Nabız alınıyor; hasta hipotansif ve semptomatik.",
+      "question": "Bu hastada ilk yaklaşım ne olmalıdır?",
+      "text": "Bu hastada ilk yaklaşım ne olmalıdır?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "160/dk"
+        },
+        {
+          "k": "TA",
+          "v": "88/58 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%94"
+        }
+      ],
+      "options": [
+        "Yalnızca gözlem yeterlidir",
+        "Yalnız görüntüleme istenir",
+        "Nabız var ve instabil: acil senkronize kardiyoversiyon; nabız yoksa KPR ve defibrilasyon",
+        "Hemen taburcu edilir",
+        "Karar tamamen hastaya bırakılır"
+      ],
+      "correct": 2,
+      "explanations": [
+        "İnstabil VT'de yalnız izlem hayati risk taşır.",
+        "İlk adım görüntülemeden önce hemodinamik değerlendirme ve tedavidir.",
+        "Hipotansif, semptomlu nabızlı VT'de senkronize kardiyoversiyon önceliklidir; nabızsız VT arrest algoritmasıyla yönetilir (AHA ALS 2025).",
+        "Bulgu hayati risk taşır; taburcu düşünülmez.",
+        "İlk yaklaşım klinik ekip tarafından yönlendirilir."
+      ],
+      "feedback": "Hipotansif, semptomlu nabızlı VT'de senkronize kardiyoversiyon önceliklidir; nabızsız VT arrest algoritmasıyla yönetilir (AHA ALS 2025).",
+      "objectiveIds": [
+        "O5"
+      ],
+      "sourceIds": [
+        "VA2022",
+        "ALS2025"
+      ],
+      "decisionId": "firstStep_vt",
+      "note": "",
+      "ecg": {
+        "mode": "vt",
+        "options": {},
+        "leads": [
+          "II",
+          "aVR",
+          "V1"
+        ],
+        "start": 0.74,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q105",
+      "mode": "vt",
+      "title": "Sentetik değerlendirme Q105",
+      "ariaLabel": "Q105 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "66 yaşında kadın hasta. Başvuru: ani başlayan çarpıntı ve baş dönmesiyle izleniyor. Nabız alınıyor; TA 88/58 mmHg, hasta soğuk terli.",
+      "question": "Bu hastada öncelikli yaklaşım nedir?",
+      "text": "Bu hastada öncelikli yaklaşım nedir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "160/dk"
+        },
+        {
+          "k": "TA",
+          "v": "88/58 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%94"
+        }
+      ],
+      "options": [
+        "Senkronize olmayan defibrilasyon uygulanır",
+        "Ayaktan Holter planlanır",
+        "Semptomla acil değerlendirme yeterlidir",
+        "Nabızlı, hemodinamik olarak instabil VT: acil senkronize kardiyoversiyon",
+        "Vagal manevra ile beklenir"
+      ],
+      "correct": 3,
+      "explanations": [
+        "Nabızlı VT'de senkronize kardiyoversiyon yapılır; defibrilasyon nabızsız VT/VF içindir.",
+        "İnstabil taşikardide ayaktan izlem uygun değildir.",
+        "Hasta zaten instabil; yalnız 'değerlendirme' ifadesi tedaviyi geciktirir.",
+        "Hipotansiyon ve semptomla seyreden nabızlı geniş kompleks taşikardide senkronize kardiyoversiyon önceliklidir (AHA ALS 2025).",
+        "Vagal manevra stabil dar kompleks SVT içindir."
+      ],
+      "feedback": "Hipotansiyon ve semptomla seyreden nabızlı geniş kompleks taşikardide senkronize kardiyoversiyon önceliklidir (AHA ALS 2025).",
+      "objectiveIds": [
+        "O5"
+      ],
+      "sourceIds": [
+        "VA2022",
+        "ALS2025"
+      ],
+      "decisionId": "unstableVt",
+      "note": "",
+      "ecg": {
+        "mode": "vt",
+        "options": {},
+        "leads": [
+          "II",
+          "aVR",
+          "V1"
+        ],
+        "start": 0.8200000000000001,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q106",
+      "mode": "vf",
+      "title": "Sentetik değerlendirme Q106",
+      "ariaLabel": "Q106 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "55 yaşında kadın hasta. Başvuru: ev bahçesinde aniden düşüp yanıtsız bulunuyor. Monitörde düzenli bir kompleks seçilemiyor; genliği ve şekli sürekli değişen kaotik bir dalga izleniyor.",
+      "question": "Bu elektriksel görünümle en uyumlu örüntü hangisidir?",
+      "text": "Bu elektriksel görünümle en uyumlu örüntü hangisidir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "alınamıyor"
+        },
+        {
+          "k": "TA",
+          "v": "ölçülemiyor"
+        },
+        {
+          "k": "Bilinç",
+          "v": "kapalı"
+        }
+      ],
+      "options": [
+        "Ventriküler fibrilasyon",
+        "Monomorfik VT",
+        "Asistoli",
+        "Atriyal flutter",
+        "Atriyal fibrilasyon"
+      ],
+      "correct": 0,
+      "explanations": [
+        "Kaotik, düzensiz, QRS seçilemiyor: VF.",
+        "VT'de düzenli tekdüze QRS olur; burada yok.",
+        "Asistolide düz çizgi olur; burada kaotik dalga var.",
+        "Flutter'da düzenli QRS olur; burada yok.",
+        "AF'de QRS genelde seçilebilir; burada seçilemiyor."
+      ],
+      "feedback": "Kaotik, düzensiz, QRS seçilemiyor: VF.",
+      "objectiveIds": [
+        "O2"
+      ],
+      "sourceIds": [
+        "VA2022",
+        "ALS2025"
+      ],
+      "decisionId": "vf",
+      "note": "",
+      "ecg": {
+        "mode": "vf",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V1"
+        ],
+        "start": 0.5,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q107",
+      "mode": "vf",
+      "title": "Sentetik değerlendirme Q107",
+      "ariaLabel": "Q107 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "66 yaşında erkek hasta. Başvuru: yüzme havuzunda aniden yanıt vermez hâle geliyor. Kaotik dalga üzerinde bir öğrenci QRS sınırlarını işaretlemeye çalışıyor.",
+      "question": "Bu kayıtta QRS genişliği hakkında hangi ifade doğrudur?",
+      "text": "Bu kayıtta QRS genişliği hakkında hangi ifade doğrudur?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "alınamıyor"
+        },
+        {
+          "k": "TA",
+          "v": "ölçülemiyor"
+        },
+        {
+          "k": "Bilinç",
+          "v": "kapalı"
+        }
+      ],
+      "options": [
+        "İki çukur arası QRS genişliğidir",
+        "Organize QRS sınırı yok",
+        "Her pozitif tepe QRS sayılır",
+        "F süresi QRS yerine yazılır",
+        "Eski VT süresi buraya uygulanır"
+      ],
+      "correct": 1,
+      "explanations": [
+        "Çukur aralığı kompleks süresi değildir.",
+        "Kaotik dalgada ayrık kompleks tanımlanamaz.",
+        "Tek tepe kompleks sınırını vermez.",
+        "F atriyal bir dalgadır, QRS değildir.",
+        "Ritim değişince eski süre geçerli değildir."
+      ],
+      "feedback": "Kaotik dalgada ayrık kompleks tanımlanamaz.",
+      "objectiveIds": [
+        "O1"
+      ],
+      "sourceIds": [
+        "VA2022",
+        "ALS2025"
+      ],
+      "decisionId": "noQrs",
+      "note": "",
+      "ecg": {
+        "mode": "vf",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V1"
+        ],
+        "start": 0.58,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q108",
+      "mode": "vf",
+      "title": "Sentetik değerlendirme Q108",
+      "ariaLabel": "Q108 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "61 yaşında kadın hasta. Başvuru: markette aniden yığılıp bilinci kapanıyor. Eşzamanlı üç derivasyonlu kayıt aşağıda gösteriliyor.",
+      "question": "Bu EKG'de öncelikle hangi tanı düşünülmelidir?",
+      "text": "Bu EKG'de öncelikle hangi tanı düşünülmelidir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "alınamıyor"
+        },
+        {
+          "k": "TA",
+          "v": "ölçülemiyor"
+        },
+        {
+          "k": "Bilinç",
+          "v": "kapalı"
+        }
+      ],
+      "options": [
+        "Ventriküler erken atım",
+        "İnferior ST yükselmeli iskemi",
+        "Fokal atriyal taşikardi",
+        "Sinüs taşikardisi",
+        "Ventriküler fibrilasyon"
+      ],
+      "correct": 4,
+      "explanations": [
+        "Ventriküler erken atım için beklenen bulgular burada yok.",
+        "İnferior ST yükselmeli iskemi için beklenen bulgular burada yok.",
+        "Fokal atriyal taşikardi için beklenen bulgular burada yok.",
+        "Sinüs taşikardisi için beklenen bulgular burada yok.",
+        "Tarif edilen bulgular Ventriküler fibrilasyon ile uyumludur."
+      ],
+      "feedback": "Tarif edilen bulgular Ventriküler fibrilasyon ile uyumludur.",
+      "objectiveIds": [
+        "O2"
+      ],
+      "sourceIds": [
+        "VA2022",
+        "ALS2025"
+      ],
+      "decisionId": "ddx_vf",
+      "note": "",
+      "ecg": {
+        "mode": "vf",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V1"
+        ],
+        "start": 0.66,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q109",
+      "mode": "vf",
+      "title": "Sentetik değerlendirme Q109",
+      "ariaLabel": "Q109 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "74 yaşında erkek hasta. Başvuru: huzurevi bahçesinde aniden yanıtsız bulunuyor. Eşzamanlı üç derivasyonlu kayıt aşağıda gösteriliyor.",
+      "question": "Bu ritim hangi sınıfa girer?",
+      "text": "Bu ritim hangi sınıfa girer?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "alınamıyor"
+        },
+        {
+          "k": "TA",
+          "v": "ölçülemiyor"
+        },
+        {
+          "k": "Bilinç",
+          "v": "kapalı"
+        }
+      ],
+      "options": [
+        "Düzenli geniş kompleks",
+        "Düzenli dar kompleks, hızlı",
+        "Düzenli dar kompleks, normal hız",
+        "Düzensiz dar kompleks",
+        "Kaotik, organize değil"
+      ],
+      "correct": 4,
+      "explanations": [
+        "Bu örnekte QRS dar, bu kadar geniş değil.",
+        "Bu örnekte hız bu kadar yüksek değil.",
+        "Bu örnekte hız veya düzen normal aralığa uymuyor.",
+        "Bu örnekte ritim düzenli, düzensiz değil.",
+        "Tekrarlayan, organize bir kompleks seçilemiyor."
+      ],
+      "feedback": "Tekrarlayan, organize bir kompleks seçilemiyor.",
+      "objectiveIds": [
+        "O2"
+      ],
+      "sourceIds": [
+        "VA2022",
+        "ALS2025"
+      ],
+      "decisionId": "rhythmClass_vf",
+      "note": "",
+      "ecg": {
+        "mode": "vf",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V1"
+        ],
+        "start": 0.74,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q110",
+      "mode": "vf",
+      "title": "Sentetik değerlendirme Q110",
+      "ariaLabel": "Q110 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "57 yaşında kadın hasta. Başvuru: iş yerinde aniden solunumu durup yanıt vermiyor. Monitördeki kaotik dalgada kompleks sınırı aranıyor.",
+      "question": "Bu kayıtta QRS kompleksi nasıl değerlendirilir?",
+      "text": "Bu kayıtta QRS kompleksi nasıl değerlendirilir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "alınamıyor"
+        },
+        {
+          "k": "TA",
+          "v": "ölçülemiyor"
+        },
+        {
+          "k": "Bilinç",
+          "v": "kapalı"
+        }
+      ],
+      "options": [
+        "Organize QRS sınırı yok",
+        "Eski VT süresi buraya uygulanır",
+        "İki çukur arası QRS genişliğidir",
+        "F süresi QRS yerine yazılır",
+        "Her pozitif tepe QRS sayılır"
+      ],
+      "correct": 0,
+      "explanations": [
+        "Kaotik dalgada ayrık kompleks tanımlanamaz.",
+        "Ritim değişince eski süre geçerli değildir.",
+        "Çukur aralığı kompleks süresi değildir.",
+        "F atriyal bir dalgadır, QRS değildir.",
+        "Tek tepe kompleks sınırını vermez."
+      ],
+      "feedback": "Kaotik dalgada ayrık kompleks tanımlanamaz.",
+      "objectiveIds": [
+        "O1"
+      ],
+      "sourceIds": [
+        "VA2022",
+        "ALS2025"
+      ],
+      "decisionId": "noQrs",
+      "note": "",
+      "ecg": {
+        "mode": "vf",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V1"
+        ],
+        "start": 0.8200000000000001,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q111",
+      "mode": "vf",
+      "title": "Sentetik değerlendirme Q111",
+      "ariaLabel": "Q111 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "63 yaşında erkek hasta. Başvuru: spor müsabakası izlerken aniden yığılıyor. İzlemde tüm ileri akım parçacıklarının durduğu bir an gösteriliyor.",
+      "question": "Bu ritimde dolaşım ve pompa durumu için hangi ifade doğrudur?",
+      "text": "Bu ritimde dolaşım ve pompa durumu için hangi ifade doğrudur?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "alınamıyor"
+        },
+        {
+          "k": "TA",
+          "v": "ölçülemiyor"
+        },
+        {
+          "k": "Bilinç",
+          "v": "kapalı"
+        }
+      ],
+      "options": [
+        "Düşük ama düzenli akım sürer",
+        "Kaotik sinyal düzenli nabız verir",
+        "Etkili ileri akım yok",
+        "Yalnız pulmoner akım korunur",
+        "Yalnız koroner akım korunur"
+      ],
+      "correct": 2,
+      "explanations": [
+        "VF'de organize ejeksiyon yoktur.",
+        "Kaotik elektrik düzenli nabza dönüşmez.",
+        "Kaotik etkinlik organize pompa oluşturmaz.",
+        "Organize ejeksiyon olmadan bu akım sürmez.",
+        "Koroner akım da bu modelde durur."
+      ],
+      "feedback": "Kaotik etkinlik organize pompa oluşturmaz.",
+      "objectiveIds": [
+        "O4"
+      ],
+      "sourceIds": [
+        "VA2022",
+        "ALS2025",
+        "CYCLE"
+      ],
+      "decisionId": "vfFlow",
+      "note": "",
+      "ecg": {
+        "mode": "vf",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V1"
+        ],
+        "start": 0.5,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q112",
+      "mode": "vf",
+      "title": "Sentetik değerlendirme Q112",
+      "ariaLabel": "Q112 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "50 yaşında kadın hasta. Başvuru: evde merdivenlerde aniden düşüp yanıtsız kalıyor. Nabız alınamıyor; monitörde kaotik elektriksel etkinlik sürüyor.",
+      "question": "Bu hastada öncelikli yaklaşım nedir?",
+      "text": "Bu hastada öncelikli yaklaşım nedir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "alınamıyor"
+        },
+        {
+          "k": "TA",
+          "v": "ölçülemiyor"
+        },
+        {
+          "k": "Bilinç",
+          "v": "kapalı"
+        }
+      ],
+      "options": [
+        "Senkronize kardiyoversiyon uygulanır",
+        "12 derivasyonlu EKG çekilip kardiyoloji beklenir",
+        "Semptomlar için ayrıntılı öykü alınır",
+        "Arresti tanı: hemen KPR başlat, defibrilatör gelir gelmez şoklanabilir ritmi defibrile et",
+        "Önce ritmin mekanizması belirlenir"
+      ],
+      "correct": 3,
+      "explanations": [
+        "VF'de senkronizasyon yapılamaz; senkronize olmayan defibrilasyon gerekir.",
+        "Tanı monitörde konur; defibrilasyon 12 derivasyon beklenmeden yapılır.",
+        "Yanıtsız ve nabızsız hastada öykü almak resüsitasyonu geciktirir.",
+        "VF nabızsız kardiyak arresttir; yüksek kaliteli KPR ve erken defibrilasyon sağkalımı belirler (AHA ALS 2025).",
+        "Mekanizma analizi arrest yönetiminden sonra gelir."
+      ],
+      "feedback": "VF nabızsız kardiyak arresttir; yüksek kaliteli KPR ve erken defibrilasyon sağkalımı belirler (AHA ALS 2025).",
+      "objectiveIds": [
+        "O5"
+      ],
+      "sourceIds": [
+        "VA2022",
+        "ALS2025"
+      ],
+      "decisionId": "arrestVf",
+      "note": "",
+      "ecg": {
+        "mode": "vf",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V1"
+        ],
+        "start": 0.58,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q113",
+      "mode": "vf",
+      "title": "Sentetik değerlendirme Q113",
+      "ariaLabel": "Q113 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "69 yaşında erkek hasta. Başvuru: önceki kalp ameliyatı öyküsüyle aniden bilinci kapanıyor. Monitörde kaotik bir görünüm varken hasta konuşabiliyor ve bilinci açık görünüyor.",
+      "question": "Bu çelişkili görünüm için öncelikli değerlendirme hangisidir?",
+      "text": "Bu çelişkili görünüm için öncelikli değerlendirme hangisidir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "alınamıyor"
+        },
+        {
+          "k": "TA",
+          "v": "ölçülemiyor"
+        },
+        {
+          "k": "Bilinç",
+          "v": "kapalı"
+        }
+      ],
+      "options": [
+        "Dalga genliği damarı gösterir",
+        "Klinik durum ve bağlantı doğrulanır",
+        "Son normal hız kaydedilip geçilir",
+        "Ekrandan kesin nabızsız VF denir",
+        "Uyanıklık tüm ritimleri dışlar"
+      ],
+      "correct": 1,
+      "explanations": [
+        "Artefakt genliği anatomik bilgi vermez.",
+        "Uyanık, konuşan hastada VF görünümü şüphe uyandırır.",
+        "Yeni görünüm mutlaka değerlendirilmeli.",
+        "Klinikle çelişen görünüm önce doğrulanmalı.",
+        "Uyanıklık başka sorunları ekarte etmez."
+      ],
+      "feedback": "Uyanık, konuşan hastada VF görünümü şüphe uyandırır.",
+      "objectiveIds": [
+        "O5"
+      ],
+      "sourceIds": [
+        "VA2022",
+        "ALS2025"
+      ],
+      "decisionId": "vfArtifact",
+      "note": "",
+      "ecg": {
+        "mode": "vf",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V1"
+        ],
+        "start": 0.66,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q114",
+      "mode": "vf",
+      "title": "Sentetik değerlendirme Q114",
+      "ariaLabel": "Q114 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "53 yaşında kadın hasta. Başvuru: otoparkta aniden yığılıp yanıt vermiyor. Monitörde kaotik etkinlik var; nabız kontrolü yapılacak.",
+      "question": "Nabız kontrolü nasıl yapılmalıdır?",
+      "text": "Nabız kontrolü nasıl yapılmalıdır?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "alınamıyor"
+        },
+        {
+          "k": "TA",
+          "v": "ölçülemiyor"
+        },
+        {
+          "k": "Bilinç",
+          "v": "kapalı"
+        }
+      ],
+      "options": [
+        "Nabız değerlendirmesi ritim analizinden sonraya ertelenir",
+        "Monitördeki elektriksel hız nabız yerine kullanılır",
+        "Nabız için otomatik tansiyon ölçümü beklenir",
+        "Nabız kontrolü 30 saniye sürdürülür",
+        "Nabız en fazla 10 saniyede kontrol edilir; kesin nabız yoksa KPR ve erken defibrilasyon"
+      ],
+      "correct": 4,
+      "explanations": [
+        "VF'de nabız kontrolü ertelenmez; arrest hemen doğrulanır.",
+        "VF'de ölçülebilir hız yoktur; elektrik nabzı kanıtlamaz.",
+        "Cihaz beklemek göğüs basısını geciktirir.",
+        "Uzun kontrol KPR'yi geciktirir; sınır 10 saniyedir.",
+        "Sağlık profesyoneli nabız kontrolünü 10 saniyeyi aşmadan yapar; şüphede KPR başlar (AHA BLS/ALS 2025)."
+      ],
+      "feedback": "Sağlık profesyoneli nabız kontrolünü 10 saniyeyi aşmadan yapar; şüphede KPR başlar (AHA BLS/ALS 2025).",
+      "objectiveIds": [
+        "O5"
+      ],
+      "sourceIds": [
+        "VA2022",
+        "ALS2025"
+      ],
+      "decisionId": "arrestPulseCheck",
+      "note": "",
+      "ecg": {
+        "mode": "vf",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V1"
+        ],
+        "start": 0.74,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q115",
+      "mode": "vf",
+      "title": "Sentetik değerlendirme Q115",
+      "ariaLabel": "Q115 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "72 yaşında erkek hasta. Başvuru: huzurevi yemekhanesinde aniden yanıtsız bulunuyor. Sistematik okumada hangi derivasyonların ön duvarı temsil ettiği gözden geçiriliyor.",
+      "question": "V3 ve V4 derivasyonları hangi bölgeyi yansıtır?",
+      "text": "V3 ve V4 derivasyonları hangi bölgeyi yansıtır?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "alınamıyor"
+        },
+        {
+          "k": "TA",
+          "v": "ölçülemiyor"
+        },
+        {
+          "k": "Bilinç",
+          "v": "kapalı"
+        }
+      ],
+      "options": [
+        "Sağ ventrikül yalnızca",
+        "Lateral duvar",
+        "Anterior duvar",
+        "Atriyum yalnızca",
+        "İnferior duvar"
+      ],
+      "correct": 2,
+      "explanations": [
+        "Sağ ventrikül daha çok V1 ve sağ prekordiyal derivasyonlarla ilişkilidir.",
+        "Lateral duvar I, aVL, V5–V6 ile değerlendirilir.",
+        "V3–V4 kalbin ön (anterior) duvarını yansıtır.",
+        "Atriyal etkinlik tek bir prekordiyal çiftle özgül olarak gösterilmez.",
+        "İnferior duvar II, III, aVF ile değerlendirilir, V3–V4 ile değil."
+      ],
+      "feedback": "V3–V4 kalbin ön (anterior) duvarını yansıtır.",
+      "objectiveIds": [
+        "O3"
+      ],
+      "sourceIds": [
+        "VA2022",
+        "ALS2025",
+        "ECG"
+      ],
+      "decisionId": "anteriorLeadGroup",
+      "note": "Retrospektif eğitim analizi: gerçek zamanlı öncelik arresti tanıyıp KPR ve erken defibrilasyondur.",
+      "ecg": {
+        "mode": "vf",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V1"
+        ],
+        "start": 0.8200000000000001,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q116",
+      "mode": "vf",
+      "title": "Sentetik değerlendirme Q116",
+      "ariaLabel": "Q116 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "58 yaşında kadın hasta. Başvuru: ev içinde aniden fenalaşıp yanıt vermez hâle geliyor. Sistematik okumada hangi derivasyonların inferior duvarı temsil ettiği gözden geçiriliyor.",
+      "question": "Hangi derivasyon grubu inferior duvarı gösterir?",
+      "text": "Hangi derivasyon grubu inferior duvarı gösterir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "alınamıyor"
+        },
+        {
+          "k": "TA",
+          "v": "ölçülemiyor"
+        },
+        {
+          "k": "Bilinç",
+          "v": "kapalı"
+        }
+      ],
+      "options": [
+        "V3, V4 — anterior duvar",
+        "aVR tek başına — sağ üst köşe",
+        "V1, V2 — septal bölge",
+        "II, III, aVF — inferior duvar",
+        "I, aVL, V5–V6 — lateral duvar"
+      ],
+      "correct": 3,
+      "explanations": [
+        "V3–V4 anterior duvarı gösterir, inferior duvarı değil.",
+        "aVR tek başına sağ üst yönü gösterir; inferior grup değildir.",
+        "V1–V2 septal bölgeyi gösterir, inferior duvarı değil.",
+        "Bu üç derivasyon kalbin inferior (alt) duvarını gösterir.",
+        "Bu grup lateral duvarı gösterir, inferior duvarı değil."
+      ],
+      "feedback": "Bu üç derivasyon kalbin inferior (alt) duvarını gösterir.",
+      "objectiveIds": [
+        "O3"
+      ],
+      "sourceIds": [
+        "VA2022",
+        "ALS2025",
+        "ECG"
+      ],
+      "decisionId": "inferiorLeadGroup",
+      "note": "Retrospektif eğitim analizi: gerçek zamanlı öncelik arresti tanıyıp KPR ve erken defibrilasyondur.",
+      "ecg": {
+        "mode": "vf",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V1"
+        ],
+        "start": 0.5,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q117",
+      "mode": "vf",
+      "title": "Sentetik değerlendirme Q117",
+      "ariaLabel": "Q117 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "64 yaşında erkek hasta. Başvuru: iş yerinde merdivende aniden yığılıyor. Standart 12 derivasyonluk kayıt üzerinde derivasyon grupları gözden geçiriliyor.",
+      "question": "aVR, aVL ve aVF birlikte hangi derivasyon grubunu oluşturur?",
+      "text": "aVR, aVL ve aVF birlikte hangi derivasyon grubunu oluşturur?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "alınamıyor"
+        },
+        {
+          "k": "TA",
+          "v": "ölçülemiyor"
+        },
+        {
+          "k": "Bilinç",
+          "v": "kapalı"
+        }
+      ],
+      "options": [
+        "Bipolar ekstremite derivasyonları",
+        "Özefagus derivasyonları",
+        "Prekordiyal derivasyonlar",
+        "Artırılmış ekstremite derivasyonları",
+        "Yalnız sağ göğüs derivasyonları"
+      ],
+      "correct": 3,
+      "explanations": [
+        "Bipolar ekstremite derivasyonları I, II, III'tür; aVR/aVL/aVF unipolardır.",
+        "Özefagus derivasyonu standart 12 derivasyonluk sette yer almaz.",
+        "Prekordiyal grup V1–V6'dır; aVR/aVL/aVF bu gruba girmez.",
+        "aVR, aVL ve aVF birlikte artırılmış (unipolar) ekstremite derivasyon grubunu oluşturur.",
+        "Sağ göğüs derivasyonları ayrı bir prekordiyal settir; aVR/aVL/aVF değildir."
+      ],
+      "feedback": "aVR, aVL ve aVF birlikte artırılmış (unipolar) ekstremite derivasyon grubunu oluşturur.",
+      "objectiveIds": [
+        "O3"
+      ],
+      "sourceIds": [
+        "VA2022",
+        "ALS2025",
+        "ECG"
+      ],
+      "decisionId": "augmentedGroup",
+      "note": "Retrospektif eğitim analizi: gerçek zamanlı öncelik arresti tanıyıp KPR ve erken defibrilasyondur.",
+      "ecg": {
+        "mode": "vf",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V1"
+        ],
+        "start": 0.58,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q118",
+      "mode": "vf",
+      "title": "Sentetik değerlendirme Q118",
+      "ariaLabel": "Q118 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "60 yaşında kadın hasta. Başvuru: bahçede aniden düşüp yanıtsız bulunuyor. Aynı kayıt üzerinde farklı bir derivasyon grubuna geçildiğinde görünüm değişiyor.",
+      "question": "Derivasyon seçimini değiştirmenin bulguya etkisi nedir?",
+      "text": "Derivasyon seçimini değiştirmenin bulguya etkisi nedir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "alınamıyor"
+        },
+        {
+          "k": "TA",
+          "v": "ölçülemiyor"
+        },
+        {
+          "k": "Bilinç",
+          "v": "kapalı"
+        }
+      ],
+      "options": [
+        "Tüm lead'ler aynı şekli gösterir",
+        "Derivasyon aynı kaynağın farklı görünümüdür",
+        "Lead değiştirmek ritmi değiştirir",
+        "Tek lead 12 derivasyona eşittir",
+        "Negatif QRS ventrikül kaynağını kanıtlar"
+      ],
+      "correct": 1,
+      "explanations": [
+        "Her derivasyon farklı açıdan bakar.",
+        "Lead değiştirmek şekli değiştirir, ritmi değiştirmez.",
+        "Görünüm değişir, kaynak aynı kalır.",
+        "Diğer derivasyonlar ek bilgi taşır.",
+        "Polarite yön farkından da olabilir."
+      ],
+      "feedback": "Lead değiştirmek şekli değiştirir, ritmi değiştirmez.",
+      "objectiveIds": [
+        "O3"
+      ],
+      "sourceIds": [
+        "VA2022",
+        "ALS2025",
+        "ECG"
+      ],
+      "decisionId": "leadAll",
+      "note": "Retrospektif eğitim analizi: gerçek zamanlı öncelik arresti tanıyıp KPR ve erken defibrilasyondur.",
+      "ecg": {
+        "mode": "vf",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V1"
+        ],
+        "start": 0.66,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q119",
+      "mode": "vf",
+      "title": "Sentetik değerlendirme Q119",
+      "ariaLabel": "Q119 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "67 yaşında erkek hasta. Başvuru: önceki defibrilatör öyküsüyle aniden bilinci kapanıyor. Sistematik okumada V1–V2’nin hangi bölgeyi yansıttığı gözden geçiriliyor.",
+      "question": "V1 ve V2 derivasyonları hangi bölgeyi yansıtır?",
+      "text": "V1 ve V2 derivasyonları hangi bölgeyi yansıtır?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "alınamıyor"
+        },
+        {
+          "k": "TA",
+          "v": "ölçülemiyor"
+        },
+        {
+          "k": "Bilinç",
+          "v": "kapalı"
+        }
+      ],
+      "options": [
+        "Sol lateral duvar",
+        "Yüksek lateral duvar",
+        "Septum ve sağ ventrikül yakını",
+        "İnferior duvar",
+        "Sadece sağ atriyum"
+      ],
+      "correct": 2,
+      "explanations": [
+        "Sol lateral duvar V5–V6 ve I, aVL ile değerlendirilir.",
+        "Yüksek lateral duvar aVL ile değerlendirilir.",
+        "V1–V2 septal bölgeyi ve sağ ventrikülün yakınını yansıtır.",
+        "İnferior duvar II, III, aVF ile değerlendirilir.",
+        "Sağ atriyum tek başına V1–V2 ile özgül olarak tanımlanmaz."
+      ],
+      "feedback": "V1–V2 septal bölgeyi ve sağ ventrikülün yakınını yansıtır.",
+      "objectiveIds": [
+        "O3"
+      ],
+      "sourceIds": [
+        "VA2022",
+        "ALS2025",
+        "ECG"
+      ],
+      "decisionId": "precordialSeptal",
+      "note": "Retrospektif eğitim analizi: gerçek zamanlı öncelik arresti tanıyıp KPR ve erken defibrilasyondur.",
+      "ecg": {
+        "mode": "vf",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V1"
+        ],
+        "start": 0.74,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q120",
+      "mode": "vf",
+      "title": "Sentetik değerlendirme Q120",
+      "ariaLabel": "Q120 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "55 yaşında kadın hasta. Başvuru: toplu taşımada aniden yanıtsız hâle geliyor. Kısa süreli bir kayıt elde ediliyor; önceki öykü ve ek testler henüz yok.",
+      "question": "Bu bulgudan etiyoloji ve risk için hangi genel sınır çıkarılabilir?",
+      "text": "Bu bulgudan etiyoloji ve risk için hangi genel sınır çıkarılabilir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "alınamıyor"
+        },
+        {
+          "k": "TA",
+          "v": "ölçülemiyor"
+        },
+        {
+          "k": "Bilinç",
+          "v": "kapalı"
+        }
+      ],
+      "options": [
+        "QRS genişliği tek başına riski verir",
+        "Örüntü desteklenir, neden ayrıca sorulur",
+        "Hız tek başına dolaşımı gösterir",
+        "Kısa kayıt başlangıç zamanını verir",
+        "P ekseni kesin odağı belirler"
+      ],
+      "correct": 1,
+      "explanations": [
+        "Risk için klinik bağlam da gerekir.",
+        "EKG bulgusu tanı verir, nedeni klinik öykü belirler.",
+        "Nabız ve basınç ayrıca değerlendirilir.",
+        "Bir pencere toplam süreyi göstermez.",
+        "P ekseni ipucudur, kesin yer vermez."
+      ],
+      "feedback": "EKG bulgusu tanı verir, nedeni klinik öykü belirler.",
+      "objectiveIds": [
+        "O5"
+      ],
+      "sourceIds": [
+        "VA2022",
+        "ALS2025"
+      ],
+      "decisionId": "limits",
+      "note": "",
+      "ecg": {
+        "mode": "vf",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V1"
+        ],
+        "start": 0.8200000000000001,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q121",
+      "mode": "pat",
+      "title": "Sentetik değerlendirme Q121",
+      "ariaLabel": "Q121 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "25 yaşında erkek hasta. Başvuru: spor müsabakası öncesi çarpıntı hissiyle geliyor. Düzenli, dar kompleksli hızlı bir ritimde, QRS öncesinde sinüsten farklı yönde bir dalga dikkati çekiyor.",
+      "question": "Bu bulgularla en uyumlu örüntü hangisidir?",
+      "text": "Bu bulgularla en uyumlu örüntü hangisidir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "150/dk"
+        },
+        {
+          "k": "TA",
+          "v": "108/70 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%97"
+        }
+      ],
+      "options": [
+        "Atriyal flutter",
+        "PVC dizisi",
+        "Atriyal fibrilasyon",
+        "Fokal atriyal taşikardi",
+        "Sinüs taşikardisi"
+      ],
+      "correct": 3,
+      "explanations": [
+        "Flutter'da sürekli taban dalgası olur; burada ayrı P var.",
+        "PVC geniş ve erken tek atımdır; burada sürekli dar ritim var.",
+        "AF düzenli P üretmez; burada düzenli.",
+        "Sinüsten farklı P, sabit ilişki: fokal AT.",
+        "Sinüs taşikardisinde P ekseni normaldir; burada değişmiş."
+      ],
+      "feedback": "Sinüsten farklı P, sabit ilişki: fokal AT.",
+      "objectiveIds": [
+        "O2"
+      ],
+      "sourceIds": [
+        "SVT2019"
+      ],
+      "decisionId": "at",
+      "note": "",
+      "ecg": {
+        "mode": "pat",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V1"
+        ],
+        "start": 0.5,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q122",
+      "mode": "pat",
+      "title": "Sentetik değerlendirme Q122",
+      "ariaLabel": "Q122 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "49 yaşında kadın hasta. Başvuru: menopoz döneminde sık çarpıntı fark ediyor. Düzenli dar kompleksli hızlı ritimde P dalgasının ekseni sinüs örneğine göre farklı görünüyor.",
+      "question": "Bu P dalgası için hangi yorum uygundur?",
+      "text": "Bu P dalgası için hangi yorum uygundur?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "150/dk"
+        },
+        {
+          "k": "TA",
+          "v": "108/70 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%97"
+        }
+      ],
+      "options": [
+        "Sürekli taban dalgası: flutter",
+        "II pozitif, aVR negatif: sinüs ekseni",
+        "İnferior ters P: ektopik eksen",
+        "Düzensiz ince dalga: AF",
+        "Ters P: mekanik yön göstergesi"
+      ],
+      "correct": 2,
+      "explanations": [
+        "Burada ayrı P var, sürekli dalga yok.",
+        "Burada P ekseni sinüsten farklı.",
+        "Sinüsten farklı yön: odak atriyumda başka yerde.",
+        "Burada düzenli tek P var, AF değil.",
+        "P ekseni elektriksel yöndür, mekanik yön değil."
+      ],
+      "feedback": "Sinüsten farklı yön: odak atriyumda başka yerde.",
+      "objectiveIds": [
+        "O1"
+      ],
+      "sourceIds": [
+        "SVT2019"
+      ],
+      "decisionId": "atAxis",
+      "note": "",
+      "ecg": {
+        "mode": "pat",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V1"
+        ],
+        "start": 0.58,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q123",
+      "mode": "pat",
+      "title": "Sentetik değerlendirme Q123",
+      "ariaLabel": "Q123 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "31 yaşında erkek hasta. Başvuru: gece nöbeti sonrası tekrarlayan çarpıntı tarif ediyor. Üç saniyelik kısa bir kayıt elde ediliyor; atağın başlangıcı ve sonu kayıtta yer almıyor.",
+      "question": "Bu kısa kayıttan hangi sınırlı yorum çıkarılabilir?",
+      "text": "Bu kısa kayıttan hangi sınırlı yorum çıkarılabilir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "150/dk"
+        },
+        {
+          "k": "TA",
+          "v": "108/70 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%97"
+        }
+      ],
+      "options": [
+        "Fokal AT desteklenir, başlangıç bilinmez",
+        "Fokal AT, SVT dışındadır",
+        "Ters P kesin anatomik odağı verir",
+        "Kayıt atağın ani başladığını kanıtlar",
+        "Kayıt toplam atak süresini verir"
+      ],
+      "correct": 0,
+      "explanations": [
+        "Kısa kayıt atağın başlangıcını göstermez.",
+        "Fokal AT, SVT grubunun bir alt türüdür.",
+        "P ekseni ipucu verir, kesin yer vermez.",
+        "Başlangıç görülmeden bu iddia edilemez.",
+        "Pencere toplam süreyi kapsamaz."
+      ],
+      "feedback": "Kısa kayıt atağın başlangıcını göstermez.",
+      "objectiveIds": [
+        "O5"
+      ],
+      "sourceIds": [
+        "SVT2019"
+      ],
+      "decisionId": "atLimits",
+      "note": "",
+      "ecg": {
+        "mode": "pat",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V1"
+        ],
+        "start": 0.66,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q124",
+      "mode": "pat",
+      "title": "Sentetik değerlendirme Q124",
+      "ariaLabel": "Q124 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "43 yaşında kadın hasta. Başvuru: anksiyete öyküsüyle sık çarpıntı yakınmasıyla başvuruyor. Kaliperle P’nin ilk sapması QRS’den 180 ms önce, QRS’in ilk sapması 40 ms önce işaretleniyor.",
+      "question": "Bu ölçümlerle PR aralığı kaç milisaniyedir?",
+      "text": "Bu ölçümlerle PR aralığı kaç milisaniyedir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "150/dk"
+        },
+        {
+          "k": "TA",
+          "v": "108/70 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%97"
+        }
+      ],
+      "options": [
+        "220 ms",
+        "180 ms",
+        "95 ms",
+        "120 ms",
+        "140 ms"
+      ],
+      "correct": 4,
+      "explanations": [
+        "220 ms QRS sonunu PR sınırı alma hatasıdır.",
+        "180 ms R tepesini QRS başlangıcı yerine alma hatasıdır.",
+        "95 ms P tepesinden QRS başlangıcına ölçüm hatasıdır.",
+        "120 ms verilen ilk sapmaların farkı değildir.",
+        "Ektopik P başlangıcı−180 ms, QRS başlangıcı−40 ms: fark 140 ms."
+      ],
+      "feedback": "Ektopik P başlangıcı−180 ms, QRS başlangıcı−40 ms: fark 140 ms.",
+      "objectiveIds": [
+        "O6"
+      ],
+      "sourceIds": [
+        "SVT2019",
+        "ECG"
+      ],
+      "decisionId": "pr140",
+      "note": "",
+      "ecg": {
+        "mode": "pat",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V1"
+        ],
+        "start": 0.74,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q125",
+      "mode": "pat",
+      "title": "Sentetik değerlendirme Q125",
+      "ariaLabel": "Q125 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "37 yaşında erkek hasta. Başvuru: alkol alımı sonrası tekrarlayan çarpıntı tarif ediyor. İki ardışık R tepesi arası 400 ms ölçülüyor.",
+      "question": "Bu döngü süresiyle elektriksel hız yaklaşık kaçtır?",
+      "text": "Bu döngü süresiyle elektriksel hız yaklaşık kaçtır?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "150/dk"
+        },
+        {
+          "k": "TA",
+          "v": "108/70 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%97"
+        }
+      ],
+      "options": [
+        "300/dk",
+        "75/dk",
+        "120/dk",
+        "100/dk",
+        "150/dk"
+      ],
+      "correct": 4,
+      "explanations": [
+        "300/dk 200 ms; flutter atriyal hızını ventrikülle karıştırır.",
+        "75/dk 800 ms döngüdür.",
+        "120/dk 500 ms döngüdür.",
+        "100/dk 600 ms döngüdür.",
+        "60/0,4=150/dk ventriküler elektriksel hızdır."
+      ],
+      "feedback": "60/0,4=150/dk ventriküler elektriksel hızdır.",
+      "objectiveIds": [
+        "O6"
+      ],
+      "sourceIds": [
+        "SVT2019",
+        "ECG"
+      ],
+      "decisionId": "rr400",
+      "note": "",
+      "ecg": {
+        "mode": "pat",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V1"
+        ],
+        "start": 0.8200000000000001,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q126",
+      "mode": "pat",
+      "title": "Sentetik değerlendirme Q126",
+      "ariaLabel": "Q126 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "54 yaşında kadın hasta. Başvuru: tiroid fazlalığı öyküsüyle tekrarlayan çarpıntı tarif ediyor. Ventriküler kompleksin izde temsil ettiği olay ayrıca soruluyor.",
+      "question": "QRS kompleksinin temel elektriksel karşılığı nedir?",
+      "text": "QRS kompleksinin temel elektriksel karşılığı nedir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "150/dk"
+        },
+        {
+          "k": "TA",
+          "v": "108/70 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%97"
+        }
+      ],
+      "options": [
+        "QRS: yalnız AV düğüm gecikmesi",
+        "QRS: yalnız atriyal repolarizasyon",
+        "QRS: ventriküler depolarizasyon",
+        "QRS: atriyal depolarizasyon",
+        "QRS: ventriküler repolarizasyon"
+      ],
+      "correct": 2,
+      "explanations": [
+        "AV gecikmesi PR aralığında değerlendirilir.",
+        "QRS'in ana kaynağı ventrikül kasıdır.",
+        "QRS ventrikül kasının elektriksel uyarılmasıdır.",
+        "Bu olay P dalgasıyla kaydedilir.",
+        "Bu olay T dalgasıyla kaydedilir."
+      ],
+      "feedback": "QRS ventrikül kasının elektriksel uyarılmasıdır.",
+      "objectiveIds": [
+        "O1"
+      ],
+      "sourceIds": [
+        "SVT2019"
+      ],
+      "decisionId": "qrs",
+      "note": "",
+      "ecg": {
+        "mode": "pat",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V1"
+        ],
+        "start": 0.5,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q127",
+      "mode": "pat",
+      "title": "Sentetik değerlendirme Q127",
+      "ariaLabel": "Q127 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "28 yaşında erkek hasta. Başvuru: enerji içeceği sonrası sık çarpıntı fark ediyor. Kompleksin ilk sapması 40 ms önce, T dalgasının son sınırı 205 ms sonra işaretleniyor.",
+      "question": "Bu ölçümlerle ham sentetik QT değeri kaçtır?",
+      "text": "Bu ölçümlerle ham sentetik QT değeri kaçtır?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "150/dk"
+        },
+        {
+          "k": "TA",
+          "v": "108/70 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%97"
+        }
+      ],
+      "options": [
+        "245 ms",
+        "400 ms",
+        "285 ms",
+        "165 ms",
+        "205 ms"
+      ],
+      "correct": 0,
+      "explanations": [
+        "QRS−40 ms, T sonu 205 ms: toplam 245 ms sentetik QT.",
+        "R–R 400 ms ile QT karıştırılmıştır.",
+        "Fazladan 40 ms eklenmiştir; verilen fark 245 ms’dir.",
+        "QRS başlangıç/son sınırları yanlış daraltılmıştır.",
+        "R tepesinden ölçerek başlangıç 40 ms dışlanmıştır."
+      ],
+      "feedback": "QRS−40 ms, T sonu 205 ms: toplam 245 ms sentetik QT.",
+      "objectiveIds": [
+        "O6"
+      ],
+      "sourceIds": [
+        "SVT2019",
+        "ECG"
+      ],
+      "decisionId": "qt245",
+      "note": "",
+      "ecg": {
+        "mode": "pat",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V1"
+        ],
+        "start": 0.58,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q128",
+      "mode": "pat",
+      "title": "Sentetik değerlendirme Q128",
+      "ariaLabel": "Q128 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "45 yaşında kadın hasta. Başvuru: uzun toplantı sonrası tekrarlayan çarpıntı tarif ediyor. Tekrarlayan çarpıntı atakları ve olası nedenler birlikte değerlendiriliyor.",
+      "question": "Bu hastada ilk yaklaşım ne olmalıdır?",
+      "text": "Bu hastada ilk yaklaşım ne olmalıdır?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "150/dk"
+        },
+        {
+          "k": "TA",
+          "v": "108/70 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%97"
+        }
+      ],
+      "options": [
+        "Yalnızca gözlem yeterlidir",
+        "Hemen taburcu edilir",
+        "Karar tamamen hastaya bırakılır",
+        "Yalnız görüntüleme istenir",
+        "Altta yatan neden ve semptomla birlikte değerlendirme"
+      ],
+      "correct": 4,
+      "explanations": [
+        "Bu bulgu daha aktif bir yaklaşım gerektirebilir; yalnız izlem yetmez.",
+        "Bulgu ciddi olabilir; taburcu öncesi değerlendirme gerekir.",
+        "İlk yaklaşım klinik ekip tarafından yönlendirilir.",
+        "İlk adım görüntülemeden önce klinik değerlendirmedir.",
+        "Tekrarlayan atriyal taşikardide neden araştırması önemlidir."
+      ],
+      "feedback": "Tekrarlayan atriyal taşikardide neden araştırması önemlidir.",
+      "objectiveIds": [
+        "O5"
+      ],
+      "sourceIds": [
+        "SVT2019"
+      ],
+      "decisionId": "firstStep_pat",
+      "note": "",
+      "ecg": {
+        "mode": "pat",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V1"
+        ],
+        "start": 0.66,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q129",
+      "mode": "pat",
+      "title": "Sentetik değerlendirme Q129",
+      "ariaLabel": "Q129 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "32 yaşında erkek hasta. Başvuru: egzersiz testi sırasında tekrarlayan hızlı atım gözleniyor. QRS’den kısa süre önce ayrı bir dalga seçiliyor.",
+      "question": "P dalgasının temel elektriksel karşılığı nedir?",
+      "text": "P dalgasının temel elektriksel karşılığı nedir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "150/dk"
+        },
+        {
+          "k": "TA",
+          "v": "108/70 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%97"
+        }
+      ],
+      "options": [
+        "P: ventriküler depolarizasyon",
+        "P: atriyal repolarizasyon",
+        "P: ventriküler repolarizasyon",
+        "P: atriyal depolarizasyon",
+        "P: yalnız AV düğüm iletimi"
+      ],
+      "correct": 3,
+      "explanations": [
+        "Bu olay QRS ile kaydedilir.",
+        "Atriyal repolarizasyon genelde QRS altında gizlenir.",
+        "Bu olay T dalgası ile kaydedilir.",
+        "P dalgası atriyumun elektriksel uyarılmasıdır.",
+        "AV düğüm gecikmesi PR aralığında değerlendirilir."
+      ],
+      "feedback": "P dalgası atriyumun elektriksel uyarılmasıdır.",
+      "objectiveIds": [
+        "O1"
+      ],
+      "sourceIds": [
+        "SVT2019"
+      ],
+      "decisionId": "p",
+      "note": "",
+      "ecg": {
+        "mode": "pat",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V1"
+        ],
+        "start": 0.74,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q130",
+      "mode": "pat",
+      "title": "Sentetik değerlendirme Q130",
+      "ariaLabel": "Q130 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "50 yaşında kadın hasta. Başvuru: düzenli olarak tekrarlayan çarpıntı atakları tarif ediyor. Hızlı seyreden nabızda diyastolik dolum süresinin kısaldığı düşünülüyor.",
+      "question": "Yüksek hızın ventrikül dolusuna etkisi için hangi ifade doğrudur?",
+      "text": "Yüksek hızın ventrikül dolusuna etkisi için hangi ifade doğrudur?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "150/dk"
+        },
+        {
+          "k": "TA",
+          "v": "108/70 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%97"
+        }
+      ],
+      "options": [
+        "P varsa doluş hızdan bağımsızdır",
+        "Kısa döngü doluşu kısaltabilir",
+        "Kısa R–R kan basıncı değeridir",
+        "Dar QRS kısalan doluşu telafi eder",
+        "Hız artışı atım hacmini sabit artırır"
+      ],
+      "correct": 1,
+      "explanations": [
+        "Kısa döngü doluşu yine de kısaltabilir.",
+        "Hız artınca diyastol kısalır.",
+        "R–R zaman ölçüsüdür, basınç değildir.",
+        "QRS genişliği doluş süresini değiştirmez.",
+        "Atım hacmi doluş ve yüke bağlıdır."
+      ],
+      "feedback": "Hız artınca diyastol kısalır.",
+      "objectiveIds": [
+        "O4"
+      ],
+      "sourceIds": [
+        "SVT2019",
+        "CYCLE"
+      ],
+      "decisionId": "fastFill",
+      "note": "",
+      "ecg": {
+        "mode": "pat",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V1"
+        ],
+        "start": 0.8200000000000001,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q131",
+      "mode": "pat",
+      "title": "Sentetik değerlendirme Q131",
+      "ariaLabel": "Q131 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "39 yaşında erkek hasta. Başvuru: gece uykudan uyanma ile birlikte çarpıntı tarif ediyor. İzlemde QRS’den kısa süre sonra basıncın yükseldiği, ancak çıkış kapaklarının henüz açılmadığı bir an inceleniyor.",
+      "question": "Bu andaki kapak durumu hangi mekanik evreyi tanımlar?",
+      "text": "Bu andaki kapak durumu hangi mekanik evreyi tanımlar?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "150/dk"
+        },
+        {
+          "k": "TA",
+          "v": "108/70 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%97"
+        }
+      ],
+      "options": [
+        "Tüm kapaklar kapalı: izovolümetrik kasılma",
+        "Çıkış kapakları açık: ejeksiyon",
+        "AV kapaklar açık: pasif doluş",
+        "Tüm kapaklar kapalı: gevşeme",
+        "AV kapaklar açık: atriyal sistol"
+      ],
+      "correct": 0,
+      "explanations": [
+        "Basınç yükselirken hacim henüz sabittir.",
+        "Bu erken evrede çıkış henüz kapalıdır.",
+        "Bu kasılma başlangıcı, doluş değildir.",
+        "Gevşeme ejeksiyon sonrasıdır.",
+        "Bu anda AV kapak kapalıdır."
+      ],
+      "feedback": "Basınç yükselirken hacim henüz sabittir.",
+      "objectiveIds": [
+        "O4"
+      ],
+      "sourceIds": [
+        "SVT2019",
+        "CYCLE"
+      ],
+      "decisionId": "mechanic",
+      "note": "",
+      "ecg": {
+        "mode": "pat",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V1"
+        ],
+        "start": 0.5,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q132",
+      "mode": "pat",
+      "title": "Sentetik değerlendirme Q132",
+      "ariaLabel": "Q132 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "47 yaşında kadın hasta. Başvuru: iş yerinde ani başlayan çarpıntı ile fark ediyor. Eşzamanlı üç derivasyonlu kayıt aşağıda gösteriliyor.",
+      "question": "Bu EKG'de öncelikle hangi tanı düşünülmelidir?",
+      "text": "Bu EKG'de öncelikle hangi tanı düşünülmelidir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "150/dk"
+        },
+        {
+          "k": "TA",
+          "v": "108/70 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%97"
+        }
+      ],
+      "options": [
+        "Ventriküler fibrilasyon",
+        "Sinüs taşikardisi",
+        "İnferior ST yükselmeli iskemi",
+        "Fokal atriyal taşikardi",
+        "Sağ dal bloğu"
+      ],
+      "correct": 3,
+      "explanations": [
+        "Ventriküler fibrilasyon için beklenen bulgular burada yok.",
+        "Sinüs taşikardisi için beklenen bulgular burada yok.",
+        "İnferior ST yükselmeli iskemi için beklenen bulgular burada yok.",
+        "Tarif edilen bulgular Fokal atriyal taşikardi ile uyumludur.",
+        "Sağ dal bloğu için beklenen bulgular burada yok."
+      ],
+      "feedback": "Tarif edilen bulgular Fokal atriyal taşikardi ile uyumludur.",
+      "objectiveIds": [
+        "O2"
+      ],
+      "sourceIds": [
+        "SVT2019"
+      ],
+      "decisionId": "ddx_pat",
+      "note": "",
+      "ecg": {
+        "mode": "pat",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V1"
+        ],
+        "start": 0.58,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q133",
+      "mode": "pat",
+      "title": "Sentetik değerlendirme Q133",
+      "ariaLabel": "Q133 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "35 yaşında erkek hasta. Başvuru: kahvaltı sonrası tekrarlayan çarpıntı tarif ediyor. Sistematik okumada hangi derivasyonların yan duvarı temsil ettiği gözden geçiriliyor.",
+      "question": "Hangi derivasyonlar lateral duvarı gösterir?",
+      "text": "Hangi derivasyonlar lateral duvarı gösterir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "150/dk"
+        },
+        {
+          "k": "TA",
+          "v": "108/70 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%97"
+        }
+      ],
+      "options": [
+        "V1, V2 — septal bölge",
+        "V1–V6 tümü — tüm prekordiyum",
+        "V3, V4 — anterior duvar",
+        "I, aVL, V5–V6 — lateral duvar",
+        "II, III, aVF — inferior duvar"
+      ],
+      "correct": 3,
+      "explanations": [
+        "V1–V2 septal bölgeyi gösterir, lateral duvarı değil.",
+        "Tüm prekordiyal grup tek başına lateral duvarı özgül olarak göstermez.",
+        "V3–V4 anterior duvarı gösterir, lateral duvarı değil.",
+        "Bu üç derivasyon grubu kalbin lateral duvarını gösterir.",
+        "Bu grup inferior duvarı gösterir, lateral duvarı değil."
+      ],
+      "feedback": "Bu üç derivasyon grubu kalbin lateral duvarını gösterir.",
+      "objectiveIds": [
+        "O3"
+      ],
+      "sourceIds": [
+        "SVT2019",
+        "ECG"
+      ],
+      "decisionId": "lateralLeadGroup",
+      "note": "",
+      "ecg": {
+        "mode": "pat",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V1"
+        ],
+        "start": 0.66,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q134",
+      "mode": "pat",
+      "title": "Sentetik değerlendirme Q134",
+      "ariaLabel": "Q134 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "42 yaşında kadın hasta. Başvuru: tekrarlayan çarpıntı atakları giderek sıklaşıyor. Aynı kayıt üzerinde farklı bir derivasyon grubuna geçildiğinde görünüm değişiyor.",
+      "question": "Derivasyon seçimini değiştirmenin bulguya etkisi nedir?",
+      "text": "Derivasyon seçimini değiştirmenin bulguya etkisi nedir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "150/dk"
+        },
+        {
+          "k": "TA",
+          "v": "108/70 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%97"
+        }
+      ],
+      "options": [
+        "Tüm lead'ler aynı şekli gösterir",
+        "Negatif QRS ventrikül kaynağını kanıtlar",
+        "Lead değiştirmek ritmi değiştirir",
+        "Tek lead 12 derivasyona eşittir",
+        "Derivasyon aynı kaynağın farklı görünümüdür"
+      ],
+      "correct": 4,
+      "explanations": [
+        "Her derivasyon farklı açıdan bakar.",
+        "Polarite yön farkından da olabilir.",
+        "Görünüm değişir, kaynak aynı kalır.",
+        "Diğer derivasyonlar ek bilgi taşır.",
+        "Lead değiştirmek şekli değiştirir, ritmi değiştirmez."
+      ],
+      "feedback": "Lead değiştirmek şekli değiştirir, ritmi değiştirmez.",
+      "objectiveIds": [
+        "O3"
+      ],
+      "sourceIds": [
+        "SVT2019",
+        "ECG"
+      ],
+      "decisionId": "leadAll",
+      "note": "",
+      "ecg": {
+        "mode": "pat",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V1"
+        ],
+        "start": 0.74,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q135",
+      "mode": "pat",
+      "title": "Sentetik değerlendirme Q135",
+      "ariaLabel": "Q135 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "56 yaşında erkek hasta. Başvuru: rutin kontrolde tesadüfen ektopik atriyal ritim saptanıyor. Eşzamanlı üç derivasyonlu kayıt aşağıda gösteriliyor.",
+      "question": "Bu ritim hangi sınıfa girer?",
+      "text": "Bu ritim hangi sınıfa girer?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "150/dk"
+        },
+        {
+          "k": "TA",
+          "v": "108/70 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%97"
+        }
+      ],
+      "options": [
+        "Düzenli dar kompleks, hızlı",
+        "Düzensiz dar kompleks",
+        "Kaotik, organize değil",
+        "Düzenli dar kompleks, normal hız",
+        "Düzenli geniş kompleks"
+      ],
+      "correct": 0,
+      "explanations": [
+        "Hız belirgin yüksek; ritim düzenli ve QRS dar.",
+        "Bu örnekte ritim düzenli, düzensiz değil.",
+        "Bu örnekte düzenli bir kompleks seçilebiliyor, kaotik değil.",
+        "Bu örnekte hız veya düzen normal aralığa uymuyor.",
+        "Bu örnekte QRS dar, bu kadar geniş değil."
+      ],
+      "feedback": "Hız belirgin yüksek; ritim düzenli ve QRS dar.",
+      "objectiveIds": [
+        "O2"
+      ],
+      "sourceIds": [
+        "SVT2019"
+      ],
+      "decisionId": "rhythmClass_pat",
+      "note": "",
+      "ecg": {
+        "mode": "pat",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V1"
+        ],
+        "start": 0.8200000000000001,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q136",
+      "mode": "flutter",
+      "title": "Sentetik değerlendirme Q136",
+      "ariaLabel": "Q136 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "59 yaşında kadın hasta. Başvuru: ameliyat öncesi değerlendirmede düzenli hızlı nabız saptanıyor. Düzenli dar kompleksler arasında sürekli, testere dişi görünümlü bir taban etkinliği izleniyor.",
+      "question": "Bu atriyal ve ventriküler bulgularla en uyumlu örüntü hangisidir?",
+      "text": "Bu atriyal ve ventriküler bulgularla en uyumlu örüntü hangisidir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "150/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "104/68 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%96"
+        }
+      ],
+      "options": [
+        "Fokal atriyal taşikardi",
+        "Atriyal fibrilasyon",
+        "Sinüs taşikardisi",
+        "PVC dizisi",
+        "Sabit 2:1 atriyal flutter"
+      ],
+      "correct": 4,
+      "explanations": [
+        "Fokal AT'de ayrı P ve düz taban olur; burada sürekli dalga var.",
+        "AF'de düzensiz taban olur; burada düzenli.",
+        "Sinüs P–QRS ilişkisi 1:1'dir; burada 2:1.",
+        "PVC tek erken geniş atımdır; burada sürekli düzenli ritim var.",
+        "Testere dişi taban ve 2:1 iletim: flutter."
+      ],
+      "feedback": "Testere dişi taban ve 2:1 iletim: flutter.",
+      "objectiveIds": [
+        "O2"
+      ],
+      "sourceIds": [
+        "SVT2019"
+      ],
+      "decisionId": "flutter",
+      "note": "",
+      "ecg": {
+        "mode": "flutter",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V1"
+        ],
+        "start": 0.5,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q137",
+      "mode": "flutter",
+      "title": "Sentetik değerlendirme Q137",
+      "ariaLabel": "Q137 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "74 yaşında erkek hasta. Başvuru: bakımevi rutin muayenesinde çarpıntı fark ediliyor. Atriyal ve ventriküler hızlar arasındaki oran ayrıca hesaplanıyor.",
+      "question": "Atriyal ve ventriküler hız ile iletim oranı arasındaki ilişki hangisidir?",
+      "text": "Atriyal ve ventriküler hız ile iletim oranı arasındaki ilişki hangisidir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "150/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "104/68 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%96"
+        }
+      ],
+      "options": [
+        "300 atriyal, 75 ventrikül: 2:1",
+        "300 atriyal, 300 ventrikül: 2:1",
+        "300 atriyal, 100 ventrikül: 2:1",
+        "300/dk atriyal, 150/dk ventrikül: 2:1",
+        "150 atriyal, 300 ventrikül: 2:1"
+      ],
+      "correct": 3,
+      "explanations": [
+        "Bu oran 4:1'dir, 2:1 değil.",
+        "Eşit hız 1:1 iletim demektir.",
+        "Bu oran 3:1'dir, 2:1 değil.",
+        "İki F dalgasından biri QRS ile iletilir.",
+        "Hızlar burada ters çevrilmiş."
+      ],
+      "feedback": "İki F dalgasından biri QRS ile iletilir.",
+      "objectiveIds": [
+        "O1"
+      ],
+      "sourceIds": [
+        "SVT2019"
+      ],
+      "decisionId": "flutterRatio",
+      "note": "",
+      "ecg": {
+        "mode": "flutter",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V1"
+        ],
+        "start": 0.58,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q138",
+      "mode": "flutter",
+      "title": "Sentetik değerlendirme Q138",
+      "ariaLabel": "Q138 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "61 yaşında kadın hasta. Başvuru: efor kapasitesinde azalma ile başvuruyor. İnferior ve V1 derivasyonlarında taban dalgasının yönü karşılaştırılıyor.",
+      "question": "Bu derivasyonlardaki taban dalgası polaritesi hangi seçenekle uyumludur?",
+      "text": "Bu derivasyonlardaki taban dalgası polaritesi hangi seçenekle uyumludur?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "150/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "104/68 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%96"
+        }
+      ],
+      "options": [
+        "F bir basınç dalgasıdır",
+        "F yalnız QRS içinde görünür",
+        "Her derivasyonda eşit F",
+        "İnferior pozitif, V1 negatif F",
+        "İnferior negatif, V1 pozitif F"
+      ],
+      "correct": 4,
+      "explanations": [
+        "F elektriksel bir atriyal dalgadır.",
+        "F sürekli, QRS'den bağımsız sürer.",
+        "F dalgası derivasyona göre farklı görünür.",
+        "Bu ters yön tipik örneğe uymaz.",
+        "Tipik flutter yönü budur."
+      ],
+      "feedback": "Tipik flutter yönü budur.",
+      "objectiveIds": [
+        "O3"
+      ],
+      "sourceIds": [
+        "SVT2019",
+        "ECG"
+      ],
+      "decisionId": "flutterPolarity",
+      "note": "",
+      "ecg": {
+        "mode": "flutter",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V1"
+        ],
+        "start": 0.66,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q139",
+      "mode": "flutter",
+      "title": "Sentetik değerlendirme Q139",
+      "ariaLabel": "Q139 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "50 yaşında erkek hasta. Başvuru: alkol alımı sonrası düzenli hızlı çarpıntı tarif ediyor. Taban hattında sürekli dalgalı bir etkinlik var; bir öğrenci bunu ayrık bir P dalgası sanıyor.",
+      "question": "Bu sürekli taban etkinliği ile ayrık P dalgası arasındaki fark nedir?",
+      "text": "Bu sürekli taban etkinliği ile ayrık P dalgası arasındaki fark nedir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "150/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "104/68 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%96"
+        }
+      ],
+      "options": [
+        "F varlığı normal atriyal katkı gösterir",
+        "F, T dalgasının başka adıdır",
+        "Sürekli F, ayrı sinüs P değildir",
+        "Her F bir QRS'dir",
+        "Ters F sinüs P ile aynıdır"
+      ],
+      "correct": 2,
+      "explanations": [
+        "Sürekli F koordineli katkıyı göstermez.",
+        "F atriyal, T ventriküler bir olaydır.",
+        "Flutter tabanı düzenli ve süreklidir, tek P değildir.",
+        "F atriyum, QRS ventrikül olayıdır; sayıları farklıdır.",
+        "F sürekli devre etkinliğidir, sinüs P değildir."
+      ],
+      "feedback": "Flutter tabanı düzenli ve süreklidir, tek P değildir.",
+      "objectiveIds": [
+        "O1"
+      ],
+      "sourceIds": [
+        "SVT2019"
+      ],
+      "decisionId": "fNotP",
+      "note": "",
+      "ecg": {
+        "mode": "flutter",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V1"
+        ],
+        "start": 0.74,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q140",
+      "mode": "flutter",
+      "title": "Sentetik değerlendirme Q140",
+      "ariaLabel": "Q140 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "67 yaşında kadın hasta. Başvuru: kronik kalp hastalığı izleminde çarpıntı saptanıyor. İki ardışık R tepesi arası 400 ms ölçülüyor.",
+      "question": "Bu döngü süresiyle elektriksel hız yaklaşık kaçtır?",
+      "text": "Bu döngü süresiyle elektriksel hız yaklaşık kaçtır?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "150/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "104/68 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%96"
+        }
+      ],
+      "options": [
+        "150/dk",
+        "300/dk",
+        "120/dk",
+        "100/dk",
+        "75/dk"
+      ],
+      "correct": 0,
+      "explanations": [
+        "60/0,4=150/dk ventriküler elektriksel hızdır.",
+        "300/dk 200 ms; flutter atriyal hızını ventrikülle karıştırır.",
+        "120/dk 500 ms döngüdür.",
+        "100/dk 600 ms döngüdür.",
+        "75/dk 800 ms döngüdür."
+      ],
+      "feedback": "60/0,4=150/dk ventriküler elektriksel hızdır.",
+      "objectiveIds": [
+        "O6"
+      ],
+      "sourceIds": [
+        "SVT2019",
+        "ECG"
+      ],
+      "decisionId": "rr400",
+      "note": "",
+      "ecg": {
+        "mode": "flutter",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V1"
+        ],
+        "start": 0.8200000000000001,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q141",
+      "mode": "flutter",
+      "title": "Sentetik değerlendirme Q141",
+      "ariaLabel": "Q141 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "56 yaşında erkek hasta. Başvuru: iş stresiyle birlikte düzenli hızlı çarpıntı tarif ediyor. Dar bir kompleksin ilk sapması 40 ms önce, son dönüşü 40 ms sonra işaretleniyor.",
+      "question": "Bu ölçümlerle QRS süresi kaç milisaniyedir?",
+      "text": "Bu ölçümlerle QRS süresi kaç milisaniyedir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "150/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "104/68 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%96"
+        }
+      ],
+      "options": [
+        "60 ms",
+        "40 ms",
+        "100 ms",
+        "80 ms",
+        "140 ms"
+      ],
+      "correct": 3,
+      "explanations": [
+        "60 ms başlangıç veya terminal bileşenin bir kısmını dışlar.",
+        "40 ms yalnız R’den son dönüşe yarı desteği sayar.",
+        "100 ms iki sınırın verilen farkından fazladır.",
+        "−40 ms ile+40 ms arasındaki QRS desteği 80 ms’dir.",
+        "140 ms geniş PVC/RBBB örneğiyle karıştırır."
+      ],
+      "feedback": "−40 ms ile+40 ms arasındaki QRS desteği 80 ms’dir.",
+      "objectiveIds": [
+        "O6"
+      ],
+      "sourceIds": [
+        "SVT2019",
+        "ECG"
+      ],
+      "decisionId": "q80",
+      "note": "",
+      "ecg": {
+        "mode": "flutter",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V1"
+        ],
+        "start": 0.5,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q142",
+      "mode": "flutter",
+      "title": "Sentetik değerlendirme Q142",
+      "ariaLabel": "Q142 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "64 yaşında kadın hasta. Başvuru: nefes darlığı ile solunum polikliniğine başvuruyor. Sistematik okumada V1–V2’nin hangi bölgeyi yansıttığı gözden geçiriliyor.",
+      "question": "V1 ve V2 derivasyonları hangi bölgeyi yansıtır?",
+      "text": "V1 ve V2 derivasyonları hangi bölgeyi yansıtır?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "150/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "104/68 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%96"
+        }
+      ],
+      "options": [
+        "Septum ve sağ ventrikül yakını",
+        "Yüksek lateral duvar",
+        "İnferior duvar",
+        "Sadece sağ atriyum",
+        "Sol lateral duvar"
+      ],
+      "correct": 0,
+      "explanations": [
+        "V1–V2 septal bölgeyi ve sağ ventrikülün yakınını yansıtır.",
+        "Yüksek lateral duvar aVL ile değerlendirilir.",
+        "İnferior duvar II, III, aVF ile değerlendirilir.",
+        "Sağ atriyum tek başına V1–V2 ile özgül olarak tanımlanmaz.",
+        "Sol lateral duvar V5–V6 ve I, aVL ile değerlendirilir."
+      ],
+      "feedback": "V1–V2 septal bölgeyi ve sağ ventrikülün yakınını yansıtır.",
+      "objectiveIds": [
+        "O3"
+      ],
+      "sourceIds": [
+        "SVT2019",
+        "ECG"
+      ],
+      "decisionId": "precordialSeptal",
+      "note": "",
+      "ecg": {
+        "mode": "flutter",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V1"
+        ],
+        "start": 0.58,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q143",
+      "mode": "flutter",
+      "title": "Sentetik değerlendirme Q143",
+      "ariaLabel": "Q143 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "72 yaşında erkek hasta. Başvuru: huzurevinde düzenli hızlı nabız rutin kontrolde saptanıyor. Kompleksin ilk sapması 40 ms önce, T dalgasının son sınırı 205 ms sonra işaretleniyor.",
+      "question": "Bu ölçümlerle ham sentetik QT değeri kaçtır?",
+      "text": "Bu ölçümlerle ham sentetik QT değeri kaçtır?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "150/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "104/68 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%96"
+        }
+      ],
+      "options": [
+        "205 ms",
+        "400 ms",
+        "245 ms",
+        "165 ms",
+        "285 ms"
+      ],
+      "correct": 2,
+      "explanations": [
+        "R tepesinden ölçerek başlangıç 40 ms dışlanmıştır.",
+        "R–R 400 ms ile QT karıştırılmıştır.",
+        "QRS−40 ms, T sonu 205 ms: toplam 245 ms sentetik QT.",
+        "QRS başlangıç/son sınırları yanlış daraltılmıştır.",
+        "Fazladan 40 ms eklenmiştir; verilen fark 245 ms’dir."
+      ],
+      "feedback": "QRS−40 ms, T sonu 205 ms: toplam 245 ms sentetik QT.",
+      "objectiveIds": [
+        "O6"
+      ],
+      "sourceIds": [
+        "SVT2019",
+        "ECG"
+      ],
+      "decisionId": "qt245",
+      "note": "",
+      "ecg": {
+        "mode": "flutter",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V1"
+        ],
+        "start": 0.66,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q144",
+      "mode": "flutter",
+      "title": "Sentetik değerlendirme Q144",
+      "ariaLabel": "Q144 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "53 yaşında kadın hasta. Başvuru: tiroid fazlalığı öyküsüyle düzenli hızlı çarpıntı tarif ediyor. Hızlı seyreden nabızda diyastolik dolum süresinin kısaldığı düşünülüyor.",
+      "question": "Yüksek hızın ventrikül dolusuna etkisi için hangi ifade doğrudur?",
+      "text": "Yüksek hızın ventrikül dolusuna etkisi için hangi ifade doğrudur?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "150/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "104/68 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%96"
+        }
+      ],
+      "options": [
+        "Hız artışı atım hacmini sabit artırır",
+        "Kısa döngü doluşu kısaltabilir",
+        "P varsa doluş hızdan bağımsızdır",
+        "Kısa R–R kan basıncı değeridir",
+        "Dar QRS kısalan doluşu telafi eder"
+      ],
+      "correct": 1,
+      "explanations": [
+        "Atım hacmi doluş ve yüke bağlıdır.",
+        "Hız artınca diyastol kısalır.",
+        "Kısa döngü doluşu yine de kısaltabilir.",
+        "R–R zaman ölçüsüdür, basınç değildir.",
+        "QRS genişliği doluş süresini değiştirmez."
+      ],
+      "feedback": "Hız artınca diyastol kısalır.",
+      "objectiveIds": [
+        "O4"
+      ],
+      "sourceIds": [
+        "SVT2019",
+        "CYCLE"
+      ],
+      "decisionId": "fastFill",
+      "note": "",
+      "ecg": {
+        "mode": "flutter",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V1"
+        ],
+        "start": 0.74,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q145",
+      "mode": "flutter",
+      "title": "Sentetik değerlendirme Q145",
+      "ariaLabel": "Q145 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "69 yaşında erkek hasta. Başvuru: kalp ameliyatı sonrası izlemde çarpıntı saptanıyor. İzlemde bir anda çıkış kapaklarının açık, giriş kapaklarının kapalı olduğu gösteriliyor.",
+      "question": "Bu andaki kapak ve akım durumu hangi mekanik evreyi tanımlar?",
+      "text": "Bu andaki kapak ve akım durumu hangi mekanik evreyi tanımlar?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "150/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "104/68 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%96"
+        }
+      ],
+      "options": [
+        "Tüm kapaklar kapalı: izovolümetrik kasılma",
+        "AV kapaklar açık: pasif doluş",
+        "Çıkış kapakları açık: ejeksiyon",
+        "Tüm kapaklar kapalı: gevşeme",
+        "AV kapaklar açık: atriyal sistol"
+      ],
+      "correct": 2,
+      "explanations": [
+        "Bu erken evre, çıkış henüz kapalıdır.",
+        "Bu giriş fazıdır, ejeksiyon değildir.",
+        "Basınç yeterince yükselince kan dışarı pompalanır.",
+        "Gevşeme ejeksiyondan sonra gelir.",
+        "Bu doluşun son parçasıdır, ejeksiyon değil."
+      ],
+      "feedback": "Basınç yeterince yükselince kan dışarı pompalanır.",
+      "objectiveIds": [
+        "O4"
+      ],
+      "sourceIds": [
+        "SVT2019",
+        "CYCLE"
+      ],
+      "decisionId": "eject",
+      "note": "",
+      "ecg": {
+        "mode": "flutter",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V1"
+        ],
+        "start": 0.8200000000000001,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q146",
+      "mode": "flutter",
+      "title": "Sentetik değerlendirme Q146",
+      "ariaLabel": "Q146 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "58 yaşında kadın hasta. Başvuru: yorgunluk ve efor dispnesiyle başvuruyor. Eşzamanlı üç derivasyonlu kayıt aşağıda gösteriliyor.",
+      "question": "Bu ritim hangi sınıfa girer?",
+      "text": "Bu ritim hangi sınıfa girer?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "150/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "104/68 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%96"
+        }
+      ],
+      "options": [
+        "Kaotik, organize değil",
+        "Düzenli dar kompleks, normal hız",
+        "Düzenli geniş kompleks",
+        "Düzensiz dar kompleks",
+        "Düzenli dar kompleks, hızlı"
+      ],
+      "correct": 4,
+      "explanations": [
+        "Bu örnekte düzenli bir kompleks seçilebiliyor, kaotik değil.",
+        "Bu örnekte hız veya düzen normal aralığa uymuyor.",
+        "Bu örnekte QRS dar, bu kadar geniş değil.",
+        "Bu örnekte ritim düzenli, düzensiz değil.",
+        "Hız belirgin yüksek; ritim düzenli ve QRS dar."
+      ],
+      "feedback": "Hız belirgin yüksek; ritim düzenli ve QRS dar.",
+      "objectiveIds": [
+        "O2"
+      ],
+      "sourceIds": [
+        "SVT2019"
+      ],
+      "decisionId": "rhythmClass_flutter",
+      "note": "",
+      "ecg": {
+        "mode": "flutter",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V1"
+        ],
+        "start": 0.5,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q147",
+      "mode": "flutter",
+      "title": "Sentetik değerlendirme Q147",
+      "ariaLabel": "Q147 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "65 yaşında erkek hasta. Başvuru: yıllık check-up sırasında düzenli hızlı nabız fark ediliyor. Aynı kayıt üzerinde farklı bir derivasyon grubuna geçildiğinde görünüm değişiyor.",
+      "question": "Derivasyon seçimini değiştirmenin bulguya etkisi nedir?",
+      "text": "Derivasyon seçimini değiştirmenin bulguya etkisi nedir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "150/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "104/68 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%96"
+        }
+      ],
+      "options": [
+        "Tüm lead'ler aynı şekli gösterir",
+        "Derivasyon aynı kaynağın farklı görünümüdür",
+        "Negatif QRS ventrikül kaynağını kanıtlar",
+        "Tek lead 12 derivasyona eşittir",
+        "Lead değiştirmek ritmi değiştirir"
+      ],
+      "correct": 1,
+      "explanations": [
+        "Her derivasyon farklı açıdan bakar.",
+        "Lead değiştirmek şekli değiştirir, ritmi değiştirmez.",
+        "Polarite yön farkından da olabilir.",
+        "Diğer derivasyonlar ek bilgi taşır.",
+        "Görünüm değişir, kaynak aynı kalır."
+      ],
+      "feedback": "Lead değiştirmek şekli değiştirir, ritmi değiştirmez.",
+      "objectiveIds": [
+        "O3"
+      ],
+      "sourceIds": [
+        "SVT2019",
+        "ECG"
+      ],
+      "decisionId": "leadAll",
+      "note": "",
+      "ecg": {
+        "mode": "flutter",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V1"
+        ],
+        "start": 0.58,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q148",
+      "mode": "flutter",
+      "title": "Sentetik değerlendirme Q148",
+      "ariaLabel": "Q148 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "51 yaşında kadın hasta. Başvuru: egzersiz sonrası düzenli hızlı çarpıntı tarif ediyor. Eşzamanlı üç derivasyonlu kayıt aşağıda gösteriliyor.",
+      "question": "Bu EKG'de öncelikle hangi tanı düşünülmelidir?",
+      "text": "Bu EKG'de öncelikle hangi tanı düşünülmelidir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "150/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "104/68 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%96"
+        }
+      ],
+      "options": [
+        "Sinüs taşikardisi",
+        "Atriyal flutter (2:1)",
+        "Sağ dal bloğu",
+        "Ventriküler fibrilasyon",
+        "Atriyal fibrilasyon"
+      ],
+      "correct": 1,
+      "explanations": [
+        "Sinüs taşikardisi için beklenen bulgular burada yok.",
+        "Tarif edilen bulgular Atriyal flutter (2:1) ile uyumludur.",
+        "Sağ dal bloğu için beklenen bulgular burada yok.",
+        "Ventriküler fibrilasyon için beklenen bulgular burada yok.",
+        "Atriyal fibrilasyon için beklenen bulgular burada yok."
+      ],
+      "feedback": "Tarif edilen bulgular Atriyal flutter (2:1) ile uyumludur.",
+      "objectiveIds": [
+        "O2"
+      ],
+      "sourceIds": [
+        "SVT2019"
+      ],
+      "decisionId": "ddx_flutter",
+      "note": "",
+      "ecg": {
+        "mode": "flutter",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V1"
+        ],
+        "start": 0.66,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q149",
+      "mode": "flutter",
+      "title": "Sentetik değerlendirme Q149",
+      "ariaLabel": "Q149 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "60 yaşında erkek hasta. Başvuru: kronik obstrüktif akciğer hastalığı izleminde çarpıntı saptanıyor. Ventrikül hızı ve ritim seçenekleri birlikte değerlendiriliyor.",
+      "question": "Bu hastada ilk yaklaşım ne olmalıdır?",
+      "text": "Bu hastada ilk yaklaşım ne olmalıdır?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "150/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "104/68 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%96"
+        }
+      ],
+      "options": [
+        "Hemen taburcu edilir",
+        "Stabil hastada hız/ritim kontrolü ve antikoagülasyon değerlendirmesi; instabilde senkronize kardiyoversiyon",
+        "Yalnız görüntüleme istenir",
+        "Yalnızca gözlem yeterlidir",
+        "Karar tamamen hastaya bırakılır"
+      ],
+      "correct": 1,
+      "explanations": [
+        "Bulgu ciddi olabilir; taburcu öncesi değerlendirme gerekir.",
+        "Flutter yönetimi AF ilkelerini izler; hemodinamik instabilitede senkronize kardiyoversiyon önceliklidir (ESC SVT 2019, AHA ALS 2025).",
+        "İlk adım görüntülemeden önce klinik değerlendirmedir.",
+        "Bu bulgu daha aktif bir yaklaşım gerektirebilir; yalnız izlem yetmez.",
+        "İlk yaklaşım klinik ekip tarafından yönlendirilir."
+      ],
+      "feedback": "Flutter yönetimi AF ilkelerini izler; hemodinamik instabilitede senkronize kardiyoversiyon önceliklidir (ESC SVT 2019, AHA ALS 2025).",
+      "objectiveIds": [
+        "O5"
+      ],
+      "sourceIds": [
+        "SVT2019"
+      ],
+      "decisionId": "firstStep_flutter",
+      "note": "",
+      "ecg": {
+        "mode": "flutter",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V1"
+        ],
+        "start": 0.74,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q150",
+      "mode": "flutter",
+      "title": "Sentetik değerlendirme Q150",
+      "ariaLabel": "Q150 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "75 yaşında kadın hasta. Başvuru: huzurevi yemekhanesinde çarpıntı yakınmasıyla fark ediliyor. Kısa süreli bir kayıt elde ediliyor; önceki öykü ve ek testler henüz yok.",
+      "question": "Bu bulgudan etiyoloji ve risk için hangi genel sınır çıkarılabilir?",
+      "text": "Bu bulgudan etiyoloji ve risk için hangi genel sınır çıkarılabilir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "150/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "104/68 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%96"
+        }
+      ],
+      "options": [
+        "P ekseni kesin odağı belirler",
+        "Örüntü desteklenir, neden ayrıca sorulur",
+        "Kısa kayıt başlangıç zamanını verir",
+        "Hız tek başına dolaşımı gösterir",
+        "QRS genişliği tek başına riski verir"
+      ],
+      "correct": 1,
+      "explanations": [
+        "P ekseni ipucudur, kesin yer vermez.",
+        "EKG bulgusu tanı verir, nedeni klinik öykü belirler.",
+        "Bir pencere toplam süreyi göstermez.",
+        "Nabız ve basınç ayrıca değerlendirilir.",
+        "Risk için klinik bağlam da gerekir."
+      ],
+      "feedback": "EKG bulgusu tanı verir, nedeni klinik öykü belirler.",
+      "objectiveIds": [
+        "O5"
+      ],
+      "sourceIds": [
+        "SVT2019"
+      ],
+      "decisionId": "limits",
+      "note": "",
+      "ecg": {
+        "mode": "flutter",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V1"
+        ],
+        "start": 0.8200000000000001,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q151",
+      "mode": "sintach",
+      "title": "Sentetik değerlendirme Q151",
+      "ariaLabel": "Q151 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "44 yaşında erkek hasta. Başvuru: ağrılı travma sonrası hızlı nabız saptanıyor. Düzenli, dar kompleksli hızlı bir ritimde her kompleksten önce aynı yönlü bir dalga korunuyor.",
+      "question": "Bu bulgularla en uyumlu örüntü hangisidir?",
+      "text": "Bu bulgularla en uyumlu örüntü hangisidir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "120/dk"
+        },
+        {
+          "k": "TA",
+          "v": "112/74 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%97"
+        }
+      ],
+      "options": [
+        "Fokal atriyal taşikardi",
+        "Sinüs taşikardisi",
+        "Atriyal fibrilasyon",
+        "Sabit 2:1 flutter",
+        "AVNRT/AVRT olasılığı"
+      ],
+      "correct": 1,
+      "explanations": [
+        "P ekseni burada normal; fokal AT'de farklı olurdu.",
+        "Hızlı ama normal P–QRS ilişkisi: sinüs taşikardisi.",
+        "AF'de P yoktur; burada var.",
+        "Flutter'da sürekli taban dalgası olur; burada yok.",
+        "Bunlarda P genelde seçilemez; burada P açık."
+      ],
+      "feedback": "Hızlı ama normal P–QRS ilişkisi: sinüs taşikardisi.",
+      "objectiveIds": [
+        "O2"
+      ],
+      "sourceIds": [
+        "SVT2019",
+        "ECG"
+      ],
+      "decisionId": "tach",
+      "note": "",
+      "ecg": {
+        "mode": "sintach",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V3"
+        ],
+        "start": 0.5,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q152",
+      "mode": "sintach",
+      "title": "Sentetik değerlendirme Q152",
+      "ariaLabel": "Q152 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "39 yaşında kadın hasta. Başvuru: tiroid fazlalığı öyküsüyle hızlı nabız tarif ediyor. Düzenli dar kompleksli ritimde P dalgasının yönü ayrıca değerlendiriliyor.",
+      "question": "Bu P dalgası için hangi yön dağılımı destekleyicidir?",
+      "text": "Bu P dalgası için hangi yön dağılımı destekleyicidir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "120/dk"
+        },
+        {
+          "k": "TA",
+          "v": "112/74 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%97"
+        }
+      ],
+      "options": [
+        "Sürekli taban dalgası: flutter",
+        "İnferior ters P: ektopik eksen",
+        "Düzensiz ince dalga: AF",
+        "Geniş S: dal bloğu bulgusu",
+        "II pozitif, aVR negatif P: sinüs ekseni"
+      ],
+      "correct": 4,
+      "explanations": [
+        "Burada ayrı P var, sürekli dalga yok.",
+        "Bu örnekte P ekseni normal, ters değil.",
+        "Burada düzenli tek P var, AF değil.",
+        "Bu P ekseni sorusu, QRS şekli değil.",
+        "Bu yön sinüs kaynaklı P ile uyumludur."
+      ],
+      "feedback": "Bu yön sinüs kaynaklı P ile uyumludur.",
+      "objectiveIds": [
+        "O1"
+      ],
+      "sourceIds": [
+        "SVT2019",
+        "ECG"
+      ],
+      "decisionId": "sinusAxis",
+      "note": "",
+      "ecg": {
+        "mode": "sintach",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V3"
+        ],
+        "start": 0.58,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q153",
+      "mode": "sintach",
+      "title": "Sentetik değerlendirme Q153",
+      "ariaLabel": "Q153 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "52 yaşında erkek hasta. Başvuru: dehidratasyon şüphesiyle hızlı nabız izleniyor. Hızlı sinüs ritmi saptanıyor; ateş ve ağrı gibi olası nedenler sorgulanıyor.",
+      "question": "Hız artışının nedeni için hangi yaklaşım uygundur?",
+      "text": "Hız artışının nedeni için hangi yaklaşım uygundur?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "120/dk"
+        },
+        {
+          "k": "TA",
+          "v": "112/74 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%97"
+        }
+      ],
+      "options": [
+        "120/dk hız AVNRT'yi kanıtlar",
+        "Sinüs P olması nedeni dışlar",
+        "Çarpıntı tarifi P kanıtını geçersiz kılar",
+        "Neden klinik olarak araştırılır",
+        "Dar QRS hacim kaybını dışlar"
+      ],
+      "correct": 3,
+      "explanations": [
+        "Hızlar örtüşür; tek başına kanıt değildir.",
+        "Sinüs kökeni olsa da neden araştırılmalıdır.",
+        "Öykü ve EKG birlikte değerlendirilir.",
+        "Ateş, ağrı, hacim kaybı gibi nedenler sorgulanır.",
+        "QRS genişliği hacim durumunu göstermez."
+      ],
+      "feedback": "Ateş, ağrı, hacim kaybı gibi nedenler sorgulanır.",
+      "objectiveIds": [
+        "O5"
+      ],
+      "sourceIds": [
+        "SVT2019",
+        "ECG"
+      ],
+      "decisionId": "tachCause",
+      "note": "",
+      "ecg": {
+        "mode": "sintach",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V3"
+        ],
+        "start": 0.66,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q154",
+      "mode": "sintach",
+      "title": "Sentetik değerlendirme Q154",
+      "ariaLabel": "Q154 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "30 yaşında kadın hasta. Başvuru: yoğun egzersiz sonrası nabız beklenenden hızlı seyrediyor. Sistematik okumada V1–V2’nin hangi bölgeyi yansıttığı gözden geçiriliyor.",
+      "question": "V1 ve V2 derivasyonları hangi bölgeyi yansıtır?",
+      "text": "V1 ve V2 derivasyonları hangi bölgeyi yansıtır?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "120/dk"
+        },
+        {
+          "k": "TA",
+          "v": "112/74 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%97"
+        }
+      ],
+      "options": [
+        "Yüksek lateral duvar",
+        "Sol lateral duvar",
+        "Septum ve sağ ventrikül yakını",
+        "İnferior duvar",
+        "Sadece sağ atriyum"
+      ],
+      "correct": 2,
+      "explanations": [
+        "Yüksek lateral duvar aVL ile değerlendirilir.",
+        "Sol lateral duvar V5–V6 ve I, aVL ile değerlendirilir.",
+        "V1–V2 septal bölgeyi ve sağ ventrikülün yakınını yansıtır.",
+        "İnferior duvar II, III, aVF ile değerlendirilir.",
+        "Sağ atriyum tek başına V1–V2 ile özgül olarak tanımlanmaz."
+      ],
+      "feedback": "V1–V2 septal bölgeyi ve sağ ventrikülün yakınını yansıtır.",
+      "objectiveIds": [
+        "O3"
+      ],
+      "sourceIds": [
+        "SVT2019",
+        "ECG"
+      ],
+      "decisionId": "precordialSeptal",
+      "note": "",
+      "ecg": {
+        "mode": "sintach",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V3"
+        ],
+        "start": 0.74,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q155",
+      "mode": "sintach",
+      "title": "Sentetik değerlendirme Q155",
+      "ariaLabel": "Q155 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "41 yaşında erkek hasta. Başvuru: ateşli çocuğuna bakarken kendisi de hastalanan babada hızlı nabız saptanıyor. Kaliperle P’nin ilk sapması QRS’den 215 ms önce, QRS’in ilk sapması 40 ms önce işaretleniyor.",
+      "question": "Bu ölçümlerle PR aralığı kaç milisaniyedir?",
+      "text": "Bu ölçümlerle PR aralığı kaç milisaniyedir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "120/dk"
+        },
+        {
+          "k": "TA",
+          "v": "112/74 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%97"
+        }
+      ],
+      "options": [
+        "175 ms",
+        "155 ms",
+        "255 ms",
+        "215 ms",
+        "130 ms"
+      ],
+      "correct": 0,
+      "explanations": [
+        "P ilk sapması−215 ms, QRS ilk sapması−40 ms: fark 175 ms.",
+        "155 ms verilen iki başlangıcın farkı değildir.",
+        "255 ms P başlangıcından QRS sonuna ölçüm hatasıdır.",
+        "215 ms P başlangıcından R tepesine ölçüm hatasıdır.",
+        "130 ms P merkezinden QRS başlangıcına gitme hatasıdır."
+      ],
+      "feedback": "P ilk sapması−215 ms, QRS ilk sapması−40 ms: fark 175 ms.",
+      "objectiveIds": [
+        "O6"
+      ],
+      "sourceIds": [
+        "SVT2019",
+        "ECG"
+      ],
+      "decisionId": "pr175",
+      "note": "",
+      "ecg": {
+        "mode": "sintach",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V3"
+        ],
+        "start": 0.8200000000000001,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q156",
+      "mode": "sintach",
+      "title": "Sentetik değerlendirme Q156",
+      "ariaLabel": "Q156 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "34 yaşında kadın hasta. Başvuru: ağrı ve anksiyete birlikte hızlı nabız saptanıyor. Dar bir kompleksin ilk sapması 40 ms önce, son dönüşü 40 ms sonra işaretleniyor.",
+      "question": "Bu ölçümlerle QRS süresi kaç milisaniyedir?",
+      "text": "Bu ölçümlerle QRS süresi kaç milisaniyedir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "120/dk"
+        },
+        {
+          "k": "TA",
+          "v": "112/74 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%97"
+        }
+      ],
+      "options": [
+        "80 ms",
+        "40 ms",
+        "140 ms",
+        "60 ms",
+        "100 ms"
+      ],
+      "correct": 0,
+      "explanations": [
+        "−40 ms ile+40 ms arasındaki QRS desteği 80 ms’dir.",
+        "40 ms yalnız R’den son dönüşe yarı desteği sayar.",
+        "140 ms geniş PVC/RBBB örneğiyle karıştırır.",
+        "60 ms başlangıç veya terminal bileşenin bir kısmını dışlar.",
+        "100 ms iki sınırın verilen farkından fazladır."
+      ],
+      "feedback": "−40 ms ile+40 ms arasındaki QRS desteği 80 ms’dir.",
+      "objectiveIds": [
+        "O6"
+      ],
+      "sourceIds": [
+        "SVT2019",
+        "ECG"
+      ],
+      "decisionId": "q80",
+      "note": "",
+      "ecg": {
+        "mode": "sintach",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V3"
+        ],
+        "start": 0.5,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q157",
+      "mode": "sintach",
+      "title": "Sentetik değerlendirme Q157",
+      "ariaLabel": "Q157 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "49 yaşında erkek hasta. Başvuru: sıcak havada uzun yürüyüş sonrası hızlı nabız fark ediyor. Kompleksin ilk sapması 40 ms önce, T dalgasının son sınırı 205 ms sonra işaretleniyor.",
+      "question": "Bu ölçümlerle ham sentetik QT değeri kaçtır?",
+      "text": "Bu ölçümlerle ham sentetik QT değeri kaçtır?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "120/dk"
+        },
+        {
+          "k": "TA",
+          "v": "112/74 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%97"
+        }
+      ],
+      "options": [
+        "165 ms",
+        "400 ms",
+        "245 ms",
+        "205 ms",
+        "285 ms"
+      ],
+      "correct": 2,
+      "explanations": [
+        "QRS başlangıç/son sınırları yanlış daraltılmıştır.",
+        "R–R 400 ms ile QT karıştırılmıştır.",
+        "QRS−40 ms, T sonu 205 ms: toplam 245 ms sentetik QT.",
+        "R tepesinden ölçerek başlangıç 40 ms dışlanmıştır.",
+        "Fazladan 40 ms eklenmiştir; verilen fark 245 ms’dir."
+      ],
+      "feedback": "QRS−40 ms, T sonu 205 ms: toplam 245 ms sentetik QT.",
+      "objectiveIds": [
+        "O6"
+      ],
+      "sourceIds": [
+        "SVT2019",
+        "ECG"
+      ],
+      "decisionId": "qt245",
+      "note": "",
+      "ecg": {
+        "mode": "sintach",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V3"
+        ],
+        "start": 0.58,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q158",
+      "mode": "sintach",
+      "title": "Sentetik değerlendirme Q158",
+      "ariaLabel": "Q158 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "27 yaşında kadın hasta. Başvuru: grip enfeksiyonu sırasında ateş ve hızlı nabız. P dalgası ile QRS arasındaki ilişki kaliperle işaretleniyor.",
+      "question": "PR aralığı hangi iki sınır arasında ölçülür?",
+      "text": "PR aralığı hangi iki sınır arasında ölçülür?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "120/dk"
+        },
+        {
+          "k": "TA",
+          "v": "112/74 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%97"
+        }
+      ],
+      "options": [
+        "QRS sonundan T sonuna",
+        "P tepesinden R tepesine",
+        "P sonundan QRS sonuna",
+        "P başlangıcından QRS başlangıcına",
+        "Bir R'den sonrakine"
+      ],
+      "correct": 3,
+      "explanations": [
+        "Bu aralık PR değil, repolarizasyon bölgesidir.",
+        "Bu ölçüm PR tanımına uymaz.",
+        "Bu, PR segmentini QRS ile karıştırır.",
+        "PR aralığı bu iki noktayla ölçülür.",
+        "Bu R–R aralığıdır, PR değildir."
+      ],
+      "feedback": "PR aralığı bu iki noktayla ölçülür.",
+      "objectiveIds": [
+        "O6"
+      ],
+      "sourceIds": [
+        "SVT2019",
+        "ECG"
+      ],
+      "decisionId": "pr",
+      "note": "",
+      "ecg": {
+        "mode": "sintach",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V3"
+        ],
+        "start": 0.66,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q159",
+      "mode": "sintach",
+      "title": "Sentetik değerlendirme Q159",
+      "ariaLabel": "Q159 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "56 yaşında erkek hasta. Başvuru: kan kaybı sonrası hızlı nabız ile izleniyor. Ventriküler kompleksin izde temsil ettiği olay ayrıca soruluyor.",
+      "question": "QRS kompleksinin temel elektriksel karşılığı nedir?",
+      "text": "QRS kompleksinin temel elektriksel karşılığı nedir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "120/dk"
+        },
+        {
+          "k": "TA",
+          "v": "112/74 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%97"
+        }
+      ],
+      "options": [
+        "QRS: atriyal depolarizasyon",
+        "QRS: yalnız atriyal repolarizasyon",
+        "QRS: yalnız AV düğüm gecikmesi",
+        "QRS: ventriküler depolarizasyon",
+        "QRS: ventriküler repolarizasyon"
+      ],
+      "correct": 3,
+      "explanations": [
+        "Bu olay P dalgasıyla kaydedilir.",
+        "QRS'in ana kaynağı ventrikül kasıdır.",
+        "AV gecikmesi PR aralığında değerlendirilir.",
+        "QRS ventrikül kasının elektriksel uyarılmasıdır.",
+        "Bu olay T dalgasıyla kaydedilir."
+      ],
+      "feedback": "QRS ventrikül kasının elektriksel uyarılmasıdır.",
+      "objectiveIds": [
+        "O1"
+      ],
+      "sourceIds": [
+        "SVT2019",
+        "ECG"
+      ],
+      "decisionId": "qrs",
+      "note": "",
+      "ecg": {
+        "mode": "sintach",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V3"
+        ],
+        "start": 0.74,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q160",
+      "mode": "sintach",
+      "title": "Sentetik değerlendirme Q160",
+      "ariaLabel": "Q160 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "32 yaşında kadın hasta. Başvuru: stresli iş günü sonrası hızlı nabız fark ediyor. Ventriküler kompleksten sonra gelen dalganın anlamı soruluyor.",
+      "question": "T dalgasının temel elektriksel karşılığı nedir?",
+      "text": "T dalgasının temel elektriksel karşılığı nedir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "120/dk"
+        },
+        {
+          "k": "TA",
+          "v": "112/74 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%97"
+        }
+      ],
+      "options": [
+        "T: yeni bir atriyal uyarı",
+        "T: ventriküler repolarizasyon",
+        "T: gecikmiş sağ ventrikül uyarısı",
+        "T: atriyal repolarizasyon",
+        "T: ventriküler depolarizasyon"
+      ],
+      "correct": 1,
+      "explanations": [
+        "Yeni P ayrı bir dalga olarak görülür.",
+        "T dalgası ventrikülün elektriksel toparlanmasıdır.",
+        "Bu bileşen QRS içinde yer alır.",
+        "Bu olay genelde QRS altında gizlenir.",
+        "Bu olay QRS ile kaydedilir."
+      ],
+      "feedback": "T dalgası ventrikülün elektriksel toparlanmasıdır.",
+      "objectiveIds": [
+        "O1"
+      ],
+      "sourceIds": [
+        "SVT2019",
+        "ECG"
+      ],
+      "decisionId": "t",
+      "note": "",
+      "ecg": {
+        "mode": "sintach",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V3"
+        ],
+        "start": 0.8200000000000001,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q161",
+      "mode": "sintach",
+      "title": "Sentetik değerlendirme Q161",
+      "ariaLabel": "Q161 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "45 yaşında erkek hasta. Başvuru: ateşli hastalık sonrası kontrol vizitinde hızlı nabız. İzlemde QRS’den kısa süre sonra basıncın yükseldiği, ancak çıkış kapaklarının henüz açılmadığı bir an inceleniyor.",
+      "question": "Bu andaki kapak durumu hangi mekanik evreyi tanımlar?",
+      "text": "Bu andaki kapak durumu hangi mekanik evreyi tanımlar?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "120/dk"
+        },
+        {
+          "k": "TA",
+          "v": "112/74 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%97"
+        }
+      ],
+      "options": [
+        "AV kapaklar açık: atriyal sistol",
+        "Tüm kapaklar kapalı: izovolümetrik kasılma",
+        "AV kapaklar açık: pasif doluş",
+        "Tüm kapaklar kapalı: gevşeme",
+        "Çıkış kapakları açık: ejeksiyon"
+      ],
+      "correct": 1,
+      "explanations": [
+        "Bu anda AV kapak kapalıdır.",
+        "Basınç yükselirken hacim henüz sabittir.",
+        "Bu kasılma başlangıcı, doluş değildir.",
+        "Gevşeme ejeksiyon sonrasıdır.",
+        "Bu erken evrede çıkış henüz kapalıdır."
+      ],
+      "feedback": "Basınç yükselirken hacim henüz sabittir.",
+      "objectiveIds": [
+        "O4"
+      ],
+      "sourceIds": [
+        "SVT2019",
+        "ECG",
+        "CYCLE"
+      ],
+      "decisionId": "mechanic",
+      "note": "",
+      "ecg": {
+        "mode": "sintach",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V3"
+        ],
+        "start": 0.5,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q162",
+      "mode": "sintach",
+      "title": "Sentetik değerlendirme Q162",
+      "ariaLabel": "Q162 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "38 yaşında kadın hasta. Başvuru: egzersiz sonrası toparlanma döneminde nabız hâlâ hızlı. İzlemde bir anda çıkış kapaklarının açık, giriş kapaklarının kapalı olduğu gösteriliyor.",
+      "question": "Bu andaki kapak ve akım durumu hangi mekanik evreyi tanımlar?",
+      "text": "Bu andaki kapak ve akım durumu hangi mekanik evreyi tanımlar?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "120/dk"
+        },
+        {
+          "k": "TA",
+          "v": "112/74 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%97"
+        }
+      ],
+      "options": [
+        "AV kapaklar açık: atriyal sistol",
+        "Çıkış kapakları açık: ejeksiyon",
+        "Tüm kapaklar kapalı: gevşeme",
+        "Tüm kapaklar kapalı: izovolümetrik kasılma",
+        "AV kapaklar açık: pasif doluş"
+      ],
+      "correct": 1,
+      "explanations": [
+        "Bu doluşun son parçasıdır, ejeksiyon değil.",
+        "Basınç yeterince yükselince kan dışarı pompalanır.",
+        "Gevşeme ejeksiyondan sonra gelir.",
+        "Bu erken evre, çıkış henüz kapalıdır.",
+        "Bu giriş fazıdır, ejeksiyon değildir."
+      ],
+      "feedback": "Basınç yeterince yükselince kan dışarı pompalanır.",
+      "objectiveIds": [
+        "O4"
+      ],
+      "sourceIds": [
+        "SVT2019",
+        "ECG",
+        "CYCLE"
+      ],
+      "decisionId": "eject",
+      "note": "",
+      "ecg": {
+        "mode": "sintach",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V3"
+        ],
+        "start": 0.58,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q163",
+      "mode": "sintach",
+      "title": "Sentetik değerlendirme Q163",
+      "ariaLabel": "Q163 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "53 yaşında erkek hasta. Başvuru: ağrı kontrolü sonrası nabız yavaşlamaya başlıyor. Eşzamanlı üç derivasyonlu kayıt aşağıda gösteriliyor.",
+      "question": "Bu ritim hangi sınıfa girer?",
+      "text": "Bu ritim hangi sınıfa girer?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "120/dk"
+        },
+        {
+          "k": "TA",
+          "v": "112/74 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%97"
+        }
+      ],
+      "options": [
+        "Düzenli geniş kompleks",
+        "Düzenli dar kompleks, normal hız",
+        "Düzenli dar kompleks, hızlı",
+        "Düzensiz dar kompleks",
+        "Kaotik, organize değil"
+      ],
+      "correct": 2,
+      "explanations": [
+        "Bu örnekte QRS dar, bu kadar geniş değil.",
+        "Bu örnekte hız veya düzen normal aralığa uymuyor.",
+        "Hız belirgin yüksek; ritim düzenli ve QRS dar.",
+        "Bu örnekte ritim düzenli, düzensiz değil.",
+        "Bu örnekte düzenli bir kompleks seçilebiliyor, kaotik değil."
+      ],
+      "feedback": "Hız belirgin yüksek; ritim düzenli ve QRS dar.",
+      "objectiveIds": [
+        "O2"
+      ],
+      "sourceIds": [
+        "SVT2019",
+        "ECG"
+      ],
+      "decisionId": "rhythmClass_sintach",
+      "note": "",
+      "ecg": {
+        "mode": "sintach",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V3"
+        ],
+        "start": 0.66,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q164",
+      "mode": "sintach",
+      "title": "Sentetik değerlendirme Q164",
+      "ariaLabel": "Q164 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "25 yaşında kadın hasta. Başvuru: kafeinli içecek ve stres birlikte hızlı nabız yapıyor. Eşzamanlı üç derivasyonlu kayıt aşağıda gösteriliyor.",
+      "question": "Bu EKG'de öncelikle hangi tanı düşünülmelidir?",
+      "text": "Bu EKG'de öncelikle hangi tanı düşünülmelidir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "120/dk"
+        },
+        {
+          "k": "TA",
+          "v": "112/74 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%97"
+        }
+      ],
+      "options": [
+        "Atriyal flutter (2:1)",
+        "Sağ dal bloğu",
+        "Ventriküler erken atım",
+        "Sinüs taşikardisi",
+        "Atriyal fibrilasyon"
+      ],
+      "correct": 3,
+      "explanations": [
+        "Atriyal flutter (2:1) için beklenen bulgular burada yok.",
+        "Sağ dal bloğu için beklenen bulgular burada yok.",
+        "Ventriküler erken atım için beklenen bulgular burada yok.",
+        "Tarif edilen bulgular Sinüs taşikardisi ile uyumludur.",
+        "Atriyal fibrilasyon için beklenen bulgular burada yok."
+      ],
+      "feedback": "Tarif edilen bulgular Sinüs taşikardisi ile uyumludur.",
+      "objectiveIds": [
+        "O2"
+      ],
+      "sourceIds": [
+        "SVT2019",
+        "ECG"
+      ],
+      "decisionId": "ddx_sintach",
+      "note": "",
+      "ecg": {
+        "mode": "sintach",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V3"
+        ],
+        "start": 0.74,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q165",
+      "mode": "sintach",
+      "title": "Sentetik değerlendirme Q165",
+      "ariaLabel": "Q165 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "47 yaşında erkek hasta. Başvuru: solunum yolu enfeksiyonu ile ateş ve hızlı nabız birlikte. Hızlı nabzın altında yatan neden araştırılıyor.",
+      "question": "Bu hastada ilk yaklaşım ne olmalıdır?",
+      "text": "Bu hastada ilk yaklaşım ne olmalıdır?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "120/dk"
+        },
+        {
+          "k": "TA",
+          "v": "112/74 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%97"
+        }
+      ],
+      "options": [
+        "Hemen taburcu edilir",
+        "Yalnız görüntüleme istenir",
+        "Altta yatan nedeni bulup tedavi etmek",
+        "Yalnızca gözlem yeterlidir",
+        "Karar tamamen hastaya bırakılır"
+      ],
+      "correct": 2,
+      "explanations": [
+        "Bulgu ciddi olabilir; taburcu öncesi değerlendirme gerekir.",
+        "İlk adım görüntülemeden önce klinik değerlendirmedir.",
+        "Sinüs taşikardisi çoğunlukla ikincildir; asıl neden tedavi edilir.",
+        "Bu bulgu daha aktif bir yaklaşım gerektirebilir; yalnız izlem yetmez.",
+        "İlk yaklaşım klinik ekip tarafından yönlendirilir."
+      ],
+      "feedback": "Sinüs taşikardisi çoğunlukla ikincildir; asıl neden tedavi edilir.",
+      "objectiveIds": [
+        "O5"
+      ],
+      "sourceIds": [
+        "SVT2019",
+        "ECG"
+      ],
+      "decisionId": "firstStep_sintach",
+      "note": "",
+      "ecg": {
+        "mode": "sintach",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V3"
+        ],
+        "start": 0.8200000000000001,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q166",
+      "mode": "lbbb",
+      "title": "Sentetik değerlendirme Q166",
+      "ariaLabel": "Q166 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "71 yaşında kadın hasta. Başvuru: hipertansiyon ve diyabet izleminde geniş kompleks saptanıyor. Düzenli sinüs ritmi sırasında QRS belirgin genişlemiş; sağ göğüs derivasyonunda derin negatif, sol yan derivasyonlarda geniş ve çentikli pozitif bir kompleks var.",
+      "question": "Bu ileti örüntüsü için en uygun sınıflama hangisidir?",
+      "text": "Bu ileti örüntüsü için en uygun sınıflama hangisidir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "Sol dal bloğu (LBBB)",
+        "Ventriküler fibrilasyon",
+        "Dar QRS iletisi",
+        "İzole PVC",
+        "Sağ dal bloğu (RBBB)"
+      ],
+      "correct": 0,
+      "explanations": [
+        "Geniş QRS, V1 negatif, yanda geniş R: LBBB.",
+        "VF'de düzenli QRS yoktur; burada düzenli.",
+        "QRS burada geniş, dar değil.",
+        "PVC tek atımdır; burada her atım aynı geniş.",
+        "RBBB'de V1'de pozitif çıkıntı olur; burada negatif."
+      ],
+      "feedback": "Geniş QRS, V1 negatif, yanda geniş R: LBBB.",
+      "objectiveIds": [
+        "O2"
+      ],
+      "sourceIds": [
+        "BBB2009"
+      ],
+      "decisionId": "lbbb",
+      "note": "",
+      "ecg": {
+        "mode": "lbbb",
+        "options": {},
+        "leads": [
+          "I",
+          "V1",
+          "V6"
+        ],
+        "start": 0.5,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q167",
+      "mode": "lbbb",
+      "title": "Sentetik değerlendirme Q167",
+      "ariaLabel": "Q167 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "59 yaşında erkek hasta. Başvuru: yeni gelişen nefes darlığı ile başvuruyor. Sağ göğüs ve sol yan derivasyonlar birlikte incelenerek QRS yönü karşılaştırılıyor.",
+      "question": "Bu derivasyonlardaki morfoloji bileşimi hangisidir?",
+      "text": "Bu derivasyonlardaki morfoloji bileşimi hangisidir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "Sürekli taban dalgası",
+        "V1 negatif, yan derivasyonlarda geniş R",
+        "Tüm derivasyonlar aynı yönde",
+        "Organize QRS yok",
+        "V1 çift çıkıntı, yanda geniş S"
+      ],
+      "correct": 1,
+      "explanations": [
+        "Bu QRS şekli sorusu, taban dalgası değil.",
+        "LBBB'de sağ ve sol taraf zıt yönde etkilenir.",
+        "Sağ ve sol taraf burada zıt yönlüdür.",
+        "Burada düzenli geniş QRS var, VF değil.",
+        "Bu RBBB örüntüsüdür, LBBB değildir."
+      ],
+      "feedback": "LBBB'de sağ ve sol taraf zıt yönde etkilenir.",
+      "objectiveIds": [
+        "O3"
+      ],
+      "sourceIds": [
+        "BBB2009",
+        "ECG"
+      ],
+      "decisionId": "lMorph",
+      "note": "",
+      "ecg": {
+        "mode": "lbbb",
+        "options": {},
+        "leads": [
+          "I",
+          "V1",
+          "V6"
+        ],
+        "start": 0.58,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q168",
+      "mode": "lbbb",
+      "title": "Sentetik değerlendirme Q168",
+      "ariaLabel": "Q168 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "69 yaşında kadın hasta. Başvuru: kalp yetersizliği polikliniğinde rutin EKG çekiliyor. Geniş bir kompleksin ilk sapması 70 ms önce, son dönüşü 90 ms sonra işaretleniyor.",
+      "question": "Bu ölçümlerle QRS süresi kaç milisaniyedir?",
+      "text": "Bu ölçümlerle QRS süresi kaç milisaniyedir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "120 ms",
+        "160 ms",
+        "240 ms",
+        "180 ms",
+        "80 ms"
+      ],
+      "correct": 1,
+      "explanations": [
+        "120 ms bu sinyalin son terminal bölümünü dışlar.",
+        "−70 ms ile+90 ms arasındaki geniş QRS desteği 160 ms’dir.",
+        "240 ms verilen 160 ms destekten 80 ms uzundur.",
+        "180 ms VT örneğinin genişliğidir.",
+        "80 ms normal dar aktivasyondur."
+      ],
+      "feedback": "−70 ms ile+90 ms arasındaki geniş QRS desteği 160 ms’dir.",
+      "objectiveIds": [
+        "O6"
+      ],
+      "sourceIds": [
+        "BBB2009",
+        "ECG"
+      ],
+      "decisionId": "q160",
+      "note": "",
+      "ecg": {
+        "mode": "lbbb",
+        "options": {},
+        "leads": [
+          "I",
+          "V1",
+          "V6"
+        ],
+        "start": 0.66,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q169",
+      "mode": "lbbb",
+      "title": "Sentetik değerlendirme Q169",
+      "ariaLabel": "Q169 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "62 yaşında erkek hasta. Başvuru: check-up paketinde tesadüfen geniş QRS saptanıyor. Geniş kompleksli bir atımda P’nin ilk sapması 245 ms önce, QRS’in ilk sapması 70 ms önce işaretleniyor.",
+      "question": "Bu geniş kompleksli atımda PR aralığı kaç milisaniyedir?",
+      "text": "Bu geniş kompleksli atımda PR aralığı kaç milisaniyedir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "245 ms",
+        "160 ms",
+        "335 ms",
+        "175 ms",
+        "130 ms"
+      ],
+      "correct": 3,
+      "explanations": [
+        "P’den R referansına gitme 70 ms fazlalık ekler.",
+        "QRS 160 ms süresi PR yerine yazılmıştır.",
+        "P’den QRS sonuna gitme QRS 160 ms’yi de içerir.",
+        "P−245 ms, QRS−70 ms:175 ms; geniş QRS PR sınırını değiştirmez.",
+        "P tepesinden ölçme ilk 45 ms’yi dışlar."
+      ],
+      "feedback": "P−245 ms, QRS−70 ms:175 ms; geniş QRS PR sınırını değiştirmez.",
+      "objectiveIds": [
+        "O6"
+      ],
+      "sourceIds": [
+        "BBB2009",
+        "ECG"
+      ],
+      "decisionId": "prL175",
+      "note": "",
+      "ecg": {
+        "mode": "lbbb",
+        "options": {},
+        "leads": [
+          "I",
+          "V1",
+          "V6"
+        ],
+        "start": 0.74,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q170",
+      "mode": "lbbb",
+      "title": "Sentetik değerlendirme Q170",
+      "ariaLabel": "Q170 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "75 yaşında kadın hasta. Başvuru: huzurevi yıllık muayenesinde geniş kompleks fark ediliyor. Geniş bir kompleksin ilk sapması 70 ms önce, T dalgasının son sınırı 360 ms sonra işaretleniyor.",
+      "question": "Bu ölçümlerle ham sentetik QT değeri kaçtır?",
+      "text": "Bu ölçümlerle ham sentetik QT değeri kaçtır?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "500 ms",
+        "360 ms",
+        "430 ms",
+        "160 ms",
+        "800 ms"
+      ],
+      "correct": 2,
+      "explanations": [
+        "70 ms başlangıç iki kez eklenmiştir.",
+        "R tepesinden başlama ilk 70 ms’yi dışlar.",
+        "QRS−70 ms, T sonu 360 ms: toplam 430 ms sentetik LBBB QT.",
+        "Bu QRS süresidir; repolarizasyon bölümünü dışlar.",
+        "R–R döngüsü QT değildir."
+      ],
+      "feedback": "QRS−70 ms, T sonu 360 ms: toplam 430 ms sentetik LBBB QT.",
+      "objectiveIds": [
+        "O6"
+      ],
+      "sourceIds": [
+        "BBB2009",
+        "ECG"
+      ],
+      "decisionId": "qt430",
+      "note": "",
+      "ecg": {
+        "mode": "lbbb",
+        "options": {},
+        "leads": [
+          "I",
+          "V1",
+          "V6"
+        ],
+        "start": 0.8200000000000001,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q171",
+      "mode": "lbbb",
+      "title": "Sentetik değerlendirme Q171",
+      "ariaLabel": "Q171 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "56 yaşında erkek hasta. Başvuru: iş yeri sağlık taramasında geniş QRS saptanıyor. Kompleks genişliği tek başına değerlendirilerek kökeni hakkında yorum yapılmak isteniyor.",
+      "question": "QRS genişliğini tek başına yorumlarken hangi sınır geçerlidir?",
+      "text": "QRS genişliğini tek başına yorumlarken hangi sınır geçerlidir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "160 ms her QRS kesin LBBB'dir",
+        "Genişlik tek başına debiyi hesaplar",
+        "120 ms üstü her QRS VT'dir",
+        "140 ms her QRS kesin RBBB'dir",
+        "Genişlik ve klinik bulgu birlikte yorumlanır"
+      ],
+      "correct": 4,
+      "explanations": [
+        "Genişlik tek başına LBBB'yi kanıtlamaz.",
+        "Genişlik zaman ölçüsüdür, debi değildir.",
+        "Dal bloğu da geniş QRS yapabilir.",
+        "PVC de bu genişlikte olabilir.",
+        "Tek genişlik VT ile bloğu kesin ayırmaz."
+      ],
+      "feedback": "Tek genişlik VT ile bloğu kesin ayırmaz.",
+      "objectiveIds": [
+        "O5"
+      ],
+      "sourceIds": [
+        "BBB2009"
+      ],
+      "decisionId": "qrsWidthCause",
+      "note": "",
+      "ecg": {
+        "mode": "lbbb",
+        "options": {},
+        "leads": [
+          "I",
+          "V1",
+          "V6"
+        ],
+        "start": 0.5,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q172",
+      "mode": "lbbb",
+      "title": "Sentetik değerlendirme Q172",
+      "ariaLabel": "Q172 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "68 yaşında kadın hasta. Başvuru: önceki EKG kaydıyla karşılaştırılan yeni kontrolde. Kalp animasyonunda bir ventrikülün aktivasyonu diğerine göre gecikmiş gösteriliyor.",
+      "question": "Bu ileti gecikmesi animasyonu nasıl yorumlanmalıdır?",
+      "text": "Bu ileti gecikmesi animasyonu nasıl yorumlanmalıdır?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "Animasyon gecikmesi hastaya özeldir",
+        "Terminal yön ejeksiyon hacmidir",
+        "Ventriküler etkinlik tamamen kaybolur",
+        "Gecikme atriyal hızdır",
+        "Gecikme eşzamanlılığı azaltabilir"
+      ],
+      "correct": 4,
+      "explanations": [
+        "Bu sabit bir öğretim gecikmesidir.",
+        "QRS yönü hacim ölçmez.",
+        "Geniş QRS etkinliğin sürdüğünü gösterir.",
+        "Dal bloğu ventrikül içi iletimdir, atriyal değildir.",
+        "Animasyon şematiktir, gerçek basınç ölçmez."
+      ],
+      "feedback": "Animasyon şematiktir, gerçek basınç ölçmez.",
+      "objectiveIds": [
+        "O4"
+      ],
+      "sourceIds": [
+        "BBB2009",
+        "CYCLE"
+      ],
+      "decisionId": "bbbDelay",
+      "note": "",
+      "ecg": {
+        "mode": "lbbb",
+        "options": {},
+        "leads": [
+          "I",
+          "V1",
+          "V6"
+        ],
+        "start": 0.58,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q173",
+      "mode": "lbbb",
+      "title": "Sentetik değerlendirme Q173",
+      "ariaLabel": "Q173 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "60 yaşında erkek hasta. Başvuru: ameliyat öncesi anestezi değerlendirmesinde geniş kompleks. Aynı ileti bozukluğu önceki bir kayıtta da görülmüş; yeni bir semptom eşlik etmiyor.",
+      "question": "Bu ileti bozukluğunun klinik yorumu için hangi ilke geçerlidir?",
+      "text": "Bu ileti bozukluğunun klinik yorumu için hangi ilke geçerlidir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "Klinik bağlam ve eski EKG ile yorumlanır",
+        "Hangi ilaç gerektiğini gösterir",
+        "Tek başına akut MI kanıtıdır",
+        "Güvenli eve dönüş ölçütüdür",
+        "Her atım nabızsız demektir"
+      ],
+      "correct": 0,
+      "explanations": [
+        "Dal bloğu tek başına yeni/eski veya iskemi ayırt etmez.",
+        "İleti örüntüsü tedavi kararını tek başına vermez.",
+        "Dal bloğu MI'yı kesinleştirmez.",
+        "Klinik bulgular değerlendirilmeden bu karar verilmez.",
+        "Geniş QRS mekanik nabzı ekarte etmez."
+      ],
+      "feedback": "Dal bloğu tek başına yeni/eski veya iskemi ayırt etmez.",
+      "objectiveIds": [
+        "O5"
+      ],
+      "sourceIds": [
+        "BBB2009"
+      ],
+      "decisionId": "bbbLimits",
+      "note": "",
+      "ecg": {
+        "mode": "lbbb",
+        "options": {},
+        "leads": [
+          "I",
+          "V1",
+          "V6"
+        ],
+        "start": 0.66,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q174",
+      "mode": "lbbb",
+      "title": "Sentetik değerlendirme Q174",
+      "ariaLabel": "Q174 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "72 yaşında kadın hasta. Başvuru: efor dispnesi ve yorgunlukla başvuruyor. Ventriküler kompleksin izde temsil ettiği olay ayrıca soruluyor.",
+      "question": "QRS kompleksinin temel elektriksel karşılığı nedir?",
+      "text": "QRS kompleksinin temel elektriksel karşılığı nedir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "QRS: ventriküler repolarizasyon",
+        "QRS: yalnız atriyal repolarizasyon",
+        "QRS: atriyal depolarizasyon",
+        "QRS: yalnız AV düğüm gecikmesi",
+        "QRS: ventriküler depolarizasyon"
+      ],
+      "correct": 4,
+      "explanations": [
+        "Bu olay T dalgasıyla kaydedilir.",
+        "QRS'in ana kaynağı ventrikül kasıdır.",
+        "Bu olay P dalgasıyla kaydedilir.",
+        "AV gecikmesi PR aralığında değerlendirilir.",
+        "QRS ventrikül kasının elektriksel uyarılmasıdır."
+      ],
+      "feedback": "QRS ventrikül kasının elektriksel uyarılmasıdır.",
+      "objectiveIds": [
+        "O1"
+      ],
+      "sourceIds": [
+        "BBB2009"
+      ],
+      "decisionId": "qrs",
+      "note": "",
+      "ecg": {
+        "mode": "lbbb",
+        "options": {},
+        "leads": [
+          "I",
+          "V1",
+          "V6"
+        ],
+        "start": 0.74,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q175",
+      "mode": "lbbb",
+      "title": "Sentetik değerlendirme Q175",
+      "ariaLabel": "Q175 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "65 yaşında erkek hasta. Başvuru: rutin kardiyoloji kontrolünde geniş QRS izleniyor. Ventriküler kompleksten sonra gelen dalganın anlamı soruluyor.",
+      "question": "T dalgasının temel elektriksel karşılığı nedir?",
+      "text": "T dalgasının temel elektriksel karşılığı nedir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "T: yeni bir atriyal uyarı",
+        "T: atriyal repolarizasyon",
+        "T: gecikmiş sağ ventrikül uyarısı",
+        "T: ventriküler repolarizasyon",
+        "T: ventriküler depolarizasyon"
+      ],
+      "correct": 3,
+      "explanations": [
+        "Yeni P ayrı bir dalga olarak görülür.",
+        "Bu olay genelde QRS altında gizlenir.",
+        "Bu bileşen QRS içinde yer alır.",
+        "T dalgası ventrikülün elektriksel toparlanmasıdır.",
+        "Bu olay QRS ile kaydedilir."
+      ],
+      "feedback": "T dalgası ventrikülün elektriksel toparlanmasıdır.",
+      "objectiveIds": [
+        "O1"
+      ],
+      "sourceIds": [
+        "BBB2009"
+      ],
+      "decisionId": "t",
+      "note": "",
+      "ecg": {
+        "mode": "lbbb",
+        "options": {},
+        "leads": [
+          "I",
+          "V1",
+          "V6"
+        ],
+        "start": 0.8200000000000001,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q176",
+      "mode": "lbbb",
+      "title": "Sentetik değerlendirme Q176",
+      "ariaLabel": "Q176 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "57 yaşında kadın hasta. Başvuru: diyabet ve hipertansiyon izleminde geniş kompleks saptanıyor. İki ardışık R tepesi arası 800 ms ölçülüyor.",
+      "question": "Bu döngü süresiyle elektriksel hız yaklaşık kaçtır?",
+      "text": "Bu döngü süresiyle elektriksel hız yaklaşık kaçtır?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "120/dk",
+        "75/dk",
+        "60/dk",
+        "150/dk",
+        "90/dk"
+      ],
+      "correct": 1,
+      "explanations": [
+        "120/dk 500 ms gerektirir.",
+        "R–R 800 ms ise 60/0,8=75/dk elektriksel hızdır.",
+        "60/dk 1000 ms gerektirir;800 ms değil.",
+        "150/dk 400 ms gerektirir.",
+        "90/dk yaklaşık 667 ms gerektirir."
+      ],
+      "feedback": "R–R 800 ms ise 60/0,8=75/dk elektriksel hızdır.",
+      "objectiveIds": [
+        "O6"
+      ],
+      "sourceIds": [
+        "BBB2009",
+        "ECG"
+      ],
+      "decisionId": "rr800",
+      "note": "",
+      "ecg": {
+        "mode": "lbbb",
+        "options": {},
+        "leads": [
+          "I",
+          "V1",
+          "V6"
+        ],
+        "start": 0.5,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q177",
+      "mode": "lbbb",
+      "title": "Sentetik değerlendirme Q177",
+      "ariaLabel": "Q177 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "63 yaşında erkek hasta. Başvuru: yıllık sağlık taramasında rutin EKG çekiliyor. Eşzamanlı üç derivasyonlu kayıt aşağıda gösteriliyor.",
+      "question": "Bu ritim hangi sınıfa girer?",
+      "text": "Bu ritim hangi sınıfa girer?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "Düzensiz dar kompleks",
+        "Düzenli dar kompleks, hızlı",
+        "Düzenli geniş kompleks",
+        "Kaotik, organize değil",
+        "Düzenli dar kompleks, normal hız"
+      ],
+      "correct": 2,
+      "explanations": [
+        "Bu örnekte ritim düzenli, düzensiz değil.",
+        "Bu örnekte hız bu kadar yüksek değil.",
+        "QRS geniş; ritim düzenli aralıklarla tekrarlıyor.",
+        "Bu örnekte düzenli bir kompleks seçilebiliyor, kaotik değil.",
+        "Bu örnekte hız veya düzen normal aralığa uymuyor."
+      ],
+      "feedback": "QRS geniş; ritim düzenli aralıklarla tekrarlıyor.",
+      "objectiveIds": [
+        "O2"
+      ],
+      "sourceIds": [
+        "BBB2009"
+      ],
+      "decisionId": "rhythmClass_lbbb",
+      "note": "",
+      "ecg": {
+        "mode": "lbbb",
+        "options": {},
+        "leads": [
+          "I",
+          "V1",
+          "V6"
+        ],
+        "start": 0.58,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q178",
+      "mode": "lbbb",
+      "title": "Sentetik değerlendirme Q178",
+      "ariaLabel": "Q178 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "70 yaşında kadın hasta. Başvuru: kalp yetersizliği kliniğinde rutin kontrol yapılıyor. Elektriksel kayıt sürerken nabız muayenesi ayrıca planlanıyor.",
+      "question": "EKG bulgusu ile mekanik nabız arasındaki ilişki için hangi değerlendirme gerekir?",
+      "text": "EKG bulgusu ile mekanik nabız arasındaki ilişki için hangi değerlendirme gerekir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "Nabız ayrıca klinik olarak bakılır",
+        "Elektriksel hız nabza birebir eşittir",
+        "QRS genişliği nabız basıncını verir",
+        "PR süresi debiyi verir",
+        "T genliği atım hacmini verir"
+      ],
+      "correct": 0,
+      "explanations": [
+        "EKG elektrik gösterir, nabzı kanıtlamaz.",
+        "Nabız açığı olabilir; eşitlik varsayılamaz.",
+        "Genişlik zaman ölçüsüdür, basınç değildir.",
+        "PR iletim süresidir, debi ölçmez.",
+        "T genliği repolarizasyon voltajıdır."
+      ],
+      "feedback": "EKG elektrik gösterir, nabzı kanıtlamaz.",
+      "objectiveIds": [
+        "O4"
+      ],
+      "sourceIds": [
+        "BBB2009",
+        "CYCLE"
+      ],
+      "decisionId": "pulse",
+      "note": "",
+      "ecg": {
+        "mode": "lbbb",
+        "options": {},
+        "leads": [
+          "I",
+          "V1",
+          "V6"
+        ],
+        "start": 0.66,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q179",
+      "mode": "lbbb",
+      "title": "Sentetik değerlendirme Q179",
+      "ariaLabel": "Q179 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "59 yaşında erkek hasta. Başvuru: önceki ameliyat öyküsüyle rutin EKG’de geniş kompleks. Kısa süreli bir kayıt elde ediliyor; önceki öykü ve ek testler henüz yok.",
+      "question": "Bu bulgudan etiyoloji ve risk için hangi genel sınır çıkarılabilir?",
+      "text": "Bu bulgudan etiyoloji ve risk için hangi genel sınır çıkarılabilir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "Kısa kayıt başlangıç zamanını verir",
+        "Hız tek başına dolaşımı gösterir",
+        "P ekseni kesin odağı belirler",
+        "QRS genişliği tek başına riski verir",
+        "Örüntü desteklenir, neden ayrıca sorulur"
+      ],
+      "correct": 4,
+      "explanations": [
+        "Bir pencere toplam süreyi göstermez.",
+        "Nabız ve basınç ayrıca değerlendirilir.",
+        "P ekseni ipucudur, kesin yer vermez.",
+        "Risk için klinik bağlam da gerekir.",
+        "EKG bulgusu tanı verir, nedeni klinik öykü belirler."
+      ],
+      "feedback": "EKG bulgusu tanı verir, nedeni klinik öykü belirler.",
+      "objectiveIds": [
+        "O5"
+      ],
+      "sourceIds": [
+        "BBB2009"
+      ],
+      "decisionId": "limits",
+      "note": "",
+      "ecg": {
+        "mode": "lbbb",
+        "options": {},
+        "leads": [
+          "I",
+          "V1",
+          "V6"
+        ],
+        "start": 0.74,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q180",
+      "mode": "lbbb",
+      "title": "Sentetik değerlendirme Q180",
+      "ariaLabel": "Q180 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "66 yaşında kadın hasta. Başvuru: huzurevi kontrolünde geniş QRS fark ediliyor. Aynı kayıt üzerinde farklı bir derivasyon grubuna geçildiğinde görünüm değişiyor.",
+      "question": "Derivasyon seçimini değiştirmenin bulguya etkisi nedir?",
+      "text": "Derivasyon seçimini değiştirmenin bulguya etkisi nedir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "Lead değiştirmek ritmi değiştirir",
+        "Tek lead 12 derivasyona eşittir",
+        "Negatif QRS ventrikül kaynağını kanıtlar",
+        "Tüm lead'ler aynı şekli gösterir",
+        "Derivasyon aynı kaynağın farklı görünümüdür"
+      ],
+      "correct": 4,
+      "explanations": [
+        "Görünüm değişir, kaynak aynı kalır.",
+        "Diğer derivasyonlar ek bilgi taşır.",
+        "Polarite yön farkından da olabilir.",
+        "Her derivasyon farklı açıdan bakar.",
+        "Lead değiştirmek şekli değiştirir, ritmi değiştirmez."
+      ],
+      "feedback": "Lead değiştirmek şekli değiştirir, ritmi değiştirmez.",
+      "objectiveIds": [
+        "O3"
+      ],
+      "sourceIds": [
+        "BBB2009",
+        "ECG"
+      ],
+      "decisionId": "leadAll",
+      "note": "",
+      "ecg": {
+        "mode": "lbbb",
+        "options": {},
+        "leads": [
+          "I",
+          "V1",
+          "V6"
+        ],
+        "start": 0.8200000000000001,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q181",
+      "mode": "rbbb",
+      "title": "Sentetik değerlendirme Q181",
+      "ariaLabel": "Q181 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "51 yaşında kadın hasta. Başvuru: efor kapasitesinde azalma ile başvuruyor. Düzenli sinüs ritmi sırasında QRS belirgin genişlemiş; sağ göğüs derivasyonunda geç bir ikinci pozitif çıkıntı, sol yan derivasyonlarda geniş bir son negatif dalga var.",
+      "question": "Bu ileti örüntüsü için en uygun sınıflama hangisidir?",
+      "text": "Bu ileti örüntüsü için en uygun sınıflama hangisidir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "Sol dal bloğu (LBBB)",
+        "Dar QRS iletisi",
+        "İzole PVC",
+        "Sağ dal bloğu (RBBB)",
+        "Atriyal flutter"
+      ],
+      "correct": 3,
+      "explanations": [
+        "LBBB'de V1 negatiftir; burada pozitif çıkıntı var.",
+        "QRS burada geniş, dar değil.",
+        "PVC tek atımdır; burada her atım aynı geniş.",
+        "Geniş QRS, V1 çift çıkıntı, yanda geniş S: RBBB.",
+        "Flutter taban dalgasıyla tanınır; burada QRS şekli önemli."
+      ],
+      "feedback": "Geniş QRS, V1 çift çıkıntı, yanda geniş S: RBBB.",
+      "objectiveIds": [
+        "O2"
+      ],
+      "sourceIds": [
+        "BBB2009"
+      ],
+      "decisionId": "rbbb",
+      "note": "",
+      "ecg": {
+        "mode": "rbbb",
+        "options": {},
+        "leads": [
+          "I",
+          "aVR",
+          "V1"
+        ],
+        "start": 0.5,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q182",
+      "mode": "rbbb",
+      "title": "Sentetik değerlendirme Q182",
+      "ariaLabel": "Q182 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "60 yaşında erkek hasta. Başvuru: yeni gelişen nefes darlığı ile başvuruyor. Sağ göğüs ve sol yan derivasyonlar birlikte incelenerek terminal QRS yönü karşılaştırılıyor.",
+      "question": "Bu derivasyonlardaki morfoloji bileşimi hangisidir?",
+      "text": "Bu derivasyonlardaki morfoloji bileşimi hangisidir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "V1 negatif, yanda geniş R",
+        "Taban dalgası çıkıntının yerine geçer",
+        "Her T yeni çıkıntıdır",
+        "Tüm derivasyonlar dar ve aynı",
+        "V1 çift çıkıntı, yanda geniş S"
+      ],
+      "correct": 4,
+      "explanations": [
+        "Bu LBBB örüntüsüdür, RBBB değildir.",
+        "Taban dalgası atriyaldir, QRS çıkıntısı değildir.",
+        "Çıkıntı QRS içindedir, T ayrı bir dalgadır.",
+        "RBBB'de QRS geniş ve derivasyona göre farklıdır.",
+        "RBBB'de sağ taraf geç aktive olur."
+      ],
+      "feedback": "RBBB'de sağ taraf geç aktive olur.",
+      "objectiveIds": [
+        "O3"
+      ],
+      "sourceIds": [
+        "BBB2009",
+        "ECG"
+      ],
+      "decisionId": "rMorph",
+      "note": "",
+      "ecg": {
+        "mode": "rbbb",
+        "options": {},
+        "leads": [
+          "I",
+          "aVR",
+          "V1"
+        ],
+        "start": 0.58,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q183",
+      "mode": "rbbb",
+      "title": "Sentetik değerlendirme Q183",
+      "ariaLabel": "Q183 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "66 yaşında kadın hasta. Başvuru: rutin kardiyoloji kontrolünde geniş QRS izleniyor. Geniş bir kompleksin ilk sapması 60 ms önce, son dönüşü 80 ms sonra işaretleniyor.",
+      "question": "Bu ölçümlerle QRS süresi kaç milisaniyedir?",
+      "text": "Bu ölçümlerle QRS süresi kaç milisaniyedir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "140 ms",
+        "110 ms",
+        "160 ms",
+        "200 ms",
+        "80 ms"
+      ],
+      "correct": 0,
+      "explanations": [
+        "−60 ms ile+80 ms arasındaki geniş QRS desteği 140 ms’dir.",
+        "110 ms terminal desteğin bir kısmını dışlar.",
+        "160 ms LBBB öğretim genişliğidir.",
+        "200 ms verilen ilk/son sapma farkından 60 ms uzundur.",
+        "80 ms normal dar QRS örneğidir."
+      ],
+      "feedback": "−60 ms ile+80 ms arasındaki geniş QRS desteği 140 ms’dir.",
+      "objectiveIds": [
+        "O6"
+      ],
+      "sourceIds": [
+        "BBB2009",
+        "ECG"
+      ],
+      "decisionId": "q140",
+      "note": "",
+      "ecg": {
+        "mode": "rbbb",
+        "options": {},
+        "leads": [
+          "I",
+          "aVR",
+          "V1"
+        ],
+        "start": 0.66,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q184",
+      "mode": "rbbb",
+      "title": "Sentetik değerlendirme Q184",
+      "ariaLabel": "Q184 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "45 yaşında erkek hasta. Başvuru: askerlik sağlık kurulu muayenesinde geniş QRS saptanıyor. Geniş kompleksli bir atımda P’nin ilk sapması 235 ms önce, QRS’in ilk sapması 60 ms önce işaretleniyor.",
+      "question": "Bu geniş kompleksli atımda PR aralığı kaç milisaniyedir?",
+      "text": "Bu geniş kompleksli atımda PR aralığı kaç milisaniyedir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "130 ms",
+        "140 ms",
+        "315 ms",
+        "235 ms",
+        "175 ms"
+      ],
+      "correct": 4,
+      "explanations": [
+        "P merkezinden ölçme ilk 45 ms’yi dışlar.",
+        "QRS 140 ms süresi PR yerine kullanılmıştır.",
+        "QRS sonu kullanılarak 140 ms kompleks de eklenmiştir.",
+        "P’den R referansına ölçme 60 ms fazlalık ekler.",
+        "P−235 ms, QRS−60 ms:175 ms; terminal sağ gecikme QRS içindedir."
+      ],
+      "feedback": "P−235 ms, QRS−60 ms:175 ms; terminal sağ gecikme QRS içindedir.",
+      "objectiveIds": [
+        "O6"
+      ],
+      "sourceIds": [
+        "BBB2009",
+        "ECG"
+      ],
+      "decisionId": "prR175",
+      "note": "",
+      "ecg": {
+        "mode": "rbbb",
+        "options": {},
+        "leads": [
+          "I",
+          "aVR",
+          "V1"
+        ],
+        "start": 0.74,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q185",
+      "mode": "rbbb",
+      "title": "Sentetik değerlendirme Q185",
+      "ariaLabel": "Q185 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "71 yaşında kadın hasta. Başvuru: huzurevi yıllık muayenesinde geniş kompleks fark ediliyor. Geniş bir kompleksin ilk sapması 60 ms önce, T dalgasının son sınırı 350 ms sonra işaretleniyor.",
+      "question": "Bu ölçümlerle ham sentetik QT değeri kaçtır?",
+      "text": "Bu ölçümlerle ham sentetik QT değeri kaçtır?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "140 ms",
+        "470 ms",
+        "350 ms",
+        "410 ms",
+        "800 ms"
+      ],
+      "correct": 3,
+      "explanations": [
+        "Bu yalnız QRS süresidir.",
+        "Başlangıç 60 ms iki kez eklenmiştir.",
+        "R tepesini başlangıç alarak 60 ms dışlar.",
+        "QRS−60 ms, T sonu 350 ms: toplam 410 ms sentetik geniş kompleks QT.",
+        "R–R döngüsü QT yerine kullanılmıştır."
+      ],
+      "feedback": "QRS−60 ms, T sonu 350 ms: toplam 410 ms sentetik geniş kompleks QT.",
+      "objectiveIds": [
+        "O6"
+      ],
+      "sourceIds": [
+        "BBB2009",
+        "ECG"
+      ],
+      "decisionId": "qt410",
+      "note": "",
+      "ecg": {
+        "mode": "rbbb",
+        "options": {},
+        "leads": [
+          "I",
+          "aVR",
+          "V1"
+        ],
+        "start": 0.8200000000000001,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q186",
+      "mode": "rbbb",
+      "title": "Sentetik değerlendirme Q186",
+      "ariaLabel": "Q186 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "59 yaşında erkek hasta. Başvuru: iş yeri periyodik muayenesinde geniş QRS saptanıyor. Kompleks genişliği tek başına değerlendirilerek kökeni hakkında yorum yapılmak isteniyor.",
+      "question": "QRS genişliğini tek başına yorumlarken hangi sınır geçerlidir?",
+      "text": "QRS genişliğini tek başına yorumlarken hangi sınır geçerlidir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "140 ms her QRS kesin RBBB'dir",
+        "Genişlik tek başına debiyi hesaplar",
+        "120 ms üstü her QRS VT'dir",
+        "160 ms her QRS kesin LBBB'dir",
+        "Genişlik ve klinik bulgu birlikte yorumlanır"
+      ],
+      "correct": 4,
+      "explanations": [
+        "PVC de bu genişlikte olabilir.",
+        "Genişlik zaman ölçüsüdür, debi değildir.",
+        "Dal bloğu da geniş QRS yapabilir.",
+        "Genişlik tek başına LBBB'yi kanıtlamaz.",
+        "Tek genişlik VT ile bloğu kesin ayırmaz."
+      ],
+      "feedback": "Tek genişlik VT ile bloğu kesin ayırmaz.",
+      "objectiveIds": [
+        "O5"
+      ],
+      "sourceIds": [
+        "BBB2009"
+      ],
+      "decisionId": "qrsWidthCause",
+      "note": "",
+      "ecg": {
+        "mode": "rbbb",
+        "options": {},
+        "leads": [
+          "I",
+          "aVR",
+          "V1"
+        ],
+        "start": 0.5,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q187",
+      "mode": "rbbb",
+      "title": "Sentetik değerlendirme Q187",
+      "ariaLabel": "Q187 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "64 yaşında kadın hasta. Başvuru: önceki EKG kaydıyla karşılaştırılan yeni kontrolde. Kalp animasyonunda bir ventrikülün aktivasyonu diğerine göre gecikmiş gösteriliyor.",
+      "question": "Bu ileti gecikmesi animasyonu nasıl yorumlanmalıdır?",
+      "text": "Bu ileti gecikmesi animasyonu nasıl yorumlanmalıdır?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "Ventriküler etkinlik tamamen kaybolur",
+        "Terminal yön ejeksiyon hacmidir",
+        "Gecikme atriyal hızdır",
+        "Gecikme eşzamanlılığı azaltabilir",
+        "Animasyon gecikmesi hastaya özeldir"
+      ],
+      "correct": 3,
+      "explanations": [
+        "Geniş QRS etkinliğin sürdüğünü gösterir.",
+        "QRS yönü hacim ölçmez.",
+        "Dal bloğu ventrikül içi iletimdir, atriyal değildir.",
+        "Animasyon şematiktir, gerçek basınç ölçmez.",
+        "Bu sabit bir öğretim gecikmesidir."
+      ],
+      "feedback": "Animasyon şematiktir, gerçek basınç ölçmez.",
+      "objectiveIds": [
+        "O4"
+      ],
+      "sourceIds": [
+        "BBB2009",
+        "CYCLE"
+      ],
+      "decisionId": "bbbDelay",
+      "note": "",
+      "ecg": {
+        "mode": "rbbb",
+        "options": {},
+        "leads": [
+          "I",
+          "aVR",
+          "V1"
+        ],
+        "start": 0.58,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q188",
+      "mode": "rbbb",
+      "title": "Sentetik değerlendirme Q188",
+      "ariaLabel": "Q188 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "56 yaşında erkek hasta. Başvuru: ameliyat öncesi anestezi değerlendirmesinde geniş kompleks. Aynı ileti bozukluğu önceki bir kayıtta da görülmüş; yeni bir semptom eşlik etmiyor.",
+      "question": "Bu ileti bozukluğunun klinik yorumu için hangi ilke geçerlidir?",
+      "text": "Bu ileti bozukluğunun klinik yorumu için hangi ilke geçerlidir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "Güvenli eve dönüş ölçütüdür",
+        "Tek başına akut MI kanıtıdır",
+        "Her atım nabızsız demektir",
+        "Hangi ilaç gerektiğini gösterir",
+        "Klinik bağlam ve eski EKG ile yorumlanır"
+      ],
+      "correct": 4,
+      "explanations": [
+        "Klinik bulgular değerlendirilmeden bu karar verilmez.",
+        "Dal bloğu MI'yı kesinleştirmez.",
+        "Geniş QRS mekanik nabzı ekarte etmez.",
+        "İleti örüntüsü tedavi kararını tek başına vermez.",
+        "Dal bloğu tek başına yeni/eski veya iskemi ayırt etmez."
+      ],
+      "feedback": "Dal bloğu tek başına yeni/eski veya iskemi ayırt etmez.",
+      "objectiveIds": [
+        "O5"
+      ],
+      "sourceIds": [
+        "BBB2009"
+      ],
+      "decisionId": "bbbLimits",
+      "note": "",
+      "ecg": {
+        "mode": "rbbb",
+        "options": {},
+        "leads": [
+          "I",
+          "aVR",
+          "V1"
+        ],
+        "start": 0.66,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q189",
+      "mode": "rbbb",
+      "title": "Sentetik değerlendirme Q189",
+      "ariaLabel": "Q189 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "69 yaşında kadın hasta. Başvuru: efor dispnesi ve yorgunlukla başvuruyor. Ventriküler kompleksin izde temsil ettiği olay ayrıca soruluyor.",
+      "question": "QRS kompleksinin temel elektriksel karşılığı nedir?",
+      "text": "QRS kompleksinin temel elektriksel karşılığı nedir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "QRS: yalnız AV düğüm gecikmesi",
+        "QRS: atriyal depolarizasyon",
+        "QRS: ventriküler repolarizasyon",
+        "QRS: ventriküler depolarizasyon",
+        "QRS: yalnız atriyal repolarizasyon"
+      ],
+      "correct": 3,
+      "explanations": [
+        "AV gecikmesi PR aralığında değerlendirilir.",
+        "Bu olay P dalgasıyla kaydedilir.",
+        "Bu olay T dalgasıyla kaydedilir.",
+        "QRS ventrikül kasının elektriksel uyarılmasıdır.",
+        "QRS'in ana kaynağı ventrikül kasıdır."
+      ],
+      "feedback": "QRS ventrikül kasının elektriksel uyarılmasıdır.",
+      "objectiveIds": [
+        "O1"
+      ],
+      "sourceIds": [
+        "BBB2009"
+      ],
+      "decisionId": "qrs",
+      "note": "",
+      "ecg": {
+        "mode": "rbbb",
+        "options": {},
+        "leads": [
+          "I",
+          "aVR",
+          "V1"
+        ],
+        "start": 0.74,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q190",
+      "mode": "rbbb",
+      "title": "Sentetik değerlendirme Q190",
+      "ariaLabel": "Q190 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "61 yaşında erkek hasta. Başvuru: diyabet ve hipertansiyon izleminde geniş kompleks saptanıyor. Ventriküler kompleksten sonra gelen dalganın anlamı soruluyor.",
+      "question": "T dalgasının temel elektriksel karşılığı nedir?",
+      "text": "T dalgasının temel elektriksel karşılığı nedir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "T: yeni bir atriyal uyarı",
+        "T: atriyal repolarizasyon",
+        "T: ventriküler depolarizasyon",
+        "T: ventriküler repolarizasyon",
+        "T: gecikmiş sağ ventrikül uyarısı"
+      ],
+      "correct": 3,
+      "explanations": [
+        "Yeni P ayrı bir dalga olarak görülür.",
+        "Bu olay genelde QRS altında gizlenir.",
+        "Bu olay QRS ile kaydedilir.",
+        "T dalgası ventrikülün elektriksel toparlanmasıdır.",
+        "Bu bileşen QRS içinde yer alır."
+      ],
+      "feedback": "T dalgası ventrikülün elektriksel toparlanmasıdır.",
+      "objectiveIds": [
+        "O1"
+      ],
+      "sourceIds": [
+        "BBB2009"
+      ],
+      "decisionId": "t",
+      "note": "",
+      "ecg": {
+        "mode": "rbbb",
+        "options": {},
+        "leads": [
+          "I",
+          "aVR",
+          "V1"
+        ],
+        "start": 0.8200000000000001,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q191",
+      "mode": "rbbb",
+      "title": "Sentetik değerlendirme Q191",
+      "ariaLabel": "Q191 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "47 yaşında kadın hasta. Başvuru: yıllık sağlık taramasında tesadüfen geniş QRS saptanıyor. Sistematik okumada hangi derivasyonların yan duvarı temsil ettiği gözden geçiriliyor.",
+      "question": "Hangi derivasyonlar lateral duvarı gösterir?",
+      "text": "Hangi derivasyonlar lateral duvarı gösterir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "V1–V6 tümü — tüm prekordiyum",
+        "V3, V4 — anterior duvar",
+        "I, aVL, V5–V6 — lateral duvar",
+        "V1, V2 — septal bölge",
+        "II, III, aVF — inferior duvar"
+      ],
+      "correct": 2,
+      "explanations": [
+        "Tüm prekordiyal grup tek başına lateral duvarı özgül olarak göstermez.",
+        "V3–V4 anterior duvarı gösterir, lateral duvarı değil.",
+        "Bu üç derivasyon grubu kalbin lateral duvarını gösterir.",
+        "V1–V2 septal bölgeyi gösterir, lateral duvarı değil.",
+        "Bu grup inferior duvarı gösterir, lateral duvarı değil."
+      ],
+      "feedback": "Bu üç derivasyon grubu kalbin lateral duvarını gösterir.",
+      "objectiveIds": [
+        "O3"
+      ],
+      "sourceIds": [
+        "BBB2009",
+        "ECG"
+      ],
+      "decisionId": "lateralLeadGroup",
+      "note": "",
+      "ecg": {
+        "mode": "rbbb",
+        "options": {},
+        "leads": [
+          "I",
+          "aVR",
+          "V1"
+        ],
+        "start": 0.5,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q192",
+      "mode": "rbbb",
+      "title": "Sentetik değerlendirme Q192",
+      "ariaLabel": "Q192 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "73 yaşında erkek hasta. Başvuru: kalp yetersizliği kliniğinde rutin kontrol yapılıyor. Sistematik okumada V1–V2’nin hangi bölgeyi yansıttığı gözden geçiriliyor.",
+      "question": "V1 ve V2 derivasyonları hangi bölgeyi yansıtır?",
+      "text": "V1 ve V2 derivasyonları hangi bölgeyi yansıtır?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "Sadece sağ atriyum",
+        "Sol lateral duvar",
+        "Yüksek lateral duvar",
+        "Septum ve sağ ventrikül yakını",
+        "İnferior duvar"
+      ],
+      "correct": 3,
+      "explanations": [
+        "Sağ atriyum tek başına V1–V2 ile özgül olarak tanımlanmaz.",
+        "Sol lateral duvar V5–V6 ve I, aVL ile değerlendirilir.",
+        "Yüksek lateral duvar aVL ile değerlendirilir.",
+        "V1–V2 septal bölgeyi ve sağ ventrikülün yakınını yansıtır.",
+        "İnferior duvar II, III, aVF ile değerlendirilir."
+      ],
+      "feedback": "V1–V2 septal bölgeyi ve sağ ventrikülün yakınını yansıtır.",
+      "objectiveIds": [
+        "O3"
+      ],
+      "sourceIds": [
+        "BBB2009",
+        "ECG"
+      ],
+      "decisionId": "precordialSeptal",
+      "note": "",
+      "ecg": {
+        "mode": "rbbb",
+        "options": {},
+        "leads": [
+          "I",
+          "aVR",
+          "V1"
+        ],
+        "start": 0.58,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q193",
+      "mode": "rbbb",
+      "title": "Sentetik değerlendirme Q193",
+      "ariaLabel": "Q193 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "53 yaşında kadın hasta. Başvuru: önceki ameliyat öyküsüyle rutin EKG’de geniş kompleks. Elektriksel kayıt sürerken nabız muayenesi ayrıca planlanıyor.",
+      "question": "EKG bulgusu ile mekanik nabız arasındaki ilişki için hangi değerlendirme gerekir?",
+      "text": "EKG bulgusu ile mekanik nabız arasındaki ilişki için hangi değerlendirme gerekir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "Nabız ayrıca klinik olarak bakılır",
+        "T genliği atım hacmini verir",
+        "Elektriksel hız nabza birebir eşittir",
+        "QRS genişliği nabız basıncını verir",
+        "PR süresi debiyi verir"
+      ],
+      "correct": 0,
+      "explanations": [
+        "EKG elektrik gösterir, nabzı kanıtlamaz.",
+        "T genliği repolarizasyon voltajıdır.",
+        "Nabız açığı olabilir; eşitlik varsayılamaz.",
+        "Genişlik zaman ölçüsüdür, basınç değildir.",
+        "PR iletim süresidir, debi ölçmez."
+      ],
+      "feedback": "EKG elektrik gösterir, nabzı kanıtlamaz.",
+      "objectiveIds": [
+        "O4"
+      ],
+      "sourceIds": [
+        "BBB2009",
+        "CYCLE"
+      ],
+      "decisionId": "pulse",
+      "note": "",
+      "ecg": {
+        "mode": "rbbb",
+        "options": {},
+        "leads": [
+          "I",
+          "aVR",
+          "V1"
+        ],
+        "start": 0.66,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q194",
+      "mode": "rbbb",
+      "title": "Sentetik değerlendirme Q194",
+      "ariaLabel": "Q194 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "65 yaşında erkek hasta. Başvuru: pilotluk sağlık raporu için rutin EKG çekiliyor. Eşzamanlı üç derivasyonlu kayıt aşağıda gösteriliyor.",
+      "question": "Bu ritim hangi sınıfa girer?",
+      "text": "Bu ritim hangi sınıfa girer?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "Düzenli geniş kompleks",
+        "Düzenli dar kompleks, hızlı",
+        "Düzenli dar kompleks, normal hız",
+        "Düzensiz dar kompleks",
+        "Kaotik, organize değil"
+      ],
+      "correct": 0,
+      "explanations": [
+        "QRS geniş; ritim düzenli aralıklarla tekrarlıyor.",
+        "Bu örnekte hız bu kadar yüksek değil.",
+        "Bu örnekte hız veya düzen normal aralığa uymuyor.",
+        "Bu örnekte ritim düzenli, düzensiz değil.",
+        "Bu örnekte düzenli bir kompleks seçilebiliyor, kaotik değil."
+      ],
+      "feedback": "QRS geniş; ritim düzenli aralıklarla tekrarlıyor.",
+      "objectiveIds": [
+        "O2"
+      ],
+      "sourceIds": [
+        "BBB2009"
+      ],
+      "decisionId": "rhythmClass_rbbb",
+      "note": "",
+      "ecg": {
+        "mode": "rbbb",
+        "options": {},
+        "leads": [
+          "I",
+          "aVR",
+          "V1"
+        ],
+        "start": 0.74,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q195",
+      "mode": "rbbb",
+      "title": "Sentetik değerlendirme Q195",
+      "ariaLabel": "Q195 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "58 yaşında kadın hasta. Başvuru: huzurevi kontrolünde geniş QRS fark ediliyor. Aynı kayıt üzerinde farklı bir derivasyon grubuna geçildiğinde görünüm değişiyor.",
+      "question": "Derivasyon seçimini değiştirmenin bulguya etkisi nedir?",
+      "text": "Derivasyon seçimini değiştirmenin bulguya etkisi nedir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "Negatif QRS ventrikül kaynağını kanıtlar",
+        "Derivasyon aynı kaynağın farklı görünümüdür",
+        "Tek lead 12 derivasyona eşittir",
+        "Tüm lead'ler aynı şekli gösterir",
+        "Lead değiştirmek ritmi değiştirir"
+      ],
+      "correct": 1,
+      "explanations": [
+        "Polarite yön farkından da olabilir.",
+        "Lead değiştirmek şekli değiştirir, ritmi değiştirmez.",
+        "Diğer derivasyonlar ek bilgi taşır.",
+        "Her derivasyon farklı açıdan bakar.",
+        "Görünüm değişir, kaynak aynı kalır."
+      ],
+      "feedback": "Lead değiştirmek şekli değiştirir, ritmi değiştirmez.",
+      "objectiveIds": [
+        "O3"
+      ],
+      "sourceIds": [
+        "BBB2009",
+        "ECG"
+      ],
+      "decisionId": "leadAll",
+      "note": "",
+      "ecg": {
+        "mode": "rbbb",
+        "options": {},
+        "leads": [
+          "I",
+          "aVR",
+          "V1"
+        ],
+        "start": 0.8200000000000001,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q196",
+      "mode": "af",
+      "title": "Sentetik değerlendirme Q196",
+      "ariaLabel": "Q196 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "67 yaşında erkek hasta. Başvuru: atriyal katkı ve pasif doluş birlikte değerlendiriliyor. Diyastol sırasında atriyoventriküler kapağın açık kaldığı, ancak organize bir atriyal kasılmanın izlenmediği belirtiliyor.",
+      "question": "Ventrikül dolusuna atriyal katkı açısından ne söylenebilir?",
+      "text": "Ventrikül dolusuna atriyal katkı açısından ne söylenebilir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "78/dk düzensiz"
+        },
+        {
+          "k": "TA",
+          "v": "126/80 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%97"
+        }
+      ],
+      "options": [
+        "Dar QRS katkıyı geri getirir",
+        "Pasif doluş da durur",
+        "Pasif doluş sürebilir",
+        "Hız düşünce doluş tam olur",
+        "f genliği doluş hacmini verir"
+      ],
+      "correct": 2,
+      "explanations": [
+        "QRS genişliği atriyal katkıyı etkilemez.",
+        "Pasif doluş ayrı bir basınç farkına bağlıdır.",
+        "Atriyal katkı kaybolsa da pasif giriş devam edebilir.",
+        "Hız azalması ayrı P oluşturmaz.",
+        "f dalgası elektriksel sinyaldir, hacim ölçmez."
+      ],
+      "feedback": "Atriyal katkı kaybolsa da pasif giriş devam edebilir.",
+      "objectiveIds": [
+        "O4"
+      ],
+      "sourceIds": [
+        "AF2024",
+        "CYCLE"
+      ],
+      "decisionId": "afResidual",
+      "note": "",
+      "ecg": {
+        "mode": "af",
+        "options": {
+          "afProfile": "controlled"
+        },
+        "leads": [
+          "II",
+          "aVF",
+          "V1"
+        ],
+        "start": 0.5,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q197",
+      "mode": "vt",
+      "title": "Sentetik değerlendirme Q197",
+      "ariaLabel": "Q197 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "61 yaşında kadın hasta. Başvuru: organize ve kaotik örnekler karşılaştırılıyor. Aynı hasta grubunda bir kayıtta düzenli geniş kompleksler, başka bir kayıtta kaotik ve düzensiz bir dalga karşılaştırılıyor.",
+      "question": "Organizasyon açısından bu iki örüntü nasıl karşılaştırılır?",
+      "text": "Organizasyon açısından bu iki örüntü nasıl karşılaştırılır?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "160/dk"
+        },
+        {
+          "k": "TA",
+          "v": "88/58 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%94"
+        }
+      ],
+      "options": [
+        "İkisi de düzenli dar ritimdir",
+        "İkisi de yalnız atriyal hızdır",
+        "VT düzenli geniş; VF kaotik",
+        "VT kaotik; VF düzenli geniş",
+        "Ayrım yalnız ST yüksekliğidir"
+      ],
+      "correct": 2,
+      "explanations": [
+        "VT geniş, VF organize değildir.",
+        "İkisi de ventriküler bir ritimdir.",
+        "VT'de tekrarlayan şekil, VF'de düzensiz dalga.",
+        "Bu tanımlar burada ters çevrilmiş.",
+        "Asıl ayrım QRS düzeni ve şeklidir."
+      ],
+      "feedback": "VT'de tekrarlayan şekil, VF'de düzensiz dalga.",
+      "objectiveIds": [
+        "O2"
+      ],
+      "sourceIds": [
+        "VA2022",
+        "ALS2025"
+      ],
+      "decisionId": "organizedCompare",
+      "note": "",
+      "ecg": {
+        "mode": "vt",
+        "options": {},
+        "leads": [
+          "II",
+          "aVR",
+          "V1"
+        ],
+        "start": 0.58,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q198",
+      "mode": "inferior",
+      "title": "Sentetik değerlendirme Q198",
+      "ariaLabel": "Q198 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "59 yaşında erkek hasta. Başvuru: artırılmış sağ kol yönü ayrıca hesaplanıyor. QRS’den kısa süre önce ayrı bir dalga seçiliyor.",
+      "question": "P dalgasının temel elektriksel karşılığı nedir?",
+      "text": "P dalgasının temel elektriksel karşılığı nedir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "P: atriyal repolarizasyon",
+        "P: ventriküler depolarizasyon",
+        "P: yalnız AV düğüm iletimi",
+        "P: atriyal depolarizasyon",
+        "P: ventriküler repolarizasyon"
+      ],
+      "correct": 3,
+      "explanations": [
+        "Atriyal repolarizasyon genelde QRS altında gizlenir.",
+        "Bu olay QRS ile kaydedilir.",
+        "AV düğüm gecikmesi PR aralığında değerlendirilir.",
+        "P dalgası atriyumun elektriksel uyarılmasıdır.",
+        "Bu olay T dalgası ile kaydedilir."
+      ],
+      "feedback": "P dalgası atriyumun elektriksel uyarılmasıdır.",
+      "objectiveIds": [
+        "O1"
+      ],
+      "sourceIds": [
+        "ACS2023"
+      ],
+      "decisionId": "p",
+      "note": "",
+      "ecg": {
+        "mode": "inferior",
+        "options": {},
+        "leads": [
+          "II",
+          "III",
+          "aVF"
+        ],
+        "start": 0.66,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q199",
+      "mode": "lbbb",
+      "title": "Sentetik değerlendirme Q199",
+      "ariaLabel": "Q199 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "64 yaşında kadın hasta. Başvuru: PR ve QRS birlikte ölçülüyor. QRS’den kısa süre önce ayrı bir dalga seçiliyor.",
+      "question": "P dalgasının temel elektriksel karşılığı nedir?",
+      "text": "P dalgasının temel elektriksel karşılığı nedir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "75/dk düzenli"
+        },
+        {
+          "k": "TA",
+          "v": "120/78 mmHg"
+        },
+        {
+          "k": "SpO₂",
+          "v": "%98"
+        }
+      ],
+      "options": [
+        "P: ventriküler depolarizasyon",
+        "P: atriyal depolarizasyon",
+        "P: atriyal repolarizasyon",
+        "P: yalnız AV düğüm iletimi",
+        "P: ventriküler repolarizasyon"
+      ],
+      "correct": 1,
+      "explanations": [
+        "Bu olay QRS ile kaydedilir.",
+        "P dalgası atriyumun elektriksel uyarılmasıdır.",
+        "Atriyal repolarizasyon genelde QRS altında gizlenir.",
+        "AV düğüm gecikmesi PR aralığında değerlendirilir.",
+        "Bu olay T dalgası ile kaydedilir."
+      ],
+      "feedback": "P dalgası atriyumun elektriksel uyarılmasıdır.",
+      "objectiveIds": [
+        "O1"
+      ],
+      "sourceIds": [
+        "BBB2009"
+      ],
+      "decisionId": "p",
+      "note": "",
+      "ecg": {
+        "mode": "lbbb",
+        "options": {},
+        "leads": [
+          "I",
+          "V1",
+          "V6"
+        ],
+        "start": 0.74,
+        "seconds": 3.2
+      }
+    },
+    {
+      "id": "Q200",
+      "mode": "vf",
+      "title": "Sentetik değerlendirme Q200",
+      "ariaLabel": "Q200 için üç derivasyonlu sentetik kayıt; zaman saniye,voltaj mV",
+      "stem": "56 yaşında erkek hasta. Başvuru: spor salonunda aniden yığılıp yanıtsız bulunuyor. Monitörde kaotik taban etkinliği izleniyor.",
+      "question": "Bu kayıtta P dalgası için ne söylenebilir?",
+      "text": "Bu kayıtta P dalgası için ne söylenebilir?",
+      "vitals": [
+        {
+          "k": "Nabız",
+          "v": "alınamıyor"
+        },
+        {
+          "k": "TA",
+          "v": "ölçülemiyor"
+        },
+        {
+          "k": "Bilinç",
+          "v": "kapalı"
+        }
+      ],
+      "options": [
+        "P yalnız V1'de görülür",
+        "P dalgası QRS'den sonra gelir",
+        "P dalgası düzenli ve normaldir",
+        "Her kaotik tepe bir P dalgasıdır",
+        "Organize atriyal depolarizasyon (P) seçilemez; taban kaotiktir"
+      ],
+      "correct": 4,
+      "explanations": [
+        "Hiçbir derivasyonda ayrık P yoktur.",
+        "VF'de organize QRS de yoktur; P–QRS ilişkisi tanımlanamaz.",
+        "VF'de düzenli sinüs P'si görülmez.",
+        "Kaotik dalgalanma ventriküler kaynaklıdır, P değildir.",
+        "VF'de organize atriyal ya da ventriküler kompleks yoktur; ayrık P aranmaz."
+      ],
+      "feedback": "VF'de organize atriyal ya da ventriküler kompleks yoktur; ayrık P aranmaz.",
+      "objectiveIds": [
+        "O1"
+      ],
+      "sourceIds": [
+        "VA2022",
+        "ALS2025"
+      ],
+      "decisionId": "vfNoP",
+      "note": "",
+      "ecg": {
+        "mode": "vf",
+        "options": {},
+        "leads": [
+          "II",
+          "aVF",
+          "V1"
+        ],
+        "start": 0.8200000000000001,
+        "seconds": 3.2
+      }
+    }
+  ],
+  "limitations": "400 sentetik madde ve 13 EKG sonucu: Simülatörün tüm tıbbi içerik ve sinyal validasyonları Ege Üniversitesi Tıp Fakültesi Kardiyoloji Anabilim Dalı öğretim üyelerince yapılmıştır. Olgu vinyetleri ve vitaller sentetik öğretim örnekleridir. 16 s gözlem yalnız akış kuralıdır."
+} satisfies AuthoredCurriculumData;
+
+const byId = Object.fromEntries(
+  [...authoredCurriculum.cases, ...authoredCurriculum.questions].map((item) => [item.id, item]),
+);
+
+export const curriculum: PulseCurriculumData = {
+  version: authoredCurriculum.version,
+  sessionSize: authoredCurriculum.sessionSize,
+  labels: authoredCurriculum.labels,
+  cases: authoredCurriculum.cases,
+  questions: authoredCurriculum.questions,
+  byId,
+  limitations: authoredCurriculum.limitations,
+};
+
+if (curriculum.cases.length !== 200 || curriculum.questions.length !== 200) {
+  throw new Error("400 authored items required");
+}
