@@ -1,6 +1,7 @@
 import { type JSX } from 'react'
 import { useStore } from '../core/StoreProvider'
 import { Footer, EcgDeco } from '../ui/chrome'
+import { ScreenHeading, SectionHeading } from '../ui/ScreenHeading'
 import sourcesData from '../data/sources.json'
 import { IconInfo, IconBook, IconHeart, IconDoc } from '../ui/icons'
 import { datasetCounts, assetUrl } from '../core/images'
@@ -91,7 +92,7 @@ export function SourcesScreen({ embedded = false }: SourcesScreenProps): JSX.Ele
       <EcgDeco embedded={embedded} />
       <div className="screen" style={{ position: 'relative', zIndex: 1 }}>
         <div className="src-wrap screen-body">
-          <h1 className="src-title">EGEMED Opaca<sup className="tm">™</sup> Hakkında</h1>
+          <ScreenHeading className="src-title">EGEMED Opaca<sup className="tm">™</sup> Hakkında</ScreenHeading>
           <p className="src-sub">
             {data.module.product}
             <sup className="tm">™</sup> {data.module.subtitle}'nü geliştiren ekip, kurum bilgisi ve modülde kullanılan
@@ -100,7 +101,7 @@ export function SourcesScreen({ embedded = false }: SourcesScreenProps): JSX.Ele
 
           {/* ---- Geliştiriciler ---- */}
           <section className="src-section" aria-labelledby="credits-h" style={{ marginTop: 0 }}>
-            <h2 id="credits-h"><IconHeart /> Geliştiriciler</h2>
+            <SectionHeading id="credits-h"><IconHeart /> Geliştiriciler</SectionHeading>
             <div className="credit-groups">
               {data.credits.map((g) => (
                 <div className="credit-group lead" key={g.role}>
@@ -132,7 +133,7 @@ export function SourcesScreen({ embedded = false }: SourcesScreenProps): JSX.Ele
 
           {/* ---- Kurum ---- */}
           <section className="src-section" aria-labelledby="inst-h">
-            <h2 id="inst-h"><IconDoc /> Kurum</h2>
+            <SectionHeading id="inst-h"><IconDoc /> Kurum</SectionHeading>
             <div className="inst-card">
               <img src={assetUrl('brand/ege-tip-logo.png')} alt="Ege Üniversitesi Tıp Fakültesi amblemi" />
               <div>
@@ -160,7 +161,7 @@ export function SourcesScreen({ embedded = false }: SourcesScreenProps): JSX.Ele
 
           {/* ---- Veri setleri ---- */}
           <section className="src-section" aria-labelledby="ds-h">
-            <h2 id="ds-h"><IconBook /> Görüntü Veri Setleri</h2>
+            <SectionHeading id="ds-h"><IconBook /> Görüntü Veri Setleri</SectionHeading>
             <p className="src-sub">
               Her bulgu etiketinin kaynağı (radyolog paneli, radyolog işaretlemesi ya da rapor metni) ayrı tutulur;
               rapor metninden otomatik çıkarılan etiketler değerlendirmede kullanılmaz.
@@ -206,7 +207,7 @@ export function SourcesScreen({ embedded = false }: SourcesScreenProps): JSX.Ele
           {/* ---- Görsel varlıklar ---- */}
           {data.assets && data.assets.length > 0 && (
             <section className="src-section" aria-labelledby="assets-h">
-              <h2 id="assets-h"><IconDoc /> Görsel Varlıklar</h2>
+              <SectionHeading id="assets-h"><IconDoc /> Görsel Varlıklar</SectionHeading>
               <div className="ds-grid">
                 {data.assets.map((a) => (
                   <article className="ds-card" key={a.id}>
@@ -228,7 +229,7 @@ export function SourcesScreen({ embedded = false }: SourcesScreenProps): JSX.Ele
 
           {/* ---- Validasyon, sınırlılıklar ve sorumluluk ---- */}
           <section className="src-section" aria-labelledby="disclaimer-h">
-            <h2 id="disclaimer-h"><IconInfo /> Validasyon, sınırlılıklar ve sorumluluk</h2>
+            <SectionHeading id="disclaimer-h"><IconInfo /> Validasyon, sınırlılıklar ve sorumluluk</SectionHeading>
             <div className="src-disclaimer">
               <IconInfo />
               <div>

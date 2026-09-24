@@ -1,4 +1,5 @@
 import { type JSX } from "react";
+import { EmbeddedProvider } from "./EmbeddedContext";
 import { useStore } from "./core/StoreProvider";
 import type { Screen } from "./core/types";
 import { DevPanel } from "./DevPanel";
@@ -153,35 +154,37 @@ export function App({
   devBuild = false,
 }: AppProps): JSX.Element {
   return (
-    <div className="eg-sim-opaca app-shell">
-      <Header embedded={embedded} env={chromeEnv} modals={{ help: HelpModal, confirm: ConfirmModal }} gamiEnabled={gamiEnabled} />
-      <main className="app-content">
-        {timing ? (
-          <ScreenBody
-            embedded={embedded}
-            startEnv={startEnv}
-            learnEnv={learnEnv}
-            popoverEnv={popoverEnv}
-            resultsEnv={resultsEnv}
-            modalEnv={modalEnv}
-            timing={timing}
-            gamiEnabled={gamiEnabled}
-            devBuild={devBuild}
-          />
-        ) : (
-          <ScreenBody
-            embedded={embedded}
-            startEnv={startEnv}
-            learnEnv={learnEnv}
-            popoverEnv={popoverEnv}
-            resultsEnv={resultsEnv}
-            modalEnv={modalEnv}
-            gamiEnabled={gamiEnabled}
-            devBuild={devBuild}
-          />
-        )}
-      </main>
-      {showDevPanel ? <DevPanel /> : null}
-    </div>
+    <EmbeddedProvider embedded={embedded}>
+      <div className="eg-sim-opaca app-shell">
+        <Header embedded={embedded} env={chromeEnv} modals={{ help: HelpModal, confirm: ConfirmModal }} gamiEnabled={gamiEnabled} />
+        <main className="app-content">
+          {timing ? (
+            <ScreenBody
+              embedded={embedded}
+              startEnv={startEnv}
+              learnEnv={learnEnv}
+              popoverEnv={popoverEnv}
+              resultsEnv={resultsEnv}
+              modalEnv={modalEnv}
+              timing={timing}
+              gamiEnabled={gamiEnabled}
+              devBuild={devBuild}
+            />
+          ) : (
+            <ScreenBody
+              embedded={embedded}
+              startEnv={startEnv}
+              learnEnv={learnEnv}
+              popoverEnv={popoverEnv}
+              resultsEnv={resultsEnv}
+              modalEnv={modalEnv}
+              gamiEnabled={gamiEnabled}
+              devBuild={devBuild}
+            />
+          )}
+        </main>
+        {showDevPanel ? <DevPanel /> : null}
+      </div>
+    </EmbeddedProvider>
   );
 }

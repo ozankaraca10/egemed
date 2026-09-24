@@ -1,6 +1,7 @@
 import { Fragment, useMemo, useState, type JSX, type ReactNode } from 'react'
 import { useStore } from '../core/StoreProvider'
 import { Footer, EcgDeco } from '../ui/chrome'
+import { ScreenHeading } from '../ui/ScreenHeading'
 import { aggregateResults } from '../core/scoring'
 import { ALL_CASES, poolFor } from '../data/pool'
 import { sampleSession, SESSION_SIZE } from '../core/session'
@@ -147,9 +148,9 @@ export function ResultsScreen({
       <EcgDeco embedded={embedded} />
       <div className="screen" style={{ position: 'relative', zIndex: 1 }}>
         <div className="results-wrap-v2 screen-body">
-          <h1 className="results-title-v2 results-title">
+          <ScreenHeading className="results-title-v2 results-title">
             {isAssessment ? 'Değerlendirme Tamamlandı' : 'Vaka Raporu'}
-          </h1>
+          </ScreenHeading>
           <p className="results-sub-v2">
             {passed
               ? 'Tebrikler — performansınız hedefin üzerinde. Bu düzeyi korumak için öğrenme modunda farklı bulgularla okumaya devam edebilirsiniz.'
