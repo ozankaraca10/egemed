@@ -16,3 +16,6 @@ packages/sim-opaca/public/assets/xray/runtime/
 packages/sim-ausculta/public/assets/audio/runtime/
 
 work/
+
+# Impeccable motoru ilk çalıştırmada indirilir; ikili dosyalar git dışı
+**/skills/impeccable/scripts/bin/
