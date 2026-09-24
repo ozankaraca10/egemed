@@ -9,6 +9,8 @@ export type { CardiacMetrics, CardiacSnapshot, MechanicalTimeline } from "./engi
 export { createCryptoRandomInt, createSeededRandomInt } from "./engine/rng";
 export type { CryptoLike, RandomInt } from "./engine/rng";
 export { createSessionId, sample } from "./engine/sample";
+export { curriculumIndex, explanationsFor, freeze, optionsFor, seededPermutation } from "./engine/curriculumIndex";
+export type { CurriculumBank } from "./engine/curriculumIndex";
 export {
   LEADS,
   MODES,
