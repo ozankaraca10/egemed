@@ -26,6 +26,8 @@ export {
 } from "./core/flow";
 export type { RegionChipVisualState, SubmitAction, TutorialEvent, TutorialProgress } from "./core/flow";
 export { SUSPEND_LIMIT_12, SUSPEND_LIMIT_2004, deserializeSuspend, serializeSuspend } from "./core/suspend";
+export { filterAssessmentPool, validateCase } from "./core/validation";
+export type { ValidationIssue } from "./core/validation";
 export type {
   AuscultationPoint,
   CaseDef,
