@@ -1,5 +1,6 @@
 import { useEffect, useRef, type JSX } from "react";
 import { useStore } from "./core/StoreProvider";
+import { gamiStoragePort } from "./core/storage";
 import { resolveEntryScreen } from "./screens/entry";
 import { LearnScreen, type LearnScreenEnv } from "./screens/LearnScreen";
 import { ModeSelectScreen } from "./screens/ModeSelectScreen";
@@ -48,9 +49,11 @@ function Shell({
   resultsEnv,
   scrollToTop,
 }: AppProps & { embedded: boolean }): JSX.Element {
-  const { state, dispatch, bus, now } = useStore();
+  const { state, dispatch, bus, now, storage } = useStore();
   const gamiRef = useRef<LocalGamiRepository | null>(null);
-  if (gamiRef.current === null) gamiRef.current = new LocalGamiRepository({ now: () => new Date(now()) });
+  if (gamiRef.current === null) {
+    gamiRef.current = new LocalGamiRepository({ storage: gamiStoragePort(storage), now: () => new Date(now()) });
+  }
   const gami = gamiRef.current;
   const screen = resolveEntryScreen(state.screen, embedded);
 
