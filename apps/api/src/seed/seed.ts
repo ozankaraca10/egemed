@@ -280,7 +280,8 @@ export interface DevSeedUserSpec {
  * `DEV_ACCOUNTS`); test bunların eşitliğini doğrular.
  */
 export const DEV_SEED_USERS: readonly DevSeedUserSpec[] = [
-  { username: "admin", displayName: "Geliştirme Yöneticisi", roles: ["admin"], simAccess: [] },
+  // API-03: sim uçları yetkiyi `sim_access` ile ister; geliştirme yöneticisi simleri deneyebilsin.
+  { username: "admin", displayName: "Geliştirme Yöneticisi", roles: ["admin"], simAccess: [...SIM_IDS] },
   {
     username: "ogrenci",
     displayName: "Geliştirme Öğrencisi",

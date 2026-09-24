@@ -80,7 +80,7 @@ describe("seed:dev — geliştirme kullanıcıları (E3 §a)", () => {
     expect(harness.store.institutions.get(result.institutionId)?.code).toBe("egemed-dev");
 
     const admin = userByUsername(harness.store, DEV_ACCOUNTS.admin.username);
-    expect(admin).toMatchObject({ authMethod: "dev", status: "active", roles: ["admin"], simAccess: [] });
+    expect(admin).toMatchObject({ authMethod: "dev", status: "active", roles: ["admin"], simAccess: ["pulse", "ausculta", "opaca"] });
     const student = userByUsername(harness.store, DEV_ACCOUNTS.student.username);
     expect(student).toMatchObject({ authMethod: "dev", status: "active", roles: ["kullanici"] });
     expect(student.simAccess).toEqual([...SIM_IDS]);

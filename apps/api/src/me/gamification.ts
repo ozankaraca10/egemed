@@ -408,8 +408,10 @@ function canonicalSummary(summary: Readonly<Record<string, number>>): string {
   );
 }
 
+/** İdempotent tekrar yalnız aynı kullanıcı×sim×deneme için geçerlidir (API-04). */
 function sameAttempt(attempt: GamiAttemptRecord, input: GamiAttemptInput): boolean {
   return (
+    attempt.simId === input.simId &&
     attempt.attemptNo === input.attemptNo &&
     attempt.startedAt === input.startedAt &&
     attempt.finishedAt === input.finishedAt &&
@@ -622,8 +624,9 @@ export function createMemoryGamificationRepo(
       };
       const byId = attempts.get(input.id);
       if (byId !== undefined) {
-        return sameAttempt(byId, input)
-          ? { kind: "existing", attempt }
+        // Başka kullanıcının/simin kimliğiyle çakışma idempotent tekrar sayılmaz (API-04).
+        return byId.userId === input.userId && sameAttempt(byId, input)
+          ? { kind: "existing", attempt: { ...attempt, simId: byId.simId } }
           : { kind: "conflict" };
       }
       for (const candidate of attempts.values()) {
@@ -803,9 +806,12 @@ export function registerMeGamificationRoutes(
       await sessions.revoke(getCookie(c, SESSION_COOKIE));
       return jsonError(c, "unauthorized");
     }
-    c.set("meActor", { userId: context.id, institutionId: context.institution.id });
+    c.set("meActor", { userId: context.id, institutionId: context.institution.id, simAccess: context.simAccess });
     return next();
   };
+
+  /** Sim başına yetki (API-03): erişimi olmayan sim için okuma ve yazma reddedilir. */
+  const canUseSim = (c: Context<AppEnv>, simId: SimId): boolean => c.get("meActor").simAccess.includes(simId);
 
   // `/me/*` çerezle korunur: mutasyonlar double-submit CSRF ister (T63 kuralı);
   // kimlik her istekte sunucuda yeniden doğrulanır.
@@ -815,8 +821,9 @@ export function registerMeGamificationRoutes(
     const actor = c.get("meActor");
     const at = now();
     // Üç simin özeti AYRI tutulur; birleştirme veya toplam puan üretilmez.
+    // Yalnız erişim verilmiş simler döner (API-03).
     const summaries = await Promise.all(
-      SIM_IDS.map((simId) =>
+      SIM_IDS.filter((simId) => actor.simAccess.includes(simId)).map((simId) =>
         deps.gamification.getSummary({
           userId: actor.userId,
           institutionId: actor.institutionId,
@@ -833,6 +840,7 @@ export function registerMeGamificationRoutes(
     if (!parsedSim.success) return jsonError(c, "not_found");
     const parsedQuery = gamiLeaderboardQuerySchema.safeParse(c.req.query());
     if (!parsedQuery.success) return jsonError(c, "invalid_request", validationDetails(parsedQuery.error));
+    if (!canUseSim(c, parsedSim.data)) return jsonError(c, "forbidden");
     const actor = c.get("meActor");
     const board = await deps.gamification.getLeaderboard({
       userId: actor.userId,
@@ -853,6 +861,7 @@ export function registerMeGamificationRoutes(
   app.get("/me/gamification/:simId", async (c) => {
     const parsed = gamiSimIdParamSchema.safeParse(c.req.param("simId"));
     if (!parsed.success) return jsonError(c, "not_found");
+    if (!canUseSim(c, parsed.data)) return jsonError(c, "forbidden");
     const actor = c.get("meActor");
     const summary = await deps.gamification.getSummary({
       userId: actor.userId,
@@ -866,6 +875,7 @@ export function registerMeGamificationRoutes(
   app.post("/me/gamification/:simId/attempts", async (c) => {
     const parsedSim = gamiSimIdParamSchema.safeParse(c.req.param("simId"));
     if (!parsedSim.success) return jsonError(c, "not_found");
+    if (!canUseSim(c, parsedSim.data)) return jsonError(c, "forbidden");
     const parsed = attemptWriteRequestSchema.safeParse(await readJson(c));
     if (!parsed.success) {
       return isScoreIssue(parsed.error)
