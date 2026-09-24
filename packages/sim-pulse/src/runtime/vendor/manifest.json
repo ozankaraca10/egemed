@@ -1,0 +1,87 @@
+{
+  "source": "EGEMED_PULSE/cardai",
+  "scripts": [
+    "model",
+    "scorm",
+    "curriculum",
+    "state",
+    "app",
+    "features",
+    "landing"
+  ],
+  "files": {
+    "model.js": {
+      "sha256": "9c04522574968b11fc01dc35f619d692e87d1d8d90e4b2c9ec0a4285b023d873",
+      "bytes": 12538
+    },
+    "scorm.js": {
+      "sha256": "3a2cf98b0f1daf11514b92320439adf28f3fbbc15c202479586970fc6f3641fd",
+      "bytes": 9976
+    },
+    "curriculum.js": {
+      "sha256": "8b03298ca5ffa349175f4a43b5685fb9f9f3ce8039caa524247fd5684fb0256b",
+      "bytes": 166081
+    },
+    "state.js": {
+      "sha256": "43e1b06319b5a0da6e16d8b70dc46026f983de463e9c84a47259dd66aa75fcf8",
+      "bytes": 7760
+    },
+    "app.js": {
+      "sha256": "afb620e18c185b99f7a6b128b3bdf7b8ae64079d24ce32808c77f8ca8cd831a8",
+      "bytes": 52923
+    },
+    "features.js": {
+      "sha256": "76745fc061c8f1e4087fba88d38596df224547747dd38579d3128fdf5121bb91",
+      "bytes": 47535
+    },
+    "landing.js": {
+      "sha256": "3d72c008cdb7dd2cc1c7867464bddba40b85859738963946385671302e8c5636",
+      "bytes": 7439
+    },
+    "index.html": {
+      "sha256": "351f0f3102ef8eb98d9e3abe526974349cfffe209cb29d1e60e55a9c257d46dc",
+      "bytes": 39091
+    },
+    "sources.json": {
+      "sha256": "857b0eadb24789043397f044704c394b205f62315055b464f79f6390bac779aa",
+      "bytes": 5127
+    },
+    "styles.css": {
+      "sha256": "8861071129fc23d1efce79f736d636e3176df79f1a2d2cea20f75bec25703ff1",
+      "bytes": 73778
+    },
+    "assets/egemed-pulse-favicon.png": {
+      "sha256": "85ec3fa85248756aa1466036a7dcc71bb1efc814e26730cd1d7b9e2fe3cf731a",
+      "bytes": 97644
+    },
+    "assets/egemed-pulse-landing.png": {
+      "sha256": "f8228c246dd7244dbb5e48374cd50b3d37f12116f23da5034f99fae0f306942a",
+      "bytes": 236983
+    },
+    "assets/ege-tip-logo.png": {
+      "sha256": "88fdc554b38522ccf45b9c1f55caba09bb2e9ba945cd1e0fdbe68ba98b50b6b3",
+      "bytes": 333436
+    },
+    "assets/brand/ege-tip-seal-128.png": {
+      "sha256": "a2d357de37b60abf412b471412773f1348667be34f59d2d708cc3a740ee03341",
+      "bytes": 28040
+    }
+  },
+  "patches": [
+    {
+      "file": "model.js",
+      "id": "PULSE-NEXTEVENT-RECURSION",
+      "matches": 1,
+      "why": "Kaynak hatası: önbellek dışındaki kısa aralıkta between() aynı girdilerle kendini çağırıp yığın taşırıyor (~30 adım sonra). Port düzeltmesiyle (T18b-FIX, engine/beats.ts) aynı: taşan uçtan önbelleği yenile."
+    },
+    {
+      "file": "features.js",
+      "id": "PULSE-ASSET-BASE",
+      "matches": 1,
+      "why": "Göreli varlık yolu kabuğun kökünde değil /sims/pulse/ altında çözülmeli."
+    }
+  ],
+  "markup": {
+    "h1ToH2": 6
+  }
+}

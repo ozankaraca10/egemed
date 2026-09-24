@@ -4,6 +4,7 @@ import { ROUTES, routeHref, type ResolvedRoute, type RouteId } from "./routes";
 import type { ShellSession } from "./session";
 import { ShellFooter } from "./ShellFooter";
 import { EgemedLogo } from "./brand/EgemedLogo";
+import { FULL_BLEED_SIMS } from "./sims/layout";
 
 export interface ShellLayoutProps {
   /** Çözümlenmiş rota; etkin bağlantı işaretlemesi bundan türetilir. */
@@ -67,6 +68,8 @@ const NAV_ICONS: Record<RouteId, ReactNode> = {
  */
 export function ShellLayout({ route, session, onLogout, children }: ShellLayoutProps): JSX.Element {
   const activeId = route.kind === "page" ? route.route.id : undefined;
+  // Kaynak runtime'ı tam genişlik için tasarlanmış simler (Pulse, PULSE-04).
+  const wideMain = route.kind === "sim" && FULL_BLEED_SIMS.has(route.simId);
   // API oturumunda görünen ad sunucudan gelir; sahte oturumda rol etiketi çizilir.
   const roleLabel = session === undefined || session === null
     ? null
@@ -103,7 +106,7 @@ export function ShellLayout({ route, session, onLogout, children }: ShellLayoutP
           </nav>
         </div>
       </header>
-      <main className="eg-shell-main" id="icerik" tabIndex={-1}>
+      <main className={wideMain ? "eg-shell-main eg-shell-main--wide" : "eg-shell-main"} id="icerik" tabIndex={-1}>
         {synthetic && <p className="eg-shell-session-banner">{t("shell.session.banner")}</p>}
         {children}
       </main>

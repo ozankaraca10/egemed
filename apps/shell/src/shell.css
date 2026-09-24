@@ -455,6 +455,16 @@ html, body { margin: 0; }
   background: var(--card); border: 1px solid var(--border);
   border-radius: var(--radius); box-shadow: var(--shadow-card);
 }
+/* Tam genişlik simler (Pulse): kaynak runtime kendi kartlarını ve kenarlarını çizer. */
+/* Sim kökü kendi yığın bağlamında kalır; iç öğeler kabuk gezinmesinin üstüne çıkmaz.
+   Mobilde sabit alt sekme çubuğu kadar alt boşluk sime değişkenle iletilir. */
+.eg-shell-sim-page--bleed .eg-shell-sim-page__host { isolation: isolate; }
+@media (max-width: 767.98px) {
+  .eg-shell-sim-page--bleed .eg-shell-sim-page__host { --pulse-bottom-inset: calc(53px + env(safe-area-inset-bottom)); }
+}
+.eg-shell-sim-page--bleed .eg-shell-sim-page__host {
+  padding: 0; background: none; border: 0; border-radius: 0; box-shadow: none;
+}
 .eg-shell-sim-page__skeleton { display: grid; align-content: start; gap: var(--sp-3); padding: var(--sp-4); }
 .eg-shell-sim-page__skeleton-block {
   display: block; height: 5.5rem; background: var(--card-soft);
@@ -647,6 +657,7 @@ html, body { margin: 0; }
     box-shadow: inset 0 -3px 0 var(--blue-400); color: var(--card);
   }
   .eg-shell-main { max-width: 72rem; margin: 0 auto; padding: var(--sp-5); }
+  .eg-shell-main--wide { max-width: 120rem; }
   /* Gezinme üst bara döndüğü için footer'ın alt çubuk boşluğu gerekmez. */
   .eg-shell .eg-shell-footer { padding-bottom: var(--sp-4); }
   .eg-shell-cards { grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr)); }

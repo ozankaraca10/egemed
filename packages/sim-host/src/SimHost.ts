@@ -38,6 +38,11 @@ export interface SimMountContext {
   readonly simId: SimulatorId;
   /** AGENTS.md: zaman doğrudan okunmaz, bağımlılık olarak enjekte edilir. */
   readonly now: () => number;
+  /**
+   * Oturumdaki kullanıcının takma kimliği (ad/e-posta değil). Sim yerel
+   * kayıtlarını bu kimlikle ayırır; yoksa anonim ad alanı kullanılır (PULSE-08).
+   */
+  readonly actorId?: string;
 }
 
 /** Modül `mount` dönüşünde zorunlu cleanup verir; idempotent olmalıdır. */
@@ -67,9 +72,22 @@ export interface SimHostOptions {
   events?: SimHostEvents;
 }
 
+/** `mount`a eşlik eden, kabuktan gelen oturum bilgisi. */
+export interface SimMountOptions {
+  readonly actorId?: string;
+}
+
+/** Bir `mount` çağrısının kimliği; yalnız o çağrının oturumunu bırakmak için. */
+export type SimMountToken = number;
+
 export interface SimHost {
   /** Var olan oturumu kapatıp `simId` için yeni yükleme başlatır. */
-  mount(target: SimMountTarget, simId: SimulatorId): void;
+  mount(target: SimMountTarget, simId: SimulatorId, options?: SimMountOptions): SimMountToken;
+  /**
+   * Yalnız `token` hâlâ son `mount` ise oturumu kapatır. Ertelenmiş cleanup'ın
+   * (ör. React effect'i) araya giren yeni mount'u iptal etmesini önler (PLATFORM-01).
+   */
+  release(token: SimMountToken): void;
   /** Etkin oturumu kapatır, bekleyen yüklemeyi geçersiz kılar; idempotent. */
   dispose(): void;
   readonly active: SimulatorId | null;
@@ -127,7 +145,7 @@ export function createSimHost(options: SimHostOptions): SimHost {
     get loading(): SimulatorId | null {
       return pending?.simId ?? null;
     },
-    mount(target: SimMountTarget, simId: SimulatorId): void {
+    mount(target: SimMountTarget, simId: SimulatorId, mountOptions?: SimMountOptions): SimMountToken {
       if (!isSimulatorId(simId)) {
         throw new Error(`Bilinmeyen simülatör kimliği: ${String(simId)}`);
       }
@@ -136,7 +154,7 @@ export function createSimHost(options: SimHostOptions): SimHost {
       endSession();
       if (loadEpoch !== epoch) {
         // Önceki oturumun temizliği yeni bir mount/dispose tetikledi; son çağrı kazanır.
-        return;
+        return loadEpoch;
       }
       pending = { epoch: loadEpoch, simId };
       events.onLoading?.(simId);
@@ -147,7 +165,7 @@ export function createSimHost(options: SimHostOptions): SimHost {
       } catch (error: unknown) {
         pending = null;
         events.onError?.(simId, error);
-        return;
+        return loadEpoch;
       }
 
       void loadResult.then(
@@ -163,7 +181,9 @@ export function createSimHost(options: SimHostOptions): SimHost {
             );
             return;
           }
-          const context: SimMountContext = { simId, now: options.now };
+          const actorId = mountOptions?.actorId;
+          const context: SimMountContext =
+            actorId === undefined ? { simId, now: options.now } : { actorId, now: options.now, simId };
           let dispose: SimDispose | undefined;
           try {
             dispose = module.mount(target, context);
@@ -199,6 +219,13 @@ export function createSimHost(options: SimHostOptions): SimHost {
           events.onError?.(simId, error);
         },
       );
+      return loadEpoch;
+    },
+    release(token: SimMountToken): void {
+      if (token !== epoch) return;
+      epoch += 1;
+      pending = null;
+      endSession();
     },
     dispose(): void {
       epoch += 1;

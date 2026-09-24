@@ -44,7 +44,7 @@ function contentFor(route: ResolvedRoute, session: ShellSession | null): ReactNo
   if (route.kind === "adminImport") return <ImportWizardPage />;
   if (route.kind === "adminRoles") return <RolesPage />;
   if (route.kind === "adminAudit") return <AuditPage />;
-  if (route.kind === "sim") return <SimRoute simId={route.simId} />;
+  if (route.kind === "sim") return <SimRoute actorId={session?.actorId} simId={route.simId} />;
   return <NotFoundPage />;
 }
 

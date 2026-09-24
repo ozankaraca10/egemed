@@ -10,7 +10,18 @@ import type { SimulatorId } from "@egemed/sim-host";
 
 export const SIM_ID = "pulse" satisfies SimulatorId;
 
-export { DEFAULT_PULSE_ASSET_BASE, createPulseModule, pulseModule } from "./mount";
+export { DEFAULT_PULSE_ASSET_BASE, createPulseModule } from "./mount";
+/**
+ * Platform Pulse modülü: kaynak runtime (EGEMED_PULSE/cardai) gölge DOM'da
+ * çalışır (PULSE-00). `createPulseModule` (sadeleştirilmiş eski ekranlar)
+ * yalnız geriye dönük dışa aktarımdır; kabuk bunu kullanmaz.
+ */
+export { DEFAULT_PULSE_RUNTIME_ASSET_BASE, createPulseRuntimeModule, pulseStorageNamespace } from "./runtime/module";
+export type { PulseRuntimeModuleDeps } from "./runtime/module";
+export { mountPulseRuntime } from "./runtime/host";
+export type { PulseRuntimeBridge, PulseRuntimeHandle, PulseRuntimeOptions } from "./runtime/host";
+import { createPulseRuntimeModule } from "./runtime/module";
+export const pulseModule = createPulseRuntimeModule();
 export type { PulseMountElement, PulseModuleDeps, PulseModuleEnv } from "./mount";
 
 export { getRootFlag, query, setRootFlag } from "./host/dom";
