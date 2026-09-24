@@ -11,40 +11,6 @@ interface FocusScope {
   querySelectorAll(selector: string): ArrayLike<Focusable>;
 }
 
-/** DOM lib'siz gövde kaydırma hedefi; aynı anda açık modalları sayar. */
-interface ScrollableBody {
-  style: { overflow: string };
-}
-
-let scrollLockCount = 0;
-let lockedBody: ScrollableBody | null = null;
-let previousBodyOverflow = "";
-
-function lockBodyScroll(): () => void {
-  const documentScope = globalThis as { document?: { body?: ScrollableBody } };
-  const body = documentScope.document?.body;
-  if (body === undefined) return () => undefined;
-
-  if (scrollLockCount === 0) {
-    lockedBody = body;
-    previousBodyOverflow = body.style.overflow;
-    body.style.overflow = "hidden";
-  }
-  scrollLockCount += 1;
-
-  let released = false;
-  return () => {
-    if (released) return;
-    released = true;
-    scrollLockCount = Math.max(0, scrollLockCount - 1);
-    if (scrollLockCount === 0 && lockedBody !== null) {
-      lockedBody.style.overflow = previousBodyOverflow;
-      lockedBody = null;
-      previousBodyOverflow = "";
-    }
-  };
-}
-
 export interface ModalProps {
   open: boolean;
   onClose: () => void;
@@ -99,8 +65,8 @@ export function nextFocusTarget<T>(
  * Erişilebilir diyalog: `role="dialog"` + `aria-modal`, Escape ile kapanış,
  * Tab/Shift+Tab odak tuzağı ve kapanışta odağı tetikleyiciye geri verme.
  *
- * Modal açık kaldığı sürece gövde kaydırmasını kilitler; iç diyalog kendi içinde
- * kayabilir ve son modal kapanınca önceki gövde stili geri yüklenir.
+ * Gövde kaydırma kilidi bu bileşenin kapsamında DEĞİLDİR; `open` durumuna göre
+ * kaydırmayı T08 kabuk tüketicisi yönetmelidir.
  */
 export function Modal({
   open,
@@ -116,11 +82,9 @@ export function Modal({
 
   useEffect(() => {
     if (!open) return;
-    const unlockBodyScroll = lockBodyScroll();
     restoreRef.current = activeElement();
     focusNode(dialogRef.current);
     return () => {
-      unlockBodyScroll();
       restoreRef.current?.focus();
     };
   }, [open]);
