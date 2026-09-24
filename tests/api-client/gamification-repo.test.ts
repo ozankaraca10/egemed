@@ -85,6 +85,46 @@ function summaryPayload(attempts: readonly unknown[] = []) {
   };
 }
 
+function leaderboardPayload() {
+  return {
+    data: {
+      period: "month",
+      cohort: "all",
+      generatedAt: "2026-09-24T10:00:00.000+03:00",
+      isDemo: false,
+      rows: [
+        {
+          id: "peer-1",
+          displayName: "MK",
+          isMe: false,
+          isPublic: true,
+          cohort: 5,
+          periodScore: 92.5,
+          attemptsCount: 2,
+          reachedAt: "2026-09-22T14:05:00.000+03:00",
+          totalXp: 9999,
+          level: 9,
+          rank: 1,
+        },
+        {
+          id: "me",
+          displayName: "AV",
+          isMe: true,
+          isPublic: true,
+          cohort: 3,
+          periodScore: 70,
+          attemptsCount: 2,
+          reachedAt: "2026-09-22T14:05:00.000+03:00",
+          totalXp: 1450,
+          level: 4,
+          rank: 2,
+        },
+      ],
+    },
+    meta: { page: 1, pageSize: 100, total: 2 },
+  };
+}
+
 function sampleAttempt(overrides: Partial<AttemptRecord> = {}): AttemptRecord {
   return {
     id: ATTEMPT_UUID,
@@ -173,21 +213,19 @@ describe("createApiGamiRepository — başarısızlık yolları", () => {
     expect(mock.calls).toHaveLength(2);
   });
 
-  it("sözleşmeye uymayan özet yanıtında ApiSchemaError fırlatır", async () => {
+  it("sözleşmeye uymayan liderlik yanıtında ApiSchemaError fırlatır", async () => {
     const mock = createFetchMock([
       {
         status: 200,
         json: {
           data: {
-            simId: SIM_ID,
-            xp: -1,
-            level: 4,
-            streak: { current: 3, best: 7, lastDate: "2026-09-22" },
-            weeklyGoal: { targetXp: 300, currentXp: 120 },
-            badges: [],
-            leaderboard: { rank: 2, total: 42 },
-            attempts: [],
+            period: "month",
+            cohort: "all",
+            generatedAt: "2026-09-24T10:00:00.000+03:00",
+            isDemo: true,
+            rows: [],
           },
+          meta: { page: 1, pageSize: 100, total: 0 },
         },
       },
     ]);
@@ -272,15 +310,17 @@ describe("createApiGamiRepository — başarı yolları", () => {
     });
   });
 
-  it("getLeaderboard özet liderlik verisini tek satırlık görünüme taşır", async () => {
-    const mock = createFetchMock([{ status: 200, json: summaryPayload() }]);
+  it("getLeaderboard liderlik uçunu çağırır ve satırları GamiLeaderboardView'e mapler", async () => {
+    const mock = createFetchMock([{ status: 200, json: leaderboardPayload() }]);
     const repo = createRepo(mock);
     const now = new Date("2026-09-24T10:00:00.000Z");
 
     const view = await repo.getLeaderboard("month", "all", now);
     expect(view.isDemo).toBe(false);
-    expect(view.rows).toHaveLength(1);
-    expect(view.rows[0]).toMatchObject({
+    expect(view.rows).toHaveLength(2);
+    expect(mock.calls[0]?.url).toContain(`/me/gamification/${SIM_ID}/leaderboard`);
+    expect(view.rows[1]).toMatchObject({
+      id: "me",
       isMe: true,
       totalXp: 1450,
       level: 4,

@@ -3,9 +3,20 @@ import { getCookie } from "hono/cookie";
 import {
   SIM_IDS,
   attemptWriteRequestSchema,
+  gamiLeaderboardQuerySchema,
   gamiSimIdParamSchema,
+  type GamiCohortFilter,
+  type GamiPeriod,
   type SimId,
 } from "@egemed/contracts";
+import type { Period } from "@egemed/gamification-core";
+import {
+  buildLeaderboardRows,
+  paginateRows,
+  toLeaderboardRowResponses,
+  type LeaderboardAttemptSeed,
+  type LeaderboardPeerSeed,
+} from "./leaderboard";
 import { jsonError, validationDetails, type AppEnv } from "../http";
 import { csrfGuard, type AuthDeps } from "../auth/routes";
 import { SESSION_COOKIE, createSessionService } from "../auth/session";
@@ -92,6 +103,25 @@ export interface GamiSummaryQuery {
   readonly at: number;
 }
 
+export interface GamiLeaderboardQuery {
+  readonly userId: string;
+  readonly institutionId: string;
+  readonly simId: SimId;
+  readonly period: GamiPeriod;
+  readonly cohort: GamiCohortFilter;
+  readonly page: number;
+  readonly pageSize: number;
+  readonly at: number;
+}
+
+export interface GamiLeaderboardRecord {
+  readonly period: GamiPeriod;
+  readonly cohort: GamiCohortFilter;
+  readonly generatedAt: number;
+  readonly rows: ReturnType<typeof toLeaderboardRowResponses>;
+  readonly total: number;
+}
+
 export interface GamiAttemptInput {
   /** İstemci üretir; anahtar budur ve yazma idempotenttir. */
   readonly id: string;
@@ -128,6 +158,7 @@ export type GamiAttemptWriteResult =
 
 export interface GamificationRepo {
   getSummary(query: GamiSummaryQuery): Promise<GamiSimSummaryRecord>;
+  getLeaderboard(query: GamiLeaderboardQuery): Promise<GamiLeaderboardRecord>;
   writeAttempt(input: GamiAttemptInput): Promise<GamiAttemptWriteResult>;
 }
 
@@ -281,6 +312,78 @@ export function createPgGamificationRepo(db: GamiDb): GamificationRepo {
       const attempt = toAttemptRecord(row);
       return sameAttempt(attempt, input) ? { kind: "existing", attempt } : { kind: "conflict" };
     },
+
+    async getLeaderboard(query) {
+      const rows = await db.query(
+        `select u.id as user_id, u.display_name, unit.code as unit_code, p.xp, p.level,
+                a.finished_at, a.score
+         from gami_profiles p
+         join users u on u.id = p.user_id
+         left join units unit on unit.id = u.unit_id and unit.deleted_at is null
+         left join gami_attempts a on a.user_id = p.user_id and a.sim_id = p.sim_id
+         where u.institution_id = $1 and p.sim_id = $2 and u.status = 'active' and u.deleted_at is null`,
+        [query.institutionId, query.simId],
+      );
+      return assembleLeaderboardRecord(query, rows.rows as readonly PgLeaderboardSourceRow[]);
+    },
+  };
+}
+
+interface PgLeaderboardSourceRow {
+  readonly user_id: string;
+  readonly display_name: string;
+  readonly unit_code: string | null;
+  readonly xp: number;
+  readonly level: number;
+  readonly finished_at: Date | null;
+  readonly score: number | null;
+}
+
+function assembleLeaderboardRecord(
+  query: GamiLeaderboardQuery,
+  rows: readonly PgLeaderboardSourceRow[],
+): GamiLeaderboardRecord {
+  const peers = new Map<string, LeaderboardPeerSeed>();
+  const profiles = new Map<string, { readonly xp: number; readonly level: number }>();
+  const attempts: LeaderboardAttemptSeed[] = [];
+
+  for (const row of rows) {
+    if (!peers.has(row.user_id)) {
+      peers.set(row.user_id, {
+        userId: row.user_id,
+        displayName: row.display_name,
+        unitCode: row.unit_code,
+        public: true,
+      });
+      profiles.set(row.user_id, { xp: row.xp, level: row.level });
+    }
+    if (row.finished_at !== null) {
+      attempts.push({
+        userId: row.user_id,
+        simId: query.simId,
+        finishedAt: row.finished_at.getTime(),
+        score: row.score,
+      });
+    }
+  }
+
+  const ranked = buildLeaderboardRows({
+    viewerUserId: query.userId,
+    peers: [...peers.values()],
+    profiles,
+    attempts,
+    simId: query.simId,
+    period: query.period as Period,
+    cohort: query.cohort,
+    at: query.at,
+  });
+  const page = paginateRows(ranked, query.page, query.pageSize);
+  return {
+    period: query.period,
+    cohort: query.cohort,
+    generatedAt: query.at,
+    rows: toLeaderboardRowResponses(page.rows, query.userId),
+    total: page.total,
   };
 }
 
@@ -326,6 +429,9 @@ export interface MemoryGamiProfileSeed {
   readonly level?: number;
   readonly streak?: GamiStreakRecord;
   readonly updatedAt?: number;
+  readonly displayName?: string;
+  readonly unitCode?: string | null;
+  readonly public?: boolean;
 }
 
 export interface MemoryGamiBadgeSeed {
@@ -362,6 +468,9 @@ export interface MemoryGamiProfileState {
   level: number;
   streak: GamiStreakRecord;
   updatedAt: number;
+  displayName: string;
+  unitCode: string | null;
+  public: boolean;
 }
 
 export interface MemoryGamiAttemptState {
@@ -416,6 +525,9 @@ export function createMemoryGamificationRepo(
         lastDate: profile.streak?.lastDate ?? null,
       },
       updatedAt: profile.updatedAt ?? 0,
+      displayName: profile.displayName ?? "Örnek Öğrenci",
+      unitCode: profile.unitCode ?? null,
+      public: profile.public ?? true,
     });
   }
   for (const badge of seed.badges ?? []) badges.push({ ...badge });
@@ -537,6 +649,54 @@ export function createMemoryGamificationRepo(
       });
       return { kind: "created", attempt };
     },
+
+    async getLeaderboard(query) {
+      const peers = [...profiles.values()]
+        .filter(
+          (profile) =>
+            profile.institutionId === query.institutionId && profile.simId === query.simId,
+        )
+        .map(
+          (profile): LeaderboardPeerSeed => ({
+            userId: profile.userId,
+            displayName: profile.displayName,
+            unitCode: profile.unitCode,
+            public: profile.public,
+          }),
+        );
+      const profileMap = new Map(
+        peers.map((peer) => {
+          const profile = profiles.get(profileKey(peer.userId, query.simId));
+          return [peer.userId, { xp: profile?.xp ?? 0, level: profile?.level ?? 1 }];
+        }),
+      );
+      const attemptSeeds: LeaderboardAttemptSeed[] = [...attempts.values()]
+        .filter((attempt) => attempt.simId === query.simId)
+        .map((attempt) => ({
+          userId: attempt.userId,
+          simId: attempt.simId,
+          finishedAt: attempt.finishedAt,
+          score: attempt.score,
+        }));
+      const ranked = buildLeaderboardRows({
+        viewerUserId: query.userId,
+        peers,
+        profiles: profileMap,
+        attempts: attemptSeeds,
+        simId: query.simId,
+        period: query.period as Period,
+        cohort: query.cohort,
+        at: query.at,
+      });
+      const page = paginateRows(ranked, query.page, query.pageSize);
+      return {
+        period: query.period,
+        cohort: query.cohort,
+        generatedAt: query.at,
+        rows: toLeaderboardRowResponses(page.rows, query.userId),
+        total: page.total,
+      };
+    },
   };
 
   return { repo, profiles, attempts, badges };
@@ -595,6 +755,28 @@ function attemptBody(attempt: GamiAttemptRecord) {
   };
 }
 
+function leaderboardBody(record: GamiLeaderboardRecord) {
+  return {
+    period: record.period,
+    cohort: record.cohort,
+    generatedAt: toIstanbulIso(record.generatedAt),
+    isDemo: false,
+    rows: record.rows.map((row) => ({
+      id: row.id,
+      displayName: row.displayName,
+      isMe: row.isMe,
+      isPublic: row.isPublic,
+      cohort: row.cohort,
+      periodScore: row.periodScore,
+      attemptsCount: row.attemptsCount,
+      reachedAt: row.reachedAt === null ? null : toIstanbulIso(new Date(row.reachedAt).getTime()),
+      totalXp: row.totalXp,
+      level: row.level,
+      rank: row.rank,
+    })),
+  };
+}
+
 function isScoreIssue(error: { readonly issues: readonly { readonly message: string }[] }): boolean {
   return error.issues.some((issue) => issue.message === "score_exceeds_max");
 }
@@ -644,6 +826,28 @@ export function registerMeGamificationRoutes(
       ),
     );
     return c.json({ data: { sims: summaries.map(summaryBody) } });
+  });
+
+  app.get("/me/gamification/:simId/leaderboard", async (c) => {
+    const parsedSim = gamiSimIdParamSchema.safeParse(c.req.param("simId"));
+    if (!parsedSim.success) return jsonError(c, "not_found");
+    const parsedQuery = gamiLeaderboardQuerySchema.safeParse(c.req.query());
+    if (!parsedQuery.success) return jsonError(c, "invalid_request", validationDetails(parsedQuery.error));
+    const actor = c.get("meActor");
+    const board = await deps.gamification.getLeaderboard({
+      userId: actor.userId,
+      institutionId: actor.institutionId,
+      simId: parsedSim.data,
+      period: parsedQuery.data.period,
+      cohort: parsedQuery.data.cohort,
+      page: parsedQuery.data.page,
+      pageSize: parsedQuery.data.pageSize,
+      at: now(),
+    });
+    return c.json({
+      data: leaderboardBody(board),
+      meta: { page: parsedQuery.data.page, pageSize: parsedQuery.data.pageSize, total: board.total },
+    });
   });
 
   app.get("/me/gamification/:simId", async (c) => {

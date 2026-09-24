@@ -2,7 +2,7 @@
  *  Sim PORT'u (`GamiRepository`) ile `@egemed/api-client` gamification uçlarını eşler.
  *  Ağ/şema hataları doğrudan fırlatılır; yerel kuyruk YOKTUR (ADR-004). */
 
-import type { AttemptWriteRequest, GamiSimSummary, GamiSummaryResponse, SimId } from "@egemed/contracts";
+import type { AttemptWriteRequest, GamiLeaderboardResponse, GamiSimSummary, SimId } from "@egemed/contracts";
 import {
   GamiRepositoryUnsupportedError,
   TR_OFFSET_MS,
@@ -18,7 +18,11 @@ import {
 } from "@egemed/gamification-core";
 
 interface GamificationApiClient {
-  getSummary(simId: SimId): Promise<GamiSummaryResponse>;
+  getSummary(simId: SimId): Promise<{ data: GamiSimSummary }>;
+  getLeaderboard(
+    simId: SimId,
+    query: { readonly period: Period; readonly cohort: CohortFilter; readonly page: number; readonly pageSize: number },
+  ): Promise<GamiLeaderboardResponse>;
   writeAttempt(simId: SimId, input: AttemptWriteRequest): Promise<void>;
 }
 
@@ -80,32 +84,29 @@ function attemptFromSummary<TAttempt extends AttemptRecord>(
   })) as unknown as readonly TAttempt[];
 }
 
-function leaderboardFromSummary(
-  summary: GamiSimSummary,
+function leaderboardFromResponse(
+  response: GamiLeaderboardResponse,
   period: Period,
   cohort: CohortFilter,
-  now: Date,
 ): GamiLeaderboardView {
   return {
     period,
     cohort,
-    generatedAt: toTrIso(now.getTime()),
-    isDemo: false,
-    rows: [
-      {
-        id: ME_ID,
-        displayName: "Anonim öğrenci",
-        isMe: true,
-        isPublic: true,
-        cohort: null,
-        periodScore: null,
-        attemptsCount: summary.attempts.length,
-        reachedAt: null,
-        totalXp: summary.xp,
-        level: summary.level,
-        rank: summary.leaderboard.rank,
-      },
-    ],
+    generatedAt: response.data.generatedAt,
+    isDemo: response.data.isDemo,
+    rows: response.data.rows.map((row) => ({
+      id: row.isMe ? ME_ID : row.id,
+      displayName: row.displayName,
+      isMe: row.isMe,
+      isPublic: row.isPublic,
+      cohort: row.cohort,
+      periodScore: row.periodScore,
+      attemptsCount: row.attemptsCount,
+      reachedAt: row.reachedAt,
+      totalXp: row.totalXp,
+      level: row.level,
+      rank: row.rank,
+    })),
   };
 }
 
@@ -172,8 +173,14 @@ export function createApiGamiRepository<TAttempt extends AttemptRecord>(
       cohort: CohortFilter,
       now: Date,
     ): Promise<GamiLeaderboardView> {
-      const summary = await loadSummary();
-      return leaderboardFromSummary(summary, period, cohort, now);
+      void now;
+      const response = await options.client.getLeaderboard(options.simId, {
+        period,
+        cohort,
+        page: 1,
+        pageSize: 100,
+      });
+      return leaderboardFromResponse(response, period, cohort);
     },
 
     async getMonthlyReward(month: string): Promise<MonthlyReward | null> {
