@@ -191,10 +191,10 @@ describe("SimRoute yükleniyor durumu", () => {
     expect(html).toContain("eg-shell-sim-page__stage");
   });
 
-  it("opaca için de yüklenirken çubuk tek h1'i korur (gerçek modül henüz mount edilmedi)", () => {
-    // SSR effect çalıştırmaz; durum hep "loading" kalır. Opaca hazır olunca
-    // çubuk `<h1>`i bırakır (bkz. e2e/sims.spec.ts) — burada yalnız yükleniyor
-    // durumundaki tekil `<h1>` sözleşmesi doğrulanır.
+  it("opaca için de çubuk tek h1'i korur (S25: gömülü ekranlar h2)", () => {
+    // SSR effect çalıştırmaz; durum hep "loading" kalır. Opaca gömülü modda
+    // `ScreenHeading` ile h2 kullandığı için kabuk hazır durumda da `<h1>`i
+    // korur (bkz. e2e/sims.spec.ts).
     const html = renderToStaticMarkup(createElement(SimRoute, { simId: "opaca" }));
     expect((html.match(/<h1\b/g) ?? []).length).toBe(1);
     expect(html).toContain(`<h1 class="eg-shell-sim-page__title">${t("sims.opaca.name")}</h1>`);

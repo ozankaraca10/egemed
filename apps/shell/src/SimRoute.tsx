@@ -27,14 +27,12 @@ export function simErrorTitle(simId: SimulatorId): string {
 }
 
 /**
- * Kendi `<h1>`ini taşıyan gerçek sim modülleri (T14c: Opaca). Bu kimlikler
- * hazır olduğunda kabuk çubuğu aynı metni `<h1>` yerine düz metin olarak
- * çizer; sayfada tek `<h1>` kalır (WCAG 2.4.6/1.3.1). Yükleniyor/hata
- * durumunda — modülün kendi başlığı henüz DOM'da değilken — çubuk `<h1>`i
- * korur. Yer tutucu modüller (pulse/ausculta) kendi başlığını taşımadığı
- * için bu kümeye girmez.
+ * Gömülü modda sayfa `<h1>`ini taşıyan sim modülleri. Hazır olduklarında
+ * kabuk çubuğu aynı metni `<h1>` yerine düz metin çizer; sayfada tek `<h1>`
+ * kalır (WCAG 2.4.6/1.3.1). Opaca (T15b-S25) gömülü modda ekran başlıklarını
+ * `h2` olarak çizdiği için kabuk `<h1>`i korur — bu kümeye girmez.
  */
-const SIMS_WITH_OWN_HEADING: ReadonlySet<SimulatorId> = new Set(["opaca"]);
+const SIMS_WITH_OWN_HEADING: ReadonlySet<SimulatorId> = new Set();
 
 /**
  * Sim rotası React host'u (ADR-006): `SimHost` bileşen ömrü boyunca tek

@@ -50,8 +50,15 @@ describe("Opaca App (statik render)", () => {
     expect(html).not.toContain("<iframe");
     expect(html).not.toContain("Simülatörü başlat");
     expect(html).toContain("Çalışma modunu seçin");
+    expect(html).toContain('<h2 class="mode-title">');
+    expect(html).not.toContain('<h1 class="mode-title">');
     expect(html).toContain('class="mode-card learn"');
     expect(html).toContain('class="eg-sim-opaca app-shell"');
+  });
+
+  it("gömülü App ağacında h1 çizilmez (kabuk çubuğu sayfanın tek h1ini taşır)", () => {
+    const html = renderApp();
+    expect(html.match(/<h1\b/g) ?? []).toHaveLength(0);
   });
 
   it("gömülü modda footer çizilmez", () => {
@@ -65,6 +72,7 @@ describe("Opaca App (statik render)", () => {
     expect(html).toContain('<header class="eg-header">');
     expect(html).toContain('<footer class="eg-footer">');
     expect(html).toContain("Radyolojik Görüntüleme Simülatörü");
+    expect(html).toContain('<h1 class="hero-title">');
   });
 
   it("DevPanel yalnız açıkça istendiğinde çizilir", () => {

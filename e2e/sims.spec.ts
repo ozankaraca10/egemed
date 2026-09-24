@@ -75,9 +75,11 @@ test.describe("Opaca sim rotası (gerçek modül)", () => {
     // paylaşır (iç içe); `.first()` ilkini görünür bekler.
     await expect(page.locator(".eg-sim-opaca").first()).toBeVisible();
 
-    // Opaca'nın kendi başlangıç ekranı (StartScreen) mount edilmiş olmalı.
-    await expect(page.locator(".start-hero-screen")).toBeVisible();
-    await expect(page.getByRole("button", { name: "Simülatörü başlat" })).toBeVisible();
+    // Gömülü modda tanıtım atlanır; mod seçimi ekranı açılır (S24).
+    await expect(page.getByRole("heading", { name: "Çalışma modunu seçin" })).toBeVisible();
+    await expect(page.locator(".mode-card.learn")).toBeVisible();
+    await expect(page.locator(".mode-card.practice")).toBeVisible();
+    await expect(page.locator(".mode-card.assessment")).toBeVisible();
 
     // Tek üst bar: Opaca embedded modda kendi marka üst barını (.eg-header) çizmez;
     // kabuğun kendi marka barı (.eg-shell-header) tek kalır, sayfada tek h1 vardır.

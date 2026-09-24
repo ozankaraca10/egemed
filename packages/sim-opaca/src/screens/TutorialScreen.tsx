@@ -6,6 +6,7 @@ import { tutorialProgress, type TutorialEvent } from '../core/flow'
 import type { Point } from '../core/geometry'
 import { FilmViewer, createNoopFilmEnv } from '../ui/FilmViewer'
 import { Footer, EcgDeco } from '../ui/chrome'
+import { ScreenHeading } from '../ui/ScreenHeading'
 import { IconArrowRight, IconCheck } from '../ui/icons'
 
 /** İlk kullanım öğreticisi: gerçek görüntüleyici üzerinde üç rehberli adım. */
@@ -44,7 +45,7 @@ export function TutorialScreen({ embedded = false }: TutorialScreenProps): JSX.E
         <div className="container screen-body">
           <div className="tutorial-wrap">
             <div className="tut-text-col">
-              <h1 className="tut-title">Nasıl kullanılır?</h1>
+              <ScreenHeading className="tut-title">Nasıl kullanılır?</ScreenHeading>
               <p className="tut-lead">Üç adımı sağdaki film üzerinde deneyin.</p>
               <p className="tut-sub">Tamamlanan adımlar işaretlenir; sıra zorunlu değildir.</p>
               <div className="tut-steps tut-steps-live">
