@@ -9,7 +9,7 @@ import {
 } from "../../packages/sim-opaca/src/index";
 import type { StoragePort, WindowLike } from "../../packages/sim-opaca/src/index";
 
-/** Statik render regresyonu — embedded başlık hiyerarşisi tek h1 kuralını bozmasın. */
+/** Statik render kabulü — E2 §8 S19: gömülü App, Türkçe başlık, çift üst bar yok, iframe yok. */
 
 const inertWindow: WindowLike = {
   addEventListener: () => undefined,
@@ -44,14 +44,41 @@ function renderApp(overrides: { embedded?: boolean; showDevPanel?: boolean } = {
 }
 
 describe("Opaca App (statik render)", () => {
-  it("gömülü varsayılan modda ekran başlığı h2 olur", () => {
+  it("gömülü varsayılan modda bağımsız üst bar çizilmez; tanıtım atlanıp mod seçimi açılır", () => {
     const html = renderApp();
+    expect(html).not.toContain('<header class="eg-header">');
+    expect(html).not.toContain("<iframe");
+    expect(html).not.toContain("Simülatörü başlat");
+    expect(html).toContain("Çalışma modunu seçin");
     expect(html).toContain('<h2 class="mode-title">');
     expect(html).not.toContain('<h1 class="mode-title">');
+    expect(html).toContain('class="mode-card learn"');
+    expect(html).toContain('class="eg-sim-opaca app-shell"');
   });
 
   it("gömülü App ağacında h1 çizilmez (kabuk çubuğu sayfanın tek h1ini taşır)", () => {
     const html = renderApp();
     expect(html.match(/<h1\b/g) ?? []).toHaveLength(0);
+  });
+
+  it("gömülü modda footer çizilmez", () => {
+    const html = renderApp();
+    expect(html).not.toContain('<footer class="eg-footer">');
+  });
+
+  it("bağımsız modda tek üst bar ve footer çizilir", () => {
+    const html = renderApp({ embedded: false });
+    expect(html.match(/<header/g)).toHaveLength(1);
+    expect(html).toContain('<header class="eg-header">');
+    expect(html).toContain('<footer class="eg-footer">');
+    expect(html).toContain("Radyolojik Görüntüleme Simülatörü");
+    expect(html).toContain('<h1 class="hero-title">');
+  });
+
+  it("DevPanel yalnız açıkça istendiğinde çizilir", () => {
+    expect(renderApp()).not.toContain("dev-panel");
+    const html = renderApp({ showDevPanel: true });
+    expect(html).toContain('class="dev-panel"');
+    expect(html).toContain("Olay günlüğü");
   });
 });
