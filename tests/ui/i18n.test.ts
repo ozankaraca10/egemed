@@ -65,6 +65,13 @@ const premiumKeys: TrKey[] = [
   "footer.rights",
 ];
 
+const simErrorKeys: TrKey[] = [
+  "sims.error.title",
+  "sims.error.body",
+  "sims.error.retry",
+  "sims.loading",
+];
+
 const howKeys: TrKey[] = [
   "home.how.title",
   "home.how.learn.title",
@@ -156,6 +163,18 @@ describe("i18n/tr sözlüğü", () => {
     expect(t("home.how.assess.body")).toBe(
       "Rastgele vaka setiyle kendinizi sınayın; alan bazlı performansınızı görün.",
     );
+  });
+
+  it("sim hata ve yükleme anahtarları tanımlı ve birebir metinleri taşır", () => {
+    for (const key of simErrorKeys) {
+      expect(t(key).trim().length, key).toBeGreaterThan(0);
+    }
+    expect(t("sims.error.title")).toBe("Simülatör açılamadı");
+    expect(t("sims.error.body")).toBe(
+      "Bağlantınızı kontrol edip yeniden deneyin. Sorun sürerse kurum BT birimine başvurun.",
+    );
+    expect(t("sims.error.retry")).toBe("Tekrar dene");
+    expect(t("sims.loading")).toBe("Simülatör yükleniyor…");
   });
 
   it("premium platform anahtarları tanımlı ve boş değil", () => {

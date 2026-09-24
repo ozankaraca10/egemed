@@ -116,6 +116,11 @@ export const tr = {
   "sims.opaca.tagline": "Radyolojik Görüntüleme Simülatörü",
   "sims.opaca.body": "Akciğer grafisi ve toraks BT'yi sistematik okumayı öğrenin.",
   "sims.open": "Simülatörü aç",
+  "sims.loading": "Simülatör yükleniyor…",
+  "sims.error.title": "Simülatör açılamadı",
+  "sims.error.body":
+    "Bağlantınızı kontrol edip yeniden deneyin. Sorun sürerse kurum BT birimine başvurun.",
+  "sims.error.retry": "Tekrar dene",
   "sims.soon": "Platforma taşınıyor",
   "footer.nav.label": "Alt bilgi",
   "footer.institution": "Ege Üniversitesi Tıp Fakültesi",
