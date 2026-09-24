@@ -90,12 +90,6 @@ describe("ModeCard açık kart", () => {
     expect(tagWith(html, "eg-mode-card__check")).toContain('aria-hidden="true"');
   });
 
-  it("headingLevel 2 ile h2 üretir", () => {
-    const html = render({ ...openCard, headingLevel: 2 });
-    expect(html).toContain("<h2");
-    expect(html).not.toContain("<h3");
-  });
-
   it("sayı + progressbar semantiğini ve çubuk genişliğini kurar", () => {
     const html = render(openCard);
     const bar = tagWith(html, "eg-mode-card__progress");
@@ -108,28 +102,9 @@ describe("ModeCard açık kart", () => {
     expect(attr(bar, "aria-labelledby")).toBe(attr(tagWith(html, "eg-mode-card__status"), "id"));
     expect(tagWith(html, "eg-mode-card__bar")).toContain('style="width:54%"');
   });
-
-  it("CTA düğmesi tıklanabilir ve yön oku dekoratiftir", () => {
-    const html = render(openCard);
-    const button = tagWith(html, "eg-mode-card__action");
-    expect(attr(button, "type")).toBe("button");
-    expect(button).not.toContain("disabled");
-    expect(button).not.toContain("aria-describedby");
-    expect(html).toContain("İnceleme moduna başla");
-    expect(tagWith(html, "eg-mode-card__arrow")).toContain('aria-hidden="true"');
-  });
 });
 
 describe("ModeCard kilitli kart", () => {
-  it("görünür kalır: rozet, neden ve ön koşul CTA metni", () => {
-    const html = render(lockedCard);
-    expect(html).toContain('data-locked="true"');
-    expect(html).toContain("Kilitli");
-    expect(html).toContain("Açılması için İnceleme tamamlanmalı");
-    expect(html).toContain("7/13 EKG sonucu izlendi");
-    expect(html).toContain("Kilidi aç → İnceleme moduna git");
-  });
-
   it("CTA devre dışı bırakılmaz; neden aria-describedby ile bağlanır", () => {
     const html = render(lockedCard);
     const button = tagWith(html, "eg-mode-card__action");

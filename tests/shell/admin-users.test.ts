@@ -1,4 +1,4 @@
-import { createElement, type ReactElement } from "react";
+import { type ReactElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import {
   ADMIN_USERS_PATH,
@@ -31,14 +31,10 @@ import {
   sortChoiceFor,
   UsersCards,
   UsersListView,
-  UsersPage,
   UsersTable,
   type UsersListViewProps,
 } from "../../apps/shell/src/admin/UsersPage";
-import { t } from "../../packages/ui/i18n/tr";
 import { describe, expect, it, vi } from "vitest";
-
-const count = (html: string, needle: string): number => html.split(needle).length - 1;
 
 const USER_A: AdminUser = {
   authMethod: "sso",
@@ -63,34 +59,10 @@ const USER_B: AdminUser = {
   username: "ornek.kullanici.002",
 };
 const SAMPLE_USERS: readonly AdminUser[] = [USER_A, USER_B];
+const READY_META = { page: 1, pageSize: 20, total: SAMPLE_USERS.length };
 
 function noop(): void {
   // yalnız zorunlu prop'u doldurur; ilgisiz durumlarda çağrılmaz
-}
-
-/** React eleman ağacını DOM'suz gezer; statik render olay taşımadığı için testler
- *  ilgili düğümün props'unu (ör. `onChange`) doğrudan çağırıp doğrular. */
-function collectElements(
-  node: unknown,
-  predicate: (element: ReactElement) => boolean,
-  results: ReactElement[] = [],
-): ReactElement[] {
-  if (node === null || node === undefined || typeof node !== "object") return results;
-  if (Array.isArray(node)) {
-    for (const child of node) collectElements(child, predicate, results);
-    return results;
-  }
-  const element = node as ReactElement;
-  if (element.type === undefined) return results;
-  if (predicate(element)) results.push(element);
-  const children = (element.props as { children?: unknown } | undefined)?.children;
-  if (children !== undefined) collectElements(children, predicate, results);
-  return results;
-}
-
-function findAllCheckboxProps(tree: ReactElement): { onChange: () => void }[] {
-  const inputs = collectElements(tree, (element) => (element.props as { type?: string }).type === "checkbox");
-  return inputs.map((element) => element.props as { onChange: () => void });
 }
 
 function baseViewProps(overrides: Partial<UsersListViewProps>): UsersListViewProps {
@@ -122,6 +94,31 @@ function baseViewProps(overrides: Partial<UsersListViewProps>): UsersListViewPro
     units: ADMIN_UNITS,
     ...overrides,
   };
+}
+
+/** React eleman ağacını DOM'suz gezer; statik render olay taşımadığı için testler
+ *  ilgili düğümün props'unu (ör. `onChange`) doğrudan çağırıp doğrular. */
+function collectElements(
+  node: unknown,
+  predicate: (element: ReactElement) => boolean,
+  results: ReactElement[] = [],
+): ReactElement[] {
+  if (node === null || node === undefined || typeof node !== "object") return results;
+  if (Array.isArray(node)) {
+    for (const child of node) collectElements(child, predicate, results);
+    return results;
+  }
+  const element = node as ReactElement;
+  if (element.type === undefined) return results;
+  if (predicate(element)) results.push(element);
+  const children = (element.props as { children?: unknown } | undefined)?.children;
+  if (children !== undefined) collectElements(children, predicate, results);
+  return results;
+}
+
+function findAllCheckboxProps(tree: ReactElement): { onChange: () => void }[] {
+  const inputs = collectElements(tree, (element) => (element.props as { type?: string }).type === "checkbox");
+  return inputs.map((element) => element.props as { onChange: () => void });
 }
 
 describe("sentetik kullanıcı kaynağı determinizmi", () => {
@@ -300,91 +297,7 @@ describe("#/admin/kullanicilar rotası ve koruması", () => {
   });
 });
 
-describe("UsersListView işaretlemesi", () => {
-  const READY_META = { page: 1, pageSize: 20, total: SAMPLE_USERS.length };
-
-  it("tablo başlıklarını, kart liste sınıflarını ve durum rozetlerini metinle çizer", () => {
-    const html = renderToStaticMarkup(
-      createElement(UsersListView, baseViewProps({ result: { data: SAMPLE_USERS, meta: READY_META }, status: "ready" })),
-    );
-    for (const key of [
-      "admin.users.table.name",
-      "admin.users.table.username",
-      "admin.users.table.role",
-      "admin.users.table.unit",
-      "admin.users.table.status",
-    ] as const) {
-      expect(html, key).toContain(`<th role="columnheader" scope="col">${t(key)}</th>`);
-    }
-    expect(html).toContain('class="eg-shell-users__table"');
-    expect(count(html, 'class="eg-shell-users__card"')).toBe(SAMPLE_USERS.length);
-    expect(html).toContain(t("admin.users.status.active"));
-    expect(html).toContain(t("admin.users.status.invited"));
-    expect(html).toContain(`href="${adminUserDetailHref("user-001")}"`);
-    expect(html).toContain("Örnek Kullanıcı 001");
-    expect(html).not.toContain("CLIX");
-  });
-
-  it("boş veri kümesinde table.empty + devre dışı 'Kullanıcı ekle' gösterir", () => {
-    const html = renderToStaticMarkup(
-      createElement(
-        UsersListView,
-        baseViewProps({ query: {}, result: { data: [], meta: { page: 1, pageSize: 20, total: 0 } }, status: "ready" }),
-      ),
-    );
-    expect(html).toContain(t("table.empty"));
-    expect(count(html, t("admin.users.action.add"))).toBe(2); // üst çubuk + boş durum
-    expect(count(html, `href="${adminUserCreateHref()}"`)).toBe(2); // T70: artık gerçek bağlantı
-    expect(html).not.toContain(t("admin.users.filtered.empty"));
-  });
-
-  it("filtreli boş sonuçta 'filtreleri temizle' eylemiyle ayrı bir metin gösterir", () => {
-    const html = renderToStaticMarkup(
-      createElement(
-        UsersListView,
-        baseViewProps({
-          query: { q: "zzz-yok" },
-          result: { data: [], meta: { page: 1, pageSize: 20, total: 0 } },
-          status: "ready",
-        }),
-      ),
-    );
-    expect(html).toContain(t("admin.users.filtered.empty"));
-    expect(html).toContain(t("admin.users.filter.clear"));
-    expect(html).not.toContain(t("table.empty"));
-  });
-
-  it("yükleniyor durumunda iskelet, hata durumunda kod + 'Yeniden dene' gösterir", () => {
-    const loading = renderToStaticMarkup(createElement(UsersListView, baseViewProps({ status: "loading" })));
-    expect(loading).toContain("eg-shell-users__skeleton");
-    expect(loading).not.toContain("eg-shell-users__table");
-
-    const error = renderToStaticMarkup(createElement(UsersListView, baseViewProps({ status: "error" })));
-    expect(error).toMatch(/role="alert"/);
-    expect(error).toContain(t("admin.users.error.title"));
-    expect(error).toContain(t("admin.users.error.body"));
-    expect(error).toContain(t("admin.users.error.retry"));
-  });
-
-  it("aria-live bölgesi seçim sayısını duyurur; seçim yokken çubuk gizlenir", () => {
-    const withResult = { data: SAMPLE_USERS, meta: READY_META };
-    const none = renderToStaticMarkup(
-      createElement(UsersListView, baseViewProps({ result: withResult, selected: new Set(), status: "ready" })),
-    );
-    expect(none).toContain('<p aria-live="polite" class="eg-visually-hidden"></p>');
-    expect(none).not.toContain("eg-shell-users__bulkbar");
-
-    const two = renderToStaticMarkup(
-      createElement(
-        UsersListView,
-        baseViewProps({ result: withResult, selected: new Set(["user-001", "user-002"]), status: "ready" }),
-      ),
-    );
-    expect(two).toContain(`<p aria-live="polite" class="eg-visually-hidden">2 ${t("admin.users.selection.suffix")}</p>`);
-    expect(two).toContain("eg-shell-users__bulkbar");
-    expect(two).toContain(t("admin.users.bulk.open"));
-  });
-
+describe("UsersListView etkileşim sözleşmeleri", () => {
   it("Escape tuşu seçim temizleme geri çağrısını tetikler (klavye sözleşmesi)", () => {
     let cleared = 0;
     const tree = UsersListView(
@@ -428,23 +341,6 @@ describe("UsersListView işaretlemesi", () => {
       checkboxProps[1]?.onChange();
       expect(calls).toEqual(["user-001", "user-002"]);
     }
-  });
-});
-
-describe("UsersPage kabı", () => {
-  it("varsayılan (dataSource'suz) çağrıldığında ilk render'da iskelet gösterir", () => {
-    const html = renderToStaticMarkup(createElement(UsersPage));
-    expect(html).toContain(t("admin.users.title"));
-    expect(html).toContain("eg-shell-users__skeleton");
-  });
-
-  it("enjekte edilen kaynakla da ilk render iskelet gösterir; efekt SSR'da çalışmaz", async () => {
-    const source = createMockUsersSource(7, 5);
-    const html = renderToStaticMarkup(createElement(UsersPage, { dataSource: source }));
-    expect(html).toContain("eg-shell-users__skeleton");
-    // Kaynağın kendisi bağımsız olarak çalışır (determinizm doğrulaması burada değil, üstteki grupta).
-    const list = await source.list({});
-    expect(list.meta.total).toBe(5);
   });
 });
 

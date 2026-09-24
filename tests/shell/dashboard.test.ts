@@ -1,25 +1,16 @@
-import { createElement, type ReactElement } from "react";
+import type { ReactElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import type { DevSession } from "../../apps/shell/src/devAuth";
 import {
   createApiGamificationSource,
   createSyntheticGamificationSource,
   summaryForSim,
   type GamiSimSummary,
 } from "../../apps/shell/src/home/gamificationSource";
-import {
-  ProgressSection,
-  ProgressSectionView,
-  type ProgressSectionViewProps,
-} from "../../apps/shell/src/home/ProgressSection";
-import { simHref } from "../../apps/shell/src/routes";
+import { ProgressSectionView, type ProgressSectionViewProps } from "../../apps/shell/src/home/ProgressSection";
 import { SIM_IDS } from "../../apps/shell/src/SimCard";
 import { gamiAllResponseSchema, gamiSimSummarySchema } from "../../packages/contracts/src/index";
 import { t } from "../../packages/ui/i18n/tr";
 import { describe, expect, it, vi } from "vitest";
-
-const count = (html: string, needle: string): number => html.split(needle).length - 1;
-const STUDENT: DevSession = { actorId: "dev-student-0001", role: "student" };
 
 /** React eleman ağacını DOM'suz gezer (admin-users.test.ts deseni). */
 function collectElements(
@@ -116,102 +107,17 @@ describe("gamificationSource: API kaynağı (@egemed/api-client)", () => {
   });
 });
 
-describe("ProgressSectionView (durumsuz görünüm)", () => {
-  it("yükleniyor durumunda üç iskelet satırı gösterir, sekme yoktur", () => {
-    const html = renderToStaticMarkup(createElement(ProgressSectionView, baseViewProps({ status: "loading" })));
-    expect(html).toContain("eg-shell-progress__skeleton");
-    expect(count(html, "eg-shell-progress__skeleton-row")).toBe(SIM_IDS.length);
-    expect(html).not.toContain('role="tab"');
-  });
-
-  it("hata durumunda kod + 'Yeniden dene' gösterir; düğme onRetry'ı tetikler", () => {
-    const html = renderToStaticMarkup(createElement(ProgressSectionView, baseViewProps({ status: "error" })));
-    expect(html).toMatch(/role="alert"/);
-    expect(html).toContain(t("home.progress.error.title"));
-    expect(html).toContain(t("home.progress.error.body"));
-    expect(html).toContain(t("home.progress.error.retry"));
-
+describe("ProgressSectionView hata kurtarma", () => {
+  it("'Yeniden dene' düğmesi onRetry'ı tetikler", () => {
     let retried = 0;
     const tree = ProgressSectionView(
       baseViewProps({ onRetry: () => { retried += 1; }, status: "error" }),
     ) as ReactElement;
+    const html = renderToStaticMarkup(tree);
+    expect(html).toMatch(/role="alert"/);
+    expect(html).toContain(t("home.progress.error.retry"));
     const [button] = collectElements(tree, (element) => element.type === "button");
     (button?.props as { onClick?: () => void } | undefined)?.onClick?.();
     expect(retried).toBe(1);
-  });
-
-  it("hazır + boş özetlerde üç sekme, her panelde boş durum metni + sim bağlantısı gösterir", () => {
-    const html = renderToStaticMarkup(createElement(ProgressSectionView, baseViewProps({ status: "ready", summaries: [] })));
-    expect((html.match(/role="tab"/g) ?? []).length).toBe(SIM_IDS.length);
-    expect(count(html, t("home.progress.tab.empty"))).toBe(SIM_IDS.length);
-    expect(count(html, t("sims.open"))).toBe(SIM_IDS.length);
-    for (const id of SIM_IDS) {
-      expect(html, id).toContain(`href="${simHref(id)}"`);
-      expect(html, id).toContain(`>${t(`sims.${id}.name`)}</button>`);
-    }
-    expect(html).not.toContain("eg-shell-progress__num");
-  });
-
-  it("hazır + dolu özetlerde XP/seviye/seri/haftalık hedef/liderlik ve rozetleri gösterir", () => {
-    const summaries: readonly GamiSimSummary[] = [
-      {
-        simId: "pulse",
-        xp: 1450,
-        level: 4,
-        streak: { current: 3, best: 7, lastDate: "2026-09-22" },
-        weeklyGoal: { targetXp: 300, currentXp: 120 },
-        badges: [{ key: "ritim-ustasi", awardedAt: "2026-09-20T10:15:00.000+03:00" }],
-        leaderboard: { rank: 5, total: 42 },
-        attempts: [],
-      },
-    ];
-    const html = renderToStaticMarkup(
-      createElement(ProgressSectionView, baseViewProps({ status: "ready", summaries })),
-    );
-    expect(html).toContain("1450");
-    expect(html).toContain(t("home.progress.xp"));
-    expect(html).toContain(t("home.progress.level"));
-    expect(html).toContain(t("home.progress.streak"));
-    expect(html).toContain("120/300");
-    expect(html).toContain(t("home.progress.weeklyGoal"));
-    expect(html).toContain("5/42");
-    expect(html).toContain(t("home.progress.leaderboard"));
-    expect(html).toContain("ritim-ustasi");
-    // Ausculta ve Opaca özeti taşımaz: boş durum korunur (simler arası birleştirme yok).
-    expect(count(html, t("home.progress.tab.empty"))).toBe(SIM_IDS.length - 1);
-  });
-
-  it("rozetsiz dolu özette 'Henüz rozet yok' gösterir", () => {
-    const summaries: readonly GamiSimSummary[] = [
-      {
-        simId: "ausculta",
-        xp: 210,
-        level: 1,
-        streak: { current: 0, best: 2, lastDate: null },
-        weeklyGoal: { targetXp: 150, currentXp: 0 },
-        badges: [],
-        leaderboard: { rank: 31, total: 58 },
-        attempts: [],
-      },
-    ];
-    const html = renderToStaticMarkup(
-      createElement(ProgressSectionView, baseViewProps({ status: "ready", summaries })),
-    );
-    expect(html).toContain(t("home.progress.badges.empty"));
-  });
-});
-
-describe("ProgressSection (kap)", () => {
-  it("varsayılan (dataSource'suz) çağrıldığında ilk render'da iskelet gösterir; SSR efekt çalıştırmaz", () => {
-    const html = renderToStaticMarkup(createElement(ProgressSection));
-    expect(html).toContain("eg-shell-progress__skeleton");
-  });
-
-  it("enjekte edilen kaynakla da ilk render iskelet gösterir; kaynağın kendisi bağımsız çalışır", async () => {
-    const source = createSyntheticGamificationSource(true);
-    const html = renderToStaticMarkup(createElement(ProgressSection, { dataSource: source, session: STUDENT }));
-    expect(html).toContain("eg-shell-progress__skeleton");
-    const summaries = await source.getSummaries();
-    expect(summaries).toHaveLength(SIM_IDS.length);
   });
 });

@@ -27,3 +27,25 @@ declare module "node:path" {
 declare module "node:url" {
   export function fileURLToPath(url: string): string;
 }
+
+/**
+ * `vite/client` tipleri kök test programına yalnızca
+ * `apps/shell/src/EntryPage.tsx` içindeki
+ * `/// <reference types="vite/client" />` yönergesi üzerinden (o dosyayı içe
+ * aktaran testler aracılığıyla) giriyordu; T53a temizliğinde o testler
+ * kaldırılınca
+ * `apps/shell/vite.config.ts` (`import.meta.url`) ve
+ * `packages/sim-opaca/src/SimModule.tsx` (`import.meta.env.DEV`) bildirimsiz
+ * kaldı. Kök program bu paketlerin `.d.ts` dosyalarını kapsamadığı için
+ * gereken en dar `ImportMeta` yüzeyi burada bildirilir; adlar
+ * `packages/sim-opaca/src/vite-env.d.ts` ile aynıdır (vite/client ile
+ * birleşebilir).
+ */
+interface ImportMetaEnv {
+  readonly DEV: boolean;
+}
+
+interface ImportMeta {
+  readonly env: ImportMetaEnv;
+  readonly url: string;
+}
