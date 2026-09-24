@@ -353,4 +353,35 @@ describe("POST /me/gamification/:simId/attempts", () => {
     expect(withoutCsrf.status).toBe(403);
     expect(testHarness.gamificationStore.attempts.size).toBe(3);
   });
+
+  it("negatif özet ve ters zaman reddedilir; GET yanıtı kendi şemasını sağlar", async () => {
+    const testHarness = harness();
+    const ali = await login(testHarness, "ali.veli");
+    const negative = await postAttempt(testHarness, ali.headers, {
+      ...attemptBody(),
+      summary: { xp: -100, ritim: 80 },
+    });
+    expect(negative.status).toBe(400);
+    const inverted = await postAttempt(testHarness, ali.headers, {
+      ...attemptBody(),
+      startedAt: "2023-11-14T22:05:00.000+03:00",
+      finishedAt: "2023-11-14T21:40:00.000+03:00",
+    });
+    expect(inverted.status).toBe(400);
+    expect(testHarness.gamificationStore.attempts.size).toBe(3);
+
+    const summary = await testHarness.app.request("/me/gamification/pulse", { headers: ali.headers });
+    const summaryBody = await summary.json();
+    const parsedSummary = gamiSummaryResponseSchema.safeParse(summaryBody);
+    if (!parsedSummary.success) expect.unreachable(JSON.stringify(parsedSummary.error.issues));
+    expect(parsedSummary.data.data.weeklyGoal.currentXp).toBeGreaterThanOrEqual(0);
+
+    const all = await testHarness.app.request("/me/gamification", { headers: ali.headers });
+    const allBody = await all.json();
+    const parsedAll = gamiAllResponseSchema.safeParse(allBody);
+    if (!parsedAll.success) expect.unreachable(JSON.stringify(parsedAll.error.issues));
+    for (const sim of parsedAll.data.data.sims) {
+      expect(sim.weeklyGoal.currentXp).toBeGreaterThanOrEqual(0);
+    }
+  });
 });

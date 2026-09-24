@@ -76,10 +76,13 @@ export const gamiAllResponseSchema = z.strictObject({
 
 export type GamiAllResponse = z.infer<typeof gamiAllResponseSchema>;
 
-/** Kodlu özet: anahtar kod, değer sayı; serbest metin ve ham yanıt yasak. */
+/** Tek denemenin kodlu özet sayısı: negatif XP yok; tavan tek oturum için makul. */
+export const ATTEMPT_SUMMARY_MAX = 1_000_000;
+
+/** Kodlu özet: anahtar kod, değer sınırlı tam sayı; serbest metin ve ham yanıt yasak. */
 export const attemptSummarySchema = z.record(
   z.string().regex(CODE_PATTERN),
-  z.number().int(),
+  z.number().int().min(0).max(ATTEMPT_SUMMARY_MAX),
 );
 
 /** POST /me/gamification/:simId/attempts gövdesi (E3 §d): `id` istemci üretir,
@@ -98,6 +101,10 @@ export const attemptWriteRequestSchema = z
   .refine((value) => value.score == null || value.maxScore == null || value.score <= value.maxScore, {
     message: "score_exceeds_max",
     path: ["score"],
+  })
+  .refine((value) => Date.parse(value.finishedAt) >= Date.parse(value.startedAt), {
+    message: "finished_before_started",
+    path: ["finishedAt"],
   });
 
 export type AttemptWriteRequest = z.infer<typeof attemptWriteRequestSchema>;

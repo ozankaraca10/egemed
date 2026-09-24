@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import type { BulkOperation } from "../../packages/contracts/src/index";
 import { createPgAdminBulkRepo } from "../../apps/api/src/admin/bulk";
 import { sessionIdForToken } from "../../apps/api/src/auth/session";
 import {
@@ -282,5 +283,69 @@ describe("POST /admin/users/bulk (E3 §d)", () => {
     expect(call?.text).not.toContain(ALI_ID);
     expect(call?.text).not.toContain(UNIT_ID);
     expect(call?.params.slice(0, 2)).toEqual([[ALI_ID], INSTITUTION_ID]);
+  });
+
+  it("her işlem PostgreSQL satırındaki kullanıcı kimliğini döner", async () => {
+    const cases: readonly { readonly operation: BulkOperation; readonly value: string | null }[] = [
+      { operation: "assign_role", value: "kullanici" },
+      { operation: "revoke_role", value: "kullanici" },
+      { operation: "set_unit", value: UNIT_ID },
+      { operation: "set_status", value: "suspended" },
+      { operation: "grant_sim", value: "pulse" },
+      { operation: "revoke_sim", value: "pulse" },
+    ];
+    for (const item of cases) {
+      const calls: string[] = [];
+      const repo = createPgAdminBulkRepo({
+        query(text) {
+          calls.push(text);
+          const returning = /returning\s+(.+)$/i.exec(text)?.[1] ?? "";
+          const row = /\buser_id\b/.test(returning) ? { user_id: ALI_ID } : { id: ALI_ID };
+          return Promise.resolve({ rows: [row] });
+        },
+      });
+      const changed = await repo.apply({
+        institutionId: INSTITUTION_ID,
+        actorUserId: ADMIN_ID,
+        operation: item.operation,
+        value: item.value,
+        userIds: [ALI_ID, BORA_ID],
+        at: FIXED_NOW,
+      });
+      expect(changed, item.operation).toEqual([ALI_ID]);
+      expect(calls[0], item.operation).toMatch(/returning\s+.*\buser_id\b/i);
+    }
+  });
+
+  it("returning id satırını da okur; güncellenen ve atlanan ayrık kalır", async () => {
+    const repo = createPgAdminBulkRepo({
+      query() {
+        return Promise.resolve({ rows: [{ id: ALI_ID }] });
+      },
+    });
+    const harness = createAdminHarness({ bulk: repo });
+    const ali = await login(harness, "ali.veli");
+    const admin = await login(harness, "ornek.yonetici");
+    const response = await bulk(harness, admin, {
+      userIds: [ALI_ID, BORA_ID],
+      operation: "set_status",
+      value: "suspended",
+    });
+    expect(response.status).toBe(200);
+    const data = (await response.json()).data as {
+      updated: number;
+      skipped: readonly { userId: string; code: string }[];
+    };
+    expect(data).toEqual({
+      dryRun: false,
+      updated: 1,
+      skipped: [{ userId: BORA_ID, code: "no_change" }],
+    });
+    const skippedIds = data.skipped.map((row) => row.userId);
+    expect(skippedIds).not.toContain(ALI_ID);
+    expect(data.updated + skippedIds.length).toBe(2);
+    expect(harness.authStore.auditEntries.map((entry) => entry.targetId)).toEqual([ALI_ID]);
+    expect(harness.authStore.sessionRecords.get(sessionIdForToken(ali.token))?.revokedAt).toBe(FIXED_NOW);
+    expect(harness.authStore.sessionRecords.get(sessionIdForToken(admin.token))?.revokedAt).toBeNull();
   });
 });

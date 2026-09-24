@@ -120,6 +120,7 @@ export { authMeResponseSchema } from "./schemas/auth";
 export type { AuthMeResponse } from "./schemas/auth";
 
 export {
+  ATTEMPT_SUMMARY_MAX,
   attemptSummarySchema,
   attemptWriteRequestSchema,
   GAMI_COHORTS,

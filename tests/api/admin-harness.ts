@@ -1,5 +1,5 @@
 import { createApp } from "../../apps/api/src/app";
-import { createMemoryAdminBulkRepo } from "../../apps/api/src/admin/bulk";
+import { createMemoryAdminBulkRepo, type AdminBulkRepo } from "../../apps/api/src/admin/bulk";
 import { createMemoryAdminOverviewRepo } from "../../apps/api/src/admin/extras";
 import {
   createMemoryAdminImportRepo,
@@ -186,6 +186,8 @@ export function createAdminHarness(
     readonly gamification?: MemoryGamificationSeed;
     /** T58 — `/admin/health` için havuz yoklaması; varsayılan her zaman sağlıklıdır. */
     readonly db?: { query(text: string, params: readonly unknown[]): Promise<unknown> };
+    /** T87 — PostgreSQL satır şeklini taklit eden toplu işlem deposu. */
+    readonly bulk?: AdminBulkRepo;
   } = {},
 ) {
   const users = options.users ?? DEFAULT_USERS;
@@ -220,7 +222,7 @@ export function createAdminHarness(
     admin: {
       auth,
       users: adminStore.users,
-      bulk: createMemoryAdminBulkRepo(adminStore),
+      bulk: options.bulk ?? createMemoryAdminBulkRepo(adminStore),
       roles: createMemoryAdminRoleRepo(adminStore),
       imports: importStore.repo,
       newId,
