@@ -1,4 +1,5 @@
 import { createElement, type ReactElement } from "react";
+import { shellSessionFromDev } from "../../apps/shell/src/session";
 import { renderToStaticMarkup } from "react-dom/server";
 import type { DevSession } from "../../apps/shell/src/devAuth";
 import {
@@ -209,7 +210,7 @@ describe("ProgressSection (kap)", () => {
 
   it("enjekte edilen kaynakla da ilk render iskelet gösterir; kaynağın kendisi bağımsız çalışır", async () => {
     const source = createSyntheticGamificationSource(true);
-    const html = renderToStaticMarkup(createElement(ProgressSection, { dataSource: source, session: STUDENT }));
+    const html = renderToStaticMarkup(createElement(ProgressSection, { dataSource: source, session: shellSessionFromDev(STUDENT) }));
     expect(html).toContain("eg-shell-progress__skeleton");
     const summaries = await source.getSummaries();
     expect(summaries).toHaveLength(SIM_IDS.length);

@@ -1,4 +1,5 @@
 import { createElement } from "react";
+import { shellSessionFromDev } from "../../apps/shell/src/session";
 import { renderToStaticMarkup } from "react-dom/server";
 import type { DevSession } from "../../apps/shell/src/devAuth";
 import { HomePage, scrollToSection } from "../../apps/shell/src/pages";
@@ -16,7 +17,7 @@ const HOW_SECTION_ID = "eg-nasil-calisir";
 function render(session?: DevSession | null): string {
   return session === undefined
     ? renderToStaticMarkup(createElement(HomePage))
-    : renderToStaticMarkup(createElement(HomePage, { session }));
+    : renderToStaticMarkup(createElement(HomePage, { session: session === null ? null : shellSessionFromDev(session) }));
 }
 
 const count = (html: string, needle: string): number => html.split(needle).length - 1;
