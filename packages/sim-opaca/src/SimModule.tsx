@@ -113,8 +113,9 @@ export function createOpacaModule(deps?: OpacaModuleDeps): SimModule {
 
       const appProps = {
         embedded: true as const,
-        gamiEnabled: resolved.gamiEnabled ?? false,
+        gamiEnabled: resolved.gamiEnabled ?? true,
         showDevPanel,
+        devBuild: Boolean(resolved.devBuild),
         ...(resolved.chromeEnv ? { chromeEnv: resolved.chromeEnv } : {}),
         ...(resolved.modalEnv ? { modalEnv: resolved.modalEnv } : {}),
         ...(resolved.startEnv ? { startEnv: resolved.startEnv } : {}),

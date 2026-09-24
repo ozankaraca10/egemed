@@ -1,4 +1,4 @@
-import { Fragment, useEffect, useState, type JSX, type ReactNode } from 'react'
+import { Fragment, useMemo, useState, type JSX, type ReactNode } from 'react'
 import { useStore } from '../core/StoreProvider'
 import { Footer, EcgDeco } from '../ui/chrome'
 import { aggregateResults } from '../core/scoring'
@@ -7,6 +7,8 @@ import { sampleSession, SESSION_SIZE } from '../core/session'
 import { firstWeakLibraryKey, weakDomainKeys } from '../core/flow'
 import { libraryKeyForFinding } from '../data/terminology'
 import { decodeMark } from '../core/geometry'
+import { GamiGains } from '../ui/gami/GamiGains'
+import { caseById, getGamiRepo } from '../gamification/bindings'
 import {
   IconScan,
   IconLungs,
@@ -39,7 +41,7 @@ export function createNoopResultsScreenEnv(): ResultsScreenEnv {
 
 const NOOP_RESULTS_ENV: ResultsScreenEnv = createNoopResultsScreenEnv()
 
-/** Oyunlaştırma oturum kazanımları (kaynak: `GamiGains` + `getGamiRepo` — G4–G8 UI dilimine ertelendi). */
+/** @deprecated GamiGains doğrudan kullanılır; geriye dönük seam. */
 export interface ResultsGamiPort {
   recordSessionResults(
     payload: { mode: 'practice' | 'assessment'; seed: number; durationMs: number; resultCount: number },
@@ -48,23 +50,17 @@ export interface ResultsGamiPort {
 }
 
 export interface ResultsScreenProps {
-  /** Platform kabuğu modu: dekorasyon ve footer çizilmez (§7.3). */
   readonly embedded?: boolean
-  /** LMS çıkış sınırı; verilmezse güvenli no-op. */
   readonly env?: ResultsScreenEnv
-  /** Oyunlaştırma bayrağı (§7.7); varsayılan kapalı — `learner_name` depolama yolu taşınmaz. */
   readonly gamiEnabled?: boolean
-  /** Oyunlaştırma kayıt seam'i; `gamiEnabled` açıkken oturum sonuçları kabuk/API'ye aktarılır. */
-  readonly gami?: ResultsGamiPort
-  /** G4–G8: `GamiGains` bileşeni kabuktan enjekte edilir; paket içinde `getGamiRepo` yoktur. */
+  readonly devBuild?: boolean
   readonly gains?: ReactNode
 }
 
 export function ResultsScreen({
   embedded = false,
   env = NOOP_RESULTS_ENV,
-  gamiEnabled = false,
-  gami,
+  gamiEnabled = true,
   gains,
 }: ResultsScreenProps): JSX.Element {
   const { state, dispatch, runtime, now } = useStore()
@@ -130,19 +126,21 @@ export function ResultsScreen({
     return `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`
   }
 
-  useEffect(() => {
-    if (!gamiEnabled || !gami || state.mode === 'learn' || !state.caseResults.length) return
-    void gami.recordSessionResults(
-      {
-        mode: state.mode === 'assessment' ? 'assessment' : 'practice',
-        seed: state.session.seed,
-        durationMs: state.assessmentTimer,
-        resultCount: state.caseResults.length,
-      },
-      new Date(now())
-    )
-    // yalnız sonuç ekranı açılışında bir kez (kaynak: GamiGains)
-  }, [])
+  const repo = useMemo(() => getGamiRepo(), [])
+  const defaultGains =
+    gamiEnabled && state.mode !== 'learn' && state.caseResults.length > 0 ? (
+      <GamiGains
+        repo={repo}
+        mode={state.mode === 'assessment' ? 'assessment' : 'practice'}
+        results={state.caseResults}
+        caseById={caseById}
+        seed={state.session.seed}
+        durationMs={state.assessmentTimer}
+        finishedAt={new Date(now())}
+        onAchievements={() => dispatch({ type: 'goto', screen: 'achievements' })}
+        onLeaderboard={() => dispatch({ type: 'goto', screen: 'leaderboard' })}
+      />
+    ) : null
 
   return (
     <>
@@ -209,7 +207,7 @@ export function ResultsScreen({
             </div>
           </div>
 
-          {gamiEnabled && gains}
+          {gamiEnabled && (gains ?? defaultGains)}
 
           <div className="card mt-16">
             <h3 style={{ marginTop: 0 }}>Alan bazlı performans</h3>

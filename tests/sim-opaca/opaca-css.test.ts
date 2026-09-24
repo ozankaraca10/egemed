@@ -8,6 +8,7 @@ const moduleCssPaths = [
   "packages/sim-opaca/src/styles/shell.css",
   "packages/sim-opaca/src/styles/film.css",
   "packages/sim-opaca/src/styles/rest.css",
+  "packages/sim-opaca/src/styles/gami.css",
 ] as const;
 
 const forbiddenBareSelectors = [":root", "html", "body", "#root", "button", "*", ":focus-visible"];
