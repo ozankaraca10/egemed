@@ -487,3 +487,42 @@ describe("sunucu yetkili XP, düzey ve seri (API-05)", () => {
     expect(data.streak.current).toBe(1);
   });
 });
+
+describe("liderlik tablosuna katılım tercihi (opt-out)", () => {
+  it("varsayılan görünür; PATCH ile çıkan kullanıcı başkalarının listesinde yoktur, kendi satırını görür", async () => {
+    const testHarness = harness({ [MERT_ID]: ["pulse"] });
+    const ali = await login(testHarness, "ali.veli");
+    const mert = await login(testHarness, "mert.ikinci");
+    const prefs = await testHarness.app.request("/me/preferences", { headers: ali.headers });
+    expect(await prefs.json()).toEqual({ data: { leaderboardVisible: true } });
+    const rowsFor = async (headers: Record<string, string>) => {
+      const response = await testHarness.app.request("/me/gamification/pulse/leaderboard?period=academic_year&cohort=all", { headers });
+      expect(response.status).toBe(200);
+      const body = (await response.json()) as { data: { rows: readonly { isMe: boolean }[] }; meta: { total: number } };
+      return body;
+    };
+    const before = await rowsFor(mert.headers);
+    const patch = await testHarness.app.request("/me/preferences", {
+      method: "PATCH",
+      headers: { ...ali.headers, "content-type": "application/json" },
+      body: JSON.stringify({ leaderboardVisible: false }),
+    });
+    expect(patch.status).toBe(200);
+    expect(await patch.json()).toEqual({ data: { leaderboardVisible: false } });
+    const after = await rowsFor(mert.headers);
+    expect(after.meta.total).toBe(before.meta.total - 1);
+    const own = await rowsFor(ali.headers);
+    expect(own.data.rows.some((row) => row.isMe)).toBe(true);
+  });
+
+  it("gövde katı şemadır; bilinmeyen alan 400 döner", async () => {
+    const testHarness = harness();
+    const ali = await login(testHarness, "ali.veli");
+    const response = await testHarness.app.request("/me/preferences", {
+      method: "PATCH",
+      headers: { ...ali.headers, "content-type": "application/json" },
+      body: JSON.stringify({ leaderboardVisible: false, displayName: "x" }),
+    });
+    expect(response.status).toBe(400);
+  });
+});

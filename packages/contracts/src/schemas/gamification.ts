@@ -179,3 +179,14 @@ export const gamiLeaderboardResponseSchema = z.strictObject({
 });
 
 export type GamiLeaderboardResponse = z.infer<typeof gamiLeaderboardResponseSchema>;
+
+/** GET/PATCH /me/preferences: liderlik tablosuna katılım (kullanıcı kararı, üç simde ortak). */
+export const mePreferencesSchema = z.strictObject({
+  leaderboardVisible: z.boolean(),
+});
+
+export type MePreferences = z.infer<typeof mePreferencesSchema>;
+
+export const mePreferencesResponseSchema = z.strictObject({
+  data: mePreferencesSchema,
+});
