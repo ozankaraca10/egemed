@@ -1,0 +1,74 @@
+/** EGEMED CLIX — rozet görünüm modeli: katalog + durum + kazanılmışlar → kart durumu.
+ *  Salt okunur kaynak: egemed-opaca/src/gamification/badgeView.ts.
+ *  Opaca'ya özgü kısa koşul/çalışma anahtarı eşlemeleri (RULE, STUDY_KEY) çekirdeğe girmez;
+ *  kısa koşul ve çalışma anahtarı katalog tanımından (`rule`, `studyKey`) gelir.
+ *  Kategori/tier RENKLERİ tasarım sistemi kararıdır (packages/tokens); burada yalnız etiketler var.
+ *  Not: kaynaktaki belirli bir kimliğe özel "ilerleme gösterme" kilidi, jenerik karşılığında
+ *  asla kazanılamayan tanımın ilerlemesinin 0 dönmesiyle sağlanır (kaynak katalogda da böyledir). */
+
+import { badgeProgress, type BadgeCategory, type BadgeContext, type BadgeDef, type BadgeTier } from "./badges";
+import type { EarnedBadge } from "./types";
+
+export const BADGE_CATEGORY_LABEL: Record<BadgeCategory, string> = {
+  topic: "Konu",
+  skill: "Beceri",
+  streak: "Seri",
+  learn: "Öğrenme",
+  milestone: "Kilometre taşı",
+};
+
+export const BADGE_TIER_LABEL: Record<BadgeTier, string> = {
+  bronze: "Bronz",
+  silver: "Gümüş",
+  gold: "Altın",
+};
+
+export type BadgeState = "earned" | "progress" | "locked";
+
+export interface BadgeView<TState, TContext extends BadgeContext = BadgeContext> {
+  def: BadgeDef<TState, TContext>;
+  state: BadgeState;
+  value: number;
+  max: number;
+  earnedAt: string | null;
+  rule: string;
+  studyKey: string | null;
+}
+
+export function badgeViews<TState, TContext extends BadgeContext>(
+  catalog: readonly BadgeDef<TState, TContext>[],
+  state: TState,
+  earned: readonly EarnedBadge[],
+  ctx: TContext,
+): BadgeView<TState, TContext>[] {
+  const earnedAtById = new Map(earned.map((e) => [e.id, e.at]));
+  return catalog.map((def) => {
+    const { value, max } = badgeProgress(def, state, ctx);
+    const earnedAt = earnedAtById.get(def.id) ?? null;
+    const badgeState: BadgeState = earnedAt ? "earned" : value > 0 ? "progress" : "locked";
+    return {
+      def,
+      state: badgeState,
+      value: Math.min(value, max),
+      max,
+      earnedAt,
+      rule: def.rule ?? "",
+      studyKey: def.studyKey ?? null,
+    };
+  });
+}
+
+/** Kazanılanlar en yeni önce, sonra devam edenler (ilerleme oranına göre), sonra kilitliler
+ *  (tanım sırası — stabil sıralama). */
+export function sortBadgeViews<TState, TContext extends BadgeContext>(
+  views: readonly BadgeView<TState, TContext>[],
+): BadgeView<TState, TContext>[] {
+  const rank: Record<BadgeState, number> = { earned: 0, progress: 1, locked: 2 };
+  const ratio = (v: BadgeView<TState, TContext>): number => (v.max > 0 ? Math.min(v.value, v.max) / v.max : 0);
+  return [...views].sort(
+    (a, b) =>
+      rank[a.state] - rank[b.state] ||
+      (a.state === "earned" ? (b.earnedAt ?? "").localeCompare(a.earnedAt ?? "") : 0) ||
+      (a.state === "progress" ? ratio(b) - ratio(a) : 0),
+  );
+}

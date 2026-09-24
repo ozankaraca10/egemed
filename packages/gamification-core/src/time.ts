@@ -33,6 +33,24 @@ export function monthKeyTr(now: Date): string {
   return `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, "0")}`;
 }
 
+const TR_MONTHS_SHORT = ["Oca", "Şub", "Mar", "Nis", "May", "Haz", "Tem", "Ağu", "Eyl", "Eki", "Kas", "Ara"] as const;
+
+function shortMonthTr(monthIndex: number): string {
+  return TR_MONTHS_SHORT[monthIndex] ?? "";
+}
+
+/** ISO anı → "8 Eyl" (TR kısa tarih, UTC+3). */
+export function trShortDate(iso: string): string {
+  const d = trWallClock(new Date(iso));
+  return `${d.getUTCDate()} ${shortMonthTr(d.getUTCMonth())}`;
+}
+
+/** ISO anı → "19 Eyl 2026" (TR uzun tarih, UTC+3). */
+export function trDate(iso: string): string {
+  const d = trWallClock(new Date(iso));
+  return `${d.getUTCDate()} ${shortMonthTr(d.getUTCMonth())} ${d.getUTCFullYear()}`;
+}
+
 /** `now`'un içinde bulunduğu TR takvim gününün başlangıcı (00:00:00.000 TR), UTC anı olarak. */
 export function startOfDayTr(now: Date): Date {
   const w = trWallClock(now);

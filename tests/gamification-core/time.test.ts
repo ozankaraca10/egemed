@@ -10,6 +10,8 @@ import {
   startOfDayTr,
   startOfMonthTr,
   startOfWeekTr,
+  trDate,
+  trShortDate,
 } from "../../packages/gamification-core/src/time";
 
 describe("TR takvimi (UTC+3, DST yok)", () => {
@@ -86,6 +88,17 @@ describe("TR takvimi (UTC+3, DST yok)", () => {
       const firstInstantOfSeptemberTr = new Date("2026-08-31T21:00:00.000Z");
       expect(startOfAcademicYearTr(lastInstantOfAugustTr).toISOString()).toBe("2025-08-31T21:00:00.000Z");
       expect(startOfAcademicYearTr(firstInstantOfSeptemberTr).toISOString()).toBe("2026-08-31T21:00:00.000Z");
+    });
+  });
+
+  describe("TR tarih biçimleri", () => {
+    it("kısa: UTC 21:00 bir sonraki TR günüdür", () => {
+      expect(trShortDate("2026-09-07T21:00:00.000Z")).toBe("8 Eyl");
+      expect(trShortDate("2026-12-31T20:59:00.000Z")).toBe("31 Ara");
+    });
+    it("uzun: gece yarısı sınırında gün ve yıl kayar", () => {
+      expect(trDate("2026-09-18T21:30:00.000Z")).toBe("19 Eyl 2026");
+      expect(trDate("2025-12-31T21:00:00.000Z")).toBe("1 Oca 2026");
     });
   });
 
