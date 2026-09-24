@@ -60,8 +60,19 @@ const premiumKeys: TrKey[] = [
   "sims.opaca.body",
   "sims.open",
   "sims.soon",
+  "footer.nav.label",
   "footer.institution",
   "footer.rights",
+];
+
+const howKeys: TrKey[] = [
+  "home.how.title",
+  "home.how.learn.title",
+  "home.how.learn.body",
+  "home.how.practice.title",
+  "home.how.practice.body",
+  "home.how.assess.title",
+  "home.how.assess.body",
 ];
 
 describe("i18n/tr sözlüğü", () => {
@@ -98,6 +109,55 @@ describe("i18n/tr sözlüğü", () => {
     expect(t("admin.section.overview")).toBe("Özet");
   });
 
+  it("admin metinleri iki rollü modele göre birebir yazılmıştır", () => {
+    expect(t("admin.intro")).toBe(
+      "Kullanıcıları, simülatör erişimini ve denetim kayıtlarını buradan yöneteceksiniz. Bölümler kullanıcı yönetimi altyapısıyla birlikte açılacak.",
+    );
+    expect(t("admin.section.overview")).toBe("Özet");
+    expect(t("admin.section.users")).toBe("Kullanıcılar");
+    expect(t("admin.section.roles")).toBe("Toplu içe aktarma");
+    expect(t("admin.section.sims")).toBe("Simülatör erişimi");
+    expect(t("admin.section.integrations")).toBe("Entegrasyonlar");
+    expect(t("admin.section.audit")).toBe("Denetim günlüğü");
+    expect(t("admin.section.overview.desc")).toBe(
+      "Kullanıcı sayıları, son girişler ve bekleyen işler; bireysel öğrenci puanı gösterilmez.",
+    );
+    expect(t("admin.section.users.desc")).toBe(
+      "Kullanıcı ekleme, düzenleme, askıya alma; giriş tipi (SSO) seçimi.",
+    );
+    expect(t("admin.section.roles.desc")).toBe(
+      "CSV şablonuyla toplu kullanıcı ekleme ve güncelleme; satır bazlı doğrulama raporu.",
+    );
+    expect(t("admin.section.sims.desc")).toBe(
+      "Kullanıcı ve grup bazında Pulse, Ausculta ve Opaca erişimi.",
+    );
+    expect(t("admin.section.integrations.desc")).toBe(
+      "SSO ve LRS bağlantı durumu; sır değerleri ekranda gösterilmez.",
+    );
+    expect(t("admin.section.audit.desc")).toBe(
+      "Yönetici eylemlerinin değiştirilemez kaydı.",
+    );
+  });
+
+  it("'Nasıl çalışır?' bölümü anahtarları tanımlı ve birebir metinleri taşır", () => {
+    for (const key of howKeys) {
+      expect(t(key).trim().length, key).toBeGreaterThan(0);
+    }
+    expect(t("home.how.title")).toBe("Nasıl çalışır?");
+    expect(t("home.how.learn.title")).toBe("İnceleme");
+    expect(t("home.how.learn.body")).toBe(
+      "Konuyu sistematik okuma rehberiyle, gerçek örnekler üzerinde keşfedin.",
+    );
+    expect(t("home.how.practice.title")).toBe("Uygulama");
+    expect(t("home.how.practice.body")).toBe(
+      "Vakalarda bulguları kendiniz işaretleyin; her adımda anında geri bildirim alın.",
+    );
+    expect(t("home.how.assess.title")).toBe("Değerlendirme");
+    expect(t("home.how.assess.body")).toBe(
+      "Rastgele vaka setiyle kendinizi sınayın; alan bazlı performansınızı görün.",
+    );
+  });
+
   it("premium platform anahtarları tanımlı ve boş değil", () => {
     for (const key of premiumKeys) {
       expect(t(key).trim().length, key).toBeGreaterThan(0);
@@ -109,6 +169,7 @@ describe("i18n/tr sözlüğü", () => {
     expect(t("home.hero.cta")).toBe("Simülatörlere git");
     expect(t("sims.open")).toBe("Simülatörü aç");
     expect(t("sims.soon")).toBe("Platforma taşınıyor");
+    expect(t("footer.nav.label")).toBe("Alt bilgi");
     expect(t("footer.institution")).toBe("Ege Üniversitesi Tıp Fakültesi");
   });
 });
