@@ -192,6 +192,7 @@ export {
   IconHeart,
   IconHelpCircle,
   IconInfo,
+  IconLock,
   IconLightbulb,
   IconLogo,
   IconLungs,
@@ -212,6 +213,18 @@ export {
   IconWave,
   IconXCircle,
 } from "./ui/icons";
+export { EcgDeco, Footer } from "./ui/chrome";
+export { EntryScreens } from "./screens/EntryScreens";
+export type { EntryScreensProps } from "./screens/EntryScreens";
+export { modePickTarget, modeRecommendLocked, resolveEntryScreen, sessionSeed } from "./screens/entry";
+export { ModeCard, ModeSelectScreen, Stepper } from "./screens/ModeSelectScreen";
+export type { ModeSelectScreenProps } from "./screens/ModeSelectScreen";
+export { StartScreen } from "./screens/StartScreen";
+export type { StartScreenProps } from "./screens/StartScreen";
+export { playVolumeCheckTone } from "./screens/tone";
+export type { VolumeCheckAudio, VolumeToneContext } from "./screens/tone";
+export { TutorialScreen, createNoopTutorialAudio } from "./screens/TutorialScreen";
+export type { TutorialAudio, TutorialScreenProps } from "./screens/TutorialScreen";
 export { AUDIO_CONFIG } from "./audio/config";
 export { createAudioEngine } from "./audio/engine";
 export type { AudioEngine, AudioEngineDeps, EngineState } from "./audio/engine";
