@@ -25,6 +25,7 @@ import {
   resolveRoute,
 } from "../../apps/shell/src/routes";
 import { ShellLayout } from "../../apps/shell/src/ShellLayout";
+import { shellSessionFromDev } from "../../apps/shell/src/session";
 import { t } from "../../packages/ui/i18n/tr";
 import { describe, expect, it } from "vitest";
 
@@ -235,7 +236,13 @@ describe("submitDevEntry", () => {
 
 describe("ShellLayout oturum göstergesi", () => {
   const layout = (session: DevSession | null): string =>
-    renderToStaticMarkup(createElement(ShellLayout, { children: null, route: resolveRoute("#/"), session }));
+    renderToStaticMarkup(
+      createElement(ShellLayout, {
+        children: null,
+        route: resolveRoute("#/"),
+        session: session === null ? null : shellSessionFromDev(session),
+      }),
+    );
 
   it("göstergeyi yalnız oturum varken çizer; rol etiketi, çıkış ve şerit birlikte gelir", () => {
     const none = layout(null);

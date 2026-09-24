@@ -43,13 +43,13 @@ describe("sim rotaları", () => {
     }
   });
   it("kartlar 'Simülatörü aç' bağlantısını sim rotasına verir; rozet yalnız yer tutucu simlerde kalır", () => {
-    const stillPlaceholder = SIM_IDS.filter((simId) => simId !== "opaca");
+    const stillPlaceholder = SIM_IDS.filter((simId) => simId !== "opaca" && simId !== "pulse");
     for (const html of [
       renderToStaticMarkup(createElement(HomePage)),
       renderToStaticMarkup(createElement(SimulatorsPage)),
     ]) {
       expect(count(html, 'class="eg-shell-sim__link"')).toBe(SIM_IDS.length);
-      // Opaca gerçek modüle bağlandı (T14c): "Platforma taşınıyor" rozeti kalkar.
+      // Opaca (T14c) ve Pulse (T14d) gerçek modüle bağlandı: "Platforma taşınıyor" rozeti kalkar.
       expect(count(html, t("sims.soon"))).toBe(stillPlaceholder.length);
       for (const simId of SIM_IDS) expect(html, simId).toContain(`href="${simHref(simId)}"`);
     }
@@ -138,14 +138,14 @@ describe("SimCard rozet ve erişilebilir başlık düzeni", () => {
   it("rozeti başlığın yanında en üstte tutar; logo dekoratif, başlık görsel gizli", () => {
     for (const [headingLevel, tag] of [[3, "h3"], [2, "h2"]] as const) {
       const html = renderToStaticMarkup(
-        createElement(SimCard, { headingLevel, href: "#/sims/pulse", id: "pulse" }),
+        createElement(SimCard, { headingLevel, href: "#/sims/ausculta", id: "ausculta" }),
       );
       const badgeIndex = html.indexOf('class="eg-badge"');
       const headingIndex = html.indexOf(`<${tag} class="eg-visually-hidden">`);
       const logoIndex = html.indexOf('class="eg-shell-sim__logo"');
       const linkIndex = html.indexOf('class="eg-shell-sim__link"');
       expect(html, tag).toContain(
-        `<${tag} class="eg-visually-hidden">${t("sims.pulse.name")}</${tag}>`,
+        `<${tag} class="eg-visually-hidden">${t("sims.ausculta.name")}</${tag}>`,
       );
       expect(badgeIndex, tag).toBeGreaterThan(-1);
       expect(badgeIndex, tag).toBeLessThan(headingIndex);
