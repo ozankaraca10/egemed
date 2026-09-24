@@ -143,6 +143,8 @@ export {
   gamiStreakSchema,
   gamiSummaryResponseSchema,
   gamiWeeklyGoalSchema,
+  mePreferencesResponseSchema,
+  mePreferencesSchema,
 } from "./schemas/gamification";
 export type {
   AttemptWriteRequest,
@@ -155,4 +157,5 @@ export type {
   GamiPeriod,
   GamiSimSummary,
   GamiSummaryResponse,
+  MePreferences,
 } from "./schemas/gamification";

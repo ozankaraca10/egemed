@@ -5,6 +5,7 @@ import {
   attemptWriteRequestSchema,
   gamiLeaderboardQuerySchema,
   gamiSimIdParamSchema,
+  mePreferencesSchema,
   type GamiCohortFilter,
   type GamiPeriod,
   type SimId,
@@ -210,10 +211,16 @@ export type GamiAttemptWriteResult =
   /** Şema `maxScore = 0` kabul eder ama `gami_attempts` check kısıtı pozitif ister. */
   | { readonly kind: "invalid" };
 
+export interface GamiPreferences {
+  readonly leaderboardVisible: boolean;
+}
+
 export interface GamificationRepo {
   getSummary(query: GamiSummaryQuery): Promise<GamiSimSummaryRecord>;
   getLeaderboard(query: GamiLeaderboardQuery): Promise<GamiLeaderboardRecord>;
   writeAttempt(input: GamiAttemptInput): Promise<GamiAttemptWriteResult>;
+  getPreferences(userId: string): Promise<GamiPreferences>;
+  setPreferences(userId: string, preferences: GamiPreferences, at: number): Promise<GamiPreferences>;
 }
 
 /** Havuzun depo katmanına görünen dar yüzeyi; `db.ts` çıktısı bunu karşılar. */
@@ -402,16 +409,32 @@ export function createPgGamificationRepo(db: GamiDb): GamificationRepo {
 
     async getLeaderboard(query) {
       const rows = await db.query(
-        `select u.id as user_id, u.display_name, unit.code as unit_code, p.xp, p.level,
+        `select u.id as user_id, u.display_name, u.leaderboard_visible, unit.code as unit_code, p.xp, p.level,
                 a.finished_at, a.score
          from gami_profiles p
          join users u on u.id = p.user_id
          left join units unit on unit.id = u.unit_id and unit.deleted_at is null
          left join gami_attempts a on a.user_id = p.user_id and a.sim_id = p.sim_id
-         where u.institution_id = $1 and p.sim_id = $2 and u.status = 'active' and u.deleted_at is null`,
-        [query.institutionId, query.simId],
+         where u.institution_id = $1 and p.sim_id = $2 and u.status = 'active' and u.deleted_at is null
+           and (u.leaderboard_visible or u.id = $3)`,
+        [query.institutionId, query.simId, query.userId],
       );
       return assembleLeaderboardRecord(query, rows.rows as readonly PgLeaderboardSourceRow[]);
+    },
+
+    async getPreferences(userId) {
+      const result = await db.query("select leaderboard_visible from users where id = $1 and deleted_at is null", [userId]);
+      const row = result.rows[0] as { readonly leaderboard_visible?: unknown } | undefined;
+      return { leaderboardVisible: row?.leaderboard_visible !== false };
+    },
+
+    async setPreferences(userId, preferences, at) {
+      const result = await db.query(
+        "update users set leaderboard_visible = $2, updated_at = $3 where id = $1 and deleted_at is null returning leaderboard_visible",
+        [userId, preferences.leaderboardVisible, new Date(at)],
+      );
+      const row = result.rows[0] as { readonly leaderboard_visible?: unknown } | undefined;
+      return { leaderboardVisible: row?.leaderboard_visible !== false };
     },
   };
 }
@@ -419,6 +442,7 @@ export function createPgGamificationRepo(db: GamiDb): GamificationRepo {
 interface PgLeaderboardSourceRow {
   readonly user_id: string;
   readonly display_name: string;
+  readonly leaderboard_visible?: boolean;
   readonly unit_code: string | null;
   readonly xp: number;
   readonly level: number;
@@ -545,6 +569,8 @@ export interface MemoryGamiAttemptSeed {
 }
 
 export interface MemoryGamificationSeed {
+  /** Liderlik tablosuna katılmayan kullanıcı kimlikleri. */
+  readonly hiddenFromLeaderboard?: readonly string[];
   readonly profiles?: readonly MemoryGamiProfileSeed[];
   readonly badges?: readonly MemoryGamiBadgeSeed[];
   readonly attempts?: readonly MemoryGamiAttemptSeed[];
@@ -603,6 +629,8 @@ export function createMemoryGamificationRepo(
   const profiles = new Map<string, MemoryGamiProfileState>();
   const attempts = new Map<string, MemoryGamiAttemptState>();
   const badges: MemoryGamiBadgeState[] = [];
+  /** Liderlik tablosundan çıkan kullanıcılar (varsayılan: görünür). */
+  const hiddenFromLeaderboard = new Set<string>(seed.hiddenFromLeaderboard ?? []);
 
   for (const profile of seed.profiles ?? []) {
     profiles.set(profileKey(profile.userId, profile.simId), {
@@ -766,11 +794,23 @@ export function createMemoryGamificationRepo(
       return { kind: "created", attempt };
     },
 
+    async getPreferences(userId) {
+      return { leaderboardVisible: !hiddenFromLeaderboard.has(userId) };
+    },
+
+    async setPreferences(userId, preferences) {
+      if (preferences.leaderboardVisible) hiddenFromLeaderboard.delete(userId);
+      else hiddenFromLeaderboard.add(userId);
+      return { leaderboardVisible: preferences.leaderboardVisible };
+    },
+
     async getLeaderboard(query) {
       const peers = [...profiles.values()]
         .filter(
           (profile) =>
-            profile.institutionId === query.institutionId && profile.simId === query.simId,
+            profile.institutionId === query.institutionId &&
+            profile.simId === query.simId &&
+            (!hiddenFromLeaderboard.has(profile.userId) || profile.userId === query.userId),
         )
         .map(
           (profile): LeaderboardPeerSeed => ({
@@ -946,6 +986,19 @@ export function registerMeGamificationRoutes(
       ),
     );
     return c.json({ data: { sims: summaries.map(summaryBody) } });
+  });
+
+  // Liderlik tablosuna katılım tercihi (üç simde ortak; sim erişimi gerektirmez).
+  app.get("/me/preferences", async (c) => {
+    const preferences = await deps.gamification.getPreferences(c.get("meActor").userId);
+    return c.json({ data: preferences });
+  });
+
+  app.patch("/me/preferences", async (c) => {
+    const parsed = mePreferencesSchema.safeParse(await readJson(c));
+    if (!parsed.success) return jsonError(c, "invalid_request", validationDetails(parsed.error));
+    const preferences = await deps.gamification.setPreferences(c.get("meActor").userId, parsed.data, now());
+    return c.json({ data: preferences });
   });
 
   app.get("/me/gamification/:simId/leaderboard", async (c) => {
