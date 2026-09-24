@@ -7,6 +7,7 @@ import { createMemoryAdminImportRepo } from "../../apps/api/src/admin/imports";
 import { createMemoryAdminRoleRepo } from "../../apps/api/src/admin/roles";
 import { createMemoryAdminStore, type AdminDeps } from "../../apps/api/src/admin/users";
 import { createMemoryAuthStore, type MemoryUserSeed } from "../../apps/api/src/auth/repo";
+import { createMemoryGamificationRepo } from "../../apps/api/src/me/gamification";
 import {
   csrfCookieOptions,
   sessionCookieOptions,
@@ -81,7 +82,8 @@ function createHarness(options: HarnessOptions = {}) {
     imports: createMemoryAdminImportRepo(adminStore, newId).repo,
     newId,
   };
-  const app = createApp({ db: fakeDb(), now: () => clock, auth, admin });
+  const gamification = createMemoryGamificationRepo().repo;
+  const app = createApp({ db: fakeDb(), now: () => clock, auth, gamification, admin });
   return {
     app,
     store,

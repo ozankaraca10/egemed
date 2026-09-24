@@ -2,12 +2,17 @@ import { Hono } from "hono";
 import type { Context } from "hono";
 import { statusForErrorCode, type ErrorCode } from "@egemed/contracts";
 import { z } from "zod";
+import { registerAdminAuditRoutes } from "./admin/audit";
 import { registerAdminBulkRoutes } from "./admin/bulk";
 import { registerAdminImportRoutes } from "./admin/imports";
 import { registerAdminRoleRoutes } from "./admin/roles";
 import { registerAdminUserRoutes, type AdminDeps } from "./admin/users";
 import { registerAuthRoutes, type AuthDeps } from "./auth/routes";
 import { errorBody, validationDetails, type AppEnv } from "./http";
+import {
+  registerMeGamificationRoutes,
+  type GamificationRepo,
+} from "./me/gamification";
 
 /**
  * T62 — Hono iskeleti (E3 §d). Uygulama; veritabanı havuzuna ve saate yalnız
@@ -29,6 +34,8 @@ export interface AppDeps {
   readonly auth: AuthDeps;
   /** T65 — `/admin/users` uçları; oturum bağımlılıklarını `auth` ile paylaşır. */
   readonly admin: AdminDeps;
+  /** T67 — `/me/gamification` uçları; kimlik `auth` oturumundan çözülür. */
+  readonly gamification: GamificationRepo;
 }
 
 /** Gelen `x-request-id` biçimi: başlık güvenli ASCII, 8–128 karakter. */
@@ -118,6 +125,11 @@ export function createApp(deps: AppDeps): Hono<AppEnv> {
   registerAdminBulkRoutes(app, deps.admin, deps.now);
   registerAdminRoleRoutes(app, deps.admin, deps.now);
   registerAdminImportRoutes(app, deps.admin, deps.now);
+  // T67 — denetim günlüğü salt okunur liste; `/admin/*` ara katmanı
+  // `registerAdminUserRoutes` içinde kaydedildiği için bu rotalar ondan sonra
+  // bağlanır. Okuma deposu `auth.audit` üzerindedir (aynı audit_log).
+  registerAdminAuditRoutes(app, deps.auth);
+  registerMeGamificationRoutes(app, { auth: deps.auth, gamification: deps.gamification }, deps.now);
 
   app.notFound((c) => c.json(errorBody("not_found"), statusForErrorCode("not_found")));
 
