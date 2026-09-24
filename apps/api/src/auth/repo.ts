@@ -22,6 +22,8 @@ export interface SessionRepo {
   findById(id: string): Promise<SessionRecord | null>;
   touch(id: string, lastSeenAt: number): Promise<void>;
   revoke(id: string, revokedAt: number): Promise<void>;
+  /** T65 — askıya alma ve silmede kullanıcının tüm açık oturumlarını iptal eder (E3 §a). */
+  revokeForUser(userId: string, revokedAt: number): Promise<void>;
 }
 
 /** Giriş eşleme sorgusunun döndürdüğü dar kullanıcı yüzeyi. */
@@ -52,10 +54,14 @@ export interface UserRepo {
 export interface AuditEntry {
   readonly occurredAt: number;
   readonly actorUserId: string | null;
+  /** T65 — eylem anındaki rol (E3 §c `actor_role`). */
+  readonly actorRole?: string | null;
   readonly institutionId: string | null;
   readonly action: string;
   readonly targetType: string | null;
   readonly targetId: string | null;
+  /** T65 — değişiklik öncesi özet (E3 §c `summary_before`); eski kayıtlarda yoktur. */
+  readonly summaryBefore?: Readonly<Record<string, string>> | null;
   readonly summaryAfter: Readonly<Record<string, string>>;
   readonly requestId: string | null;
 }
@@ -145,6 +151,12 @@ export function createPgAuthRepos(db: AuthDb): PgAuthRepos {
         new Date(revokedAt),
       ]);
     },
+    async revokeForUser(userId, revokedAt) {
+      await db.query(
+        "update sessions set revoked_at = coalesce(revoked_at, $2) where user_id = $1 and revoked_at is null",
+        [userId, new Date(revokedAt)],
+      );
+    },
   };
 
   const users: UserRepo = {
@@ -199,14 +211,16 @@ export function createPgAuthRepos(db: AuthDb): PgAuthRepos {
   const audit: AuditRepo = {
     async insert(entry) {
       await db.query(
-        "insert into audit_log (occurred_at, actor_user_id, institution_id, action, target_type, target_id, summary_after, request_id) values ($1, $2, $3, $4, $5, $6, $7::jsonb, $8)",
+        "insert into audit_log (occurred_at, actor_user_id, actor_role, institution_id, action, target_type, target_id, summary_before, summary_after, request_id) values ($1, $2, $3, $4, $5, $6, $7, $8::jsonb, $9::jsonb, $10)",
         [
           new Date(entry.occurredAt),
           entry.actorUserId,
+          entry.actorRole ?? null,
           entry.institutionId,
           entry.action,
           entry.targetType,
           entry.targetId,
+          entry.summaryBefore == null ? null : JSON.stringify(entry.summaryBefore),
           JSON.stringify(entry.summaryAfter),
           entry.requestId,
         ],
@@ -292,6 +306,13 @@ export function createMemoryAuthStore(
       const record = sessionRecords.get(id);
       if (record !== undefined && record.revokedAt === null) {
         sessionRecords.set(id, { ...record, revokedAt });
+      }
+    },
+    async revokeForUser(userId, revokedAt) {
+      for (const [id, record] of sessionRecords) {
+        if (record.userId === userId && record.revokedAt === null) {
+          sessionRecords.set(id, { ...record, revokedAt });
+        }
       }
     },
   };

@@ -1,6 +1,8 @@
 import { serve } from "@hono/node-server";
+import { randomUUID } from "node:crypto";
 import process from "node:process";
 import { createApp } from "./app.ts";
+import { createPgAdminUsersRepo } from "./admin/users.ts";
 import { createPgAuthRepos } from "./auth/repo.ts";
 import { createDb } from "./db.ts";
 import { loadEnv } from "./env.ts";
@@ -25,16 +27,18 @@ function serverNow(): number {
 
 const env = loadEnv(process.env);
 const db = createDb(env.DATABASE_URL);
+const auth = {
+  ...createPgAuthRepos(db),
+  nodeEnv: env.NODE_ENV,
+  devEnabled: env.AUTH_DEV_ENABLED,
+  sessionIdleMs: env.SESSION_IDLE_MINUTES * 60_000,
+  sessionAbsoluteMs: env.SESSION_ABSOLUTE_HOURS * 3_600_000,
+};
 const app = createApp({
   db,
   now: serverNow,
-  auth: {
-    ...createPgAuthRepos(db),
-    nodeEnv: env.NODE_ENV,
-    devEnabled: env.AUTH_DEV_ENABLED,
-    sessionIdleMs: env.SESSION_IDLE_MINUTES * 60_000,
-    sessionAbsoluteMs: env.SESSION_ABSOLUTE_HOURS * 3_600_000,
-  },
+  auth,
+  admin: { auth, users: createPgAdminUsersRepo(db), newId: () => randomUUID() },
 });
 
 serve({ fetch: app.fetch, port: env.PORT });

@@ -8,10 +8,20 @@ import type { z } from "zod";
  * bağlama yazılır ve oturum audit kayıtları oradan okur.
  */
 
-/** İstek bağlamı: ara katman üretilen/doğrulanan `request_id`yi buraya yazar. */
+/**
+ * T65 — admin uçlarının istek başına yeniden doğruladığı kimlik (E3 §b kural 3).
+ * Rol çerezde önbelleklenmez; her istekte sunucuda okunur.
+ */
+export interface AdminActor {
+  readonly userId: string;
+  readonly institutionId: string;
+}
+
+/** İstek bağlamı: ara katman üretilen/doğrulanan `request_id`yi ve admin kimliğini buraya yazar. */
 export interface AppEnv {
   Variables: {
     requestId: string;
+    adminActor: AdminActor;
   };
 }
 

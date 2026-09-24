@@ -2,6 +2,7 @@ import { Hono } from "hono";
 import type { Context } from "hono";
 import { statusForErrorCode, type ErrorCode } from "@egemed/contracts";
 import { z } from "zod";
+import { registerAdminUserRoutes, type AdminDeps } from "./admin/users";
 import { registerAuthRoutes, type AuthDeps } from "./auth/routes";
 import { errorBody, validationDetails, type AppEnv } from "./http";
 
@@ -9,8 +10,8 @@ import { errorBody, validationDetails, type AppEnv } from "./http";
  * T62 — Hono iskeleti (E3 §d). Uygulama; veritabanı havuzuna ve saate yalnız
  * enjekte edilen dar arayüzlerle bağlanır, `Date.now()` kullanmaz. Tüm hatalar
  * `{ error: { code, details? } }` zarfını taşır; kodlar `@egemed/contracts`
- * kataloğundandır ve 500 yanıtı ayrıntı sızdırmaz. T63 ile `/auth/*` uçları
- * aynı bağlama (ve aynı `now` enjeksiyonuna) bağlanır.
+ * kataloğundandır ve 500 yanıtı ayrıntı sızdırmaz. T63 ile `/auth/*`, T65 ile
+ * `/admin/users` uçları aynı bağlama (ve aynı `now` enjeksiyonuna) bağlanır.
  */
 
 /** Havuzun uygulamaya görünen dar yüzeyi; `db.ts` çıktısı bunu yapısal olarak karşılar. */
@@ -23,6 +24,8 @@ export interface AppDeps {
   readonly db: DbHealth;
   readonly now: () => number;
   readonly auth: AuthDeps;
+  /** T65 — `/admin/users` uçları; oturum bağımlılıklarını `auth` ile paylaşır. */
+  readonly admin: AdminDeps;
 }
 
 /** Gelen `x-request-id` biçimi: başlık güvenli ASCII, 8–128 karakter. */
@@ -105,6 +108,7 @@ export function createApp(deps: AppDeps): Hono<AppEnv> {
   });
 
   registerAuthRoutes(app, deps.auth, deps.now);
+  registerAdminUserRoutes(app, deps.admin, deps.now);
 
   app.notFound((c) => c.json(errorBody("not_found"), statusForErrorCode("not_found")));
 

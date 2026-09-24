@@ -11,4 +11,6 @@ declare module "node:crypto" {
 
   export function createHash(algorithm: "sha256"): Hasher;
   export function randomBytes(size: number): { toString(encoding: "base64url"): string };
+  /** T65 — admin uçlarında opak kimlik üretimi (uuid). */
+  export function randomUUID(): string;
 }
