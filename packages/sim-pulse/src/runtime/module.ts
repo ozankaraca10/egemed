@@ -65,6 +65,9 @@ export function createPulseRuntimeModule(deps: PulseRuntimeModuleDeps = {}): Sim
         assetBase: deps.assetBase ?? DEFAULT_PULSE_RUNTIME_ASSET_BASE,
         storage: deps.storage ?? browserStorage(),
         storageNamespace: pulseStorageNamespace(context.actorId),
+        // Kaynak ilk girişte kalıcı (modal) tam ekran önerisi açar; platformda
+        // gezinme kabuğundadır ve modal onu kilitler. Tam ekran düğmesi kalır.
+        defaultPreferences: { "pulse.fsPromptDone": "1" },
         ...(deps.bridge === undefined ? {} : { bridge: deps.bridge }),
       });
       let detachGami: (() => void) | null = null;

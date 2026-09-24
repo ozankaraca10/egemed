@@ -54,6 +54,8 @@ export interface PulseRuntimeOptions {
   readonly storageNamespace: string;
   readonly storage: Storage;
   readonly bridge?: PulseRuntimeBridge;
+  /** Ad alanında yoksa yazılan kaynak tercihleri (ör. gömülü modda kapalı tam ekran önerisi). */
+  readonly defaultPreferences?: Readonly<Record<string, string>>;
 }
 
 export interface PulseRuntimeHandle {
@@ -249,6 +251,13 @@ export function mountPulseRuntime(target: HTMLElement, options: PulseRuntimeOpti
         };
 
   const storage = namespacedStorage(options.storage, options.storageNamespace);
+  for (const [key, value] of Object.entries(options.defaultPreferences ?? {})) {
+    try {
+      if (storage.getItem(key) === null) storage.setItem(key, value);
+    } catch {
+      // Depolama kapalıysa kaynak kendi varsayılanıyla sürer.
+    }
+  }
 
   // --- Gölge document ----------------------------------------------------------
   const doc: Document = new Proxy(realDocument, {
