@@ -24,3 +24,9 @@ Her görev tek paket/uygulama ve yaklaşık en fazla 400 satır diff hedefler. A
 Uzun bağlam ve yüksek token gerektiren istisna görevlerde, insan triage sonrası Cursor CLI Grok 4.7 `high` kullanılabilir. AGTX faz ajanı proje düzeyinde olduğu için bu görevler ayrı worktree içinde `scripts/agtx/cursor-grok.sh` ile elle yürütülür; varsayılan Running OpenCode DeepSeek V4.1 Flash `max` kalır.
 
 Claude Code kotası doluyken AGTX Planning Cursor CLI Grok 4.7 `high` ile yürür. Kritik ADR, xAPI profili, güvenlik/KVKK ve paketler arası sözleşme kararlarında Codex GPT-6 Astra ikinci görüş verir; bulgular karar kaydında görünür ve insan onayı bekler. Review fazı Codex Astra ile yürür; Astra kendi bulgularını raporlar, merge etmez.
+
+## Test kuralları (depo sahibi, 24 Eylül 2026)
+- Kodu yazdıktan sonra birim testi yazma.
+- Tek test mekanizması olarak E2E testlerini güçlü biçimde tercih et. Karmaşık özelliklerin çalıştığını onlarla doğrula. E2E testlerinin sonunda doğrulanabilir ve tekrarlanabilir bir artefakt üret (ör. ekran görüntüleri, axe raporu, JSON sonuç özeti).
+- Bir sistemi yalıtılmış test etmen gerekiyorsa önce başarısız olabileceği tüm yolları yaz, sonra kodu yaz.
+- Mevcut istisnalar (silinmez): simülatör motorlarının kaynakla birebirliğini kanıtlayan altın/diferansiyel testler, kaynak depolardan taşınan regresyon testleri, güvenlik/yetki, veritabanı migration ve sözleşme (şema) doğrulama testleri, yaşam döngüsü/sızıntı testleri.
