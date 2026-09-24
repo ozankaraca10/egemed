@@ -1,7 +1,7 @@
 import type { JSX, ReactNode } from "react";
 import { t } from "@egemed/ui/i18n";
 import type { DevSession } from "./devAuth";
-import { ROUTES, routeHref, type ResolvedRoute } from "./routes";
+import { ROUTES, routeHref, type ResolvedRoute, type RouteId } from "./routes";
 
 export interface ShellLayoutProps {
   /** Çözümlenmiş rota; etkin bağlantı işaretlemesi bundan türetilir. */
@@ -31,10 +31,37 @@ export function focusMain(event: { preventDefault(): void }): void {
   doc?.getElementById("icerik")?.focus();
 }
 
+/** Simge çizimi; renk `currentColor`'dan gelir, etiketi metin taşır (dekoratif). */
+function navIcon(paths: readonly string[]): ReactNode {
+  return (
+    <svg
+      aria-hidden="true"
+      className="eg-shell-nav__svg"
+      fill="none"
+      stroke="currentColor"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth={2}
+      viewBox="0 0 24 24"
+    >
+      {paths.map((path) => (
+        <path d={path} key={path} />
+      ))}
+    </svg>
+  );
+}
+
+const NAV_ICONS: Record<RouteId, ReactNode> = {
+  home: navIcon(["M3 10.5 12 3l9 7.5", "M5.5 9.2V21h13V9.2"]),
+  notebook: navIcon(["M6 3h11a2 2 0 0 1 2 2v16H8a2 2 0 0 1-2-2z", "M6 17h13"]),
+  simulators: navIcon(["M3 12h4l2-5 3 10 2-5h7", "M3 20h18"]),
+  tasks: navIcon(["M4 6h16", "M4 12h16", "M4 18h10"]),
+};
+
 /**
- * Kabuk iskeleti: "İçeriğe geç", marka şeridi, tek `nav` ve `main#icerik`.
- * Render DOM'a dokunmaz; yalnız atlama bağlantısının olay işleyicisi dokunur.
- * Tek `nav` CSS ile <768 px alt sekme, >=768 px üst bar olur.
+ * Kabuk iskeleti: "İçeriğe geç", lacivert marka üst barı, tek `nav` ve
+ * `main#icerik`. Render DOM'a dokunmaz; yalnız atlama bağlantısının olay
+ * işleyicisi dokunur. Tek `nav` CSS ile <768 px alt sekme, >=768 px üst bar olur.
  */
 export function ShellLayout({ route, session, onLogout, children }: ShellLayoutProps): JSX.Element {
   const activeId = route.kind === "page" ? route.route.id : undefined;
@@ -45,25 +72,35 @@ export function ShellLayout({ route, session, onLogout, children }: ShellLayoutP
     <div className="eg-shell">
       <a className="eg-shell-skip" href="#icerik" onClick={focusMain}>{t("shell.skip")}</a>
       <header className="eg-shell-header">
-        <p className="eg-shell-brand">{t("shell.brand")}</p>
-        {roleLabel !== null && (
-          <div className="eg-shell-session">
-            <span className="eg-shell-session__role">{roleLabel}</span>
-            <button className="eg-shell-session__logout" onClick={onLogout} type="button">
-              {t("shell.session.logout")}
-            </button>
-          </div>
-        )}
-        <nav aria-label={t("shell.nav.label")} className="eg-shell-nav">
-          {ROUTES.map((item) => (
-            <a
-              aria-current={item.id === activeId ? "page" : undefined}
-              className="eg-shell-nav__link" href={routeHref(item.id)} key={item.id}
-            >
-              {t(item.labelKey)}
-            </a>
-          ))}
-        </nav>
+        <a className="eg-shell-brand" href={routeHref("home")}>
+          <span className="eg-shell-brand__mark">
+            <span className="eg-shell-brand__eyebrow">{t("shell.brand.eyebrow")}</span>
+            <span className="eg-shell-brand__name">{t("shell.brand.name")}</span>
+          </span>
+          <span aria-hidden="true" className="eg-shell-brand__divider" />
+          <span className="eg-shell-brand__tagline">{t("shell.brand.tagline")}</span>
+        </a>
+        <div className="eg-shell-header__side">
+          {roleLabel !== null && (
+            <div className="eg-shell-session">
+              <span className="eg-shell-session__role">{roleLabel}</span>
+              <button className="eg-shell-session__logout" onClick={onLogout} type="button">
+                {t("shell.session.logout")}
+              </button>
+            </div>
+          )}
+          <nav aria-label={t("shell.nav.label")} className="eg-shell-nav">
+            {ROUTES.map((item) => (
+              <a
+                aria-current={item.id === activeId ? "page" : undefined}
+                className="eg-shell-nav__link" href={routeHref(item.id)} key={item.id}
+              >
+                <span aria-hidden="true" className="eg-shell-nav__icon">{NAV_ICONS[item.id]}</span>
+                <span className="eg-shell-nav__label">{t(item.labelKey)}</span>
+              </a>
+            ))}
+          </nav>
+        </div>
       </header>
       <main className="eg-shell-main" id="icerik" tabIndex={-1}>
         {roleLabel !== null && <p className="eg-shell-session-banner">{t("shell.session.banner")}</p>}

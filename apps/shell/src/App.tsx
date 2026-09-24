@@ -62,7 +62,11 @@ export function App(): JSX.Element | null {
   if (route.kind === "admin" && guardHref !== null) return null;
   return (
     <ShellLayout onLogout={logout} route={route} session={session}>
-      {route.kind === "page" ? pageFor(route.route.id) : route.kind === "admin" ? <AdminPage /> : <NotFoundPage />}
+      {route.kind === "page"
+        ? pageFor(route.route.id, session)
+        : route.kind === "admin"
+          ? <AdminPage />
+          : <NotFoundPage />}
     </ShellLayout>
   );
 }
