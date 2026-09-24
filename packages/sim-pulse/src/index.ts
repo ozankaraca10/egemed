@@ -105,6 +105,47 @@ export type {
   CaseReportView,
   CaseStageMarkupOptions,
 } from "./ui/case";
+export {
+  bindQuizActions,
+  createQuizFlowView,
+  createQuizQuestionView,
+  grade,
+  gradeQuiz,
+  QUIZ_ACTIONS,
+  QUIZ_SESSION_SIZE,
+  quizQuestionCardMarkup,
+} from "./ui/quiz";
+export type {
+  BindQuizActionsOptions,
+  QuizAction,
+  QuizActionEvent,
+  QuizActionTarget,
+  QuizFeedbackView,
+  QuizFlowView,
+  QuizGradeRow,
+  QuizGradeSource,
+  QuizGradeView,
+  QuizOptionView,
+  QuizQuestionMarkupOptions,
+  QuizQuestionView,
+} from "./ui/quiz";
+export {
+  buildQuizResultsView,
+  buildResultsCsv,
+  buildSessionCompletionPayload,
+  escapeResultsCsvCell,
+  resetQuizProgress,
+  RESULTS_CSV_DELIMITER,
+  RESULTS_PASS_THRESHOLD,
+} from "./ui/results";
+export type {
+  BuildResultsCsvOptions,
+  QuizResultsView,
+  ResetQuizProgressResult,
+  ResultsAreaRow,
+  ResultsSummaryView,
+  SessionCompletionPayload,
+} from "./ui/results";
 export { coronaryParticlePositions, drawHeartCanvas, observeHeartCanvas } from "./ui/sim/heartCanvas";
 export type {
   CoronaryParticle, HeartCanvasContext, HeartCanvasOptions, HeartCanvasSize, HeartResizeObserver,
