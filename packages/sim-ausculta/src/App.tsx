@@ -1,0 +1,99 @@
+import { useEffect, type JSX } from "react";
+import { useStore } from "./core/StoreProvider";
+import { resolveEntryScreen } from "./screens/entry";
+import { LearnScreen, type LearnScreenEnv } from "./screens/LearnScreen";
+import { ModeSelectScreen } from "./screens/ModeSelectScreen";
+import { ResultsScreen, type ResultsScreenEnv } from "./screens/ResultsScreen";
+import { SimulationScreen, type SimulationAudio } from "./screens/SimulationScreen";
+import type { SimulationScreenEnv } from "./screens/simulation/runtime";
+import { SourcesScreen } from "./screens/SourcesScreen";
+import { StartScreen } from "./screens/StartScreen";
+import type { VolumeCheckAudio, VolumeToneContext } from "./screens/tone";
+import { TutorialScreen, type TutorialAudio } from "./screens/TutorialScreen";
+import type { ModalEnv } from "./ui/modal-env";
+import { EmbeddedProvider } from "./ui/ScreenHeading";
+
+/** Kaynak `App.tsx`: belge ekranları sayfa düzeyinde kayar; öğrenme ve simülasyon kaymaz. */
+const DOC_SCREENS = new Set(["start", "modes", "tutorial", "results", "sources"]);
+
+/** Ekranların paylaştığı motor yüzeyi. Mount başına bir örnek; modül singleton'ı yoktur. */
+export interface AuscultaAudio extends SimulationAudio, TutorialAudio {
+  stop(): void;
+  dispose(): void;
+}
+
+function volumeAudio(audio: AuscultaAudio): VolumeCheckAudio {
+  return { ensureContext: () => audio.ensureContext() as Promise<VolumeToneContext> };
+}
+
+export interface AppProps {
+  /** Platform kabuğu: tanıtım atlanır, sim üst barı çizilmez, başlıklar h2 olur. */
+  readonly embedded?: boolean;
+  readonly audio: AuscultaAudio;
+  readonly learnEnv?: LearnScreenEnv;
+  readonly simulationEnv?: SimulationScreenEnv;
+  readonly modalEnv?: ModalEnv;
+  readonly resultsEnv?: ResultsScreenEnv;
+  readonly scrollToTop?: () => void;
+}
+
+function Shell({
+  embedded,
+  audio,
+  learnEnv,
+  simulationEnv,
+  modalEnv,
+  resultsEnv,
+  scrollToTop,
+}: AppProps & { embedded: boolean }): JSX.Element {
+  const { state, dispatch } = useStore();
+  const screen = resolveEntryScreen(state.screen, embedded);
+
+  useEffect(() => {
+    audio.stop();
+  }, [audio, state.screen]);
+
+  useEffect(() => {
+    scrollToTop?.();
+  }, [scrollToTop, state.screen]);
+
+  useEffect(() => {
+    if (embedded) return;
+    if (state.screen === "modes" && !state.tutorialDone && !state.tutorialSeen) {
+      dispatch({ type: "goto", screen: "tutorial" });
+    }
+  }, [dispatch, embedded, state.screen, state.tutorialDone, state.tutorialSeen]);
+
+  const doc = DOC_SCREENS.has(screen);
+  return (
+    <EmbeddedProvider embedded={embedded}>
+      <div className={`eg-sim-ausculta app-shell${doc ? " app-shell--doc" : ""}`}>
+        <main className="app-content">
+          {screen === "start" ? <StartScreen embedded={embedded} audio={volumeAudio(audio)} /> : null}
+          {screen === "modes" ? <ModeSelectScreen embedded={embedded} /> : null}
+          {screen === "tutorial" ? <TutorialScreen embedded={embedded} audio={audio} /> : null}
+          {screen === "learn" ? (
+            <LearnScreen embedded={embedded} audio={audio} {...(learnEnv ? { env: learnEnv } : {})} />
+          ) : null}
+          {screen === "simulation" ? (
+            <SimulationScreen
+              embedded={embedded}
+              audio={audio}
+              {...(simulationEnv ? { env: simulationEnv } : {})}
+              {...(modalEnv ? { modalEnv } : {})}
+            />
+          ) : null}
+          {screen === "results" ? (
+            <ResultsScreen embedded={embedded} {...(resultsEnv ? { env: resultsEnv } : {})} />
+          ) : null}
+          {screen === "sources" ? <SourcesScreen embedded={embedded} /> : null}
+        </main>
+      </div>
+    </EmbeddedProvider>
+  );
+}
+
+/** Gömülü kabuk. Üst bar platformdadır; sim ikinci bir `header` çizmez. */
+export function App({ embedded = true, ...props }: AppProps): JSX.Element {
+  return <Shell embedded={embedded} {...props} />;
+}

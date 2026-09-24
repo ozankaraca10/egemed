@@ -2,6 +2,7 @@ import type { JSX } from "react";
 import { useStore } from "../core/StoreProvider";
 import sourcesData from "../data/sources.json";
 import { EcgDeco, Footer, touchTarget } from "../ui/chrome";
+import { ScreenHeading } from "../ui/ScreenHeading";
 import { IconBook, IconDoc, IconHeart, IconInfo } from "../ui/icons";
 
 /** Kaynaklar (E2 §9 S16b). Atıf, lisans ve validasyon metinleri `sources.json` ile aynıdır.
@@ -97,9 +98,9 @@ export function SourcesScreen({ embedded = false }: SourcesScreenProps): JSX.Ele
       <EcgDeco embedded={embedded} />
       <div className="screen" style={{ position: "relative", zIndex: 1 }}>
         <div className="src-wrap screen-body">
-          <h1 className="src-title">
+          <ScreenHeading className="src-title">
             EGEMED Ausculta<sup className="tm">™</sup> Hakkında
-          </h1>
+          </ScreenHeading>
           <p className="src-sub">
             {data.module.product}
             <sup className="tm">™</sup> {data.module.subtitle}'nü geliştiren ekip, kurum bilgisi ve modülde kullanılan
