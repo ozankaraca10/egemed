@@ -4,6 +4,13 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "migrate:up": "node-pg-migrate up --migrations-dir migrations",
+    "migrate:down": "node-pg-migrate down --migrations-dir migrations",
+    "test:db": "vitest run --config vitest.db.config.ts",
     "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "node-pg-migrate": "9.0.0",
+    "pg": "8.23.0"
   }
 }
