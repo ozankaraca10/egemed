@@ -159,6 +159,18 @@ açıkça durur. Bu koşum için kök betik: `pnpm e2e:api` (API'yi önce
 verilmediğinde bugünkü davranış korunur; yalnız konsola "api-dev projesi
 atlandı" uyarısı basılır.
 
+### Giriş hız sınırı (T81)
+
+Giriş hız sınırı kullanıcı adı başına **15 dakikada 8 denemedir** ve API
+sürecinin belleğinde tutulur (`apps/api/src/auth/rate-limit.ts`; anahtar ham
+kullanıcı adı taşımaz, SHA-256'dır). CI'daki `e2e` ve `api-e2e` işleri her
+koşuda **taze bir API süreci** başlattığı için bu sınır sorun değildir:
+hız sınırı penceresi her koşuda boş başlar. Yerelde ise `pnpm e2e:api`'yi
+tekrar koşmadan önce API'yi **yeniden başlatın** (`pnpm --filter @egemed/api
+dev` sürecini durdurup yeniden açın): bellek içi sayaç süreci yaşamaya devam
+ettiği sürece silinmez ve bir önceki koşumun denemeleri 15 dakikalık pencerede
+birikmiş olabilir; aksi hâlde giriş uçları `429` döndürür.
+
 ## 9. KVKK notu
 
 Veri sorumluluğu ve hukuki dayanak insan/hukuk kararıdır (ADR-007); bu
