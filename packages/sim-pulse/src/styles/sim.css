@@ -1,0 +1,156 @@
+/* Anatomi ve EKG sahnesi — etkileşimli içerik simülasyon kökünde yalıtılır. */
+.eg-sim-pulse .workspace {
+  display: grid;
+  grid-template-columns: minmax(0, 42fr) minmax(0, 58fr);
+  grid-template-rows: minmax(0, 1fr);
+  gap: var(--eg-pulse-gap);
+  min-height: 0;
+}
+
+.eg-sim-pulse .panel {
+  min-width: 0;
+  min-height: 0;
+  border: 1px solid var(--eg-pulse-line);
+  border-radius: var(--eg-pulse-radius);
+  background: var(--eg-pulse-paper);
+  box-shadow: var(--eg-pulse-shadow);
+}
+
+.eg-sim-pulse .anatomy-panel {
+  display: grid;
+  grid-template-rows: auto minmax(300px, 1fr) auto;
+  overflow: hidden;
+  background: radial-gradient(ellipse at 50% 46%, var(--card), var(--card-soft) 66%, var(--blue-50));
+}
+
+.eg-sim-pulse .anatomy-stage {
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.eg-sim-pulse .anatomy-stage > svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  padding-bottom: 44px;
+}
+
+.eg-sim-pulse .organs {
+  fill: var(--card-soft);
+  stroke: var(--ink-300);
+  stroke-width: 1.5;
+}
+
+.eg-sim-pulse .vessel {
+  stroke-width: 17;
+  opacity: 0.63;
+}
+
+.eg-sim-pulse .vessel-blue {
+  stroke: var(--blue-500);
+}
+
+.eg-sim-pulse .vessel-red {
+  stroke: var(--red-500);
+}
+
+.eg-sim-pulse .right-column {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: minmax(320px, 1fr) minmax(160px, 1fr);
+  gap: var(--eg-pulse-gap);
+  min-width: 0;
+  min-height: 0;
+}
+
+.eg-sim-pulse .ecg-panel {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: auto auto minmax(100px, 1fr) auto auto;
+  color: var(--eg-pulse-ink);
+  border-color: var(--border-strong);
+}
+
+.eg-sim-pulse .ecg-screen {
+  position: relative;
+  min-height: 110px;
+  margin-inline: 10px;
+  overflow: hidden;
+  touch-action: none;
+  border: 1px solid var(--red-100);
+  border-radius: var(--r-sm);
+  background: var(--eg-pulse-paper);
+}
+
+.eg-sim-pulse .ecg-screen canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  cursor: crosshair;
+}
+
+.eg-sim-pulse .caliper-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.eg-sim-pulse .caliper-handle {
+  position: absolute;
+  top: 46%;
+  width: 18px;
+  height: 18px;
+  border: 2px solid var(--eg-pulse-paper);
+  border-radius: 50%;
+  background: var(--eg-pulse-field);
+  transform: translate(-50%, -50%);
+  pointer-events: auto;
+  cursor: move;
+}
+
+.eg-sim-pulse .ecg-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 8px;
+  padding: 6px 10px;
+  color: var(--eg-pulse-muted);
+  border-top: 1px solid var(--eg-pulse-line);
+}
+
+.eg-sim-pulse .tool-btn {
+  min-height: 44px;
+  padding: 6px 8px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--r-sm);
+  color: var(--eg-pulse-ink);
+  background: var(--blue-50);
+}
+
+.eg-sim-pulse .tool-btn.active,
+.eg-sim-pulse .tool-btn[aria-pressed="true"] {
+  color: var(--blue-700);
+  border-color: var(--blue-500);
+  background: var(--blue-100);
+}
+
+.eg-sim-pulse .metrics {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  padding-block: 5px;
+  border-top: 1px solid var(--eg-pulse-line);
+}
+
+@media (max-width: 900px) {
+  .eg-sim-pulse .workspace {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .eg-sim-pulse .right-column {
+    grid-template-rows: minmax(300px, auto) minmax(160px, auto);
+  }
+}

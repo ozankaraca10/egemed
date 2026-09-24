@@ -165,6 +165,9 @@ importers:
       '@egemed/sim-host':
         specifier: workspace:*
         version: link:../sim-host
+      '@egemed/tokens':
+        specifier: workspace:*
+        version: link:../tokens
 
   packages/tokens: {}
 
