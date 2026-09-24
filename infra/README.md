@@ -1,9 +1,10 @@
 # Geliştirme altyapısı (infra)
 
-Yerel geliştirme için iki servis çalıştırır: `postgres` (CLIX geliştirme
-veritabanı) ve `lrs` (geliştirme LRS'si; kurum LRS'sinin yerini tutar).
+Yerel geliştirme için iki servis çalıştırır: `postgres` (EGEMED platformu
+geliştirme veritabanı) ve `lrs` (geliştirme LRS'si; kurum LRS'sinin yerini tutar).
 API servisi henüz yoktur (T01 iskeleti). Servisler arasında bağımlılık yoktur:
-ADR-004 gereği CLIX ifade saklamaz, LRS de CLIX Postgres'ine bağlanmaz.
+ADR-004 gereği EGEMED platformu ifade saklamaz, LRS de platformun Postgres'ine
+bağlanmaz.
 
 ## Kullanım
 

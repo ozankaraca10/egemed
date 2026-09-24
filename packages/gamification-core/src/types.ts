@@ -1,4 +1,4 @@
-/** EGEMED CLIX — oyunlaştırma çekirdeği (sim-bağımsız) veri tipleri.
+/** EGEMED — oyunlaştırma çekirdeği (sim-bağımsız) veri tipleri.
  *  Salt okunur kaynak: egemed-opaca/src/gamification/types.ts.
  *  Opaca'ya özgü alanlar (bulgu, lokalizasyon, ABCDE vb.) `extra` içinde taşınır;
  *  çekirdek hiçbir sim verisine bağlı değildir. Bu dosya yalnız tip tanımları içerir. */

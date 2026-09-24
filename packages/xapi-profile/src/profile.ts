@@ -5,8 +5,8 @@
  * insan geçirir (docs/specs/E0-temel.md, T06 [KARAR]).
  */
 
-/** Profil IRI'si; yer tutucu alan adı, insan kararı (research.md açık soru 1). */
-export const PROFILE_IRI = "https://xapi.egemed.example/clix/v0" as const;
+/** Profil IRI'si; K2 insan onayı bekleyen yer tutucu (research.md açık soru 1). */
+export const PROFILE_IRI = "https://egemed.ege.edu.tr/xapi/v0" as const;
 
 /** Desteklenen simülatörler; her ifade tam olarak birini taşır (ADR-003). */
 export const SIMULATORS = ["pulse", "ausculta", "opaca"] as const;

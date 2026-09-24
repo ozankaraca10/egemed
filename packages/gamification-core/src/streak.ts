@@ -1,4 +1,4 @@
-/** EGEMED CLIX — günlük seri.
+/** EGEMED — günlük seri.
  *  Salt okunur kaynak: egemed-opaca/src/gamification/streak.ts.
  *  "Seri: art arda TR takvim günleri; o gün en az bir tamamlanmış oturum (uygulama ya da değerlendirme).
  *  Bugün veya dün etkinlik varsa seri sürer." Saf fonksiyon; zaman parametre (`now`). */

@@ -1,4 +1,4 @@
-/** EGEMED CLIX — jenerik rozet motoru: katalog + durum → yeni kazanılan rozetler.
+/** EGEMED — jenerik rozet motoru: katalog + durum → yeni kazanılan rozetler.
  *  Salt okunur kaynak: egemed-opaca/src/gamification/badges.ts.
  *  Opaca'ya özgü rozet tanımları (bulgu, lokalizasyon, ABCDE vb.) ve eşikleri çekirdeğe GİRMEZ;
  *  her sim kendi `BadgeDef[]` kataloğunu ve eşiklerini taşır. `state`/`ctx` sim'e göre

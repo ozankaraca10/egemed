@@ -1,4 +1,4 @@
-/** EGEMED CLIX — ilerleme grafiği verisi. Salt okunur kaynak: egemed-opaca/src/gamification/chart.ts.
+/** EGEMED — ilerleme grafiği verisi. Salt okunur kaynak: egemed-opaca/src/gamification/chart.ts.
  *  Saf; XP kuralı parametre (`rules`), TR kısa tarih çekirdeğin takvim modülündedir. */
 
 import type { GamiRules } from "./rules";

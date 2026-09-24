@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { activityIri, type ActivityPath } from "../../packages/xapi-profile/src/iri";
 
-const BASE = "https://xapi.egemed.example/clix/";
+const BASE = "https://egemed.ege.edu.tr/xapi/";
 
 describe("activityIri", () => {
   it("aynı girdi için aynı IRI üretir (determinizm)", () => {
@@ -24,31 +24,31 @@ describe("activityIri", () => {
   });
 
   it("https olmayan base'i reddeder", () => {
-    expect(() => activityIri("http://xapi.egemed.example/clix/", { simulator: "pulse" })).toThrow(
+    expect(() => activityIri("http://egemed.ege.edu.tr/xapi/", { simulator: "pulse" })).toThrow(
       RangeError,
     );
   });
 
   it("sonda '/' olmayan base'i reddeder", () => {
-    expect(() => activityIri("https://xapi.egemed.example/clix", { simulator: "pulse" })).toThrow(
+    expect(() => activityIri("https://egemed.ege.edu.tr/xapi", { simulator: "pulse" })).toThrow(
       RangeError,
     );
   });
 
   it("sorgu veya fragment taşıyan base'i reddeder", () => {
     // Sondaki "/" korunur; reddin nedeni yalnız sorgu/fragment olur.
-    expect(() => activityIri("https://xapi.egemed.example/clix?x=1/", { simulator: "pulse" })).toThrow(
+    expect(() => activityIri("https://egemed.ege.edu.tr/xapi?x=1/", { simulator: "pulse" })).toThrow(
       RangeError,
     );
-    expect(() => activityIri("https://xapi.egemed.example/clix#f/", { simulator: "pulse" })).toThrow(
+    expect(() => activityIri("https://egemed.ege.edu.tr/xapi#f/", { simulator: "pulse" })).toThrow(
       RangeError,
     );
   });
 
   it("boş yetki veya boşluk içeren base'i reddeder", () => {
-    expect(() => activityIri("https:///clix/", { simulator: "pulse" })).toThrow(RangeError);
+    expect(() => activityIri("https:///xapi/", { simulator: "pulse" })).toThrow(RangeError);
     expect(() => activityIri("https://", { simulator: "pulse" })).toThrow(RangeError);
-    expect(() => activityIri("https://x.example/clix /", { simulator: "pulse" })).toThrow(RangeError);
+    expect(() => activityIri("https://x.example/xapi /", { simulator: "pulse" })).toThrow(RangeError);
     expect(() => activityIri("xapi", { simulator: "pulse" })).toThrow(RangeError);
   });
 

@@ -1,4 +1,4 @@
-/** EGEMED CLIX — deneme → XP, toplam XP → seviye/ilerleme.
+/** EGEMED — deneme → XP, toplam XP → seviye/ilerleme.
  *  Salt okunur kaynak: egemed-opaca/src/gamification/xp.ts.
  *  Saf fonksiyonlar; zaman kullanılmaz, kurallar parametre olarak verilir. */
 

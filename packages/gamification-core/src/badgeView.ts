@@ -1,4 +1,4 @@
-/** EGEMED CLIX — rozet görünüm modeli: katalog + durum + kazanılmışlar → kart durumu.
+/** EGEMED — rozet görünüm modeli: katalog + durum + kazanılmışlar → kart durumu.
  *  Salt okunur kaynak: egemed-opaca/src/gamification/badgeView.ts.
  *  Opaca'ya özgü kısa koşul/çalışma anahtarı eşlemeleri (RULE, STUDY_KEY) çekirdeğe girmez;
  *  kısa koşul ve çalışma anahtarı katalog tanımından (`rule`, `studyKey`) gelir.

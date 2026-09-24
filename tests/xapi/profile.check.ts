@@ -14,7 +14,7 @@ import {
 } from "../../packages/xapi-profile/src/index";
 
 export const validActivityIri: ActivityIri = activityIri(
-  "https://xapi.egemed.example/clix/",
+  "https://egemed.ege.edu.tr/xapi/",
   { simulator: "pulse" },
 );
 
@@ -26,7 +26,7 @@ export const validActor: XapiActor = opaqueActor(
 );
 
 // @ts-expect-error ham string ActivityIri yerine geçmez (marka zorunlu).
-export const rawActivityIri: ActivityIri = "https://xapi.egemed.example/clix/pulse";
+export const rawActivityIri: ActivityIri = "https://egemed.ege.edu.tr/xapi/pulse";
 
 // @ts-expect-error ham string OpaqueActorId yerine geçmez (marka zorunlu).
 export const rawOpaqueId: OpaqueActorId = "kurum-ogrenci-0001";
