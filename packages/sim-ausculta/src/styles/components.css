@@ -18,7 +18,7 @@
 .eg-sim-ausculta .eg-header .divider-v { width: 1px; height: 24px; background: rgba(255,255,255,.22); flex-shrink: 0; }
 .eg-sim-ausculta .eg-progress-chip { display: flex; align-items: center; gap: 10px; color: var(--blue-100); font-size: var(--fs-sm); white-space: nowrap; }
 .eg-sim-ausculta .eg-progress-chip .bar { width: 110px; height: 7px; border-radius: var(--r-pill); background: rgba(255,255,255,.18); overflow: hidden; }
-.eg-sim-ausculta .eg-progress-chip .bar > i { display: block; height: 100%; border-radius: var(--r-pill); background: var(--blue-400); transition: width .3s ease; }
+.eg-sim-ausculta .eg-progress-chip .bar > i { display: block; height: 100%; width: 100%; border-radius: var(--r-pill); background: var(--blue-400); transform-origin: left center; transform: scaleX(0); transition: transform .3s ease; }
 .eg-sim-ausculta .eg-timer { display: flex; align-items: center; gap: 7px; font-variant-numeric: tabular-nums; color: var(--blue-100); font-size: var(--fs-md); }
 .eg-sim-ausculta .eg-mode-chip { display: flex; align-items: center; gap: 8px; padding: 7px 14px; border-radius: var(--r-pill); font-size: var(--fs-sm); font-weight: 600; white-space: nowrap; }
 .eg-sim-ausculta .eg-mode-chip.learn { background: rgba(31,169,113,.25); color: var(--green-100); }
@@ -106,7 +106,7 @@
 .eg-sim-ausculta .hero-cta:active { transform: translateY(1px); }
 .eg-sim-ausculta .hero-cta svg { width: 20px; height: 20px; }
 .eg-sim-ausculta .hero-links { display: flex; align-items: center; gap: 14px; margin: var(--sp-3) 0 16px; }
-.eg-sim-ausculta .hero-link { display: inline-flex; align-items: center; gap: 7px; background: none; border: 0; color: var(--ink-600); font-size: var(--fs-md); font-weight: 600; cursor: pointer; padding: 4px 2px; }
+.eg-sim-ausculta .hero-link { display: inline-flex; align-items: center; gap: 7px; background: none; border: 0; color: var(--ink-600); font-size: var(--fs-md); font-weight: 600; cursor: pointer; padding: 4px 2px; min-height: 44px; }
 .eg-sim-ausculta .hero-link:hover { color: var(--blue-700); }
 .eg-sim-ausculta .hero-link svg { width: 16px; height: 16px; }
 .eg-sim-ausculta .hero-link-sep { width: 1px; height: 16px; background: var(--border-strong); }
@@ -204,7 +204,7 @@
 .eg-sim-ausculta .case-end-bars { display: flex; flex-direction: column; gap: 7px; margin-bottom: 12px; }
 .eg-sim-ausculta .ce-bar-row { display: grid; grid-template-columns: 84px 1fr 36px; align-items: center; gap: 8px; font-size: var(--fs-xs); color: var(--border); }
 .eg-sim-ausculta .ce-bar { height: 7px; border-radius: var(--r-pill); background: rgba(255,255,255,.15); overflow: hidden; }
-.eg-sim-ausculta .ce-bar > i { display: block; height: 100%; background: linear-gradient(90deg, var(--blue-400), var(--blue-300)); border-radius: var(--r-pill); }
+.eg-sim-ausculta .ce-bar > i { display: block; height: 100%; width: 100%; background: linear-gradient(90deg, var(--blue-400), var(--blue-300)); border-radius: var(--r-pill); transform-origin: left center; transform: scaleX(0); transition: transform .3s ease; }
 .eg-sim-ausculta .ce-pct { text-align: right; font-weight: 700; color: var(--bg-grad-a); }
 .eg-sim-ausculta .case-end-block { margin-bottom: 9px; }
 .eg-sim-ausculta .case-end-block b { font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: .5px; color: var(--blue-300); }
@@ -215,7 +215,7 @@
 .eg-sim-ausculta .stage-card { background: rgba(255,255,255,.94); border: 1px solid var(--border); border-radius: var(--r-lg); box-shadow: var(--shadow-card); padding: 10px; display: flex; flex-direction: column; gap: 8px; flex: 1; min-height: 0; }
 .eg-sim-ausculta .stage-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-shrink: 0; flex-wrap: wrap; }
 .eg-sim-ausculta .view-toggle { display: flex; background: var(--card); border: 1.5px solid var(--border-strong); border-radius: var(--r-md); padding: 3px; gap: 3px; }
-.eg-sim-ausculta .view-toggle button { border: 0; background: transparent; color: var(--ink-600); font-size: var(--fs-sm); font-weight: 600; padding: 6px 7px; border-radius: var(--r-md); display: flex; align-items: center; gap: 4px; white-space: nowrap; }
+.eg-sim-ausculta .view-toggle button { border: 0; background: transparent; color: var(--ink-600); font-size: var(--fs-sm); font-weight: 600; padding: 6px 7px; min-width: 44px; min-height: 44px; border-radius: var(--r-md); display: flex; align-items: center; gap: 4px; white-space: nowrap; }
 .eg-sim-ausculta .view-toggle button.active { background: var(--blue-600); color: var(--card); box-shadow: 0 2px 8px rgba(22,115,230,.35); }
 .eg-sim-ausculta .strict-banner { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; background: var(--orange-100); border: 1.5px solid var(--orange-500); color: var(--amber-700); border-radius: var(--r-md); padding: 9px var(--sp-3); font-size: var(--fs-sm); line-height: 1.4; }
 .eg-sim-ausculta .strict-banner strong { color: var(--amber-700); }
@@ -265,7 +265,7 @@
 .eg-sim-ausculta .ped-table td { padding: 3px 4px; border-bottom: 1px solid var(--blue-50); }
 .eg-sim-ausculta .ped-notes { margin: 0; padding-left: 16px; font-size: var(--fs-xs); color: var(--ink-700); line-height: 1.45; }
 .eg-sim-ausculta .region-list { display: flex; flex-wrap: wrap; align-items: center; gap: 7px; padding: 6px 2px 2px; flex-shrink: 0; }
-.eg-sim-ausculta .region-list button { border: 1px solid var(--border-strong); background: var(--card); color: var(--ink-700); font-size: var(--fs-xs); font-weight: 600; padding: 6px 11px; border-radius: var(--r-pill); display: inline-flex; align-items: center; gap: 5px; }
+.eg-sim-ausculta .region-list button { border: 1px solid var(--border-strong); background: var(--card); color: var(--ink-700); font-size: var(--fs-xs); font-weight: 600; padding: 6px 11px; min-height: 44px; border-radius: var(--r-pill); display: inline-flex; align-items: center; gap: 5px; }
 .eg-sim-ausculta .region-list button:hover { background: var(--blue-50); }
 .eg-sim-ausculta .region-list button.is-active { background: var(--blue-600); border-color: var(--blue-600); color: var(--card); }
 .eg-sim-ausculta .region-list button.is-listened:not(.is-active) { border-color: var(--green-500); color: var(--green-600); background: var(--green-50); }
@@ -277,11 +277,11 @@
 .eg-sim-ausculta .toolbar > .tool-sep, .eg-sim-ausculta .toolbar > .head-toggle, .eg-sim-ausculta .toolbar > .view-toggle, .eg-sim-ausculta .toolbar > .vol-group, .eg-sim-ausculta .toolbar > .btn { flex-shrink: 0; }
 .eg-sim-ausculta .tool-sep { width: 1px; height: 26px; background: var(--border); }
 .eg-sim-ausculta .body-toggle { display: flex; background: var(--card-soft); border: 1.5px solid var(--border-strong); border-radius: var(--r-md); padding: 3px; gap: 3px; }
-.eg-sim-ausculta .body-toggle button { border: 0; background: transparent; color: var(--ink-600); padding: 6px 11px; border-radius: var(--r-md); font-size: var(--fs-sm); font-weight: 600; display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+.eg-sim-ausculta .body-toggle button { border: 0; background: transparent; color: var(--ink-600); padding: 6px 11px; min-height: 44px; border-radius: var(--r-md); font-size: var(--fs-sm); font-weight: 600; display: flex; align-items: center; gap: 6px; white-space: nowrap; }
 .eg-sim-ausculta .body-toggle.compact button { padding: 6px 10px; font-size: var(--fs-xs); }
 .eg-sim-ausculta .body-toggle button.active { background: var(--blue-600); color: var(--card); }
 .eg-sim-ausculta .head-toggle { display: flex; background: var(--card-soft); border: 1.5px solid var(--border-strong); border-radius: var(--r-md); padding: 3px; gap: 3px; }
-.eg-sim-ausculta .head-toggle button { border: 0; background: transparent; color: var(--ink-600); padding: 6px 7px; border-radius: var(--r-md); font-size: var(--fs-sm); font-weight: 600; display: flex; align-items: center; gap: 4px; white-space: nowrap; }
+.eg-sim-ausculta .head-toggle button { border: 0; background: transparent; color: var(--ink-600); padding: 6px 7px; min-width: 44px; min-height: 44px; border-radius: var(--r-md); font-size: var(--fs-sm); font-weight: 600; display: flex; align-items: center; gap: 4px; white-space: nowrap; }
 .eg-sim-ausculta .head-toggle button.active { background: var(--blue-600); color: var(--card); }
 .eg-sim-ausculta .head-toggle button:disabled { opacity: .4; cursor: not-allowed; }
 .eg-sim-ausculta .vol-group { display: flex; align-items: center; gap: 7px; color: var(--ink-700); font-size: var(--fs-sm); font-weight: 600; }
@@ -296,7 +296,7 @@
 .eg-sim-ausculta .play-state.playing .eq i:nth-child(2) { animation-delay: .15s; }
 .eg-sim-ausculta .play-state.playing .eq i:nth-child(3) { animation-delay: .3s; }
 .eg-sim-ausculta .play-state.playing .eq i:nth-child(4) { animation-delay: .45s; }
-.eg-sim-ausculta .toolbar .btn.small { padding: 6px 10px; gap: 6px; }
+.eg-sim-ausculta .toolbar .btn.small { padding: 6px 10px; gap: 6px; min-height: 44px; }
 .eg-sim-ausculta .toolbar .head-toggle svg, .eg-sim-ausculta .toolbar .view-toggle svg, .eg-sim-ausculta .toolbar .vol-group svg, .eg-sim-ausculta .toolbar .btn.small svg { width: 15px; height: 15px; }
 .eg-sim-ausculta .toolbar .vol-group .pct { display: none; }
 .eg-sim-ausculta .dot-live { width: 8px; height: 8px; border-radius: 50%; background: var(--green-600); box-shadow: 0 0 0 3px rgba(22,163,74,.18); animation: eg-ausculta-dotpulse 1.4s ease-in-out infinite; flex-shrink: 0; }
@@ -314,7 +314,7 @@
 .eg-sim-ausculta .lib-group .g-title { position: sticky; top: 0; z-index: 2; display: flex; align-items: center; gap: 8px; font-weight: 800; color: var(--ink-900); font-size: var(--fs-md); margin: 0 0 8px; padding: 6px 2px; background: linear-gradient(180deg, rgba(238,244,251,.98) 70%, rgba(238,244,251,0)); backdrop-filter: blur(2px); }
 .eg-sim-ausculta .lib-group .g-title svg { width: 16px; height: 16px; color: var(--blue-600); }
 .eg-sim-ausculta .lib-items { display: flex; flex-direction: column; gap: 6px; }
-.eg-sim-ausculta .lib-item { display: flex; align-items: center; gap: 9px; text-align: left; width: 100%; min-width: 0; border: 1px solid var(--border); background: rgba(255,255,255,.9); border-radius: var(--r-md); padding: 8px 10px; }
+.eg-sim-ausculta .lib-item { display: flex; align-items: center; gap: 9px; text-align: left; width: 100%; min-width: 0; min-height: 44px; border: 1px solid var(--border); background: rgba(255,255,255,.9); border-radius: var(--r-md); padding: 8px 10px; }
 .eg-sim-ausculta .lib-item .lib-main { flex: 1 1 auto; min-width: 0; }
 .eg-sim-ausculta .lib-item .lib-right { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
 .eg-sim-ausculta .lib-item:hover { border-color: var(--blue-400); }
@@ -325,7 +325,7 @@
 .eg-sim-ausculta .lib-item .lib-main > span { font-size: var(--fs-xs); color: var(--ink-600); display: block; margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .eg-sim-ausculta .lib-item .chev { color: var(--ink-300); font-weight: 700; font-size: var(--fs-lg); }
 .eg-sim-ausculta .tabbar { display: flex; gap: 4px; background: var(--card-soft); border: 1px solid var(--border); border-radius: var(--r-md); padding: 4px; margin-bottom: 11px; }
-.eg-sim-ausculta .tabbar button { flex: 1; border: 0; background: transparent; border-radius: var(--r-md); padding: 8px 6px; font-size: var(--fs-sm); font-weight: 600; color: var(--ink-600); display: flex; align-items: center; justify-content: center; gap: 7px; white-space: nowrap; }
+.eg-sim-ausculta .tabbar button { flex: 1; border: 0; background: transparent; border-radius: var(--r-md); padding: 8px 6px; min-height: 44px; font-size: var(--fs-sm); font-weight: 600; color: var(--ink-600); display: flex; align-items: center; justify-content: center; gap: 7px; white-space: nowrap; }
 .eg-sim-ausculta .tabbar button.active { background: var(--blue-600); color: var(--card); box-shadow: 0 2px 8px rgba(22,115,230,.3); }
 .eg-sim-ausculta .info-body { font-size: var(--fs-md); color: var(--ink-700); line-height: 1.58; }
 .eg-sim-ausculta .metaphor-card { display: flex; gap: 11px; align-items: flex-start; background: linear-gradient(90deg, rgba(253,238,205,.75), rgba(255,250,240,.6)); border: 1px solid var(--orange-100); border-radius: var(--r-md); padding: 11px var(--sp-3); }
@@ -348,11 +348,11 @@
 .eg-sim-ausculta .wave-panel { border: 1px solid var(--border); border-radius: var(--r-lg); background: var(--card); padding: 11px var(--sp-3) 9px; }
 .eg-sim-ausculta .wave-panel canvas { width: 100%; height: 88px; display: block; }
 .eg-sim-ausculta .wave-zoom { display: flex; justify-content: flex-end; gap: 4px; margin-bottom: 6px; }
-.eg-sim-ausculta .wave-zoom button { font-size: var(--fs-xs); font-weight: 700; padding: 3px 8px; border-radius: var(--r-sm); border: 1px solid var(--border-strong); background: var(--card); color: var(--ink-600); }
+.eg-sim-ausculta .wave-zoom button { font-size: var(--fs-xs); font-weight: 700; padding: 3px 8px; min-width: 44px; min-height: 44px; border-radius: var(--r-sm); border: 1px solid var(--border-strong); background: var(--card); color: var(--ink-600); }
 .eg-sim-ausculta .wave-zoom button.active { background: var(--blue-600); border-color: var(--blue-600); color: var(--card); }
 .eg-sim-ausculta .wave-canvas-wrap { width: 100%; }
 .eg-sim-ausculta .transport { display: flex; align-items: center; gap: 12px; margin-top: 9px; }
-.eg-sim-ausculta .t-btn { width: 37px; height: 37px; border-radius: 50%; border: 1.5px solid var(--border-strong); background: var(--card); color: var(--blue-700); display: flex; align-items: center; justify-content: center; }
+.eg-sim-ausculta .t-btn { width: 44px; height: 44px; min-width: 44px; min-height: 44px; border-radius: 50%; border: 1.5px solid var(--border-strong); background: var(--card); color: var(--blue-700); display: flex; align-items: center; justify-content: center; }
 .eg-sim-ausculta .t-btn:hover { background: var(--blue-50); }
 .eg-sim-ausculta .t-btn.main { width: 48px; height: 48px; background: linear-gradient(180deg, var(--blue-500), var(--blue-700)); color: var(--card); border: 0; box-shadow: 0 6px 16px rgba(22,115,230,.4); }
 .eg-sim-ausculta .t-btn:disabled { opacity: .4; }
@@ -427,7 +427,7 @@
 .eg-sim-ausculta .domain-row .dr-ic { width: 30px; height: 30px; border-radius: var(--r-md); background: var(--blue-50); color: var(--blue-600); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
 .eg-sim-ausculta .domain-row .dr-lbl { font-size: var(--fs-md); color: var(--ink-700); font-weight: 600; }
 .eg-sim-ausculta .domain-bar { height: 9px; border-radius: var(--r-pill); background: var(--blue-100); overflow: hidden; }
-.eg-sim-ausculta .domain-bar > i { display: block; height: 100%; background: linear-gradient(90deg, var(--blue-500), var(--blue-700)); border-radius: var(--r-pill); }
+.eg-sim-ausculta .domain-bar > i { display: block; height: 100%; width: 100%; background: linear-gradient(90deg, var(--blue-500), var(--blue-700)); border-radius: var(--r-pill); transform-origin: left center; transform: scaleX(0); transition: transform .3s ease; }
 .eg-sim-ausculta .domain-row .dr-pct { font-weight: 800; color: var(--ink-900); text-align: right; font-variant-numeric: tabular-nums; font-size: var(--fs-md); }
 .eg-sim-ausculta .results-actions { display: flex; gap: 12px; flex-wrap: wrap; margin-top: var(--sp-5); }
 .eg-sim-ausculta .table-scroll { overflow-x: auto; }
@@ -532,7 +532,7 @@
 .eg-sim-ausculta .modal-card { background: var(--card); color: var(--ink-900); border-radius: var(--r-lg); box-shadow: 0 24px 60px rgba(9,26,52,.28); width: min(680px, 100%); max-height: min(78vh, 640px); display: flex; flex-direction: column; overflow: hidden; }
 .eg-sim-ausculta .modal-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 14px 16px; border-bottom: 1px solid var(--border); }
 .eg-sim-ausculta .modal-head h3 { margin: 0; font-size: var(--fs-lg); color: var(--navy-800); }
-.eg-sim-ausculta .modal-close { width: 34px; height: 34px; border-radius: var(--r-md); border: 1px solid var(--border-strong); background: var(--card); color: var(--ink-600); display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; }
+.eg-sim-ausculta .modal-close { width: 44px; height: 44px; min-width: 44px; min-height: 44px; border-radius: var(--r-md); border: 1px solid var(--border-strong); background: var(--card); color: var(--ink-600); display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; }
 .eg-sim-ausculta .modal-close:hover { background: var(--card-soft); color: var(--ink-900); }
 .eg-sim-ausculta .modal-close svg { width: 18px; height: 18px; }
 .eg-sim-ausculta .modal-body { padding: 14px 16px var(--sp-4); overflow-y: auto; }

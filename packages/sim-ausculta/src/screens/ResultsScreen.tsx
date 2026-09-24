@@ -7,7 +7,7 @@ import type { SimRuntime } from "../core/runtime";
 import { useStore } from "../core/StoreProvider";
 import type { ScoringWeights } from "../core/types";
 import libraryData from "../data/library.json";
-import { EcgDeco, Footer, touchTarget } from "../ui/chrome";
+import { EcgDeco, fillScale, Footer, touchTarget } from "../ui/chrome";
 import { ScreenHeading } from "../ui/ScreenHeading";
 import {
   IconCheckCircle,
@@ -212,7 +212,7 @@ export function ResultsScreen({ embedded = false, env = NOOP_RESULTS_ENV }: Resu
                       <span className="dr-ic">{row.icon}</span>
                       <span className="dr-lbl">{row.label}</span>
                       <span className="domain-bar">
-                        <i style={{ width: `${pct}%` }} />
+                        <i style={fillScale(pct)} />
                       </span>
                       <span className="dr-pct">%{pct}</span>
                     </div>
