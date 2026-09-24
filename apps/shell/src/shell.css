@@ -20,11 +20,30 @@
 }
 .eg-shell-skip:focus { transform: none; }
 .eg-shell-header {
-  display: flex; align-items: center; justify-content: space-between;
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
   gap: var(--sp-3); padding: var(--sp-3) var(--sp-4);
   background: var(--card); border-bottom: 1px solid var(--border);
 }
 .eg-shell-brand { margin: 0; color: var(--navy-900); font-size: var(--fs-lg); font-weight: 600; }
+/* Sahte oturum göstergesi: rol etiketi + çıkış; ikisi de >=44 px (T35b). */
+.eg-shell-session { display: flex; align-items: center; gap: var(--sp-2); }
+.eg-shell-session__role {
+  box-sizing: border-box; display: inline-flex; align-items: center;
+  min-height: var(--eg-shell-touch-min); padding: 0 var(--sp-2);
+  background: var(--blue-50); border: 1px solid var(--blue-300); border-radius: var(--r-pill);
+  color: var(--navy-900); font-size: var(--fs-sm); font-weight: 600;
+}
+.eg-shell-session__logout {
+  box-sizing: border-box; display: inline-flex; align-items: center; justify-content: center;
+  min-height: var(--eg-shell-touch-min); padding: 0 var(--sp-3);
+  background: var(--card); border: 1px solid var(--border-strong); border-radius: var(--r-md);
+  color: var(--text); font: inherit; font-size: var(--fs-sm); font-weight: 600; cursor: pointer;
+}
+.eg-shell-session-banner {
+  box-sizing: border-box; margin: 0 0 var(--sp-4); padding: var(--sp-2) var(--sp-3);
+  background: var(--blue-50); border: 1px solid var(--blue-300); border-radius: var(--r-sm);
+  color: var(--navy-900); font-size: var(--fs-sm);
+}
 .eg-shell-nav {
   position: fixed; right: 0; bottom: 0; left: 0; z-index: 20;
   display: flex; gap: var(--sp-1);
@@ -47,6 +66,7 @@
 .eg-shell-page__title { margin: 0 0 var(--sp-3); color: var(--navy-900); font-size: var(--fs-xl); }
 .eg-shell-page__body { margin: 0 0 var(--sp-4); color: var(--muted); }
 .eg-shell-cards { display: grid; gap: var(--sp-3); margin: 0; padding: 0; list-style: none; }
+.eg-shell-admin__desc { margin: 0; }
 .eg-shell-link {
   display: inline-flex; align-items: center; justify-content: center;
   min-height: 44px; padding: 0 var(--sp-4);
@@ -95,6 +115,15 @@
   margin: 0 0 var(--sp-4); padding: var(--sp-3); border: 1px solid var(--blue-600);
   border-radius: var(--r-sm); background: var(--blue-50); color: var(--navy-900); font-size: var(--fs-sm);
 }
+/* Geliştirmeye özel ipucu kutusu; üretim build'inde hiç çizilmez (T35b). */
+.eg-shell-entry__dev {
+  box-sizing: border-box; margin: 0 0 var(--sp-4); padding: var(--sp-3);
+  background: var(--card-soft); border: 1px dashed var(--border-strong); border-radius: var(--r-sm);
+  color: var(--text); font-size: var(--fs-sm);
+}
+.eg-shell-entry__dev-title { margin: 0 0 var(--sp-1); color: var(--navy-900); font-weight: 700; }
+.eg-shell-entry__dev-account { margin: 0 0 var(--sp-1); font-weight: 600; }
+.eg-shell-entry__dev-note { margin: 0; color: var(--muted); }
 .eg-shell-entry__form { display: grid; gap: var(--sp-2); }
 .eg-shell-entry__label { margin-top: var(--sp-2); color: var(--text); font-weight: 600; }
 .eg-shell-entry__input {

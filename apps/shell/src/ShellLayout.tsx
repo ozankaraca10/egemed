@@ -1,10 +1,15 @@
 import type { JSX, ReactNode } from "react";
 import { t } from "@egemed/ui/i18n";
+import type { DevSession } from "./devAuth";
 import { ROUTES, routeHref, type ResolvedRoute } from "./routes";
 
 export interface ShellLayoutProps {
   /** Çözümlenmiş rota; etkin bağlantı işaretlemesi bundan türetilir. */
   route: ResolvedRoute;
+  /** Geçerli sahte oturum; yoksa oturum göstergesi çizilmez. */
+  session?: DevSession | null;
+  /** "Çıkış yap" işleyicisi; oturum silme ve yönlendirme `App`'te yapılır. */
+  onLogout?: () => void;
   children: ReactNode;
 }
 
@@ -31,13 +36,24 @@ export function focusMain(event: { preventDefault(): void }): void {
  * Render DOM'a dokunmaz; yalnız atlama bağlantısının olay işleyicisi dokunur.
  * Tek `nav` CSS ile <768 px alt sekme, >=768 px üst bar olur.
  */
-export function ShellLayout({ route, children }: ShellLayoutProps): JSX.Element {
+export function ShellLayout({ route, session, onLogout, children }: ShellLayoutProps): JSX.Element {
   const activeId = route.kind === "page" ? route.route.id : undefined;
+  const roleLabel = session === undefined || session === null
+    ? null
+    : t(session.role === "admin" ? "shell.session.admin" : "shell.session.student");
   return (
     <div className="eg-shell">
       <a className="eg-shell-skip" href="#icerik" onClick={focusMain}>{t("shell.skip")}</a>
       <header className="eg-shell-header">
         <p className="eg-shell-brand">{t("shell.brand")}</p>
+        {roleLabel !== null && (
+          <div className="eg-shell-session">
+            <span className="eg-shell-session__role">{roleLabel}</span>
+            <button className="eg-shell-session__logout" onClick={onLogout} type="button">
+              {t("shell.session.logout")}
+            </button>
+          </div>
+        )}
         <nav aria-label={t("shell.nav.label")} className="eg-shell-nav">
           {ROUTES.map((item) => (
             <a
@@ -49,7 +65,10 @@ export function ShellLayout({ route, children }: ShellLayoutProps): JSX.Element 
           ))}
         </nav>
       </header>
-      <main className="eg-shell-main" id="icerik" tabIndex={-1}>{children}</main>
+      <main className="eg-shell-main" id="icerik" tabIndex={-1}>
+        {roleLabel !== null && <p className="eg-shell-session-banner">{t("shell.session.banner")}</p>}
+        {children}
+      </main>
     </div>
   );
 }
