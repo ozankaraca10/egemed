@@ -61,7 +61,7 @@
 
 .eg-sim-opaca .film-tools{ display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; padding: 8px 10px; background: var(--navy-950); border-top: 1px solid var(--film-edge); color: var(--film-ink); font-size: var(--fs-sm); }
 .eg-sim-opaca .film-tools .seg{ display: inline-flex; border: 1px solid rgba(138, 163, 199, .3); border-radius: var(--r-sm); overflow: hidden; }
-.eg-sim-opaca .film-tools .seg button, .eg-sim-opaca .film-tools .tool-btn{ background: transparent; color: var(--film-ink); border: 0; padding: 6px 11px; font: inherit; font-weight: 600; cursor: pointer; min-height: 32px; }
+.eg-sim-opaca .film-tools .seg button, .eg-sim-opaca .film-tools .tool-btn{ background: transparent; color: var(--film-ink); border: 0; padding: 6px 11px; font: inherit; font-weight: 600; cursor: pointer; min-height: 44px; min-width: 44px; }
 .eg-sim-opaca .film-tools .seg button + button{ border-left: 1px solid rgba(138, 163, 199, .3); }
 .eg-sim-opaca .film-tools .tool-btn{ border: 1px solid rgba(138, 163, 199, .3); border-radius: var(--r-sm); }
 .eg-sim-opaca .film-tools button:hover:not(:disabled){ background: rgba(56, 214, 255, .1); }
