@@ -25,13 +25,14 @@ export function pulsePhaseLabelKey(phase: string): `sim.pulse.phase.${PulsePhase
 
 export function pulseMetricReadouts(metrics: CardiacMetrics): readonly PulseMetricReadout[] {
   const ms = (value: number | null): string | null => value === null ? null : String(value);
-  return [
+  const readouts: readonly Omit<PulseMetricReadout, "labelKey">[] = [
     { id: "rr", value: ms(metrics.rr), unit: "ms" },
     { id: "pr", value: ms(metrics.pr), unit: "ms" },
     { id: "qrs", value: ms(metrics.qrs), unit: "ms" },
     { id: "qt", value: ms(metrics.qt), unit: "ms" },
     { id: "st", value: metrics.st === null ? null : Number(metrics.st.toFixed(2)).toString().replace(".", ","), unit: "mV" },
-  ].map((metric) => ({ ...metric, labelKey: `sim.pulse.metric.${metric.id}` as const }));
+  ];
+  return readouts.map((metric) => ({ ...metric, labelKey: `sim.pulse.metric.${metric.id}` }));
 }
 
 export function pulseMetricSnapshot(model: CardiacModel, time: number, lead = "II") {

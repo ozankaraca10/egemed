@@ -69,6 +69,15 @@ export type { ModeCard, ModeCardId } from "./ui/modes";
 export { HEART_PHASES, HEART_REGIONS, highlightedHeartRegions, isHeartRegionActive } from "./ui/sim/heart";
 export type { HeartPhase, HeartRegion } from "./ui/sim/heart";
 export { heartMarkup } from "./ui/sim/heartMarkup";
+export { bindCaliperDrag, caliperPointFromPointer, nudgeCaliper } from "./ui/case/caliper";
+export type {
+  CaliperDragOptions, CaliperHandle, CaliperHandleBinding, CaliperHandleTarget, CaliperPoint,
+  CaliperRect, CaliperState, CaliperPointerEvent,
+} from "./ui/case/caliper";
+export { validateChallenge, scheduleChallengeCompletion } from "./ui/case/challenge";
+export type { ChallengeBeat, ChallengeGeometry, ChallengeTimerPort, ChallengeType } from "./ui/case/challenge";
+export { guideSteps, guideStepAt } from "./ui/case/guide";
+export type { GuidePhase, GuideStep } from "./ui/case/guide";
 export { coronaryParticlePositions, drawHeartCanvas, observeHeartCanvas } from "./ui/sim/heartCanvas";
 export type {
   CoronaryParticle, HeartCanvasContext, HeartCanvasOptions, HeartCanvasSize, HeartResizeObserver,
