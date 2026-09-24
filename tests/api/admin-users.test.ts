@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { createApp } from "../../apps/api/src/app";
 import { createMemoryAdminBulkRepo } from "../../apps/api/src/admin/bulk";
+import { createMemoryAdminOverviewRepo } from "../../apps/api/src/admin/extras";
 import { createMemoryAdminImportRepo } from "../../apps/api/src/admin/imports";
 import { createMemoryAdminRoleRepo } from "../../apps/api/src/admin/roles";
 import {
@@ -182,17 +183,19 @@ function createHarness(options: { readonly users?: readonly HarnessUser[] } = {}
     sessionIdleMs: DEFAULT_SESSION_IDLE_MS,
     sessionAbsoluteMs: DEFAULT_SESSION_ABSOLUTE_MS,
   };
+  const importStore = createMemoryAdminImportRepo(adminStore, newId);
   const app = createApp({
     db: fakeDb(),
     now: () => clock,
     auth,
     gamification: createMemoryGamificationRepo().repo,
+    overview: createMemoryAdminOverviewRepo(adminStore, importStore),
     admin: {
       auth,
       users: adminStore.users,
       bulk: createMemoryAdminBulkRepo(adminStore),
       roles: createMemoryAdminRoleRepo(adminStore),
-      imports: createMemoryAdminImportRepo(adminStore, newId).repo,
+      imports: importStore.repo,
       newId,
     },
   });
