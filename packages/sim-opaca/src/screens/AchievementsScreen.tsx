@@ -8,6 +8,7 @@ import { sessionSeedFromNow } from './simulation-core'
 import { OPACA_BADGES } from '../gamification/catalog'
 import { OPACA_RULES } from '../gamification/rules'
 import { Footer } from '../ui/chrome'
+import { ScreenHeading } from '../ui/ScreenHeading'
 import { GamiDemoBanner } from '../ui/gami/GamiDemoBanner'
 import { GamiPageTabs } from '../ui/gami/GamiPageTabs'
 import { GamiProfileStrip } from '../ui/gami/GamiProfileStrip'
@@ -101,7 +102,7 @@ export function AchievementsScreen({ embedded = false, devBuild = false, modalEn
           )}
           <div className="results-title-row">
             <div>
-              <h1 className="results-title-v2">Başarılarım</h1>
+              <ScreenHeading className="results-title-v2">Başarılarım</ScreenHeading>
               <p className="results-sub-v2">Değerlendirme ve uygulama oturumlarından kazandığın ilerleme.</p>
             </div>
             {view.hasAttempts && (

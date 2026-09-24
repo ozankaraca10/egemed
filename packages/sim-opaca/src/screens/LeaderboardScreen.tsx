@@ -6,6 +6,7 @@ import { poolFor } from '../data/pool'
 import { sampleSession, SESSION_SIZE } from '../core/session'
 import { sessionSeedFromNow } from './simulation-core'
 import { Footer } from '../ui/chrome'
+import { ScreenHeading } from '../ui/ScreenHeading'
 import { GamiDemoBanner } from '../ui/gami/GamiDemoBanner'
 import { GamiPageTabs } from '../ui/gami/GamiPageTabs'
 import { GamiSeg } from '../ui/gami/GamiSeg'
@@ -92,7 +93,7 @@ export function LeaderboardScreen({ embedded = false, devBuild = false, modalEnv
           <GamiPageTabs active="leaderboard" />
           <div className="results-title-row">
             <div>
-              <h1 className="results-title-v2">Liderlik Tahtası</h1>
+              <ScreenHeading className="results-title-v2">Liderlik Tahtası</ScreenHeading>
               <p className="results-sub-v2">Değerlendirme modundaki en iyi 3 denemenin ortalamasıyla sıralanır (en az 2 deneme).</p>
             </div>
           </div>
