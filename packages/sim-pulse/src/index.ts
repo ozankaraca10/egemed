@@ -31,3 +31,8 @@ export {
 export type { Fiducials, Lead, LeadShape, Limb, Mode, ShapeKey, WaveformPoint } from "./engine/shapes";
 export { ACTIVE_VIEWS, MAX_STATE_BYTES, SESSION_COUNT, STATE_VERSION, blank, decode, derive, encode } from "./engine/state";
 export type { ActiveView, CurriculumItem, PulseCurriculum, PulseState, Section, Session, StateContext } from "./engine/state";
+export { createLocalStoragePersistence } from "./persistence/localStorage";
+export { createMemoryPersistence } from "./persistence/memory";
+export { MAX_PERSISTENCE_BYTES, utf8ByteLength } from "./persistence/policy";
+export { PULSE_LEGACY_STORAGE_KEYS, PULSE_STORAGE_KEY } from "./persistence/types";
+export type { PersistenceErrorCode, PersistencePort, PersistenceResult, PersistenceStorage } from "./persistence/types";
