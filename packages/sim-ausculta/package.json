@@ -7,6 +7,8 @@
     ".": "./src/index.ts"
   },
   "scripts": {
+    "check:assets": "node tools/check-assets.mjs",
+    "sync:audio": "node tools/sync-audio.mjs",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

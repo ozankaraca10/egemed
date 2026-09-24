@@ -1,0 +1,77 @@
+import { readFileSync } from "node:fs";
+import { describe, expect, it } from "vitest";
+
+const DATA_DIR = "packages/sim-ausculta/src/data";
+const JSON_NAMES = [
+  "auscultation-points.json",
+  "cases-auto.json",
+  "cases.json",
+  "fixture.json",
+  "library.json",
+  "pediatric-reference.json",
+  "sounds-external.json",
+  "sounds.json",
+  "sources.json",
+] as const;
+
+function load(name: string): unknown {
+  return JSON.parse(readFileSync(`${DATA_DIR}/${name}`, "utf8")) as unknown;
+}
+
+function recordsOf(value: unknown): readonly { id?: unknown; runtimeUrl?: unknown }[] {
+  const records = (value as { records?: unknown }).records;
+  if (!Array.isArray(records)) throw new Error("records dizisi yok");
+  return records as { id?: unknown; runtimeUrl?: unknown }[];
+}
+
+const sounds = load("sounds.json") as { count?: unknown; records?: unknown };
+const external = load("sounds-external.json") as { count?: unknown; records?: unknown };
+const cases = load("cases.json") as { cases?: unknown };
+const casesAuto = load("cases-auto.json") as { count?: unknown; cases?: unknown };
+const points = load("auscultation-points.json") as { points?: unknown };
+const library = load("library.json") as { groups?: { items?: { key?: unknown }[] }[] };
+const pediatric = load("pediatric-reference.json") as { rows?: unknown };
+const sources = load("sources.json") as { datasets?: unknown; inventory?: unknown };
+
+const soundRecords = recordsOf(sounds);
+const externalRecords = recordsOf(external);
+const libraryItems = (library.groups ?? []).flatMap((group) => group.items ?? []);
+
+describe("Ausculta veri envanteri", () => {
+  it("kopyalanan JSON dosyaları okunur", () => {
+    for (const name of JSON_NAMES) {
+      expect(readFileSync(`${DATA_DIR}/${name}`, "utf8").length).toBeGreaterThan(0);
+    }
+  });
+
+  it("kayıt sayıları kaynak kopyasıyla aynıdır", () => {
+    expect(sounds.count).toBe(245);
+    expect(soundRecords).toHaveLength(245);
+    expect(external.count).toBe(4);
+    expect(externalRecords).toHaveLength(4);
+    expect(cases.cases).toHaveLength(23);
+    expect(casesAuto.count).toBe(176);
+    expect(casesAuto.cases).toHaveLength(176);
+    expect(points.points).toHaveLength(17);
+    expect(library.groups).toHaveLength(3);
+    expect(libraryItems).toHaveLength(20);
+    expect(pediatric.rows).toHaveLength(6);
+    expect(sources.datasets).toHaveLength(2);
+    expect(sources.inventory).toHaveLength(2);
+  });
+
+  it("her ses kaydında id ve runtimeUrl vardır", () => {
+    for (const record of [...soundRecords, ...externalRecords]) {
+      expect(typeof record.id).toBe("string");
+      expect(record.id).not.toBe("");
+      expect(typeof record.runtimeUrl).toBe("string");
+      expect(String(record.runtimeUrl).startsWith("assets/audio/runtime/")).toBe(true);
+    }
+  });
+
+  it("kütüphane ses anahtarları doludur", () => {
+    const keys = libraryItems.map((item) => item.key);
+    expect(keys.every((key) => typeof key === "string" && key.length > 0)).toBe(true);
+    expect(new Set(keys).size).toBe(keys.length);
+  });
+});
