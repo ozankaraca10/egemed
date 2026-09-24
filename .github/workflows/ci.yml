@@ -35,3 +35,151 @@ jobs:
         run: pnpm install --frozen-lockfile
       - name: Kapılar
         run: pnpm turbo run lint typecheck test
+
+  e2e:
+    name: e2e (mobil)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - name: pnpm kur
+        uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v4.4.0
+      - name: Node kur
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - name: Bağımlılıkları kur
+        run: pnpm install --frozen-lockfile
+      - name: Chromium kur
+        run: npx playwright install --with-deps chromium
+      - name: Mobil e2e koş
+        run: CI=true pnpm e2e:mobile
+      - name: E2E artefaktlarını yükle
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: e2e-artifacts
+          path: |
+            e2e-artifacts/
+            playwright-report/
+          if-no-files-found: warn
+
+  api-e2e:
+    name: api-e2e (gerçek API + PostgreSQL)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    env:
+      # CI-özel sahte değerler; sır değildir (plan T98). Depo sır taraması
+      # DSN'de gömülü parolayı yakaladığı için parola DATABASE_URL'e yazılmaz:
+      # pg, eksik parolayı PGPASSWORD'den okur (connection-parameters fallback).
+      DATABASE_URL: postgres://egemed_ci@127.0.0.1:5432/egemed_ci
+      PGUSER: egemed_ci
+      PGPASSWORD: egemed-ci-sifre
+      PGHOST: 127.0.0.1
+      PGPORT: "5432"
+      PGDATABASE: egemed_ci
+    services:
+      postgres:
+        # PostgreSQL 18; infra/prod ve infra/dev compose ile aynı etiket+digest pin.
+        image: postgres:18.4-alpine@sha256:9a8afca54e7861fd90fab5fdf4c42477a6b1cb7d293595148e674e0a3181de15
+        env:
+          POSTGRES_USER: egemed_ci
+          POSTGRES_PASSWORD: egemed-ci-sifre
+          POSTGRES_DB: egemed_ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U egemed_ci"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - name: pnpm kur
+        uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v4.4.0
+      - name: Node kur
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - name: Bağımlılıkları kur
+        run: pnpm install --frozen-lockfile
+      - name: Chromium kur
+        run: npx playwright install --with-deps chromium
+      - name: Migration'ları uygula
+        run: pnpm --filter @egemed/api migrate:up
+      - name: Geliştirme tohumunu yükle
+        run: AUTH_DEV_ENABLED=true pnpm --filter @egemed/api seed:dev
+      - name: API'yi arka planda başlat
+        env:
+          PORT: "3100"
+          AUTH_DEV_ENABLED: "true"
+        run: pnpm --filter @egemed/api start >api-e2e.log 2>&1 &
+      - name: /health yanıtını bekle
+        run: |
+          for i in $(seq 1 60); do
+            if curl -fsS http://127.0.0.1:3100/health >/dev/null 2>&1; then
+              echo "API hazır (${i}. yoklamada)."
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "API /health yanıt vermedi; api-e2e.log:"
+          cat api-e2e.log
+          exit 1
+      - name: API e2e koş
+        run: CI=true pnpm e2e:api
+      - name: API e2e artefaktlarını yükle
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: e2e-api-artifacts
+          path: |
+            e2e-artifacts/
+            playwright-report/
+            api-e2e.log
+          if-no-files-found: warn
+
+  api-db:
+    name: api-db (migration turu)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      # api-e2e ile aynı CI-özel sahte değerler; sır değildir.
+      DATABASE_URL: postgres://egemed_ci@127.0.0.1:5432/egemed_ci
+      PGUSER: egemed_ci
+      PGPASSWORD: egemed-ci-sifre
+      PGHOST: 127.0.0.1
+      PGPORT: "5432"
+      PGDATABASE: egemed_ci
+    services:
+      postgres:
+        image: postgres:18.4-alpine@sha256:9a8afca54e7861fd90fab5fdf4c42477a6b1cb7d293595148e674e0a3181de15
+        env:
+          POSTGRES_USER: egemed_ci
+          POSTGRES_PASSWORD: egemed-ci-sifre
+          POSTGRES_DB: egemed_ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U egemed_ci"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - name: pnpm kur
+        uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v4.4.0
+      - name: Node kur
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - name: Bağımlılıkları kur
+        run: pnpm install --frozen-lockfile
+      - name: DB turunu koş
+        run: pnpm --filter @egemed/api test:db

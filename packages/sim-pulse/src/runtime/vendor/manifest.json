@@ -81,6 +81,18 @@
       "why": "Göreli varlık yolu kabuğun kökünde değil /sims/pulse/ altında çözülmeli."
     },
     {
+      "file": "features.js",
+      "id": "KAYNAK-01-SCORE-VS-MODULE",
+      "matches": 1,
+      "why": "Kaynak kusuru (Astra KAYNAK-01): sınav sonucu modül tamamlama (tüm ritimler + vakalar + ≥80) ile puan eşiğini tek 'passed'da birleştiriyor; doğrudan sınava girip 100 alan öğrenci 'Hedefin altında' görüyor. Sonuç ekranında sınav durumu yalnız puan eşiğine (80) bağlanır; modül tamamlanmadıysa ayrı not gösterilir. SCORM/kayıt 'passed' anlamı değişmez."
+    },
+    {
+      "file": "features.js",
+      "id": "KAYNAK-01-MODULE-NOTE",
+      "matches": 1,
+      "why": "Modül tamamlama koşulu puan eşiğinden ayrı gösterilir (KAYNAK-01)."
+    },
+    {
       "file": "index.html",
       "id": "PULSE-A11Y-LANDING-HELP-NAME",
       "matches": 1,

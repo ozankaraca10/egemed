@@ -18,6 +18,7 @@ COPY apps/api/package.json apps/api/
 # bağlamda bulunmalıdır (deponun tamamı bağlamda yoktur, bkz. dockerignore).
 COPY packages/contracts/package.json packages/contracts/
 COPY packages/gamification-core/package.json packages/gamification-core/
+COPY packages/gami-catalogs/package.json packages/gami-catalogs/
 # Yalnız @egemed/api ve çalışma zamanı bağımlılıkları (contracts ve
 # gamification-core dâhil) kurulur; devDependencies imaja girmez.
 RUN corepack pnpm --filter "@egemed/api..." install --prod --frozen-lockfile
@@ -44,6 +45,7 @@ COPY apps/api/ts-register.mjs apps/api/ts-register.mjs
 COPY apps/api/ts-resolve.mjs apps/api/ts-resolve.mjs
 COPY packages/contracts/src packages/contracts/src
 COPY packages/gamification-core/src packages/gamification-core/src
+COPY packages/gami-catalogs/src packages/gami-catalogs/src
 WORKDIR /app/apps/api
 # node kullanıcısı (uid 1000); imajda root ile süreç çalışmaz.
 USER node

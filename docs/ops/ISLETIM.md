@@ -78,6 +78,14 @@ docker compose --env-file infra/prod/.env.prod -f infra/prod/docker-compose.prod
 `migrate:down` şeması geri döndürür ama veri yıkıcı olabilir; yalnız
 yedekten sonra ve farkı okuyarak kullanın (bkz. §6).
 
+Migration 005 (API-05): `gami_attempts` tablosuna `mode`, `case_count`,
+`hints_used` ve `xp` kolonları varsayılanlarla eklenir; XP bundan sonra
+sunucuda hesaplanır ve deneme ile profil XP/düzey/seri tek ifadede yazılır
+(istemcinin kodlu özetindeki `xp` yetkili değildir). Migration veri
+dönüştürmez: 005 öncesi denemeler `xp = 0` alır, bu yüzden o satırlar haftalık
+hedefin `currentXp` toplamına katkı vermez (profil XP'si değişmez). Geri alma
+kolonları düşürür (§6 kuralı: yalnız yedekten sonra).
+
 ## 4. İlk admin tohumu (seed:admin)
 
 Üretimde `--allow-production` (veya `SEED_ALLOW_PRODUCTION=true`) zorunludur;
@@ -140,8 +148,6 @@ gerekiyorsa ayrı onaylı görevle açılır.
 - `docker compose ps`, `docker compose logs -f api` ile yerel takip; json-file
   rotasyonu compose'dadır (max-size 10m, max-file 5).
 
-## 8. KVKK notu
-
 ## 8. E2E API zorunluluk kapağı
 
 `playwright.config.ts`, API ayakta değilken `api-dev` Playwright projesini hiç
@@ -152,6 +158,18 @@ açıkça durur. Bu koşum için kök betik: `pnpm e2e:api` (API'yi önce
 `pnpm --filter @egemed/api dev` gibi bir komutla ayakta tutun). Değişken
 verilmediğinde bugünkü davranış korunur; yalnız konsola "api-dev projesi
 atlandı" uyarısı basılır.
+
+### Giriş hız sınırı (T81)
+
+Giriş hız sınırı kullanıcı adı başına **15 dakikada 8 denemedir** ve API
+sürecinin belleğinde tutulur (`apps/api/src/auth/rate-limit.ts`; anahtar ham
+kullanıcı adı taşımaz, SHA-256'dır). CI'daki `e2e` ve `api-e2e` işleri her
+koşuda **taze bir API süreci** başlattığı için bu sınır sorun değildir:
+hız sınırı penceresi her koşuda boş başlar. Yerelde ise `pnpm e2e:api`'yi
+tekrar koşmadan önce API'yi **yeniden başlatın** (`pnpm --filter @egemed/api
+dev` sürecini durdurup yeniden açın): bellek içi sayaç süreci yaşamaya devam
+ettiği sürece silinmez ve bir önceki koşumun denemeleri 15 dakikalık pencerede
+birikmiş olabilir; aksi hâlde giriş uçları `429` döndürür.
 
 ## 9. KVKK notu
 

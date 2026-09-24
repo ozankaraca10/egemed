@@ -7,6 +7,7 @@ import {
 } from "../../packages/contracts/src/index";
 import { WEEKLY_XP_TARGET, levelForXpClosedForm, nextStreak } from "../../apps/api/src/me/gamification";
 import { DEFAULT_RULES, levelForXp } from "../../packages/gamification-core/src/index";
+import { encodePulseSummary } from "../../packages/gami-catalogs/src/index";
 import {
   ALI_ID,
   FIXED_NOW,
@@ -485,5 +486,69 @@ describe("sunucu yetkili XP, düzey ve seri (API-05)", () => {
     expect(data.xp).toBe(120);
     expect(data.level).toBe(levelForXp(120, DEFAULT_RULES).level);
     expect(data.streak.current).toBe(1);
+  });
+});
+
+describe("liderlik tablosuna katılım tercihi (opt-out)", () => {
+  it("varsayılan görünür; PATCH ile çıkan kullanıcı başkalarının listesinde yoktur, kendi satırını görür", async () => {
+    const testHarness = harness({ [MERT_ID]: ["pulse"] });
+    const ali = await login(testHarness, "ali.veli");
+    const mert = await login(testHarness, "mert.ikinci");
+    const prefs = await testHarness.app.request("/me/preferences", { headers: ali.headers });
+    expect(await prefs.json()).toEqual({ data: { leaderboardVisible: true } });
+    const rowsFor = async (headers: Record<string, string>) => {
+      const response = await testHarness.app.request("/me/gamification/pulse/leaderboard?period=academic_year&cohort=all", { headers });
+      expect(response.status).toBe(200);
+      const body = (await response.json()) as { data: { rows: readonly { isMe: boolean }[] }; meta: { total: number } };
+      return body;
+    };
+    const before = await rowsFor(mert.headers);
+    const patch = await testHarness.app.request("/me/preferences", {
+      method: "PATCH",
+      headers: { ...ali.headers, "content-type": "application/json" },
+      body: JSON.stringify({ leaderboardVisible: false }),
+    });
+    expect(patch.status).toBe(200);
+    expect(await patch.json()).toEqual({ data: { leaderboardVisible: false } });
+    const after = await rowsFor(mert.headers);
+    expect(after.meta.total).toBe(before.meta.total - 1);
+    const own = await rowsFor(ali.headers);
+    expect(own.data.rows.some((row) => row.isMe)).toBe(true);
+  });
+
+  it("gövde katı şemadır; bilinmeyen alan 400 döner", async () => {
+    const testHarness = harness();
+    const ali = await login(testHarness, "ali.veli");
+    const response = await testHarness.app.request("/me/preferences", {
+      method: "PATCH",
+      headers: { ...ali.headers, "content-type": "application/json" },
+      body: JSON.stringify({ leaderboardVisible: false, displayName: "x" }),
+    });
+    expect(response.status).toBe(400);
+  });
+});
+
+describe("sunucu rozet değerlendirmesi (ADR-008)", () => {
+  it("Pulse denemesinin kodlu özetinden rozetler sunucuda verilir; tekrar rozet çoğaltmaz", async () => {
+    const testHarness = harness();
+    const ali = await login(testHarness, "ali.veli");
+    const summary = encodePulseSummary({
+      score: 90,
+      extra: { ecgMode: "af", modeMastered: true, correctlyReadLeads: 3, caliperAccurate: null, rhythmRecognitionStreak: 4 },
+    });
+    const post = () =>
+      testHarness.app.request("/me/gamification/pulse/attempts", {
+        method: "POST",
+        headers: { ...ali.headers, "content-type": "application/json" },
+        body: JSON.stringify(attemptBody({ summary })),
+      });
+    expect((await post()).status).toBe(201);
+    expect((await post()).status).toBe(200);
+    const response = await testHarness.app.request("/me/gamification/pulse", { headers: ali.headers });
+    const keys = ((await response.json()) as { data: { badges: readonly { key: string }[] } }).data.badges.map((badge) => badge.key);
+    expect(keys).toContain("rhythm-streak-3");
+    expect(keys).toContain("mode-af");
+    expect(keys).not.toContain("rhythm-streak-10");
+    expect(keys.filter((key) => key === "mode-af")).toHaveLength(1);
   });
 });
