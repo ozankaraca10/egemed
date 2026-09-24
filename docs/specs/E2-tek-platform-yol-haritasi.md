@@ -16,6 +16,28 @@ Durum: Uygulama planı. ADR-006 kabul edildi; kimlik, xAPI profil sabitlemesi ve
 3. **K3 LRS yolu:** tarayıcıdan doğrudan iletim veya API vekili; sır dağıtımı, token süresi, CORS ve kurum LRS yetkileri kararlaştırılır. Öneri: kısa ömürlü kurum yetkisiyle API vekili; CLIX veritabanında ifade/yeniden deneme kuyruğu yok.
 4. **K4 Admin yetkileri:** kurum yöneticisi, içerik yöneticisi, eğitmen ve salt okunur denetçi yetki matrisi; kimlerin kullanıcı rolü atayacağı ve hangi kurum verisini göreceği kurumca onaylanır.
 
+## Alınan kararlar (23 Eylül 2026)
+
+Depo sahibinin canlı oturumda verdiği kararlar; dilim etkileri envanterlerde (E2-opaca/pulse/ausculta
+port envanterleri) işlendi.
+
+- **K-P1 Paket yerleşimi:** Simülatör kodu `packages/sim-<id>` altına taşınır (sim-opaca, sim-ausculta,
+  sim-pulse); `sims/*` arşiv/boş kalır.
+- **Opaca varlıkları:** `public/assets/xray/runtime` (621 dosya / ~20 MB, kaynakta git-dışı) yerel
+  kopyadan kopyalanır; import betikleriyle yeniden üretim yolu kullanılmaz.
+- **Opaca test hedefi:** Platform hedefi **153 çalışma zamanı testi** (66 core + 87 gamification); `scripts/`
+  hattı (veri üretimi + LMS paketleme) ve 56 betik testi taşınmaz, kaynak depoda arşiv kalır; `jszip`/`sharp`
+  eklenmez. Vaka seti yeniden üretilecekse kaynak depoda üretilip çıktı kopyalanır.
+- **Oyunlaştırma:** Üç simde de (Opaca, Pulse, Ausculta) zorunlu dilimler halinde aktarılır — koşullu değil;
+  ortak mantık (XP, seviye, seri, hedef, zaman, sıralama, ödül, grafik) `packages/gamification-core`'a, sim
+  başına farklı rozet kataloğu/hedefler ve ekranlar sim paketine. Sim verileri birleşmez: her sim kendi
+  oyunlaştırma deposunu tutar.
+- **T11:** `packages/gamification-core` — sim-bağımsız oyunlaştırma çekirdeği; Opaca portuyla birlikte
+  yürür, Pulse ve Ausculta da tüketicisidir (sim başına farklı rozet/hedef); sime özgü konfig ve ekranlar
+  sim paketinde kalır.
+- **Açık (insan onayı):** oyunlaştırma ve `bestScore` verisinin localStorage'da tutulması ADR-005 ile
+  gerilimli; K-P3 kararına kadar depolama bir port arkasında kalır.
+
 ## İş sırası ve görev sınırları
 
 Her kod görevi tek paket/uygulama ve yaklaşık 400 satır diff hedefler. Sözleşmeler tüketicilerinden önce review ve depo sahibinin merge kapısından geçer. Aynı pakette eşzamanlı Running açılmaz.
@@ -26,11 +48,11 @@ Her kod görevi tek paket/uygulama ve yaklaşık 400 satır diff hedefler. Sözl
 | 0 | T14b Kabuk sim rotaları | Üç lazy rota, React host, yükleme/hata/çıkış durumları; mount/unmount testi | T14a merge |
 | 1 | T20 Ortak sim çerçevesi | Sim başlığı, geri/çıkış, mod kartı, soru, geri bildirim, sonuç; token ve i18n; 360/768/1440 | T14b |
 | 1 | T21 Sim olay sözlüğü | Sim başlatma, mod, etkileşim, yanıt, tamamlama için tipli olaylar; sim başına tek id; ağ yok | T14a, K2 taslağı |
-| 2 | T15a Opaca envanter ve motor sınırı | Dosya/asset haritası; 119 kaynak testinin portta nasıl koşacağı; kopya lisans/atıf | T14b |
-| 2 | T15b… Opaca port dilimleri | Mevcut React+TS uygulamasını ayrı modülde başlat/temizle; 119 regresyon testi yeşil; ilk çalışan rota | T15a, T20 |
+| 2 | T15a Opaca envanter ve motor sınırı | Dosya/asset haritası; 153 kaynak testinin portta nasıl koşacağı; kopya lisans/atıf | T14b |
+| 2 | T15b… Opaca port dilimleri | Mevcut React+TS uygulamasını ayrı modülde başlat/temizle; 153 regresyon testi yeşil; ilk çalışan rota | T15a, T20 |
 | 2 | T16a… Opaca ortak UI uyumu | Mevcut React ekranlarını ekran ekran ortak çerçeveye/tokenlara uyarla; klinik motor sonuçları değişmez | T15b |
-| 3 | T17a… Ausculta portu | Mevcut React ekranlarını modüle al; ses motoru/asset ömrü, kullanıcı etkileşimi ve temizleme; çalışan rota, kaynak regresyonu | T14b, T20 |
-| 3 | T18a… Pulse portu | EKG motoru, animasyon/zamanlayıcı temizliği, test iskeleti; çalışan rota | T14b, T20 |
+| 3 | T17a… Ausculta portu | Mevcut React ekranlarını modüle al; ses motoru/asset ömrü, kullanıcı etkileşimi ve temizleme; çalışan rota, kaynak regresyonu; oyunlaştırma dilimi Opaca sonrası (`packages/gamification-core` tüketicisi, kendi rozet/hedefleri) | T14b, T20 |
+| 3 | T18a… Pulse portu | EKG motoru, animasyon/zamanlayıcı temizliği, test iskeleti; çalışan rota; oyunlaştırma dilimi Opaca sonrası (`packages/gamification-core` tüketicisi, kendi rozet/hedefleri) | T14b, T20 |
 | 4 | T22 xAPI istemcisi | Yapılandırılmış endpoint/kimlik, gönderim, ağ hatası ve tekrar deneme politikası; sır sızdırma testi | K2, K3 |
 | 4 | T23 Sim xAPI adaptörleri | Her simin olaylarını profildeki fiillere ayrı eşle; kodlu yanıt, opak aktör, tek `SimulatorId` | T21, T22, çalışan simler |
 | 4 | T24 LRS entegrasyon testi | Geliştirme LRS'sine gerçek ifade; başarılı ve hatalı iletim; CLIX'te kayıt tutulmadığını doğrula | T23 |
@@ -49,7 +71,7 @@ Her kod görevi tek paket/uygulama ve yaklaşık 400 satır diff hedefler. Sözl
 
 ## Opaca port dilimleri — T15/T16 ayrıntısı
 
-Opaca kaynağı zaten React+TS'tir. T15 ekranları yeniden React'e yazmaz; mevcut uygulamayı modül yapar. İlk portta gamification kapalı tutulur; kaynakta SCORM öğrenci adı ve localStorage profil/deneme verisi kullanımı ADR-005 ile uyumsuzdur.
+Opaca kaynağı zaten React+TS'tir. T15 ekranları yeniden React'e yazmaz; mevcut uygulamayı modül yapar. Gamification dilimleri Opaca portuyla birlikte zorunlu olarak aktarılır (Karar 23 Eyl 2026) ancak bayrak kapalı tutulur; kaynakta SCORM öğrenci adı ve localStorage profil/deneme verisi kullanımı ADR-005 ile uyumsuzdur.
 
 1. `core/types.ts`, `geometry.ts`, `answers.ts` saf alan tipleri; ardından `flow.ts`, `scoring.ts`, `validation.ts`, `session.ts` ve kaynak testlerini küçük sentetik fixture'lara ayır.
 2. Görüntü/veri sınırını ayrı işle: `images.ts`, `pool.ts`, ölçüm/bölge/terminoloji; JSON ve büyük varlıkları içerik topluca okunmadan kontrollü taşı. Mutlak `/assets` yollarını platform taban yolunda doğrula.
@@ -58,12 +80,12 @@ Opaca kaynağı zaten React+TS'tir. T15 ekranları yeniden React'e yazmaz; mevcu
 5. `ui/chrome.tsx`, ikonlar, diyaloglar, soru ve film bileşenlerini küçük gruplarla taşı. 651 satırlık `FilmViewer.tsx` pointer/etkileşim ve görünüm/kontrol parçalarına ayrılır.
 6. Start/Mode/Tutorial ekranlarını birlikte; Results, Sources, Learn ekranlarını ayrı dilimlerde taşı. 458 satırlık Simulation ekranını oturum durumu ve görünüm parçalarına ayır. DevPanel üretim rotasına girmez.
 7. Opaca `App.tsx`/StoreProvider için SimHost adaptörü yaz. Çift üst bar/footer oluşmasını engelle. Global `:root`, `body`, `button` ve genel sınıfları sim kökü altında kapsamlandır; CSS değişimi ayrı görevlerdir.
-8. Kaynak 119 testi port boyunca semantik gruplarda yeşil tut; route mount→unmount→remount, StrictMode, listener/timer/ses temizliği ve iki opak aktör arasında yerel durum sızıntısı senaryolarını ekle.
+8. Kaynak 153 çalışma zamanı testini (66 core + 87 gamification) port boyunca semantik gruplarda yeşil tut; route mount→unmount→remount, StrictMode, listener/timer/ses temizliği ve iki opak aktör arasında yerel durum sızıntısı senaryolarını ekle.
 
 ## Ausculta ve Pulse port dilimleri — T17/T18 ayrıntısı
 
-- **Ausculta** zaten React+TS'tir. Alan tipleri/akış; puanlama/oturum/çözücü; ses motoru; store reducer/provider; UI; ekranlar; CSS ve SimHost adaptörü ayrı dilimlerdir. Global AudioEngine singleton'ı modül oturumuna indirgenir; geç `fetch/decode` sonrası ses başlatma engellenir. `store.tsx`, `PatientStage`, `SimulationScreen` ve 1000+ satır CSS tek görevde taşınmaz. SCORM, localStorage ve `Date.now()` kullanımı portta ayrı karara bağlanır.
-- **Pulse** düz JS/DOM uygulamasıdır. Önce `model.js` ve deterministik motor testleri; ardından curriculum/state ayrıştırma; root-parametreli controller ve RAF/interval/listener temizliği; özellik ekranları ve React giriş; CSS kapsamlandırma gelir. `app.js` fiziksel satır sayısı düşük ama yoğun kod taşır, görev boyutu mantıksal değişimle ölçülür. Global `window.CardAI*` ve belge çapı DOM aramaları modül oturumuna kapatılır.
+- **Ausculta** zaten React+TS'tir. Alan tipleri/akış; puanlama/oturum/çözücü; ses motoru; store reducer/provider; UI; ekranlar; CSS ve SimHost adaptörü ayrı dilimlerdir. Global AudioEngine singleton'ı modül oturumuna indirgenir; geç `fetch/decode` sonrası ses başlatma engellenir. `store.tsx`, `PatientStage`, `SimulationScreen` ve 1000+ satır CSS tek görevde taşınmaz. SCORM, localStorage ve `Date.now()` kullanımı portta ayrı karara bağlanır. Oyunlaştırma dilimi Opaca portu ve `packages/gamification-core` sonrası eklenir; Ausculta kendi rozet kataloğunu/hedeflerini taşır.
+- **Pulse** düz JS/DOM uygulamasıdır. Önce `model.js` ve deterministik motor testleri; ardından curriculum/state ayrıştırma; root-parametreli controller ve RAF/interval/listener temizliği; özellik ekranları ve React giriş; CSS kapsamlandırma gelir. `app.js` fiziksel satır sayısı düşük ama yoğun kod taşır, görev boyutu mantıksal değişimle ölçülür. Global `window.CardAI*` ve belge çapı DOM aramaları modül oturumuna kapatılır. Oyunlaştırma dilimi Opaca portu ve `packages/gamification-core` sonrası eklenir; Pulse kendi rozet kataloğunu/hedeflerini taşır.
 
 ## Admin ekran haritası
 

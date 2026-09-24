@@ -27,8 +27,8 @@ girdisidir. Kaynak: ADR-006 (kabul), E2 yol haritası (T19 worktree'si), E1-sim-
 | SimHost sözleşmesi hazır | `task/T14-sim-host` 2d8f2d5: `packages/sim-host/src/SimHost.ts` (mount→dispose, epoch, `now`) | T14a yazıldı, **dev'e merge değil**; T14b (kabuk rotaları) yok |
 | Opaca token'ları hazır | `packages/tokens/opaca.css` snapshot | Paket `opaca.css`'i **ihraç etmiyor**, hiçbir yerde import edilmiyor |
 | Kaynak kod strict TS | `egemed-opaca/tsconfig.app.json`'da `strict` yok; `lib: ES2023+DOM` | Platform strict (`noUncheckedIndexedAccess`, `exactOptionalPropertyTypes`, `verbatimModuleSyntax`), kökte DOM lib yok |
-| Gamification ilk portta kapalı | E2 §50–52 | Ürün kararı; kod taşınırsa bayrak (`?gami=1` / `VITE_GAMI`) zaten varsayılan kapalı |
-| Paket yerleşimi `packages/sim-opaca` | E1 açık sorusu, öneri | **[Varsayım]** — insan/ADR kararı bekler |
+| Gamification üç simde zorunlu | E2 §50–52 | Karar (23 Eyl 2026, revize): oyunlaştırma Opaca, Pulse ve Ausculta dilimlerinde zorunlu; bayrak (`?gami=1` / `VITE_GAMI`) varsayılan kapalı |
+| Paket yerleşimi `packages/sim-opaca` | E1 açık sorusu, öneri | **Karar (23 Eyl 2026, K-P1):** `packages/sim-opaca`; `sims/*` arşiv/boş kalır |
 
 ## 3. Modül envanteri (kaynak `src/`, 8050 satır TS/TSX)
 
@@ -91,18 +91,21 @@ veri notudur; taşımada değiştirilmez, ayrı veri görevi açar.
 
 ## 6. Test envanteri — gerçek sayılar ve gruplar
 
-Ölçüm: 15 test dosyası / **209 test** (kaynak repoda tamamı yeşil, ~0,8 sn).
+Ölçüm: 15 test dosyası / **209 test** (kaynak repoda tamamı yeşil, ~0,8 sn). Platforma taşınan
+**153 çalışma zamanı testi** (66 core + 87 gamification); 56 betik testi taşınmaz, kaynak depoda arşiv
+kalır (Karar 23 Eyl 2026).
 
 | Dosya | Test | `describe` grupları | Port kararı |
 |---|---|---|---|
 | `tests/core.test.ts` | 66 | geometri · yanıt doğruluğu · skor · vaka doğrulama · akış · oturum örnekleme · suspend · SCORM çalışma zamanı · reducer · reducer — konu uygulaması dönüşü · en iyi puan (bestScore) · paketlenen veri | Taşınır (S1–S7) |
 | `tests/gamification/*.test.ts` (13 dosya) | 87 | zaman/TR takvimi 16 · ranking 12 · repo 11 · xp 10 · badges 8 · streak-goals 7 · leaderboardView 7 · attempt 4 · badgeView 4 · chart 4 · flag 2 · ui-meta 2 | Taşınır, bayrak kapalı (G1–G5) |
-| `tests/scripts.test.ts` | 45 | CSV · DICOM · ortak yardımcılar · vaka seçimi (V1/V10) · soru imzası · güvenli çeldirici · bilgi sorusu tavanı · içe aktarıcılar | **Taşınmaz** (build hattı; `sharp`, `child_process`, fixtures) |
-| `tests/remote-zip.test.ts` | 11 | remote-zip Range okuma · Commons lisans filtresi · pediatrik oran | **Taşınmaz** (`jszip`, yerel HTTP sunucusu) |
+| `tests/scripts.test.ts` | 45 | CSV · DICOM · ortak yardımcılar · vaka seçimi (V1/V10) · soru imzası · güvenli çeldirici · bilgi sorusu tavanı · içe aktarıcılar | **Taşınmaz — kaynak depoda arşiv (veri üretimi + LMS paketleme), Karar 23 Eyl 2026** |
+| `tests/remote-zip.test.ts` | 11 | remote-zip Range okuma · Commons lisans filtresi · pediatrik oran | **Taşınmaz — kaynak depoda arşiv (veri üretimi + LMS paketleme), Karar 23 Eyl 2026** |
 
-- **Platform regresyon ağı: 153 test** (66 core + 87 gamification). Build-time 56 test kaynak arşivde
-  kalır; platforma alınırsa `jszip`+`sharp` devDependency'si gerekir (onaysız yeni bağımlılık → ayrı karar).
-- E1/E2'deki "119 test" hedefi bu ölçümle güncellenmelidir; aksi halde kabul kapısı eksik sayar.
+- **Platform regresyon ağı: 153 test** (66 core + 87 gamification) — Karar (23 Eyl 2026): yalnız çalışma
+  zamanı testleri taşınır; `scripts/` hattı (veri üretimi + LMS paketleme) ve 56 betik testi kaynak depoda
+  arşiv kalır. `jszip`/`sharp` eklenmez; vaka seti yeniden üretilecekse kaynak depoda üretilip çıktı kopyalanır.
+- E1/E2'deki "119 test" hedefi bu ölçümle güncellenir; kabul kapısı 153 test üzerinden sayar.
 - Platform test deseni: DOM yok → `renderToStaticMarkup`, saf fonksiyon, dosya okuma `ts.sys.readFile`
   (`tests/shell/layout.test.ts`, `tests/ui/css-tokens.test.ts`). Kaynak testlerin DOM'suz koşanları
   (core, gamification) bu desene uyar; `tests/gamification/helpers.ts:27` bellek içi `localStorage`
@@ -125,8 +128,9 @@ veri notudur; taşımada değiştirilmez, ayrı veri görevi açar.
 - Anahtarlar: `opaca.bestScore` (`store.tsx:78,83,416`), `opaca.fsPromptDone` (`StartScreen.tsx:14,26,38`),
   `opaca.gami.v1` (`rules.ts:42`; `storage.ts:35-58`).
 - İlk portta gamification kapalıyken `gami.v1` yazılmaz; `bestScore` ve `fsPromptDone` davranışı
-  platformda korunmalı mı kararı insanındır (cihaz-yerel veri, kurum altyapısı dışı). **[Öneri]** İlk
-  portta davranış korunur, anahtarlar `opaca.` önekiyle kalır; politika kararı T16/T24'e taşınır.
+  platformda korunmalı mı kararı insanındır (cihaz-yerel veri, kurum altyapısı dışı). **[İnsan onayı]**
+  Karar (23 Eyl 2026): depolama K-P3 kararına kadar bir port arkasında kalır; davranışın korunup
+  korunmayacağı ve anahtar politikası K-P3/T16/T24'te netleşir.
 
 ### 7.3 Global CSS ve çift kabuk
 - `styles.css` global `:root` token bloğu (hex'ler), `*`, `html, body`, `#root`, `button`,
@@ -178,9 +182,10 @@ veri notudur; taşımada değiştirilmez, ayrı veri görevi açar.
 - Bayrak kapalıyken bile `chrome.tsx:6`, `LearnScreen.tsx:3-4`, `ModeSelectScreen.tsx:8-9`,
   `ResultsScreen.tsx:14-15` gamification modüllerini import eder; `useGami.ts:17-22` modül düzeyi
   `LocalRepo` singleton'ı kurar ve `new Date()` çağırır. İlk portta bu dosyalar taşınmazsa derleme
-  kırılır; taşınırsa 87 test regresyon ağına girer. **[Öneri]** Pure katman (G1–G5) ilk portta taşınır,
-  `AchievementsScreen`/`LeaderboardScreen` + `ui/gami` (G6–G8) T16'ya ertelenir; App bu iki ekranı
-  `GAMI_ENABLED` koşulu + lazy import ile bağlar.
+  kırılır; taşınırsa 87 test regresyon ağına girer. **Karar (23 Eyl 2026):** Gamification Opaca portuyla
+  zorunlu dilimler halinde taşınır (G1–G8, §8); sim-bağımsız çekirdek `packages/gamification-core`'a,
+  rozet kataloğu/konfig ve ekranlar sim paketine gider. App bu iki ekranı `GAMI_ENABLED` koşulu + lazy
+  import ile bağlar.
 
 ## 8. SimHost'a ilk port dilimleri
 
@@ -192,7 +197,8 @@ Dilimler sıralıdır; aynı pakette paralel Running açılmaz.
 ### T15b-0 — Veri ve asset taşıma (kod dilimi değil, ayrı görev)
 - `packages/sim-opaca/src/data/*.json` (7 dosya, ~1,7 MB) + `public/brand` + `public/assets/ct`
   kopyalanır; `public/assets/xray/runtime` (621 dosya/20 MB) **git-dışı** olduğundan yerel kopyadan
-  taşınır veya `scripts/import-*` hattıyla yeniden üretilir (karar insan).
+  kopyalanır; import betikleriyle yeniden üretim yolu **kullanılmaz** (Karar 23 Eyl 2026). Kopyalama
+  hedefi (kök `public/` düzeni mi, `/sims/opaca/` mı) **[insan onayı]**.
 - Kabul: `tests/sim-opaca/assets.test.ts` — `images.json`'daki her `runtimeUrl` ve `stack[].frames[]`
   yolu ile `brand` referansları diskte var; eksikse test kırmızı (xray taşınmadan port "bitti" sayılmaz).
 
@@ -250,16 +256,24 @@ enjekte eder, üretimde `react-dom/client` kullanılır. `now`, React context il
 akar; `Date.now()` kullanılmaz. `DevPanel` üretim rotasına girmez (yalnız `import.meta.env.DEV` +
 `?dev=1`); çift üst bar/footer oluşmaması için Opaca `Header`/`.eg-footer` kabukta gizlenir.
 
-### Koşullu dilimler — gamification (bayrak kapalı; T16'ya devredilebilir)
+### Zorunlu dilimler — gamification (bayrak kapalı; Opaca portuyla aktarılır)
 
-| # | Dilim | Dosyalar (satır) | Yaklaşık | Kabul |
-|---|---|---|---|---|
-| G1 | Pure kurallar A | `types.ts` 112 + `rules.ts` 65 + `xp.ts` 62 + `streak.ts` 47 + `avatar.ts` 12 | ~298 | `tests/sim-opaca/gamification/{xp,streak-goals,ui-meta}.test.ts` |
-| G2 | Pure kurallar B | `badges.ts` 112 + `badgeView.ts` 64 + `chart.ts` 47 + `goals.ts` 64 | ~287 | `badges, badgeView, chart` testleri |
-| G3 | Pure kurallar C | `attempt.ts` 71 + `stats.ts` 133 + `ranking.ts` 108 + `rewards.ts` 68 | ~380 | `attempt, ranking` testleri |
-| G4 | Zaman + köprü | `time.ts` 97 + `flag.ts` 20 + `useGami.ts` 71 + `storage.ts` 62 | ~250 | `time, flag, repo/storage` testleri (bellek içi shim) |
-| G5 | Repo + demo | `repo.ts` 218 + `mock.ts` 118 + `demo.ts` 221 | ~557 → ikiye bölünür | `repo, leaderboardView` testleri |
-| G6–G8 | Gami UI + 2 ekran | `ui/gami/` 846 + `AchievementsScreen` 143 + `LeaderboardScreen` 139 | ~376 × 3 | statik render; `GAMI_ENABLED=false` iken arayüzde gami öğesi yok |
+Karar (23 Eyl 2026, revize): Oyunlaştırma üç simde de (Opaca, Pulse, Ausculta) zorunlu dilimlerdir.
+Sim-bağımsız çekirdek (XP, seviye, seri, hedef, zaman, sıralama, ödül, grafik) `packages/gamification-core`'a;
+sime özgü rozet kataloğu/konfig ve ekranlar `packages/sim-opaca`'ya gider; rozet kataloğu ve hedefler sim
+başına farklıdır. Sim verileri birleşmez: her sim kendi oyunlaştırma deposunu tutar; depolama K-P3
+kararına kadar bir port arkasında kalır. Dosya düzeyinde
+sınıflandırılamayanlar (`avatar.ts`, `flag.ts`, `attempt.ts`, `stats.ts`) dilim görevinde netleşir; belirsiz
+kalanlar **[insan onayı]**.
+
+| # | Dilim | Dosyalar (satır) | Hedef paket (Karar 23 Eyl 2026) | Yaklaşık | Kabul |
+|---|---|---|---|---|---|
+| G1 | Pure kurallar A | `types.ts` 112 + `rules.ts` 65 + `xp.ts` 62 + `streak.ts` 47 + `avatar.ts` 12 | `packages/gamification-core` (XP, seviye, seri) | ~298 | `tests/sim-opaca/gamification/{xp,streak-goals,ui-meta}.test.ts` |
+| G2 | Pure kurallar B | `badges.ts` 112 + `badgeView.ts` 64 + `chart.ts` 47 + `goals.ts` 64 | `packages/gamification-core` (hedef, grafik); rozet kataloğu/konfig `packages/sim-opaca` | ~287 | `badges, badgeView, chart` testleri |
+| G3 | Pure kurallar C | `attempt.ts` 71 + `stats.ts` 133 + `ranking.ts` 108 + `rewards.ts` 68 | `packages/gamification-core` (sıralama, ödül) | ~380 | `attempt, ranking` testleri |
+| G4 | Zaman + köprü | `time.ts` 97 + `flag.ts` 20 + `useGami.ts` 71 + `storage.ts` 62 | `packages/gamification-core` (zaman); yerel depo/köprü `packages/sim-opaca`, port arkasında | ~250 | `time, flag, repo/storage` testleri (bellek içi shim) |
+| G5 | Repo + demo | `repo.ts` 218 + `mock.ts` 118 + `demo.ts` 221 | `packages/sim-opaca` (her sim kendi deposu; port arkasında) | ~557 → ikiye bölünür | `repo, leaderboardView` testleri |
+| G6–G8 | Gami UI + 2 ekran | `ui/gami/` 846 + `AchievementsScreen` 143 + `LeaderboardScreen` 139 | `packages/sim-opaca` (ekranlar) | ~376 × 3 | statik render; `GAMI_ENABLED=false` iken arayüzde gami öğesi yok |
 
 ## 9. Kabul testleri ve komutlar
 
@@ -269,11 +283,11 @@ akar; `Date.now()` kullanılmaz. `DevPanel` üretim rotasına girmez (yalnız `i
 | Modül yaşam döngüsü | `tests/sim-opaca/sim-module.test.ts` | mount→dispose→remount; dispose idempotent; geç gelen lazy modül mount edilmez (SimHost epoch) |
 | Statik render | `tests/sim-opaca/static-render.test.ts` | `renderToStaticMarkup(<OpacaApp/>)`; Türkçe başlıklar, tek üst bar, `<iframe>` yok |
 | Store temizliği | `tests/sim-opaca/store-lifecycle.test.ts` | dispose sonrası beforeunload/visibilitychange/pagehide/timer yok; `now` enjekte |
-| Regresyon | `tests/sim-opaca/core/*.test.ts` + `tests/sim-opaca/gamification/*.test.ts` | Kaynak grupların taşınmış hali; hedef **153 test** (scripts 56 hariç) |
+| Regresyon | `tests/sim-opaca/core/*.test.ts` + `tests/sim-opaca/gamification/*.test.ts` | Kaynak grupların taşınmış hali; hedef **153 test** (66 core + 87 gamification) — Karar 23 Eyl 2026 |
 | Asset bütünlüğü | `tests/sim-opaca/assets.test.ts` | `images.json` yolları + `brand` dosyaları diskte (xray/runtime git-dışı kapısı) |
 | CSS sözleşmesi | `tests/sim-opaca/opaca-css.test.ts` | Her CSS diliminde (S20–S23): `:root`/`body`/`#root`/`button` yok, sınıflar `.eg-sim-opaca` kapsamlı, hex yalnız `packages/tokens/opaca.css`'te, tüm `var()` tanımlı |
 | Kapı komutu | `pnpm turbo lint typecheck test` | 7/7 görev + tüm testler |
-| Kaynak regresyon | `egemed-opaca`'da `npx vitest run` | Taşıma sırasında kaynakta 209 test yeşil kalır |
+| Kaynak regresyon | `egemed-opaca`'da `npx vitest run` | Taşıma sırasında kaynakta 209 testin tamamı (153 taşınan + 56 arşiv) yeşil kalır |
 | Diff disiplini | `git diff --check` | Boşluk/çakışma hatası yok |
 
 Not: T14a'nın `tests/sim-host/sim-host.test.ts` dosyası sahte sim ile host davranışını zaten kapsar;
@@ -282,11 +296,16 @@ T09 mobil e2e (Playwright, 360/768/1440) çalışan rota sonrası T09'a aittir; 
 
 ## 10. Açık kararlar (insan)
 
-1. **Test hedefi:** 119 yerine kaynakta 209 / platformda runtime 153 kabul edilsin mi? scripts hattı
-   arşivde kalıyorsa 56 test platforma taşınmaz; taşınacaksa `jszip`+`sharp` onayı gerekir.
-2. **Asset politikası:** `public/assets/xray/runtime` (20 MB, git-dışı) kopya mı, import betikleriyle
-   üretim mi? Modül varlıkları kökte mi, `/sims/opaca/` altında mı servis edilecek?
-3. **Paket yerleşimi:** `packages/sim-opaca` (E1 önerisi) onayı.
-4. **Gamification:** pure katman ilk portta mı, T16/T11 `packages/gamification-core` ile mi?
-   `bestScore`/`fsPromptDone` localStorage davranışı platformda korunacak mı?
-5. **SCORM → xAPI:** ilk portta MockAdapter/no-op; eşleme K2/K3 kararları sonrası T22/T23.
+1. **Test hedefi — Karar (23 Eyl 2026):** Platform hedefi **153 çalışma zamanı testi** (66 core + 87 gamification).
+   `scripts/` hattı (veri üretimi + LMS paketleme) ve 56 betik testi taşınmaz, kaynak depoda arşiv kalır;
+   `jszip`/`sharp` eklenmez. Vaka seti yeniden üretilecekse kaynak depoda üretilip çıktı kopyalanır.
+2. **Asset politikası — Karar (23 Eyl 2026):** `public/assets/xray/runtime` (20 MB, git-dışı) yerel kopyadan
+   kopyalanır; import betikleriyle yeniden üretim yolu kullanılmaz. Modül varlıklarının sunum kökü
+   (kök `public/` düzeni mi, `/sims/opaca/` mı) **[insan onayı]**; T15b-0'da netleşir.
+3. **Paket yerleşimi — Karar (23 Eyl 2026, K-P1):** `packages/sim-opaca`; `sims/*` arşiv/boş kalır.
+4. **Gamification — Karar (23 Eyl 2026, revize):** Oyunlaştırma üç simde de (Opaca, Pulse, Ausculta) zorunlu
+   dilimler halinde aktarılır; sim-bağımsız çekirdek `packages/gamification-core`'a, sime özgü rozet
+   kataloğu/konfig ve ekranlar sim paketine gider (§8); rozet kataloğu ve hedefler sim başına farklıdır.
+   `bestScore`/`fsPromptDone` localStorage davranışı **[insan onayı]**: ADR-005 ile
+   gerilimli; K-P3 kararına kadar depolama bir port arkasında kalır.
+5. **SCORM → xAPI — açık (insan onayı):** ilk portta MockAdapter/no-op; eşleme K2/K3 kararları sonrası T22/T23.
