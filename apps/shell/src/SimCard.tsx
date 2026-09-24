@@ -1,17 +1,10 @@
 import type { JSX } from "react";
-import { Badge, Card } from "@egemed/ui";
+import { Card } from "@egemed/ui";
 import { t } from "@egemed/ui/i18n";
 
 /** Simülatör kimlikleri; sıra AGENTS.md'deki Pulse → Ausculta → Opaca sırasıdır. */
 export const SIM_IDS = ["pulse", "ausculta", "opaca"] as const;
 export type SimId = (typeof SIM_IDS)[number];
-
-/**
- * Kabuğa gerçek modülü bağlanmış simler (T14c: Opaca, T14d: Pulse). Bu
- * kimlikler için "Platforma taşınıyor" rozeti çizilmez; ausculta yer
- * tutucuda kaldığı sürece rozet görünür kalır.
- */
-const LIVE_SIM_IDS: ReadonlySet<SimId> = new Set(["opaca", "pulse"]);
 
 /**
  * Yatay sim logoları. `width`/`height` gerçek piksel oranıyla verilir; kart
@@ -51,11 +44,12 @@ export interface SimCardProps {
 }
 
 /**
- * Simülatör kartı: durum rozeti + ad (görsel gizli erişilebilir başlık),
- * logo, tagline, tanıtım ve isteğe bağlı bağlantı. Rozet kartın en üstünde
- * başlığın yanındadır; logo adı zaten taşıdığı için `alt=""` kalır ve
- * erişilebilir ad tek kaynaktan (başlık) gelir. Kart kabuğu `@egemed/ui`
- * Card; gölge/radius aile token'larından gelir.
+ * Simülatör kartı: ad (görsel gizli erişilebilir başlık), logo, tagline,
+ * tanıtım ve isteğe bağlı bağlantı. Üç sim de gerçek modüllere bağlandığı
+ * için "Platforma taşınıyor" rozeti kalkmıştır (T14e); logo adı zaten
+ * taşıdığı için `alt=""` kalır ve erişilebilir ad tek kaynaktan (başlık)
+ * gelir. Kart kabuğu `@egemed/ui` Card; gölge/radius aile token'larından
+ * gelir.
  */
 export function SimCard({
   id,
@@ -65,12 +59,10 @@ export function SimCard({
 }: SimCardProps): JSX.Element {
   const logo = SIM_LOGOS[id];
   const Heading = headingTags[headingLevel];
-  const isLive = LIVE_SIM_IDS.has(id);
   return (
     <Card>
       <div className={`eg-shell-sim eg-shell-sim--${size}`}>
         <div className="eg-shell-sim__head">
-          {isLive ? null : <Badge tone="info">{t("sims.soon")}</Badge>}
           <Heading className="eg-visually-hidden">{t(`sims.${id}.name`)}</Heading>
         </div>
         <img

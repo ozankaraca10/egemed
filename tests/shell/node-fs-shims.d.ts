@@ -1,10 +1,12 @@
 /**
  * `@types/node` repoda kurulu değil (yeni bağımlılık yasak). Kök tsconfig
  * programı (testler) `apps/shell/src` altındaki `.d.ts` dosyalarını kapsamadığı
- * için Opaca varlık eklentisinin ihtiyaç duyduğu `node:fs`/`node:path`/
- * `node:url` yüzeyi test programı adına burada bildirilir; uygulama kopyası
- * `apps/shell/src/node-fs-shims.d.ts` içindedir (bkz. `tests/api/node-crypto.d.ts`
- * ile aynı yaklaşım).
+ * için sim varlık eklentilerinin (Opaca T14c, Pulse T14d, Ausculta T14e)
+ * ihtiyaç duyduğu `node:fs`/`node:path`/`node:url` yüzeyi test programı adına
+ * burada bildirilir; uygulama kopyası `apps/shell/src/node-fs-shims.d.ts`
+ * içindedir (bkz. `tests/api/node-crypto.d.ts` ile aynı yaklaşım).
+ * `force: false` Ausculta kök varlıklarında var olan dosyayı atlar (kabuk
+ * genel klasörü kazanır).
  */
 declare module "node:fs" {
   export function statSync(path: string): { isFile(): boolean };
@@ -12,7 +14,7 @@ declare module "node:fs" {
   export function cpSync(
     source: string,
     destination: string,
-    options: { recursive: boolean },
+    options: { recursive: boolean; force?: boolean },
   ): void;
 }
 

@@ -37,7 +37,7 @@ describe("ShellLayout işaretlemesi", () => {
     const html = renderRoute("#/simulatorler");
     expect((html.match(/class="eg-card"/g) ?? []).length).toBe(3);
     expect(html).not.toContain("<iframe");
-    expect(html).toContain(t("sims.soon"));
+    expect(html).not.toContain(t("sims.soon"));
     for (const id of SIM_IDS) {
       expect(html, id).toContain(t(`sims.${id}.name`));
       expect(html, id).toContain(t(`sims.${id}.tagline`));
