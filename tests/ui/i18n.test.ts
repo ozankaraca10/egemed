@@ -31,6 +31,57 @@ const adminKeys: TrKey[] = [
   "admin.section.audit.desc",
 ];
 
+const adminUsersKeys: TrKey[] = [
+  "admin.users.open",
+  "admin.users.title",
+  "admin.users.action.add",
+  "admin.users.filter.search",
+  "admin.users.filter.role",
+  "admin.users.filter.role.all",
+  "admin.users.role.admin",
+  "admin.users.role.kullanici",
+  "admin.users.filter.unit",
+  "admin.users.filter.unit.all",
+  "admin.users.filter.status",
+  "admin.users.filter.status.all",
+  "admin.users.status.invited",
+  "admin.users.status.active",
+  "admin.users.status.suspended",
+  "admin.users.status.deleted",
+  "admin.users.filter.authMethod",
+  "admin.users.filter.authMethod.all",
+  "admin.users.authMethod.sso",
+  "admin.users.authMethod.dev",
+  "admin.users.filter.clear",
+  "admin.users.sort.label",
+  "admin.users.sort.displayNameAsc",
+  "admin.users.sort.displayNameDesc",
+  "admin.users.sort.createdAtDesc",
+  "admin.users.sort.createdAtAsc",
+  "admin.users.sort.lastLoginDesc",
+  "admin.users.sort.lastLoginAsc",
+  "admin.users.table.caption",
+  "admin.users.table.select",
+  "admin.users.table.name",
+  "admin.users.table.username",
+  "admin.users.table.role",
+  "admin.users.table.unit",
+  "admin.users.table.status",
+  "admin.users.cards.label",
+  "admin.users.filtered.empty",
+  "admin.users.error.title",
+  "admin.users.error.body",
+  "admin.users.error.retry",
+  "admin.users.selection.suffix",
+  "admin.users.selection.clear",
+  "admin.users.bulk.activate",
+  "admin.users.bulk.suspend",
+  "admin.users.pagination.prev",
+  "admin.users.pagination.next",
+  "admin.users.pagination.page",
+  "admin.users.pagination.records",
+];
+
 const premiumKeys: TrKey[] = [
   "shell.brand.eyebrow",
   "shell.brand.name",
@@ -145,6 +196,23 @@ describe("i18n/tr sözlüğü", () => {
     expect(t("admin.section.audit.desc")).toBe(
       "Yönetici eylemlerinin değiştirilemez kaydı.",
     );
+  });
+
+  it("kullanıcılar listesi (T69a) anahtarları tanımlı, boş değil ve iki rollü modele göre yazılmıştır", () => {
+    for (const key of adminUsersKeys) {
+      expect(t(key).trim().length, key).toBeGreaterThan(0);
+    }
+    expect(t("admin.users.title")).toBe("Kullanıcılar");
+    expect(t("admin.users.role.admin")).toBe("Yönetici");
+    expect(t("admin.users.role.kullanici")).toBe("Kullanıcı");
+    expect(t("admin.users.status.invited")).toBe("Davetli");
+    expect(t("admin.users.status.active")).toBe("Etkin");
+    expect(t("admin.users.status.suspended")).toBe("Askıda");
+    expect(t("admin.users.status.deleted")).toBe("Silindi");
+    expect(t("admin.users.authMethod.sso")).toBe("SSO");
+    expect(t("admin.users.authMethod.dev")).toBe("Geliştirme");
+    expect(t("admin.users.filter.clear")).toBe("Filtreleri temizle");
+    expect(t("admin.users.error.retry")).toBe("Yeniden dene");
   });
 
   it("'Nasıl çalışır?' bölümü anahtarları tanımlı ve birebir metinleri taşır", () => {

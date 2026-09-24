@@ -18,6 +18,7 @@ export type ResolvedRoute =
   | { kind: "page"; route: RouteDef }
   | { kind: "entry"; role: EntryRole; titleKey: TrKey }
   | { kind: "admin"; titleKey: TrKey }
+  | { kind: "adminUsers"; titleKey: TrKey }
   | { kind: "sim"; simId: SimulatorId; titleKey: TrKey }
   | { kind: "notFound"; path: string };
 
@@ -28,6 +29,9 @@ export const ENTRY_PATHS: Record<EntryRole, `/giris/${string}`> = {
 
 /** Yönetici paneli yolu; ana gezinmeye EKLENMEZ, yalnız admin oturumuyla açılır. */
 export const ADMIN_PATH = "/admin" as const;
+
+/** Kullanıcılar listesi yolu (T69a, E3 §e.1); admin paneliyle aynı korumayı paylaşır. */
+export const ADMIN_USERS_PATH = "/admin/kullanicilar" as const;
 
 export const ROUTES: readonly RouteDef[] = [
   { id: "home", path: "/", labelKey: "shell.nav.home", titleKey: "shell.home.title" },
@@ -75,6 +79,7 @@ function toPath(hash: string): string {
 /** Hash'i saf olarak çözer; DOM'a dokunmaz (bkz. useHashRoute). */
 export function resolveRoute(hash: string): ResolvedRoute {
   const path = toPath(hash);
+  if (path === ADMIN_USERS_PATH) return { kind: "adminUsers", titleKey: "admin.users.title" };
   if (path === ADMIN_PATH) return { kind: "admin", titleKey: "admin.title" };
   if (path === ENTRY_PATHS.admin) return { kind: "entry", role: "admin", titleKey: "entry.admin.title" };
   if (path === ENTRY_PATHS.student) return { kind: "entry", role: "student", titleKey: "entry.student.title" };
@@ -107,6 +112,21 @@ export function routeHref(id: RouteId): `#${string}` {
 /** Yönetici paneli bağlantısı; yalnız sahte oturum akışında kullanılır. */
 export function adminHref(): `#${string}` {
   return `#${ADMIN_PATH}`;
+}
+
+/** Kullanıcılar listesi bağlantısı; AdminPage "Kullanıcılar" kartı buraya gider. */
+export function adminUsersHref(): `#${string}` {
+  return `#${ADMIN_USERS_PATH}`;
+}
+
+/** Kullanıcı ayrıntısı yer tutucu rotası (T70'te uygulanır); şimdilik bulunamadıya düşer. */
+export function adminUserDetailHref(userId: string): `#${string}` {
+  return `#${ADMIN_USERS_PATH}/${userId}`;
+}
+
+/** Admin oturumu koruması yalnız yönetici rotalarında (panel + kullanıcılar) uygulanır. */
+export function isAdminProtected(route: ResolvedRoute): boolean {
+  return route.kind === "admin" || route.kind === "adminUsers";
 }
 
 /** Sahte giriş sonrası hedef: yönetici panele, test öğrencisi ana sayfaya gider. */
