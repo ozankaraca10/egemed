@@ -297,3 +297,5 @@ export type {
 } from "./screens/SimulationScreen";
 export { ResultsScreen, createNoopResultsScreenEnv } from "./screens/ResultsScreen";
 export type { ResultsGamiPort, ResultsScreenEnv, ResultsScreenProps } from "./screens/ResultsScreen";
+export { SourcesScreen } from "./screens/SourcesScreen";
+export type { SourcesScreenProps } from "./screens/SourcesScreen";
