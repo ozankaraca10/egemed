@@ -16,6 +16,7 @@ export interface AuscultaStats {
   pediatricCorrect: number;
   mixedCorrect: number;
   headChoiceCorrect: number;
+  correctDiagnosisCount?: number;
 }
 
 const progress = (value: number, max: number): BadgeProgress => ({ value, max });
@@ -90,4 +91,5 @@ export const AUSCULTA_BADGES: BadgeDef<AuscultaStats>[] = [
   countBadge("pediatric", "Pediatrik vakalar", "Pediatrik işaretli beş vakada akustik bulguyu doğru tanı.", "5 vaka", "topic", "User", (s) => s.pediatricCorrect, b.pediatric),
   countBadge("mixed-sounds", "Kalp ve akciğer birlikte", "Aynı vakada hem kalp hem akciğer ses sınıfını doğru ayırt et.", "3 vaka", "topic", "Stethoscope", (s) => s.mixedCorrect, b.mixed),
   countBadge("head-choice", "Bell ve diyafram", "Düşük ve yüksek frekans için bell veya diyafram seçimini doğru yap.", "5 doğru", "skill", "Stethoscope", (s) => s.headChoiceCorrect, b.headChoice),
+  countBadge("diagnosis-3", "Tanı eşleştirmesi", "Tanı sorularında üç doğru yanıt ver.", "3 doğru tanı", "skill", "Check", (s) => s.correctDiagnosisCount ?? 0, 3),
 ];

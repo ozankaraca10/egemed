@@ -527,12 +527,17 @@ describe("PATCH /admin/users/:id (E3 §d)", () => {
       updatedAt: FIXED_NOW,
     });
     expect(harness.authStore.auditEntries).toHaveLength(1);
-    expect(harness.authStore.auditEntries[0]).toMatchObject({
+    const audit = harness.authStore.auditEntries[0];
+    expect(audit).toMatchObject({
       action: "user.update",
       targetId: ALI_ID,
-      summaryBefore: { displayName: "Ali Veli", email: "ali.veli@example.invalid" },
-      summaryAfter: { displayName: "Ali Veli Güncel", email: "ali.guncel@example.invalid" },
+      summaryBefore: { status: "active", authMethod: "dev", roles: "kullanici", unitId: UNIT_ID },
+      summaryAfter: { status: "active", authMethod: "dev", roles: "kullanici", unitId: "" },
     });
+    const serialized = JSON.stringify(audit);
+    expect(serialized).not.toContain("Ali Veli");
+    expect(serialized).not.toContain("ali.veli");
+    expect(serialized).not.toContain("@");
   });
 
   it("çakışan eşleme anahtarını 409 ile reddeder", async () => {

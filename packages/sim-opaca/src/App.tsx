@@ -3,7 +3,8 @@ import { EmbeddedProvider } from "./EmbeddedContext";
 import { useStore } from "./core/StoreProvider";
 import type { Screen } from "./core/types";
 import { DevPanel } from "./DevPanel";
-import { createLearnGamiPort, createSimulationGamiPort } from "./gamification/bindings";
+import { useLearnGamiPort, useSimulationGamiPort } from "./gamification/bindings";
+import { GamiSyncErrorBanner } from "./ui/gami/GamiSyncErrorBanner";
 import { AchievementsScreen } from "./screens/AchievementsScreen";
 import { LeaderboardScreen } from "./screens/LeaderboardScreen";
 import { LearnScreen } from "./screens/LearnScreen";
@@ -82,8 +83,10 @@ function ScreenBody({
   devBuild: boolean;
 }): JSX.Element | null {
   const { state } = useStore();
-  const learnGami = gamiEnabled ? createLearnGamiPort() : undefined;
-  const simGami = gamiEnabled ? createSimulationGamiPort() : undefined;
+  const learnGamiPort = useLearnGamiPort();
+  const simGamiPort = useSimulationGamiPort();
+  const learnGami = gamiEnabled ? learnGamiPort : undefined;
+  const simGami = gamiEnabled ? simGamiPort : undefined;
   switch (state.screen) {
     case "start":
       if (embedded) {
@@ -157,6 +160,7 @@ export function App({
     <EmbeddedProvider embedded={embedded}>
       <div className="eg-sim-opaca app-shell">
         <Header embedded={embedded} env={chromeEnv} modals={{ help: HelpModal, confirm: ConfirmModal }} gamiEnabled={gamiEnabled} />
+        {gamiEnabled ? <GamiSyncErrorBanner /> : null}
         <main className="app-content">
           {timing ? (
             <ScreenBody

@@ -246,7 +246,11 @@ export function reducer(s: AppState, a: Action, seam: ReducerSeam = noopSeam): A
       seam.emit({ type: "answer_selected", qid: a.qid });
       return { ...s, answers: { ...s.answers, [a.qid]: a.values } };
     case "submitAnswer":
-      seam.emit({ type: "answer_submitted", qid: a.qid, correct: a.correct });
+      {
+        const question = findCase(s.currentCaseId)?.questions.find((item) => item.id === a.qid);
+        seam.emit({ type: "answer_submitted", qid: a.qid, correct: a.correct });
+        if (a.correct && question?.domain === "diagnosis") seam.emit({ type: "correct_diagnosis", caseId: s.currentCaseId, qid: a.qid });
+      }
       return { ...s, revealed: { ...s.revealed, [a.qid]: true }, lastFeedback: { correct: a.correct, qid: a.qid } };
     case "useHint":
       seam.emit({ type: "hint_used", caseId: s.currentCaseId });
@@ -268,6 +272,11 @@ export function reducer(s: AppState, a: Action, seam: ReducerSeam = noopSeam): A
         const threshold = def.masteryThreshold ?? MASTERY_THRESHOLD;
         result = { ...result, total: adjustedTotal, mastery: adjustedTotal >= threshold };
       }
+      const domainPercents: Partial<Record<string, number>> = {};
+      for (const [key, value] of Object.entries(result.domains)) {
+        if (value.max > 0) domainPercents[key] = Math.round((value.earned / value.max) * 100);
+      }
+      if (s.mode !== "learn") seam.emit({ type: "case_completed", caseId: def.id, mode: s.mode, score: result.total, mastery: result.mastery, hintsUsed: result.hintsUsed, domains: domainPercents });
       return {
         ...s,
         caseResults: [...s.caseResults, result],

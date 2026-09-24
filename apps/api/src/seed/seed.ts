@@ -262,7 +262,7 @@ export async function seedBootstrapAdmin(
     action: "bootstrap.admin",
     targetType: "user",
     targetId: id,
-    summaryAfter: { username, status: "invited", authMethod: "sso", roles: "admin", source: "seed:admin" },
+    summaryAfter: { status: "invited", authMethod: "sso", roles: "admin", source: "seed:admin" },
     requestId: null,
   });
   return { outcome: "created", userId: id, institutionId: institution.id };

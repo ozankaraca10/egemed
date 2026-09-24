@@ -1,9 +1,10 @@
-/** `GamificationRepo` arayüzü + `LocalRepo` uygulaması. */
+/** `GamiRepository` PORT'u + `LocalRepo` yerel uygulaması. */
 
 import type {
   Cohort,
   CohortFilter,
   GamiProfile,
+  GamiRepository,
   MonthlyReward,
   Period,
   RewardWinner,
@@ -19,6 +20,18 @@ import { monthlyRewardFor, rewardWinnersHistory } from "./rewards";
 import { computeStats } from "./stats";
 import { loadState, saveState, type OpacaGamiState } from "./storage";
 import type { LeaderboardRow, LeaderboardView } from "./types";
+
+export type { GamiRepository } from "@egemed/gamification-core";
+export { formatGamiSyncError } from "./errors";
+
+/** Geriye dönük ad — `@egemed/gamification-core` PORT'u ile aynı. */
+export type GamificationRepo = GamiRepository<OpacaAttemptRecord>;
+
+export type OpacaGamiRepo = LocalRepo | GamiRepository<OpacaAttemptRecord>;
+
+export function isLocalRepo(repo: OpacaGamiRepo): repo is LocalRepo {
+  return repo instanceof LocalRepo;
+}
 
 const ME_ID = "me";
 const ANONYMOUS_LABEL = "Anonim öğrenci";
@@ -43,23 +56,12 @@ export function initials(name: string): string {
   return letters.map((ch) => ch!.toLocaleUpperCase("tr-TR")).join("");
 }
 
-export interface GamificationRepo {
-  getMe(): Promise<GamiProfile & { id: string }>;
-  updateMe(patch: Partial<GamiProfile>): Promise<void>;
-  recordAttempt(attempt: OpacaAttemptRecord): Promise<void>;
-  recordLearn(activity: { topic?: string; ctStack?: string }, now: Date): Promise<void>;
-  listAttempts(): Promise<OpacaAttemptRecord[]>;
-  getLeaderboard(period: Period, cohort: CohortFilter, now: Date): Promise<LeaderboardView>;
-  getMonthlyReward(month: string): Promise<MonthlyReward | null>;
-  getRewardWinners(lastNMonths: number, now: Date): Promise<RewardWinner[]>;
-}
-
 export interface LocalRepoOptions {
   lmsStudentName?: string | null;
   stateOverride?: OpacaGamiState;
 }
 
-export class LocalRepo implements GamificationRepo {
+export class LocalRepo implements GamiRepository<OpacaAttemptRecord> {
   private lmsStudentName: string | null;
   private override: OpacaGamiState | null;
 
@@ -199,24 +201,33 @@ export class LocalRepo implements GamificationRepo {
   }
 }
 
-/** Testler için modül düzeyinde depo sıfırlama. */
+/** Testler ve dispose için modül düzeyinde depo sıfırlama. */
 export function resetGamiRepo(): void {
-  repo = null;
+  localRepo = null;
+  injectedRepo = null;
 }
 
-let repo: LocalRepo | null = null;
+let localRepo: LocalRepo | null = null;
+let injectedRepo: GamiRepository<OpacaAttemptRecord> | null = null;
+
+/** Kabuk/SimModule: API deposu enjekte eder; `null` yerel davranışa döner. */
+export function configureGamiRepository(repo: GamiRepository<OpacaAttemptRecord> | null): void {
+  injectedRepo = repo;
+  if (repo === null) localRepo = null;
+}
 
 export interface GamiRepoInit {
   lmsName?: string | null;
   demoState?: OpacaGamiState;
 }
 
-export function getGamiRepo(init: GamiRepoInit = {}): LocalRepo {
-  if (!repo) {
+export function getGamiRepo(init: GamiRepoInit = {}): OpacaGamiRepo {
+  if (injectedRepo) return injectedRepo;
+  if (!localRepo) {
     const opts: LocalRepoOptions = { lmsStudentName: init.lmsName ?? null };
     if (init.demoState !== undefined) opts.stateOverride = init.demoState;
-    repo = new LocalRepo(opts);
+    localRepo = new LocalRepo(opts);
   }
-  if (init.lmsName) repo.setLmsStudentName(init.lmsName);
-  return repo;
+  if (init.lmsName) localRepo.setLmsStudentName(init.lmsName);
+  return localRepo;
 }

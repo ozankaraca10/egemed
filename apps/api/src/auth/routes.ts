@@ -11,6 +11,7 @@ import {
 import type { Env } from "../env";
 import { jsonError, validationDetails, type AppEnv } from "../http";
 import type { AuditRepo, MeContext, SessionRepo, UserRepo } from "./repo";
+import { createLoginRateLimiter, loginRateKey } from "./rate-limit";
 import {
   CSRF_COOKIE,
   CSRF_HEADER,
@@ -159,6 +160,7 @@ export function registerAuthRoutes(app: Hono<AppEnv>, deps: AuthDeps, now: () =>
     absoluteMs: deps.sessionAbsoluteMs,
   });
   const secureCookies = deps.nodeEnv === "production";
+  const loginRate = createLoginRateLimiter();
 
   // Tüm `/auth/*` mutasyonları CSRF korumalıdır; dev girişi oturum öncesidir
   // (CSRF çerezi henüz yoktur) ve yalnız Origin kontrolü taşır.
@@ -172,6 +174,8 @@ export function registerAuthRoutes(app: Hono<AppEnv>, deps: AuthDeps, now: () =>
     if (!deps.devEnabled || deps.nodeEnv === "production") return jsonError(c, "not_found");
     const parsed = devLoginRequestSchema.safeParse(await readJson(c));
     if (!parsed.success) return jsonError(c, "invalid_request", validationDetails(parsed.error));
+    const rateKey = loginRateKey("dev", parsed.data.username);
+    if (!loginRate.consume(rateKey, now())) return jsonError(c, "rate_limited");
 
     const user = await deps.users.findByUsername(parsed.data.username);
     if (user === null) {

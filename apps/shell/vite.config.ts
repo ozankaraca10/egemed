@@ -6,7 +6,7 @@ import { cpSync, existsSync, readFileSync, statSync } from "node:fs";
 import { dirname, extname, relative, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 import react from "@vitejs/plugin-react";
-import { defineConfig, type Plugin } from "vite";
+import { defineConfig, loadEnv, type Plugin } from "vite";
 
 const SHELL_ROOT = dirname(fileURLToPath(import.meta.url));
 
@@ -201,6 +201,28 @@ function scopedAssetsPlugin(options: ScopedAssetsPluginOptions): Plugin {
   };
 }
 
+/**
+ * T57 — API'li geliştirme sunucusu: `VITE_API_PROXY_TARGET` doluysa `/api/**`
+ * istekleri hedefe aktarılır ve ön ek (`/api`) atılır. Kabuk API ile aynı
+ * kökenden konuşur; böylece çerez oturumu ve `Origin` kontrolü bozulmaz.
+ * Yalnız geliştirme sunucusunu etkiler; üretim derlemesine girmez.
+ */
+function apiProxyConfig(env: Record<string, string>): Record<string, unknown> {
+  const target = env.VITE_API_PROXY_TARGET?.trim();
+  if (target === undefined || target.length === 0) return {};
+  return {
+    server: {
+      proxy: {
+        "/api": {
+          target,
+          changeOrigin: false,
+          rewrite: (path: string) => path.replace(/^\/api/, ""),
+        },
+      },
+    },
+  };
+}
+
 function opacaAssetsPlugin(): Plugin {
   return scopedAssetsPlugin({
     missingDirWarning:
@@ -295,7 +317,7 @@ function auscultaRootAssetsPlugin(): Plugin {
   };
 }
 
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
   base: "./",
   plugins: [
     react(),
@@ -304,4 +326,5 @@ export default defineConfig({
     auscultaAssetsPlugin(),
     auscultaRootAssetsPlugin(),
   ],
-});
+  ...apiProxyConfig(loadEnv(mode, SHELL_ROOT, "VITE_")),
+}));
