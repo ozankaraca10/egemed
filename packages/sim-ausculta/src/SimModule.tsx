@@ -181,6 +181,7 @@ export function createAuscultaModule(deps?: AuscultaModuleDeps): SimModule {
         ...(resolved.simulationEnv ? { simulationEnv: resolved.simulationEnv } : {}),
         ...(resolved.modalEnv ? { modalEnv: resolved.modalEnv } : {}),
         ...(resolved.resultsEnv ? { resultsEnv: resolved.resultsEnv } : {}),
+        ...(context.reportAttempt === undefined ? {} : { reportAttempt: context.reportAttempt }),
       };
 
       root.render(

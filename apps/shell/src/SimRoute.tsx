@@ -4,6 +4,7 @@ import { FULL_BLEED_SIMS } from "./sims/layout";
 import { t } from "@egemed/ui/i18n";
 import { shellNow } from "./now";
 import { routeHref, simTitleKey } from "./routes";
+import { createBrowserAttemptReporter, type ReportedAttempt } from "./reportAttempt";
 import { loadSimModule } from "./sims/loaders";
 
 /** Sim host kapsayıcısı; kök tsconfig DOM lib'i taşımadığı için tip yapısaldır. */
@@ -18,6 +19,11 @@ export interface SimRouteProps {
   readonly simId: SimulatorId;
   /** Oturumdaki kullanıcının takma kimliği; sim kayıtlarını kullanıcıya ayırır (PULSE-08). */
   readonly actorId?: string | undefined;
+  /**
+   * API oturumunun taban adresi. Doluysa tamamlanan denemeler sunucuya gider.
+   * Sahte geliştirme oturumunda verilmez.
+   */
+  readonly apiBaseUrl?: string | null;
 }
 
 /**
@@ -54,7 +60,7 @@ const SIMS_WITH_OWN_HEADING: ReadonlySet<SimulatorId> = new Set([]);
  * kutusu host'un kardeşidir; yükleniyor/hata sırasında host gizlenmez, boş
  * kalır ve aşama ızgarasında aynı hücreyi paylaşır.
  */
-export function SimRoute({ actorId, simId }: SimRouteProps): JSX.Element {
+export function SimRoute({ actorId, apiBaseUrl = null, simId }: SimRouteProps): JSX.Element {
   const containerRef = useRef<SimContainer | null>(null);
   const hostRef = useRef<SimHost | null>(null);
   const [status, setStatus] = useState<SimRouteStatus>("loading");
@@ -79,9 +85,20 @@ export function SimRoute({ actorId, simId }: SimRouteProps): JSX.Element {
     // Mount da mikro göreve ertelenir: önceki simin (ör. Opaca React kökü)
     // kapanışı React render'ı sırasında değil, ondan sonra olur. Sıra korunur:
     // önceki cleanup'ın `release`ı bu mount'tan önce kuyruğa girer.
-    const mounted = Promise.resolve().then(() =>
-      host.mount(container, simId, actorId === undefined ? undefined : { actorId }),
-    );
+    const mounted = Promise.resolve().then(() => {
+      const reporter = apiBaseUrl === null ? null : createBrowserAttemptReporter(apiBaseUrl);
+      const reportAttempt =
+        reporter === null
+          ? undefined
+          : (attempt: ReportedAttempt) => {
+              void reporter(simId, attempt).catch(() => undefined);
+            };
+      const options = {
+        ...(actorId === undefined ? {} : { actorId }),
+        ...(reportAttempt === undefined ? {} : { reportAttempt }),
+      };
+      return host.mount(container, simId, Object.keys(options).length === 0 ? undefined : options);
+    });
     return () => {
       // Gerçek React tabanlı modüller (Opaca) dispose'ta kendi kökünü
       // `unmount()` eder; bu, kabuğun bu bileşeni kaldırdığı AYNI commit
@@ -95,7 +112,7 @@ export function SimRoute({ actorId, simId }: SimRouteProps): JSX.Element {
       // değiştirildiğinde yeni mount'u iptal etmez (PLATFORM-01).
       void mounted.then((token) => host.release(token));
     };
-  }, [simId, actorId, attempt]);
+  }, [simId, actorId, apiBaseUrl, attempt]);
 
   const title = t(simTitleKey(simId));
   const ownsHeading = status === "ready" && SIMS_WITH_OWN_HEADING.has(simId);

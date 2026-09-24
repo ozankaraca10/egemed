@@ -40,7 +40,7 @@ function titleKeyFor(route: ResolvedRoute): TrKey {
 }
 
 /** Rota içeriğini seçer; üst bar (`ShellLayout`) tüm iç sayfalarda ortaktır. */
-function contentFor(route: ResolvedRoute, session: ShellSession | null): ReactNode {
+function contentFor(route: ResolvedRoute, session: ShellSession | null, apiBaseUrl: string | null): ReactNode {
   if (route.kind === "page") return pageFor(route.route.id, session);
   if (route.kind === "admin") return <AdminPage />;
   if (route.kind === "adminUsers") return <UsersPage />;
@@ -49,7 +49,9 @@ function contentFor(route: ResolvedRoute, session: ShellSession | null): ReactNo
   if (route.kind === "adminImport") return <ImportWizardPage />;
   if (route.kind === "adminRoles") return <RolesPage />;
   if (route.kind === "adminAudit") return <AuditPage />;
-  if (route.kind === "sim") return <SimRoute actorId={session?.actorId} simId={route.simId} />;
+  if (route.kind === "sim") {
+    return <SimRoute actorId={session?.actorId} apiBaseUrl={apiBaseUrl} simId={route.simId} />;
+  }
   return <NotFoundPage />;
 }
 
@@ -187,7 +189,7 @@ export function App(): JSX.Element | null {
   if (isAdminProtected(route) && (apiPending || guardHref !== null)) return null;
   return frame(
     <ShellLayout onLogout={logout} route={route} session={session}>
-      {contentFor(route, session)}
+      {contentFor(route, session, apiEnabled && session !== null ? apiBaseUrl : null)}
     </ShellLayout>,
   );
 }
