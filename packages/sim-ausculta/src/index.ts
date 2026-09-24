@@ -113,6 +113,23 @@ export {
   stageViewConfig,
 } from "./ui/patient-stage/geometry";
 export type { BodyType, NormPoint, StageBox, StageCoordPoint, StageRect, StageViewConfig } from "./ui/patient-stage/geometry";
+export {
+  PatientStage,
+  StageAudioProvider,
+  createNoopStageEnv,
+  createStageSession,
+} from "./ui/PatientStage";
+export type {
+  PatientStageProps,
+  StageAudio,
+  StageAudioStatus,
+  StageEnv,
+  StageHandle,
+  StageObserveTarget,
+  StagePoint,
+  StageSession,
+  StageSessionBindings,
+} from "./ui/PatientStage";
 export { Chestpiece } from "./ui/stethoscope";
 export { TorsoPediatricBack, TorsoPediatricFront } from "./ui/torso-pediatric";
 export { AUDIO_CONFIG } from "./audio/config";
