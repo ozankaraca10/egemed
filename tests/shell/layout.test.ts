@@ -21,6 +21,8 @@ describe("ShellLayout işaretlemesi", () => {
     expect(html).toContain('href="#icerik"');
     expect(html).toContain(t("shell.skip"));
     expect(html).toMatch(/<main[^>]*id="icerik"[^>]*tabindex="-1"/);
+    expect(html).toContain('class="eg-shell-footer"');
+    expect(html).toContain(t("footer.institution"));
   });
   it('yalnız etkin bağlantı aria-current="page" taşır', () => {
     for (const route of ROUTES) {

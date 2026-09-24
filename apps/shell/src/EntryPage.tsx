@@ -3,7 +3,9 @@ import { useState, type FormEvent, type JSX } from "react";
 import { t } from "@egemed/ui/i18n";
 import { checkDevCredentials, createSessionStore, type DevSession, type DevSessionStorage } from "./devAuth";
 import { focusMain } from "./ShellLayout";
+import { ShellFooter } from "./ShellFooter";
 import { entryHref, entryRedirectHref, type EntryRole } from "./routes";
+import { SIM_ICONS, SIM_IDS } from "./SimCard";
 
 /** Kök tsconfig DOM lib'i taşımadığı için form alanı erişimi en dar arayüzle yapılır. */
 interface FieldLike { value: string }
@@ -106,6 +108,23 @@ export function EntryPage({ role, devEnabled = false }: EntryPageProps): JSX.Ele
         <img alt="" className="eg-shell-entry__logo" src="/brand/ege-tip-logo.png" />
         <p className="eg-shell-entry__name">{t("entry.brand")}</p>
         <p className="eg-shell-entry__tagline">{t("entry.tagline")}</p>
+        <div className="eg-shell-entry__sims">
+          <div className="eg-shell-entry__simrow">
+            {SIM_IDS.map((id) => (
+              <img
+                alt=""
+                className="eg-shell-entry__simicon"
+                height={SIM_ICONS[id].height}
+                key={id}
+                src={SIM_ICONS[id].src}
+                width={SIM_ICONS[id].width}
+              />
+            ))}
+          </div>
+          <p className="eg-shell-entry__sims-label">
+            {SIM_IDS.map((id) => t(`sims.${id}.name`)).join(" · ")}
+          </p>
+        </div>
       </section>
       <main className="eg-shell-entry__main" id="icerik" tabIndex={-1}>
         <div className="eg-shell-entry__panel">
@@ -160,6 +179,7 @@ export function EntryPage({ role, devEnabled = false }: EntryPageProps): JSX.Ele
           )}
           <a className="eg-shell-entry__back" href="#/">{t("entry.back")}</a>
         </div>
+        <ShellFooter small />
       </main>
     </div>
   );

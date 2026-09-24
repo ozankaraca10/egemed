@@ -7,6 +7,8 @@ import { SIM_IDS, SimCard } from "./SimCard";
 
 const TRUST_KEYS = ["data", "faculty", "privacy"] as const;
 const TRUST_SECTION_ID = "eg-neden-guvenilir";
+const HOW_STEPS = ["learn", "practice", "assess"] as const;
+const HOW_SECTION_ID = "eg-nasil-calisir";
 type EmptyPageProps = { titleKey: TrKey; bodyKey: TrKey; children?: ReactNode };
 
 function EmptyPage({ titleKey, bodyKey, children }: EmptyPageProps): JSX.Element {
@@ -39,7 +41,7 @@ export interface HomePageProps {
   readonly session?: DevSession | null;
 }
 
-/** Ana sayfa: hero + üç sim kartı + ilerleme sekmeleri + güven kanıtları. */
+/** Ana sayfa: hero + "Nasıl çalışır?" adımları + üç sim kartı + ilerleme sekmeleri + güven kanıtları. */
 export function HomePage({ session = null }: HomePageProps): JSX.Element {
   const roleLabel =
     session === null
@@ -66,12 +68,30 @@ export function HomePage({ session = null }: HomePageProps): JSX.Element {
           </a>
           <a
             className="eg-shell-hero__secondary"
-            href={`#${TRUST_SECTION_ID}`}
-            onClick={(event) => scrollToSection(event, TRUST_SECTION_ID)}
+            href={`#${HOW_SECTION_ID}`}
+            onClick={(event) => scrollToSection(event, HOW_SECTION_ID)}
           >
             {t("home.hero.secondary")}
           </a>
         </p>
+      </section>
+      <section
+        aria-labelledby="eg-home-how"
+        className="eg-shell-home__section"
+        id={HOW_SECTION_ID}
+      >
+        <h2 className="eg-shell-section__title" id="eg-home-how">
+          {t("home.how.title")}
+        </h2>
+        <ol className="eg-shell-how">
+          {HOW_STEPS.map((step, index) => (
+            <li className={`eg-shell-how__step eg-shell-how__step--${step}`} key={step}>
+              <span aria-hidden="true" className="eg-shell-how__num">{index + 1}</span>
+              <h3 className="eg-shell-how__title">{t(`home.how.${step}.title`)}</h3>
+              <p className="eg-shell-how__body">{t(`home.how.${step}.body`)}</p>
+            </li>
+          ))}
+        </ol>
       </section>
       <section aria-labelledby="eg-home-sims" className="eg-shell-home__section">
         <h2 className="eg-shell-section__title" id="eg-home-sims">
