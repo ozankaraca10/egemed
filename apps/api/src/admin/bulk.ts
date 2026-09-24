@@ -58,6 +58,15 @@ function issueDetails(code: string, path: readonly string[]): unknown {
 /** Kurum ve yaşam koşulunu SQL'de yeniden doğrulayan ortak kapsam. */
 const USER_SCOPE = "u.id = any($1::uuid[]) and u.institution_id = $2 and u.deleted_at is null";
 
+/** `returning user_id` ve `returning id` satırlarının ikisinden de kimliği okur. */
+function changedUserId(row: unknown): string | undefined {
+  if (typeof row !== "object" || row === null) return undefined;
+  const record = row as { readonly user_id?: unknown; readonly id?: unknown };
+  if (typeof record.user_id === "string") return record.user_id;
+  if (typeof record.id === "string") return record.id;
+  return undefined;
+}
+
 export function createPgAdminBulkRepo(db: AdminDb): AdminBulkRepo {
   return {
     async apply(input) {
@@ -78,13 +87,13 @@ export function createPgAdminBulkRepo(db: AdminDb): AdminBulkRepo {
           break;
         case "set_unit":
           ({ rows } = await db.query(
-            `update users set unit_id = $3::uuid, updated_at = $4 where id = any($1::uuid[]) and institution_id = $2 and deleted_at is null and unit_id is distinct from $3::uuid returning id`,
+            `update users set unit_id = $3::uuid, updated_at = $4 where id = any($1::uuid[]) and institution_id = $2 and deleted_at is null and unit_id is distinct from $3::uuid returning id as user_id`,
             [ids, input.institutionId, input.value, new Date(input.at)],
           ));
           break;
         case "set_status":
           ({ rows } = await db.query(
-            `update users set status = $3, updated_at = $4 where id = any($1::uuid[]) and institution_id = $2 and deleted_at is null and status <> $3 returning id`,
+            `update users set status = $3, updated_at = $4 where id = any($1::uuid[]) and institution_id = $2 and deleted_at is null and status <> $3 returning id as user_id`,
             [ids, input.institutionId, input.value, new Date(input.at)],
           ));
           break;
@@ -101,7 +110,10 @@ export function createPgAdminBulkRepo(db: AdminDb): AdminBulkRepo {
           ));
           break;
       }
-      return rows.map((row) => (row as { readonly user_id: string }).user_id);
+      return rows.flatMap((row) => {
+        const id = changedUserId(row);
+        return id === undefined ? [] : [id];
+      });
     },
   };
 }

@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  ATTEMPT_SUMMARY_MAX,
   attemptWriteRequestSchema,
   authMeResponseSchema,
   gamiAllResponseSchema,
@@ -94,6 +95,11 @@ describe("GET /me/gamification/:simId yanıtı", () => {
       gamiSummaryResponseSchema.safeParse({ data: { ...simSummary(), rawAnswers: ["a", "b"] } }).success,
     ).toBe(false);
     expect(gamiSummaryResponseSchema.safeParse({ data: { ...simSummary(), simId: "kalp" } }).success).toBe(false);
+    expect(
+      gamiSummaryResponseSchema.safeParse({
+        data: { ...simSummary(), weeklyGoal: { targetXp: 300, currentXp: -60 } },
+      }).success,
+    ).toBe(false);
     expect(gamiSimIdParamSchema.safeParse("ausculta").success).toBe(true);
     expect(gamiSimIdParamSchema.safeParse("kalp").success).toBe(false);
   });
@@ -200,5 +206,33 @@ describe("POST /me/gamification/:simId/attempts gövdesi", () => {
     expect(attemptWriteRequestSchema.safeParse({ ...attemptBody(), id: undefined }).success).toBe(false);
     expect(attemptWriteRequestSchema.safeParse({ ...attemptBody(), score: 120, maxScore: 100 }).success).toBe(false);
     expect(attemptWriteRequestSchema.safeParse({ ...attemptBody(), score: undefined }).success).toBe(true);
+  });
+
+  it("özet sayısını sınırlar ve bitişi başlangıçtan önce reddeder", () => {
+    expect(attemptWriteRequestSchema.safeParse({ ...attemptBody(), summary: { xp: 0 } }).success).toBe(true);
+    expect(
+      attemptWriteRequestSchema.safeParse({ ...attemptBody(), summary: { xp: ATTEMPT_SUMMARY_MAX } }).success,
+    ).toBe(true);
+    expect(attemptWriteRequestSchema.safeParse({ ...attemptBody(), summary: { xp: -100 } }).success).toBe(false);
+    expect(
+      attemptWriteRequestSchema.safeParse({
+        ...attemptBody(),
+        summary: { xp: ATTEMPT_SUMMARY_MAX + 1 },
+      }).success,
+    ).toBe(false);
+    const inverted = attemptWriteRequestSchema.safeParse({
+      ...attemptBody(),
+      startedAt: "2026-09-22T14:05:00.000+03:00",
+      finishedAt: "2026-09-22T14:04:00.000+03:00",
+    });
+    expect(inverted.success).toBe(false);
+    if (!inverted.success) expect(inverted.error.issues.map((issue) => issue.message)).toContain("finished_before_started");
+    expect(
+      attemptWriteRequestSchema.safeParse({
+        ...attemptBody(),
+        startedAt: attemptBody().finishedAt,
+        finishedAt: attemptBody().finishedAt,
+      }).success,
+    ).toBe(true);
   });
 });
