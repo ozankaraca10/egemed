@@ -28,6 +28,8 @@ export { CardiacModel } from "./engine/model";
 export type { CardiacMetrics, CardiacSnapshot, MechanicalTimeline } from "./engine/model";
 export { createPulseController } from "./engine/controller";
 export type { PulseController, PulseControllerOptions } from "./engine/controller";
+export { applyMode, selectLead, showView } from "./engine/actions";
+export type { PulseActionContext } from "./engine/actions";
 export { createPulseScheduler } from "./engine/scheduler";
 export type { FrameCallback, FrameHandle, IntervalHandle, PulseScheduler, PulseSchedulerOptions } from "./engine/scheduler";
 export { createCryptoRandomInt, createSeededRandomInt } from "./engine/rng";
@@ -56,6 +58,8 @@ export type { Fiducials, Lead, LeadShape, Limb, Mode, ShapeKey, WaveformPoint } 
 export { ACTIVE_VIEWS, MAX_STATE_BYTES, SESSION_COUNT, STATE_VERSION, blank, decode, derive, encode } from "./engine/state";
 export type { ActiveView, CurriculumItem, PulseCurriculum, PulseState, Section, Session, StateContext } from "./engine/state";
 export { createLocalStoragePersistence } from "./persistence/localStorage";
+export { MODE_CARDS } from "./ui/modes";
+export type { ModeCard, ModeCardId } from "./ui/modes";
 export { createMemoryPersistence } from "./persistence/memory";
 export { MAX_PERSISTENCE_BYTES, utf8ByteLength } from "./persistence/policy";
 export { PULSE_LEGACY_STORAGE_KEYS, PULSE_STORAGE_KEY } from "./persistence/types";
