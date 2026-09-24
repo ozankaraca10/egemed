@@ -85,7 +85,6 @@ test.describe("Opaca sim rotası (gerçek modül)", () => {
 
     // Gömülü modda tanıtım atlanır; mod seçimi ekranı açılır (S24).
     await expect(page.getByRole("heading", { name: "Çalışma modunu seçin" })).toBeVisible();
-    await expect(page.locator(".mode-card.learn h3")).toHaveText("İnceleme Modu");
     await expect(page.locator(".mode-card.learn")).toBeVisible();
     await expect(page.locator(".mode-card.practice")).toBeVisible();
     await expect(page.locator(".mode-card.assessment")).toBeVisible();

@@ -25,7 +25,7 @@ export interface ModeSelectScreenProps {
   readonly gamiEnabled?: boolean
 }
 
-/** Mod seçim ekranı: İnceleme / Uygulama / Değerlendirme. */
+/** Mod seçim ekranı: Öğrenme (İnceleme) / Uygulama / Değerlendirme. */
 export function ModeSelectScreen({ embedded = false, gamiEnabled = false }: ModeSelectScreenProps): JSX.Element {
   const { state, dispatch, now } = useStore()
   const practiceCount = poolFor('practice').length
@@ -58,15 +58,15 @@ export function ModeSelectScreen({ embedded = false, gamiEnabled = false }: Mode
         <div className="container screen-body">
           <Stepper active={1} labels={['Mod seçimi', 'Çalışma', 'Tamamla']} />
           <ScreenHeading className="mode-title">Çalışma modunu seçin</ScreenHeading>
-          <p className="mode-sub">Önce inceleme modunda okuma sırasını oturtmanız önerilir.</p>
+          <p className="mode-sub">Önce öğrenme modunda okuma sırasını oturtmanız önerilir.</p>
           <div className="mode-cards">
             <ModeCard
               kind="learn"
               icon={<IconGraduation />}
-              title="İnceleme Modu"
+              title="Öğrenme Modu"
               text={`${LIBRARY_ITEMS.length} konuyu örnek filmler, okuma bölgeleri ve uzman işaretlemeleriyle inceleyin.`}
               items={['ABCDE okuma rehberi', 'Uzman işaretlemesi açılıp kapanır', 'Süre ve puan yok']}
-              cta="İncelemeye başla"
+              cta="Öğrenmeye başla"
               onPick={() => pick('learn')}
             />
             <ModeCard
@@ -75,7 +75,7 @@ export function ModeSelectScreen({ embedded = false, gamiEnabled = false }: Mode
               title="Uygulama Modu"
               text={practiceCount ? `${practiceCount} vakalık havuzdan her oturumda rastgele ${Math.min(SESSION_SIZE, practiceCount)} vaka; ipucu ve geri bildirimle.` : 'Uygulama havuzu boş: önce veri setini içe aktarın.'}
               items={['Görüntü üzerinde işaretleme', 'İpucu desteği', 'Yanıttan sonra uzman işaretlemesi']}
-              cta={recommendLearn && practiceCount ? 'İncelemeye git' : 'Vakaları çöz'}
+              cta={recommendLearn && practiceCount ? 'Öğrenmeye git' : 'Vakaları çöz'}
               disabled={!practiceCount}
               recommendLocked={recommendLearn && !!practiceCount}
               onPick={() => pickOrRecommendLearn('practice', !!practiceCount)}
@@ -88,7 +88,7 @@ export function ModeSelectScreen({ embedded = false, gamiEnabled = false }: Mode
               text={assessmentCount ? `${assessmentCount} radyolog etiketli vakalık havuzdan rastgele ${Math.min(SESSION_SIZE, assessmentCount)} vaka.` : 'Değerlendirme havuzu boş: radyolog etiketli veri seti içe aktarılmalı.'}
               items={['Okuma bölgesi ve uzman katmanı yok', 'Vaka başına süre sınırı', 'SCORM puanı']}
               rules="İpucu yok · geri bildirim yalnız sonunda · puan LMS'e yazılır"
-              cta={recommendLearn && assessmentCount ? 'İncelemeye git' : 'Değerlendirmeye gir'}
+              cta={recommendLearn && assessmentCount ? 'Öğrenmeye git' : 'Değerlendirmeye gir'}
               disabled={!assessmentCount}
               recommendLocked={recommendLearn && !!assessmentCount}
               onPick={() => pickOrRecommendLearn('assessment', !!assessmentCount)}
@@ -157,7 +157,7 @@ export function ModeCard({
       <div className="ic">{icon}</div>
       {recommendLocked ? (
         <p className="mode-lock-hint" role="status">
-          <IconLock width={14} height={14} aria-hidden="true" /> Önce inceleme modunda okuma sırasını oturtmanız önerilir.
+          <IconLock width={14} height={14} aria-hidden="true" /> Önce öğrenme modunda okuma sırasını oturtmanız önerilir.
         </p>
       ) : null}
       <h3>{title}</h3>

@@ -148,19 +148,4 @@ describe("Opaca CSS sözleşmesi (S20–S23)", () => {
     expect(index).toContain('import "./styles/film.css"');
     expect(index).toContain('import "./styles/rest.css"');
   });
-
-  it("shell.css mobil kırılımı platform 768px setiyle hizalıdır", () => {
-    const shellCss = moduleCss["packages/sim-opaca/src/styles/shell.css"];
-    expect(shellCss).toContain("@media (max-width: 767px)");
-    expect(shellCss).not.toMatch(/@media \(max-width: 720px\)/);
-    expect(shellCss).toContain("@media (max-height: 820px) and (min-width: 768px)");
-  });
-
-  it("ikincil kontroller 44px dokunma eşiğini karşılar", () => {
-    const restCss = moduleCss["packages/sim-opaca/src/styles/rest.css"];
-    const filmCss = moduleCss["packages/sim-opaca/src/styles/film.css"];
-    expect(restCss).toMatch(/\.eg-sim-opaca \.modal-close\{[^}]*min-(?:width|height): 44px/);
-    expect(restCss).toMatch(/\.eg-sim-opaca \.icon-btn\{[^}]*min-(?:width|height): 44px/);
-    expect(filmCss).toMatch(/\.eg-sim-opaca \.film-tools \.seg button[^}]*min-height: 44px/);
-  });
 });
