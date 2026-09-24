@@ -4,13 +4,19 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "dev": "node --import ./ts-register.mjs --watch src/server.ts",
+    "start": "node --import ./ts-register.mjs src/server.ts",
     "migrate:up": "node-pg-migrate up --migrations-dir migrations",
     "migrate:down": "node-pg-migrate down --migrations-dir migrations",
     "test:db": "vitest run --config vitest.db.config.ts",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@egemed/contracts": "workspace:*",
+    "@hono/node-server": "2.1.1",
+    "hono": "4.13.9",
     "node-pg-migrate": "9.0.0",
-    "pg": "8.23.0"
+    "pg": "8.23.0",
+    "zod": "4.6.5"
   }
 }
