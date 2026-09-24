@@ -97,8 +97,18 @@ export interface AdminUserGamificationSummary {
   readonly streakCurrent: number;
 }
 
-/** `audit_log.action` kodlarından ayrıntı geçmişinde gösterilen alt küme (E3 §c/§d). */
-export type UserHistoryAction = "user.create" | "user.suspend" | "user.activate" | "user.delete";
+/**
+ * `audit_log.action` kodlarından ayrıntı geçmişinde gösterilen alt küme (E3
+ * §c/§d). `role.grant`/`role.revoke` T73'te `setRoles` (elle admin atama)
+ * için eklendi.
+ */
+export type UserHistoryAction =
+  | "user.create"
+  | "user.suspend"
+  | "user.activate"
+  | "user.delete"
+  | "role.grant"
+  | "role.revoke";
 
 export interface AdminUserHistoryEntry {
   readonly id: string;
@@ -144,6 +154,153 @@ export interface UpdateUserInput {
   readonly status?: UserStatus;
 }
 
+/**
+ * `POST /admin/users/bulk` gövdesi (E3 §d; `@egemed/contracts`
+ * `bulkRequestSchema` ile aynı ayrımlı birlik). `assign_role`/`revoke_role`
+ * biçimsel olarak tam `UserRole` kabul eder; `value === "admin"` istek
+ * düzeyinde reddedilir (bkz. `validateBulkInput` — gerçek API'de 403
+ * `role_not_permitted`, E3 §b/§d). `set_unit` bu mock katmanında `null`
+ * (kaldırma) desteklemez: `AdminUser.unitId` zorunlu alandır.
+ */
+export type BulkOperation = "assign_role" | "revoke_role" | "set_unit" | "set_status" | "grant_sim" | "revoke_sim";
+export const BULK_OPERATIONS: readonly BulkOperation[] = [
+  "assign_role",
+  "revoke_role",
+  "set_unit",
+  "set_status",
+  "grant_sim",
+  "revoke_sim",
+];
+/** E3 §b: toplu durum değişimi yalnız etkinleştir/askıya alır; silme ayrı, tek kullanıcılık uçtadır. */
+export type BulkStatus = "active" | "suspended";
+export const BULK_STATUSES: readonly BulkStatus[] = ["active", "suspended"];
+
+export type BulkEditInput =
+  | { readonly userIds: readonly string[]; readonly operation: "assign_role" | "revoke_role"; readonly value: UserRole }
+  | { readonly userIds: readonly string[]; readonly operation: "set_unit"; readonly value: string }
+  | { readonly userIds: readonly string[]; readonly operation: "set_status"; readonly value: BulkStatus }
+  | { readonly userIds: readonly string[]; readonly operation: "grant_sim" | "revoke_sim"; readonly value: SimId };
+
+/** Satır atlama nedeni; hata değildir — dryRun ve gerçek uygulama aynı sayıyı verir. */
+export type BulkSkipReason = "no_change" | "would_orphan_roles";
+export interface BulkEditRowResult {
+  readonly userId: string;
+  readonly reason: BulkSkipReason;
+}
+/** `dryRun` önizlemesi ve gerçek uygulama aynı şekli döner (E3 §d örnek yanıtı). */
+export interface BulkEditResult {
+  readonly updated: number;
+  readonly skipped: readonly BulkEditRowResult[];
+}
+
+/** İstek düzeyinde geçersiz işlem+değer birleşimi; satır bazlı değil (bkz. yukarıdaki tip notu). */
+export type BulkValidationError = "role_not_permitted" | "unknown_unit";
+
+/** `assign_role`/`revoke_role` yalnız `kullanici` kabul eder (§b); `set_unit` bilinen bir birimi hedeflemelidir. */
+export function validateBulkInput(input: BulkEditInput): BulkValidationError | null {
+  if ((input.operation === "assign_role" || input.operation === "revoke_role") && input.value !== "kullanici") {
+    return "role_not_permitted";
+  }
+  if (input.operation === "set_unit" && !ADMIN_UNITS.some((unit) => unit.id === input.value)) {
+    return "unknown_unit";
+  }
+  return null;
+}
+
+/** Tek kullanıcıya işlemi saf olarak uygular; değişiklik yoksa/riskliyse atlama nedeniyle döner. */
+export function bulkOutcomeForUser(
+  user: AdminUserDetail,
+  input: BulkEditInput,
+  nowMs: number,
+): { readonly next: AdminUserDetail; readonly reason?: BulkSkipReason } {
+  if (input.operation === "assign_role") {
+    if (user.roles.includes(input.value)) return { next: user, reason: "no_change" };
+    const roles = [...user.roles, input.value];
+    return { next: { ...user, role: roles.includes("admin") ? "admin" : "kullanici", roles } };
+  }
+  if (input.operation === "revoke_role") {
+    if (!user.roles.includes(input.value)) return { next: user, reason: "no_change" };
+    const roles = user.roles.filter((role) => role !== input.value);
+    // Kullanıcıyı tüm rollerden arındırmak (tam erişimsiz bırakmak) toplu işlemle yapılmaz.
+    if (roles.length === 0) return { next: user, reason: "would_orphan_roles" };
+    return { next: { ...user, role: roles.includes("admin") ? "admin" : "kullanici", roles } };
+  }
+  if (input.operation === "set_unit") {
+    if (user.unitId === input.value) return { next: user, reason: "no_change" };
+    return { next: { ...user, unitId: input.value } };
+  }
+  if (input.operation === "set_status") {
+    if (user.status === input.value) return { next: user, reason: "no_change" };
+    const action = STATUS_HISTORY_ACTION[input.value];
+    const history =
+      action === undefined ? user.history : [...user.history, historyEntry(user.id, user.history.length + 1, toIso(nowMs), action)];
+    return { next: { ...user, history, status: input.value } };
+  }
+  if (input.operation === "grant_sim") {
+    if (user.simAccess.includes(input.value)) return { next: user, reason: "no_change" };
+    return { next: { ...user, simAccess: [...user.simAccess, input.value] } };
+  }
+  // Açık `=== "revoke_sim"` kontrolü: birleşik ayrımlı `operation` alanı (grant_sim|revoke_sim)
+  // yüzünden dolaylı eleme yerine doğrudan eşleşme kullanılır (TS `value: SimId` daralımı için).
+  if (input.operation === "revoke_sim") {
+    if (!user.simAccess.includes(input.value)) return { next: user, reason: "no_change" };
+    return { next: { ...user, simAccess: user.simAccess.filter((simId) => simId !== input.value) } };
+  }
+  throw new Error(`Tanınmayan toplu işlem: ${String(input.operation)}`);
+}
+
+/**
+ * Seçilen tüm kullanıcılar için işlemi planlar (E3 §d: "herhangi bir satır
+ * geçersizse işlem uygulanmaz, atomik"). Bilinmeyen `userId` tüm işlemi
+ * reddeder (`Error("not_found")`); bilinen satırlar değişmiyorsa/riskliyse
+ * `skipped`e düşer, hataya sayılmaz.
+ */
+export function planBulkEdit(
+  users: readonly AdminUserDetail[],
+  input: BulkEditInput,
+  nowMs: number,
+): { readonly updatedUsers: readonly AdminUserDetail[]; readonly result: BulkEditResult } {
+  const updatedUsers: AdminUserDetail[] = [];
+  const skipped: BulkEditRowResult[] = [];
+  for (const userId of input.userIds) {
+    const user = users.find((candidate) => candidate.id === userId);
+    if (user === undefined) throw new Error("not_found");
+    const outcome = bulkOutcomeForUser(user, input, nowMs);
+    if (outcome.reason !== undefined) skipped.push({ reason: outcome.reason, userId });
+    else updatedUsers.push(outcome.next);
+  }
+  return { result: { skipped, updated: updatedUsers.length }, updatedUsers };
+}
+
+/** Kendi admin rolünü kaldırma girişimini engeller (E3 §e.6 uyarısı: "kendi admin rolünü kaldıramaz"). */
+export type RoleChangeError = "self_admin_removal";
+
+export function guardSelfAdminRemoval(
+  current: AdminUserDetail,
+  nextRoles: readonly UserRole[],
+  actingUserId: string | null,
+): RoleChangeError | null {
+  const removesAdmin = current.roles.includes("admin") && !nextRoles.includes("admin");
+  if (actingUserId !== null && current.id === actingUserId && removesAdmin) return "self_admin_removal";
+  return null;
+}
+
+export interface UsersSummary {
+  readonly roleCounts: Readonly<Record<UserRole, number>>;
+  readonly simCounts: Readonly<Record<SimId, number>>;
+}
+
+/** Roller ve erişim ekranı (E3 §e.6) için rol/sim sayıları; saf, tam listeden hesaplanır. */
+export function computeUsersSummary(users: readonly AdminUserDetail[]): UsersSummary {
+  const roleCounts: Record<UserRole, number> = { admin: 0, kullanici: 0 };
+  const simCounts: Record<SimId, number> = { ausculta: 0, opaca: 0, pulse: 0 };
+  for (const user of users) {
+    roleCounts[user.role] += 1;
+    for (const simId of user.simAccess) simCounts[simId] += 1;
+  }
+  return { roleCounts, simCounts };
+}
+
 /** E3 §d: liste yanıtı `{ data, meta }`; API bağlanana dek bu sözleşmeyi taşır. */
 export interface UsersDataSource {
   list(query: UsersListQuery): Promise<UsersListResult>;
@@ -153,6 +310,18 @@ export interface UsersDataSource {
   create(input: CreateUserInput): Promise<AdminUserDetail>;
   /** Kayıt yoksa `Error("not_found")` ile reddeder (404). */
   update(id: string, patch: UpdateUserInput): Promise<AdminUserDetail>;
+  /** `POST /admin/users/bulk?dryRun=true`; hiçbir kaydı değiştirmez, yalnız etkiyi hesaplar. */
+  bulkPreview(input: BulkEditInput): Promise<BulkEditResult>;
+  /** `POST /admin/users/bulk`; atomik uygular (bkz. `planBulkEdit`). */
+  bulkApply(input: BulkEditInput): Promise<BulkEditResult>;
+  /**
+   * `PUT /admin/users/:id/roles` (T73, E3 §b/§e.6): admin rolünü elle ver/kaldır.
+   * `actingUserId` geçerli oturumun kimliğidir; kendi admin rolünü kaldırma
+   * girişimi `Error("self_admin_removal")` ile reddedilir.
+   */
+  setRoles(id: string, roles: readonly UserRole[], actingUserId?: string | null): Promise<AdminUserDetail>;
+  /** Roller ve erişim ekranı özet sayıları (E3 §e.6). */
+  summary(): Promise<UsersSummary>;
 }
 
 export const DEFAULT_PAGE_SIZE = 20;
@@ -238,8 +407,8 @@ export function applyUsersQuery(users: readonly AdminUser[], query: UsersListQue
   };
 }
 
-/** mulberry32: bağımlılıksız, deterministik 32 bit PRNG. */
-function mulberry32(seed: number): () => number {
+/** mulberry32: bağımlılıksız, deterministik 32 bit PRNG; `auditDataSource.ts` da bunu paylaşır. */
+export function mulberry32(seed: number): () => number {
   let state = seed >>> 0;
   return function next(): number {
     state = (state + 0x6d2b79f5) | 0;
@@ -396,7 +565,30 @@ export function createMockUsersSource(
       : users.some((user) => (user.email ?? "").toLowerCase() === value);
   }
 
+  function runBulk(input: BulkEditInput, apply: boolean): Promise<BulkEditResult> {
+    const validationError = validateBulkInput(input);
+    if (validationError !== null) return Promise.reject(new Error(validationError));
+    try {
+      const { result, updatedUsers } = planBulkEdit(users, input, now());
+      if (apply) {
+        for (const updated of updatedUsers) {
+          const index = users.findIndex((candidate) => candidate.id === updated.id);
+          if (index !== -1) users[index] = updated;
+        }
+      }
+      return Promise.resolve(result);
+    } catch (error) {
+      return Promise.reject(error instanceof Error ? error : new Error("internal_error"));
+    }
+  }
+
   return {
+    bulkApply(input: BulkEditInput): Promise<BulkEditResult> {
+      return runBulk(input, true);
+    },
+    bulkPreview(input: BulkEditInput): Promise<BulkEditResult> {
+      return runBulk(input, false);
+    },
     create(input: CreateUserInput): Promise<AdminUserDetail> {
       const value = input.mappingKeyType === "email" ? input.mappingKeyValue.trim().toLowerCase() : input.mappingKeyValue.trim();
       if (isDuplicateMappingKey(input.mappingKeyType, value)) {
@@ -412,6 +604,24 @@ export function createMockUsersSource(
     },
     list(query: UsersListQuery): Promise<UsersListResult> {
       return Promise.resolve(applyUsersQuery(users, query));
+    },
+    setRoles(id: string, roles: readonly UserRole[], actingUserId: string | null = null): Promise<AdminUserDetail> {
+      const index = users.findIndex((user) => user.id === id);
+      const current = users[index];
+      if (index === -1 || current === undefined) return Promise.reject(new Error("not_found"));
+      const guard = guardSelfAdminRemoval(current, roles, actingUserId);
+      if (guard !== null) return Promise.reject(new Error(guard));
+      const grantedAdmin = roles.includes("admin") && !current.roles.includes("admin");
+      const revokedAdmin = !roles.includes("admin") && current.roles.includes("admin");
+      const action: UserHistoryAction | null = grantedAdmin ? "role.grant" : revokedAdmin ? "role.revoke" : null;
+      const history =
+        action === null ? current.history : [...current.history, historyEntry(id, current.history.length + 1, toIso(now()), action)];
+      const updated: AdminUserDetail = { ...current, history, role: roles.includes("admin") ? "admin" : "kullanici", roles };
+      users[index] = updated;
+      return Promise.resolve(updated);
+    },
+    summary(): Promise<UsersSummary> {
+      return Promise.resolve(computeUsersSummary(users));
     },
     update(id: string, patch: UpdateUserInput): Promise<AdminUserDetail> {
       const index = users.findIndex((user) => user.id === id);

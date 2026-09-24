@@ -83,6 +83,7 @@ const DETAIL_ACTIVE: AdminUserDetail = {
 function baseDetailViewProps(overrides: Partial<UserDetailViewProps>): UserDetailViewProps {
   return {
     actionError: false,
+    currentUserId: null,
     deleteConfirmText: "",
     detail: DETAIL_ACTIVE,
     onCancelAction: noop,

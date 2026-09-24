@@ -1,12 +1,22 @@
 import type { JSX } from "react";
 import { Badge, Card } from "@egemed/ui";
 import { t, type TrKey } from "@egemed/ui/i18n";
-import { adminImportHref, adminUsersHref } from "./routes";
+import { adminAuditHref, adminImportHref, adminRolesHref, adminUsersHref } from "./routes";
 
-/** Yönetici paneli bölümleri; "Kullanıcılar" T69a'da, "Toplu içe aktarma" T71'de bağlanır, diğerleri "Yakında" kalır. */
+/**
+ * Yönetici paneli bölümleri; "Kullanıcılar" T69a'da, "Toplu içe aktarma"
+ * T71'de, "Roller ve erişim" + "Denetim günlüğü" T73'te bağlanır; kalanı
+ * "Yakında" kalır.
+ */
 const ADMIN_SECTIONS: readonly { titleKey: TrKey; descKey: TrKey; href?: `#${string}`; openKey?: TrKey }[] = [
   { descKey: "admin.section.overview.desc", titleKey: "admin.section.overview" },
   { descKey: "admin.section.users.desc", href: adminUsersHref(), titleKey: "admin.section.users" },
+  {
+    descKey: "admin.section.rolesAccess.desc",
+    href: adminRolesHref(),
+    openKey: "admin.roles.open",
+    titleKey: "admin.section.rolesAccess",
+  },
   {
     descKey: "admin.section.roles.desc",
     href: adminImportHref(),
@@ -15,7 +25,12 @@ const ADMIN_SECTIONS: readonly { titleKey: TrKey; descKey: TrKey; href?: `#${str
   },
   { descKey: "admin.section.sims.desc", titleKey: "admin.section.sims" },
   { descKey: "admin.section.integrations.desc", titleKey: "admin.section.integrations" },
-  { descKey: "admin.section.audit.desc", titleKey: "admin.section.audit" },
+  {
+    descKey: "admin.section.audit.desc",
+    href: adminAuditHref(),
+    openKey: "admin.audit.open",
+    titleKey: "admin.section.audit",
+  },
 ];
 
 /** Yönetici alanı: altı bölüm kartı; "Kullanıcılar" listeye bağlanır, kalanı "Yakında" rozetli. */
