@@ -235,7 +235,7 @@ Kurallar:
 | Kapı | Bağlı dilimler | Etki |
 |---|---|---|
 | **K-P1** paket yerleşimi | **S0a** (zorunlu) | **Karar (23 Eyl 2026): `packages/sim-ausculta`**; `sims/*` arşiv/boş kalır. Workspace/tsconfig sözleşmesi ve hedef yollar bu karara göre kurulur |
-| **K-P2** SCORM | S8b, S8d, S15c, S16a, S19a | Seam mi kaldırma mı; SCORM test sayısı bu kararla netleşir |
+| **K-P2** SCORM | S8b, S8d, S15c, S16a, S19a | **Karar (port, ADR-006):** LMS/CMI adaptörü yok; bellek seam. S19a sayımı: 13 SCORM testinden 7 uyarlandı, 6 emekli (§13) |
 | **K-P3** localStorage | S8c | `bestScore` kaldırma/oturum-içi; `landingSound`/`fsPromptDone` kabuk ya da çıkarma |
 | **K-P4** varlık sunumu | S3b, S18b | 31 MB / 249 wav kökü |
 | **K-P5** i18n kapsamı | S13a, S13b, S14, S15b, S16a, S16b | Gömülü metinlerin `packages/ui/i18n/tr.ts`'e taşınması |
@@ -340,9 +340,9 @@ S3a: `src/data` 8 JSON / 1.173.260 B (`fixture.json` hariç). S3b: `public/brand
 
 | # | Dilim | Kaynak (satır) | Hedef dosyalar | ~diff | Bağımlılık | Kabul testi |
 |---|---|---|---|---|---|---|
-| S19a | SCORM testleri uyarlama/emeklilik | `tests/core.test.ts:31-85,581-719` | `tests/sim-ausculta/runtime*.test.ts` | ~200 | **K-P2**, S8d | Korunacak/uyarlanacak/emekliye ayrılacak sayı K-P2'de kesinleşir |
-| S19b | 114 test mutabakatı | `tests/core.test.ts` 114 test | `tests/sim-ausculta/*` | ~80 | S0d…S19a | `pnpm turbo test`; §10 eşlemesiyle port/uyarlama/emeklilik sayımı karşılaştırılır |
-| S20 | Lint kapsamı kapanışı | — | `eslint.config.js` (`sims/**` ignore kaldırma) | ~10 | S19b, S5, S7, S8d, S13a, S13b, S14, S15c, S16a | `pnpm lint` sims dahil; kalan `Date.now()` sıfır |
+| S19a | SCORM testleri uyarlama/emeklilik | `tests/core.test.ts:31-85,581-719` | `tests/sim-ausculta/runtime-flush.test.ts` | ~200 | **K-P2**, S8d | **Sonuç:** 13 test → 7 uyarlama, 6 emekli, 0 aynen (§13) |
+| S19b | 114 test mutabakatı | `tests/core.test.ts` 114 test | `tests/sim-ausculta/*` | ~80 | S0d…S19a | **Sonuç:** 101 port + 7 uyarlama + 6 emekli = 114 (§13) |
+| S20 | Lint kapsamı kapanışı | — | `packages/sim-ausculta` (canlı kod); `sims/**` boş arşiv | ~10 | S19b, S5, S7, S8d, S13a, S13b, S14, S15c, S16a | **Sonuç:** `Date.now()` çağrısı 0; `sims/**` kullanılmıyor (§13) |
 | S21 | Oyunlaştırma (Opaca sonrası, `packages/gamification-core` tüketicisi) | — (yeni) | `packages/sim-ausculta/src/gami/*`; çekirdek `packages/gamification-core`'dan | ≤~400 (bölünür) | **Opaca portu + `packages/gamification-core` merge**, S18a | yeni `gami.test.ts`; sime özgü rozet kataloğu/hedefler; `GAMI_ENABLED=false` iken arayüzde gami öğesi yok |
 
 ## 10. Kabul testi matrisi (kaynak test → dilim eşlemesi)
@@ -407,9 +407,8 @@ dosya sayısı ve boyutu; `sims/*` yer tutucuları; family-tokens'ta Ausculta pa
 
 1. **K-P1 Paket yerleşimi — Karar (23 Eyl 2026):** `packages/sim-ausculta`; `sims/*` arşiv/boş kalır.
    Karar S0a'yı ve `tests/config/tsconfig.test.ts` genişletmesini belirler; S0a bu karara göre başlar.
-2. **K-P2 SCORM:** adaptör tamamen kaldırılsın mı? Kaldırılırsa 31-85 ve 581-719 gruplarından
-   hangileri emekliye ayrılır, hangileri runtime seam'ine uyarlanır? Karar S8b/S8d/S15c/S16a/S19a'yı
-   açar; korunacak/uyarlanacak/emekliye ayrılacak test sayısı S19a'da kesinleşir.
+2. **K-P2 SCORM — Karar (port, ADR-006; sayım T17b-S19):** LMS/CMI adaptörü kalkar; suspend ve
+   oturum seam'i `RuntimeAdapter` üzerindedir. 31-85 ve 581-719: 7 uyarlama, 6 emekli (§13).
 3. **K-P3 localStorage:** `bestScore` kaldırılsın mı, oturum-içi mi tutulsun? `landingSound`/
    `fsPromptDone` kabuğa mı taşınsın, simden mi çıkarılsın? Karar S8c'yi açar.
 4. **K-P4 Varlık sunumu:** 31 MB/249 wav için shell `public` kopyası mı, sim paketi `public` mi,
@@ -417,3 +416,63 @@ dosya sayısı ve boyutu; `sims/*` yer tutucuları; family-tokens'ta Ausculta pa
 5. **K-P5 i18n kapsamı:** gömülü Türkçe metinler (ör. `StartScreen.tsx:70-101`, `chrome.tsx:124-131`)
    hangi dilimde `packages/ui/i18n/tr.ts`'e taşınır? Öneri: S13a/S13b/S14/S15b/S16a/S16b ekran
    dilimleriyle birlikte.
+
+## 13. Test mutabakatı (T17b-S19, 24 Eyl 2026)
+
+Kaynak `tests/core.test.ts` @ `3d60ef7`: **114** `it`. Sayım: port (aynı iddia, gerçek JSON veya
+satır içi saf girdi) + uyarlama (CMI yüzeyi kalkmış seam) + emeklilik = 114. Yeni düşük sinyalli
+test eklenmedi. S1a/S2a (`scoring.test.ts`, `validation.test.ts`) `CORE_CASES` /
+`poolFor("assessment")` ile `cases.json` üzerindedir; sentetik `CaseDef` yok.
+
+### 13.1 S19a — SCORM grupları (13)
+
+K-P2: pencere taraması, `cmi.*` alan adları, 1.2/2004 ayrımı ve öğrenci kimliği taşınmaz.
+Uyarlananlar `tests/sim-ausculta/runtime-flush.test.ts` içindedir.
+
+| Kaynak `it` | Grup | Sonuç |
+|---|---|---|
+| mock adapter temel CRUD | 31-85 | uyarlama — bellek adaptörü yazım/flush |
+| LMS yoksa standalone fallback (`detectScorm`) | 31-85 | emekli — `parent`/`opener` taraması yok |
+| 2004 Initialize/SetValue/GetValue sırası | 31-85 | emekli — CMI API yok |
+| 1.2 `success_status` → `lesson_status` | 31-85 | emekli — sürüm eşlemesi yok |
+| 2004 `"incorrect"` + `PT4S` | 581-719 | uyarlama — `correct: false`, `latencySec: 4` |
+| 1.2 `"wrong"`, latency yazılmaz | 581-719 | emekli — tek kayıt biçimi |
+| O2 type/id/ayırıcı | 581-719 | uyarlama — `choice`, vaka kimliği, `response: string[]` |
+| O2(d) `_count` | 581-719 | uyarlama — önceki kayıtlara ekleme |
+| O1 `completion_status` ezmeme | 581-719 | emekli — CMI durum yazımı yok |
+| O1 `Scorm12Adapter` `lesson_status` | 581-719 | emekli — 1.2 adaptörü yok |
+| O3 `cmi.exit` | 581-719 | uyarlama — `completed` bayrağı |
+| D12 terminate sonrası no-op | 581-719 | uyarlama |
+| beforeunload `suspend_data` | 581-719 | uyarlama — `flushNow` + konum |
+
+**7 uyarlama, 6 emekli, 0 aynen.** `runtime-flush.test.ts` içindeki `init` geri yükleme ve no-op
+testleri S8d seam ekidir; 114 sayımına girmez.
+
+### 13.2 S19b — §10 grupları
+
+| Kaynak grup | `it` | Hedef | Sonuç |
+|---|---:|---|---|
+| 31-85 | 4 | `runtime-flush.test.ts` | 1 uyarlama, 3 emekli |
+| 87-146 | 3 | `suspend.test.ts` | 3 port |
+| 148-234 | 7 | `reducer.test.ts` | 7 port |
+| 236-315 | 8 | `scoring.test.ts` | 8 port (S1a, `cases.json`) |
+| 317-366 | 5 | `validation.test.ts` | 5 port (S2a, `cases.json`) |
+| 368-415 | 8 | `data-sync.test.ts` | 8 port |
+| 417-477 | 10 | `session.test.ts` | 10 port |
+| 478-506 | 2 | `session.test.ts` | 2 port |
+| 507-580 | 5 | `data-sync.test.ts` | 5 port |
+| 581-719 | 9 | `runtime-flush.test.ts` | 6 uyarlama, 3 emekli |
+| 721-758 | 2 | `suspend.test.ts` | 2 port |
+| 760-828 | 9 | `metrics.test.ts` | 9 port |
+| 829-921 | 14 | `resolver.test.ts` | 14 port |
+| 922-1043 | 20 | `flow.test.ts` | 20 port |
+| 1045-1076 | 5 | `flow.test.ts` | 5 port |
+| 1077-1091 | 3 | `terminology.test.ts` | 3 port |
+| **Toplam** | **114** | | **101 port + 7 uyarlama + 6 emekli** |
+
+### 13.3 S20 — `Date.now` ve `sims/**`
+
+`packages/sim-ausculta` altında `Date.now()` çağrısı **0** (yorumlar hariç). Canlı kod
+`packages/sim-ausculta` içindedir ve kök ESLint kuralı bu yolu kapsar. `sims/ausculta`,
+`sims/opaca`, `sims/pulse` boştur (K-P1 arşiv). `eslint.config.js` bu dilimde değiştirilmedi;
+`sims/**` yok sayması boş arşiv yolu içindir.
