@@ -78,6 +78,7 @@ describe("tsconfig sözleşmesi", () => {
       "packages/gamification-core/tsconfig.json",
       "packages/sim-host/tsconfig.json",
       "packages/sim-opaca/tsconfig.json",
+      "packages/sim-pulse/tsconfig.json",
       "packages/ui/tsconfig.json",
       "packages/xapi-profile/tsconfig.json",
     ]);
