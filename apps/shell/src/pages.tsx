@@ -2,7 +2,7 @@ import type { JSX, ReactNode } from "react";
 import { Tabs } from "@egemed/ui";
 import { t, type TrKey } from "@egemed/ui/i18n";
 import type { DevSession } from "./devAuth";
-import { routeHref, type RouteId } from "./routes";
+import { routeHref, simHref, type RouteId } from "./routes";
 import { SIM_IDS, SimCard } from "./SimCard";
 
 const TRUST_KEYS = ["data", "faculty", "privacy"] as const;
@@ -80,7 +80,7 @@ export function HomePage({ session = null }: HomePageProps): JSX.Element {
         <ul className="eg-shell-cards">
           {SIM_IDS.map((id) => (
             <li key={id}>
-              <SimCard href={routeHref("simulators")} id={id} />
+              <SimCard href={simHref(id)} id={id} />
             </li>
           ))}
         </ul>
@@ -141,7 +141,7 @@ export function SimulatorsPage(): JSX.Element {
       <ul className="eg-shell-cards">
         {SIM_IDS.map((id) => (
           <li key={id}>
-            <SimCard headingLevel={2} id={id} size="large" />
+            <SimCard headingLevel={2} href={simHref(id)} id={id} size="large" />
           </li>
         ))}
       </ul>

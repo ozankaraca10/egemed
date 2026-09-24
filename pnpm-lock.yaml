@@ -43,6 +43,9 @@ importers:
 
   apps/shell:
     dependencies:
+      '@egemed/sim-host':
+        specifier: workspace:*
+        version: link:../../packages/sim-host
       '@egemed/tokens':
         specifier: workspace:*
         version: link:../../packages/tokens

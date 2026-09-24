@@ -1,3 +1,4 @@
+import { isSimulatorId, type SimulatorId } from "@egemed/sim-host";
 import type { TrKey } from "@egemed/ui/i18n";
 
 /** Kabukta tanımlı sayfa kimlikleri. */
@@ -12,11 +13,12 @@ export interface RouteDef {
   titleKey: TrKey;
 }
 
-/** Hash çözümlemesi: tanımlı sayfa, giriş, yönetici paneli ya da bulunamadı. */
+/** Hash çözümlemesi: tanımlı sayfa, giriş, yönetici paneli, sim ya da bulunamadı. */
 export type ResolvedRoute =
   | { kind: "page"; route: RouteDef }
   | { kind: "entry"; role: EntryRole; titleKey: TrKey }
   | { kind: "admin"; titleKey: TrKey }
+  | { kind: "sim"; simId: SimulatorId; titleKey: TrKey }
   | { kind: "notFound"; path: string };
 
 export const ENTRY_PATHS: Record<EntryRole, `/giris/${string}`> = {
@@ -34,12 +36,35 @@ export const ROUTES: readonly RouteDef[] = [
   { id: "notebook", path: "/not-defteri", labelKey: "shell.nav.notebook", titleKey: "shell.notebook.title" },
 ];
 
-/** Simülatör yolları yalnız gösterim içindir; `sims/*` içe aktarılmaz, iframe kurulmaz (ADR-003). */
-export const SIM_PATHS: Record<"pulse" | "ausculta" | "opaca", `/sims/${string}/`> = {
-  pulse: "/sims/pulse/",
-  ausculta: "/sims/ausculta/",
-  opaca: "/sims/opaca/",
+/**
+ * Simülatör rotaları: kimlik başına hash yolu. `sims/*` paketleri burada içe
+ * aktarılmaz, iframe kurulmaz (ADR-003/ADR-006); kart bağlantıları bu yolları
+ * kullanır. Ana gezinmeye (`ROUTES`) eklenmez.
+ */
+export const SIM_PATHS: Record<SimulatorId, `/sims/${SimulatorId}`> = {
+  pulse: "/sims/pulse",
+  ausculta: "/sims/ausculta",
+  opaca: "/sims/opaca",
 };
+
+const SIM_PREFIX = "/sims/";
+
+/** Yolun sim kimliğini döndürür; tanınmayan `#/sims/*` yolu için null (→ bulunamadı). */
+function simIdForPath(path: string): SimulatorId | null {
+  if (!path.startsWith(SIM_PREFIX)) return null;
+  const candidate = path.slice(SIM_PREFIX.length);
+  return isSimulatorId(candidate) ? candidate : null;
+}
+
+/** Sim sayfası başlığı; tek `h1` bu sözlük anahtarından çizilir. */
+export function simTitleKey(simId: SimulatorId): TrKey {
+  return `sims.${simId}.name`;
+}
+
+/** Sim rotası bağlantısı; kartlardaki "Simülatörü aç" buraya gider. */
+export function simHref(simId: SimulatorId): `#${string}` {
+  return `#${SIM_PATHS[simId]}`;
+}
 
 function toPath(hash: string): string {
   const raw = hash.startsWith("#") ? hash.slice(1) : hash;
@@ -53,6 +78,8 @@ export function resolveRoute(hash: string): ResolvedRoute {
   if (path === ADMIN_PATH) return { kind: "admin", titleKey: "admin.title" };
   if (path === ENTRY_PATHS.admin) return { kind: "entry", role: "admin", titleKey: "entry.admin.title" };
   if (path === ENTRY_PATHS.student) return { kind: "entry", role: "student", titleKey: "entry.student.title" };
+  const simId = simIdForPath(path);
+  if (simId !== null) return { kind: "sim", simId, titleKey: simTitleKey(simId) };
   const route = ROUTES.find((candidate) => candidate.path === path);
   return route === undefined ? { kind: "notFound", path } : { kind: "page", route };
 }

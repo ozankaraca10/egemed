@@ -1,4 +1,4 @@
-import { useEffect, useRef, type JSX } from "react";
+import { useEffect, useRef, type JSX, type ReactNode } from "react";
 import { t, type TrKey } from "@egemed/ui/i18n";
 import { AdminPage } from "./AdminPage";
 import { createSessionStore, sessionWhenEnabled, type DevSession } from "./devAuth";
@@ -6,6 +6,7 @@ import { EntryPage } from "./EntryPage";
 import { NotFoundPage, pageFor } from "./pages";
 import { adminGuardHref, entryHref, type ResolvedRoute } from "./routes";
 import { ShellLayout } from "./ShellLayout";
+import { SimRoute } from "./SimRoute";
 import { useHashRoute } from "./useHashRoute";
 
 /**
@@ -22,6 +23,14 @@ function titleKeyFor(route: ResolvedRoute): TrKey {
   if (route.kind === "page") return route.route.titleKey;
   if (route.kind === "notFound") return "shell.notFound.title";
   return route.titleKey;
+}
+
+/** Rota içeriğini seçer; üst bar (`ShellLayout`) tüm iç sayfalarda ortaktır. */
+function contentFor(route: ResolvedRoute, session: DevSession | null): ReactNode {
+  if (route.kind === "page") return pageFor(route.route.id, session);
+  if (route.kind === "admin") return <AdminPage />;
+  if (route.kind === "sim") return <SimRoute simId={route.simId} />;
+  return <NotFoundPage />;
 }
 
 /**
@@ -62,11 +71,7 @@ export function App(): JSX.Element | null {
   if (route.kind === "admin" && guardHref !== null) return null;
   return (
     <ShellLayout onLogout={logout} route={route} session={session}>
-      {route.kind === "page"
-        ? pageFor(route.route.id, session)
-        : route.kind === "admin"
-          ? <AdminPage />
-          : <NotFoundPage />}
+      {contentFor(route, session)}
     </ShellLayout>
   );
 }
