@@ -58,30 +58,40 @@ export const tr = {
   "shell.session.banner": "Geliştirme oturumu: gerçek kimlik doğrulama yok, veri kaydedilmez.",
   "admin.title": "Yönetici paneli",
   "admin.intro":
-    "Yönetici alanı taslağı. Bölümler kimlik ve yetki kararlarından (K1, K4) sonra açılacak.",
+    "Kullanıcıları, simülatör erişimini ve denetim kayıtlarını buradan yöneteceksiniz. Bölümler kullanıcı yönetimi altyapısıyla birlikte açılacak.",
   "admin.soon": "Yakında",
   "admin.section.overview": "Özet",
   "admin.section.users": "Kullanıcılar",
-  "admin.section.roles": "Roller ve erişim",
-  "admin.section.sims": "Simülatörler ve içerik",
+  "admin.section.roles": "Toplu içe aktarma",
+  "admin.section.sims": "Simülatör erişimi",
   "admin.section.integrations": "Entegrasyonlar",
-  "admin.section.audit": "Denetim ve ayarlar",
+  "admin.section.audit": "Denetim günlüğü",
   "admin.section.overview.desc":
-    "Kurum ve simülatör erişilebilirliği, son entegrasyon hataları, bekleyen yönetim işleri; bireysel öğrenci puanı yok.",
+    "Kullanıcı sayıları, son girişler ve bekleyen işler; bireysel öğrenci puanı gösterilmez.",
   "admin.section.users.desc":
-    "Kurum dizininden gelen kullanıcıları arama, rol ve kapsam görüntüleme; seçilen kimlik modeline göre davet ve etkinleştirme.",
+    "Kullanıcı ekleme, düzenleme, askıya alma; giriş tipi (SSO) seçimi.",
   "admin.section.roles.desc":
-    "Rol matrisi, simülatör bazlı erişim, birim kapsamı, yetki değişikliği onayı.",
-  "admin.section.sims.desc": "Modül durumu, sürüm, görünürlük, içerik ataması.",
+    "CSV şablonuyla toplu kullanıcı ekleme ve güncelleme; satır bazlı doğrulama raporu.",
+  "admin.section.sims.desc":
+    "Kullanıcı ve grup bazında Pulse, Ausculta ve Opaca erişimi.",
   "admin.section.integrations.desc":
-    "Moodle/LTI ve LRS bağlantı sağlığı, anahtarların yalnız durumu; sır değeri ekranda gösterilmez.",
-  "admin.section.audit.desc":
-    "Yönetici eylemleri, kurum ayarları, saklama ve erişim politikası.",
+    "SSO ve LRS bağlantı durumu; sır değerleri ekranda gösterilmez.",
+  "admin.section.audit.desc": "Yönetici eylemlerinin değiştirilemez kaydı.",
   "home.hero.title": "Klinik becerileri gerçek verilerle, tek platformda geliştirin.",
   "home.hero.lead":
     "EKG, oskültasyon ve radyolojik görüntüleme simülatörleri; sistematik okuma, uygulama ve değerlendirme modları.",
   "home.hero.cta": "Simülatörlere git",
   "home.hero.secondary": "Nasıl çalışır?",
+  "home.how.title": "Nasıl çalışır?",
+  "home.how.learn.title": "İnceleme",
+  "home.how.learn.body":
+    "Konuyu sistematik okuma rehberiyle, gerçek örnekler üzerinde keşfedin.",
+  "home.how.practice.title": "Uygulama",
+  "home.how.practice.body":
+    "Vakalarda bulguları kendiniz işaretleyin; her adımda anında geri bildirim alın.",
+  "home.how.assess.title": "Değerlendirme",
+  "home.how.assess.body":
+    "Rastgele vaka setiyle kendinizi sınayın; alan bazlı performansınızı görün.",
   "home.greeting": "Hoş geldiniz",
   "home.progress.title": "İlerlemem",
   "home.progress.empty":
@@ -107,6 +117,7 @@ export const tr = {
   "sims.opaca.body": "Akciğer grafisi ve toraks BT'yi sistematik okumayı öğrenin.",
   "sims.open": "Simülatörü aç",
   "sims.soon": "Platforma taşınıyor",
+  "footer.nav.label": "Alt bilgi",
   "footer.institution": "Ege Üniversitesi Tıp Fakültesi",
   "footer.rights": "EGEMED CLIX · Eğitim amaçlıdır, tanı aracı değildir.",
 } as const;
