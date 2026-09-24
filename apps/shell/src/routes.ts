@@ -19,6 +19,8 @@ export type ResolvedRoute =
   | { kind: "entry"; role: EntryRole; titleKey: TrKey }
   | { kind: "admin"; titleKey: TrKey }
   | { kind: "adminUsers"; titleKey: TrKey }
+  | { kind: "adminUserCreate"; titleKey: TrKey }
+  | { kind: "adminUserDetail"; userId: string; titleKey: TrKey }
   | { kind: "sim"; simId: SimulatorId; titleKey: TrKey }
   | { kind: "notFound"; path: string };
 
@@ -32,6 +34,9 @@ export const ADMIN_PATH = "/admin" as const;
 
 /** Kullanıcılar listesi yolu (T69a, E3 §e.1); admin paneliyle aynı korumayı paylaşır. */
 export const ADMIN_USERS_PATH = "/admin/kullanicilar" as const;
+
+/** Kullanıcı ekle alt yolu segmenti (T70, E3 §e.2): `#/admin/kullanicilar/yeni`. */
+export const ADMIN_USER_CREATE_SEGMENT = "yeni" as const;
 
 export const ROUTES: readonly RouteDef[] = [
   { id: "home", path: "/", labelKey: "shell.nav.home", titleKey: "shell.home.title" },
@@ -80,6 +85,15 @@ function toPath(hash: string): string {
 export function resolveRoute(hash: string): ResolvedRoute {
   const path = toPath(hash);
   if (path === ADMIN_USERS_PATH) return { kind: "adminUsers", titleKey: "admin.users.title" };
+  if (path === `${ADMIN_USERS_PATH}/${ADMIN_USER_CREATE_SEGMENT}`) {
+    return { kind: "adminUserCreate", titleKey: "admin.users.form.title" };
+  }
+  if (path.startsWith(`${ADMIN_USERS_PATH}/`)) {
+    const userId = path.slice(ADMIN_USERS_PATH.length + 1);
+    if (userId.length > 0 && !userId.includes("/")) {
+      return { kind: "adminUserDetail", titleKey: "admin.users.detail.routeTitle", userId };
+    }
+  }
   if (path === ADMIN_PATH) return { kind: "admin", titleKey: "admin.title" };
   if (path === ENTRY_PATHS.admin) return { kind: "entry", role: "admin", titleKey: "entry.admin.title" };
   if (path === ENTRY_PATHS.student) return { kind: "entry", role: "student", titleKey: "entry.student.title" };
@@ -119,14 +133,24 @@ export function adminUsersHref(): `#${string}` {
   return `#${ADMIN_USERS_PATH}`;
 }
 
-/** Kullanıcı ayrıntısı yer tutucu rotası (T70'te uygulanır); şimdilik bulunamadıya düşer. */
+/** Kullanıcı ayrıntısı/düzenle bağlantısı (T70, E3 §e.3): `#/admin/kullanicilar/:id`. */
 export function adminUserDetailHref(userId: string): `#${string}` {
   return `#${ADMIN_USERS_PATH}/${userId}`;
 }
 
-/** Admin oturumu koruması yalnız yönetici rotalarında (panel + kullanıcılar) uygulanır. */
+/** Kullanıcı ekle bağlantısı (T70, E3 §e.2): `#/admin/kullanicilar/yeni`. */
+export function adminUserCreateHref(): `#${string}` {
+  return `#${ADMIN_USERS_PATH}/${ADMIN_USER_CREATE_SEGMENT}`;
+}
+
+/** Admin oturumu koruması yalnız yönetici rotalarında (panel + kullanıcılar + ekle/ayrıntı) uygulanır. */
 export function isAdminProtected(route: ResolvedRoute): boolean {
-  return route.kind === "admin" || route.kind === "adminUsers";
+  return (
+    route.kind === "admin" ||
+    route.kind === "adminUsers" ||
+    route.kind === "adminUserCreate" ||
+    route.kind === "adminUserDetail"
+  );
 }
 
 /** Sahte giriş sonrası hedef: yönetici panele, test öğrencisi ana sayfaya gider. */
