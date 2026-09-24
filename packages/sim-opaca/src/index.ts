@@ -52,6 +52,17 @@ export type {
   HeaderProps,
   HelpModalSeamProps,
 } from "./ui/chrome";
+export { ConfirmModal } from "./ui/ConfirmModal";
+export type { ConfirmModalProps } from "./ui/ConfirmModal";
+export { HelpModal } from "./ui/HelpModal";
+export type { HelpModalProps } from "./ui/HelpModal";
+export { NOOP_MODAL_ENV, createNoopModalEnv, tabTrapTarget } from "./ui/modal-env";
+export type { ModalEnv, ModalFocusable, ModalKeyEvent, TabTrapTarget } from "./ui/modal-env";
+export { FeedbackCard, QuestionCard } from "./ui/Questions";
+export type { FeedbackCardProps, QuestionCardProps } from "./ui/Questions";
+export { TUTORIAL_STEPS, TutorialSteps } from "./ui/TutorialSteps";
+export { ZoneChips } from "./ui/ZoneChips";
+export type { ZoneChipsProps } from "./ui/ZoneChips";
 export {
   IconArrowRight,
   IconArrowUp,
@@ -112,6 +123,7 @@ export {
   IconVolume,
   IconVolumeX,
   IconWave,
+  IconXCircle,
 } from "./ui/icons";
 export { createMemoryRuntimeAdapter, createNoopRuntimeAdapter, createSimRuntime } from "./core/runtime";
 export type {
