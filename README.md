@@ -34,11 +34,11 @@ yönetici `#/giris/admin` → `admin` / `egemed`; test öğrencisi `#/giris/test
 | Yol | Ne | Not |
 |---|---|---|
 | `apps/shell` | React 19 + Vite 8 **web kabuğu**: üst bar/alt sekme, hash yönlendirici, ana sayfa (dashboard), simülatörler sayfası, giriş ekranları, `/admin` taslağı, sim rotaları (`#/sims/<id>`) | Metinler `packages/ui/i18n/tr.ts`'ten; renkler `packages/tokens` |
-| `apps/api` | Sunucu (Hono, ADR-002): PostgreSQL migration'ları (`migrations/`; append-only denetim tetikleyicisi), oturum/CSRF, admin uçları (`/admin/users`, toplu işlem, CSV içe aktarma, rol, `/admin/audit`), `/me/gamification`, tohumlama, SSO adaptör iskeleti | E3 dilimleri T60–T76 |
+| `apps/api` | Hono + PostgreSQL API (ADR-002): migration'lar (`migrations/`; append-only denetim tetikleyicisi), oturum/CSRF, admin uçları (`/admin/users`, toplu işlem, CSV içe aktarma, rol, `/admin/audit`), `/me/gamification`, `migrate:up` ve `seed:admin`; SSO adaptör iskeleti | SSO protokolü kararı bekliyor |
 | `packages/sim-host` | **SimHost sözleşmesi**: `mount(target, context) → dispose`, lazy yükleme, epoch iptali, tek etkin oturum | Tüm simler bu sözleşmeyle bağlanır |
-| `packages/sim-opaca` | Opaca modülü (portlanıyor): çekirdek (tipler, geometri, skor, akış, oturum, suspend, reducer, runtime), veri JSON + BT/marka varlıkları, UI (chrome, sorular, modaller, film çekirdeği/bilgi paneli) | Röntgen `public/assets/xray/runtime/` **git dışı** (lisans incelemesi) |
-| `packages/sim-pulse` | Pulse modülü (portlanıyor): EKG motoru (`engine/shapes`, `beats`, `model`) | Kaynak düz JS/yoğun satır; biçimlendirilerek taşınır |
-| `packages/sim-ausculta` | Ausculta modülü (portlanıyor): çekirdek tipler, suspend, puanlama… | Ses motoru sonraki dilimlerde |
+| `packages/sim-opaca` | Opaca modülü: çekirdek, veri, UI ve SimHost adaptörü | Kabukta canlı; röntgen `public/assets/xray/runtime/` git dışı, `sync:xray` ile yerel kaynaktan alınır |
+| `packages/sim-pulse` | Pulse modülü: EKG motoru, durum, müfredat, ekranlar ve SimHost adaptörü | Kabukta canlı |
+| `packages/sim-ausculta` | Ausculta modülü: çekirdek, ses motoru, store/runtime, UI, ekranlar ve SimHost adaptörü | Adaptör hazır; ses varlıkları git dışı, `sync:audio` ile yerel kaynaktan alınır |
 | `packages/gamification-core` | **Sim-bağımsız oyunlaştırma çekirdeği**: XP, seviye, seri, haftalık hedef, zaman (Europe/Istanbul), jenerik rozet motoru, sıralama, ödül, grafik | Rozet kataloğu ve kurallar her simde ayrı (parametre) |
 | `packages/contracts` | Paylaşılan sözleşmeler (zod): kimlik, kullanıcı, CSV içe aktarma, oyunlaştırma, hata kodları | API ve UI aynı şemayı kullanır |
 | `packages/api-client` | Tipli API istemcisi: `contracts` şemalarıyla yanıt doğrulama, CSRF başlığı, oturum/admin/içe aktarma/oyunlaştırma uçları | Kabuk veri kaynakları (admin, dashboard) buradan beslenir |
@@ -47,11 +47,14 @@ yönetici `#/giris/admin` → `admin` / `egemed`; test öğrencisi `#/giris/test
 | `packages/xapi-profile` | xAPI profili v0 (fiiller, IRI, opak aktör) — **Önerildi**, insan onayı (K2) bekliyor | |
 | `packages/xapi-client` | Boş iskelet — K2/K3 sonrası T22 | |
 | `tests/` | Vitest birim/sözleşme testleri (paket başına klasör) — DOM yok; `renderToStaticMarkup` + saf fonksiyonlar | `tests/config/*` yapı sözleşmeleri |
-| `e2e/` | Playwright + axe testleri (T09) | `playwright.config.ts` dev (5199) ve prod önizleme (5198) sunucusu kurar |
-| `infra/` | `docker-compose.dev.yml` (Postgres 18.4, SQL LRS 0.9.8, digest-pinli) | Sırlar yalnız `.env.local` |
+| `e2e/` · `e2e-artifacts/` | Playwright + axe testleri ve her koşuya ait JSON özet/ekran görüntüsü çıktıları | `playwright.config.ts` dev (5199) ve prod önizleme (5198) sunucusu kurar; artefaktlar git dışıdır |
+| `infra/` · `infra/prod/` | Geliştirme Postgres/LRS compose'u; üretim API/Postgres compose'u, Dockerfile ve nginx örneği | Sırlar yalnız yerel env dosyalarında |
 | `docs/adr/` | Mimari karar kayıtları 001–007 | Durum: Önerildi / Kabul |
 | `docs/specs/` | Epik ve plan belgeleri (E0–E3) | Aşağıda §5 |
 | `docs/agentic/` | Ajan devir/kurulum notları (`CODEX-DEVIR.md`) | Tarihsel bağlam |
+| `docs/ops/` · `docs/audits/` | Üretim işletim kılavuzu ve Impeccable arayüz denetim raporları | Yayın hazırlığı ve denetim kaydı |
+| `DESIGN.md` · `PRODUCT.md` | Impeccable tasarım sistemi ve ürün bağlamı | Arayüz çalışmaları için başvuru |
+| `.claude/` · `.agents/` · `.opencode/` | Impeccable beceri tanımları ve referansları | Ajan araçlarına göre kopyalanmış |
 | `sims/` | **Eski yer tutucu** — K-P1 kararıyla simler `packages/sim-<id>` altında; burası arşiv/boş | Lint ve workspace dışı |
 | `.agtx/` | Görev worktree'leri (`.agtx/worktrees/<görev>`) ve pano verisi — **git dışı** | Lint'ten hariç |
 
@@ -139,23 +142,20 @@ uygulanması.
 
 ---
 
-## 7. Durum (24 Eylül 2026, öğleden sonra)
+## 7. Durum (24 Eylül 2026, akşam)
 
-- **Opaca:** port **tamam** ve kabukta canlı (`#/sims/opaca`): S1–S24 dilimleri, oyunlaştırma G1–G2, kapsamlı CSS; röntgen
-  görselleri git dışı yerel kopyadan sunulur.
-- **Pulse:** motor (şekil, atım, sinyal/snapshot), durum/göç, müfredat, kalıcılık, host, controller, çizim, ekranlar ve CSS
-  tamam; SimHost adaptörü (S15a) sürüyor, ardından kabuk rotası (S15b) gelecek. Müfredattaki T04 kaynak bulgusu testte
-  `it.fails` ile işaretli (insan kararı bekliyor).
-- **Ausculta:** çekirdek, veri/ses, ses motoru (singleton/iptal/sızıntı düzeltmeleri), store/runtime, UI ve ekranlar büyük
-  ölçüde tamam; Sonuç/Kaynaklar (S16), CSS (S17) ve SimHost adaptörü (S18) sırada.
-- **Platform API:** sözleşmeler, migration'lar (append-only denetim tetikleyicisi dahil), Hono iskeleti, oturum/CSRF,
-  `/admin/users` + toplu işlem + CSV içe aktarma + rol ucu, `/admin/audit`, `/me/gamification` ve tohumlama tamam; SSO adaptör
-  iskeleti hazır, protokol kararı bekliyor.
-- **Kabuk:** premium görünüm, EGEMED logosu, giriş görseli, dashboard sekmeleri, admin kullanıcı listesi/formu/içe aktarma;
-  `packages/api-client`; e2e 80 kontrolün 77'si geçiyor.
-- **Bilinenler:** Pulse `nextEvent` hatası portta düzeltildi (kaynağa uygulanması insan kararı). Opaca gömülü rotada intro
-  atlandığı için (S24) e2e'deki `.start-hero-screen` beklentisi güncel değil; üç koşu bu nedenle başarısız (test güncellemesi
-  sırada).
+- **Opaca:** port tamam ve kabukta canlı (`#/sims/opaca`); röntgen görselleri git dışı yerel kaynaktan `sync:xray` ile alınır.
+- **Pulse:** motor, durum, müfredat, ekranlar, CSS ve SimHost adaptörü tamam; kabukta canlı (`#/sims/pulse`). Müfredattaki T04
+  kaynak bulgusu testte `it.fails` olarak işaretli; insan kararı bekliyor.
+- **Ausculta:** çekirdek, ses, store/runtime, UI ve ekranlar ile SimHost adaptörü hazır. Kabuk lazy rotasına henüz bağlanmadı;
+  mevcut rota yer tutucu gösteriyor. Ses varlıkları `sync:audio` ile git-dışı yerel kaynaktan alınır.
+- **Platform API:** Hono/PostgreSQL, migration'lar, oturum/CSRF, admin kullanıcı ve denetim uçları, oyunlaştırma ve seed akışı
+  mevcut. Üretim compose/Dockerfile/nginx yapılandırması `infra/prod/`, işletim adımları `docs/ops/ISLETIM.md` içindedir;
+  yayın hazırlığı sürüyor ve SSO protokolü kararı bekliyor.
+- **Arayüz denetimi:** `docs/audits/IMPECCABLE-2026-09-24.md` raporu Audit Health 13/20, Design Health 26/40 ve P0:3, P1:8,
+  P2:7 bulgu kaydediyor; özellikle Ausculta'nın responsive düzeni, CTA ve simler arası terminoloji takip gerektiriyor.
+- **E2E:** Playwright + axe her koşuda JSON özeti ve ekran görüntülerini `e2e-artifacts/<run-id>/` altına yazar. README'deki
+  önceki 77/80 sonucu tarihsel koşuya aittir; güncel yayın kapısı olarak değerlendirilmemelidir.
 
 ## CI
 
