@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { createApp } from "../../apps/api/src/app";
+import { createMemoryAdminBulkRepo } from "../../apps/api/src/admin/bulk";
+import { createMemoryAdminImportRepo } from "../../apps/api/src/admin/imports";
+import { createMemoryAdminRoleRepo } from "../../apps/api/src/admin/roles";
 import {
   DuplicateMappingKeyError,
   createMemoryAdminStore,
@@ -182,7 +185,14 @@ function createHarness(options: { readonly users?: readonly HarnessUser[] } = {}
     db: fakeDb(),
     now: () => clock,
     auth,
-    admin: { auth, users: adminStore.users, newId },
+    admin: {
+      auth,
+      users: adminStore.users,
+      bulk: createMemoryAdminBulkRepo(adminStore),
+      roles: createMemoryAdminRoleRepo(adminStore),
+      imports: createMemoryAdminImportRepo(adminStore, newId).repo,
+      newId,
+    },
   });
   return {
     app,

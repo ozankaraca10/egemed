@@ -2,6 +2,9 @@ import { Hono } from "hono";
 import type { Context } from "hono";
 import { statusForErrorCode, type ErrorCode } from "@egemed/contracts";
 import { z } from "zod";
+import { registerAdminBulkRoutes } from "./admin/bulk";
+import { registerAdminImportRoutes } from "./admin/imports";
+import { registerAdminRoleRoutes } from "./admin/roles";
 import { registerAdminUserRoutes, type AdminDeps } from "./admin/users";
 import { registerAuthRoutes, type AuthDeps } from "./auth/routes";
 import { errorBody, validationDetails, type AppEnv } from "./http";
@@ -109,6 +112,12 @@ export function createApp(deps: AppDeps): Hono<AppEnv> {
 
   registerAuthRoutes(app, deps.auth, deps.now);
   registerAdminUserRoutes(app, deps.admin, deps.now);
+  // T66 — toplu işlem, elle rol atama ve içe aktarma; `/admin/*` ara katmanı
+  // (csrfGuard + requireAdmin) `registerAdminUserRoutes` içinde kaydedilir, bu
+  // yüzden bu rotalar ondan SONRA bağlanır.
+  registerAdminBulkRoutes(app, deps.admin, deps.now);
+  registerAdminRoleRoutes(app, deps.admin, deps.now);
+  registerAdminImportRoutes(app, deps.admin, deps.now);
 
   app.notFound((c) => c.json(errorBody("not_found"), statusForErrorCode("not_found")));
 

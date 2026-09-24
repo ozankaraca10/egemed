@@ -13,9 +13,16 @@ declare module "pg" {
     readonly connectionString?: string;
   }
 
+  /** T66 — tek transaction için havuzdan alınan istemci (dar yüzey). */
+  export interface PoolClient {
+    query(text: string, values?: readonly unknown[]): Promise<QueryResult>;
+    release(): void;
+  }
+
   export class Pool {
     constructor(config?: PoolConfig);
     query(text: string, values?: readonly unknown[]): Promise<QueryResult>;
+    connect(): Promise<PoolClient>;
   }
 
   const pg: { readonly Pool: typeof Pool };

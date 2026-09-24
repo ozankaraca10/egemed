@@ -2,6 +2,9 @@ import { createHash } from "node:crypto";
 import { describe, expect, it } from "vitest";
 import { authMeResponseSchema } from "../../packages/contracts/src/index";
 import { createApp } from "../../apps/api/src/app";
+import { createMemoryAdminBulkRepo } from "../../apps/api/src/admin/bulk";
+import { createMemoryAdminImportRepo } from "../../apps/api/src/admin/imports";
+import { createMemoryAdminRoleRepo } from "../../apps/api/src/admin/roles";
 import { createMemoryAdminStore, type AdminDeps } from "../../apps/api/src/admin/users";
 import { createMemoryAuthStore, type MemoryUserSeed } from "../../apps/api/src/auth/repo";
 import {
@@ -68,10 +71,15 @@ function createHarness(options: HarnessOptions = {}) {
     sessionIdleMs: options.idleMs ?? DEFAULT_SESSION_IDLE_MS,
     sessionAbsoluteMs: options.absoluteMs ?? DEFAULT_SESSION_ABSOLUTE_MS,
   };
+  const adminStore = createMemoryAdminStore();
+  const newId = () => "00000000-0000-4000-8000-0000000000ff";
   const admin: AdminDeps = {
     auth,
-    users: createMemoryAdminStore().users,
-    newId: () => "00000000-0000-4000-8000-0000000000ff",
+    users: adminStore.users,
+    bulk: createMemoryAdminBulkRepo(adminStore),
+    roles: createMemoryAdminRoleRepo(adminStore),
+    imports: createMemoryAdminImportRepo(adminStore, newId).repo,
+    newId,
   };
   const app = createApp({ db: fakeDb(), now: () => clock, auth, admin });
   return {

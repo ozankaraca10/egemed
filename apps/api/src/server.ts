@@ -2,6 +2,9 @@ import { serve } from "@hono/node-server";
 import { randomUUID } from "node:crypto";
 import process from "node:process";
 import { createApp } from "./app.ts";
+import { createPgAdminBulkRepo } from "./admin/bulk.ts";
+import { createPgAdminImportRepo } from "./admin/imports.ts";
+import { createPgAdminRoleRepo } from "./admin/roles.ts";
 import { createPgAdminUsersRepo } from "./admin/users.ts";
 import { createPgAuthRepos } from "./auth/repo.ts";
 import { createDb } from "./db.ts";
@@ -38,7 +41,14 @@ const app = createApp({
   db,
   now: serverNow,
   auth,
-  admin: { auth, users: createPgAdminUsersRepo(db), newId: () => randomUUID() },
+  admin: {
+    auth,
+    users: createPgAdminUsersRepo(db),
+    bulk: createPgAdminBulkRepo(db),
+    roles: createPgAdminRoleRepo(db),
+    imports: createPgAdminImportRepo(db),
+    newId: () => randomUUID(),
+  },
 });
 
 serve({ fetch: app.fetch, port: env.PORT });
