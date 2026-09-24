@@ -13,6 +13,18 @@ export {
   practiceAdjusted,
   scoreCase,
 } from "./core/scoring";
+export {
+  countUnlistenedInOtherView,
+  firstWeakLibraryKey,
+  libraryKeyForCase,
+  nextActionForSubmit,
+  otherViewHintText,
+  regionChipState,
+  resampleActiveMode,
+  tutorialProgress,
+  weakDomainKeys,
+} from "./core/flow";
+export type { RegionChipVisualState, SubmitAction, TutorialEvent, TutorialProgress } from "./core/flow";
 export { SUSPEND_LIMIT_12, SUSPEND_LIMIT_2004, deserializeSuspend, serializeSuspend } from "./core/suspend";
 export type {
   AuscultationPoint,
