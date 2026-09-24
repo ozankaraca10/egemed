@@ -37,6 +37,10 @@ const auth = {
   devEnabled: env.AUTH_DEV_ENABLED,
   sessionIdleMs: env.SESSION_IDLE_MINUTES * 60_000,
   sessionAbsoluteMs: env.SESSION_ABSOLUTE_HOURS * 3_600_000,
+  // T64 — SSO adaptörü protokol kararına bağlıdır (§i). Protokol seçilene dek
+  // adaptör enjekte edilmez ve `/auth/sso/*` uçları 404 döner; SSO_PROVIDER ve
+  // SSO_STATE_SECRET yalnız `loadEnv` ile doğrulanır.
+  sso: null,
 };
 const app = createApp({
   db,

@@ -11,6 +11,13 @@ declare module "node:crypto" {
     digest(encoding: "hex" | "base64url"): string;
   }
 
+  export interface Hmac {
+    update(data: string, inputEncoding?: "utf8"): Hmac;
+    digest(encoding: "base64url"): string;
+  }
+
   export function createHash(algorithm: "sha256"): Hasher;
+  /** T64 — SSO state/nonce çerezi HMAC-SHA256 ile imzalanır. */
+  export function createHmac(algorithm: "sha256", key: string): Hmac;
   export function randomBytes(size: number): { toString(encoding: "base64url"): string };
 }

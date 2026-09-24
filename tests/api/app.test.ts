@@ -181,6 +181,7 @@ describe("ortam doğrulaması", () => {
       AUTH_DEV_ENABLED: false,
       SESSION_IDLE_MINUTES: 30,
       SESSION_ABSOLUTE_HOURS: 12,
+      SSO_PROVIDER: "none",
     });
   });
 
@@ -227,6 +228,16 @@ describe("ortam doğrulaması", () => {
     const env = loadEnv({ ...base, SESSION_IDLE_MINUTES: "45", SESSION_ABSOLUTE_HOURS: "8" });
     expect(env.SESSION_IDLE_MINUTES).toBe(45);
     expect(env.SESSION_ABSOLUTE_HOURS).toBe(8);
+  });
+
+  it("SSO sağlayıcısı seçilirse imza anahtarını zorunlu kılar", () => {
+    expect(() => loadEnv({ ...base, SSO_PROVIDER: "oidc" })).toThrow(EnvValidationError);
+    expect(() => loadEnv({ ...base, SSO_STATE_SECRET: "kisa" })).toThrow(EnvValidationError);
+
+    const secret = "sso-state-secret-0123456789abcdef";
+    const env = loadEnv({ ...base, SSO_PROVIDER: "oidc", SSO_STATE_SECRET: secret });
+    expect(env.SSO_PROVIDER).toBe("oidc");
+    expect(env.SSO_STATE_SECRET).toBe(secret);
   });
 
   it("hata metni değer sızdırmaz", () => {

@@ -4,6 +4,7 @@ import { z } from "zod";
  * T62 — ortam doğrulaması (E3 §a, §g). Değerler `@egemed/contracts` dışında
  * burada zod ile doğrulanır; hata metni hiçbir değeri (özellikle DSN'i)
  * taşımaz. `AUTH_DEV_ENABLED=true` yalnız üretim dışı ortamda geçerlidir.
+ * T64 — SSO sağlayıcı kimliği ve state imza anahtarı da burada doğrulanır.
  */
 
 /** Boş dizge "tanımsız" sayılır: `.env.example` boş değerlerle kopyalanabilir. */
@@ -22,6 +23,11 @@ const envSchema = z.object({
   // Oturum süreleri (E3 §a): boşta kalma 30 dk, mutlak üst sınır 12 sa.
   SESSION_IDLE_MINUTES: z.coerce.number().int().min(1).max(1440).default(30),
   SESSION_ABSOLUTE_HOURS: z.coerce.number().int().min(1).max(168).default(12),
+  // T64 — SSO adaptörü: protokol (§i) seçilene dek `none` kalır ve uçlar 404
+  // döner. Seçim yapıldığında bu değer adaptörü belirler.
+  SSO_PROVIDER: z.enum(["none", "oidc", "saml", "cas"]).default("none"),
+  // state/nonce çerezini imzalayan HMAC anahtarı; en az 256 bit entropi bekler.
+  SSO_STATE_SECRET: z.string().trim().min(32).optional(),
 });
 
 export type Env = z.infer<typeof envSchema>;
@@ -46,6 +52,8 @@ export function loadEnv(source: Record<string, string | undefined>): Env {
     AUTH_DEV_ENABLED: emptyAsUndefined(source.AUTH_DEV_ENABLED),
     SESSION_IDLE_MINUTES: emptyAsUndefined(source.SESSION_IDLE_MINUTES),
     SESSION_ABSOLUTE_HOURS: emptyAsUndefined(source.SESSION_ABSOLUTE_HOURS),
+    SSO_PROVIDER: emptyAsUndefined(source.SSO_PROVIDER),
+    SSO_STATE_SECRET: emptyAsUndefined(source.SSO_STATE_SECRET),
   });
   if (!parsed.success) {
     throw new EnvValidationError(
@@ -54,6 +62,10 @@ export function loadEnv(source: Record<string, string | undefined>): Env {
   }
   if (parsed.data.NODE_ENV === "production" && parsed.data.AUTH_DEV_ENABLED) {
     throw new EnvValidationError(["AUTH_DEV_ENABLED"]);
+  }
+  // Sağlayıcı seçildiyse imza anahtarı da zorunludur; eksikse açılış durur.
+  if (parsed.data.SSO_PROVIDER !== "none" && parsed.data.SSO_STATE_SECRET === undefined) {
+    throw new EnvValidationError(["SSO_STATE_SECRET"]);
   }
   return parsed.data;
 }

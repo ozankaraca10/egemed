@@ -19,11 +19,13 @@ import {
   csrfTokenForSession,
   safeTokenEquals,
 } from "./session";
+import type { SsoDeps } from "./sso/types";
 
 /**
  * T63 — `/auth/*` uçları (E3 §a, §d): dev sağlayıcısı, `/auth/me`, `/auth/logout`.
  * Mutasyonlar double-submit CSRF (`X-CSRF-Token` + `egemed_csrf` çerezi) ve
  * Origin kontrolü ister; çerez oturumu güvenlik öznitelikleriyle kurulur.
+ * T64 ile SSO uçları aynı bağımlılıklara ve aynı oturum çekirdeğine bağlanır.
  */
 
 /** Uçların bağlandığı bağımlılıklar; üretimde `server.ts` doldurur. */
@@ -35,6 +37,8 @@ export interface AuthDeps {
   readonly devEnabled: boolean;
   readonly sessionIdleMs: number;
   readonly sessionAbsoluteMs: number;
+  /** T64 — SSO adaptörü; enjekte edilmezse `/auth/sso/*` uçları 404'tür. */
+  readonly sso?: SsoDeps | null | undefined;
 }
 
 /** E3 §a çerez kuralı: HttpOnly, SameSite=Lax, Path=/, Domain yok. */

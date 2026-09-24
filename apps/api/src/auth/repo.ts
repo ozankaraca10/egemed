@@ -44,8 +44,21 @@ export interface MeContext {
   readonly simAccess: readonly SimId[];
 }
 
+/** T64 — SSO eşleme anahtarı: kurum kullanıcı adı ve/veya e-posta (E3 §a). */
+export interface SsoMappingKey {
+  readonly username?: string | undefined;
+  readonly email?: string | undefined;
+}
+
 export interface UserRepo {
   findByUsername(username: string): Promise<AuthUser | null>;
+  /** T64 — eşleme anahtarıyla SSO kullanıcısı arar; büyük/küçük harf duyarsız. */
+  findByMappingKey(key: SsoMappingKey): Promise<AuthUser | null>;
+  /**
+   * T64 — ilk girişte `sso_subject`i bağlar; bağlıysa mevcut değeri döndürür
+   * (yarış güvenli). Kullanıcı yok/silinmişse `null`.
+   */
+  bindSsoSubject(userId: string, subject: string, at: number): Promise<string | null>;
   getMeContext(userId: string): Promise<MeContext | null>;
   markLogin(userId: string, at: number): Promise<void>;
 }
@@ -212,6 +225,16 @@ function toSessionRecord(row: SessionRow): SessionRecord {
   };
 }
 
+/** Bellek deposunda kullanıcı satırının giriş eşlemesine görünen dar yüzeyi. */
+function toAuthUser(user: MemoryUserState): AuthUser {
+  return {
+    id: user.id,
+    status: user.status,
+    authMethod: user.authMethod,
+    institutionId: user.institutionId,
+  };
+}
+
 export function createPgAuthRepos(db: AuthDb): PgAuthRepos {
   const sessions: SessionRepo = {
     async insert(record) {
@@ -270,6 +293,36 @@ export function createPgAuthRepos(db: AuthDb): PgAuthRepos {
         authMethod: row.auth_method as AuthMethod,
         institutionId: row.institution_id,
       };
+    },
+    async findByMappingKey(key) {
+      const username = key.username ?? "";
+      const email = key.email ?? "";
+      if (username === "" && email === "") return null;
+      // Eksik anahtar boş dizgeyle sorulur; `lower(null)` karşılaştırması
+      // eşleşmez, böylece koşul her zaman parametreli kalır. Kullanıcı adı
+      // eşleşmesi e-posta eşleşmesine yeğlenir (belirlenimci sonuç).
+      const result = await db.query(
+        "select id, status, auth_method, institution_id from users where deleted_at is null and (lower(username) = lower($1) or lower(email) = lower($2)) order by case when lower(username) = lower($1) then 0 else 1 end limit 1",
+        [username, email],
+      );
+      const row = result.rows[0] as UserRow | undefined;
+      if (row === undefined) return null;
+      return {
+        id: row.id,
+        status: row.status as UserStatus,
+        authMethod: row.auth_method as AuthMethod,
+        institutionId: row.institution_id,
+      };
+    },
+    async bindSsoSubject(userId, subject, at) {
+      // İlk bağlama kazanır: eşzamanlı iki girişten biri subject'i yazar,
+      // diğeri mevcut değeri okur ve uyuşmazlıkta reddedilir.
+      const result = await db.query(
+        "update users set sso_subject = coalesce(sso_subject, $2), updated_at = $3 where id = $1 and deleted_at is null returning sso_subject",
+        [userId, subject, new Date(at)],
+      );
+      const row = result.rows[0] as { readonly sso_subject: string } | undefined;
+      return row === undefined ? null : row.sso_subject;
     },
     async getMeContext(userId) {
       const base = await db.query(
@@ -348,6 +401,10 @@ export function createPgAuthRepos(db: AuthDb): PgAuthRepos {
 export interface MemoryUserSeed {
   readonly id: string;
   readonly username?: string | null;
+  /** T64 — SSO eşleme anahtarı; kurum içinde büyük/küçük harf duyarsız eşlenir. */
+  readonly email?: string | null;
+  /** T64 — bağlı IdP subject'i; farklı subject gelirse giriş reddedilir. */
+  readonly ssoSubject?: string | null;
   readonly displayName: string;
   readonly authMethod: AuthMethod;
   readonly status?: UserStatus;
@@ -360,6 +417,8 @@ export interface MemoryUserSeed {
 export interface MemoryUserState {
   readonly id: string;
   readonly username: string | null;
+  readonly email: string | null;
+  ssoSubject: string | null;
   readonly displayName: string;
   readonly authMethod: AuthMethod;
   status: UserStatus;
@@ -390,6 +449,8 @@ export function createMemoryAuthStore(
     userRecords.set(user.id, {
       id: user.id,
       username: user.username ?? null,
+      email: user.email ?? null,
+      ssoSubject: user.ssoSubject ?? null,
       displayName: user.displayName,
       authMethod: user.authMethod,
       status: user.status ?? "active",
@@ -445,6 +506,28 @@ export function createMemoryAuthStore(
         }
       }
       return null;
+    },
+    async findByMappingKey(key) {
+      const username = key.username?.toLowerCase();
+      const email = key.email?.toLowerCase();
+      if (username === undefined && email === undefined) return null;
+      let emailMatch: MemoryUserState | null = null;
+      for (const user of userRecords.values()) {
+        if (user.status === "deleted") continue;
+        if (username !== undefined && user.username?.toLowerCase() === username) {
+          return toAuthUser(user);
+        }
+        if (emailMatch === null && email !== undefined && user.email?.toLowerCase() === email) {
+          emailMatch = user;
+        }
+      }
+      return emailMatch === null ? null : toAuthUser(emailMatch);
+    },
+    async bindSsoSubject(userId, subject) {
+      const user = userRecords.get(userId);
+      if (user === undefined || user.status === "deleted") return null;
+      if (user.ssoSubject === null) user.ssoSubject = subject;
+      return user.ssoSubject;
     },
     async getMeContext(userId) {
       const user = userRecords.get(userId);
