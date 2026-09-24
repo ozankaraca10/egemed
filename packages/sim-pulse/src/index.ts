@@ -61,6 +61,45 @@ export type {
 } from "./ui/landing";
 export { PULSE_TUTORIAL_STEPS, createTutorialStepViews, shouldRunPulseTutorial } from "./ui/tutorial";
 export type { PulseTutorialRunState, TutorialStep, TutorialStepStatus, TutorialStepView } from "./ui/tutorial";
+export { buildAttemptRecord, rhythmStreakAfter } from "./gamification/attempt";
+export type { PulseAttemptInput, PulseAttemptRecord, PulseDomain, PulseExtra } from "./gamification/attempt";
+export {
+  PULSE_ANONYMOUS_LABEL,
+  PULSE_DEMO_PEERS,
+  PULSE_GAMI_MAX_ATTEMPTS,
+  PULSE_GAMI_STORAGE_KEY,
+  computePulseStats,
+  createMemoryGamiRepo,
+  createStorageGamiRepo,
+  decodePulseGamiState,
+  emptyPulseGamiState,
+  pulseLearnTopic,
+} from "./gamification/repo";
+export type {
+  PulseDemoPeer,
+  PulseGamiRepo,
+  PulseGamiRepoOptions,
+  PulseGamiState,
+  PulseGamiWriteResult,
+  PulseLeaderboardRow,
+  PulseLeaderboardView,
+} from "./gamification/repo";
+export {
+  PULSE_COHORTS,
+  PULSE_PERIODS,
+  PULSE_PERIOD_LABELS,
+  achievementsMarkup,
+  createPulseAchievementsView,
+  createPulseGainsView,
+  createPulseLeaderboardView,
+  gainsMarkup,
+  leaderboardMarkup,
+} from "./gamification/ui";
+export type {
+  PulseAchievementsView,
+  PulseGainsView,
+  PulseLeaderboardTableView,
+} from "./gamification/ui";
 export { pulseMetricReadouts, pulseMetricSnapshot, pulsePhaseLabelKey } from "./ui/sim/metrics";
 export type { PulseMetricId, PulseMetricReadout, PulsePhase } from "./ui/sim/metrics";
 export { systematicReadout } from "./ui/sim/explain";

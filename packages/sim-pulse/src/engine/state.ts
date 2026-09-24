@@ -9,7 +9,7 @@ export { SESSION_COUNT } from "./sample";
 
 export const STATE_VERSION = 6;
 export const MAX_STATE_BYTES = 4096;
-export const ACTIVE_VIEWS = ["sim", "case", "quiz", "modes", "about", "results", "tutorial"] as const;
+export const ACTIVE_VIEWS = ["sim", "case", "quiz", "modes", "about", "results", "tutorial", "achievements", "leaderboard"] as const;
 export type ActiveView = (typeof ACTIVE_VIEWS)[number];
 export type Section = "case" | "quiz";
 export interface CurriculumItem { correct: number; ecg: { leads: readonly Lead[] } }
@@ -125,7 +125,7 @@ export function decode(input: unknown, ctx: StateContext): PulseState {
     const best = decodeSession(raw.b, "quiz", ctx); if (isRecord(raw.b) && best.submitted.every(Boolean)) s.bestAttempt = best;
     const bestCase = decodeSession(raw.bc, "case", ctx); if (isRecord(raw.bc) && bestCase.submitted.every(Boolean)) s.bestCaseAttempt = bestCase;
     s.currentCase = int(raw.j, 0, 9); s.quizPage = int(raw.k, 0, 9);
-    const storedView = int(raw.u, 0, 7, 0);
+    const storedView = int(raw.u, 0, ACTIVE_VIEWS.length, 0);
     s.activeView = storedView === 3 ? "sim" : ACTIVE_VIEWS[storedView > 3 ? storedView - 1 : storedView] ?? "sim";
     s.tutorialDone = raw.w === 1;
     if (raw.cv !== ctx.curriculum.version) { s.caseSession = freshSession("case", ctx); s.quizSession = freshSession("quiz", ctx); s.bestAttempt = null; s.bestCaseAttempt = null; }
