@@ -81,6 +81,20 @@ const PATCHES = {
       replace: "window.__pulseAssetBase+'assets/",
       all: true,
     },
+    {
+      id: "KAYNAK-01-SCORE-VS-MODULE",
+      why:
+        "Kaynak kusuru (Astra KAYNAK-01): sınav sonucu modül tamamlama (tüm ritimler + vakalar + ≥80) ile puan eşiğini tek 'passed'da birleştiriyor; doğrudan sınava girip 100 alan öğrenci 'Hedefin altında' görüyor. Sonuç ekranında sınav durumu yalnız puan eşiğine (80) bağlanır; modül tamamlanmadıysa ayrı not gösterilir. SCORM/kayıt 'passed' anlamı değişmez.",
+      find: "passed=section==='quiz'?state.passed:correct>=8,",
+      replace: "passed=section==='quiz'?score>=80:correct>=8,moduleDone=section!=='quiz'||state.passed,",
+    },
+    {
+      id: "KAYNAK-01-MODULE-NOTE",
+      why: "Modül tamamlama koşulu puan eşiğinden ayrı gösterilir (KAYNAK-01).",
+      find: '<span class="rs-lbl">Durum (eşik 80)</span></div>`]',
+      replace:
+        '<span class="rs-lbl">Durum (eşik 80)</span>${moduleDone?\'\':\'<span class="rs-lbl" data-egemed-module-note>Modül henüz tamamlanmadı: tüm ritimleri inceleyip vakaları bitirin.</span>\'}</div>`]',
+    },
   ],
 };
 
