@@ -266,3 +266,5 @@ export { ModeCard, ModeSelectScreen, Stepper } from "./screens/ModeSelectScreen"
 export type { ModeSelectScreenProps } from "./screens/ModeSelectScreen";
 export { TutorialScreen } from "./screens/TutorialScreen";
 export type { TutorialScreenProps } from "./screens/TutorialScreen";
+export { LearnScreen, createNoopLearnScreenEnv } from "./screens/LearnScreen";
+export type { LearnGamiPort, LearnScreenEnv, LearnScreenProps } from "./screens/LearnScreen";
