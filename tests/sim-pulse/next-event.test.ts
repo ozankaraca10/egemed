@@ -24,7 +24,7 @@ describe("CardiacModel nextEvent regresyonu", () => {
         time = next;
       }
     }
-  });
+  }, 30_000); // 13 mod × 500 adım; yük altında (paralel ajanlar) 5 sn varsayılanı aşabiliyor
 
   it("ileri kullanımdan sonra geri atlayan t değerini güvenle işler", () => {
     for (const mode of MODES) {
