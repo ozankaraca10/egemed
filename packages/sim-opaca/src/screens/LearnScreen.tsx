@@ -43,6 +43,12 @@ export function createNoopLearnScreenEnv(): LearnScreenEnv {
 
 const NOOP_LEARN_ENV: LearnScreenEnv = createNoopLearnScreenEnv()
 const NOOP_FILM_ENV = createNoopFilmEnv()
+/** Kaynakta `LIBRARY_ITEMS[0]`; strict indeks erişimi için modül yüklenirken doğrulanan ilk öğe (boş kütüphane veri hatasıdır). */
+const FIRST_LIBRARY_ITEM: LibraryItem = (() => {
+  const first = LIBRARY_ITEMS[0]
+  if (!first) throw new Error('LIBRARY_ITEMS boş olamaz')
+  return first
+})()
 
 /** Oyunlaştırma öğrenme kaydı (kaynak: `getGamiRepo().recordLearn`). */
 export interface LearnGamiPort {
@@ -67,7 +73,7 @@ export function LearnScreen({
   gami,
 }: LearnScreenProps): JSX.Element {
   const { state, dispatch, now } = useStore()
-  const [selectedKey, setSelectedKey] = useState<string>(() => state.learnFocusKey ?? LIBRARY_ITEMS[0].key)
+  const [selectedKey, setSelectedKey] = useState<string>(() => state.learnFocusKey ?? FIRST_LIBRARY_ITEM.key)
   const [tab, setTab] = useState<'desc' | 'film' | 'clin'>('desc')
   const [exampleIdx, setExampleIdx] = useState(() => state.learnFocusIdx ?? 0)
   const lastKey = useRef(selectedKey)
@@ -80,7 +86,7 @@ export function LearnScreen({
     if (initialLearnFocus.current) dispatch({ type: 'setLearnFocus', key: null })
   }, [dispatch])
 
-  const item = LIBRARY_ITEMS.find((it) => it.key === selectedKey) ?? LIBRARY_ITEMS[0]
+  const item = LIBRARY_ITEMS.find((it) => it.key === selectedKey) ?? FIRST_LIBRARY_ITEM
 
   useEffect(() => {
     if (!gamiEnabled || !gami) return
@@ -93,8 +99,10 @@ export function LearnScreen({
       const ap = examplesFor(null, 'AP')
       const out: ImageRecord[] = []
       for (let i = 0; i < Math.max(pa.length, ap.length) && out.length < 12; i++) {
-        if (pa[i]) out.push(pa[i])
-        if (ap[i]) out.push(ap[i])
+        const p = pa[i]
+        const a = ap[i]
+        if (p) out.push(p)
+        if (a) out.push(a)
       }
       return out
     }
@@ -194,7 +202,7 @@ export function LearnScreen({
                   </div>
                   {annotationFinding && (
                     <label className="points-toggle">
-                      <input type="checkbox" checked={showExpert} onChange={(e) => setShowExpert(e.target.checked)} disabled={!hasExpertBox} />
+                      <input type="checkbox" checked={showExpert} onChange={(e) => setShowExpert((e.currentTarget as unknown as { checked: boolean }).checked)} disabled={!hasExpertBox} />
                       {hasExpertBox ? 'Uzman işaretlemesini göster' : 'Bu filmde uzman işaretlemesi yok'}
                     </label>
                   )}
@@ -206,7 +214,7 @@ export function LearnScreen({
                     zones={ZONES}
                     showZones={state.showZones && image.modality !== 'CT'}
                     showAnnotations={showExpert && hasExpertBox}
-                    annotationFinding={annotationFinding}
+                    annotationFinding={annotationFinding ?? null}
                     onZoneEnter={onZoneEnter}
                     onZoneDwell={onZoneDwell}
                     onActiveZones={setActiveZones}
