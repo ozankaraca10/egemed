@@ -76,6 +76,7 @@ describe("tsconfig sözleşmesi", () => {
   it("packages altındaki paket tsconfig'lerini bulur", () => {
     expect(packageConfigs).toEqual([
       "packages/gamification-core/tsconfig.json",
+      "packages/sim-ausculta/tsconfig.json",
       "packages/sim-host/tsconfig.json",
       "packages/sim-opaca/tsconfig.json",
       "packages/sim-pulse/tsconfig.json",
