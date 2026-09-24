@@ -114,6 +114,9 @@ importers:
       '@egemed/contracts':
         specifier: workspace:*
         version: link:../contracts
+      '@egemed/gamification-core':
+        specifier: workspace:*
+        version: link:../gamification-core
 
   packages/contracts:
     dependencies:
