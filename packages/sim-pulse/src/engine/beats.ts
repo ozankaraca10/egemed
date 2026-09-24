@@ -231,6 +231,12 @@ export class BeatEngine {
     }
     this.ensure((from + to) / 2);
     if (from < this.cacheFrom - 1.2 || to > this.cacheTo + 1.2) {
+      // Kaynaktan bilinçli sapma (hata düzeltmesi): kısa aralığı aynı girdilerle
+      // yinelemek yerine taşan uçtan yenile; özyineleme böylece yalnız geniş aralığı böler.
+      if (to - from <= 6) {
+        this.ensure(to > this.cacheTo + 1.2 ? to : from);
+        return this.beats.slice(this.lowerBound(from), this.lowerBound(to + 1e-10));
+      }
       const result: Beat[] = [];
       for (let t = from; t < to; t += 6) {
         result.push(...this.between(t, Math.min(to, t + 6)));
