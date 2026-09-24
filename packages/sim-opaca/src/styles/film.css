@@ -1,0 +1,108 @@
+/*
+ * Opaca FilmViewer CSS — kapsam B (E2 §8 S22)
+ * Kaynak: egemed-opaca/src/styles.css (.film-*, .anno-*, .zone-*, .measure-*, .mark-*, .seg, .popover)
+ * Tüm kurallar .eg-sim-opaca kökü altında; hex yalnız @egemed/tokens/opaca.css'te.
+ */
+.eg-sim-opaca .film-card{ padding: 8px; gap: 8px; }
+.eg-sim-opaca .film-card-head{ display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; padding: 2px 4px; }
+
+.eg-sim-opaca .film-viewer{ display: flex; flex-direction: column; flex: 1; min-height: 0; border-radius: var(--r-md); overflow: hidden; background: var(--film-bg); border: 1px solid var(--film-edge); }
+.eg-sim-opaca .film-stage{
+  position: relative; flex: 1; min-height: 280px; display: flex; align-items: center; justify-content: center;
+  overflow: hidden; user-select: none; touch-action: none; outline: none;
+  background: radial-gradient(90% 80% at 50% 45%, rgba(10, 26, 54, 1) 0%, var(--film-bg) 70%);
+}
+.eg-sim-opaca .film-stage:focus-visible{ box-shadow: inset 0 0 0 3px var(--scan); }
+.eg-sim-opaca .film-layer{ position: relative; transform-origin: center center; will-change: transform; }
+.eg-sim-opaca .film-layer img{ display: block; width: 100%; height: 100%; object-fit: contain; opacity: 0; transition: opacity .35s ease; -webkit-user-drag: none; }
+.eg-sim-opaca .film-layer img.is-loaded{ opacity: 1; }
+.eg-sim-opaca .film-overlay{ position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; overflow: visible; }
+.eg-sim-opaca .zone-rect{ fill: transparent; stroke-width: 1.4px; vector-effect: non-scaling-stroke; stroke-dasharray: 5 4; opacity: .7; }
+.eg-sim-opaca .zone-rect.step-A{ stroke: var(--zone-a); }
+.eg-sim-opaca .zone-rect.step-B{ stroke: var(--zone-b); }
+.eg-sim-opaca .zone-rect.step-C{ stroke: var(--zone-c); }
+.eg-sim-opaca .zone-rect.step-D{ stroke: var(--zone-d); }
+.eg-sim-opaca .zone-rect.step-E{ stroke: var(--zone-e); }
+.eg-sim-opaca .anno-rect{ fill: rgba(255, 216, 77, .12); stroke: var(--expert); stroke-width: 2.2px; vector-effect: non-scaling-stroke; }
+.eg-sim-opaca .anno-poly{ fill: rgba(255, 216, 77, .16); stroke: var(--expert); stroke-width: 2px; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
+.eg-sim-opaca .anno-label{ position: absolute; transform: translateY(-100%); background: var(--expert); color: rgba(29, 22, 0, 1); font-size: 11px; font-weight: 700; padding: 1px 6px; border-radius: 4px 4px 4px 0; white-space: nowrap; pointer-events: none; }
+.eg-sim-opaca .measure-line{ stroke: var(--scan); stroke-width: 2px; vector-effect: non-scaling-stroke; }
+.eg-sim-opaca .measure-line.m1{ stroke: rgba(255, 157, 92, 1); }
+.eg-sim-opaca .measure-dot{ fill: var(--scan); }
+.eg-sim-opaca .film-mark{ position: absolute; width: 22px; height: 22px; margin: -11px 0 0 -11px; border-radius: 50%; border: 2px solid var(--card); box-shadow: 0 0 0 2px var(--red-500), 0 0 12px rgba(225, 29, 72, .8); pointer-events: none; z-index: 2; }
+.eg-sim-opaca .film-mark::before, .eg-sim-opaca .film-mark::after{ content: ''; position: absolute; background: var(--card); left: 50%; top: 50%; }
+.eg-sim-opaca .film-mark::before{ width: 2px; height: 30px; margin: -15px 0 0 -1px; opacity: .6; }
+.eg-sim-opaca .film-mark::after{ width: 30px; height: 2px; margin: -1px 0 0 -15px; opacity: .6; }
+
+.eg-sim-opaca .film-mark-circle{
+  position: absolute; transform: translate(-50%, -50%); border-radius: 50%;
+  border: 2px dashed var(--red-500); background: rgba(225, 29, 72, .14);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, .5) inset; pointer-events: none; z-index: 1;
+}
+.eg-sim-opaca .film-mark-circle.is-miss{ border-color: var(--orange-500); background: rgba(245, 158, 11, .14); }
+.eg-sim-opaca .mark-miss-line{ stroke: var(--orange-500); stroke-width: 2px; stroke-dasharray: 4 3; vector-effect: non-scaling-stroke; }
+.eg-sim-opaca .mark-miss-arrowhead{ fill: var(--orange-500); }
+
+
+.eg-sim-opaca .film-scan{ position: absolute; left: 0; right: 0; top: 0; height: 2px; pointer-events: none; background: var(--scan); box-shadow: 0 0 14px 3px var(--scan-soft), 0 0 2px var(--scan); animation: film-scan 1.1s cubic-bezier(.45, 0, .25, 1) forwards; }
+@keyframes film-scan{ 0% { transform: translateY(0); opacity: 0; } 12% { opacity: 1; } 88% { opacity: 1; } 100% { transform: translateY(100cqh); opacity: 0; } }
+.eg-sim-opaca .film-stage{ container-type: size; }
+@media (prefers-reduced-motion: reduce) { .eg-sim-opaca .film-scan{ display: none; } .eg-sim-opaca .film-layer img{ transition: none; } }
+
+.eg-sim-opaca .film-hud{ position: absolute; top: 8px; left: 8px; display: flex; gap: 6px; pointer-events: none; }
+.eg-sim-opaca .film-hud span{ background: rgba(2, 10, 26, .72); color: var(--film-ink); border: 1px solid rgba(138, 163, 199, .25); border-radius: var(--r-pill); padding: 3px 10px; font-size: var(--fs-xs); font-weight: 600; font-variant-numeric: tabular-nums; }
+.eg-sim-opaca .film-hud .film-hud-zone{ color: var(--scan); }
+.eg-sim-opaca .film-hud .film-hud-slice{ color: var(--film-ink); font-variant-numeric: tabular-nums; }
+.eg-sim-opaca .film-mark-hint{ position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); background: rgba(225, 29, 72, .92); color: var(--card); font-size: var(--fs-sm); font-weight: 600; padding: 5px 14px; border-radius: var(--r-pill); pointer-events: none; white-space: nowrap; }
+.eg-sim-opaca .film-empty{ color: var(--film-ink-dim); padding: 24px; text-align: center; max-width: 36ch; line-height: 1.5; }
+.eg-sim-opaca .film-empty code{ color: var(--scan); }
+.eg-sim-opaca .film-empty-card{ flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; text-align: center; color: var(--ink-600); background: var(--card-soft); border: 1px dashed var(--border-strong); border-radius: var(--r-md); padding: 24px; min-height: 280px; }
+.eg-sim-opaca .film-empty-card p{ margin: 0; max-width: 40ch; }
+
+.eg-sim-opaca .film-tools{ display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; padding: 8px 10px; background: var(--navy-950); border-top: 1px solid var(--film-edge); color: var(--film-ink); font-size: var(--fs-sm); }
+.eg-sim-opaca .film-tools .seg{ display: inline-flex; border: 1px solid rgba(138, 163, 199, .3); border-radius: var(--r-sm); overflow: hidden; }
+.eg-sim-opaca .film-tools .seg button, .eg-sim-opaca .film-tools .tool-btn{ background: transparent; color: var(--film-ink); border: 0; padding: 6px 11px; font: inherit; font-weight: 600; cursor: pointer; min-height: 32px; }
+.eg-sim-opaca .film-tools .seg button + button{ border-left: 1px solid rgba(138, 163, 199, .3); }
+.eg-sim-opaca .film-tools .tool-btn{ border: 1px solid rgba(138, 163, 199, .3); border-radius: var(--r-sm); }
+.eg-sim-opaca .film-tools button:hover:not(:disabled){ background: rgba(56, 214, 255, .1); }
+.eg-sim-opaca .film-tools button.active{ background: var(--brand-600); color: var(--card); }
+.eg-sim-opaca .film-tools button:disabled{ opacity: .4; cursor: not-allowed; }
+.eg-sim-opaca .film-tools button:focus-visible, .eg-sim-opaca .film-tools select:focus-visible{ outline: 2px solid var(--scan); outline-offset: 1px; }
+.eg-sim-opaca .film-select{ display: inline-flex; align-items: center; gap: 6px; color: var(--film-ink-dim); }
+.eg-sim-opaca .film-select select{ background: var(--film-edge); color: var(--film-ink); border: 1px solid rgba(138, 163, 199, .3); border-radius: var(--r-sm); padding: 5px 8px; font: inherit; min-height: 32px; }
+
+.eg-sim-opaca .film-slice-slider span{ white-space: nowrap; font-variant-numeric: tabular-nums; }
+.eg-sim-opaca .film-slice-slider input[type='range']{ width: 130px; accent-color: var(--scan); }
+.eg-sim-opaca .film-tools .popover-wrap{ position: relative; }
+.eg-sim-opaca .film-adjust{ position: absolute; bottom: calc(100% + 8px); left: 0; z-index: 30; min-width: 240px; display: grid; gap: 10px; background: var(--film-edge); color: var(--film-ink); border: 1px solid rgba(138, 163, 199, .35); padding: 12px; }
+.eg-sim-opaca .film-adjust label{ display: grid; gap: 4px; font-size: var(--fs-sm); }
+.eg-sim-opaca .film-adjust b{ float: right; font-variant-numeric: tabular-nums; }
+.eg-sim-opaca .film-adjust input[type='range']{ width: 100%; accent-color: var(--scan); }
+.eg-sim-opaca .film-measure-out{ display: inline-flex; align-items: center; gap: 8px; color: var(--scan); font-weight: 600; font-variant-numeric: tabular-nums; }
+.eg-sim-opaca .film-viewer.is-inert .film-tools{ pointer-events: none; opacity: .5; }
+.eg-sim-opaca .film-viewer.is-strict .film-tools{ background: rgba(18, 10, 46, 1); }
+
+.eg-sim-opaca .zone-chips{ display: flex; flex-wrap: wrap; gap: 6px 14px; padding: 4px 2px 0; flex-shrink: 0; }
+.eg-sim-opaca .zone-step{ display: flex; align-items: center; gap: 6px; }
+.eg-sim-opaca .zone-step-head{ display: inline-flex; align-items: center; gap: 4px; }
+.eg-sim-opaca .zone-step-head b{ display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 50%; background: var(--blue-50); color: var(--brand-900); font-size: var(--fs-xs); border: 1px solid var(--border-strong); }
+.eg-sim-opaca .zone-step.is-complete .zone-step-head b{ background: var(--green-600); color: var(--card); border-color: var(--green-600); }
+.eg-sim-opaca .zone-step-title{ display: none; }
+.eg-sim-opaca .zone-step-list{ display: inline-flex; flex-wrap: wrap; gap: 4px; }
+.eg-sim-opaca .zone-chip{ border: 1px solid var(--border); background: var(--card); color: var(--ink-700); border-radius: var(--r-pill); padding: 3px 10px; font: inherit; font-size: var(--fs-xs); font-weight: 600; cursor: pointer; min-height: 26px; display: inline-flex; align-items: center; gap: 4px; }
+.eg-sim-opaca .zone-chip:hover{ border-color: var(--blue-400); }
+.eg-sim-opaca .zone-chip.is-suggested{ border-color: var(--blue-400); background: var(--blue-50); }
+.eg-sim-opaca .zone-chip.is-inspected{ color: var(--green-600); border-color: rgba(167, 223, 191, 1); background: var(--green-50); }
+.eg-sim-opaca .zone-chip.is-active{ background: var(--brand-600); border-color: var(--brand-600); color: var(--card); }
+
+.eg-sim-opaca .popover-wrap{ position: relative; display: inline-flex; isolation: isolate; }
+.eg-sim-opaca .popover{ position: absolute; top: calc(100% + 6px); right: 0; z-index: 15; width: min(280px, 72vw); max-height: min(260px, 50vh); overflow-y: auto; background: var(--card); border: 1px solid var(--border-strong); border-radius: var(--r-md); box-shadow: var(--shadow-pop); padding: 10px 12px; font-size: var(--fs-sm); color: var(--ink-700); line-height: 1.5; text-align: left; animation: modal-fade .12s ease-out; }
+
+@media (max-width: 720px){
+  .eg-sim-opaca .film-tools{ gap: 6px; padding: 6px; }
+  .eg-sim-opaca .film-select span{ display: none; }
+  .eg-sim-opaca .zone-chips{ gap: 6px; }
+}
+@media (min-width: 1500px) {
+  .eg-sim-opaca .zone-step-title{ display: inline; font-size: var(--fs-xs); color: var(--ink-500); }
+}

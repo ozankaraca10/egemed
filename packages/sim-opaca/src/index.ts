@@ -1,5 +1,7 @@
 import "@egemed/tokens/opaca.css";
 import "./styles/shell.css";
+import "./styles/film.css";
+import "./styles/rest.css";
 
 import type { SimulatorId } from "@egemed/sim-host";
 
