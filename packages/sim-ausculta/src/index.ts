@@ -90,6 +90,31 @@ export type {
   SimRuntime,
   SuspendWrite,
 } from "./core/runtime";
+export {
+  INITIAL_STAGE_POSITION,
+  KEYBOARD_STEP,
+  SNAP_MAX_PX,
+  SNAP_WIDTH_RATIO,
+  STAGE_X_MAX,
+  STAGE_X_MIN,
+  STAGE_Y_MAX,
+  STAGE_Y_MIN,
+  clampStagePosition,
+  coordOf,
+  findNearestPoint,
+  fitStageBox,
+  isPediatricSchematic,
+  isPlaceKey,
+  isPrimaryPointer,
+  nudgeStagePosition,
+  pointerToStagePosition,
+  pointsInView,
+  snapTolerance,
+  stageViewConfig,
+} from "./ui/patient-stage/geometry";
+export type { BodyType, NormPoint, StageBox, StageCoordPoint, StageRect, StageViewConfig } from "./ui/patient-stage/geometry";
+export { Chestpiece } from "./ui/stethoscope";
+export { TorsoPediatricBack, TorsoPediatricFront } from "./ui/torso-pediatric";
 export { AUDIO_CONFIG } from "./audio/config";
 export { createAudioEngine } from "./audio/engine";
 export type { AudioEngine, AudioEngineDeps, EngineState } from "./audio/engine";
