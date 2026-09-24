@@ -7,10 +7,10 @@ Tarih: 2026-09-23
 ## Bağlam
 xAPI ifadeleri bir aktör tanımlayıcısı taşır. KVKK kapsamında özel nitelikli
 sağlık verisi işleyen bu platformda öğrenci kimliği asgari düzeyde tutulmalıdır.
-CLIX hesap ve not tutmaz; ders, ödev ve not defteri Moodle'dadır.
+EGEMED hesap ve not tutmaz; ders, ödev ve not defteri Moodle'dadır.
 
 ## Öneri
-- CLIX hesap, oturum kaydı ve not tutmaz.
+- EGEMED hesap, oturum kaydı ve not tutmaz.
 - Tanımlayıcı, Moodle başlatma bağlamından gelen **opak kurum kimliğidir**.
 - E-posta, ad ve öğrenci numarası ifadeye girmez.
 - Kaynak (LTI 1.3 veya SCORM `cmi.learner_id`) açık soru olarak kalır; bu
@@ -38,5 +38,5 @@ CLIX hesap ve not tutmaz; ders, ödev ve not defteri Moodle'dadır.
 ## Astra ikinci görüşü
 
 - Opak `account.name` biçim denetimi kişisel veriden arınmayı tek başına kanıtlamaz; Moodle/kurum kaynağı ham ad, e-posta veya öğrenci numarasını göndermemelidir. Eşleme kurum tarafında kalmalıdır.
-- Yeni admin ve kullanıcı yönetimi isteği bu ADR'deki “CLIX hesap/oturum tutmaz” kuralıyla uzlaştırılmalıdır. Öneri: kurum SSO/Moodle kimliği, sunucuda kurum kapsamlı rol/grup eşlemesi ve CLIX'te öğrenci roster'ı olmaması. Yerel kullanıcı/parola veritabanı istenirse ayrı ADR ve veri sahipliği kararı gerekir.
+- Yeni admin ve kullanıcı yönetimi isteği bu ADR'deki “EGEMED hesap/oturum tutmaz” kuralıyla uzlaştırılmalıdır. Öneri: kurum SSO/Moodle kimliği, sunucuda kurum kapsamlı rol/grup eşlemesi ve EGEMED'de öğrenci roster'ı olmaması. Yerel kullanıcı/parola veritabanı istenirse ayrı ADR ve veri sahipliği kararı gerekir.
 - Test öğrenci girişi yalnız sentetik geliştirme akışı olmalı; üretim aktör/oturum kaynağı sayılamaz. LTI/OIDC akışı, admin rol kaynağı ve kimlik yaşam döngüsü insan kararı olarak açık kalır.

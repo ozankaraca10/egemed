@@ -1,6 +1,6 @@
 # @egemed/tokens
 
-EGEMED CLIX için ortak tasarım tokenları. `AGENTS.md` kuralı "Renkler
+EGEMED için ortak tasarım tokenları. `AGENTS.md` kuralı "Renkler
 `packages/tokens` üzerinden" bu paketle somutlaşır.
 
 ## Amaç

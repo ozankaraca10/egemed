@@ -156,7 +156,7 @@ Satır sayıları `wc -l` ile alındı **[K]**. "Motor" = davranışı korunacak
    serileştirme ve oturum devam ettirme davranışı bellek-içi runtime seam'ine taşınır (xAPI
    eşlemesi T21/T23 sonrası). Kaynak SCORM adapter testleri (`tests/core.test.ts:31-85,581-719`)
    bu karara göre uyarlanır veya emekliye ayrılır — insan kararı.
-2. localStorage: `bestScore` öğrenci performans verisidir; ADR-005 (asgari veri, CLIX kayıt
+2. localStorage: `bestScore` öğrenci performans verisidir; ADR-005 (asgari veri, EGEMED kayıt
    tutmaz) ile çelişir. Kaldırılması veya oturum-içi tutulması önerilir. `landingSound`/`fsPromptDone`
    platform kabuğunun tercihleri olduğundan sim modülüne taşınmaz.
 3. `Date.now()` → enjekte saat (`now`); `performance.now()` → motor saat seam'i. Determinizm

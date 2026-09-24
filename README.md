@@ -1,6 +1,6 @@
-# EGEMED CLIX — Klinik Öğrenme Platformu
+# EGEMED — Klinik Öğrenme Platformu
 
-EGEMED CLIX, Ege Üniversitesi Tıp Fakültesi için geliştirilen üç klinik simülatörü — **Pulse** (EKG ve kardiyak fizyoloji),
+EGEMED, Ege Üniversitesi Tıp Fakültesi için geliştirilen üç klinik simülatörü — **Pulse** (EKG ve kardiyak fizyoloji),
 **Ausculta** (kardiyopulmoner oskültasyon) ve **Opaca** (akciğer grafisi ve toraks BT) — **tek bir React platformu** içinde ayrı
 modüller olarak sunan, mobil uyumlu bir tıp eğitimi uygulamasıdır. Eski model (her simülatör ayrı SCORM paketi) terk edilmiştir
 (ADR-006).
@@ -21,6 +21,8 @@ pnpm e2e:mobile                      # Playwright + axe: 360/768/1440 px, WCAG 2
 pnpm infra:up / pnpm infra:down      # geliştirme Postgres 18 (5432) + SQL LRS (8080) — colima/docker; değerler .env.local
 pnpm --filter @egemed/sim-opaca sync:xray   # git-dışı Opaca röntgen görsellerini yerel kaynak depodan kopyalar
 ```
+
+Üretim alan adı: **egemed.ege.edu.tr** (iş bitince). Açık ad: **EGEMED Klinik Öğrenme Deneyimi Platformu**.
 
 Geliştirme ortamında sahte giriş (yalnız `pnpm dev`; üretim derlemesinde kod ve hesaplar pakete girmez):
 yönetici `#/giris/admin` → `admin` / `egemed`; test öğrencisi `#/giris/test-ogrenci` → `ogrenci` / `egemed`.
@@ -66,9 +68,9 @@ yönetici `#/giris/admin` → `admin` / `egemed`; test öğrencisi `#/giris/test
   **sekmelerle** ayrı gösterir, toplam puan üretmez.
 - **Gömülü mod:** Sim modülleri platform içinde kendi üst bar/footer'ını çizmez (tek üst bar kuralı); sim kapsayıcısı React çocuğu
   içermez (vanilla modül güvenle `appendChild`/temizlik yapar).
-- **Kimlik ve veri (ADR-007, Kabul):** CLIX kullanıcı kaydı tutar; kullanıcıları admin kaydeder (tek tek ve toplu CSV); giriş tipi
-  **SSO** (protokol henüz belirlenmedi; o zamana kadar geliştirme sağlayıcısı). CLIX parola saklamaz. Roller şimdilik yalnız
-  **admin** ve **kullanıcı** (diğerleri park edildi). Oyunlaştırma verisi CLIX veritabanında kullanıcı×sim başına tutulur.
+- **Kimlik ve veri (ADR-007, Kabul):** EGEMED kullanıcı kaydı tutar; kullanıcıları admin kaydeder (tek tek ve toplu CSV); giriş tipi
+  **SSO** (protokol henüz belirlenmedi; o zamana kadar geliştirme sağlayıcısı). EGEMED parola saklamaz. Roller şimdilik yalnız
+  **admin** ve **kullanıcı** (diğerleri park edildi). Oyunlaştırma verisi EGEMED veritabanında kullanıcı×sim başına tutulur.
   xAPI ifadeleri kurum LRS'sine gider, aktör opaktır (ad/e-posta yok).
 - **Zaman ve rastgelelik:** `Date.now()` yasak (lint kuralı); `now` bağımlılık olarak enjekte edilir. Rastgelelik tohumlu ve
   deterministiktir. Tarih/saat Europe/Istanbul.
@@ -115,7 +117,7 @@ kimliğinden tohumlanır; stem bulguyu anlatmaz, arayüz ipucu sızdırmaz; geri
 
 ### Açık kararlar (insan)
 SSO protokolü (OIDC/SAML/CAS); xAPI profili (K2) ve LRS iletim yolu (K3); saklama/imha süreleri; liderlik tablosunda ad/takma ad;
-CLIX logosu; ana sayfadaki "öğretim üyesi denetimi" ifadesinin teyidi; Pulse kaynak deposundaki `nextEvent` hatasının kaynağa da
+EGEMED logosu; ana sayfadaki "öğretim üyesi denetimi" ifadesinin teyidi; Pulse kaynak deposundaki `nextEvent` hatasının kaynağa da
 uygulanması.
 
 ---

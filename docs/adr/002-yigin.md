@@ -14,7 +14,7 @@ bu seçime bağlıdır.
 - **Kabuk:** Vite + React. Sunucu tarafı render (SSR) yoktur; uygulama statik
   olarak derlenir ve iframe gömme ile çalışır.
 - **API:** Hono, Node 22 üzerinde.
-- **Veritabanı:** Öğrenci veritabanı yoktur; CLIX öğrenci kaydı tutmaz.
+- **Veritabanı:** Öğrenci veritabanı yoktur; EGEMED öğrenci kaydı tutmaz.
 - Yeni bağımlılık eklenmez; seçim T01'de onaylanan araç zinciriyle sınırlıdır.
 - `exactOptionalPropertyTypes` gevşetilmez; sürtünme çıkarsa çözüm ADR ile
   aranır, bayrak düşürülmez.
