@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { blank, decode, derive, encode, MAX_STATE_BYTES, MODES } from "../../packages/sim-pulse/src/index";
+import { blank, createSeededRandomInt, decode, derive, encode, MAX_STATE_BYTES, MODES } from "../../packages/sim-pulse/src/index";
 import type { PulseCurriculum, StateContext } from "../../packages/sim-pulse/src/index";
 
 const byId: Record<string, { correct: number; ecg: { leads: readonly ["I", "aVR", "V1"] } }> = {};
@@ -10,11 +10,7 @@ for (let i = 0; i < 200; i += 1) {
   byId[questions[i]!] = { correct: i % 5, ecg: { leads: ["I", "aVR", "V1"] } };
 }
 const curriculum: PulseCurriculum = { version: "fixture-1", cases, questions, byId };
-const context: StateContext = { curriculum, makeSession: (section, data) => {
-  const ids = (section === "case" ? data.cases : data.questions).slice(0, 10);
-  return { id: section === "case" ? "case-session" : "quiz-session", ids, answers: ids.map(() => null), submitted: ids.map(() => false),
-    leadSelections: ids.map(() => ["I", "aVR", "V1"]), interactionIndices: ids.map(() => null) };
-} };
+const context: StateContext = { curriculum, randomInt: createSeededRandomInt(20260924) };
 
 describe("Pulse v6 durum şeması", () => {
   it("boş durum encode/decode gidiş-dönüşünü korur", () => {
@@ -58,7 +54,9 @@ describe("Pulse v6 durum şeması", () => {
     const maxBack = decode(encode(complete, context), context);
     expect([maxBack.bestScore, maxBack.passed, Object.keys(maxBack.viewed).length]).toEqual([100, true, 13]);
 
-    const a = encode(blank(context), context), b = encode(blank(context), context);
+    const deterministicContext = (): StateContext => ({ curriculum, randomInt: createSeededRandomInt(20260924) });
+    const aContext = deterministicContext(), bContext = deterministicContext();
+    const a = encode(blank(aContext), aContext), b = encode(blank(bContext), bContext);
     expect(JSON.stringify(a)).toBe(JSON.stringify(b));
   });
 

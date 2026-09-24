@@ -2,9 +2,12 @@
    this schema has no global, random, clock, DOM, or authored-data dependency. */
 import { LEADS, MODES } from "./shapes";
 import type { Lead, Mode } from "./shapes";
+import { sample, SESSION_COUNT } from "./sample";
+import type { RandomInt } from "./rng";
+
+export { SESSION_COUNT } from "./sample";
 
 export const STATE_VERSION = 6;
-export const SESSION_COUNT = 10;
 export const MAX_STATE_BYTES = 4096;
 export const ACTIVE_VIEWS = ["sim", "case", "quiz", "modes", "about", "results", "tutorial"] as const;
 export type ActiveView = (typeof ACTIVE_VIEWS)[number];
@@ -35,7 +38,7 @@ export interface PulseState {
 }
 export interface StateContext {
   curriculum: PulseCurriculum;
-  makeSession?: (section: Section, curriculum: PulseCurriculum) => Session;
+  randomInt: RandomInt;
   previousPassed?: boolean;
 }
 
@@ -48,11 +51,7 @@ const validMode = (v: unknown): v is Mode => typeof v === "string" && (MODES as 
 const byteLength = (value: string): number => [...value].reduce((n, ch) => n + (ch.codePointAt(0)! <= 0x7f ? 1 : ch.codePointAt(0)! <= 0x7ff ? 2 : ch.codePointAt(0)! <= 0xffff ? 3 : 4), 0);
 
 function freshSession(section: Section, ctx: StateContext): Session {
-  if (ctx.makeSession) return ctx.makeSession(section, ctx.curriculum);
-  const pool = section === "case" ? ctx.curriculum.cases : ctx.curriculum.questions;
-  const ids = pool.slice(0, SESSION_COUNT);
-  return { id: "pending", ids, answers: ids.map(() => null), submitted: ids.map(() => false),
-    leadSelections: ids.map((id) => [...(ctx.curriculum.byId[id]?.ecg.leads ?? ["II"])]), interactionIndices: ids.map(() => null) };
+  return sample(section, ctx.curriculum, ctx.randomInt);
 }
 
 function validateSession(raw: unknown, section: Section, ctx: StateContext): Session {

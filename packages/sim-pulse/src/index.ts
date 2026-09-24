@@ -6,6 +6,9 @@ export { BeatEngine } from "./engine/beats";
 export type { AfProfile, Beat, BeatOptions, Checkpoint } from "./engine/beats";
 export { CardiacModel } from "./engine/model";
 export type { CardiacMetrics, CardiacSnapshot, MechanicalTimeline } from "./engine/model";
+export { createCryptoRandomInt, createSeededRandomInt } from "./engine/rng";
+export type { CryptoLike, RandomInt } from "./engine/rng";
+export { createSessionId, sample } from "./engine/sample";
 export {
   LEADS,
   MODES,
