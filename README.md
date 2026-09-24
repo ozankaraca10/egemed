@@ -52,9 +52,7 @@ yönetici `#/giris/admin` → `admin` / `egemed`; test öğrencisi `#/giris/test
 | `docs/adr/` | Mimari karar kayıtları 001–007 | Durum: Önerildi / Kabul |
 | `docs/specs/` | Epik ve plan belgeleri (E0–E3) | Aşağıda §5 |
 | `docs/agentic/` | Ajan devir/kurulum notları (`CODEX-DEVIR.md`) | Tarihsel bağlam |
-| `docs/ops/` · `docs/audits/` | Üretim işletim kılavuzu ve Impeccable arayüz denetim raporları | Yayın hazırlığı ve denetim kaydı |
-| `DESIGN.md` · `PRODUCT.md` | Impeccable tasarım sistemi ve ürün bağlamı | Arayüz çalışmaları için başvuru |
-| `.claude/` · `.agents/` · `.opencode/` | Impeccable beceri tanımları ve referansları | Ajan araçlarına göre kopyalanmış |
+| `docs/ops/` · `docs/audits/` | Üretim işletim kılavuzu ve güvenlik denetim raporları | Yayın hazırlığı ve denetim kaydı |
 | `sims/` | **Eski yer tutucu** — K-P1 kararıyla simler `packages/sim-<id>` altında; burası arşiv/boş | Lint ve workspace dışı |
 | `.agtx/` | Görev worktree'leri (`.agtx/worktrees/<görev>`) ve pano verisi — **git dışı** | Lint'ten hariç |
 
@@ -152,8 +150,6 @@ uygulanması.
 - **Platform API:** Hono/PostgreSQL, migration'lar, oturum/CSRF, admin kullanıcı ve denetim uçları, oyunlaştırma ve seed akışı
   mevcut. Üretim compose/Dockerfile/nginx yapılandırması `infra/prod/`, işletim adımları `docs/ops/ISLETIM.md` içindedir;
   yayın hazırlığı sürüyor ve SSO protokolü kararı bekliyor.
-- **Arayüz denetimi:** `docs/audits/IMPECCABLE-2026-09-24.md` raporu Audit Health 13/20, Design Health 26/40 ve P0:3, P1:8,
-  P2:7 bulgu kaydediyor; özellikle Ausculta'nın responsive düzeni, CTA ve simler arası terminoloji takip gerektiriyor.
 - **E2E:** Playwright + axe her koşuda JSON özeti ve ekran görüntülerini `e2e-artifacts/<run-id>/` altına yazar. README'deki
   önceki 77/80 sonucu tarihsel koşuya aittir; güncel yayın kapısı olarak değerlendirilmemelidir.
 

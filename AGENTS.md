@@ -3,7 +3,7 @@
 EGEMED, Pulse, Ausculta ve Opaca simülatörlerini tek React platformu içinde ayrı modüller olarak sunan mobil uyumlu klinik öğrenme platformudur (ADR-006; eski SCORM/iframe modelinin yerine geçer). Simülatör verileri hiçbir yüzeyde birleştirilmez; öğrenci verisi kurum altyapısında kalır; ders, ödev ve not defteri Moodle'dadır.
 
 ## Harita
-`apps/shell` React web kabuğu; `apps/api` Hono + PostgreSQL API (migrations); `packages/sim-opaca`, `sim-pulse`, `sim-ausculta` simülatörleri; `packages/sim-host`, `gamification-core`, `contracts`, `api-client`, `tokens`, `ui`, `xapi-client`, `xapi-profile`; `e2e/` testleri ve `e2e-artifacts/` çıktıları; `infra/` geliştirme, `infra/prod/` üretim; `docs/adr`, `specs`, `agentic`, `ops`, `audits`, `legacy`; `DESIGN.md` / `PRODUCT.md` ürün ve tasarım bağlamı; `.claude/`, `.agents/`, `.opencode/` Impeccable beceri dosyaları.
+`apps/shell` React web kabuğu; `apps/api` Hono + PostgreSQL API (migrations); `packages/sim-opaca`, `sim-pulse`, `sim-ausculta` simülatörleri; `packages/sim-host`, `gamification-core`, `contracts`, `api-client`, `tokens`, `ui`, `xapi-client`, `xapi-profile`; `e2e/` testleri ve `e2e-artifacts/` çıktıları; `infra/` geliştirme, `infra/prod/` üretim; `docs/adr`, `specs`, `agentic`, `ops`, `audits`, `legacy`.
 
 ## Komutlar
 `pnpm i`; `pnpm turbo lint typecheck test`; `pnpm e2e:mobile` (tekrarlanabilir özet ve ekran görüntüleri `e2e-artifacts/<run-id>/` altına yazılır); `pnpm dev`; `pnpm --filter @egemed/api migrate:up`; `pnpm --filter @egemed/api seed:admin`; `pnpm --filter @egemed/sim-opaca sync:xray`; `pnpm --filter @egemed/sim-ausculta sync:audio`.
