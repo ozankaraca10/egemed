@@ -74,6 +74,22 @@ export {
   saveBestScore,
 } from "./core/reducer";
 export type { Action, AppState, BodySex, ReducerSeam, StoragePort } from "./core/reducer";
+export { createFlushHandlers, createLifecycle } from "./core/lifecycle";
+export type { FlushTarget, Lifecycle, LifecycleHandlers, WindowLike } from "./core/lifecycle";
+export { StoreProvider, useStore } from "./core/StoreProvider";
+export type { StoreContextValue, StoreProviderProps } from "./core/StoreProvider";
+export { createMemoryRuntimeAdapter, createNoopRuntimeAdapter, createSimRuntime } from "./core/runtime";
+export type {
+  FinishReport,
+  InteractionRecord,
+  MemoryRuntimeAdapter,
+  RuntimeAdapter,
+  RuntimeCall,
+  RuntimeOptions,
+  ScoreReport,
+  SimRuntime,
+  SuspendWrite,
+} from "./core/runtime";
 export { AUDIO_CONFIG } from "./audio/config";
 export { createAudioEngine } from "./audio/engine";
 export type { AudioEngine, AudioEngineDeps, EngineState } from "./audio/engine";

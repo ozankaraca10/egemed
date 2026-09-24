@@ -11,7 +11,14 @@
     "sync:audio": "node tools/sync-audio.mjs",
     "typecheck": "tsc --noEmit"
   },
+  "peerDependencies": {
+    "react": "^19"
+  },
   "dependencies": {
     "@egemed/sim-host": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/react": "19.3.0",
+    "react": "19.3.0"
   }
 }
