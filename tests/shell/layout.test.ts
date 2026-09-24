@@ -50,9 +50,11 @@ describe("ShellLayout işaretlemesi", () => {
   });
   it("üst bar marka bloğu işlenir", () => {
     const html = renderRoute("#/");
-    expect(html).toContain(t("shell.brand.eyebrow"));
-    expect(html).toContain(t("shell.brand.name"));
+    expect(html).toContain(`aria-label="${t("shell.brand.full")}"`);
+    expect(html).toContain('class="eg-shell-logo eg-shell-logo--on-dark"');
+    expect(html).toContain("EGEMED");
     expect(html).toContain(t("shell.brand.tagline"));
+    expect(html).not.toContain("CLIX");
   });
   it("atlama bağlantısı hash gezinmesini iptal eden işleyiciye bağlıdır", () => {
     // Statik HTML olay işleyicisi taşımaz; `ShellLayout` bilinçli olarak hook'suz

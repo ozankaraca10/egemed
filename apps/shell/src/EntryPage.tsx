@@ -6,6 +6,7 @@ import { focusMain } from "./ShellLayout";
 import { ShellFooter } from "./ShellFooter";
 import { entryHref, entryRedirectHref, type EntryRole } from "./routes";
 import { SIM_ICONS, SIM_IDS } from "./SimCard";
+import { EgemedLogo } from "./brand/EgemedLogo";
 
 /** Kök tsconfig DOM lib'i taşımadığı için form alanı erişimi en dar arayüzle yapılır. */
 interface FieldLike { value: string }
@@ -106,8 +107,7 @@ export function EntryPage({ role, devEnabled = false }: EntryPageProps): JSX.Ele
       <a className="eg-shell-skip" href="#icerik" onClick={focusMain}>{t("shell.skip")}</a>
       <section aria-label={t("entry.brand")} className="eg-shell-entry__brand">
         <img alt="" className="eg-shell-entry__logo" src="/brand/ege-tip-logo.png" />
-        <p className="eg-shell-entry__name">{t("entry.brand")}</p>
-        <p className="eg-shell-entry__tagline">{t("entry.tagline")}</p>
+        <EgemedLogo variant="on-dark" />
         <div className="eg-shell-entry__sims">
           <div className="eg-shell-entry__simrow">
             {SIM_IDS.map((id) => (

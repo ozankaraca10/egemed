@@ -34,6 +34,9 @@ describe("giriş rotaları", () => {
       expect(html).not.toContain(t("entry.session.synthetic"));
     }
     expect(html).toContain('src="/brand/ege-tip-logo.png"');
+    expect(html).toContain(`aria-label="${t("shell.brand.full")}"`);
+    expect(html).toContain('class="eg-shell-logo eg-shell-logo--on-dark"');
+    expect(html).not.toContain("CLIX");
     expect(html).toContain('href="#icerik"');
     const warningIndex = html.indexOf(t("entry.auth.pending"));
     expect(warningIndex).toBeGreaterThan(-1);
