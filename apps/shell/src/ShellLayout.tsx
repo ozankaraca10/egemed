@@ -2,6 +2,7 @@ import type { JSX, ReactNode } from "react";
 import { t } from "@egemed/ui/i18n";
 import type { DevSession } from "./devAuth";
 import { ROUTES, routeHref, type ResolvedRoute, type RouteId } from "./routes";
+import { ShellFooter } from "./ShellFooter";
 
 export interface ShellLayoutProps {
   /** Çözümlenmiş rota; etkin bağlantı işaretlemesi bundan türetilir. */
@@ -106,6 +107,7 @@ export function ShellLayout({ route, session, onLogout, children }: ShellLayoutP
         {roleLabel !== null && <p className="eg-shell-session-banner">{t("shell.session.banner")}</p>}
         {children}
       </main>
+      <ShellFooter />
     </div>
   );
 }

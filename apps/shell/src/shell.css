@@ -92,10 +92,32 @@ html, body { margin: 0; }
 .eg-shell-nav__link[aria-current="page"] {
   color: var(--blue-700); font-weight: 600; box-shadow: inset 0 -3px 0 var(--blue-600);
 }
-.eg-shell-main {
-  box-sizing: border-box; padding: var(--sp-4);
-  padding-bottom: calc(var(--eg-shell-touch-min) + env(safe-area-inset-bottom) + var(--sp-5));
+.eg-shell-main { box-sizing: border-box; padding: var(--sp-4); }
+/* Mobilde alt sekme çubuğu sabittir; boşluğu sayfa sonundaki footer'ın alt
+   dolgusu verir (aşağıda `.eg-shell .eg-shell-footer`), böylece footer çubuğun
+   altında kalmaz ve içerik ile footer arasında çift boşluk oluşmaz. */
+.eg-shell-footer {
+  box-sizing: border-box; display: flex; flex-wrap: wrap; align-items: center;
+  justify-content: center; gap: var(--sp-2) var(--sp-3); padding: var(--sp-4);
+  background: var(--card); border-top: 1px solid var(--border);
+  color: var(--muted); font-size: var(--fs-sm); text-align: center;
 }
+.eg-shell .eg-shell-footer {
+  padding-bottom: calc(var(--eg-shell-touch-min) + env(safe-area-inset-bottom) + var(--sp-3));
+}
+.eg-shell-footer__seal { display: block; flex-shrink: 0; width: 1.75rem; height: 1.75rem; }
+.eg-shell-footer__text {
+  display: flex; flex-wrap: wrap; align-items: baseline; justify-content: center;
+  gap: var(--sp-1) var(--sp-2); margin: 0;
+}
+.eg-shell-footer__institution { color: var(--navy-800); font-weight: 700; }
+.eg-shell-footer__rights { color: var(--muted); }
+/* Giriş ekranı: sağ panelin altında, küçük ve kartsız varyant. */
+.eg-shell-footer--small {
+  padding: var(--sp-3) var(--sp-4) var(--sp-4); background: none; border-top: 0;
+  font-size: var(--fs-xs);
+}
+.eg-shell-footer--small .eg-shell-footer__seal { width: 1.25rem; height: 1.25rem; }
 .eg-shell-page__title { margin: 0 0 var(--sp-3); color: var(--navy-900); font-size: var(--fs-2xl); }
 .eg-shell-page__body { margin: 0 0 var(--sp-4); color: var(--muted); }
 .eg-shell-cards { display: grid; gap: var(--sp-3); margin: 0; padding: 0; list-style: none; }
@@ -140,7 +162,33 @@ html, body { margin: 0; }
   min-height: var(--eg-shell-touch-min); padding: 0 var(--sp-2);
   color: var(--blue-700); font-weight: 600;
 }
+/* --- "Nasıl çalışır?": üç adım, mod kimliği renkleri (İnceleme yeşil,
+   Uygulama mavi, Değerlendirme mor). Bilgi yalnız renkle verilmez: her adımda
+   görünür numara + başlık vardır; renk yalnız üst şerit ve sayı zemininde
+   tekrarlanan bir ipucudur. --- */
+.eg-shell-how { display: grid; gap: var(--sp-3); margin: 0; padding: 0; list-style: none; }
+.eg-shell-how__step {
+  box-sizing: border-box; padding: var(--sp-4); padding-top: var(--sp-5);
+  background: var(--card); border: 1px solid var(--border); border-top: 4px solid var(--border-strong);
+  border-radius: var(--radius); box-shadow: var(--shadow-card);
+}
+.eg-shell-how__step--learn { border-top-color: var(--green-600); }
+.eg-shell-how__step--practice { border-top-color: var(--blue-600); }
+.eg-shell-how__step--assess { border-top-color: var(--purple-600); }
+.eg-shell-how__num {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 2rem; height: 2rem; border-radius: var(--r-pill);
+  font-size: var(--fs-xl); font-weight: 800; line-height: 1;
+}
+.eg-shell-how__step--learn .eg-shell-how__num { background: var(--green-50); color: var(--green-600); }
+.eg-shell-how__step--practice .eg-shell-how__num { background: var(--blue-50); color: var(--blue-700); }
+.eg-shell-how__step--assess .eg-shell-how__num { background: var(--purple-50); color: var(--purple-600); }
+.eg-shell-how__title { margin: var(--sp-2) 0; color: var(--navy-800); font-size: var(--fs-lg); }
+.eg-shell-how__body { margin: 0; color: var(--muted); }
 .eg-shell-sim { display: grid; gap: var(--sp-2); }
+/* Rozet kartın en üstünde, başlığın yanındadır; başlık görsel gizli kalır
+   (ad zaten logoda yazılı), erişilebilir ad tek kaynaktan gelir. */
+.eg-shell-sim__head { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-2); }
 .eg-shell-sim__logo {
   width: 100%; height: 5.5rem; object-fit: contain; object-position: left center;
 }
@@ -166,12 +214,17 @@ html, body { margin: 0; }
   background: var(--blue-50); border: 1px solid var(--blue-600); border-radius: var(--r-md);
   color: var(--navy-900); font-weight: 600; text-decoration: none;
 }
+/* Aşama: host ile iskelet/hata aynı ızgara hücresini paylaşır (üst üste
+   çizilir). Host React çocuğu taşımaz ve gizlenmez; yükleniyor/hata sırasında
+   boş kalır, hazır olduğunda vanilla sim modülü kendi kökünü buraya ekler. */
+.eg-shell-sim-page__stage { display: grid; }
+.eg-shell-sim-page__stage > * { grid-area: 1 / 1; min-width: 0; }
 .eg-shell-sim-page__host {
   box-sizing: border-box; min-height: 20rem; padding: var(--sp-4);
   background: var(--card); border: 1px solid var(--border);
   border-radius: var(--radius); box-shadow: var(--shadow-card);
 }
-.eg-shell-sim-page__skeleton { display: grid; gap: var(--sp-3); }
+.eg-shell-sim-page__skeleton { display: grid; align-content: start; gap: var(--sp-3); padding: var(--sp-4); }
 .eg-shell-sim-page__skeleton-block {
   display: block; height: 5.5rem; background: var(--card-soft);
   border: 1px dashed var(--border-strong); border-radius: var(--radius);
@@ -224,9 +277,17 @@ html, body { margin: 0; }
 .eg-shell-entry__logo { width: clamp(5rem, 12vw, 9rem); height: auto; }
 .eg-shell-entry__name { margin: var(--sp-4) 0 var(--sp-2); font-size: var(--fs-3xl); font-weight: 700; letter-spacing: .02em; }
 .eg-shell-entry__tagline { max-width: 28rem; margin: 0; color: var(--blue-100); font-size: var(--fs-xl); }
+/* Beyaz sim ikon sırası: dekoratif (alt=""), adlar altta görünür metinle. */
+.eg-shell-entry__sims { display: grid; gap: var(--sp-2); justify-items: center; margin-top: var(--sp-5); }
+.eg-shell-entry__simrow { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: var(--sp-4); }
+.eg-shell-entry__simicon { display: block; width: auto; height: 2rem; }
+.eg-shell-entry__sims-label {
+  margin: 0; color: var(--blue-100); font-size: var(--fs-sm);
+  font-weight: 600; letter-spacing: .08em;
+}
 .eg-shell-entry__main {
-  display: flex; align-items: center; justify-content: center; box-sizing: border-box;
-  min-width: 0; padding: var(--sp-6);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  box-sizing: border-box; min-width: 0; padding: var(--sp-6);
 }
 .eg-shell-entry__panel {
   box-sizing: border-box; width: min(100%, 30rem); padding: var(--sp-6);
@@ -279,7 +340,7 @@ html, body { margin: 0; }
   .eg-shell-entry__logo { width: 4.5rem; }
   .eg-shell-entry__name { margin: var(--sp-2) 0; font-size: var(--fs-2xl); }
   .eg-shell-entry__tagline { font-size: var(--fs-md); }
-  .eg-shell-entry__main { align-items: flex-start; padding: var(--sp-4) var(--sp-3) calc(var(--sp-5) + env(safe-area-inset-bottom)); }
+  .eg-shell-entry__main { align-items: center; justify-content: flex-start; padding: var(--sp-4) var(--sp-3) calc(var(--sp-5) + env(safe-area-inset-bottom)); }
   .eg-shell-entry__panel { padding: var(--sp-4); }
 }
 @media (max-width: 380px) {
@@ -310,7 +371,10 @@ html, body { margin: 0; }
     box-shadow: inset 0 -3px 0 var(--blue-400); color: var(--card);
   }
   .eg-shell-main { max-width: 72rem; margin: 0 auto; padding: var(--sp-5); }
+  /* Gezinme üst bara döndüğü için footer'ın alt çubuk boşluğu gerekmez. */
+  .eg-shell .eg-shell-footer { padding-bottom: var(--sp-4); }
   .eg-shell-cards { grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr)); }
+  .eg-shell-how { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .eg-shell-trust { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .eg-shell-hero { padding: var(--sp-6); }
 }

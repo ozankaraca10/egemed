@@ -10,6 +10,8 @@ import { describe, expect, it } from "vitest";
 const STUDENT: DevSession = { actorId: "dev-student-0001", role: "student" };
 const TRUST_KEYS = ["data", "faculty", "privacy"] as const;
 const TRUST_SECTION_ID = "eg-neden-guvenilir";
+const HOW_STEPS = ["learn", "practice", "assess"] as const;
+const HOW_SECTION_ID = "eg-nasil-calisir";
 
 function render(session?: DevSession | null): string {
   return session === undefined
@@ -30,7 +32,23 @@ describe("HomePage premium yerleşimi", () => {
     expect(html).toContain(t("home.hero.lead"));
     expect(html).toContain(`<a class="eg-shell-cta" href="${routeHref("simulators")}">`);
     expect(html).toContain(t("home.hero.cta"));
-    expect(html).toContain(`href="#${TRUST_SECTION_ID}"`);
+    expect(html).toContain(
+      `<a class="eg-shell-hero__secondary" href="#${HOW_SECTION_ID}">${t("home.hero.secondary")}</a>`,
+    );
+  });
+  it("hero'dan sonra üç adımlı 'Nasıl çalışır?' bölümünü sim kartlarından önce çizer", () => {
+    const html = render();
+    expect(html).toContain(`id="${HOW_SECTION_ID}"`);
+    expect(html).toContain(t("home.how.title"));
+    expect(count(html, "eg-shell-how__step--")).toBe(3);
+    expect(count(html, 'class="eg-shell-how__num"')).toBe(3);
+    for (const step of HOW_STEPS) {
+      expect(html, step).toContain(`eg-shell-how__step--${step}`);
+      expect(html, step).toContain(t(`home.how.${step}.title`));
+      expect(html, step).toContain(t(`home.how.${step}.body`));
+    }
+    expect(html.indexOf(`id="${HOW_SECTION_ID}"`)).toBeLessThan(html.indexOf('id="eg-home-sims"'));
+    expect(html).toContain(`id="${TRUST_SECTION_ID}"`);
   });
   it("üç sim kartını rozet ve simülatörler bağlantısıyla listeler", () => {
     const html = render();
@@ -76,7 +94,7 @@ describe("scrollToSection", () => {
   it("hash gezinmesini iptal eder; DOM yokken sessizce döner", () => {
     let prevented = 0;
     expect(() =>
-      scrollToSection({ preventDefault: () => { prevented += 1; } }, TRUST_SECTION_ID),
+      scrollToSection({ preventDefault: () => { prevented += 1; } }, HOW_SECTION_ID),
     ).not.toThrow();
     expect(prevented).toBe(1);
   });

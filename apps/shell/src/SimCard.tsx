@@ -16,6 +16,20 @@ export const SIM_LOGOS: Record<SimId, { src: string; width: number; height: numb
   pulse: { height: 266, src: "/brand/sims/pulse-horizontal.png", width: 800 },
 };
 
+/**
+ * Giriş ekranı sol paneli için beyaz sim ikonları. Üç kaynak da beyaz-saydam
+ * PNG'dir (Pulse marka kitindeki `09_..._symbol-white.png`); CSS filtresi
+ * gerekmez. `width`/`height` doğal piksel oranıdır.
+ */
+export const SIM_ICONS: Record<SimId, { src: string; width: number; height: number }> = {
+  ausculta: { height: 128, src: "/brand/sims/ausculta-icon-white.png", width: 118 },
+  opaca: { height: 256, src: "/brand/sims/opaca-icon-white.png", width: 256 },
+  pulse: { height: 1024, src: "/brand/sims/pulse-icon-white.png", width: 1024 },
+};
+
+/** Kart başlığı düzeyleri; `Card` ile aynı eşleme (2 → h2, 3 → h3). */
+const headingTags = { 2: "h2", 3: "h3" } as const;
+
 export interface SimCardProps {
   readonly id: SimId;
   /** Simülatörler sayfasında logo ve kart bir kademe büyür. */
@@ -30,9 +44,11 @@ export interface SimCardProps {
 }
 
 /**
- * Simülatör kartı: logo (dekoratif, ad başlıkta), ad, tagline, tanıtım,
- * "Platforma taşınıyor" rozeti ve isteğe bağlı bağlantı. Kart kabuğu
- * `@egemed/ui` Card; gölge/radius aile token'larından gelir.
+ * Simülatör kartı: durum rozeti + ad (görsel gizli erişilebilir başlık),
+ * logo, tagline, tanıtım ve isteğe bağlı bağlantı. Rozet kartın en üstünde
+ * başlığın yanındadır; logo adı zaten taşıdığı için `alt=""` kalır ve
+ * erişilebilir ad tek kaynaktan (başlık) gelir. Kart kabuğu `@egemed/ui`
+ * Card; gölge/radius aile token'larından gelir.
  */
 export function SimCard({
   id,
@@ -41,13 +57,14 @@ export function SimCard({
   href,
 }: SimCardProps): JSX.Element {
   const logo = SIM_LOGOS[id];
+  const Heading = headingTags[headingLevel];
   return (
-    <Card
-      footer={<Badge tone="info">{t("sims.soon")}</Badge>}
-      headingLevel={headingLevel}
-      title={t(`sims.${id}.name`)}
-    >
+    <Card>
       <div className={`eg-shell-sim eg-shell-sim--${size}`}>
+        <div className="eg-shell-sim__head">
+          <Badge tone="info">{t("sims.soon")}</Badge>
+          <Heading className="eg-visually-hidden">{t(`sims.${id}.name`)}</Heading>
+        </div>
         <img
           alt=""
           className="eg-shell-sim__logo"

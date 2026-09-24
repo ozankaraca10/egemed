@@ -18,11 +18,26 @@ export interface SimRouteProps {
 }
 
 /**
+ * Hata kutusu başlığı: sim adı + hata etiketi. Mevcut sözlük anahtarlarından
+ * türetilir; "tekrar dene" düğmesi aynı kutuda yer alır. Özel bir "Tekrar
+ * dene" anahtarı sözlükte yoktur (bkz. T38c summary — ayrı copy görevi).
+ */
+export function simErrorTitle(simId: SimulatorId): string {
+  return `${t(simTitleKey(simId))} · ${t("badge.tone.danger")}`;
+}
+
+/**
  * Sim rotası React host'u (ADR-006): `SimHost` bileşen ömrü boyunca tek
  * örnektir; modül `useEffect` içinde kapsayıcıya mount edilir, cleanup'ta
  * dispose edilir. Sim değişiminde yeni oturum kurulurken host önceki oturumu
  * kendisi kapatır; "tekrar dene" aynı yolu yeniden çalıştırır. Saat tek
  * sağlayıcıdan (`shellNow`) enjekte edilir; `Date.now()` kullanılmaz.
+ *
+ * Host kapsayıcısı React çocuğu taşımaz (T14b): vanilla sim modülü aynı düğüme
+ * `appendChild` yapar ve kendi içeriğini `innerHTML=""` ile temizleyebilir;
+ * React'in kaldıracağı düğüm olmadığı için bu güvenlidir. İskelet ve hata
+ * kutusu host'un kardeşidir; yükleniyor/hata sırasında host gizlenmez, boş
+ * kalır ve aşama ızgarasında aynı hücreyi paylaşır.
  */
 export function SimRoute({ simId }: SimRouteProps): JSX.Element {
   const containerRef = useRef<SimContainer | null>(null);
@@ -58,14 +73,15 @@ export function SimRoute({ simId }: SimRouteProps): JSX.Element {
           {t("shell.nav.simulators")}
         </a>
       </div>
-      {/* Kök program DOM lib'i taşımaz (boş `HTMLDivElement`); gerçek düğüm
-          çalışma zamanında host sözleşmesini karşılar. */}
-      <div
-        className="eg-shell-sim-page__host"
-        ref={(node: unknown) => {
-          containerRef.current = node as SimContainer | null;
-        }}
-      >
+      <div className="eg-shell-sim-page__stage">
+        {/* Kök program DOM lib'i taşımaz (boş `HTMLDivElement`); gerçek düğüm
+            çalışma zamanında host sözleşmesini karşılar. */}
+        <div
+          className="eg-shell-sim-page__host"
+          ref={(node: unknown) => {
+            containerRef.current = node as SimContainer | null;
+          }}
+        />
         {status === "loading" && (
           <div aria-hidden="true" className="eg-shell-sim-page__skeleton">
             <span className="eg-shell-sim-page__skeleton-block" />
@@ -74,7 +90,7 @@ export function SimRoute({ simId }: SimRouteProps): JSX.Element {
         )}
         {status === "error" && (
           <div className="eg-shell-sim-page__error" role="alert">
-            <p className="eg-shell-sim-page__error-title">{t("badge.tone.danger")}</p>
+            <p className="eg-shell-sim-page__error-title">{simErrorTitle(simId)}</p>
             <button
               className="eg-shell-sim-page__retry"
               onClick={() => setAttempt((value) => value + 1)}

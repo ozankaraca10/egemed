@@ -2,6 +2,7 @@ import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { EntryPage, submitEntryPreview } from "../../apps/shell/src/EntryPage";
 import { ENTRY_PATHS, entryHref, resolveRoute, ROUTES } from "../../apps/shell/src/routes";
+import { SIM_ICONS, SIM_IDS } from "../../apps/shell/src/SimCard";
 import { t } from "../../packages/ui/i18n/tr";
 import { describe, expect, it } from "vitest";
 
@@ -45,6 +46,19 @@ describe("giriş rotaları", () => {
     expect(html).toContain('for="entry-password"');
     expect(html).toContain('type="submit"');
     expect(html).not.toContain('role="alert"');
+  });
+
+  it("sol panelde üç beyaz sim ikonunu dekoratif olarak, adlarını görünür metinle gösterir", () => {
+    const html = renderToStaticMarkup(createElement(EntryPage, { role: "student" }));
+    expect(html).toContain('class="eg-shell-entry__simrow"');
+    for (const id of SIM_IDS) {
+      const icon = SIM_ICONS[id];
+      const tag = html.match(new RegExp(`<img[^>]*src="${icon.src}"[^>]*>`))?.[0] ?? "";
+      expect(tag, id).toContain('alt=""');
+      expect(tag, id).toContain(`width="${icon.width}"`);
+      expect(tag, id).toContain(`height="${icon.height}"`);
+    }
+    expect(html).toContain(SIM_IDS.map((id) => t(`sims.${id}.name`)).join(" · "));
   });
 
   it("önizleme gönderimini iptal eder ve yalnız bekleyen durum bildiricisini tetikler", () => {

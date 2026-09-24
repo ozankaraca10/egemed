@@ -54,4 +54,14 @@ describe("shell.css token sözleşmesi", () => {
     expect(shellCss).toMatch(/html\s*,\s*body\s*\{[^}]*margin:\s*0/);
     expect(shellCss).toMatch(/:focus:not\(:focus-visible\)[^{]*\{[^}]*outline:\s*none/);
   });
+  it("footer'ı alt çubuk boşluğuyla, adımları mod kimliği renkleriyle tanımlar", () => {
+    expect(shellCss).toMatch(/\.eg-shell \.eg-shell-footer\s*\{[^}]*padding-bottom:\s*calc\(/);
+    expect(shellCss).toMatch(/\.eg-shell-footer--small\s*\{/);
+    expect(shellCss).toMatch(/\.eg-shell-how__step--learn\s*\{[^}]*var\(--green-600\)/);
+    expect(shellCss).toMatch(/\.eg-shell-how__step--practice\s*\{[^}]*var\(--blue-600\)/);
+    expect(shellCss).toMatch(/\.eg-shell-how__step--assess\s*\{[^}]*var\(--purple-600\)/);
+    expect(shellCss).toMatch(/\.eg-shell-how__num\s*\{[^}]*width:\s*2rem/);
+    expect(shellCss).toMatch(/\.eg-shell-entry__simicon\s*\{[^}]*height:\s*2rem/);
+    expect(shellCss).not.toMatch(/\.eg-shell-entry__simicon[^{]*\{[^}]*filter:/);
+  });
 });

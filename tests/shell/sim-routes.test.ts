@@ -3,8 +3,8 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { shellNow } from "../../apps/shell/src/now";
 import { HomePage, SimulatorsPage } from "../../apps/shell/src/pages";
 import { resolveRoute, routeHref, SIM_PATHS, simHref, simTitleKey } from "../../apps/shell/src/routes";
-import { SIM_IDS } from "../../apps/shell/src/SimCard";
-import { SimRoute } from "../../apps/shell/src/SimRoute";
+import { SIM_IDS, SimCard } from "../../apps/shell/src/SimCard";
+import { SimRoute, simErrorTitle } from "../../apps/shell/src/SimRoute";
 import { loadSimModule } from "../../apps/shell/src/sims/loaders";
 import { createPlaceholderModule } from "../../apps/shell/src/sims/placeholder";
 import { SIMULATOR_IDS, type SimMountTarget } from "../../packages/sim-host/src/SimHost";
@@ -111,6 +111,37 @@ describe("yer tutucu sim modülü", () => {
   });
 });
 
+describe("SimCard rozet ve erişilebilir başlık düzeni", () => {
+  it("rozeti başlığın yanında en üstte tutar; logo dekoratif, başlık görsel gizli", () => {
+    for (const [headingLevel, tag] of [[3, "h3"], [2, "h2"]] as const) {
+      const html = renderToStaticMarkup(
+        createElement(SimCard, { headingLevel, href: "#/sims/pulse", id: "pulse" }),
+      );
+      const badgeIndex = html.indexOf('class="eg-badge"');
+      const headingIndex = html.indexOf(`<${tag} class="eg-visually-hidden">`);
+      const logoIndex = html.indexOf('class="eg-shell-sim__logo"');
+      const linkIndex = html.indexOf('class="eg-shell-sim__link"');
+      expect(html, tag).toContain(
+        `<${tag} class="eg-visually-hidden">${t("sims.pulse.name")}</${tag}>`,
+      );
+      expect(badgeIndex, tag).toBeGreaterThan(-1);
+      expect(badgeIndex, tag).toBeLessThan(headingIndex);
+      expect(headingIndex, tag).toBeLessThan(logoIndex);
+      expect(logoIndex, tag).toBeLessThan(linkIndex);
+      expect(html, tag).not.toContain("eg-card__footer");
+    }
+  });
+
+  it("simülatörler sayfasında kart başlıkları h2 olarak kalır", () => {
+    const html = renderToStaticMarkup(createElement(SimulatorsPage));
+    for (const simId of SIM_IDS) {
+      expect(html, simId).toContain(
+        `<h2 class="eg-visually-hidden">${t(`sims.${simId}.name`)}</h2>`,
+      );
+    }
+  });
+});
+
 describe("SimRoute yükleniyor durumu", () => {
   it("tek h1, aria-busy ve çıkış bağlantısıyla host kapsayıcısını çizer", () => {
     const html = renderToStaticMarkup(createElement(SimRoute, { simId: "ausculta" }));
@@ -120,6 +151,27 @@ describe("SimRoute yükleniyor durumu", () => {
     expect(html).toContain(`href="${routeHref("simulators")}"`);
     expect(html).toContain('class="eg-shell-sim-page__host"');
     expect(html).not.toContain('role="alert"');
+  });
+
+  it("host kapsayıcısını React çocuğu olmadan çizer; iskelet onun kardeşidir (T14b)", () => {
+    const html = renderToStaticMarkup(createElement(SimRoute, { simId: "ausculta" }));
+    // Vanilla sim modülü host'a appendChild yapar ve içeriği temizleyebilir;
+    // React'in kaldıracağı çocuk olmadığı için host boş kalmalıdır.
+    expect(html).toMatch(/<div class="eg-shell-sim-page__host"><\/div>/);
+    const hostIndex = html.indexOf("eg-shell-sim-page__host");
+    const skeletonIndex = html.indexOf("eg-shell-sim-page__skeleton");
+    expect(skeletonIndex).toBeGreaterThan(hostIndex);
+    expect(html).toContain("eg-shell-sim-page__stage");
+  });
+});
+
+describe("simErrorTitle", () => {
+  it("sim adı ve hata etiketini mevcut anahtarlardan birleştirir", () => {
+    for (const simId of SIMULATOR_IDS) {
+      expect(simErrorTitle(simId), simId).toBe(
+        `${t(`sims.${simId}.name`)} · ${t("badge.tone.danger")}`,
+      );
+    }
   });
 });
 
