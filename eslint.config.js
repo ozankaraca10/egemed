@@ -3,7 +3,7 @@ import tseslint from "typescript-eslint";
 
 export default tseslint.config(
   {
-    ignores: ["**/dist/**", "**/.turbo/**", "**/coverage/**", "sims/**", "work/**", ".agtx/**", "playwright-report/**", "test-results/**", "e2e-artifacts/**", ".claude/**", ".agents/**", ".opencode/**", ".codex/**", ".cursor/**"],
+    ignores: ["**/dist/**", "**/.turbo/**", "**/coverage/**", "sims/**", "work/**", ".agtx/**", "playwright-report/**", "test-results/**", "e2e-artifacts/**"],
   },
   js.configs.recommended,
   ...tseslint.configs.recommended,
