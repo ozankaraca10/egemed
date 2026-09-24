@@ -35,6 +35,7 @@ const premiumKeys: TrKey[] = [
   "shell.brand.eyebrow",
   "shell.brand.name",
   "shell.brand.tagline",
+  "shell.brand.full",
   "home.hero.title",
   "home.hero.lead",
   "home.hero.cta",
@@ -181,14 +182,31 @@ describe("i18n/tr sözlüğü", () => {
     for (const key of premiumKeys) {
       expect(t(key).trim().length, key).toBeGreaterThan(0);
     }
-    expect(t("shell.brand.eyebrow")).toBe("EGEMED");
-    expect(t("shell.brand.name")).toBe("CLIX");
-    expect(t("shell.brand.tagline")).toBe("Klinik Öğrenme Platformu");
+    expect(t("shell.brand.eyebrow")).toBe("Ege Üniversitesi Tıp Fakültesi");
+    expect(t("shell.brand.name")).toBe("EGEMED");
+    expect(t("shell.brand.tagline")).toBe("Klinik Öğrenme Deneyimi Platformu");
+    expect(t("shell.brand.full")).toBe("EGEMED Klinik Öğrenme Deneyimi Platformu");
     expect(t("home.greeting")).toBe("Hoş geldiniz");
     expect(t("home.hero.cta")).toBe("Simülatörlere git");
     expect(t("sims.open")).toBe("Simülatörü aç");
     expect(t("sims.soon")).toBe("Platforma taşınıyor");
     expect(t("footer.nav.label")).toBe("Alt bilgi");
     expect(t("footer.institution")).toBe("Ege Üniversitesi Tıp Fakültesi");
+  });
+
+  it("ad değişikliği: marka metinleri EGEMED adını taşır", () => {
+    expect(t("entry.brand")).toBe("EGEMED");
+    expect(t("entry.tagline")).toBe("Klinik öğrenme deneyimi tek platformda.");
+    expect(t("shell.brand")).toBe("EGEMED");
+    expect(t("shell.home.body")).toBe(
+      "EGEMED Klinik Öğrenme Deneyimi Platformu'na hoş geldiniz.",
+    );
+    expect(t("footer.rights")).toBe("EGEMED · Eğitim amaçlıdır, tanı aracı değildir.");
+  });
+
+  it("sözlükteki hiçbir değer 'clix' içermez (büyük/küçük harf duyarsız)", () => {
+    for (const [key, value] of Object.entries(tr)) {
+      expect(value.toLowerCase().includes("clix"), key).toBe(false);
+    }
   });
 });
