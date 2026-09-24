@@ -1,6 +1,7 @@
 import { useEffect, useRef, type JSX, type ReactNode } from "react";
 import { t, type TrKey } from "@egemed/ui/i18n";
 import { AdminPage } from "./AdminPage";
+import { ImportWizardPage } from "./admin/ImportWizardPage";
 import { UserDetailPage } from "./admin/UserDetailPage";
 import { UserFormPage } from "./admin/UserFormPage";
 import { UsersPage } from "./admin/UsersPage";
@@ -35,6 +36,7 @@ function contentFor(route: ResolvedRoute, session: DevSession | null): ReactNode
   if (route.kind === "adminUsers") return <UsersPage />;
   if (route.kind === "adminUserCreate") return <UserFormPage />;
   if (route.kind === "adminUserDetail") return <UserDetailPage userId={route.userId} />;
+  if (route.kind === "adminImport") return <ImportWizardPage />;
   if (route.kind === "sim") return <SimRoute simId={route.simId} />;
   return <NotFoundPage />;
 }

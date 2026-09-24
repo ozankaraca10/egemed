@@ -16,6 +16,7 @@ import {
   ADMIN_PATH,
   adminGuardHref,
   adminHref,
+  adminImportHref,
   adminUsersHref,
   entryRedirectHref,
   ROUTES,
@@ -140,7 +141,7 @@ describe("#/admin rotası ve AdminPage", () => {
     );
     expect(nav).not.toContain('href="#/admin"');
   });
-  it("tek h1, giriş metni, altı bölüm gösterir; 'Kullanıcılar' bağlanır, kalanı 'Yakında' rozetlidir", () => {
+  it("tek h1, giriş metni, altı bölüm gösterir; 'Kullanıcılar'/'Toplu içe aktarma' bağlanır, kalanı 'Yakında' rozetlidir", () => {
     const html = renderToStaticMarkup(createElement(AdminPage));
     expect((html.match(/<h1\b/g) ?? []).length).toBe(1);
     expect(html).toContain(t("admin.title"));
@@ -156,11 +157,12 @@ describe("#/admin rotası ve AdminPage", () => {
     ] as const) {
       expect(html).toContain(t(key));
     }
-    // Beş bölüm hâlâ "Yakında"; "Kullanıcılar" tek gerçek bağlantıya sahiptir.
-    expect(html.split(t("admin.soon")).length - 1).toBe(5);
+    // Dört bölüm hâlâ "Yakında"; "Kullanıcılar" ve "Toplu içe aktarma" (T71) gerçek bağlantıya sahiptir.
+    expect(html.split(t("admin.soon")).length - 1).toBe(4);
     expect(html).not.toContain("<button");
-    expect((html.match(/<a\b/g) ?? []).length).toBe(1);
+    expect((html.match(/<a\b/g) ?? []).length).toBe(2);
     expect(html).toContain(`<a class="eg-shell-admin__link" href="${adminUsersHref()}">${t("admin.users.open")}</a>`);
+    expect(html).toContain(`<a class="eg-shell-admin__link" href="${adminImportHref()}">${t("admin.import.open")}</a>`);
   });
 });
 

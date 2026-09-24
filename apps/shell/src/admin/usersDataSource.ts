@@ -29,15 +29,17 @@ export type SortOrder = "asc" | "desc";
 
 export interface AdminUnit {
   readonly id: string;
+  /** ASCII, insan-okunur birim kodu (E3 §f `birim_kodu` sütunuyla eşleşir; T71). */
+  readonly code: string;
   readonly name: string;
 }
 
 /** Sınıflandırma amaçlı sabit birim listesi (dönem/grup); yetki kapsamı değildir (E3 §b). */
 export const ADMIN_UNITS: readonly AdminUnit[] = [
-  { id: "unit-1", name: "1. Sınıf" },
-  { id: "unit-2", name: "2. Sınıf" },
-  { id: "unit-3", name: "3. Sınıf" },
-  { id: "unit-4", name: "4. Sınıf" },
+  { code: "1-sinif", id: "unit-1", name: "1. Sınıf" },
+  { code: "2-sinif", id: "unit-2", name: "2. Sınıf" },
+  { code: "3-sinif", id: "unit-3", name: "3. Sınıf" },
+  { code: "4-sinif", id: "unit-4", name: "4. Sınıf" },
 ];
 
 export interface AdminUser {

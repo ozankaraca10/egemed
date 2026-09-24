@@ -311,6 +311,29 @@ html, body { margin: 0; }
   border: 1px solid var(--border-strong); border-radius: var(--r-sm); background: var(--card); color: var(--text); font: inherit;
 }
 
+/* --- Toplu içe aktarma sihirbazı (T71, E3 §e.4/§f): framework landing (adım
+   göstergesi)/dialog (uygula onayı)/feedback/results-summary bileşenlerinden türetilir. --- */
+.eg-shell-import__steps {
+  display: flex; flex-wrap: wrap; gap: var(--sp-2); margin: 0 0 var(--sp-4); padding: 0; list-style: none;
+}
+.eg-shell-import__step {
+  display: inline-flex; align-items: center; gap: var(--sp-1); padding: var(--sp-1) var(--sp-2);
+  border-radius: var(--r-sm); color: var(--muted); font-size: var(--fs-sm); font-weight: 600;
+}
+.eg-shell-import__step[aria-current="step"] { background: var(--blue-50); color: var(--blue-700); }
+.eg-shell-import__step-num {
+  display: inline-flex; align-items: center; justify-content: center; width: 1.5rem; height: 1.5rem;
+  border-radius: 999px; background: var(--card-soft); font-size: var(--fs-sm);
+}
+.eg-shell-import__panel {
+  display: grid; gap: var(--sp-3); padding: var(--sp-4); background: var(--card);
+  border: 1px solid var(--border); border-radius: var(--r-lg); box-shadow: var(--shadow-card);
+}
+.eg-shell-import__panelTitle { margin: 0; color: var(--navy-900); font-size: var(--fs-lg); }
+.eg-shell-import__mapTable { width: 100%; border-collapse: collapse; }
+.eg-shell-import__mapTable th, .eg-shell-import__mapTable td { padding: var(--sp-2); border-bottom: 1px solid var(--border); text-align: left; }
+.eg-shell-import__errorList, .eg-shell-import__previewList { display: grid; gap: var(--sp-1); margin: 0; padding: 0; list-style: none; }
+
 .eg-shell-link {
   display: inline-flex; align-items: center; justify-content: center;
   min-height: 44px; padding: 0 var(--sp-4);
