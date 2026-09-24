@@ -81,9 +81,28 @@
   text-decoration: none;
 }
 
+/* Kaynak portta düşen üst bar düğmesi temeli (cardai/styles.css `.eg-navbtn`);
+   düğme varsayılan `buttonface` zeminine düşerse beyaz metin okunmaz (T14d).
+   Dokunma hedefi aile kuralıyla en az 44 px'tir (AGENTS). */
+.eg-sim-pulse .eg-navbtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 44px;
+  padding: 8px 10px;
+  border: 0;
+  border-radius: var(--r-sm);
+  background: transparent;
+  color: var(--blue-100);
+  font-size: var(--fs-sm);
+  font-weight: 650;
+  white-space: nowrap;
+}
+
 .eg-sim-pulse .eg-brand:hover,
 .eg-sim-pulse .eg-navbtn:hover {
   background: rgba(255, 255, 255, 0.12);
+  color: var(--eg-pulse-paper);
 }
 
 .eg-sim-pulse main,

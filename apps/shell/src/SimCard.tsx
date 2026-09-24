@@ -7,11 +7,11 @@ export const SIM_IDS = ["pulse", "ausculta", "opaca"] as const;
 export type SimId = (typeof SIM_IDS)[number];
 
 /**
- * Kabuğa gerçek modülü bağlanmış simler (T14c: Opaca). Bu kimlikler için
- * "Platforma taşınıyor" rozeti çizilmez; diğerleri yer tutucuda kaldığı
- * sürece rozet görünür kalır.
+ * Kabuğa gerçek modülü bağlanmış simler (T14c: Opaca, T14d: Pulse). Bu
+ * kimlikler için "Platforma taşınıyor" rozeti çizilmez; ausculta yer
+ * tutucuda kaldığı sürece rozet görünür kalır.
  */
-const LIVE_SIM_IDS: ReadonlySet<SimId> = new Set(["opaca"]);
+const LIVE_SIM_IDS: ReadonlySet<SimId> = new Set(["opaca", "pulse"]);
 
 /**
  * Yatay sim logoları. `width`/`height` gerçek piksel oranıyla verilir; kart

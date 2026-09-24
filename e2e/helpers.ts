@@ -9,8 +9,19 @@ export const ROUTES = [
   { hash: "#/giris/admin", label: "yönetici girişi" },
   { hash: "#/giris/test-ogrenci", label: "test öğrencisi girişi" },
   { hash: "#/sims/opaca", label: "opaca sim rotası" },
+  { hash: "#/sims/pulse", label: "pulse sim rotası" },
   { hash: "#/bilinmeyen-rota", label: "bilinmeyen rota" },
 ] as const;
+
+/**
+ * Kabuğa gerçek modülü bağlanmış sim rotalarının kendi kökü (T14c: Opaca,
+ * T14d: Pulse). `openRoute` bu rotalarda yer tutucu kökü değil, sim
+ * paketinin kendi kökünü bekler.
+ */
+const LIVE_SIM_ROOT_SELECTORS: Readonly<Record<string, string>> = {
+  "#/sims/opaca": ".eg-sim-opaca",
+  "#/sims/pulse": ".eg-sim-pulse",
+};
 
 /** Konsol ve sayfa hatalarını toplar; testin sonunda boş olması beklenir. */
 export function trackErrors(page: Page): string[] {
@@ -23,19 +34,21 @@ export function trackErrors(page: Page): string[] {
 }
 
 /**
- * Hash rotasını açar; kabuk çizilene dek bekler. Opaca gerçek modüle
- * bağlandı (T14c): kendi kökü (`.eg-sim-opaca`) beklenir. Pulse/ausculta
- * S15a/S18a'ya dek yer tutucuda kaldığı için o kökü bekler.
+ * Hash rotasını açar; kabuk çizilene dek bekler. Kabuğa gerçek modülü
+ * bağlanmış sim rotaları (T14c: Opaca, T14d: Pulse) kendi kökünü bekler;
+ * ausculta S18a'ya dek yer tutucuda kaldığı için o kökü bekler.
  */
 export async function openRoute(page: Page, hash: string): Promise<void> {
   await page.goto(`/${hash}`, { waitUntil: "networkidle" });
-  // Opaca kendi `<main>` iskelesini kabuğun `<main id="icerik">`si içine
-  // gömer (iç içe, T14c); `.first()` her rotada kabuğun kendi bölgesini
-  // bekler.
+  // Gerçek modüller kendi `<main>` iskelesini kabuğun `<main id="icerik">`si
+  // içine gömer (iç içe, T14c/T14d); `.first()` her rotada kabuğun kendi
+  // bölgesini bekler.
   await expect(page.locator("main").first()).toBeVisible();
-  if (hash === "#/sims/opaca") {
-    // Kaynak paket kapsayıcısı ve `App` kökü aynı sınıfı paylaşır (iç içe).
-    await expect(page.locator(".eg-sim-opaca").first()).toBeVisible();
+  const liveRootSelector = LIVE_SIM_ROOT_SELECTORS[hash];
+  if (liveRootSelector !== undefined) {
+    // Kaynak paket kapsayıcısı ve gerçek modül kökü aynı sınıfı paylaşabilir
+    // (iç içe); `.first()` ilkini görünür bekler.
+    await expect(page.locator(liveRootSelector).first()).toBeVisible();
   } else if (hash.startsWith("#/sims/")) {
     await expect(page.locator(".eg-shell-sim-placeholder")).toBeVisible();
   }

@@ -80,6 +80,9 @@ importers:
       '@egemed/sim-opaca':
         specifier: workspace:*
         version: link:../../packages/sim-opaca
+      '@egemed/sim-pulse':
+        specifier: workspace:*
+        version: link:../../packages/sim-pulse
       '@egemed/tokens':
         specifier: workspace:*
         version: link:../../packages/tokens

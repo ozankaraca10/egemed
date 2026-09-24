@@ -44,7 +44,7 @@
 .eg-sim-pulse .mode-progress i{display:block;height:100%;background:var(--blue-600);border-radius:var(--r-pill)}
 .eg-sim-pulse .mode-card.learn .mode-progress i{background:var(--green-600)}
 .eg-sim-pulse .mode-card .btn{margin-top:auto;width:100%;min-height:44px;border-radius:var(--r-md);font-weight:700;border:0;color:var(--card);font-size:var(--fs-md)}
-.eg-sim-pulse .mode-card.learn .btn{background:var(--green-600)}
+.eg-sim-pulse .mode-card.learn .btn{background:color-mix(in srgb,var(--green-600),black 18%)}
 .eg-sim-pulse .mode-card.practice .btn{background:var(--blue-600)}
 .eg-sim-pulse .mode-card.assessment .btn{background:var(--purple-600)}
 .eg-sim-pulse .mode-card.locked .btn{background:var(--card);color:var(--ink-700);border:1.5px solid var(--border-strong)}

@@ -7,6 +7,7 @@ import { loadSimModule } from "../../apps/shell/src/sims/loaders";
 import { createPlaceholderModule } from "../../apps/shell/src/sims/placeholder";
 import { SIMULATOR_IDS, type SimMountTarget } from "../../packages/sim-host/src/SimHost";
 import { opacaModule } from "../../packages/sim-opaca/src/index";
+import { pulseModule } from "../../packages/sim-pulse/src/index";
 import { t } from "../../packages/ui/i18n/tr";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
@@ -74,12 +75,17 @@ describe("yer tutucu sim modülü", () => {
     expect(loaded).not.toEqual(createPlaceholderModule("opaca"));
   });
 
-  it("pulse/ausculta yükleyicileri hâlâ yer tutucu modül döndürür (S15a/S18a'ya dek)", async () => {
-    for (const simId of ["pulse", "ausculta"] as const) {
-      const loaded = await loadSimModule(simId);
-      expect(loaded.id, simId).toBe(simId);
-      expect(loaded).not.toBe(opacaModule);
-    }
+  it("pulse yükleyicisi @egemed/sim-pulse'ın gerçek modülünü döndürür (T14d, yer tutucu değil)", async () => {
+    const loaded = await loadSimModule("pulse");
+    expect(loaded).toBe(pulseModule);
+    expect(loaded).not.toEqual(createPlaceholderModule("pulse"));
+  });
+
+  it("ausculta yükleyicisi hâlâ yer tutucu modül döndürür (S18a'ya dek)", async () => {
+    const loaded = await loadSimModule("ausculta");
+    expect(loaded.id).toBe("ausculta");
+    expect(loaded).not.toBe(opacaModule);
+    expect(loaded).not.toBe(pulseModule);
   });
 });
 
