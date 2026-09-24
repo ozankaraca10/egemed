@@ -45,9 +45,3 @@ export function EcgDeco({ embedded = false }: EcgDecoProps): ReactNode {
 export function touchTarget(): { minWidth: number; minHeight: number } {
   return HIT;
 }
-
-/** İlerleme dolgusu genişlik yerine ölçeklenir; düzeni her karede yeniden hesaplamaz. */
-export function fillScale(percent: number): { transform: string } {
-  const clamped = Math.min(100, Math.max(0, percent)) / 100;
-  return { transform: `scaleX(${clamped})` };
-}

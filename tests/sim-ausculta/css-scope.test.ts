@@ -1,14 +1,13 @@
 import ts from "typescript";
 import { describe, expect, it } from "vitest";
 
-/** Ausculta CSS sözleşmesi — E2 §6 ve §9 S17a–S17d. */
+/** Ausculta CSS sözleşmesi — E2 §6 ve §9 S17a–S17c. S17d (responsive) bu dilimde yok. */
 
 const tokenCssPath = "packages/tokens/ausculta.css";
 const bridgePath = "packages/sim-ausculta/src/styles/tokens.css";
 const moduleCssPaths = [
   "packages/sim-ausculta/src/styles/base.css",
   "packages/sim-ausculta/src/styles/components.css",
-  "packages/sim-ausculta/src/styles/responsive.css",
 ] as const;
 
 const forbiddenBareSelectors = [":root", "html", "body", "#root", "button", "*", ":focus-visible"];
@@ -116,22 +115,11 @@ describe("Ausculta CSS kapsam sözleşmesi (S17a–S17c)", () => {
     expect(components).toMatch(/\.eg-sim-ausculta \.badge\s*\{/);
     expect(components).toMatch(/\.eg-sim-ausculta \.eg-footer\s*\{/);
     expect(base + components).not.toMatch(/@media\b/);
-    const responsive = moduleCss[2]?.css ?? "";
-    expect(responsive).toMatch(/@media\s*\(\s*max-width:\s*767px\s*\)/);
-    expect(responsive).toMatch(/@media\s*\(\s*min-width:\s*768px\s*\)/);
-    expect(responsive).toMatch(/@media\s*\(\s*min-width:\s*1440px\s*\)/);
-    expect(responsive).toMatch(/@media\s*\(\s*prefers-reduced-motion:\s*reduce\s*\)/);
-    expect(responsive).toMatch(/\.hide-mobile\s*\{[^}]*display:\s*none/);
-    expect(components).toMatch(/transform:\s*scaleX\(0\)/);
-    expect(components).not.toMatch(/transition:\s*width/);
-    expect(components).toMatch(/\.modal-close[\s\S]*min-height:\s*44px/);
-    expect(components).toMatch(/\.t-btn\s*\{[^}]*min-height:\s*44px/);
     const entry = read("packages/sim-ausculta/src/index.ts");
     expect(entry).toContain('import "@egemed/tokens/family-tokens.css"');
     expect(entry).toContain('import "@egemed/tokens/ausculta.css"');
     expect(entry).toContain('import "./styles/tokens.css"');
     expect(entry).toContain('import "./styles/base.css"');
     expect(entry).toContain('import "./styles/components.css"');
-    expect(entry).toContain('import "./styles/responsive.css"');
   });
 });
