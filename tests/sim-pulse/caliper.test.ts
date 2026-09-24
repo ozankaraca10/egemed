@@ -53,7 +53,7 @@ describe("Pulse vaka kaliperi", () => {
     const life = lifecycle(), pointerTarget = new Target(), a = new Target(), b = new Target();
     const state: CaliperState = { a: { x: 0.1, y: 0.2 }, b: { x: 0.8, y: 0.7 } };
     let captures = 0, changes = 0;
-    const handleA = Object.assign(a, { setPointerCapture: (_id: number) => { captures += 1; } });
+    const handleA = Object.assign(a, { setPointerCapture: () => { captures += 1; } });
     bindCaliperDrag({ lifecycle: life, pointerTarget, state,
       handles: [{ handle: "a", target: handleA }, { handle: "b", target: b }],
       rect: () => ({ left: 0, top: 0, width: 100, height: 100 }), changed: () => { changes += 1; } });

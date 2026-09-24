@@ -43,6 +43,12 @@ export function scheduleChallengeCompletion(
   onComplete: () => void,
   delayMs = 1400,
 ): void {
-  const handle = timers.setTimeout(onComplete, delayMs);
-  lifecycle.timer(handle, (value) => timers.clearTimeout(value));
+  let active = true;
+  const handle = timers.setTimeout(() => {
+    if (active) onComplete();
+  }, delayMs);
+  lifecycle.timer(handle, (value) => {
+    active = false;
+    timers.clearTimeout(value);
+  });
 }

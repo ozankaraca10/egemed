@@ -12,6 +12,7 @@ export const CALIPER_Y_MIN = 0.04;
 export const CALIPER_Y_MAX = 0.96;
 
 const clamp = (n: number, min: number, max: number): number => Math.min(max, Math.max(min, n));
+const rounded = (n: number): number => Number(n.toFixed(3));
 
 export function caliperPointFromPointer(clientX: number, clientY: number, rect: CaliperRect): CaliperPoint {
   if (rect.width <= 0 || rect.height <= 0) return { x: CALIPER_X_MIN, y: CALIPER_Y_MIN };
@@ -24,10 +25,10 @@ export function caliperPointFromPointer(clientX: number, clientY: number, rect: 
 export function nudgeCaliper(state: CaliperState, handle: CaliperHandle, key: string, large = false): boolean {
   const delta = large ? 0.02 : 0.005;
   const point = state[handle];
-  if (key === "ArrowLeft") point.x = clamp(point.x - delta, CALIPER_X_MIN, CALIPER_X_MAX);
-  else if (key === "ArrowRight") point.x = clamp(point.x + delta, CALIPER_X_MIN, CALIPER_X_MAX);
-  else if (key === "ArrowUp") point.y = clamp(point.y - delta, CALIPER_Y_MIN, CALIPER_Y_MAX);
-  else if (key === "ArrowDown") point.y = clamp(point.y + delta, CALIPER_Y_MIN, CALIPER_Y_MAX);
+  if (key === "ArrowLeft") point.x = rounded(clamp(point.x - delta, CALIPER_X_MIN, CALIPER_X_MAX));
+  else if (key === "ArrowRight") point.x = rounded(clamp(point.x + delta, CALIPER_X_MIN, CALIPER_X_MAX));
+  else if (key === "ArrowUp") point.y = rounded(clamp(point.y - delta, CALIPER_Y_MIN, CALIPER_Y_MAX));
+  else if (key === "ArrowDown") point.y = rounded(clamp(point.y + delta, CALIPER_Y_MIN, CALIPER_Y_MAX));
   else return false;
   return true;
 }
