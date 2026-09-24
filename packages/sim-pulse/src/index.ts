@@ -10,6 +10,9 @@ import type { SimulatorId } from "@egemed/sim-host";
 
 export const SIM_ID = "pulse" satisfies SimulatorId;
 
+export { DEFAULT_PULSE_ASSET_BASE, createPulseModule, pulseModule } from "./mount";
+export type { PulseMountElement, PulseModuleDeps, PulseModuleEnv } from "./mount";
+
 export { getRootFlag, query, setRootFlag } from "./host/dom";
 export type { PulseRoot } from "./host/dom";
 export { createPulseEventEmitter, PULSE_EVENT_NAMES } from "./host/events";
