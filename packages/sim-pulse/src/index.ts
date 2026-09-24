@@ -28,6 +28,16 @@ export { CardiacModel } from "./engine/model";
 export type { CardiacMetrics, CardiacSnapshot, MechanicalTimeline } from "./engine/model";
 export { PULSE_MODE_CONTENT } from "./data/content";
 export type { PulseModeContent } from "./data/content";
+export { PULSE_SOURCES, buildAboutLimitations, createPulseAboutView, initials, renderPulseAboutMarkup, withAssetBase } from "./ui/about";
+export type {
+  CreatePulseAboutViewOptions,
+  PulseAboutView,
+  PulseAboutViewCreditGroup,
+  PulseAboutViewPerson,
+  PulseSourcesDocument,
+} from "./ui/about";
+export { PULSE_TUTORIAL_STEPS, createTutorialStepViews, shouldRunPulseTutorial } from "./ui/tutorial";
+export type { PulseTutorialRunState, TutorialStep, TutorialStepStatus, TutorialStepView } from "./ui/tutorial";
 export { pulseMetricReadouts, pulseMetricSnapshot, pulsePhaseLabelKey } from "./ui/sim/metrics";
 export type { PulseMetricId, PulseMetricReadout, PulsePhase } from "./ui/sim/metrics";
 export { systematicReadout } from "./ui/sim/explain";
