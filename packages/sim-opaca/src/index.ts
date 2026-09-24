@@ -288,3 +288,10 @@ export type {
   SessionRegenPlan,
   SimulationDispatch,
 } from "./screens/simulation-core";
+export { SimulationScreen, createNoopSimulationPopoverEnv } from "./screens/SimulationScreen";
+export type {
+  SimulationGamiPort,
+  SimulationPopoverEnv,
+  SimulationPopoverEvent,
+  SimulationScreenProps,
+} from "./screens/SimulationScreen";
