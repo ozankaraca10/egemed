@@ -9,7 +9,8 @@ import type { WindowLike } from "./core/lifecycle";
 import type { StoragePort } from "./core/reducer";
 import type { RuntimeAdapter } from "./core/runtime";
 import { createNoopRuntimeAdapter } from "./core/runtime";
-import { createBrowserOpacaBindings } from "./platform-deps";
+import { createBrowserOpacaBindings, createNamespacedStoragePort, opacaStorageNamespace } from "./platform-deps";
+import { bindGamiStorage } from "./gamification/storage";
 import type { ChromeEnv } from "./ui/chrome";
 import type { ModalEnv } from "./ui/modal-env";
 import type { LearnScreenEnv } from "./screens/LearnScreen";
@@ -110,6 +111,10 @@ export function createOpacaModule(deps?: OpacaModuleDeps): SimModule {
     mount(target: SimMountTarget, context: SimMountContext): SimDispose {
       const resolved = deps ?? defaultProductionDeps();
       const previousBase = setAssetBase(resolved.assetBase ?? DEFAULT_ASSET_BASE);
+      // T93: tüm yerel kayıtlar (durum, oyunlaştırma, tercih) actorId ad alanıyla
+      // okunur/yazılır; öneksiz eski kayıtlar yeni ad alanına taşınmaz.
+      const storage = createNamespacedStoragePort(resolved.storage, opacaStorageNamespace(context.actorId));
+      bindGamiStorage(storage);
       const container = resolved.createContainer();
       target.appendChild(container.node);
 
@@ -135,7 +140,7 @@ export function createOpacaModule(deps?: OpacaModuleDeps): SimModule {
           now: context.now,
           children: createElement(StoreProvider, {
             now: context.now,
-            storage: resolved.storage,
+            storage,
             runtime: resolved.runtime ?? createNoopRuntimeAdapter(),
             env: resolved.env,
             initialState: { ...initialState, screen: "modes" },
@@ -151,6 +156,7 @@ export function createOpacaModule(deps?: OpacaModuleDeps): SimModule {
         if (disposed) return;
         disposed = true;
         bindGamiRepository(null);
+        bindGamiStorage(null);
         root.unmount();
         container.remove();
         resetAssetBase(previousBase);

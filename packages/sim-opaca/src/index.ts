@@ -34,6 +34,8 @@ export {
   createBrowserStartScreenEnv,
   createBrowserWindowLike,
   createLocalStoragePort,
+  createNamespacedStoragePort,
+  opacaStorageNamespace,
 } from "./platform-deps";
 export type { BrowserOpacaBindings } from "./platform-deps";
 
