@@ -71,6 +71,9 @@ importers:
       '@egemed/sim-host':
         specifier: workspace:*
         version: link:../../packages/sim-host
+      '@egemed/sim-opaca':
+        specifier: workspace:*
+        version: link:../../packages/sim-opaca
       '@egemed/tokens':
         specifier: workspace:*
         version: link:../../packages/tokens

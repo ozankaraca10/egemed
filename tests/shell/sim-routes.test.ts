@@ -8,6 +8,7 @@ import { SimRoute, simErrorTitle } from "../../apps/shell/src/SimRoute";
 import { loadSimModule } from "../../apps/shell/src/sims/loaders";
 import { createPlaceholderModule } from "../../apps/shell/src/sims/placeholder";
 import { SIMULATOR_IDS, type SimMountTarget } from "../../packages/sim-host/src/SimHost";
+import { opacaModule } from "../../packages/sim-opaca/src/index";
 import { t } from "../../packages/ui/i18n/tr";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
@@ -40,13 +41,15 @@ describe("sim rotaları", () => {
       expect(resolveRoute(hash).kind, hash).toBe("notFound");
     }
   });
-  it("kartlar 'Simülatörü aç' bağlantısını sim rotasına verir, rozet korunur", () => {
+  it("kartlar 'Simülatörü aç' bağlantısını sim rotasına verir; rozet yalnız yer tutucu simlerde kalır", () => {
+    const stillPlaceholder = SIM_IDS.filter((simId) => simId !== "opaca");
     for (const html of [
       renderToStaticMarkup(createElement(HomePage)),
       renderToStaticMarkup(createElement(SimulatorsPage)),
     ]) {
       expect(count(html, 'class="eg-shell-sim__link"')).toBe(SIM_IDS.length);
-      expect(count(html, t("sims.soon"))).toBe(SIM_IDS.length);
+      // Opaca gerçek modüle bağlandı (T14c): "Platforma taşınıyor" rozeti kalkar.
+      expect(count(html, t("sims.soon"))).toBe(stillPlaceholder.length);
       for (const simId of SIM_IDS) expect(html, simId).toContain(`href="${simHref(simId)}"`);
     }
   });
@@ -109,6 +112,20 @@ describe("yer tutucu sim modülü", () => {
       expect((await loadSimModule(simId)).id, simId).toBe(simId);
     }
   });
+
+  it("opaca yükleyicisi @egemed/sim-opaca'nın gerçek modülünü döndürür (yer tutucu değil)", async () => {
+    const loaded = await loadSimModule("opaca");
+    expect(loaded).toBe(opacaModule);
+    expect(loaded).not.toEqual(createPlaceholderModule("opaca"));
+  });
+
+  it("pulse/ausculta yükleyicileri hâlâ yer tutucu modül döndürür (S15a/S18a'ya dek)", async () => {
+    for (const simId of ["pulse", "ausculta"] as const) {
+      const loaded = await loadSimModule(simId);
+      expect(loaded.id, simId).toBe(simId);
+      expect(loaded).not.toBe(opacaModule);
+    }
+  });
 });
 
 describe("SimCard rozet ve erişilebilir başlık düzeni", () => {
@@ -130,6 +147,16 @@ describe("SimCard rozet ve erişilebilir başlık düzeni", () => {
       expect(logoIndex, tag).toBeLessThan(linkIndex);
       expect(html, tag).not.toContain("eg-card__footer");
     }
+  });
+
+  it("opaca kartında rozet çizilmez, başlık ve bağlantı korunur (gerçek modüle bağlandı)", () => {
+    const html = renderToStaticMarkup(
+      createElement(SimCard, { href: "#/sims/opaca", id: "opaca" }),
+    );
+    expect(html).not.toContain('class="eg-badge"');
+    expect(html).not.toContain(t("sims.soon"));
+    expect(html).toContain(`<h3 class="eg-visually-hidden">${t("sims.opaca.name")}</h3>`);
+    expect(html).toContain('href="#/sims/opaca"');
   });
 
   it("simülatörler sayfasında kart başlıkları h2 olarak kalır", () => {
@@ -162,6 +189,15 @@ describe("SimRoute yükleniyor durumu", () => {
     const skeletonIndex = html.indexOf("eg-shell-sim-page__skeleton");
     expect(skeletonIndex).toBeGreaterThan(hostIndex);
     expect(html).toContain("eg-shell-sim-page__stage");
+  });
+
+  it("opaca için de yüklenirken çubuk tek h1'i korur (gerçek modül henüz mount edilmedi)", () => {
+    // SSR effect çalıştırmaz; durum hep "loading" kalır. Opaca hazır olunca
+    // çubuk `<h1>`i bırakır (bkz. e2e/sims.spec.ts) — burada yalnız yükleniyor
+    // durumundaki tekil `<h1>` sözleşmesi doğrulanır.
+    const html = renderToStaticMarkup(createElement(SimRoute, { simId: "opaca" }));
+    expect((html.match(/<h1\b/g) ?? []).length).toBe(1);
+    expect(html).toContain(`<h1 class="eg-shell-sim-page__title">${t("sims.opaca.name")}</h1>`);
   });
 });
 

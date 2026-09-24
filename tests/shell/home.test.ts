@@ -54,7 +54,9 @@ describe("HomePage premium yerleşimi", () => {
     const html = render();
     expect(count(html, 'class="eg-card"')).toBe(3);
     expect(count(html, 'class="eg-shell-sim__link"')).toBe(3);
-    expect(count(html, t("sims.soon"))).toBe(3);
+    // Opaca gerçek modüle bağlandı (T14c): "Platforma taşınıyor" rozeti kalkar,
+    // pulse/ausculta yer tutucuda kaldığı sürece ikisi için görünür kalır.
+    expect(count(html, t("sims.soon"))).toBe(2);
     expect(count(html, 'class="eg-shell-sim__logo"')).toBe(3);
     for (const id of SIM_IDS) {
       expect(html, id).toContain(markup(t(`sims.${id}.name`)));

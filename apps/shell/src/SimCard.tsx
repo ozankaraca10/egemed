@@ -7,6 +7,13 @@ export const SIM_IDS = ["pulse", "ausculta", "opaca"] as const;
 export type SimId = (typeof SIM_IDS)[number];
 
 /**
+ * Kabuğa gerçek modülü bağlanmış simler (T14c: Opaca). Bu kimlikler için
+ * "Platforma taşınıyor" rozeti çizilmez; diğerleri yer tutucuda kaldığı
+ * sürece rozet görünür kalır.
+ */
+const LIVE_SIM_IDS: ReadonlySet<SimId> = new Set(["opaca"]);
+
+/**
  * Yatay sim logoları. `width`/`height` gerçek piksel oranıyla verilir; kart
  * görseli sabit yüksekliğe `object-fit: contain` ile oturur, CLS oluşmaz.
  */
@@ -58,11 +65,12 @@ export function SimCard({
 }: SimCardProps): JSX.Element {
   const logo = SIM_LOGOS[id];
   const Heading = headingTags[headingLevel];
+  const isLive = LIVE_SIM_IDS.has(id);
   return (
     <Card>
       <div className={`eg-shell-sim eg-shell-sim--${size}`}>
         <div className="eg-shell-sim__head">
-          <Badge tone="info">{t("sims.soon")}</Badge>
+          {isLive ? null : <Badge tone="info">{t("sims.soon")}</Badge>}
           <Heading className="eg-visually-hidden">{t(`sims.${id}.name`)}</Heading>
         </div>
         <img
