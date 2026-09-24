@@ -5,6 +5,7 @@
   "type": "module",
   "exports": {
     "./family-tokens.css": "./family-tokens.css",
-    "./opaca.css": "./opaca.css"
+    "./opaca.css": "./opaca.css",
+    "./ausculta.css": "./ausculta.css"
   }
 }

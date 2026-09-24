@@ -1,0 +1,16 @@
+/* Ausculta köprü tokenları aile paletine çözülür ve modül kökünde kalır. */
+.eg-sim-ausculta {
+  --eg-ausculta-text: var(--ink-900);
+  --eg-ausculta-muted: var(--ink-600);
+  --eg-ausculta-ink: var(--ink-800);
+  --eg-ausculta-line: var(--border);
+  --eg-ausculta-paper: var(--card);
+  --eg-ausculta-radius: var(--r-lg);
+  --eg-ausculta-font: var(--font);
+  --eg-ausculta-bg-a: var(--bg-grad-a);
+  --eg-ausculta-bg-b: var(--bg-grad-b);
+  --eg-ausculta-shadow: var(--shadow-card);
+  --eg-ausculta-focus: var(--blue-600);
+  --eg-ausculta-navy-950: var(--navy-950);
+  --eg-ausculta-overlay: var(--overlay-90);
+}

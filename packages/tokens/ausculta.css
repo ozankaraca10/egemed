@@ -1,0 +1,14 @@
+/*
+ * Ausculta'ya özgü renkler. Aile paleti family-tokens.css'tedir.
+ * Hex yalnız bu dosyada. Kaynak: egemed-ausculta/src/styles.css :root.
+ */
+:root {
+  --navy-950: #061e44;
+  --overlay-94: rgba(255, 255, 255, .94);
+  --overlay-90: rgba(255, 255, 255, .9);
+  --overlay-88: rgba(255, 255, 255, .88);
+  /* Kaynakta tanımsızdı; fallback değeri burada bağlanır. */
+  --green-700: var(--green-600);
+  --orange-50: var(--orange-100);
+  --amber-900: var(--ink-800);
+}
