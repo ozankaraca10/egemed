@@ -1,15 +1,15 @@
 import type { JSX, ReactNode } from "react";
 import { t } from "@egemed/ui/i18n";
-import type { DevSession } from "./devAuth";
 import { ROUTES, routeHref, type ResolvedRoute, type RouteId } from "./routes";
+import type { ShellSession } from "./session";
 import { ShellFooter } from "./ShellFooter";
 import { EgemedLogo } from "./brand/EgemedLogo";
 
 export interface ShellLayoutProps {
   /** Çözümlenmiş rota; etkin bağlantı işaretlemesi bundan türetilir. */
   route: ResolvedRoute;
-  /** Geçerli sahte oturum; yoksa oturum göstergesi çizilmez. */
-  session?: DevSession | null;
+  /** Geçerli oturum (sahte ya da API); yoksa oturum göstergesi çizilmez. */
+  session?: ShellSession | null;
   /** "Çıkış yap" işleyicisi; oturum silme ve yönlendirme `App`'te yapılır. */
   onLogout?: () => void;
   children: ReactNode;
@@ -67,9 +67,13 @@ const NAV_ICONS: Record<RouteId, ReactNode> = {
  */
 export function ShellLayout({ route, session, onLogout, children }: ShellLayoutProps): JSX.Element {
   const activeId = route.kind === "page" ? route.route.id : undefined;
+  // API oturumunda görünen ad sunucudan gelir; sahte oturumda rol etiketi çizilir.
   const roleLabel = session === undefined || session === null
     ? null
-    : t(session.role === "admin" ? "shell.session.admin" : "shell.session.student");
+    : session.displayName ?? t(session.role === "admin" ? "shell.session.admin" : "shell.session.student");
+  // "Geliştirme oturumu" uyarısı yalnız sentetik oturum içindir (T35b); API
+  // oturumu sunucuda kayıt üretir, bu yüzden uyarı çizilmez.
+  const synthetic = session !== undefined && session !== null && session.displayName === null;
   return (
     <div className="eg-shell">
       <a className="eg-shell-skip" href="#icerik" onClick={focusMain}>{t("shell.skip")}</a>
@@ -100,7 +104,7 @@ export function ShellLayout({ route, session, onLogout, children }: ShellLayoutP
         </div>
       </header>
       <main className="eg-shell-main" id="icerik" tabIndex={-1}>
-        {roleLabel !== null && <p className="eg-shell-session-banner">{t("shell.session.banner")}</p>}
+        {synthetic && <p className="eg-shell-session-banner">{t("shell.session.banner")}</p>}
         {children}
       </main>
       <ShellFooter />

@@ -5,6 +5,7 @@ import { checkDevCredentials, createSessionStore, type DevSession, type DevSessi
 import { focusMain } from "./ShellLayout";
 import { ShellFooter } from "./ShellFooter";
 import { entryHref, entryRedirectHref, type EntryRole } from "./routes";
+import type { ShellSession } from "./session";
 import { SIM_ICONS, SIM_IDS } from "./SimCard";
 import { EgemedLogo } from "./brand/EgemedLogo";
 
@@ -22,6 +23,10 @@ export interface EntryPageProps {
   role: EntryRole;
   /** Geliştirmeye özel sahte kimlik doğrulama; `App` bunu `import.meta.env.DEV` ile besler. */
   devEnabled?: boolean;
+  /** T57 — API taban adresi; doluysa giriş `/auth/dev/login` ile API oturumu açar. */
+  apiBaseUrl?: string | null;
+  /** T57 — API oturumu kurulduğunda kabuk durumunu günceller (`App` geçirir). */
+  onApiSignedIn?: (session: ShellSession) => void;
 }
 
 export interface EntryFormValues {
@@ -64,8 +69,8 @@ export function submitDevEntry(
   return session;
 }
 
-/** Giriş ekranı: dev kapalıyken yalnız önizleme, açıkken sahte kimlik doğrulama. */
-export function EntryPage({ role, devEnabled = false }: EntryPageProps): JSX.Element {
+/** Giriş ekranı: dev kapalıyken yalnız önizleme, açıkken sahte ya da API oturumu. */
+export function EntryPage({ role, devEnabled = false, apiBaseUrl = null, onApiSignedIn }: EntryPageProps): JSX.Element {
   const [submitted, setSubmitted] = useState(false);
   const [invalid, setInvalid] = useState(false);
   const isAdmin = role === "admin";
@@ -73,30 +78,51 @@ export function EntryPage({ role, devEnabled = false }: EntryPageProps): JSX.Ele
 
   function onSubmit(event: FormEvent<HTMLFormElement>): void {
     // Dev dalı doğrudan `import.meta.env.DEV` ile korunur: üretim build'inde
-    // tümüyle elenir ve `devAuth` pakete girmez; önizleme yolu birebir kalır.
+    // tümüyle elenir; `devAuth` ve `apiAuth` pakete girmez, önizleme yolu birebir kalır.
     if (import.meta.env.DEV && devEnabled) {
       const form = event.currentTarget as unknown as FormLike;
-      submitDevEntry(
-        event,
-        {
-          password: form.elements.namedItem("password")?.value ?? "",
-          username: form.elements.namedItem("username")?.value ?? "",
-        },
-        role,
-        {
-          onInvalid: () => {
-            setSubmitted(false);
+      const values: EntryFormValues = {
+        password: form.elements.namedItem("password")?.value ?? "",
+        username: form.elements.namedItem("username")?.value ?? "",
+      };
+      if (apiBaseUrl !== null) {
+        // API oturumu uçtan uca çerezle kurulur (T57); yönlendirme `/auth/me`
+        // rolüne göre yapılır, formdaki role göre değil.
+        event.preventDefault();
+        void import("./apiAuth")
+          .then((module) =>
+            module.submitApiEntry(values, role, apiBaseUrl, {
+              onInvalid: () => {
+                setSubmitted(false);
+                setInvalid(true);
+              },
+              onSignedIn: (session) => {
+                onApiSignedIn?.(session);
+                // DOM'suz ortamda (SSR/test) yönlendirme sessizce atlanır.
+                const win = (globalThis as { window?: DevWindow }).window;
+                if (win === undefined) return;
+                win.location.hash = entryRedirectHref(session.role);
+              },
+            }),
+          )
+          .catch(() => {
             setInvalid(true);
-          },
-          onSignedIn: (session) => {
-            // DOM'suz ortamda (SSR/test) oturum yazımı ve yönlendirme sessizce atlanır.
-            const win = (globalThis as { window?: DevWindow }).window;
-            if (win === undefined) return;
-            createSessionStore(win.sessionStorage).write(session);
-            win.location.hash = entryRedirectHref(session.role);
-          },
+          });
+        return;
+      }
+      submitDevEntry(event, values, role, {
+        onInvalid: () => {
+          setSubmitted(false);
+          setInvalid(true);
         },
-      );
+        onSignedIn: (session) => {
+          // DOM'suz ortamda (SSR/test) oturum yazımı ve yönlendirme sessizce atlanır.
+          const win = (globalThis as { window?: DevWindow }).window;
+          if (win === undefined) return;
+          createSessionStore(win.sessionStorage).write(session);
+          win.location.hash = entryRedirectHref(session.role);
+        },
+      });
       return;
     }
     submitEntryPreview(event, () => setSubmitted(true));

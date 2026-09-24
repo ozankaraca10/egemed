@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type JSX } from "react";
 import { Badge, Tabs, type TabItem } from "@egemed/ui";
 import { t } from "@egemed/ui/i18n";
-import type { DevSession } from "../devAuth";
+import type { ShellSession } from "../session";
 import { simHref } from "../routes";
 import { SIM_IDS, type SimId } from "../SimCard";
 import {
@@ -130,13 +130,13 @@ export function ProgressSectionView({ status, summaries, onRetry }: ProgressSect
 }
 
 export interface ProgressSectionProps {
-  /** Geçerli sahte oturum; `null`/verilmezse veri kaynağı boş durum döner. */
-  readonly session?: DevSession | null;
+  /** Geçerli oturum (sahte ya da API); `null`/verilmezse veri kaynağı boş durum döner. */
+  readonly session?: ShellSession | null;
   /** Testte/gelecekte gerçek API kaynağıyla değiştirmek için enjekte edilir. */
   readonly dataSource?: GamificationSource;
 }
 
-function defaultSource(session: DevSession | null): GamificationSource {
+function defaultSource(session: ShellSession | null): GamificationSource {
   return createSyntheticGamificationSource(session !== null);
 }
 

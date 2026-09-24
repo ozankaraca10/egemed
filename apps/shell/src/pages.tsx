@@ -1,8 +1,8 @@
 import type { JSX, ReactNode } from "react";
 import { t, type TrKey } from "@egemed/ui/i18n";
-import type { DevSession } from "./devAuth";
 import { ProgressSection } from "./home/ProgressSection";
 import { routeHref, simHref, type RouteId } from "./routes";
+import type { ShellSession } from "./session";
 import { SIM_IDS, SimCard } from "./SimCard";
 
 const TRUST_KEYS = ["data", "faculty", "privacy"] as const;
@@ -38,7 +38,7 @@ export function scrollToSection(event: { preventDefault(): void }, id: string): 
 
 export interface HomePageProps {
   /** Oturum varsa başlığın üstünde "Hoş geldiniz" + rol etiketi çizilir. */
-  readonly session?: DevSession | null;
+  readonly session?: ShellSession | null;
 }
 
 /** Ana sayfa: hero + "Nasıl çalışır?" adımları + üç sim kartı + ilerleme sekmeleri + güven kanıtları. */
@@ -166,6 +166,6 @@ const PAGES: Record<Exclude<RouteId, "home">, () => JSX.Element> = {
   tasks: TasksPage,
 };
 
-export function pageFor(id: RouteId, session: DevSession | null = null): JSX.Element {
+export function pageFor(id: RouteId, session: ShellSession | null = null): JSX.Element {
   return id === "home" ? <HomePage session={session} /> : PAGES[id]();
 }

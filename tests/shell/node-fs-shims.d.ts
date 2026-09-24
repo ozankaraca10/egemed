@@ -29,6 +29,18 @@ declare module "node:url" {
 }
 
 /**
+ * T57 — `playwright.config.ts` API yoklaması (`/health`) için gereken dar
+ * `node:child_process` yüzeyi; kök programda `@types/node` yok (yeni bağımlılık
+ * yasak), bu yüzden yalnız kullanılan imza bildirilir.
+ */
+declare module "node:child_process" {
+  export function execSync(
+    command: string,
+    options: { encoding: "utf8"; stdio: ["ignore", "pipe", "ignore"] },
+  ): string;
+}
+
+/**
  * `vite/client` tipleri kök test programına yalnızca
  * `apps/shell/src/EntryPage.tsx` içindeki
  * `/// <reference types="vite/client" />` yönergesi üzerinden (o dosyayı içe
