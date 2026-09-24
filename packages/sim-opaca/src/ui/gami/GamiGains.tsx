@@ -10,8 +10,10 @@ import type { OpacaStats } from '../../gamification/stats'
 import { badgeViews, BADGE_TIER_LABEL, attemptXp, levelForXp, type BadgeView, type GamiMode, type Period } from '@egemed/gamification-core'
 import { computeStats } from '../../gamification/stats'
 import { daysLeft } from '../../gamification/leaderboardView'
-import type { LocalRepo } from '../../gamification/repo'
+import { useGamiContext } from '../../gamification/GamiContext'
+import { isLocalRepo, type OpacaGamiRepo } from '../../gamification/repo'
 import type { OpacaBadgeContext } from '../../gamification/catalog'
+import type { OpacaGamiState } from '../../gamification/storage'
 
 type OpacaBadgeView = BadgeView<OpacaStats, OpacaBadgeContext>
 
@@ -25,17 +27,30 @@ interface Gains {
   confetti: boolean
 }
 
-async function rankOf(repo: LocalRepo, period: Period, now: Date) {
+async function rankOf(repo: OpacaGamiRepo, period: Period, now: Date) {
   const v = await repo.getLeaderboard(period, 'all', now)
   const me = v.rows.find((r) => r.isMe)
   return { rank: me?.rank ?? null, of: v.rows.filter((r) => r.rank !== null).length }
 }
 
+async function loadRepoState(repo: OpacaGamiRepo): Promise<OpacaGamiState> {
+  if (isLocalRepo(repo)) return repo.snapshot()
+  const [attempts, me] = await Promise.all([repo.listAttempts(), repo.getMe()])
+  return {
+    v: 1,
+    attempts: [...attempts],
+    learn: { topics: [], items: {} },
+    earned: [],
+    profile: { displayName: me.displayName, public: me.public, cohort: me.cohort },
+  }
+}
+
 /** Sonuç ekranı "Bu oturumda kazandıkların" (tasarım promptu §6). Oturumu bir kez kaydeder (idempotent kimlik). */
 export function GamiGains({ repo, mode, results, caseById, seed, durationMs, finishedAt, onAchievements, onLeaderboard }: {
-  repo: LocalRepo; mode: GamiMode; results: CaseResult[]; caseById: (id: string) => CaseDef | undefined
+  repo: OpacaGamiRepo; mode: GamiMode; results: CaseResult[]; caseById: (id: string) => CaseDef | undefined
   seed: number; durationMs: number; finishedAt: Date; onAchievements: () => void; onLeaderboard: () => void
 }) {
+  const { reportSyncError } = useGamiContext()
   const [gains, setGains] = useState<Gains | null>(null)
   useEffect(() => {
     let alive = true
@@ -44,30 +59,36 @@ export function GamiGains({ repo, mode, results, caseById, seed, durationMs, fin
     if (!attempt) return
     const period: Period = daysLeft(at) < 7 ? 'month' : 'week'
     ;(async () => {
-      const already = repo.snapshot().attempts.some((a) => a.id === attempt.id)
-      const beforeEarned = new Set(repo.snapshot().earned.map((e) => e.id))
-      const before = mode === 'assessment' ? await rankOf(repo, period, at) : null
-      await repo.recordAttempt(attempt)
-      const s = repo.snapshot()
-      const stats = computeStats(s.attempts, s.learn, s.earned, at)
-      const views = badgeViews(OPACA_BADGES, stats, s.earned, { now: at })
-      const fresh = already ? [] : views.filter((v) => v.state === 'earned' && !beforeEarned.has(v.def.id))
-      const next = views.filter((v) => v.state === 'progress').sort((a, b) => b.value / b.max - a.value / a.max)[0] ?? null
-      const after = mode === 'assessment' ? await rankOf(repo, period, at) : null
-      const bonus = mode === 'assessment' && attempt.score >= OPACA_RULES.xp.assessmentBonusThreshold ? OPACA_RULES.xp.assessmentBonus : 0
-      if (!alive) return
-      setGains({
-        newBadge: fresh[0] ?? null,
-        nextBadge: next,
-        xp: attemptXp(attempt, OPACA_RULES),
-        bonus,
-        level: levelForXp(stats.totalXp, OPACA_RULES),
-        rank: after ? { period, rank: after.rank, of: after.of, delta: before?.rank && after.rank ? before.rank - after.rank : null } : null,
-        confetti: fresh.length > 0 && attempt.mastery,
-      })
+      try {
+        const beforeState = await loadRepoState(repo)
+        const already = beforeState.attempts.some((a) => a.id === attempt.id)
+        const beforeEarned = new Set(beforeState.earned.map((e) => e.id))
+        const before = mode === 'assessment' ? await rankOf(repo, period, at) : null
+        await repo.recordAttempt(attempt)
+        const afterState = await loadRepoState(repo)
+        const stats = computeStats(afterState.attempts, afterState.learn, afterState.earned, at)
+        const views = badgeViews(OPACA_BADGES, stats, afterState.earned, { now: at })
+        const fresh = already ? [] : views.filter((v) => v.state === 'earned' && !beforeEarned.has(v.def.id))
+        const next = views.filter((v) => v.state === 'progress').sort((a, b) => b.value / b.max - a.value / a.max)[0] ?? null
+        const after = mode === 'assessment' ? await rankOf(repo, period, at) : null
+        const bonus = mode === 'assessment' && attempt.score >= OPACA_RULES.xp.assessmentBonusThreshold ? OPACA_RULES.xp.assessmentBonus : 0
+        if (!alive) return
+        setGains({
+          newBadge: fresh[0] ?? null,
+          nextBadge: next,
+          xp: attemptXp(attempt, OPACA_RULES),
+          bonus,
+          level: levelForXp(stats.totalXp, OPACA_RULES),
+          rank: after ? { period, rank: after.rank, of: after.of, delta: before?.rank && after.rank ? before.rank - after.rank : null } : null,
+          confetti: fresh.length > 0 && attempt.mastery,
+        })
+      } catch (error: unknown) {
+        if (!alive) return
+        reportSyncError(error, 'write')
+      }
     })()
     return () => { alive = false }
-  }, [caseById, durationMs, finishedAt, mode, repo, results, seed])
+  }, [caseById, durationMs, finishedAt, mode, repo, reportSyncError, results, seed])
 
   if (!gains) return null
   const span = gains.level.levelEndXp - gains.level.levelStartXp

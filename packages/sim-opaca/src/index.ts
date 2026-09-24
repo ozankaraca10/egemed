@@ -14,6 +14,16 @@ export { DevPanel } from "./DevPanel";
 export { createOpacaModule, opacaModule } from "./SimModule";
 export { opacaModule as default } from "./SimModule";
 export type { OpacaContainer, OpacaModuleDeps, OpacaRoot } from "./SimModule";
+export { GamiProvider, bindGamiRepository, useGamiContext } from "./gamification/GamiContext";
+export type { GamiContextValue, GamiSyncError } from "./gamification/GamiContext";
+export {
+  configureGamiRepository,
+  formatGamiSyncError,
+  getGamiRepo,
+  isLocalRepo,
+  resetGamiRepo,
+} from "./gamification/repo";
+export type { GamificationRepo, GamiRepoInit, LocalRepo, OpacaGamiRepo } from "./gamification/repo";
 export {
   createBrowserChromeEnv,
   createBrowserLearnScreenEnv,
