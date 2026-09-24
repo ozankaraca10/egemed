@@ -17,7 +17,7 @@ modüller olarak sunan, mobil uyumlu bir tıp eğitimi uygulamasıdır. Eski mod
 pnpm i                               # Node ≥ 22 (.nvmrc), pnpm 10 (packageManager pin); --frozen-lockfile kırılmaz
 pnpm turbo lint typecheck test       # ana kalite kapısı (her görevde yeşil olmalı)
 pnpm dev                             # kabuk: http://localhost:5173
-pnpm e2e:mobile                      # Playwright + axe: 360/768/1440 px, WCAG 2.2 AA, giriş/güvenlik akışları
+pnpm e2e:mobile                      # Playwright + axe: 360/768/1440 px, WCAG 2.2 AA, giriş/güvenlik akışları (artefakt: e2e-artifacts/<git-sha>/)
 pnpm infra:up / pnpm infra:down      # geliştirme Postgres 18 (5432) + SQL LRS (8080) — colima/docker; değerler .env.local
 pnpm --filter @egemed/sim-opaca sync:xray   # git-dışı Opaca röntgen görsellerini yerel kaynak depodan kopyalar
 ```

@@ -9,11 +9,16 @@ const env = (globalThis as { process?: { env?: Record<string, string | undefined
 const isCI = env["CI"] === "true";
 
 export default defineConfig({
+  globalSetup: "./e2e/global-setup.ts",
   testDir: "./e2e",
   fullyParallel: true,
   forbidOnly: isCI,
   retries: isCI ? 1 : 0,
-  reporter: [["list"], ["html", { open: "never" }]],
+  reporter: [
+    ["list"],
+    ["html", { open: "never" }],
+    ["./e2e/artifact-reporter.ts"],
+  ],
   use: {
     baseURL: DEV_URL,
     screenshot: "only-on-failure",
