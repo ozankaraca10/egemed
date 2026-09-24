@@ -25,7 +25,7 @@ const defined = (source: string): Set<string> => new Set(capture(source, /(--[\w
 describe("shell.css token sözleşmesi", () => {
   it("renk literali içermez, sınıflar eg-shell- öneklidir, her var() tanımlı token'a bağlanır", () => {
     for (const pattern of colorLiterals) expect(shellCss).not.toMatch(pattern);
-    const classes = capture(shellCss, /\.([A-Za-z][\w-]*)/g);
+    const classes = capture(shellCss.replace(/url\([^)]*\)/g, ""), /\.([A-Za-z][\w-]*)/g);
     expect(classes.length).toBeGreaterThan(0);
     for (const name of classes) expect(name.startsWith("eg-shell"), name).toBe(true);
     const family = defined(read("packages/tokens/family-tokens.css"));
@@ -49,6 +49,12 @@ describe("shell.css token sözleşmesi", () => {
     expect(shellCss).toContain("prefers-reduced-motion: reduce");
     expect(shellCss).toContain(":focus-visible");
     expect(shellCss).not.toMatch(/\.eg-shell-entry__logo\s*\{[^}]*filter:/);
+    // Görsel panelin kendi arka planıdır (tam görünür); %10 katman ::before'dadır ve görsel içermez.
+    expect(shellCss).toMatch(/\.eg-shell-entry__brand\s*\{[^}]*url\("\/brand\/entry-bg\.jpg"\)/);
+    expect(shellCss).toContain('background-image: url("/brand/entry-bg-760.jpg")');
+    expect(shellCss).toMatch(/\.eg-shell-entry__brand::before\s*\{[^}]*opacity:\s*\.10/);
+    expect(shellCss).not.toMatch(/\.eg-shell-entry__brand::before\s*\{[^}]*url\(/);
+    expect(shellCss).toMatch(/\.eg-shell-entry__brand\s*\{[^}]*center 35% \/ cover/);
   });
   it("gövde kenar boşluğunu sıfırlar ve programatik odakta çerçeve çizmez (B2)", () => {
     expect(shellCss).toMatch(/html\s*,\s*body\s*\{[^}]*margin:\s*0/);

@@ -3,6 +3,7 @@ import { t } from "@egemed/ui/i18n";
 import type { DevSession } from "./devAuth";
 import { ROUTES, routeHref, type ResolvedRoute, type RouteId } from "./routes";
 import { ShellFooter } from "./ShellFooter";
+import { EgemedLogo } from "./brand/EgemedLogo";
 
 export interface ShellLayoutProps {
   /** Çözümlenmiş rota; etkin bağlantı işaretlemesi bundan türetilir. */
@@ -74,12 +75,7 @@ export function ShellLayout({ route, session, onLogout, children }: ShellLayoutP
       <a className="eg-shell-skip" href="#icerik" onClick={focusMain}>{t("shell.skip")}</a>
       <header className="eg-shell-header">
         <a className="eg-shell-brand" href={routeHref("home")}>
-          <span className="eg-shell-brand__mark">
-            <span className="eg-shell-brand__eyebrow">{t("shell.brand.eyebrow")}</span>
-            <span className="eg-shell-brand__name">{t("shell.brand.name")}</span>
-          </span>
-          <span aria-hidden="true" className="eg-shell-brand__divider" />
-          <span className="eg-shell-brand__tagline">{t("shell.brand.tagline")}</span>
+          <EgemedLogo variant="on-dark" />
         </a>
         <div className="eg-shell-header__side">
           {roleLabel !== null && (
