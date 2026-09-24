@@ -1,5 +1,6 @@
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
+import { tr } from "../../packages/ui/i18n/tr";
 import { Table, type TableColumn } from "../../packages/ui/src/Table";
 import { describe, expect, it } from "vitest";
 
@@ -38,5 +39,11 @@ describe("Table işaretlemesi", () => {
     for (const cell of cells) {
       expect(cell).toMatch(/data-label="(Ad|Durum)"/);
     }
+  });
+
+  it("boş liste sözlükten gelen table.empty metnini gösterir", () => {
+    const html = render([]);
+    expect(html).toContain(tr["table.empty"]);
+    expect((html.match(/<td[^>]*>/g) ?? []).length).toBe(1);
   });
 });

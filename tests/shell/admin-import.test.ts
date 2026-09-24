@@ -1,3 +1,5 @@
+import { createElement } from "react";
+import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
 import { ADMIN_IMPORT_PATH, adminImportHref, isAdminProtected, resolveRoute } from "../../apps/shell/src/routes";
 import {
@@ -18,7 +20,17 @@ import {
   type ImportRow,
   type TemplateColumn,
 } from "../../apps/shell/src/admin/importsDataSource";
+import { ImportWizardPage, ImportWizardView, type ImportWizardViewProps } from "../../apps/shell/src/admin/ImportWizardPage";
 import type { AdminUser } from "../../apps/shell/src/admin/usersDataSource";
+import { t } from "../../packages/ui/i18n/tr";
+
+function render(element: ReturnType<typeof createElement>): string {
+  return renderToStaticMarkup(element);
+}
+
+function noop(): void {
+  // yalnız zorunlu prop'u doldurur; ilgisiz durumlarda çağrılmaz
+}
 
 function emptyRaw(): Record<TemplateColumn, string> {
   return { ad_soyad: "", birim_kodu: "", eposta: "", giris_tipi: "", kullanici_adi: "", rol: "", sim_erisimi: "" };
@@ -318,5 +330,173 @@ describe("#/admin/ice-aktar rotası ve koruması (T71)", () => {
     expect(adminImportHref()).toBe(`#${ADMIN_IMPORT_PATH}`);
     expect(resolveRoute(adminImportHref())).toEqual({ kind: "adminImport", titleKey: "admin.import.title" });
     expect(isAdminProtected({ kind: "adminImport", titleKey: "admin.import.title" })).toBe(true);
+  });
+});
+
+function baseViewProps(overrides: Partial<ImportWizardViewProps>): ImportWizardViewProps {
+  return {
+    applyConfirmOpen: false,
+    applyResult: null,
+    applyStatus: "idle",
+    batch: null,
+    csvText: "",
+    fileNameInput: "kullanicilar.csv",
+    headers: [],
+    mapping: {},
+    mode: "ekle",
+    onBack: noop,
+    onCancelApply: noop,
+    onConfirmApply: noop,
+    onCsvTextChange: noop,
+    onDownloadErrors: noop,
+    onDownloadTemplate: noop,
+    onFileNameChange: noop,
+    onMappingChange: noop,
+    onModeChange: noop,
+    onNext: noop,
+    onRequestApply: noop,
+    onRestart: noop,
+    onUploadRequest: noop,
+    onValidateRetry: noop,
+    rows: [],
+    step: "template",
+    uploadErrorCode: null,
+    uploadStatus: "idle",
+    validateStatus: "idle",
+    ...overrides,
+  };
+}
+
+describe("ImportWizardView işaretlemesi (E3 §e.4)", () => {
+  it("adım göstergesi yedi adımı sıralar; etkin adım aria-current taşır", () => {
+    const html = render(createElement(ImportWizardView, baseViewProps({ step: "validate" })));
+    for (const key of [
+      "admin.import.step.template",
+      "admin.import.step.upload",
+      "admin.import.step.map",
+      "admin.import.step.validate",
+      "admin.import.step.preview",
+      "admin.import.step.apply",
+      "admin.import.step.result",
+    ] as const) {
+      expect(html).toContain(t(key));
+    }
+    expect(html).toContain('aria-current="step"');
+    expect(html.match(/aria-current="step"/g) ?? []).toHaveLength(1);
+  });
+
+  it("şablon adımı indirme eylemini ve 'İleri' düğmesini gösterir", () => {
+    const html = render(createElement(ImportWizardView, baseViewProps({ step: "template" })));
+    expect(html).toContain(t("admin.import.template.download"));
+    expect(html).toContain(t("admin.import.action.next"));
+  });
+
+  it("yükle adımında mod seçimi, dosya adı ve CSV alanını gösterir; hata kodunu Türkçeye çevirir", () => {
+    const html = render(
+      createElement(ImportWizardView, baseViewProps({ step: "upload", uploadErrorCode: "too_many_rows", uploadStatus: "error" })),
+    );
+    expect(html).toContain(t("admin.import.upload.mode.ekle"));
+    expect(html).toContain(t("admin.import.upload.mode.guncelle"));
+    expect(html).toContain(t("admin.import.upload.error.too_many_rows"));
+    expect(html).toMatch(/role="alert"/);
+  });
+
+  it("eşle adımında yedi hedef alanı ve algılanan başlıkları seçenek olarak gösterir", () => {
+    const html = render(
+      createElement(
+        ImportWizardView,
+        baseViewProps({ headers: ["kullanici_adi", "ad_soyad"], mapping: { kullanici_adi: "kullanici_adi" }, step: "map" }),
+      ),
+    );
+    for (const key of [
+      "admin.import.field.kullanici_adi",
+      "admin.import.field.eposta",
+      "admin.import.field.ad_soyad",
+      "admin.import.field.rol",
+      "admin.import.field.birim_kodu",
+      "admin.import.field.sim_erisimi",
+      "admin.import.field.giris_tipi",
+    ] as const) {
+      expect(html).toContain(t(key));
+    }
+    expect(html).toContain('<option value="kullanici_adi">kullanici_adi</option>');
+  });
+
+  it("doğrulama adımında sayıları ve satır hatalarını gösterir; hata yoksa 'Hata yok.' gösterir", () => {
+    const errorRow: ImportRow = {
+      errors: [{ code: "display_name_invalid", column: "ad_soyad", message: "Ad soyad 2-120 karakter olmalıdır." }],
+      raw: emptyRaw(),
+      rowNo: 5,
+      status: "error",
+    };
+    const withErrors = render(
+      createElement(
+        ImportWizardView,
+        baseViewProps({
+          batch: { appliedCount: 0, errorCount: 1, fileName: "x.csv", id: "import-1", mode: "ekle", rowCount: 2, status: "validated", templateVersion: "2026-09", validCount: 1 },
+          rows: [errorRow],
+          step: "validate",
+        }),
+      ),
+    );
+    expect(withErrors).toContain("Ad soyad 2-120 karakter olmalıdır.");
+    expect(withErrors).toContain(t("admin.import.validate.download"));
+
+    const noErrors = render(
+      createElement(
+        ImportWizardView,
+        baseViewProps({
+          batch: { appliedCount: 0, errorCount: 0, fileName: "x.csv", id: "import-2", mode: "ekle", rowCount: 1, status: "validated", templateVersion: "2026-09", validCount: 1 },
+          step: "validate",
+        }),
+      ),
+    );
+    expect(noErrors).toContain(t("admin.import.validate.none"));
+  });
+
+  it("uygula adımı onay diyaloğunu açık/kapalı gösterir; onaylama düğmesi mevcuttur", () => {
+    const html = render(
+      createElement(
+        ImportWizardView,
+        baseViewProps({
+          applyConfirmOpen: true,
+          batch: { appliedCount: 0, errorCount: 0, fileName: "x.csv", id: "import-3", mode: "ekle", rowCount: 3, status: "validated", templateVersion: "2026-09", validCount: 3 },
+          step: "apply",
+        }),
+      ),
+    );
+    expect(html).toContain('role="dialog"');
+    expect(html).toContain(t("admin.import.apply.confirm.title"));
+    expect(html).toContain(t("admin.import.apply.confirm.body.ekle"));
+  });
+
+  it("sonuç adımı uygulanan/hatalı sayılarını ve yeniden başlatma eylemini gösterir", () => {
+    const html = render(
+      createElement(
+        ImportWizardView,
+        baseViewProps({
+          applyResult: { alreadyApplied: false, appliedCount: 5, batchId: "import-4", errorCount: 1 },
+          step: "result",
+        }),
+      ),
+    );
+    expect(html).toContain("5");
+    expect(html).toContain(t("admin.import.result.applied"));
+    expect(html).toContain(t("admin.import.result.restart"));
+    expect(html).toContain(t("admin.import.validate.download"));
+  });
+});
+
+describe("ImportWizardPage kabı", () => {
+  it("varsayılan (dataSource'suz) çağrıldığında ilk render'da şablon adımını gösterir", () => {
+    const html = render(createElement(ImportWizardPage));
+    expect(html).toContain(t("admin.import.title"));
+    expect(html).toContain(t("admin.import.template.download"));
+  });
+
+  it("enjekte edilen kaynakla da ilk render şablon adımını gösterir", () => {
+    const source = createMockImportsSource([EXISTING_USER], () => 0);
+    const html = render(createElement(ImportWizardPage, { dataSource: source }));
+    expect(html).toContain(t("admin.import.template.download"));
   });
 });
