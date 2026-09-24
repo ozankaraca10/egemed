@@ -56,8 +56,10 @@ export interface GamiRepository<TAttempt extends AttemptRecord = AttemptRecord> 
 /** API deposunda henüz karşılığı olmayan PORT yöntemi — yerel kuyruk tutulmaz (ADR-004). */
 export class GamiRepositoryUnsupportedError extends Error {
   readonly name = "GamiRepositoryUnsupportedError";
+  readonly method: string;
 
-  constructor(readonly method: string) {
+  constructor(method: string) {
     super(`GamiRepository.${method} API deposunda desteklenmiyor.`);
+    this.method = method;
   }
 }
