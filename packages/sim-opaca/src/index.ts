@@ -35,8 +35,12 @@ export {
 } from "./core/geometry";
 export type { Point } from "./core/geometry";
 export { IMAGES, datasetCounts, examplesFor, expertPositive, getImage, isExpertSource } from "./core/images";
-export { BEST_SCORE_KEY, computeCaseResult, initialState, initialTelemetry, loadBestScore, reducer, saveBestScore } from "./core/reducer";
+export { BEST_SCORE_KEY, buildSuspend, computeCaseResult, initialState, initialTelemetry, loadBestScore, reducer, saveBestScore } from "./core/reducer";
 export type { Action, AppState, ReducerSeam, StoragePort } from "./core/reducer";
+export { createFlushHandlers, createLifecycle } from "./core/lifecycle";
+export type { FlushTarget, Lifecycle, LifecycleHandlers, WindowLike } from "./core/lifecycle";
+export { StoreProvider, useStore } from "./core/StoreProvider";
+export type { StoreContextValue, StoreProviderProps } from "./core/StoreProvider";
 export { createMemoryRuntimeAdapter, createNoopRuntimeAdapter, createSimRuntime } from "./core/runtime";
 export type {
   FinishReport,
