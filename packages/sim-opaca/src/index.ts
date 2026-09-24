@@ -4,6 +4,17 @@ export const SIM_ID = "opaca" satisfies SimulatorId;
 
 export { isAnswerCorrect } from "./core/answers";
 export {
+  firstWeakLibraryKey,
+  isTimedOut,
+  nextActionForSubmit,
+  remainingSec,
+  stepProgress,
+  tutorialProgress,
+  weakDomainKeys,
+  zoneChipState,
+} from "./core/flow";
+export type { SubmitAction, TutorialEvent, TutorialProgress, ZoneChipVisualState } from "./core/flow";
+export {
   MARK_CENTER_DISTANCE_FRACTION,
   MARK_RADIUS_SHORT_EDGE_FRACTION,
   MAX_LOCALIZATION_BOX_AREA,
@@ -23,6 +34,16 @@ export {
 export type { Point } from "./core/geometry";
 export { IMAGES, datasetCounts, examplesFor, expertPositive, getImage, isExpertSource } from "./core/images";
 export { HINT_PENALTY_PRACTICE, MASTERY_THRESHOLD, aggregateResults, practiceAdjusted, scoreCase } from "./core/scoring";
+export {
+  IMAGE_DEPENDENT_QUESTION_TYPES,
+  SESSION_SIZE,
+  mulberry32,
+  questionSignature,
+  sampleSession,
+  shuffledOptions,
+  stringSeed,
+} from "./core/session";
+export { SUSPEND_LIMIT_12, SUSPEND_LIMIT_2004, deserializeSuspend, serializeSuspend } from "./core/suspend";
 export { filterAssessmentPool, validateCase } from "./core/validation";
 export type { ValidationIssue } from "./core/validation";
 export { DEFAULT_WEIGHTS, EXPERT_SOURCES } from "./core/types";
