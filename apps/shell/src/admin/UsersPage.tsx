@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type JSX, type KeyboardEvent } from "react";
 import { Badge, type BadgeTone } from "@egemed/ui";
 import { t, type TrKey } from "@egemed/ui/i18n";
-import { adminUserDetailHref } from "../routes";
+import { adminUserCreateHref, adminUserDetailHref } from "../routes";
 import {
   ADMIN_UNITS,
   createMockUsersSource,
@@ -357,9 +357,9 @@ export function UsersListView({
     <section className="eg-shell-page eg-shell-users">
       <div className="eg-shell-users__head">
         <h1 className="eg-shell-page__title">{t("admin.users.title")}</h1>
-        <button aria-disabled="true" className="eg-shell-users__add" disabled type="button">
+        <a className="eg-shell-users__add" href={adminUserCreateHref()}>
           {t("admin.users.action.add")}
-        </button>
+        </a>
       </div>
       <UsersFilters
         onClearFilters={onClearFilters}
@@ -389,9 +389,7 @@ export function UsersListView({
         {status === "ready" && result !== null && result.meta.total === 0 && !filtered && (
           <div className="eg-shell-users__empty">
             <p>{t("table.empty")}</p>
-            <button aria-disabled="true" disabled type="button">
-              {t("admin.users.action.add")}
-            </button>
+            <a href={adminUserCreateHref()}>{t("admin.users.action.add")}</a>
           </div>
         )}
         {status === "ready" && result !== null && result.meta.total === 0 && filtered && (

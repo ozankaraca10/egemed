@@ -82,6 +82,89 @@ const adminUsersKeys: TrKey[] = [
   "admin.users.pagination.records",
 ];
 
+const adminUserFormKeys: TrKey[] = [
+  "admin.users.form.title",
+  "admin.users.form.mappingKey.label",
+  "admin.users.form.mappingKey.username",
+  "admin.users.form.mappingKey.email",
+  "admin.users.form.field.displayName",
+  "admin.users.form.field.authMethod",
+  "admin.users.form.field.authMethod.hint",
+  "admin.users.form.field.role",
+  "admin.users.form.field.role.hint",
+  "admin.users.form.field.unit",
+  "admin.users.form.field.unit.placeholder",
+  "admin.users.form.field.simAccess",
+  "admin.users.form.notice.sso",
+  "admin.users.form.action.cancel",
+  "admin.users.form.action.save",
+  "admin.users.form.action.confirm",
+  "admin.users.form.action.back",
+  "admin.users.form.discard.confirm",
+  "admin.users.form.confirm.title",
+  "admin.users.form.confirm.body",
+  "admin.users.form.confirm.authMethod",
+  "admin.users.form.confirm.role",
+  "admin.users.form.confirm.simAccess",
+  "admin.users.form.confirm.simAccess.none",
+  "admin.users.form.error.mappingValueRequired",
+  "admin.users.form.error.usernameInvalid",
+  "admin.users.form.error.emailInvalid",
+  "admin.users.form.error.duplicateMappingKey",
+  "admin.users.form.error.displayNameInvalid",
+  "admin.users.form.error.unitRequired",
+  "admin.users.form.error.submit",
+];
+
+const adminUserDetailKeys: TrKey[] = [
+  "admin.users.detail.back",
+  "admin.users.detail.routeTitle",
+  "admin.users.detail.tabs.label",
+  "admin.users.detail.tab.general",
+  "admin.users.detail.tab.roles",
+  "admin.users.detail.tab.gamification",
+  "admin.users.detail.tab.history",
+  "admin.users.detail.general.username",
+  "admin.users.detail.general.email",
+  "admin.users.detail.general.displayName",
+  "admin.users.detail.general.unit",
+  "admin.users.detail.general.authMethod",
+  "admin.users.detail.general.status",
+  "admin.users.detail.general.lastLogin",
+  "admin.users.detail.general.lastLogin.never",
+  "admin.users.detail.general.notSet",
+  "admin.users.detail.roles.title",
+  "admin.users.detail.roles.access",
+  "admin.users.detail.roles.access.empty",
+  "admin.users.detail.gamification.empty",
+  "admin.users.detail.gamification.xp",
+  "admin.users.detail.gamification.level",
+  "admin.users.detail.gamification.streak",
+  "admin.users.detail.history.empty",
+  "admin.users.detail.history.action.user.create",
+  "admin.users.detail.history.action.user.suspend",
+  "admin.users.detail.history.action.user.activate",
+  "admin.users.detail.history.action.user.delete",
+  "admin.users.detail.action.suspend",
+  "admin.users.detail.action.activate",
+  "admin.users.detail.action.delete",
+  "admin.users.detail.action.cancel",
+  "admin.users.detail.action.apply",
+  "admin.users.detail.confirm.suspend.title",
+  "admin.users.detail.confirm.suspend.body",
+  "admin.users.detail.confirm.activate.title",
+  "admin.users.detail.confirm.activate.body",
+  "admin.users.detail.confirm.delete.title",
+  "admin.users.detail.confirm.delete.body",
+  "admin.users.detail.confirm.delete.inputLabel",
+  "admin.users.detail.confirm.delete.mismatch",
+  "admin.users.detail.error.title",
+  "admin.users.detail.error.body",
+  "admin.users.detail.actionError",
+  "admin.users.detail.notFound.title",
+  "admin.users.detail.notFound.body",
+];
+
 const premiumKeys: TrKey[] = [
   "shell.brand.eyebrow",
   "shell.brand.name",
@@ -213,6 +296,25 @@ describe("i18n/tr sözlüğü", () => {
     expect(t("admin.users.authMethod.dev")).toBe("Geliştirme");
     expect(t("admin.users.filter.clear")).toBe("Filtreleri temizle");
     expect(t("admin.users.error.retry")).toBe("Yeniden dene");
+  });
+
+  it("kullanıcı ekle formu (T70) anahtarları tanımlı, boş değil ve admin rolü yasağı yazılıdır", () => {
+    for (const key of adminUserFormKeys) {
+      expect(t(key).trim().length, key).toBeGreaterThan(0);
+    }
+    expect(t("admin.users.form.title")).toBe("Yeni kullanıcı");
+    expect(t("admin.users.form.notice.sso")).toBe("Kimlik doğrulama SSO ile yapılır; parola oluşturulmaz.");
+    expect(t("admin.users.form.error.duplicateMappingKey")).toBe("Bu kullanıcı adı veya e-posta zaten kayıtlı.");
+  });
+
+  it("kullanıcı ayrıntı/düzenle ekranı (T70) anahtarları tanımlı ve boş değil", () => {
+    for (const key of adminUserDetailKeys) {
+      expect(t(key).trim().length, key).toBeGreaterThan(0);
+    }
+    expect(t("admin.users.detail.routeTitle")).toBe("Kullanıcı ayrıntısı");
+    expect(t("admin.users.detail.confirm.delete.body")).toBe(
+      "Bu işlem geri alınamaz. Devam etmek için kullanıcı adını yazın.",
+    );
   });
 
   it("'Nasıl çalışır?' bölümü anahtarları tanımlı ve birebir metinleri taşır", () => {

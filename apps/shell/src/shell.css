@@ -138,8 +138,8 @@ html, body { margin: 0; }
 .eg-shell-users__add {
   box-sizing: border-box; display: inline-flex; align-items: center; justify-content: center;
   min-height: var(--eg-shell-touch-min); padding: 0 var(--sp-4);
-  background: var(--card-soft); border: 1px dashed var(--border-strong); border-radius: var(--r-md);
-  color: var(--muted); font: inherit; font-weight: 600; cursor: not-allowed;
+  background: var(--blue-700); border: 0; border-radius: var(--r-md);
+  color: var(--card); font: inherit; font-weight: 700; text-decoration: none;
 }
 .eg-shell-users__filters {
   display: grid; gap: var(--sp-3); grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -223,6 +223,94 @@ html, body { margin: 0; }
 @media (min-width: 1440px) {
   .eg-shell-users__filters { grid-template-columns: repeat(6, minmax(0, 1fr)) auto; align-items: end; }
 }
+
+/* --- Kullanıcı ekle (T70, E3 §e.2): framework dialog/feedback bileşenlerinden
+   türetilir, `Modal` (@egemed/ui) içinde açılır; 360'ta tam ekran, 768/1440'ta ortalanmış. --- */
+.eg-shell-userform__form { display: grid; gap: var(--sp-3); }
+.eg-shell-userform__field { display: grid; gap: var(--sp-1); border: 0; margin: 0; padding: 0; }
+.eg-shell-userform__label { color: var(--text); font-weight: 600; }
+.eg-shell-userform__field input, .eg-shell-userform__field select {
+  box-sizing: border-box; min-height: var(--eg-shell-touch-min); padding: 0 var(--sp-3);
+  border: 1px solid var(--border-strong); border-radius: var(--r-sm); background: var(--card);
+  color: var(--text); font: inherit;
+}
+.eg-shell-userform__field select:disabled { color: var(--muted); background: var(--card-soft); }
+.eg-shell-userform__radio, .eg-shell-userform__checkbox {
+  display: inline-flex; align-items: center; gap: var(--sp-2); min-height: var(--eg-shell-touch-min); margin-right: var(--sp-3);
+}
+.eg-shell-userform__error { margin: 0; color: var(--red-600); font-size: var(--fs-sm); font-weight: 600; }
+.eg-shell-userform__discard { margin: 0; color: var(--red-600); font-size: var(--fs-sm); font-weight: 600; }
+.eg-shell-userform__notice {
+  margin: 0; padding: var(--sp-3); border: 1px solid var(--blue-600); border-radius: var(--r-sm);
+  background: var(--blue-50); color: var(--navy-900); font-size: var(--fs-sm);
+}
+.eg-shell-userform__actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: var(--sp-3); }
+.eg-shell-userform__actions button {
+  box-sizing: border-box; min-height: var(--eg-shell-touch-min); padding: 0 var(--sp-4);
+  border-radius: var(--r-md); font: inherit; font-weight: 600; cursor: pointer;
+}
+.eg-shell-userform__actions button[type="submit"], .eg-shell-userform__confirm .eg-shell-userform__actions button:last-child {
+  background: var(--blue-700); border: 0; color: var(--card);
+}
+.eg-shell-userform__actions button[type="button"]:not(:last-child) {
+  background: var(--card); border: 1px solid var(--border-strong); color: var(--text);
+}
+.eg-shell-userform__summary { display: grid; grid-template-columns: auto 1fr; gap: var(--sp-2) var(--sp-3); margin: 0; }
+.eg-shell-userform__summary dt { color: var(--muted); font-weight: 600; }
+.eg-shell-userform__summary dd { margin: 0; color: var(--text); }
+.eg-shell-userform__confirm { display: grid; gap: var(--sp-3); }
+
+/* --- Kullanıcı ayrıntı/düzenle (T70, E3 §e.3): framework results-summary/mode-card
+   (sekmeler)/dialog (onay)/feedback bileşenlerinden türetilir. --- */
+.eg-shell-userdetail__back {
+  display: inline-flex; align-items: center; min-height: var(--eg-shell-touch-min);
+  margin-bottom: var(--sp-3); color: var(--blue-700); font-weight: 600; text-decoration: none;
+}
+.eg-shell-userdetail__head {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--sp-3);
+  margin-bottom: var(--sp-3);
+}
+.eg-shell-userdetail__actions { display: flex; flex-wrap: wrap; gap: var(--sp-2); }
+.eg-shell-userdetail__actions button {
+  box-sizing: border-box; min-height: var(--eg-shell-touch-min); padding: 0 var(--sp-3);
+  background: var(--card); border: 1px solid var(--border-strong); border-radius: var(--r-md);
+  color: var(--text); font: inherit; font-weight: 600; cursor: pointer;
+}
+.eg-shell-userdetail__delete { color: var(--red-600); border-color: var(--red-500); }
+.eg-shell-userdetail__skeleton { display: grid; gap: var(--sp-2); }
+.eg-shell-userdetail__skeleton-row {
+  display: block; height: 2.75rem; background: var(--card-soft);
+  border: 1px dashed var(--border-strong); border-radius: var(--r-md);
+}
+.eg-shell-userdetail__error, .eg-shell-userdetail__empty {
+  box-sizing: border-box; display: grid; gap: var(--sp-3); justify-items: start;
+  padding: var(--sp-4); background: var(--card); border: 1px solid var(--border); border-radius: var(--r-lg);
+}
+.eg-shell-userdetail__error { background: var(--red-100); border-color: var(--red-500); }
+.eg-shell-userdetail__errorTitle { margin: 0; color: var(--red-600); font-weight: 700; }
+.eg-shell-userdetail__summary { display: grid; grid-template-columns: auto 1fr; gap: var(--sp-2) var(--sp-3); margin: 0; }
+.eg-shell-userdetail__summary dt { color: var(--muted); font-weight: 600; }
+.eg-shell-userdetail__summary dd { margin: 0; color: var(--text); }
+.eg-shell-userdetail__rolesTitle { margin: var(--sp-3) 0 var(--sp-1); color: var(--navy-900); font-weight: 700; }
+.eg-shell-userdetail__badgeList { display: flex; flex-wrap: wrap; gap: var(--sp-2); margin: 0; padding: 0; list-style: none; }
+.eg-shell-userdetail__gamiList { display: grid; gap: var(--sp-3); margin: 0; padding: 0; list-style: none; }
+.eg-shell-userdetail__gamiCard {
+  padding: var(--sp-3); background: var(--card); border: 1px solid var(--border); border-radius: var(--r-lg);
+  box-shadow: var(--shadow-card);
+}
+.eg-shell-userdetail__gamiSim { margin: 0 0 var(--sp-1); color: var(--navy-900); font-weight: 700; }
+.eg-shell-userdetail__history { display: grid; gap: var(--sp-1); margin: 0; padding: 0; list-style: none; }
+.eg-shell-userdetail__history li {
+  display: flex; flex-wrap: wrap; justify-content: space-between; gap: var(--sp-3);
+  padding: var(--sp-2) 0; border-bottom: 1px solid var(--border);
+}
+.eg-shell-userdetail__confirm { display: grid; gap: var(--sp-3); }
+.eg-shell-userdetail__confirmField { display: grid; gap: var(--sp-1); }
+.eg-shell-userdetail__confirmField input {
+  box-sizing: border-box; min-height: var(--eg-shell-touch-min); padding: 0 var(--sp-3);
+  border: 1px solid var(--border-strong); border-radius: var(--r-sm); background: var(--card); color: var(--text); font: inherit;
+}
+
 .eg-shell-link {
   display: inline-flex; align-items: center; justify-content: center;
   min-height: 44px; padding: 0 var(--sp-4);

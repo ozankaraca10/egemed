@@ -3,6 +3,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import {
   ADMIN_USERS_PATH,
   adminGuardHref,
+  adminUserCreateHref,
   adminUserDetailHref,
   adminUsersHref,
   entryHref,
@@ -263,10 +264,19 @@ describe("#/admin/kullanicilar rotası ve koruması", () => {
     expect(adminUsersHref()).toBe(`#${ADMIN_USERS_PATH}`);
     expect(resolveRoute(adminUsersHref())).toEqual({ kind: "adminUsers", titleKey: "admin.users.title" });
   });
-  it("ayrıntı yer tutucu rotası (#/admin/kullanicilar/:id) henüz uygulanmadığı için bulunamadıya düşer", () => {
+  it("ayrıntı rotası (#/admin/kullanicilar/:id, T70) kullanıcı kimliğiyle çözülür", () => {
     const href = adminUserDetailHref("user-001");
     expect(href).toBe(`#${ADMIN_USERS_PATH}/user-001`);
-    expect(resolveRoute(href).kind).toBe("notFound");
+    expect(resolveRoute(href)).toEqual({
+      kind: "adminUserDetail",
+      titleKey: "admin.users.detail.routeTitle",
+      userId: "user-001",
+    });
+  });
+  it("kullanıcı ekle rotası (#/admin/kullanicilar/yeni, T70) çözülür", () => {
+    const href = adminUserCreateHref();
+    expect(href).toBe(`#${ADMIN_USERS_PATH}/yeni`);
+    expect(resolveRoute(href)).toEqual({ kind: "adminUserCreate", titleKey: "admin.users.form.title" });
   });
   it("admin panelle aynı korumayı paylaşır: oturumsuz erişim girişe döner", () => {
     expect(isAdminProtected({ kind: "adminUsers", titleKey: "admin.users.title" })).toBe(true);
@@ -312,7 +322,7 @@ describe("UsersListView işaretlemesi", () => {
     );
     expect(html).toContain(t("table.empty"));
     expect(count(html, t("admin.users.action.add"))).toBe(2); // üst çubuk + boş durum
-    expect(html).toContain('aria-disabled="true"');
+    expect(count(html, `href="${adminUserCreateHref()}"`)).toBe(2); // T70: artık gerçek bağlantı
     expect(html).not.toContain(t("admin.users.filtered.empty"));
   });
 
