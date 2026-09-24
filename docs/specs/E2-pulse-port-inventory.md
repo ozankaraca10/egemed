@@ -185,10 +185,10 @@ portta vitest'e taşınacak regresyon kaynağıdırlar.
 
 ## 10. Port dilimleri (sıralı, her biri derlenebilir/testlenebilir, ≤~400 satır diff)
 
-Öneri yerleşim: **`packages/sim-pulse/`** — `sims/**` workspace ve eslint dışı olduğundan
-(`pnpm-workspace.yaml:2-3`, `eslint.config.js:6`) kapılar ancak workspace paketinde çalışır;
-kesin yerleşim **K-P1** kararıdır. Her dilimde `pnpm turbo lint typecheck test` yeşil; testler
-kökte `tests/sim-pulse/*.test.ts` (vitest `include`, `vitest.config.ts:5`).
+Yerleşim (Karar 23 Eyl 2026, K-P1): **`packages/sim-pulse/`** — `sims/**` workspace ve eslint dışı
+olduğundan (`pnpm-workspace.yaml:2-3`, `eslint.config.js:6`) kapılar ancak workspace paketinde çalışır;
+`sims/*` arşiv/boş kalır. Her dilimde `pnpm turbo lint typecheck test` yeşil; testler kökte
+`tests/sim-pulse/*.test.ts` (vitest `include`, `vitest.config.ts:5`).
 
 **Boyut yöntemi:** `~diff` = biçimlendirilmiş kaynak tahmini (bayt / 40; §1¹) + yeni kabul testi
 tahmini. Kaynak QA betikleri port edilmez; testler yeni yazıldığından test payı tahminidir.
@@ -198,7 +198,7 @@ Ham satır sayıları yoğun stil nedeniyle kullanılmaz; 400'ü aşan dilimler 
 
 | Kapı | Bağlı dilimler | Etki |
 |---|---|---|
-| **K-P1** paket yerleşimi | **S0a** (zorunlu) | `packages/sim-pulse` mı `sims/pulse` mı; workspace/eslint/turbo/tsconfig sözleşmesi; karar verilmeden S0a başlamaz |
+| **K-P1** paket yerleşimi | **S0a** (zorunlu) | **Karar (23 Eyl 2026): `packages/sim-pulse`**; `sims/*` arşiv/boş kalır. Workspace/eslint/turbo/tsconfig sözleşmesi bu yola göre kurulur |
 | **K-P2** SCORM | S5a, S7a, S12b, S15a | ADR-006: LMS/API çağrıları ve paketleme kaldırılır; 4096 bayt/bozuk kayıt politikası `PersistencePort`'ta korunur; `finish`/etkileşim raporu seam mi, kaldırma mı |
 | **K-P3** yerel depolama | S5a, S5b, S13b | `egemed-pulse-6.0` + legacy anahtarlar, ses tercihi ve tam ekran istemi kabukta mı simde mi; öğrenci verisi ADR-005 |
 | **K-P4** varlık sunumu | S13b, S15b | 4 görsel + `sources.json` kökü (`context.assetBase`); mutlak `/assets` varsayımı yasak |
@@ -244,6 +244,7 @@ Ham satır sayıları yoğun stil nedeniyle kullanılmaz; 400'ü aşan dilimler 
 | S15a | Sim adaptörü (sim paketi) | `app.js:160-173` (2,7 KB), `index.html:143-145` | `src/mount.tsx` | ~270 | **T14a merge**, S13b, S14e | mount→dispose→remount, StrictMode, sızıntı yok |
 | — | **Review/merge kapısı** | S15a (`packages/sim-pulse`) birleşmeden S15b (`apps/shell`) başlamaz | — | — | S15a `VERDICT: APPROVE` + merge (depo sahibi) | — |
 | S15b | Shell lazy rotası (`apps/shell`) | `apps/shell/src/routes.ts:24-30` | `apps/shell` rota + lazy import | ~150 | **S15a merge**, **K-P4** | Rota testi + mount smoke; `/sims/pulse/` |
+| S16 | Oyunlaştırma (Opaca sonrası, `packages/gamification-core` tüketicisi) | — (yeni) | `packages/sim-pulse/src/gami/*`; çekirdek `packages/gamification-core`'dan | ≤~400 (bölünür) | **Opaca portu + `packages/gamification-core` merge**, S15a | Karar (23 Eyl 2026, revize): oyunlaştırma üç simde de (Ausculta dahil) zorunlu; Pulse kendi rozet kataloğunu/hedeflerini taşır, sime özgü ekranlar sim paketinde, sim verisi ayrı kalır |
 | T09 | Mobil e2e (ayrı görev, T09) | — | `e2e/pulse.spec.ts` | (T09 kapsamı) | S15b | 360/768/1440, klavye, 44 px, yatay taşma yok |
 
 ¹ Verbatim veri kopyası satır bütçesine sayılmaz; ~diff yalnız sayım testi/manifest içindir
@@ -253,8 +254,9 @@ yeniden düzenlenir.
 
 Sıra: S0a–S0e motor çekirdeği hemen başlar; S1–S4 durum/veri; S5–S6 kalıcılık/host
 (**S6 için T14a**); S7–S13 görünüm (T20 çerçevesi); S14 CSS en son (görünüm sabitlenince);
-S15a adaptör → **review/merge kapısı** → S15b shell rotası; T09 e2e ayrı görev. T21 olay
-sözlüğü gelince S6/S7a `emit` çağrıları tiplenir; ağ yazımı yok (K2/K3 kapıları).
+S15a adaptör → **review/merge kapısı** → S15b shell rotası; S16 oyunlaştırma Opaca portu
+(`packages/gamification-core`) sonrası; T09 e2e ayrı görev. T21 olay sözlüğü gelince S6/S7a
+`emit` çağrıları tiplenir; ağ yazımı yok (K2/K3 kapıları).
 
 ## 11. Varsayım / kanıt ayrımı
 
@@ -265,7 +267,8 @@ ortam; `Date.now()` yasağı; ADR-006'nın SCORM dağıtımını kaldırması; E
 `mount(root, context) → dispose` sözleşme metni.
 
 **Varsayım (doğrulanmadı, karar gerektirir):**
-1. Hedef paket `packages/sim-pulse/` ve `SimContext` alanları (§10) — E1 açık sorusu; T14a sabitler.
+1. Hedef paket `packages/sim-pulse/` — Karar (23 Eyl 2026, K-P1). `SimContext` alanları (§10) — E1 açık
+   sorusu; T14a sabitler.
 2. `educator` görünüm değerinin ölü olduğu ve düşürüleceği.
 3. Chrome metinlerinin `packages/ui/i18n/tr.ts` içine `sim.pulse.*` ile taşınacağı; authored
    içeriğin veri kalacağı.
@@ -289,5 +292,6 @@ ortam; `Date.now()` yasağı; ADR-006'nın SCORM dağıtımını kaldırması; E
    korunmalı mı? (öneri: koru); hangi anahtarlar kabuğa taşınır?
 6. **Tıbbi içerik/atıf:** `sources.json` credits ve "sentetik, tanı aracı değil" metinleri aynen
    taşınmalı; lisans "tüm hakları saklıdır" (kaynak README §Lisans); **K-P4/K-P5** ile bağlı.
-7. **İnsan kapıları:** K-P1…K-P5, S3 istisnası ve T04 hatası §10 Kapılar tablosunda dilimlere
-   bağlandı; K2/K3 (xAPI/LRS) bu envanterin dışında; T18a yalnız port girdisini üretir.
+7. **İnsan kapıları:** K-P1 çözüldü (Karar 23 Eyl 2026: `packages/sim-pulse`); K-P2…K-P5, S3 istisnası
+   ve T04 hatası §10 Kapılar tablosunda dilimlere bağlandı; K2/K3 (xAPI/LRS) bu envanterin dışında;
+   T18a yalnız port girdisini üretir.

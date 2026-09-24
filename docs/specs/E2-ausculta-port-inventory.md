@@ -198,7 +198,7 @@ Satır sayıları `wc -l` ile alındı **[K]**. "Motor" = davranışı korunacak
 
 | Kısıt | Kanıt | Sonuç |
 |---|---|---|
-| `sims/*` workspace dışı | `pnpm-workspace.yaml` | S0a'da `"sims/*"` eklenir ya da `packages/sim-ausculta` seçilir (**K-P1** ön koşulu) |
+| `sims/*` workspace dışı | `pnpm-workspace.yaml` | Karar (23 Eyl 2026, K-P1): `packages/sim-ausculta`; `sims/*` arşiv/boş kalır, workspace sözleşmesi bu yola göre kurulur |
 | `sims/**` lint dışı | `eslint.config.js:7` | Port süresince Date.now denetimi dışı; S20'de kapatılır |
 | Turbo girdileri sims'i içermiyor | `turbo.json` `//#lint`, `//#test`, `//#typecheck` | S0a'da `sims/**` girdilere eklenmezse önbellek yanlış yeşil verir |
 | Test kapsamı kökte | `vitest.config.ts` `tests/**/*.test.ts` | Port testleri kaynak dilimleriyle birlikte `tests/sim-ausculta/` altına taşınır (§10) |
@@ -231,7 +231,7 @@ Kurallar:
 
 | Kapı | Bağlı dilimler | Etki |
 |---|---|---|
-| **K-P1** paket yerleşimi | **S0a** (zorunlu) | Workspace/tsconfig sözleşmesi ve hedef yollar; karar verilmeden S0a başlamaz |
+| **K-P1** paket yerleşimi | **S0a** (zorunlu) | **Karar (23 Eyl 2026): `packages/sim-ausculta`**; `sims/*` arşiv/boş kalır. Workspace/tsconfig sözleşmesi ve hedef yollar bu karara göre kurulur |
 | **K-P2** SCORM | S8b, S8d, S15c, S16a, S19a | Seam mi kaldırma mı; SCORM test sayısı bu kararla netleşir |
 | **K-P3** localStorage | S8c | `bestScore` kaldırma/oturum-içi; `landingSound`/`fsPromptDone` kabuk ya da çıkarma |
 | **K-P4** varlık sunumu | S3b, S18b | 31 MB / 249 wav kökü |
@@ -239,15 +239,19 @@ Kurallar:
 | **T14a merge** | **S18a** (zorunlu) | SimHost sözleşmesi tüketicisinden önce birleşir; S18a merge edilmeden S18b başlamaz |
 
 S0-S17 dilimleri **T14a SimHost sözleşmesinden bağımsızdır**; S0a K-P1'e, S8\*/S15c/S16a K-P2/K-P3'e,
-S3b/S18b K-P4'e bağlıdır. `sims/ausculta` yolu K-P1 **önerisidir**; `packages/sim-ausculta` seçilirse
-tablodaki `sims/ausculta/…` yolları birebir eşlenir.
+S3b/S18b K-P4'e bağlıdır. Karar (23 Eyl 2026, K-P1): paket yolu `packages/sim-ausculta`; tablodaki
+`sims/ausculta/…` yolları `packages/sim-ausculta/…` olarak okunur.
+
+**Oyunlaştırma (revize Karar 23 Eyl 2026):** Oyunlaştırma üç simde de (Opaca, Pulse, Ausculta) zorunlu;
+Ausculta da `packages/gamification-core` tüketicisidir. Dilim, Opaca portu ve çekirdek merge sonrası
+eklenir (S21); Ausculta kendi rozet kataloğunu/hedeflerini taşır, sim verisi ayrı kalır.
 
 ### Faz A — İskelet, config ve çekirdek tipler
 
 | # | Dilim | Kaynak (satır) | Hedef dosyalar | ~diff | Bağımlılık | Kabul testi (kaynak → yeni) |
 |---|---|---|---|---|---|---|
 | S0a | Platform config + sim kaydı | `pnpm-workspace.yaml`, `turbo.json`, `vitest.config.ts`, kök `tsconfig.json`, `tests/config/tsconfig.test.ts` | — | ~90 | **K-P1** | `pnpm turbo lint typecheck test` yeşil; sözleşme testi sim paketini tarar; JSON import kararı sabitlenir |
-| S0b | Sim paketi iskeleti + JSON stratejisi | — | `sims/ausculta/{package.json,tsconfig.json}`, `src/index.ts` | ~120 | S0a | yeni `json-import.test.ts` (küçük fixture derlenir) |
+| S0b | Sim paketi iskeleti + JSON stratejisi | — | `packages/sim-ausculta/{package.json,tsconfig.json}`, `src/index.ts` | ~120 | S0a | yeni `json-import.test.ts` (küçük fixture derlenir) |
 | S0c | Çekirdek tipler | `core/types.ts` 242 | `src/core/types.ts` | ~300 | S0b | yeni `types.test.ts` (şema fixture'ı) |
 | S0d | Suspend serileştirme | `core/suspend.ts` 114 | `src/core/suspend.ts` | ~260 | S0c | `tests/core.test.ts:87-146,721-758` → `suspend.test.ts` |
 
@@ -319,8 +323,8 @@ tablodaki `sims/ausculta/…` yolları birebir eşlenir.
 
 | # | Dilim | Kaynak (satır) | Hedef dosyalar | ~diff | Bağımlılık | Kabul testi |
 |---|---|---|---|---|---|---|
-| S18a | SimHost adaptörü (sim paketi) | `App.tsx` 73, `main.tsx` 15 | `sims/ausculta/src/mount.tsx` | ~180 | **T14a merge**, S16b, S17d | yeni `mount.test.ts` (mount→dispose→remount, StrictMode, sızıntı) |
-| — | **Review/merge kapısı** | S18a (`sims/ausculta`) birleşmeden S18b (`apps/shell`) başlamaz | — | — | S18a `VERDICT: APPROVE` + merge (depo sahibi) | — |
+| S18a | SimHost adaptörü (sim paketi) | `App.tsx` 73, `main.tsx` 15 | `packages/sim-ausculta/src/mount.tsx` | ~180 | **T14a merge**, S16b, S17d | yeni `mount.test.ts` (mount→dispose→remount, StrictMode, sızıntı) |
+| — | **Review/merge kapısı** | S18a (`packages/sim-ausculta`) birleşmeden S18b (`apps/shell`) başlamaz | — | — | S18a `VERDICT: APPROVE` + merge (depo sahibi) | — |
 | S18b | Shell lazy rotası (`apps/shell`) | `apps/shell/src/routes.ts:24-30` | `apps/shell` rota + lazy import | ~150 | **S18a merge**, **K-P4** | yeni `tests/shell/ausculta-route.test.ts` + mount smoke |
 
 ### Faz H — Kapanış
@@ -330,6 +334,7 @@ tablodaki `sims/ausculta/…` yolları birebir eşlenir.
 | S19a | SCORM testleri uyarlama/emeklilik | `tests/core.test.ts:31-85,581-719` | `tests/sim-ausculta/runtime*.test.ts` | ~200 | **K-P2**, S8d | Korunacak/uyarlanacak/emekliye ayrılacak sayı K-P2'de kesinleşir |
 | S19b | 114 test mutabakatı | `tests/core.test.ts` 114 test | `tests/sim-ausculta/*` | ~80 | S0d…S19a | `pnpm turbo test`; §10 eşlemesiyle port/uyarlama/emeklilik sayımı karşılaştırılır |
 | S20 | Lint kapsamı kapanışı | — | `eslint.config.js` (`sims/**` ignore kaldırma) | ~10 | S19b, S5, S7, S8d, S13a, S13b, S14, S15c, S16a | `pnpm lint` sims dahil; kalan `Date.now()` sıfır |
+| S21 | Oyunlaştırma (Opaca sonrası, `packages/gamification-core` tüketicisi) | — (yeni) | `packages/sim-ausculta/src/gami/*`; çekirdek `packages/gamification-core`'dan | ≤~400 (bölünür) | **Opaca portu + `packages/gamification-core` merge**, S18a | yeni `gami.test.ts`; sime özgü rozet kataloğu/hedefler; `GAMI_ENABLED=false` iken arayüzde gami öğesi yok |
 
 ## 10. Kabul testi matrisi (kaynak test → dilim eşlemesi)
 
@@ -391,9 +396,8 @@ dosya sayısı ve boyutu; `sims/*` yer tutucuları; family-tokens'ta Ausculta pa
 
 ## 12. İnsan kararı bekleyen açık sorular
 
-1. **K-P1 Paket yerleşimi:** `sims/ausculta` (rezerve dizin, `sims/*` workspace'e eklenir) mi,
-   E1 önerisi `packages/sim-ausculta` mı? Karar S0a'yı ve `tests/config/tsconfig.test.ts`
-   genişletmesini belirler; verilmeden S0a başlamaz.
+1. **K-P1 Paket yerleşimi — Karar (23 Eyl 2026):** `packages/sim-ausculta`; `sims/*` arşiv/boş kalır.
+   Karar S0a'yı ve `tests/config/tsconfig.test.ts` genişletmesini belirler; S0a bu karara göre başlar.
 2. **K-P2 SCORM:** adaptör tamamen kaldırılsın mı? Kaldırılırsa 31-85 ve 581-719 gruplarından
    hangileri emekliye ayrılır, hangileri runtime seam'ine uyarlanır? Karar S8b/S8d/S15c/S16a/S19a'yı
    açar; korunacak/uyarlanacak/emekliye ayrılacak test sayısı S19a'da kesinleşir.
