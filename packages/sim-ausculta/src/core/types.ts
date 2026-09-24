@@ -8,6 +8,7 @@ export type Screen =
   | "learn"
   | "simulation"
   | "results"
+  | "progress"
   | "sources";
 export type PatientView = "front" | "back";
 export type StethHead = "bell" | "diaphragm";
@@ -232,7 +233,8 @@ export type SimEvent =
   | { type: "answer_selected"; qid: string; at: number }
   | { type: "answer_submitted"; qid: string; correct: boolean; at: number }
   | { type: "hint_used"; caseId: string; at: number }
-  | { type: "case_completed"; caseId: string; mode: Mode; at: number }
+  | { type: "case_completed"; caseId: string; mode: Mode; score: number; mastery: boolean; hintsUsed: number; domains: Partial<Record<string, number>>; at: number }
+  | { type: "correct_diagnosis"; caseId: string; qid: string; at: number }
   | { type: "assessment_completed"; total: number; at: number };
 
 export interface RuntimeFlags {

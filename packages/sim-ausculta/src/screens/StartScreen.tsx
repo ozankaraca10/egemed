@@ -72,6 +72,8 @@ export function StartScreen({ embedded = false, audio }: StartScreenProps): JSX.
           Simülatörü başlat <IconArrowRight />
         </button>
         <div className="hero-links">
+          <button className="hero-link" style={HIT} onClick={() => dispatch({ type: "goto", screen: "progress" })}>İlerleme</button>
+          <span className="hero-link-sep" aria-hidden="true" />
           <button className="hero-link" style={HIT} onClick={() => dispatch({ type: "goto", screen: "tutorial" })}>
             Nasıl kullanılır?
           </button>
