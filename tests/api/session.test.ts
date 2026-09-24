@@ -14,6 +14,7 @@ import {
   sessionCookieOptions,
   type AuthDeps,
 } from "../../apps/api/src/auth/routes";
+import { LOGIN_RATE_MAX, LOGIN_RATE_WINDOW_MS } from "../../apps/api/src/auth/rate-limit";
 import {
   CSRF_COOKIE,
   CSRF_HEADER,
@@ -323,6 +324,22 @@ describe("dev sağlayıcı (E3 §a)", () => {
       summaryAfter: { reason: "unknown_user", provider: "dev" },
       requestId: "test-istek-kimligi-1",
     });
+  });
+
+  it("aynı kullanıcı adı eşik aşımında 429 döner; pencereden sonra yeniden dener", async () => {
+    const harness = createHarness();
+    for (let attempt = 0; attempt < LOGIN_RATE_MAX; attempt += 1) {
+      const response = await devLogin(harness, "yok.boyle");
+      expect(response.status).toBe(401);
+    }
+    const limited = await devLogin(harness, "yok.boyle");
+    expect(limited.status).toBe(429);
+    expect(await limited.json()).toEqual({ error: { code: "rate_limited" } });
+    expect(JSON.stringify(harness.store.auditEntries)).not.toContain("yok.boyle");
+
+    harness.advance(LOGIN_RATE_WINDOW_MS);
+    const again = await devLogin(harness, "yok.boyle");
+    expect(again.status).toBe(401);
   });
 
   it("geçersiz gövdeyi 400 invalid_request ile reddeder", async () => {

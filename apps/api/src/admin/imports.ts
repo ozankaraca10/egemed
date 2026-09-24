@@ -311,7 +311,7 @@ function buildValues(fields: readonly string[]): Record<string, string> {
   return values;
 }
 
-function toImportError(issue: z.ZodIssue, values: Readonly<Record<string, string>>): ImportRowError {
+function toImportError(issue: z.ZodIssue): ImportRowError {
   if (issue.message === "mapping_key_required") {
     return rowError("kullanici_adi", "mapping_key_required");
   }
@@ -323,10 +323,8 @@ function toImportError(issue: z.ZodIssue, values: Readonly<Record<string, string
     case "too_big":
       return rowError(column, "invalid_length");
     case "invalid_type":
-    case "invalid_value": {
-      const value = values[column] ?? "";
-      return rowError(column, "invalid_value", `${messageFor("invalid_value")}: ${value}`);
-    }
+    case "invalid_value":
+      return rowError(column, "invalid_value");
     default:
       return rowError(column, issue.code);
   }
@@ -382,7 +380,7 @@ async function validateRow(
   }
   const parsed = csvRowSchema.safeParse(values);
   if (!parsed.success) {
-    for (const issue of parsed.error.issues) draft.errors.push(toImportError(issue, values));
+    for (const issue of parsed.error.issues) draft.errors.push(toImportError(issue));
     draft.status = "error";
     return draft;
   }
@@ -502,7 +500,7 @@ export async function validateImportRows(
  * gereği tırnaklanır.
  */
 export function escapeCsvCell(value: string): string {
-  const guarded = /^[=+\-@\t\r]/.test(value) ? `'${value}` : value;
+  const guarded = /^[\t\r\n ]*[=+\-@]|^[=+\-@\t\r]/.test(value) ? `'${value}` : value;
   return /[;"\n\r]/.test(guarded) ? `"${guarded.replace(/"/g, '""')}"` : guarded;
 }
 
@@ -1084,7 +1082,6 @@ export function registerAdminImportRoutes(
     const actor = c.get("adminActor");
     const at = now();
     const batchId = deps.newId();
-    const text = await c.req.text();
 
     const failUpload = async (code: string, rowCount = 0) => {
       await deps.imports.createBatch(
@@ -1119,6 +1116,11 @@ export function registerAdminImportRoutes(
       });
     };
 
+    const declaredLength = Number(c.req.header("content-length"));
+    if (Number.isFinite(declaredLength) && declaredLength > CSV_MAX_BYTES) {
+      return failUpload("file_too_large");
+    }
+    const text = await c.req.text();
     if (utf8ByteLength(text) > CSV_MAX_BYTES) return failUpload("file_too_large");
     let parsed: { readonly header: readonly string[]; readonly records: readonly CsvRecord[] };
     try {
