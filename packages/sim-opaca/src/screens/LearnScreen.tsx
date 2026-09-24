@@ -221,7 +221,7 @@ export function LearnScreen({
                     onTool={(tool) => dispatch({ type: 'toolUsed', tool })}
                     onToggleZones={() => dispatch({ type: 'toggleZones' })}
                     showInfoOverlay={tab === 'film'}
-                    onStackEnd={onStackEnd}
+                    {...(onStackEnd ? { onStackEnd } : {})}
                     env={NOOP_FILM_ENV}
                   />
                 ) : (
