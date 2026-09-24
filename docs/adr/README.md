@@ -11,6 +11,7 @@ insan onayına sunulur; öneri metni karar değildir.
 | [ADR-004](004-lrs.md) | LRS ve xAPI ifade iletimi | Kabul |
 | [ADR-005](005-kimlik.md) | Kimlik ve öğrenci tanımlayıcısı | Kabul |
 | [ADR-006](006-tek-platform.md) | Tek platform — simülatörler iç modül (hibrit) | Kabul |
+| [ADR-007](007-kimlik-ve-kullanici-verisi.md) | Kimlik, kullanıcı kaydı ve oyunlaştırma verisi | Önerildi |
 
 `Durum: Kabul` satırını yalnız insan yazar. ADR-006 (23 Eylül 2026) ADR-003'ün gömme modelini iç modülle değiştirdi; veri izolasyonu kuralı geçerli. Astra ikinci görüşü her ADR'de
 `Bekleniyor.` olarak durur; bulgular gelene kadar karar kaydı tamamlanmış
