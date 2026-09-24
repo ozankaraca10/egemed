@@ -1,3 +1,5 @@
+import type { AttemptRecord } from "@egemed/gamification-core";
+
 /**
  * SimHost sözleşmesi (ADR-006): tek React kabuk içindeki sim modülleri için
  * mount/dispose yaşam döngüsü. Paket React'e bağımlı değildir; motorlar
@@ -43,6 +45,11 @@ export interface SimMountContext {
    * kayıtlarını bu kimlikle ayırır; yoksa anonim ad alanı kullanılır (PULSE-08).
    */
   readonly actorId?: string;
+  /**
+   * API oturumunda kabuğun verdiği rapor hattı. Yerel deneme yazımı
+   * başarıyla bitince sim bunu çağırır; yoksa alan hiç yoktur.
+   */
+  readonly reportAttempt?: (attempt: AttemptRecord) => void;
 }
 
 /** Modül `mount` dönüşünde zorunlu cleanup verir; idempotent olmalıdır. */
@@ -75,6 +82,7 @@ export interface SimHostOptions {
 /** `mount`a eşlik eden, kabuktan gelen oturum bilgisi. */
 export interface SimMountOptions {
   readonly actorId?: string;
+  readonly reportAttempt?: (attempt: AttemptRecord) => void;
 }
 
 /** Bir `mount` çağrısının kimliği; yalnız o çağrının oturumunu bırakmak için. */
@@ -103,6 +111,17 @@ interface Session {
 interface PendingLoad {
   epoch: number;
   simId: SimulatorId;
+}
+
+function mountContext(simId: SimulatorId, now: () => number, mountOptions: SimMountOptions | undefined): SimMountContext {
+  const actorId = mountOptions?.actorId;
+  const reportAttempt = mountOptions?.reportAttempt;
+  return {
+    now,
+    simId,
+    ...(actorId === undefined ? {} : { actorId }),
+    ...(reportAttempt === undefined ? {} : { reportAttempt }),
+  };
 }
 
 /**
@@ -181,9 +200,7 @@ export function createSimHost(options: SimHostOptions): SimHost {
             );
             return;
           }
-          const actorId = mountOptions?.actorId;
-          const context: SimMountContext =
-            actorId === undefined ? { simId, now: options.now } : { actorId, now: options.now, simId };
+          const context = mountContext(simId, options.now, mountOptions);
           let dispose: SimDispose | undefined;
           try {
             dispose = module.mount(target, context);

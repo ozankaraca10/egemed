@@ -64,6 +64,8 @@ function lastRhythmStreak(state: PulseGamiState): number {
 export interface PulseGamiBridgeOptions {
   readonly repo: PulseGamiRepo;
   readonly now: () => number;
+  /** Yerel yazım başarıyla bitince kabuğa iletilir; hata akışı bozmaz. */
+  readonly reportAttempt?: (attempt: PulseAttemptRecord) => void;
 }
 
 /** Köprüyü kurar; dönen işlev izlemeyi bırakır ve eklenen öğeleri kaldırır. */
@@ -153,6 +155,17 @@ export function attachPulseGamification(handle: PulseRuntimeHandle, options: Pul
     return started === undefined ? 0 : Math.max(0, options.now() - started);
   };
 
+  const reportRecord = (record: PulseAttemptRecord): void => {
+    const report = options.reportAttempt;
+    if (report === undefined) return;
+    try {
+      const result = report(record) as void | Promise<void>;
+      if (result instanceof Promise) void result.catch(() => undefined);
+    } catch {
+      // Rapor hatası öğrenme akışını bozmaz.
+    }
+  };
+
   const observe = (state: SourceState): void => {
     for (const session of [state.quizSession, state.caseSession]) {
       if (!sessionStart.has(session.id)) sessionStart.set(session.id, options.now());
@@ -174,7 +187,12 @@ export function attachPulseGamification(handle: PulseRuntimeHandle, options: Pul
         sessionId: quiz.id,
         totalQuestions: quiz.ids.length,
       });
-      if (record !== null) void repo.recordAttempt(record, nowDate()).then((result) => applyWrite(result, true));
+      if (record !== null) {
+        void repo.recordAttempt(record, nowDate()).then((result) => {
+          applyWrite(result, true);
+          reportRecord(record);
+        });
+      }
     }
     const kase = state.caseSession;
     if (kase.submitted.length > 0 && kase.submitted.every(Boolean) && !recorded.has(`c:${kase.id}`)) {
@@ -197,7 +215,12 @@ export function attachPulseGamification(handle: PulseRuntimeHandle, options: Pul
         sessionId: kase.id,
         totalQuestions: kase.ids.length,
       });
-      if (record !== null) void repo.recordAttempt(record, nowDate()).then((result) => applyWrite(result, false));
+      if (record !== null) {
+        void repo.recordAttempt(record, nowDate()).then((result) => {
+          applyWrite(result, false);
+          reportRecord(record);
+        });
+      }
     }
     const viewed = state.viewed[state.mode] ?? 0;
     if (viewed >= STUDY_SECONDS && !studied.has(state.mode)) {

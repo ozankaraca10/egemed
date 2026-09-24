@@ -1,5 +1,6 @@
 /// <reference lib="dom" />
 import type { SimDispose, SimModule, SimMountContext, SimMountTarget } from "@egemed/sim-host";
+import type { PulseAttemptRecord } from "../gamification/attempt";
 import { createStorageGamiRepo } from "../gamification/repo";
 import type { PulseGamiRepo } from "../gamification/repo";
 import { attachPulseGamification } from "./gami";
@@ -73,9 +74,13 @@ export function createPulseRuntimeModule(deps: PulseRuntimeModuleDeps = {}): Sim
       let detachGami: (() => void) | null = null;
       if (deps.gamiEnabled !== false) {
         try {
+          const reportAttempt = context.reportAttempt;
           detachGami = attachPulseGamification(handle, {
             now: context.now,
             repo: deps.gamiRepository ?? createStorageGamiRepo(handle.storage),
+            ...(reportAttempt === undefined
+              ? {}
+              : { reportAttempt: (record: PulseAttemptRecord) => reportAttempt(record) }),
           });
         } catch {
           // Oyunlaştırma kurulamasa da simülatör çalışmaya devam eder.

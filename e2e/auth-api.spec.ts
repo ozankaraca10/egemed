@@ -1,4 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
+import { curriculum } from "../packages/sim-pulse/src/data/curriculum";
 import { captureRouteScreenshot } from "./artifacts";
 import { trackErrors } from "./helpers";
 
@@ -146,6 +147,44 @@ test.describe("API oturumu (dev sağlayıcı)", () => {
     expect(JSON.stringify(payload)).not.toContain("1450");
     await expect(page.getByRole("heading", { name: "İlerlemem" })).toBeVisible();
     await expect(page.getByText("1450", { exact: true })).toHaveCount(0);
+    await expect(page.locator(".eg-shell-progress__num").first()).toHaveText(String(pulseXp));
+  });
+
+  test("Pulse sınavı API oturumunda sunucuya yazılır ve dashboard XP eşleşir", async ({ page }) => {
+    await page.goto(STUDENT_ENTRY);
+    await signIn(page, "ogrenci");
+    await expect(page).toHaveURL(/#\/$/);
+    const posted = page.waitForResponse(
+      (response) =>
+        response.url().includes("/me/gamification/pulse/attempts") &&
+        response.request().method() === "POST" &&
+        (response.status() === 200 || response.status() === 201),
+    );
+    await page.goto("/#/sims/pulse");
+    const root = page.locator(".egemed-pulse-runtime");
+    await root.locator("#startSimulator").click();
+    if (await root.locator("#tutorialSkip").isVisible()) await root.locator("#tutorialSkip").click();
+    await root.locator('#modeCards [data-view="quiz"]').click();
+    for (let i = 0; i < 10; i += 1) {
+      const id = /Q\d{3}/.exec(await root.locator("#quizForm").innerText())?.[0];
+      expect(id, `soru ${i + 1} kimliği`).toBeDefined();
+      const item = curriculum.byId[id ?? ""];
+      expect(item, id).toBeDefined();
+      await root.locator(`#quizForm input[value="${item?.correct ?? ""}"]`).check();
+      await root.locator("#quizSubmit").click();
+      if (i < 9) await root.locator("#quizItemNext").click();
+    }
+    await posted;
+    const summary = page.waitForResponse(
+      (response) => response.url().includes("/me/gamification") && !response.url().includes("/attempts") && response.request().method() === "GET" && response.ok(),
+    );
+    await page.goto("/#/");
+    const payload = (await (await summary).json()) as {
+      data?: { sims?: readonly { simId?: string; xp?: number }[] };
+    };
+    const pulseXp = payload.data?.sims?.find((sim) => sim.simId === "pulse")?.xp ?? 0;
+    expect(pulseXp).toBeGreaterThan(0);
+    await expect(page.getByRole("heading", { name: "İlerlemem" })).toBeVisible();
     await expect(page.locator(".eg-shell-progress__num").first()).toHaveText(String(pulseXp));
   });
 });
