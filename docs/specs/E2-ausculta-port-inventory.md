@@ -262,8 +262,8 @@ eklenir (S21); Ausculta kendi rozet kataloğunu/hedeflerini taşır, sim verisi 
 | S1a | Puanlama | `core/scoring.ts` 123 | `src/core/scoring.ts` | ~230 | S0c | `:236-315` → `scoring.test.ts` |
 | S1b | Akış | `core/flow.ts` 140 | `src/core/flow.ts` | ~290 | S0c | `:922-1043,1045-1076` → `flow.test.ts` |
 | S2a | Vaka doğrulama | `core/validation.ts` 97 | `src/core/validation.ts` | ~170 | S0c | `:317-366` → `validation.test.ts` |
-| S3a | Veri JSON kopyası | `src/data/*.json` 1,1 MB | `src/data/*.json` (verbatim) | ~60¹ | S0b | yeni `data-inventory.test.ts` (kayıt sayısı, `runtimeUrl`) |
-| S3b | Varlık yerleşimi | `public/**` 31 MB / 266 dosya | K-P4 kararına göre kök | ~60¹ | **K-P4**, S0b | yeni `asset-paths.test.ts` (görsel + ilk wav yolu) |
+| S3a | Veri JSON kopyası | `src/data/*.json` 8 dosya / 1.173.260 B² | `packages/sim-ausculta/src/data/*.json` (verbatim; `fixture.json` durur) | ~60¹ | S0b | `data-inventory.test.ts` (kayıt sayısı, `runtimeUrl`, kütüphane `key`) |
+| S3b | Varlık yerleşimi | `public/brand` 13 / 1.033.264 B, `body` 4 / 369.408 B, `audio/runtime` 249 wav / 30.067.212 B (git-dışı)² | `packages/sim-ausculta/public/…` | ~60¹ | **K-P4**, S0b | `assets.test.ts` (JSON görsel yolları; runtime `skipIf`) + `check:assets` |
 | S3c | Ses atama çözücü | `core/resolver.ts` 146 | `src/core/resolver.ts` | ~270 | S3a | `:829-921` → `resolver.test.ts` |
 | S3d | Landing metrikleri | `data/metrics.ts` 46 | `src/data/metrics.ts` | ~140 | S3a | `:760-828` → `metrics.test.ts` |
 | S2b | Oturum + havuz | `core/session.ts` 77, `data/pool.ts` 15 | `src/core/session.ts`, `src/data/pool.ts` | ~210 | S2a, S3a | `:417-506` → `session.test.ts` |
@@ -271,6 +271,12 @@ eklenir (S21); Ausculta kendi rozet kataloğunu/hedeflerini taşır, sim verisi 
 | S4b | Veri senkronu + tutarlılık testleri | `tests/core.test.ts` (test) | — | ~150 | S2a, S2b, S4a | `:368-415,507-580` → `data-sync.test.ts` |
 
 ¹ Verbatim veri/varlık kopyası satır bütçesine sayılmaz; ~diff yalnız manifest ve test içindir.
+
+² **Sonuç (T17b-S3, 24 Eyl 2026):** Kaynak yerel kopyadan `cp`/`rsync` ile taşındı; içerik okunmadı.
+S3a: `src/data` 8 JSON / 1.173.260 B (`fixture.json` hariç). S3b: `public/brand` 13 dosya / 1.033.264 B,
+`public/assets/body` 4 dosya / 369.408 B (git); `public/assets/audio/runtime` 249 wav / 30.067.212 B
+(git-dışı, kök `.gitignore`). Kaynakta runtime dışı izlenen `public/assets/audio` dosyası yok.
+`tools/sync-audio.mjs` (`AUSCULTA_SOURCE_DIR`) yeniden kopyalar; `check:assets` runtime dahil zorunludur.
 
 ### Faz C — Ses motoru
 
