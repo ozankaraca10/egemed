@@ -36,6 +36,18 @@ export type {
   PulseAboutViewPerson,
   PulseSourcesDocument,
 } from "./ui/about";
+export { LANDING_SOUND_PREFERENCE_KEY, createPulseLandingContent, createPulseLandingController } from "./ui/landing";
+export type {
+  CreatePulseLandingContentOptions,
+  CreatePulseLandingControllerOptions,
+  LandingPreferencePersistencePort,
+  LandingPersistenceResult,
+  PulseLandingContent,
+  PulseLandingController,
+  PulseLandingCounts,
+  PulseLandingFeature,
+  PulseLandingVariant,
+} from "./ui/landing";
 export { PULSE_TUTORIAL_STEPS, createTutorialStepViews, shouldRunPulseTutorial } from "./ui/tutorial";
 export type { PulseTutorialRunState, TutorialStep, TutorialStepStatus, TutorialStepView } from "./ui/tutorial";
 export { pulseMetricReadouts, pulseMetricSnapshot, pulsePhaseLabelKey } from "./ui/sim/metrics";
@@ -169,6 +181,17 @@ export {
 export type { EcgColumnGeometry, EcgGeometry } from "./ui/sim/ecgGeometry";
 export { ITEM_ECG_ZOOM_STEPS, drawItemEcg, itemEcgZoom, itemEcgZoomLabel, observeItemEcg } from "./ui/sim/itemEcg";
 export type { DrawItemEcgOptions, ItemEcgZoom } from "./ui/sim/itemEcg";
+export { createMonitorAudioPort } from "./audio/monitor";
+export type {
+  AudioParamPort,
+  AudioPort,
+  CreateMonitorAudioPortOptions,
+  MonitorAudioConfig,
+  MonitorAudioContext,
+  MonitorGainNode,
+  MonitorIntervalHost,
+  MonitorOscillatorNode,
+} from "./audio/monitor";
 export { createMemoryPersistence } from "./persistence/memory";
 export { MAX_PERSISTENCE_BYTES, utf8ByteLength } from "./persistence/policy";
 export { PULSE_LEGACY_STORAGE_KEYS, PULSE_STORAGE_KEY } from "./persistence/types";
