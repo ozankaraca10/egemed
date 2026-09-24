@@ -16,11 +16,12 @@ Bu kılavuz, platformun tek sunucu dağıtımını (egemed.ege.edu.tr) kurmayı,
   aşamasından kopyalanır, `ts-register.mjs`/`ts-resolve.mjs` kancası,
   `apps/api/src` + `migrations` ve workspace paket kaynakları
   (`@egemed/contracts`, `@egemed/gamification-core`) imajdadır; derleme
-  makinesinin node_modules'ına bağımlı değildir. Sunucu
-  `--experimental-transform-types` ile başlar: gamification-core TypeScript
-  parametre property'si kullanır (src/repository.ts) ve Node'un strip-only
-  modu bu söz dizimini yürütemez (bkz. audit API-01/API-02). Derleme bağlamı
-  BuildKit altında `infra/prod/Dockerfile.dockerignore` ile budaılır.
+  makinesinin node_modules'ına bağımlı değildir. Sunucu Node 22'nin yerleşik
+  TypeScript desteğiyle bayraksız başlar (`CMD ["node", "--import",
+  "./ts-register.mjs", "src/server.ts"]`); API-01 düzeltmesiyle (T85)
+  gamification-core'daki parametre property'si kaldırıldı, strip-only kip
+  yeterlidir (bkz. audit API-01/API-02). Derleme bağlamı BuildKit altında
+  `infra/prod/Dockerfile.dockerignore` ile budaılır.
 - **PostgreSQL 18:** compose'da adlandırılmış `postgres-data` volume'ü ile.
 - **LRS:** kurum altyapısındadır; EGEMED hiçbir yüzeyde ifade saklamaz
   (ADR-004). Tarayıcı LRS'ye doğrudan bağlanır; nginx CSP `connect-src`
