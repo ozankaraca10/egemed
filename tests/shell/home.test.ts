@@ -64,12 +64,11 @@ describe("HomePage premium yerleşimi", () => {
       expect(html, id).toContain(markup(t(`sims.${id}.body`)));
     }
   });
-  it("ilerleme sekmeleri üç sekme, üç boş durum gösterir; sayı/çubuk yoktur", () => {
+  it("ilerlemem bölümü başlığı ve iskeletiyle çizilir (T74: veri getirme SSR'da çalışmaz)", () => {
     const html = render();
     expect(html).toContain(t("home.progress.title"));
-    expect((html.match(/role="tab"/g) ?? []).length).toBe(3);
-    for (const id of SIM_IDS) expect(html, id).toContain(`>${t(`sims.${id}.name`)}</button>`);
-    expect(count(html, t("home.progress.empty"))).toBe(3);
+    expect(html).toContain("eg-shell-progress__skeleton");
+    // Gerçek sekme/veri sözleşmesi tests/shell/dashboard.test.ts içinde doğrulanır.
     expect(html).not.toContain('role="progressbar"');
   });
   it("üç güven kanıtı kartını ve kaydırma hedefi kimliğini çizer", () => {

@@ -207,6 +207,21 @@ const simErrorKeys: TrKey[] = [
   "sims.loading",
 ];
 
+const homeProgressKeys: TrKey[] = [
+  "home.progress.tab.empty",
+  "home.progress.xp",
+  "home.progress.level",
+  "home.progress.streak",
+  "home.progress.streak.best",
+  "home.progress.weeklyGoal",
+  "home.progress.leaderboard",
+  "home.progress.badges",
+  "home.progress.badges.empty",
+  "home.progress.error.title",
+  "home.progress.error.body",
+  "home.progress.error.retry",
+];
+
 const howKeys: TrKey[] = [
   "home.how.title",
   "home.how.learn.title",
@@ -315,6 +330,14 @@ describe("i18n/tr sözlüğü", () => {
     expect(t("admin.users.detail.confirm.delete.body")).toBe(
       "Bu işlem geri alınamaz. Devam etmek için kullanıcı adını yazın.",
     );
+  });
+
+  it("İlerlemem dashboard'u (T74, E3 §e.8) anahtarları tanımlı ve boş değil", () => {
+    for (const key of homeProgressKeys) {
+      expect(t(key).trim().length, key).toBeGreaterThan(0);
+    }
+    expect(t("home.progress.xp")).toBe("XP");
+    expect(t("home.progress.error.retry")).toBe("Yeniden dene");
   });
 
   it("'Nasıl çalışır?' bölümü anahtarları tanımlı ve birebir metinleri taşır", () => {

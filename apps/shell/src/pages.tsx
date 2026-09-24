@@ -1,7 +1,7 @@
 import type { JSX, ReactNode } from "react";
-import { Tabs } from "@egemed/ui";
 import { t, type TrKey } from "@egemed/ui/i18n";
 import type { DevSession } from "./devAuth";
+import { ProgressSection } from "./home/ProgressSection";
 import { routeHref, simHref, type RouteId } from "./routes";
 import { SIM_IDS, SimCard } from "./SimCard";
 
@@ -47,11 +47,6 @@ export function HomePage({ session = null }: HomePageProps): JSX.Element {
     session === null
       ? null
       : t(session.role === "admin" ? "entry.role.admin" : "entry.role.student");
-  const tabs = SIM_IDS.map((id) => ({
-    id,
-    label: t(`sims.${id}.name`),
-    panel: <p className="eg-shell-progress__empty">{t("home.progress.empty")}</p>,
-  }));
   return (
     <div className="eg-shell-home">
       <section className="eg-shell-hero">
@@ -105,12 +100,7 @@ export function HomePage({ session = null }: HomePageProps): JSX.Element {
           ))}
         </ul>
       </section>
-      <section aria-labelledby="eg-home-progress" className="eg-shell-home__section">
-        <h2 className="eg-shell-section__title" id="eg-home-progress">
-          {t("home.progress.title")}
-        </h2>
-        <Tabs items={tabs} label={t("home.progress.title")} />
-      </section>
+      <ProgressSection session={session} />
       <section
         aria-labelledby="eg-home-trust"
         className="eg-shell-home__section"

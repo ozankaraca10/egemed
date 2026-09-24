@@ -68,6 +68,12 @@ importers:
 
   apps/shell:
     dependencies:
+      '@egemed/api-client':
+        specifier: workspace:*
+        version: link:../../packages/api-client
+      '@egemed/contracts':
+        specifier: workspace:*
+        version: link:../../packages/contracts
       '@egemed/sim-host':
         specifier: workspace:*
         version: link:../../packages/sim-host

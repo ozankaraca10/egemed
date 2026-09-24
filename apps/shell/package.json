@@ -9,6 +9,8 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@egemed/api-client": "workspace:*",
+    "@egemed/contracts": "workspace:*",
     "@egemed/sim-host": "workspace:*",
     "@egemed/sim-opaca": "workspace:*",
     "@egemed/tokens": "workspace:*",

@@ -225,6 +225,18 @@ export const tr = {
   "home.progress.title": "İlerlemem",
   "home.progress.empty":
     "Bir simülatörde ilk oturumunuzu tamamladığınızda ilerlemeniz burada görünür.",
+  "home.progress.tab.empty": "Henüz ilerleme yok — simülatöre başla.",
+  "home.progress.xp": "XP",
+  "home.progress.level": "Seviye",
+  "home.progress.streak": "Seri",
+  "home.progress.streak.best": "En iyi seri",
+  "home.progress.weeklyGoal": "Haftalık hedef",
+  "home.progress.leaderboard": "Liderlik",
+  "home.progress.badges": "Son rozetler",
+  "home.progress.badges.empty": "Henüz rozet yok.",
+  "home.progress.error.title": "İlerleme yüklenemedi",
+  "home.progress.error.body": "internal_error — ilerlemeniz getirilemedi.",
+  "home.progress.error.retry": "Yeniden dene",
   "home.trust.title": "Neden güvenilir?",
   "home.trust.data.title": "Açık ve atıflı veri",
   "home.trust.data.body":

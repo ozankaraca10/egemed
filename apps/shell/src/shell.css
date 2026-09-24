@@ -442,6 +442,45 @@ html, body { margin: 0; }
   background: var(--card-soft); border: 1px dashed var(--border-strong);
   border-radius: var(--radius); color: var(--muted); text-align: center;
 }
+/* --- "İlerlemem" (T74, E3 §e.8): framework results-summary (özet kutuları) +
+   mode-card (sekme dili) + topbar/footer (kabuk) + feedback (boş/hata)
+   bileşenlerinden türetilir; simler arası toplam YOKTUR (ADR-006/007). --- */
+.eg-shell-progress__skeleton { display: grid; gap: var(--sp-2); }
+.eg-shell-progress__skeleton-row {
+  display: block; height: 2.75rem; background: var(--card-soft);
+  border: 1px dashed var(--border-strong); border-radius: var(--r-md);
+}
+.eg-shell-progress__error {
+  box-sizing: border-box; display: grid; gap: var(--sp-3); justify-items: start;
+  padding: var(--sp-4); background: var(--red-100); border: 1px solid var(--red-500);
+  border-radius: var(--r-lg);
+}
+.eg-shell-progress__error-title { margin: 0; color: var(--red-600); font-weight: 700; }
+.eg-shell-progress__tabEmpty {
+  box-sizing: border-box; display: grid; gap: var(--sp-3); justify-items: start;
+  padding: var(--sp-5) var(--sp-4); background: var(--card-soft);
+  border: 1px dashed var(--border-strong); border-radius: var(--radius); color: var(--muted);
+}
+.eg-shell-progress__tabEmptyLink {
+  display: inline-flex; align-items: center; box-sizing: border-box;
+  min-height: var(--eg-shell-touch-min); padding: 0 var(--sp-4);
+  background: var(--blue-700); border-radius: var(--r-md); color: var(--card);
+  font-weight: 600; text-decoration: none;
+}
+.eg-shell-progress__panel { display: grid; gap: var(--sp-4); }
+.eg-shell-progress__boxes { display: flex; flex-wrap: wrap; gap: var(--sp-3); }
+.eg-shell-progress__box {
+  box-sizing: border-box; display: grid; gap: var(--sp-1); justify-items: center;
+  min-width: 8rem; padding: var(--sp-3); background: var(--card);
+  border: 1px solid var(--border); border-radius: var(--r-lg); box-shadow: var(--shadow-card);
+  text-align: center;
+}
+.eg-shell-progress__num { margin: 0; color: var(--navy-900); font-size: var(--fs-xl); font-weight: 800; }
+.eg-shell-progress__sub { margin: 0; color: var(--muted); font-size: var(--fs-xs); }
+.eg-shell-progress__lbl { margin: 0; color: var(--muted); font-size: var(--fs-sm); font-weight: 600; }
+.eg-shell-progress__badges { display: grid; gap: var(--sp-2); }
+.eg-shell-progress__badgesTitle { margin: 0; color: var(--navy-800); font-weight: 700; }
+.eg-shell-progress__badgeList { display: flex; flex-wrap: wrap; gap: var(--sp-2); margin: 0; padding: 0; list-style: none; }
 .eg-shell-trust { display: grid; gap: var(--sp-3); margin: 0; padding: 0; list-style: none; }
 .eg-shell-trust__item {
   box-sizing: border-box; padding: var(--sp-4); background: var(--card);
