@@ -1,8 +1,10 @@
 # ADR-007: Kimlik, kullanıcı kaydı ve oyunlaştırma verisi
 
-Durum: **Önerildi** — "Kabul" satırını yalnız insan yazar.
-Kabul eden: (insan onayı bekleniyor)
+Durum: Kabul
+Kabul eden: depo sahibi (canlı oturum, soru-yanıt: "Kabul"), 2026-09-24
 Tarih: 2026-09-23
+Onaylanan bağımlılıklar (aynı oturum): `pg`, `node-pg-migrate`, `zod`. SSO protokolü açık (kurum bilgisi bekleniyor);
+o zamana kadar `dev` sağlayıcıyla ilerlenir.
 İlişkili: ADR-002, ADR-004, ADR-005, ADR-006; E2 K1 kapısı; ayrıntılı tasarım
 `docs/specs/E3-kullanici-yonetimi.md`.
 
