@@ -1,10 +1,17 @@
 import { describe, expect, it } from "vitest";
 import { errorResponseSchema } from "../../packages/contracts/src/index";
 import { createApp } from "../../apps/api/src/app";
+import { createMemoryAuthStore } from "../../apps/api/src/auth/repo";
+import type { AuthDeps } from "../../apps/api/src/auth/routes";
+import {
+  DEFAULT_SESSION_ABSOLUTE_MS,
+  DEFAULT_SESSION_IDLE_MS,
+} from "../../apps/api/src/auth/session";
 import { EnvValidationError, loadEnv } from "../../apps/api/src/env";
 
 // T62 — E3 §d iskelet sözleşmesi: request_id, hata zarfı, güvenlik başlıkları,
-// sağlık uçları ve ortam doğrulaması. DB gerekmez; havuz ve saat sahtedir.
+// sağlık uçları ve ortam doğrulaması. T63 ile uygulama `/auth/*` bağımlılıkları
+// da alır; bu dosya yalnız iskelet sözleşmesini sınar (DB ve oturum gerekmez).
 
 const FIXED_NOW = 1_700_000_000_000;
 const GENERATED_ID_PATTERN =
@@ -38,8 +45,21 @@ function createFakeDb(options: { readonly fail?: Error } = {}) {
   return db;
 }
 
+function createTestAuth(): AuthDeps {
+  const store = createMemoryAuthStore();
+  return {
+    sessions: store.repos.sessions,
+    users: store.repos.users,
+    audit: store.repos.audit,
+    nodeEnv: "test",
+    devEnabled: false,
+    sessionIdleMs: DEFAULT_SESSION_IDLE_MS,
+    sessionAbsoluteMs: DEFAULT_SESSION_ABSOLUTE_MS,
+  };
+}
+
 function createTestApp(db = createFakeDb()) {
-  return { app: createApp({ db, now: () => FIXED_NOW }), db };
+  return { app: createApp({ db, now: () => FIXED_NOW, auth: createTestAuth() }), db };
 }
 
 describe("request_id ara katmanı", () => {
@@ -142,11 +162,20 @@ describe("ortam doğrulaması", () => {
       PORT: 3000,
       NODE_ENV: "development",
       AUTH_DEV_ENABLED: false,
+      SESSION_IDLE_MINUTES: 30,
+      SESSION_ABSOLUTE_HOURS: 12,
     });
   });
 
   it("boş değerleri varsayılan sayar", () => {
-    const env = loadEnv({ ...base, PORT: "", NODE_ENV: "", AUTH_DEV_ENABLED: "" });
+    const env = loadEnv({
+      ...base,
+      PORT: "",
+      NODE_ENV: "",
+      AUTH_DEV_ENABLED: "",
+      SESSION_IDLE_MINUTES: "",
+      SESSION_ABSOLUTE_HOURS: "",
+    });
     expect(env.PORT).toBe(3000);
     expect(env.NODE_ENV).toBe("development");
     expect(env.AUTH_DEV_ENABLED).toBe(false);
@@ -175,6 +204,12 @@ describe("ortam doğrulaması", () => {
   it("üretim dışında AUTH_DEV_ENABLED=true'ya izin verir", () => {
     const env = loadEnv({ ...base, NODE_ENV: "test", AUTH_DEV_ENABLED: "true" });
     expect(env.AUTH_DEV_ENABLED).toBe(true);
+  });
+
+  it("oturum sürelerini env ile ayarlar", () => {
+    const env = loadEnv({ ...base, SESSION_IDLE_MINUTES: "45", SESSION_ABSOLUTE_HOURS: "8" });
+    expect(env.SESSION_IDLE_MINUTES).toBe(45);
+    expect(env.SESSION_ABSOLUTE_HOURS).toBe(8);
   });
 
   it("hata metni değer sızdırmaz", () => {
