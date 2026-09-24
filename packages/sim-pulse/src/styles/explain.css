@@ -1,0 +1,89 @@
+/* Mod seçimi ve ilk kullanım öğreticisi. */
+/* Mod seçimi ekranı, mod çipi ve ilk kullanım öğreticisi. */
+.eg-sim-pulse .mode-context{display:flex;align-items:center;gap:8px}
+.eg-sim-pulse .mode-chip{display:inline-flex;align-items:center;gap:7px;padding:6px 12px;border-radius:var(--r-pill);font-size:var(--fs-sm);font-weight:700;white-space:nowrap;background:rgba(255,255,255,.14);color:var(--card)}
+.eg-sim-pulse .mode-chip:before{content:'';width:9px;height:9px;border-radius:50%;background:var(--blue-400)}
+.eg-sim-pulse .mode-chip.learn:before{background:var(--green-500)}
+.eg-sim-pulse .mode-chip.assessment:before{background:var(--purple-600)}
+.eg-sim-pulse .app[data-mode-identity=assessment] .topbar{box-shadow:inset 0 -3px 0 var(--purple-600)}
+.eg-sim-pulse .topbar .eg-navbtn[aria-pressed=true]{background:rgba(255,255,255,.22);color:var(--card)}
+.eg-sim-pulse .modes-view{max-width:1020px;margin:0 auto;padding:8px 0 24px}
+.eg-sim-pulse .stepper{display:flex;justify-content:center;margin:8px auto 2px;padding:0;list-style:none;max-width:520px}
+.eg-sim-pulse .step{position:relative;width:150px;display:flex;flex-direction:column;align-items:center;gap:4px}
+.eg-sim-pulse .step .dot{width:20px;height:20px;border-radius:50%;display:grid;place-items:center;font-size:var(--fs-xs);font-weight:700;background:var(--card);color:var(--ink-400);border:2px solid var(--border-strong);z-index:1}
+.eg-sim-pulse .step.active .dot{background:var(--blue-600);border-color:var(--blue-600);color:var(--card);box-shadow:0 0 0 4px rgba(22,115,230,.15)}
+.eg-sim-pulse .step .lbl{font-size:var(--fs-xs);color:var(--ink-600)}
+.eg-sim-pulse .step.active .lbl{color:var(--ink-900);font-weight:700}
+.eg-sim-pulse .step .line{position:absolute;top:10px;left:-50%;width:100%;height:2px;background:var(--border-strong)}
+.eg-sim-pulse .mode-title{text-align:center;font-size:clamp(28px,3.4vw,42px);font-weight:800;color:var(--navy-800);margin:8px 0 4px;letter-spacing:-.5px}
+.eg-sim-pulse .mode-sub{text-align:center;color:var(--ink-600);font-size:var(--fs-lg);margin:0 0 18px}
+.eg-sim-pulse .honesty-banner{display:flex;align-items:center;gap:10px;max-width:760px;margin:0 auto 18px;padding:10px 14px;border:1px solid var(--border);border-radius:var(--r-lg);background:rgba(255,255,255,.85);color:var(--ink-700);font-size:var(--fs-sm);text-align:left}
+.eg-sim-pulse .mode-cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}
+.eg-sim-pulse .mode-card{background:rgba(255,255,255,.92);border:1px solid var(--border);border-radius:var(--r-xl);padding:20px 20px 16px;text-align:center;box-shadow:var(--shadow-card);display:flex;flex-direction:column;gap:10px}
+.eg-sim-pulse .mode-card .ic{width:60px;height:60px;border-radius:50%;margin:0 auto;display:grid;place-items:center}
+.eg-sim-pulse .mode-card .ic svg{width:30px;height:30px;fill:currentColor}
+.eg-sim-pulse .mode-card.learn .ic{background:var(--green-50);color:var(--green-600)}
+.eg-sim-pulse .mode-card.practice .ic{background:var(--blue-50);color:var(--blue-600)}
+.eg-sim-pulse .mode-card.assessment .ic{background:var(--purple-50);color:var(--purple-600)}
+.eg-sim-pulse .mode-card.locked .ic{background:var(--blue-50);color:var(--ink-400)}
+.eg-sim-pulse .mode-card h3{font-size:var(--fs-xl);margin:0;color:var(--navy-800)}
+.eg-sim-pulse .mode-card.learn h3{color:var(--green-600)}
+.eg-sim-pulse .mode-card.practice h3{color:var(--blue-700)}
+.eg-sim-pulse .mode-card.assessment h3{color:var(--purple-600)}
+.eg-sim-pulse .lock-badge{display:inline-flex;align-items:center;gap:4px;margin-left:6px;font-size:var(--fs-xs);font-weight:700;color:var(--ink-600);background:var(--blue-50);border-radius:var(--r-pill);padding:2px 8px;vertical-align:middle}
+.eg-sim-pulse .mode-card .desc{color:var(--ink-600);font-size:var(--fs-md);min-height:52px;margin:0}
+.eg-sim-pulse .mode-card ul{list-style:none;margin:2px 0 8px;padding:9px 4px 0;border-top:1px solid var(--border);display:flex;flex-direction:column;gap:8px;text-align:left}
+.eg-sim-pulse .mode-card li{display:flex;gap:10px;align-items:center;font-size:var(--fs-md);color:var(--ink-700)}
+.eg-sim-pulse .mode-card li .ck{width:19px;height:19px;border-radius:50%;display:grid;place-items:center;flex-shrink:0;font-size:var(--fs-xs)}
+.eg-sim-pulse .mode-card.learn li .ck{background:var(--green-100);color:var(--green-600)}
+.eg-sim-pulse .mode-card.practice li .ck{background:var(--blue-100);color:var(--blue-600)}
+.eg-sim-pulse .mode-card.assessment li .ck{background:var(--purple-100);color:var(--purple-600)}
+.eg-sim-pulse .mode-status{font-size:var(--fs-sm);color:var(--ink-600);text-align:left}
+.eg-sim-pulse .mode-card.locked .mode-status{color:var(--amber-700)}
+.eg-sim-pulse .mode-progress{height:6px;border-radius:var(--r-pill);background:var(--blue-100);overflow:hidden;margin-top:6px}
+.eg-sim-pulse .mode-progress i{display:block;height:100%;background:var(--blue-600);border-radius:var(--r-pill)}
+.eg-sim-pulse .mode-card.learn .mode-progress i{background:var(--green-600)}
+.eg-sim-pulse .mode-card .btn{margin-top:auto;width:100%;min-height:44px;border-radius:var(--r-md);font-weight:700;border:0;color:var(--card);font-size:var(--fs-md)}
+.eg-sim-pulse .mode-card.learn .btn{background:var(--green-600)}
+.eg-sim-pulse .mode-card.practice .btn{background:var(--blue-600)}
+.eg-sim-pulse .mode-card.assessment .btn{background:var(--purple-600)}
+.eg-sim-pulse .mode-card.locked .btn{background:var(--card);color:var(--ink-700);border:1.5px solid var(--border-strong)}
+.eg-sim-pulse .mode-rules{font-size:var(--fs-xs);color:var(--ink-600);text-align:left}
+.eg-sim-pulse .mode-foot{text-align:center;margin-top:16px}
+.eg-sim-pulse .link-btn{border:0;background:transparent;color:var(--blue-700);font-size:var(--fs-sm);text-decoration:underline;text-underline-offset:3px}
+.eg-sim-pulse .tutorial-panel{position:fixed;left:18px;top:150px;z-index:40;width:min(330px,calc(100vw - 36px));max-height:calc(100dvh - 274px);overflow:auto;display:flex;flex-direction:column;gap:10px;padding:16px;border:1px solid var(--border-strong);border-radius:var(--r-lg);background:rgba(255,255,255,.97);box-shadow:var(--shadow-pop);color:var(--ink-800)}
+.eg-sim-pulse .tutorial-panel h2{margin:0;font-size:var(--fs-lg);color:var(--navy-800)}
+.eg-sim-pulse .tutorial-lede{margin:0;color:var(--ink-600);font-size:var(--fs-sm);line-height:1.45}
+.eg-sim-pulse .tutorial-steps{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:8px}
+.eg-sim-pulse .tutorial-steps li{display:flex;gap:10px;align-items:flex-start;padding:9px 10px;border:1px solid var(--border);border-radius:var(--r-md);background:var(--card)}
+.eg-sim-pulse .tutorial-steps li.current{border-color:var(--blue-500);background:var(--blue-50);box-shadow:inset 0 0 0 1px var(--blue-300)}
+.eg-sim-pulse .tutorial-steps li .n{flex:0 0 22px;width:22px;height:22px;border-radius:50%;display:grid;place-items:center;background:var(--card);border:2px solid var(--border-strong);color:var(--ink-500);font-size:var(--fs-xs);font-weight:700}
+.eg-sim-pulse .tutorial-steps li.done .n{background:var(--green-600);border-color:var(--green-600);color:var(--card)}
+.eg-sim-pulse .tutorial-steps li.done .n span{display:none}
+.eg-sim-pulse .tutorial-steps li.done .n:after{content:'✓'}
+.eg-sim-pulse .tutorial-steps b{display:block;font-size:var(--fs-sm);color:var(--ink-900)}
+.eg-sim-pulse .tutorial-steps .t{display:block;font-size:var(--fs-xs);color:var(--ink-600);margin-top:2px;line-height:1.4}
+.eg-sim-pulse .tutorial-remember{display:flex;align-items:center;gap:7px;color:var(--ink-600);font-size:var(--fs-xs)}
+.eg-sim-pulse .tutorial-actions{display:flex;gap:8px;justify-content:flex-end}
+.eg-sim-pulse .eg-navbtn svg{width:18px;height:18px;fill:none;flex-shrink:0}
+@media(max-height:820px) and (min-width:1000px){.eg-sim-pulse .modes-view{padding:2px 0 12px}
+.eg-sim-pulse .mode-title{font-size:clamp(26px,2.6vw,34px);margin:4px 0 2px}
+.eg-sim-pulse .mode-sub{font-size:var(--fs-md);margin-bottom:10px}
+.eg-sim-pulse .honesty-banner{margin-bottom:12px;padding:7px 12px}
+.eg-sim-pulse .stepper{margin:4px auto 0}
+.eg-sim-pulse .mode-card{padding:14px 14px 12px;gap:8px;border-radius:var(--r-lg)}
+.eg-sim-pulse .mode-card .ic{width:48px;height:48px}
+.eg-sim-pulse .mode-card .ic svg{width:24px;height:24px}
+.eg-sim-pulse .mode-card h3{font-size:var(--fs-lg)}
+.eg-sim-pulse .mode-card .desc{font-size:var(--fs-sm);min-height:0}
+.eg-sim-pulse .mode-card ul{padding-top:7px;gap:6px}
+.eg-sim-pulse .mode-card li{font-size:var(--fs-sm)}
+.eg-sim-pulse .mode-status{font-size:var(--fs-xs)}
+.eg-sim-pulse .mode-card .btn{min-height:38px}
+.eg-sim-pulse .mode-rules{font-size:var(--fs-xs)}
+.eg-sim-pulse .mode-foot{margin-top:10px}}
+@media(max-width:1024px){.eg-sim-pulse .mode-cards{grid-template-columns:minmax(0,1fr)}
+.eg-sim-pulse .modes-view{max-width:560px}}
+@media(max-width:999px){.eg-sim-pulse .tutorial-panel{left:12px;right:auto;top:auto;bottom:70px;width:min(300px,calc(100vw - 24px));max-height:40dvh}}
+@media(max-width:720px){.eg-sim-pulse .mode-context{order:4}
+.eg-sim-pulse .mode-chip{padding:5px 10px}}
