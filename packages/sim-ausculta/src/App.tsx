@@ -1,4 +1,4 @@
-import { useEffect, type JSX } from "react";
+import { useEffect, useRef, type JSX } from "react";
 import { useStore } from "./core/StoreProvider";
 import { resolveEntryScreen } from "./screens/entry";
 import { LearnScreen, type LearnScreenEnv } from "./screens/LearnScreen";
@@ -12,9 +12,11 @@ import type { VolumeCheckAudio, VolumeToneContext } from "./screens/tone";
 import { TutorialScreen, type TutorialAudio } from "./screens/TutorialScreen";
 import type { ModalEnv } from "./ui/modal-env";
 import { EmbeddedProvider } from "./ui/ScreenHeading";
+import { ProgressScreen } from "./screens/ProgressScreen";
+import { LocalGamiRepository } from "./gamification/repo";
 
 /** Kaynak `App.tsx`: belge ekranları sayfa düzeyinde kayar; öğrenme ve simülasyon kaymaz. */
-const DOC_SCREENS = new Set(["start", "modes", "tutorial", "results", "sources"]);
+const DOC_SCREENS = new Set(["start", "modes", "tutorial", "results", "progress", "sources"]);
 
 /** Ekranların paylaştığı motor yüzeyi. Mount başına bir örnek; modül singleton'ı yoktur. */
 export interface AuscultaAudio extends SimulationAudio, TutorialAudio {
@@ -46,12 +48,25 @@ function Shell({
   resultsEnv,
   scrollToTop,
 }: AppProps & { embedded: boolean }): JSX.Element {
-  const { state, dispatch } = useStore();
+  const { state, dispatch, bus, now } = useStore();
+  const gamiRef = useRef<LocalGamiRepository | null>(null);
+  if (gamiRef.current === null) gamiRef.current = new LocalGamiRepository({ now: () => new Date(now()) });
+  const gami = gamiRef.current;
   const screen = resolveEntryScreen(state.screen, embedded);
 
   useEffect(() => {
     audio.stop();
   }, [audio, state.screen]);
+
+  useEffect(() => bus.subscribe((event) => {
+    if (event.type === "case_completed" && event.mode === "practice") {
+      gami.recordEvent({ type: "case_completed", id: `${event.caseId}:${event.mode}:${event.at}`, finishedAt: new Date(event.at).toISOString(), mode: event.mode, score: event.score, mastery: event.mastery, hintsUsed: event.hintsUsed, domains: event.domains });
+    } else if (event.type === "assessment_completed") {
+      gami.recordEvent({ type: "case_completed", id: `assessment:${event.at}`, finishedAt: new Date(event.at).toISOString(), mode: "assessment", score: event.total, mastery: event.total >= 80, hintsUsed: 0, domains: {} });
+    } else if (event.type === "correct_diagnosis") {
+      gami.recordEvent({ type: "correct_diagnosis", id: `${event.caseId}:${event.qid}:${event.at}`, finishedAt: new Date(event.at).toISOString() });
+    }
+  }), [bus, gami]);
 
   useEffect(() => {
     scrollToTop?.();
@@ -86,6 +101,7 @@ function Shell({
           {screen === "results" ? (
             <ResultsScreen embedded={embedded} {...(resultsEnv ? { env: resultsEnv } : {})} />
           ) : null}
+          {screen === "progress" ? <ProgressScreen embedded={embedded} repository={gami} /> : null}
           {screen === "sources" ? <SourcesScreen embedded={embedded} /> : null}
         </main>
       </div>
