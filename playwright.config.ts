@@ -37,6 +37,19 @@ function isApiRunning(): boolean {
 }
 
 const apiRunning = isApiRunning();
+const requireApi = env["E2E_REQUIRE_API"] === "1";
+if (requireApi && !apiRunning) {
+  throw new Error(
+    `E2E_REQUIRE_API=1 verildi ama API ayakta değil (${API_URL}/health yanıt vermedi). ` +
+      "API'yi başlatın (örn. pnpm --filter @egemed/api dev) ve E2E_REQUIRE_API=1 olmadan " +
+      "koşmanın api-dev testlerini sessizce atladığını unutmayın.",
+  );
+}
+if (!apiRunning) {
+  console.warn(
+    "api-dev projesi atlandı: API ayakta değil. Zorunlu koşum için E2E_REQUIRE_API=1 kullanın (pnpm e2e:api).",
+  );
+}
 const API_SPEC = /auth-api\.spec\.ts/;
 const PROD_SPEC = /auth-prod\.spec\.ts/;
 

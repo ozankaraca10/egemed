@@ -141,6 +141,19 @@ gerekiyorsa ayrı onaylı görevle açılır.
 
 ## 8. KVKK notu
 
+## 8. E2E API zorunluluk kapağı
+
+`playwright.config.ts`, API ayakta değilken `api-dev` Playwright projesini hiç
+tanımlamaz; bu testler koşum listesinden sessizce çıkar. API'nin çalışması
+zorunluyken sessiz atlanmayı engellemek için `E2E_REQUIRE_API=1` verin: API
+`/health` ucuna yanıt vermezse yapılandırma anlaşılır bir Türkçe hatayla
+açıkça durur. Bu koşum için kök betik: `pnpm e2e:api` (API'yi önce
+`pnpm --filter @egemed/api dev` gibi bir komutla ayakta tutun). Değişken
+verilmediğinde bugünkü davranış korunur; yalnız konsola "api-dev projesi
+atlandı" uyarısı basılır.
+
+## 9. KVKK notu
+
 Veri sorumluluğu ve hukuki dayanak insan/hukuk kararıdır (ADR-007); bu
 kılavuz hukuki tavsiye değildir. Uygulama notları:
 
