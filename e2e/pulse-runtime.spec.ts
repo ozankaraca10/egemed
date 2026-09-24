@@ -110,6 +110,11 @@ test.describe("Pulse kaynak runtime", () => {
     }
     await expect(root.locator("#resultsView")).toBeVisible();
     await expect(root.getByRole("button", { name: /Tekrar dene/ })).toBeVisible();
+    // KAYNAK-01: doğrudan sınava girip 100 alan öğrenci "Hedefin altında" görmez;
+    // modül tamamlama (inceleme + vakalar) ayrı not olarak gösterilir.
+    await expect(root.locator("#resultsView")).toContainText("✓ Başarılı");
+    await expect(root.locator("#resultsView")).not.toContainText("Hedefin altında");
+    await expect(root.locator("[data-egemed-module-note]")).toBeVisible();
 
     // Platform oyunlaştırması: deneme kullanıcı×sim ad alanına tek kez yazılır,
     // sonuç ekranında kazanım kartı ve "İlerlemem" diyaloğu açılır.
