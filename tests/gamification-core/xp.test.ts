@@ -23,8 +23,8 @@ describe("XP kuralları", () => {
     expect(assessmentXp({ caseCount: 10, score: 79.9 }, DEFAULT_RULES)).toBe(100);
     expect(assessmentXp({ caseCount: 10, score: 80 }, DEFAULT_RULES)).toBe(120);
   });
-  it("öğrenme: konu başına 2; toplam = denemeler + öğrenme", () => {
-    const learn = { topics: ["a", "b", "c"], ctStacksCompleted: [] };
+  it("öğrenme: konu başına 2; koleksiyonlar (items) XP'ye girmez; toplam = denemeler + öğrenme", () => {
+    const learn = { topics: ["a", "b", "c"], items: { modules: ["m1", "m2"] } };
     expect(learnXp(learn, DEFAULT_RULES)).toBe(6);
     const list = [attempt({ score: 85 }), attempt({ mode: "practice", caseCount: 10, mastery: false })];
     expect(list.map((a) => attemptXp(a, DEFAULT_RULES))).toEqual([120, 50]);

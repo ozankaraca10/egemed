@@ -23,10 +23,12 @@ export interface AttemptRecord<TDomain extends string = string, TExtra = unknown
   extra: TExtra;
 }
 
-/** Öğrenme modu etkinliği — konu/BT yığını başına yalnız bir kez sayılır (set semantiği). */
+/** Öğrenme modu etkinliği — konu/öğe başına yalnız bir kez sayılır (set semantiği).
+ *  `topics` düz konu anahtarlarıdır; `items` sim'e özgü koleksiyonları tamamlanmış öğe
+ *  kimliklerine eşler (ör. Opaca'da `items.ctStacks`). Çekirdek anahtar uzayını bilmez. */
 export interface LearnActivity {
   topics: string[];
-  ctStacksCompleted: string[];
+  items: Record<string, string[]>;
 }
 
 /** Dönem (kohort) — 1'den 6'ya kadar tüm sınıflar (ödül/kohort kararı kaynakla aynı). */
@@ -38,7 +40,7 @@ export interface GamiProfile {
   cohort: Cohort | null;
 }
 
-/** Kazanılan rozet kaydı; rozet motoru GC2'de. */
+/** Kazanılan rozet kaydı; kazanım mantığı `badges.ts` jenerik motorundadır. */
 export interface EarnedBadge {
   id: string;
   at: string; // ISO 8601
@@ -55,3 +57,30 @@ export interface GamiStateV1<TDomain extends string = string, TExtra = unknown> 
 /** Sıralama/dönem türleri. */
 export type Period = "today" | "week" | "month" | "academic_year";
 export type CohortFilter = "all" | Cohort;
+
+/** Aylık ödül yapılandırması. Yapılandırma VERİSİ sim paketindedir (ör. sponsor/koşullar);
+ *  çekirdek yalnız biçimi ve uygunluk mantığını taşır (`ranking.rewardStandings`). */
+export interface MonthlyReward {
+  month: string; // 'YYYY-MM'
+  title: string;
+  description: string;
+  sponsor: string;
+  winnersCount: number;
+  eligibility: {
+    cohorts: Cohort[];
+    minAssessments: number;
+    requirePublicName: boolean;
+  };
+  terms: string[];
+}
+
+/** Geçmiş ödül kazananı (sim'in kendi verisi). */
+export interface RewardWinner {
+  month: string;
+  rank: number;
+  displayName: string;
+  score: number;
+  isMe: boolean;
+}
+
+export type EligibilityReason = "eligible" | "min_assessments" | "cohort" | "private_profile";
