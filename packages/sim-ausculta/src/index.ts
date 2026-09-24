@@ -62,6 +62,9 @@ export {
   TERMINOLOGY,
 } from "./data/terminology";
 export type { HeartFindingKey, LungFindingKey } from "./data/terminology";
+export { AUDIO_CONFIG } from "./audio/config";
+export { createAudioEngine } from "./audio/engine";
+export type { AudioEngine, AudioEngineDeps, EngineState } from "./audio/engine";
 export type {
   AuscultationPoint,
   CaseDef,
