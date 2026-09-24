@@ -28,6 +28,24 @@ export type { RegionChipVisualState, SubmitAction, TutorialEvent, TutorialProgre
 export { SUSPEND_LIMIT_12, SUSPEND_LIMIT_2004, deserializeSuspend, serializeSuspend } from "./core/suspend";
 export { filterAssessmentPool, validateCase } from "./core/validation";
 export type { ValidationIssue } from "./core/validation";
+export {
+  EXTERNAL_RECORDS,
+  RECORDS,
+  assessmentPointFilter,
+  assessmentPool,
+  availableCount,
+  getSound,
+  manifest,
+  resolveAssignment,
+  resolveAssignmentEx,
+  resolveCaseSounds,
+  resolveCaseSoundsEx,
+  resolveLibrarySound,
+  resolveLibrarySoundEx,
+} from "./core/resolver";
+export type { CaseSoundsResolution, LibrarySoundResult } from "./core/resolver";
+export { computeMetrics } from "./data/metrics";
+export type { InventoryMetrics } from "./data/metrics";
 export type {
   AuscultationPoint,
   CaseDef,
