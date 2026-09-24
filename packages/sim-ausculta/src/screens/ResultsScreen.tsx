@@ -8,6 +8,7 @@ import { useStore } from "../core/StoreProvider";
 import type { ScoringWeights } from "../core/types";
 import libraryData from "../data/library.json";
 import { EcgDeco, Footer, touchTarget } from "../ui/chrome";
+import { ScreenHeading } from "../ui/ScreenHeading";
 import {
   IconCheckCircle,
   IconChevronRight,
@@ -132,9 +133,9 @@ export function ResultsScreen({ embedded = false, env = NOOP_RESULTS_ENV }: Resu
       <EcgDeco embedded={embedded} />
       <div className="screen" style={{ position: "relative", zIndex: 1 }}>
         <div className="results-wrap-v2 screen-body">
-          <h1 className="results-title-v2 results-title">
+          <ScreenHeading className="results-title-v2 results-title">
             {isAssessment ? "Değerlendirme Tamamlandı" : "Vaka Raporu"}
-          </h1>
+          </ScreenHeading>
           <p className="results-sub-v2">
             {passed
               ? "Tebrikler — performansınız hedefin üzerinde. Bu düzeyi korumak için öğrenme modunda farklı ses sınıflarıyla pratik yapmaya devam edebilirsiniz."
