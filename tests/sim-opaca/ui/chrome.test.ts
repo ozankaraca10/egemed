@@ -77,11 +77,13 @@ describe("Opaca chrome (statik render)", () => {
     expect(html).toContain('aria-label="Yardım"');
   });
 
-  it("marka görselleri kaynak yoluyla ve dekoratif boş alt metinle çizilir", () => {
-    expect(renderToStaticMarkup(createElement(BrandMark, { size: 32 }))).toContain('src="brand/logo-icon-white-web.png"');
+  it("marka görselleri assetUrl ile çözümlenmiş yolla ve dekoratif boş alt metinle çizilir", () => {
+    expect(renderToStaticMarkup(createElement(BrandMark, { size: 32 }))).toContain(
+      'src="/sims/opaca/brand/logo-icon-white-web.png"'
+    );
     const html = renderStandalone();
-    expect(html).toContain('src="brand/logo-icon-white-web.png"');
-    expect(html).toContain('src="brand/logo-icon-web.png"');
+    expect(html).toContain('src="/sims/opaca/brand/logo-icon-white-web.png"');
+    expect(html).toContain('src="/sims/opaca/brand/logo-icon-web.png"');
     expect(html.match(/alt=""/g)).toHaveLength(2);
   });
 

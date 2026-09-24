@@ -44,12 +44,13 @@ function renderApp(overrides: { embedded?: boolean; showDevPanel?: boolean } = {
 }
 
 describe("Opaca App (statik render)", () => {
-  it("gömülü varsayılan modda bağımsız üst bar çizilmez, Türkçe başlık ve iframe yoktur", () => {
+  it("gömülü varsayılan modda bağımsız üst bar çizilmez; tanıtım atlanıp mod seçimi açılır", () => {
     const html = renderApp();
     expect(html).not.toContain('<header class="eg-header">');
     expect(html).not.toContain("<iframe");
-    expect(html).toContain("Radyolojik görüntüyü sistematik okumayı gerçek verilerle öğrenin.");
-    expect(html).toContain("Simülatörü başlat");
+    expect(html).not.toContain("Simülatörü başlat");
+    expect(html).toContain("Çalışma modunu seçin");
+    expect(html).toContain('class="mode-card learn"');
     expect(html).toContain('class="eg-sim-opaca app-shell"');
   });
 

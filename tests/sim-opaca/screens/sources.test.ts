@@ -86,7 +86,7 @@ describe("SourcesScreen (statik render)", () => {
     }
     expect(html).toContain(esc(data.module.validationStatement));
     expect(html).toContain(esc(data.disclaimer));
-    expect(html).toContain("brand/ege-tip-logo.png");
+    expect(html).toContain('src="/sims/opaca/brand/ege-tip-logo.png"');
     expect(html).toContain(esc(data.module.developedBy));
   });
 

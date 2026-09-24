@@ -10,6 +10,7 @@ import {
   type Point,
 } from '../core/geometry'
 import { findingShort } from '../data/terminology'
+import { assetUrl } from '../core/images'
 import { FilmCornerBadge } from './FilmInfoPanel'
 import {
   WINDOW_PRESETS,
@@ -219,7 +220,7 @@ export const FilmViewer = forwardRef<FilmViewerHandle, FilmViewerProps>(function
     onStackEnd()
   }, [clampedSlice, stackFramesList.length, image, onStackEnd])
 
-  const frameSrc = stackFramesList[clampedSlice] ?? image?.runtimeUrl
+  const frameSrc = assetUrl(stackFramesList[clampedSlice] ?? image?.runtimeUrl)
   const goSlice = (next: number) => setSliceIndex(goToSlice(next, stackFramesList.length))
 
   useEffect(() => {

@@ -32,6 +32,9 @@ export function resolveAssetUrl(path: string | null | undefined): string | undef
   return `${assetBase}${normalized}`;
 }
 
+/** Marka ve görüntü yolları için tek çözümleyici (`resolveAssetUrl` takma adı). */
+export const assetUrl = resolveAssetUrl;
+
 export function getImage(id: string | null | undefined): ImageRecord | undefined {
   return id ? byId.get(id) : undefined;
 }

@@ -56,11 +56,15 @@ describe("StartScreen (statik render)", () => {
     expect(html).toContain("Neden güvenilir?");
     expect(html).toContain("radyolojik görüntü");
     expect(html).toContain('<footer class="eg-footer">');
+    expect(html).toContain('src="/sims/opaca/brand/logo-horizontal-web.png"');
+    expect(html).toContain("SCORM uyumlu ölçme ve değerlendirme");
   });
 
-  it("gömülü modda footer çizilmez", () => {
+  it("gömülü modda footer çizilmez ve SCORM ifadesi kaldırılır", () => {
     const html = renderInStore(createElement(StartScreen, { embedded: true }));
     expect(html).not.toContain("<footer");
+    expect(html).not.toContain("SCORM");
+    expect(html).toContain("ölçme ve değerlendirme");
   });
 });
 

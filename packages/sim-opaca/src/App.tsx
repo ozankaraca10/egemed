@@ -85,6 +85,9 @@ function ScreenBody({
   const simGami = gamiEnabled ? createSimulationGamiPort() : undefined;
   switch (state.screen) {
     case "start":
+      if (embedded) {
+        return <ModeSelectScreen embedded={embedded} gamiEnabled={gamiEnabled} />;
+      }
       return timing ? (
         <StartScreen embedded={embedded} env={startEnv} modalEnv={modalEnv} timing={timing} />
       ) : (
