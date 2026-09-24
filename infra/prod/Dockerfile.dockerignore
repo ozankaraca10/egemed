@@ -1,0 +1,22 @@
+# infra/prod/Dockerfile için bağlam budaması (T86). BuildKit, Dockerfile'ın
+# adına özel <ad>.dockerignore dosyasını Dockerfile'ın yanından okur; derleme
+# kökü depo kökü olduğundan bu dosya olmadan worktree'deki tüm node_modules,
+# dist ve git-dışı artefaktlar bağlama girerdi. Budama ile bağlam temiz
+# checkout eşdeğeridir ve imaj derleme makinesindeki node_modules'a
+# bağımlı olamaz; izin verilenler imajın kopyaladığı manifest, kaynak ve
+# runtime yardımcı dosyalarıdır.
+**
+!package.json
+!pnpm-lock.yaml
+!pnpm-workspace.yaml
+!apps/api/**
+!packages/contracts/**
+!packages/gamification-core/**
+# İçe kurulu bağımlılık dizinleri bağlama girmez; kurulum yalnız lockfile'dan
+# deps aşamasında yapılır.
+apps/api/node_modules
+packages/contracts/node_modules
+packages/gamification-core/node_modules
+# Sırlar bağlam dışı kalır; .env değerleri repoda da imajda da yoktur.
+**/.env
+**/.env.*

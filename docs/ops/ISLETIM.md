@@ -12,7 +12,15 @@ Bu kılavuz, platformun tek sunucu dağıtımını (egemed.ege.edu.tr) kurmayı,
   (sim varlıkları `dist/sims/<id>/` dâhil; bkz. ADR-006/ADR-002). Nginx sunar.
 - **API:** `infra/prod/Dockerfile` imajı — node:22 digest-pinli, non-root,
   yalnız prod bağımlılıkları (ADR-002). `127.0.0.1:3000` üzerinden ters
-  vekile açıktır.
+  vekile açıktır. İmaj çalışma zamanında tamdır: prod `node_modules` deps
+  aşamasından kopyalanır, `ts-register.mjs`/`ts-resolve.mjs` kancası,
+  `apps/api/src` + `migrations` ve workspace paket kaynakları
+  (`@egemed/contracts`, `@egemed/gamification-core`) imajdadır; derleme
+  makinesinin node_modules'ına bağımlı değildir. Sunucu
+  `--experimental-transform-types` ile başlar: gamification-core TypeScript
+  parametre property'si kullanır (src/repository.ts) ve Node'un strip-only
+  modu bu söz dizimini yürütemez (bkz. audit API-01/API-02). Derleme bağlamı
+  BuildKit altında `infra/prod/Dockerfile.dockerignore` ile budaılır.
 - **PostgreSQL 18:** compose'da adlandırılmış `postgres-data` volume'ü ile.
 - **LRS:** kurum altyapısındadır; EGEMED hiçbir yüzeyde ifade saklamaz
   (ADR-004). Tarayıcı LRS'ye doğrudan bağlanır; nginx CSP `connect-src`
@@ -55,7 +63,8 @@ ln -sfn /srv/egemed/releases/<sürüm> /srv/egemed/shell-dist
 ## 3. Migration (node-pg-migrate)
 
 Migration'lar imaj içinde `apps/api/migrations` dizinindedir; API açılışta
-migration çalıştırmaz. Yeni sürümde sıra: api'yi durdur → migration → api'yi
+migration çalıştırmaz. Komut non-root (node, uid 1000) olarak çalışır ve
+`.bin` yolu apps/api'nin kendi node_modules'ından çözülür (pnpm düzeni). Yeni sürümde sıra: api'yi durdur → migration → api'yi
 aç.
 
 ```sh
