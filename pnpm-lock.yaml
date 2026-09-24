@@ -122,9 +122,15 @@ importers:
 
   packages/sim-opaca:
     dependencies:
+      '@egemed/gamification-core':
+        specifier: workspace:*
+        version: link:../gamification-core
       '@egemed/sim-host':
         specifier: workspace:*
         version: link:../sim-host
+      '@egemed/tokens':
+        specifier: workspace:*
+        version: link:../tokens
     devDependencies:
       '@types/react':
         specifier: 19.3.0
