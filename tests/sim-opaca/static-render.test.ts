@@ -56,6 +56,11 @@ describe("Opaca App (statik render)", () => {
     expect(html).toContain('class="eg-sim-opaca app-shell"');
   });
 
+  it("gömülü App ağacında h1 çizilmez (kabuk çubuğu sayfanın tek h1ini taşır)", () => {
+    const html = renderApp();
+    expect(html.match(/<h1\b/g) ?? []).toHaveLength(0);
+  });
+
   it("gömülü modda footer çizilmez", () => {
     const html = renderApp();
     expect(html).not.toContain('<footer class="eg-footer">');
