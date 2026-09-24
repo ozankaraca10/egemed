@@ -41,6 +41,9 @@ const EXPECTED_KEYS = [
   "PORT",
   "NODE_ENV",
   "AUTH_DEV_ENABLED",
+  // apps/api SSO adaptörü (T64); değerler boş bırakılır.
+  "SSO_PROVIDER",
+  "SSO_STATE_SECRET",
 ] as const;
 
 // Sır taraması: gizli anahtar, kimlik bilgisi taşıyan DSN ve AWS anahtarı.

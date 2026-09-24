@@ -8,6 +8,7 @@ import { registerAdminImportRoutes } from "./admin/imports";
 import { registerAdminRoleRoutes } from "./admin/roles";
 import { registerAdminUserRoutes, type AdminDeps } from "./admin/users";
 import { registerAuthRoutes, type AuthDeps } from "./auth/routes";
+import { registerSsoRoutes } from "./auth/sso/routes";
 import { errorBody, validationDetails, type AppEnv } from "./http";
 import {
   registerMeGamificationRoutes,
@@ -118,6 +119,9 @@ export function createApp(deps: AppDeps): Hono<AppEnv> {
   });
 
   registerAuthRoutes(app, deps.auth, deps.now);
+  // T64 — `/auth/sso/*`; adaptör `auth.sso` ile enjekte edilmezse rotalar
+  // bağlanmaz ve istekler 404 alır.
+  registerSsoRoutes(app, deps.auth, deps.now);
   registerAdminUserRoutes(app, deps.admin, deps.now);
   // T66 — toplu işlem, elle rol atama ve içe aktarma; `/admin/*` ara katmanı
   // (csrfGuard + requireAdmin) `registerAdminUserRoutes` içinde kaydedilir, bu
