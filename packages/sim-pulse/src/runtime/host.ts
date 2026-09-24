@@ -54,11 +54,15 @@ export interface PulseRuntimeOptions {
   readonly storageNamespace: string;
   readonly storage: Storage;
   readonly bridge?: PulseRuntimeBridge;
+  /** Ad alanında yoksa yazılan kaynak tercihleri (ör. gömülü modda kapalı tam ekran önerisi). */
+  readonly defaultPreferences?: Readonly<Record<string, string>>;
 }
 
 export interface PulseRuntimeHandle {
   readonly host: HTMLElement;
   readonly shadow: ShadowRoot;
+  /** Kullanıcı×sim ad alanlı kayıt; platform ekleri (oyunlaştırma) de bunu kullanır. */
+  readonly storage: Storage;
   /** Kaynak `window.*` API'leri (CardAIController, CardAIScorm …); testler ve köprü için. */
   global(name: string): unknown;
   dispose(): void;
@@ -247,6 +251,13 @@ export function mountPulseRuntime(target: HTMLElement, options: PulseRuntimeOpti
         };
 
   const storage = namespacedStorage(options.storage, options.storageNamespace);
+  for (const [key, value] of Object.entries(options.defaultPreferences ?? {})) {
+    try {
+      if (storage.getItem(key) === null) storage.setItem(key, value);
+    } catch {
+      // Depolama kapalıysa kaynak kendi varsayılanıyla sürer.
+    }
+  }
 
   // --- Gölge document ----------------------------------------------------------
   const doc: Document = new Proxy(realDocument, {
@@ -340,6 +351,7 @@ export function mountPulseRuntime(target: HTMLElement, options: PulseRuntimeOpti
   const handle: PulseRuntimeHandle = {
     host,
     shadow,
+    storage,
     global: (name) => local[name],
     dispose() {
       if (disposed) return;
