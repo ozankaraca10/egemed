@@ -79,6 +79,18 @@
       "id": "PULSE-ASSET-BASE",
       "matches": 1,
       "why": "Göreli varlık yolu kabuğun kökünde değil /sims/pulse/ altında çözülmeli."
+    },
+    {
+      "file": "index.html",
+      "id": "PULSE-A11Y-LANDING-HELP-NAME",
+      "matches": 1,
+      "why": "Mobilde etiket gizlenince düğmenin erişilebilir adı kalmıyor (axe button-name)."
+    },
+    {
+      "file": "index.html",
+      "id": "PULSE-A11Y-LANDING-ABOUT-NAME",
+      "matches": 1,
+      "why": "Mobilde etiket gizlenince düğmenin erişilebilir adı kalmıyor (axe button-name)."
     }
   ],
   "markup": {

@@ -84,6 +84,22 @@ const PATCHES = {
   ],
 };
 
+/** index.html işaretleme yamaları (kaynak erişilebilirlik kusurları, PULSE-10). */
+const MARKUP_PATCHES = [
+  {
+    id: "PULSE-A11Y-LANDING-HELP-NAME",
+    why: "Mobilde etiket gizlenince düğmenin erişilebilir adı kalmıyor (axe button-name).",
+    find: '<button class="eg-navbtn" id="landingHelp" type="button">',
+    replace: '<button class="eg-navbtn" id="landingHelp" type="button" aria-label="Yardım">',
+  },
+  {
+    id: "PULSE-A11Y-LANDING-ABOUT-NAME",
+    why: "Mobilde etiket gizlenince düğmenin erişilebilir adı kalmıyor (axe button-name).",
+    find: '<button class="eg-navbtn" id="landingAbout" type="button">',
+    replace: '<button class="eg-navbtn" id="landingAbout" type="button" aria-label="Hakkında">',
+  },
+];
+
 function sha256(buffer) {
   return createHash("sha256").update(buffer).digest("hex");
 }
@@ -114,11 +130,17 @@ function wrapScript(name, code) {
 }
 
 /** index.html gövdesi: betik etiketleri çıkar, h1 → h2[data-h1], kaynaklar gömülür. */
-function buildMarkup(html, sourcesJson) {
+function buildMarkup(html, sourcesJson, applied) {
   const start = html.indexOf("<body>");
   const end = html.lastIndexOf("</body>");
   if (start < 0 || end < 0) throw new Error("index.html: <body> bulunamadı.");
   let body = html.slice(start + "<body>".length, end);
+  for (const patch of MARKUP_PATCHES) {
+    const count = body.split(patch.find).length - 1;
+    if (count !== 1) throw new Error(`index.html: '${patch.id}' yaması ${count} kez eşleşti (beklenen 1).`);
+    body = body.replace(patch.find, patch.replace);
+    applied.push({ file: "index.html", id: patch.id, matches: count, why: patch.why });
+  }
   body = body.replace(/<script src="[^"]+"><\/script>\s*/g, "");
   const placeholder = '<script type="application/json" id="pulse-sources"></script>';
   if (body.split(placeholder).length !== 2) throw new Error("index.html: pulse-sources yer tutucusu tek değil.");
@@ -164,7 +186,7 @@ function main() {
     );
   }
 
-  const { body, h1Count } = buildMarkup(record("index.html"), record("sources.json"));
+  const { body, h1Count } = buildMarkup(record("index.html"), record("sources.json"), applied);
   writeFileSync(
     resolve(OUT, "markup.js"),
     `// ÜRETİLMİŞ DOSYA. Kaynak: EGEMED_PULSE/cardai/index.html (<body>), sources.json gömülü.\n/* eslint-disable */\nexport default ${JSON.stringify(body)};\n`,
