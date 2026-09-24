@@ -12,6 +12,10 @@ import {
 import { createMemoryAuthStore, type MemoryUserSeed } from "../../apps/api/src/auth/repo";
 import type { AuthDeps } from "../../apps/api/src/auth/routes";
 import {
+  createMemoryGamificationRepo,
+  type MemoryGamificationSeed,
+} from "../../apps/api/src/me/gamification";
+import {
   CSRF_COOKIE,
   CSRF_HEADER,
   DEFAULT_SESSION_ABSOLUTE_MS,
@@ -172,10 +176,15 @@ function fakeDb() {
 }
 
 export function createAdminHarness(
-  options: { readonly users?: readonly HarnessUser[] } = {},
+  options: {
+    readonly users?: readonly HarnessUser[];
+    /** T67 — `/me/gamification` testleri için sentetik oyunlaştırma tohumu. */
+    readonly gamification?: MemoryGamificationSeed;
+  } = {},
 ) {
   const users = options.users ?? DEFAULT_USERS;
   const authStore = createMemoryAuthStore({ users: users.map(toAuthSeed) });
+  const gamificationStore = createMemoryGamificationRepo(options.gamification ?? {});
   const adminStore = createMemoryAdminStore({
     users: users.map(toAdminSeed),
     units: UNITS,
@@ -200,6 +209,7 @@ export function createAdminHarness(
     db: fakeDb(),
     now: () => clock,
     auth,
+    gamification: gamificationStore.repo,
     admin: {
       auth,
       users: adminStore.users,
@@ -214,6 +224,7 @@ export function createAdminHarness(
     authStore,
     adminStore,
     importStore,
+    gamificationStore,
     advance(ms: number) {
       clock += ms;
     },

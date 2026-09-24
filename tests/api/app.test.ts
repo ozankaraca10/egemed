@@ -7,6 +7,7 @@ import { createMemoryAdminRoleRepo } from "../../apps/api/src/admin/roles";
 import { createMemoryAdminStore, type AdminDeps } from "../../apps/api/src/admin/users";
 import { createMemoryAuthStore } from "../../apps/api/src/auth/repo";
 import type { AuthDeps } from "../../apps/api/src/auth/routes";
+import { createMemoryGamificationRepo } from "../../apps/api/src/me/gamification";
 import {
   DEFAULT_SESSION_ABSOLUTE_MS,
   DEFAULT_SESSION_IDLE_MS,
@@ -74,7 +75,8 @@ function createTestApp(db = createFakeDb()) {
     imports: createMemoryAdminImportRepo(store, newId).repo,
     newId,
   };
-  return { app: createApp({ db, now: () => FIXED_NOW, auth, admin }), db };
+  const gamification = createMemoryGamificationRepo().repo;
+  return { app: createApp({ db, now: () => FIXED_NOW, auth, gamification, admin }), db };
 }
 
 describe("request_id ara katmanı", () => {

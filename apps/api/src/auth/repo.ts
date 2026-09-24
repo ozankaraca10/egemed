@@ -66,8 +66,40 @@ export interface AuditEntry {
   readonly requestId: string | null;
 }
 
+/** T67 — `/admin/audit` liste sorgusu (E3 §d): kurum kapsamlı, salt okunur. */
+export interface AuditListQuery {
+  readonly institutionId: string;
+  readonly actorId?: string | undefined;
+  readonly action?: string | undefined;
+  readonly targetType?: string | undefined;
+  readonly targetId?: string | undefined;
+  /** Kapsayıcı alt/üst sınır (epoch ms). */
+  readonly from?: number | undefined;
+  readonly to?: number | undefined;
+  readonly page: number;
+  readonly pageSize: number;
+}
+
+/** Liste satırı: `id` bigint kolonunun ondalık dizgesi; yalnız kodlu özet taşır. */
+export interface AuditListRow {
+  readonly id: string;
+  readonly occurredAt: number;
+  readonly actorUserId: string | null;
+  readonly actorRole: string | null;
+  readonly action: string;
+  readonly targetType: string | null;
+  readonly targetId: string | null;
+  readonly summaryBefore: Readonly<Record<string, string>> | null;
+  readonly summaryAfter: Readonly<Record<string, string>> | null;
+  readonly requestId: string | null;
+}
+
 export interface AuditRepo {
   insert(entry: AuditEntry): Promise<void>;
+  /** T67 — kurum kapsamlı liste; filtreler ve sayfalama sunucuda uygulanır. */
+  list(
+    query: AuditListQuery,
+  ): Promise<{ readonly rows: readonly AuditListRow[]; readonly total: number }>;
 }
 
 /** Havuzun depo katmanına görünen dar yüzeyi; `db.ts` çıktısı bunu karşılar. */
@@ -101,6 +133,71 @@ interface UserRow {
   readonly status: string;
   readonly auth_method: string;
   readonly institution_id: string;
+}
+
+interface AuditRow {
+  readonly id: string;
+  readonly occurred_at: Date;
+  readonly actor_user_id: string | null;
+  readonly actor_role: string | null;
+  readonly action: string;
+  readonly target_type: string | null;
+  readonly target_id: string | null;
+  readonly summary_before: unknown;
+  readonly summary_after: unknown;
+  readonly request_id: string | null;
+}
+
+/** jsonb özetleri yalnız nesne olarak kabul edilir; diğer değerler null'a indirgenir. */
+function toSummary(value: unknown): Readonly<Record<string, string>> | null {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) return null;
+  return value as Readonly<Record<string, string>>;
+}
+
+function toAuditListRow(row: AuditRow): AuditListRow {
+  return {
+    id: row.id,
+    occurredAt: row.occurred_at.getTime(),
+    actorUserId: row.actor_user_id,
+    actorRole: row.actor_role,
+    action: row.action,
+    targetType: row.target_type,
+    targetId: row.target_id,
+    summaryBefore: toSummary(row.summary_before),
+    summaryAfter: toSummary(row.summary_after),
+    requestId: row.request_id,
+  };
+}
+
+/** Filtreler koşul + parametre üretir; kullanıcı girdisi SQL metnine girmez. */
+function buildAuditFilter(query: AuditListQuery): { readonly where: string; readonly params: unknown[] } {
+  const params: unknown[] = [query.institutionId];
+  const conditions = ["institution_id = $1"];
+  if (query.actorId !== undefined) {
+    params.push(query.actorId);
+    conditions.push(`actor_user_id = $${params.length}`);
+  }
+  if (query.action !== undefined) {
+    params.push(query.action);
+    conditions.push(`action = $${params.length}`);
+  }
+  if (query.targetType !== undefined) {
+    params.push(query.targetType);
+    conditions.push(`target_type = $${params.length}`);
+  }
+  if (query.targetId !== undefined) {
+    params.push(query.targetId);
+    conditions.push(`target_id = $${params.length}`);
+  }
+  if (query.from !== undefined) {
+    params.push(new Date(query.from));
+    conditions.push(`occurred_at >= $${params.length}`);
+  }
+  if (query.to !== undefined) {
+    params.push(new Date(query.to));
+    conditions.push(`occurred_at <= $${params.length}`);
+  }
+  return { where: conditions.join(" and "), params };
 }
 
 function toSessionRecord(row: SessionRow): SessionRecord {
@@ -225,6 +322,22 @@ export function createPgAuthRepos(db: AuthDb): PgAuthRepos {
           entry.requestId,
         ],
       );
+    },
+    async list(query) {
+      const filter = buildAuditFilter(query);
+      const totalResult = await db.query(
+        `select count(*)::int as total from audit_log where ${filter.where}`,
+        filter.params,
+      );
+      const totalRow = totalResult.rows[0] as { readonly total?: unknown } | undefined;
+      const rowsResult = await db.query(
+        `select id::text as id, occurred_at, actor_user_id, actor_role, action, target_type, target_id, summary_before, summary_after, request_id from audit_log where ${filter.where} order by occurred_at desc, id desc limit $${filter.params.length + 1} offset $${filter.params.length + 2}`,
+        [...filter.params, query.pageSize, (query.page - 1) * query.pageSize],
+      );
+      return {
+        rows: rowsResult.rows.map((row) => toAuditListRow(row as AuditRow)),
+        total: typeof totalRow?.total === "number" ? totalRow.total : 0,
+      };
     },
   };
 
@@ -357,6 +470,35 @@ export function createMemoryAuthStore(
   const audit: AuditRepo = {
     async insert(entry) {
       auditEntries.push({ ...entry });
+    },
+    async list(query) {
+      const matches = auditEntries
+        .map((entry, index) => ({ id: String(index + 1), entry }))
+        .filter(({ entry }) => {
+          if (entry.institutionId !== query.institutionId) return false;
+          if (query.actorId !== undefined && entry.actorUserId !== query.actorId) return false;
+          if (query.action !== undefined && entry.action !== query.action) return false;
+          if (query.targetType !== undefined && entry.targetType !== query.targetType) return false;
+          if (query.targetId !== undefined && entry.targetId !== query.targetId) return false;
+          if (query.from !== undefined && entry.occurredAt < query.from) return false;
+          if (query.to !== undefined && entry.occurredAt > query.to) return false;
+          return true;
+        })
+        .sort((a, b) => b.entry.occurredAt - a.entry.occurredAt || Number(b.id) - Number(a.id))
+        .map(({ id, entry }) => ({
+          id,
+          occurredAt: entry.occurredAt,
+          actorUserId: entry.actorUserId,
+          actorRole: entry.actorRole ?? null,
+          action: entry.action,
+          targetType: entry.targetType,
+          targetId: entry.targetId,
+          summaryBefore: entry.summaryBefore ?? null,
+          summaryAfter: entry.summaryAfter,
+          requestId: entry.requestId,
+        }));
+      const start = (query.page - 1) * query.pageSize;
+      return { rows: matches.slice(start, start + query.pageSize), total: matches.length };
     },
   };
 

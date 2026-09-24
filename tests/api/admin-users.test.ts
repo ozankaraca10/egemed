@@ -13,6 +13,7 @@ import {
 } from "../../apps/api/src/admin/users";
 import { createMemoryAuthStore, type MemoryUserSeed } from "../../apps/api/src/auth/repo";
 import type { AuthDeps } from "../../apps/api/src/auth/routes";
+import { createMemoryGamificationRepo } from "../../apps/api/src/me/gamification";
 import {
   CSRF_COOKIE,
   CSRF_HEADER,
@@ -185,6 +186,7 @@ function createHarness(options: { readonly users?: readonly HarnessUser[] } = {}
     db: fakeDb(),
     now: () => clock,
     auth,
+    gamification: createMemoryGamificationRepo().repo,
     admin: {
       auth,
       users: adminStore.users,

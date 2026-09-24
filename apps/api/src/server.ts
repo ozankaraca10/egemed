@@ -9,6 +9,7 @@ import { createPgAdminUsersRepo } from "./admin/users.ts";
 import { createPgAuthRepos } from "./auth/repo.ts";
 import { createDb } from "./db.ts";
 import { loadEnv } from "./env.ts";
+import { createPgGamificationRepo } from "./me/gamification.ts";
 
 /**
  * T62 — giriş noktası (`pnpm --filter @egemed/api dev|start`). Node 22'nin
@@ -41,6 +42,7 @@ const app = createApp({
   db,
   now: serverNow,
   auth,
+  gamification: createPgGamificationRepo(db),
   admin: {
     auth,
     users: createPgAdminUsersRepo(db),

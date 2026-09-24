@@ -17,11 +17,21 @@ export interface AdminActor {
   readonly institutionId: string;
 }
 
-/** İstek bağlamı: ara katman üretilen/doğrulanan `request_id`yi ve admin kimliğini buraya yazar. */
+/**
+ * T67 — `/me/*` uçlarının oturum sahibi. Kimlik yalnız çerezdeki oturumdan
+ * çözülür; yol veya gövde parametresiyle başka kullanıcı istenemez.
+ */
+export interface MeActor {
+  readonly userId: string;
+  readonly institutionId: string;
+}
+
+/** İstek bağlamı: ara katman üretilen/doğrulanan `request_id`yi ve aktör kimliğini buraya yazar. */
 export interface AppEnv {
   Variables: {
     requestId: string;
     adminActor: AdminActor;
+    meActor: MeActor;
   };
 }
 
