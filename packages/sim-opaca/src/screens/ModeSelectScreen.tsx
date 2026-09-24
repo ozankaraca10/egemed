@@ -5,6 +5,7 @@ import { poolFor } from '../data/pool'
 import { LIBRARY_ITEMS } from '../data/terminology'
 import { sampleSession, SESSION_SIZE } from '../core/session'
 import { Footer, EcgDeco } from '../ui/chrome'
+import { ScreenHeading } from '../ui/ScreenHeading'
 import { IconGraduation, IconFilm, IconChart, IconCheck, IconGift, IconLock } from '../ui/icons'
 
 /** Ay sonuna kalan tam gün (TR; kaynak `gamification/leaderboardView.ts:daysLeft`). */
@@ -56,7 +57,7 @@ export function ModeSelectScreen({ embedded = false, gamiEnabled = false }: Mode
       <div className="screen" style={{ position: 'relative', zIndex: 1 }}>
         <div className="container screen-body">
           <Stepper active={1} labels={['Mod seçimi', 'Çalışma', 'Tamamla']} />
-          <h1 className="mode-title">Çalışma modunu seçin</h1>
+          <ScreenHeading className="mode-title">Çalışma modunu seçin</ScreenHeading>
           <p className="mode-sub">Önce öğrenme modunda okuma sırasını oturtmanız önerilir.</p>
           <div className="mode-cards">
             <ModeCard

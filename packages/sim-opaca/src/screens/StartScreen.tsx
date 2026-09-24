@@ -6,6 +6,7 @@ import { computeMetrics } from '../data/metrics'
 import sourcesData from '../data/sources.json'
 import { assetUrl } from '../core/images'
 import { Footer } from '../ui/chrome'
+import { ScreenHeading } from '../ui/ScreenHeading'
 import { ConfirmModal } from '../ui/ConfirmModal'
 import { IconArrowRight, IconInfo } from '../ui/icons'
 import type { ChromeEnv } from '../ui/chrome'
@@ -125,7 +126,7 @@ export function StartScreen({
         <div className="start-card">
           <div className="start-card-inner">
             <img className="hero-logo" src={assetUrl('brand/logo-horizontal-web.png')} alt="EGEMED Opaca — Radyolojik Görüntüleme Simülatörü" />
-            <h1 className="hero-title">Radyolojik görüntüyü sistematik okumayı gerçek verilerle öğrenin.</h1>
+            <ScreenHeading className="hero-title">Radyolojik görüntüyü sistematik okumayı gerçek verilerle öğrenin.</ScreenHeading>
             <p className="hero-sub">
               Akciğer grafisi ve toraks BT; {M.libraryItems} konu başlığı, ABCDE okuma rehberi ve görüntü
               üzerinde işaretleme; {embedded ? 'ölçme ve değerlendirme' : 'SCORM uyumlu ölçme ve değerlendirme'}.
