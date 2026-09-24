@@ -227,6 +227,25 @@ export { TutorialScreen, createNoopTutorialAudio } from "./screens/TutorialScree
 export type { TutorialAudio, TutorialScreenProps } from "./screens/TutorialScreen";
 export { LearnAudioProvider, LearnScreen, createNoopLearnAudio, createNoopLearnScreenEnv } from "./screens/LearnScreen";
 export type { LearnAudio, LearnScreenEnv, LearnScreenProps } from "./screens/LearnScreen";
+export { SimulationScreen, createNoopSimulationAudio } from "./screens/SimulationScreen";
+export type { SimulationAudio, SimulationScreenProps } from "./screens/SimulationScreen";
+export {
+  applyPrimaryAction,
+  armTimer,
+  bindDismissListeners,
+  createNoopSimulationScreenEnv,
+  rememberQuestionShown,
+  reportSessionCompletion,
+  warmCaseSounds,
+} from "./screens/simulation/runtime";
+export type {
+  SimulationBus,
+  SimulationClock,
+  SimulationGamiPort,
+  SimulationListenerEnv,
+  SimulationPointerEvent,
+  SimulationScreenEnv,
+} from "./screens/simulation/runtime";
 export {
   CASE_FLASH_MS,
   CASE_TRANSITION_MS,
