@@ -1,4 +1,4 @@
-/** EGEMED CLIX — dönem puanı, sıralama, ödül uygunluğu.
+/** EGEMED — dönem puanı, sıralama, ödül uygunluğu.
  *  Salt okunur kaynak: egemed-opaca/src/gamification/ranking.ts.
  *  Saf fonksiyonlar; davranış birebir. Kurallar parametre (`rules`), ödül yapılandırması veri
  *  olarak dışarıdan gelir. Bu dosya `now` almaz — çağıran taraf dönem penceresine göre önceden

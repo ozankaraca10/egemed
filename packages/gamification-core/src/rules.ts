@@ -1,4 +1,4 @@
-/** EGEMED CLIX — oyunlaştırma çekirdeği sayısal kuralları (TEK kaynak).
+/** EGEMED — oyunlaştırma çekirdeği sayısal kuralları (TEK kaynak).
  *  Salt okunur kaynak: egemed-opaca/src/gamification/rules.ts.
  *  Modüller sabit import etmez; kurallar parametre olarak geçirilir (`practiceXp(attempt, rules)` vb.).
  *  Sim başına farklı hedef = farklı `GamiRules` nesnesi. `DEFAULT_RULES` Opaca değerleridir.

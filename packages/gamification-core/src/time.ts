@@ -1,4 +1,4 @@
-/** EGEMED CLIX — oyunlaştırma TR takvimi (Europe/Istanbul, 2016'dan beri sabit UTC+3, DST yok).
+/** EGEMED — oyunlaştırma TR takvimi (Europe/Istanbul, 2016'dan beri sabit UTC+3, DST yok).
  *  Salt okunur kaynak: egemed-opaca/src/gamification/time.ts.
  *  Kurallar saf fonksiyondur, zaman parametre (`now: Date`) olarak verilir;
  *  bu dosya içinde Date.now()/`new Date()` ÇAĞRILMAZ (yalnız verilen `now`'dan türetim yapılır). */

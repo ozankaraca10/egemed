@@ -1,4 +1,4 @@
-/** EGEMED CLIX — aylık ödül seçimi ve kazanan geçmişi (saf fonksiyonlar).
+/** EGEMED — aylık ödül seçimi ve kazanan geçmişi (saf fonksiyonlar).
  *  Salt okunur kaynak: egemed-opaca/src/gamification/rewards.ts.
  *  Ödül yapılandırması ve kazanan VERİSİ Opaca'ya özgüdür → sim paketinde; burada yalnız
  *  seçim/okuma mantığı vardır. `now` her zaman parametredir. */

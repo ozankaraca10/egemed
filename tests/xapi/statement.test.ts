@@ -10,7 +10,7 @@ import {
 } from "../../packages/xapi-profile/src/statement";
 
 const NOW_ISO = "2026-09-23T11:05:00Z";
-const BASE = "https://xapi.egemed.example/clix/";
+const BASE = "https://egemed.ege.edu.tr/xapi/";
 const VERB_KEYS: readonly VerbKey[] = [
   "initialized",
   "experienced",

@@ -1,6 +1,7 @@
-# EGEMED CLIX geliştirme altyapısı: Postgres + SQL LRS (yetanalytics/lrsql).
-# ADR-004: CLIX ifade saklamaz; geliştirme LRS'si CLIX Postgres'inden ayrıdır,
-# bu yüzden iki servis arasında bağımlılık kurulmaz ve LRS Postgres'e bağlanmaz.
+# EGEMED platformu geliştirme altyapısı: Postgres + SQL LRS (yetanalytics/lrsql).
+# ADR-004: EGEMED platformu ifade saklamaz; geliştirme LRS'si platformun
+# Postgres'inden ayrıdır, bu yüzden iki servis arasında bağımlılık kurulmaz ve
+# LRS Postgres'e bağlanmaz.
 # Sırlar yalnız .env.local'den gelir; repoda değer yoktur. Volume tanımlanmaz:
 # geliştirme verisi geçicidir (kalıcı veri istenirse ayrı onaylı görev).
 # Kullanım: pnpm infra:up / pnpm infra:down (bkz. infra/README.md).

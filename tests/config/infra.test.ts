@@ -155,7 +155,7 @@ describe("geliştirme compose'u", () => {
     }
   });
 
-  it("LRS'yi CLIX Postgres'ine bağlamaz", () => {
+  it("LRS'yi EGEMED platformu Postgres'ine bağlamaz", () => {
     const lrs = serviceBlock(body, "lrs");
     expect(lrs).not.toContain("LRSQL_DB_");
     expect(lrs).not.toContain("depends_on:");

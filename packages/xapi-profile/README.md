@@ -36,8 +36,8 @@ işidir). Simülatör-bağımsızdır; `sims/*` içe aktarılmaz.
 | `assessment` | değerlendirme |
 
 Extension anahtarları mutlak IRI'dir ve `PROFILE_IRI`
-(`https://xapi.egemed.example/clix/v0`, yer tutucu — insan kararı) altındadır;
-kurum LRS tabanı değildir.
+(`https://egemed.ege.edu.tr/xapi/v0`, yer tutucu — K2 insan onayı bekler)
+altındadır; kurum LRS tabanı değildir.
 
 ## Activity IRI kuralı
 

@@ -1,4 +1,4 @@
-/** EGEMED CLIX — haftalık 3 sistem hedefi, Pazartesi 00:00 TR'de sıfırlanır.
+/** EGEMED — haftalık 3 sistem hedefi, Pazartesi 00:00 TR'de sıfırlanır.
  *  Salt okunur kaynak: egemed-opaca/src/gamification/goals.ts.
  *  Saf fonksiyon; zaman parametre (`now`), kurallar parametre (`rules`). */
 
