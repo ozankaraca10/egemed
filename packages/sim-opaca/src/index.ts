@@ -33,6 +33,18 @@ export {
 } from "./core/geometry";
 export type { Point } from "./core/geometry";
 export { IMAGES, datasetCounts, examplesFor, expertPositive, getImage, isExpertSource } from "./core/images";
+export { createMemoryRuntimeAdapter, createNoopRuntimeAdapter, createSimRuntime } from "./core/runtime";
+export type {
+  FinishReport,
+  InteractionRecord,
+  MemoryRuntimeAdapter,
+  RuntimeAdapter,
+  RuntimeCall,
+  RuntimeOptions,
+  ScoreReport,
+  SimRuntime,
+  SuspendWrite,
+} from "./core/runtime";
 export { HINT_PENALTY_PRACTICE, MASTERY_THRESHOLD, aggregateResults, practiceAdjusted, scoreCase } from "./core/scoring";
 export {
   IMAGE_DEPENDENT_QUESTION_TYPES,
