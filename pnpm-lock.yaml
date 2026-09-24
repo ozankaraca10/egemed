@@ -80,6 +80,9 @@ importers:
       '@egemed/contracts':
         specifier: workspace:*
         version: link:../../packages/contracts
+      '@egemed/gami-catalogs':
+        specifier: workspace:*
+        version: link:../../packages/gami-catalogs
       '@egemed/sim-ausculta':
         specifier: workspace:*
         version: link:../../packages/sim-ausculta

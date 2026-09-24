@@ -180,10 +180,15 @@ test.describe("API oturumu (dev sağlayıcı)", () => {
     );
     await page.goto("/#/");
     const payload = (await (await summary).json()) as {
-      data?: { sims?: readonly { simId?: string; xp?: number }[] };
+      data?: { sims?: readonly { simId?: string; xp?: number; badges?: readonly { key?: string }[] }[] };
     };
-    const pulseXp = payload.data?.sims?.find((sim) => sim.simId === "pulse")?.xp ?? 0;
+    const pulse = payload.data?.sims?.find((sim) => sim.simId === "pulse");
+    const pulseXp = pulse?.xp ?? 0;
     expect(pulseXp).toBeGreaterThan(0);
+    // ADR-008: 10/10 sınav → 10'luk ritim serisi; rozetler sunucuda kodlu özetten verilir.
+    const badgeKeys = (pulse?.badges ?? []).map((badge) => badge.key);
+    expect(badgeKeys).toContain("rhythm-streak-3");
+    expect(badgeKeys).toContain("rhythm-streak-10");
     await expect(page.getByRole("heading", { name: "İlerlemem" })).toBeVisible();
     await expect(page.locator(".eg-shell-progress__num").first()).toHaveText(String(pulseXp));
   });

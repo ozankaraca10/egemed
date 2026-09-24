@@ -6,6 +6,7 @@
  */
 
 import { createApiClient, createApiGamiRepository, type ApiClient } from "@egemed/api-client";
+import { PULSE_MODES, encodePulseSummary, type PulseSummaryInput } from "@egemed/gami-catalogs";
 import type { SimId } from "@egemed/contracts";
 import { browserApiWindow, csrfTokenFromCookie } from "./apiAuth";
 
@@ -64,9 +65,34 @@ export function codedAttemptSummary(attempt: Pick<ReportedAttempt, "score" | "ca
   return { score, correct, total };
 }
 
+function isPulseExtra(extra: unknown): extra is PulseSummaryInput["extra"] {
+  if (typeof extra !== "object" || extra === null) return false;
+  const value = extra as Record<string, unknown>;
+  return (
+    typeof value["ecgMode"] === "string" &&
+    (PULSE_MODES as readonly string[]).includes(value["ecgMode"]) &&
+    typeof value["modeMastered"] === "boolean" &&
+    typeof value["correctlyReadLeads"] === "number" &&
+    (value["caliperAccurate"] === null || typeof value["caliperAccurate"] === "boolean") &&
+    typeof value["rhythmRecognitionStreak"] === "number"
+  );
+}
+
+/**
+ * ADR-008: sunucu rozetleri sime özgü kodlu özetten değerlendirir. Kodlayıcısı
+ * olmayan sim yalnız genel özeti gönderir (rozeti S2 ile gelir).
+ */
+export function simSummaryCodes(simId: SimId, attempt: Pick<ReportedAttempt, "score" | "extra">): Record<string, number> {
+  if (simId === "pulse" && isPulseExtra(attempt.extra)) {
+    return encodePulseSummary({ extra: attempt.extra, score: attempt.score });
+  }
+  return {};
+}
+
 export async function reportSimAttempt(client: Pick<ApiClient, "gamification">, simId: SimId, attempt: ReportedAttempt): Promise<void> {
   const id = await deterministicAttemptUuid(`${simId}:${attempt.id}`);
-  const summary = codedAttemptSummary(attempt);
+  const generic = codedAttemptSummary(attempt);
+  const summary = { ...generic, ...simSummaryCodes(simId, attempt) };
   const repo = createApiGamiRepository({
     client: client.gamification,
     simId,
@@ -75,7 +101,7 @@ export async function reportSimAttempt(client: Pick<ApiClient, "gamification">, 
       attemptNo: input.attemptNo,
       startedAt: input.startedAt,
       finishedAt: offsetIso(input.attempt.finishedAt),
-      score: summary.score,
+      score: generic.score,
       maxScore: 100,
       passed: input.attempt.mastery,
       summary,
