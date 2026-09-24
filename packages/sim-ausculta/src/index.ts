@@ -46,6 +46,22 @@ export {
 export type { CaseSoundsResolution, LibrarySoundResult } from "./core/resolver";
 export { computeMetrics } from "./data/metrics";
 export type { InventoryMetrics } from "./data/metrics";
+export { ALL_CASES, AUTO_CASES, CORE_CASES, poolFor } from "./data/pool";
+export { mulberry32, sampleSession, SESSION_SIZE, shuffledOptions, stringSeed } from "./core/session";
+export {
+  heartFindingText,
+  heartLabel,
+  heartLibrarySub,
+  libraryShortTitle,
+  librarySub,
+  libraryTitle,
+  lungFindingText,
+  lungLabel,
+  lungLibrarySub,
+  MIXED_TITLES,
+  TERMINOLOGY,
+} from "./data/terminology";
+export type { HeartFindingKey, LungFindingKey } from "./data/terminology";
 export type {
   AuscultationPoint,
   CaseDef,

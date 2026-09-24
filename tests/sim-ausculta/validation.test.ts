@@ -1,55 +1,16 @@
+import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import { filterAssessmentPool, validateCase } from "../../packages/sim-ausculta/src/index";
-import type { CaseDef, Question } from "../../packages/sim-ausculta/src/index";
+import { CORE_CASES, filterAssessmentPool, validateCase } from "../../packages/sim-ausculta/src/index";
+import type { CaseDef } from "../../packages/sim-ausculta/src/index";
 
-/** Kaynak tests/core.test.ts:317-366 (5 test → 5 test).
- *  Vaka JSON bu dilimde yok; sentetik fixture. S3a sonrası tam veri. */
+/** Kaynak tests/core.test.ts:317-366 (5 test → 5 test). Tam çekirdek havuz: cases.json. */
 
-const pointIds = ["cardiac_aortic", "cardiac_mitral"];
-const soundKeys = new Set(["heart.normal"]);
-
-const question: Question = {
-  id: "q1",
-  type: "single_choice",
-  domain: "recognition",
-  prompt: "?",
-  options: [
-    { id: "a", label: "A" },
-    { id: "b", label: "B" },
-  ],
-  correct: ["a"],
-  feedbackCorrect: "",
-  feedbackIncorrect: "",
-};
-
-const baseCase: CaseDef = {
-  id: "case_synthetic",
-  title: "Sentetik vaka",
-  modes: ["practice", "assessment"],
-  patient: { age: 40, sex: "kadın" },
-  chiefComplaint: "",
-  history: "",
-  vitalSigns: {},
-  objectives: [],
-  tasks: [],
-  views: ["front"],
-  allowedHeads: ["diaphragm"],
-  soundAssignments: [{ pointId: "cardiac_aortic", category: "heart", acousticFinding: "normal" }],
-  primaryAcousticFinding: "normal",
-  clinicalDiagnosis: null,
-  mappingValidation: "validated",
-  technique: {
-    requiredPoints: ["cardiac_aortic"],
-    minPointsVisited: 1,
-    minDwellMs: 1500,
-    minListenMsPerPoint: 2000,
-  },
-  questions: [question],
-  feedback: { summary: "" },
-  references: [],
-};
-
-const cases: CaseDef[] = [baseCase];
+const DATA = "packages/sim-ausculta/src/data";
+const pointIds = (JSON.parse(readFileSync(`${DATA}/auscultation-points.json`, "utf8")) as { points: { id: string }[] }).points.map(
+  (p) => p.id,
+);
+const soundKeys = new Set<string>();
+const cases: CaseDef[] = CORE_CASES;
 
 /* ---------------- vaka şeması (§19, §36) ---------------- */
 describe("vaka şeması doğrulaması", () => {
@@ -62,14 +23,14 @@ describe("vaka şeması doğrulaması", () => {
 
   it("bilinmeyen oskültasyon noktası hatadır", () => {
     const c = cases[0];
-    if (!c) throw new Error("sentetik vaka yok");
+    if (!c) throw new Error("vaka yok");
     const bad = { ...c, technique: { ...c.technique, requiredPoints: ["yok_olmayan_nokta"] } };
     expect(validateCase(bad, pointIds, soundKeys).some((i) => i.message.includes("yok_olmayan_nokta"))).toBe(true);
   });
 
   it("doğrulanmamış eşleme + tanı sorusu → değerlendirmeye giremez (§6, §19)", () => {
     const c = cases[0];
-    if (!c) throw new Error("sentetik vaka yok");
+    if (!c) throw new Error("vaka yok");
     const withDiag: CaseDef = {
       ...c,
       clinicalDiagnosis: null,
@@ -93,9 +54,9 @@ describe("vaka şeması doğrulaması", () => {
 
   it("soru doğru yanıtı seçenekler arasında olmalıdır", () => {
     const c = cases[0];
-    if (!c) throw new Error("sentetik vaka yok");
+    if (!c) throw new Error("vaka yok");
     const first = c.questions[0];
-    if (!first) throw new Error("sentetik soru yok");
+    if (!first) throw new Error("soru yok");
     const bad: CaseDef = {
       ...c,
       questions: [{ ...first, correct: ["yok"] }],
@@ -105,7 +66,7 @@ describe("vaka şeması doğrulaması", () => {
 
   it("filtre havuzu hatalı vakayı dışlar (§19)", () => {
     const c = cases[0];
-    if (!c) throw new Error("sentetik vaka yok");
+    if (!c) throw new Error("vaka yok");
     const broken: CaseDef = { ...c, id: "broken_case", questions: [] };
     const pool = filterAssessmentPool(
       [c, broken],
