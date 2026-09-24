@@ -1,5 +1,6 @@
 import { createApp } from "../../apps/api/src/app";
 import { createMemoryAdminBulkRepo } from "../../apps/api/src/admin/bulk";
+import { createMemoryAdminOverviewRepo } from "../../apps/api/src/admin/extras";
 import {
   createMemoryAdminImportRepo,
   type MemoryAdminImportStore,
@@ -53,6 +54,8 @@ export interface HarnessUser {
   readonly status: UserStatus;
   readonly roles: readonly Role[];
   readonly simAccess: readonly SimId[];
+  /** T58 — `/admin/overview` son 7 gün penceresi için sabit son giriş anı. */
+  readonly lastLoginAt?: number | null;
 }
 
 export function user(overrides: Partial<HarnessUser> & { readonly id: string }): HarnessUser {
@@ -66,6 +69,7 @@ export function user(overrides: Partial<HarnessUser> & { readonly id: string }):
     status: "active",
     roles: ["kullanici"],
     simAccess: [],
+    lastLoginAt: null,
     ...overrides,
   };
 }
@@ -163,7 +167,7 @@ function toAdminSeed(seed: HarnessUser): MemoryAdminUserSeed {
     roles: seed.roles,
     simAccess: seed.simAccess,
     createdAt: SEED_CREATED_AT,
-    lastLoginAt: null,
+    lastLoginAt: seed.lastLoginAt ?? null,
   };
 }
 
@@ -180,6 +184,8 @@ export function createAdminHarness(
     readonly users?: readonly HarnessUser[];
     /** T67 — `/me/gamification` testleri için sentetik oyunlaştırma tohumu. */
     readonly gamification?: MemoryGamificationSeed;
+    /** T58 — `/admin/health` için havuz yoklaması; varsayılan her zaman sağlıklıdır. */
+    readonly db?: { query(text: string, params: readonly unknown[]): Promise<unknown> };
   } = {},
 ) {
   const users = options.users ?? DEFAULT_USERS;
@@ -206,10 +212,11 @@ export function createAdminHarness(
   };
   const importStore: MemoryAdminImportStore = createMemoryAdminImportRepo(adminStore, newId);
   const app = createApp({
-    db: fakeDb(),
+    db: options.db ?? fakeDb(),
     now: () => clock,
     auth,
     gamification: gamificationStore.repo,
+    overview: createMemoryAdminOverviewRepo(adminStore, importStore),
     admin: {
       auth,
       users: adminStore.users,

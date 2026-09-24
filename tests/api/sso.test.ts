@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { createApp } from "../../apps/api/src/app";
 import { createMemoryAdminBulkRepo } from "../../apps/api/src/admin/bulk";
+import { createMemoryAdminOverviewRepo } from "../../apps/api/src/admin/extras";
 import { createMemoryAdminImportRepo } from "../../apps/api/src/admin/imports";
 import { createMemoryAdminRoleRepo } from "../../apps/api/src/admin/roles";
 import { createMemoryAdminStore, type AdminDeps } from "../../apps/api/src/admin/users";
@@ -116,16 +117,18 @@ function createHarness(options: HarnessOptions = {}) {
   };
   const adminStore = createMemoryAdminStore();
   const newId = () => "00000000-0000-4000-8000-0000000000ff";
+  const importStore = createMemoryAdminImportRepo(adminStore, newId);
   const admin: AdminDeps = {
     auth,
     users: adminStore.users,
     bulk: createMemoryAdminBulkRepo(adminStore),
     roles: createMemoryAdminRoleRepo(adminStore),
-    imports: createMemoryAdminImportRepo(adminStore, newId).repo,
+    imports: importStore.repo,
     newId,
   };
   const gamification = createMemoryGamificationRepo().repo;
-  const app = createApp({ db: fakeDb(), now: () => clock, auth, gamification, admin });
+  const overview = createMemoryAdminOverviewRepo(adminStore, importStore);
+  const app = createApp({ db: fakeDb(), now: () => clock, auth, gamification, overview, admin });
   return {
     app,
     store,

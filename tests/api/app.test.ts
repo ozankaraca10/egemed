@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { errorResponseSchema } from "../../packages/contracts/src/index";
 import { createApp } from "../../apps/api/src/app";
 import { createMemoryAdminBulkRepo } from "../../apps/api/src/admin/bulk";
+import { createMemoryAdminOverviewRepo } from "../../apps/api/src/admin/extras";
 import { createMemoryAdminImportRepo } from "../../apps/api/src/admin/imports";
 import { createMemoryAdminRoleRepo } from "../../apps/api/src/admin/roles";
 import { createMemoryAdminStore, type AdminDeps } from "../../apps/api/src/admin/users";
@@ -67,16 +68,21 @@ function createTestApp(db = createFakeDb()) {
   const auth = createTestAuth();
   const store = createMemoryAdminStore();
   const newId = () => "00000000-0000-4000-8000-0000000000ff";
+  const importStore = createMemoryAdminImportRepo(store, newId);
   const admin: AdminDeps = {
     auth,
     users: store.users,
     bulk: createMemoryAdminBulkRepo(store),
     roles: createMemoryAdminRoleRepo(store),
-    imports: createMemoryAdminImportRepo(store, newId).repo,
+    imports: importStore.repo,
     newId,
   };
   const gamification = createMemoryGamificationRepo().repo;
-  return { app: createApp({ db, now: () => FIXED_NOW, auth, gamification, admin }), db };
+  const overview = createMemoryAdminOverviewRepo(store, importStore);
+  return {
+    app: createApp({ db, now: () => FIXED_NOW, auth, gamification, overview, admin }),
+    db,
+  };
 }
 
 describe("request_id ara katmanı", () => {

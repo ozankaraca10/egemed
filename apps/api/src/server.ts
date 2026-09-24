@@ -3,6 +3,7 @@ import { randomUUID } from "node:crypto";
 import process from "node:process";
 import { createApp } from "./app.ts";
 import { createPgAdminBulkRepo } from "./admin/bulk.ts";
+import { createPgAdminOverviewRepo } from "./admin/extras.ts";
 import { createPgAdminImportRepo } from "./admin/imports.ts";
 import { createPgAdminRoleRepo } from "./admin/roles.ts";
 import { createPgAdminUsersRepo } from "./admin/users.ts";
@@ -47,6 +48,7 @@ const app = createApp({
   now: serverNow,
   auth,
   gamification: createPgGamificationRepo(db),
+  overview: createPgAdminOverviewRepo(db),
   admin: {
     auth,
     users: createPgAdminUsersRepo(db),
