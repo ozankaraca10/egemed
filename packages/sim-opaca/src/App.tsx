@@ -2,6 +2,9 @@ import { type JSX } from "react";
 import { useStore } from "./core/StoreProvider";
 import type { Screen } from "./core/types";
 import { DevPanel } from "./DevPanel";
+import { createLearnGamiPort, createSimulationGamiPort } from "./gamification/bindings";
+import { AchievementsScreen } from "./screens/AchievementsScreen";
+import { LeaderboardScreen } from "./screens/LeaderboardScreen";
 import { LearnScreen } from "./screens/LearnScreen";
 import { ModeSelectScreen } from "./screens/ModeSelectScreen";
 import { ResultsScreen } from "./screens/ResultsScreen";
@@ -26,7 +29,6 @@ import { createNoopStartScreenEnv } from "./screens/StartScreen";
 import { createNoopSimulationPopoverEnv } from "./screens/SimulationScreen";
 
 export interface AppProps {
-  /** Platform kabuğu modu; varsayılan gömülü (çift üst bar/footer oluşmaz, §7.3). */
   readonly embedded?: boolean;
   readonly chromeEnv?: ChromeEnv;
   readonly modalEnv?: ModalEnv;
@@ -35,20 +37,14 @@ export interface AppProps {
   readonly popoverEnv?: SimulationPopoverEnv;
   readonly resultsEnv?: ResultsScreenEnv;
   readonly timing?: WindowLike;
-  /** Oyunlaştırma bayrağı (§7.7); varsayılan kapalı. */
   readonly gamiEnabled?: boolean;
-  /** Geliştirici paneli; yalnız dev build + `?dev=1` için true verilir. */
   readonly showDevPanel?: boolean;
+  readonly devBuild?: boolean;
 }
 
 function PendingScreen({ screen, embedded }: { screen: Screen; embedded: boolean }): JSX.Element {
   const { dispatch } = useStore();
-  const label =
-    screen === "sources"
-      ? "Kaynaklar ekranı yükleniyor."
-      : screen === "achievements"
-        ? "Başarılar ekranı yükleniyor."
-        : "Sıralama ekranı yükleniyor.";
+  const label = screen === "sources" ? "Kaynaklar ekranı yükleniyor." : "Ekran yükleniyor.";
   return (
     <>
       <EcgDeco embedded={embedded} />
@@ -72,6 +68,7 @@ function ScreenBody({
   modalEnv,
   timing,
   gamiEnabled,
+  devBuild,
 }: {
   embedded: boolean;
   startEnv: StartScreenEnv;
@@ -81,19 +78,31 @@ function ScreenBody({
   modalEnv: ModalEnv;
   timing?: WindowLike;
   gamiEnabled: boolean;
+  devBuild: boolean;
 }): JSX.Element | null {
   const { state } = useStore();
+  const learnGami = gamiEnabled ? createLearnGamiPort() : undefined;
+  const simGami = gamiEnabled ? createSimulationGamiPort() : undefined;
   switch (state.screen) {
     case "start":
-      return timing
-        ? <StartScreen embedded={embedded} env={startEnv} modalEnv={modalEnv} timing={timing} />
-        : <StartScreen embedded={embedded} env={startEnv} modalEnv={modalEnv} />;
+      return timing ? (
+        <StartScreen embedded={embedded} env={startEnv} modalEnv={modalEnv} timing={timing} />
+      ) : (
+        <StartScreen embedded={embedded} env={startEnv} modalEnv={modalEnv} />
+      );
     case "modes":
       return <ModeSelectScreen embedded={embedded} gamiEnabled={gamiEnabled} />;
     case "tutorial":
       return <TutorialScreen embedded={embedded} />;
     case "learn":
-      return <LearnScreen embedded={embedded} env={learnEnv} gamiEnabled={gamiEnabled} />;
+      return (
+        <LearnScreen
+          embedded={embedded}
+          env={learnEnv}
+          gamiEnabled={gamiEnabled}
+          {...(learnGami ? { gami: learnGami } : {})}
+        />
+      );
     case "simulation":
       return (
         <SimulationScreen
@@ -101,20 +110,32 @@ function ScreenBody({
           popoverEnv={popoverEnv}
           modalEnv={modalEnv}
           gamiEnabled={gamiEnabled}
+          {...(simGami ? { gami: simGami } : {})}
         />
       );
     case "results":
-      return <ResultsScreen embedded={embedded} env={resultsEnv} gamiEnabled={gamiEnabled} />;
-    case "sources":
+      return (
+        <ResultsScreen embedded={embedded} env={resultsEnv} gamiEnabled={gamiEnabled} devBuild={devBuild} />
+      );
     case "achievements":
+      return gamiEnabled ? (
+        <AchievementsScreen embedded={embedded} devBuild={devBuild} modalEnv={modalEnv} />
+      ) : (
+        <PendingScreen screen="achievements" embedded={embedded} />
+      );
     case "leaderboard":
-      return <PendingScreen screen={state.screen} embedded={embedded} />;
+      return gamiEnabled ? (
+        <LeaderboardScreen embedded={embedded} devBuild={devBuild} modalEnv={modalEnv} />
+      ) : (
+        <PendingScreen screen="leaderboard" embedded={embedded} />
+      );
+    case "sources":
+      return <PendingScreen screen="sources" embedded={embedded} />;
     default:
       return null;
   }
 }
 
-/** Opaca kök uygulama: ekran anahtarı, gömülü kabuk modu ve isteğe bağlı DevPanel (E2 §8 S19). */
 export function App({
   embedded = true,
   chromeEnv = createNoopChromeEnv(),
@@ -124,17 +145,13 @@ export function App({
   popoverEnv = createNoopSimulationPopoverEnv(),
   resultsEnv = createNoopResultsScreenEnv(),
   timing,
-  gamiEnabled = false,
+  gamiEnabled = true,
   showDevPanel = false,
+  devBuild = false,
 }: AppProps): JSX.Element {
   return (
     <div className="eg-sim-opaca app-shell">
-      <Header
-        embedded={embedded}
-        env={chromeEnv}
-        modals={{ help: HelpModal, confirm: ConfirmModal }}
-        gamiEnabled={gamiEnabled}
-      />
+      <Header embedded={embedded} env={chromeEnv} modals={{ help: HelpModal, confirm: ConfirmModal }} gamiEnabled={gamiEnabled} />
       <main className="app-content">
         {timing ? (
           <ScreenBody
@@ -146,6 +163,7 @@ export function App({
             modalEnv={modalEnv}
             timing={timing}
             gamiEnabled={gamiEnabled}
+            devBuild={devBuild}
           />
         ) : (
           <ScreenBody
@@ -156,6 +174,7 @@ export function App({
             resultsEnv={resultsEnv}
             modalEnv={modalEnv}
             gamiEnabled={gamiEnabled}
+            devBuild={devBuild}
           />
         )}
       </main>
