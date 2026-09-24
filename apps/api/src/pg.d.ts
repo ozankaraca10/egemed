@@ -23,6 +23,8 @@ declare module "pg" {
     constructor(config?: PoolConfig);
     query(text: string, values?: readonly unknown[]): Promise<QueryResult>;
     connect(): Promise<PoolClient>;
+    /** T68 — tohum CLI'ı iş bitince havuzu kapatır. */
+    end(): Promise<void>;
   }
 
   const pg: { readonly Pool: typeof Pool };
