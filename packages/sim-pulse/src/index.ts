@@ -2,6 +2,9 @@ import "@egemed/tokens/family-tokens.css";
 import "./styles/tokens.css";
 import "./styles/base.css";
 import "./styles/sim.css";
+import "./styles/explain.css";
+import "./styles/case.css";
+import "./styles/responsive.css";
 
 import type { SimulatorId } from "@egemed/sim-host";
 
