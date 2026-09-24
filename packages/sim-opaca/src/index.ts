@@ -64,6 +64,8 @@ export { TUTORIAL_STEPS, TutorialSteps } from "./ui/TutorialSteps";
 export { ZoneChips } from "./ui/ZoneChips";
 export type { ZoneChipsProps } from "./ui/ZoneChips";
 export { FilmCornerBadge, FilmInfoPanel, sideMarkerFor, syntheticDateFor } from "./ui/FilmInfoPanel";
+export { FilmViewer, createNoopFilmEnv } from "./ui/FilmViewer";
+export type { FilmEnv, FilmStageRoot, FilmViewerHandle, FilmViewerProps } from "./ui/FilmViewer";
 export {
   MARK_KEY_STEP,
   MAX_SCALE,
