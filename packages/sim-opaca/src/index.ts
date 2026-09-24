@@ -2,6 +2,25 @@ import type { SimulatorId } from "@egemed/sim-host";
 
 export const SIM_ID = "opaca" satisfies SimulatorId;
 
+export { App } from "./App";
+export type { AppProps } from "./App";
+export { DevPanel } from "./DevPanel";
+export { createOpacaModule, opacaModule } from "./SimModule";
+export { opacaModule as default } from "./SimModule";
+export type { OpacaContainer, OpacaModuleDeps, OpacaRoot } from "./SimModule";
+export {
+  createBrowserChromeEnv,
+  createBrowserLearnScreenEnv,
+  createBrowserModalEnv,
+  createBrowserOpacaBindings,
+  createBrowserResultsScreenEnv,
+  createBrowserSimulationPopoverEnv,
+  createBrowserStartScreenEnv,
+  createBrowserWindowLike,
+  createLocalStoragePort,
+} from "./platform-deps";
+export type { BrowserOpacaBindings } from "./platform-deps";
+
 export { isAnswerCorrect } from "./core/answers";
 export { LOG_LIMIT, LOG_TRIM, createBus } from "./core/events";
 export type { EventBus, SimEventDraft } from "./core/events";
@@ -34,7 +53,18 @@ export {
   zonesAt,
 } from "./core/geometry";
 export type { Point } from "./core/geometry";
-export { IMAGES, datasetCounts, examplesFor, expertPositive, getImage, isExpertSource } from "./core/images";
+export {
+  DEFAULT_ASSET_BASE,
+  IMAGES,
+  datasetCounts,
+  examplesFor,
+  expertPositive,
+  getImage,
+  isExpertSource,
+  resolveAssetUrl,
+  resetAssetBase,
+  setAssetBase,
+} from "./core/images";
 export {
   BEST_SCORE_KEY,
   FS_PROMPT_KEY,

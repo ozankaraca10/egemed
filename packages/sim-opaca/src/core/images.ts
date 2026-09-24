@@ -8,6 +8,30 @@ const manifest = imagesData as unknown as ImagesManifest;
 export const IMAGES: ImageRecord[] = manifest.records ?? [];
 const byId = new Map(IMAGES.map((r) => [r.id, r]));
 
+/** Platform varlık taban yolu (S19 SimHost bağlamı; varsayılan kabuk rotası). */
+export const DEFAULT_ASSET_BASE = "/sims/opaca/";
+
+let assetBase = DEFAULT_ASSET_BASE;
+
+/** Mount başına varlık taban yolunu ayarlar; önceki değeri döndürür (dispose'ta geri alınır). */
+export function setAssetBase(base: string): string {
+  const previous = assetBase;
+  assetBase = base.endsWith("/") ? base : `${base}/`;
+  return previous;
+}
+
+export function resetAssetBase(base: string): void {
+  assetBase = base;
+}
+
+/** Göreli veya mutlak `/assets` yollarını platform taban yoluna çözümler. */
+export function resolveAssetUrl(path: string | null | undefined): string | undefined {
+  if (!path) return undefined;
+  if (/^https?:\/\//i.test(path)) return path;
+  const normalized = path.startsWith("/") ? path.slice(1) : path;
+  return `${assetBase}${normalized}`;
+}
+
 export function getImage(id: string | null | undefined): ImageRecord | undefined {
   return id ? byId.get(id) : undefined;
 }
