@@ -1,5 +1,6 @@
 import { useEffect, useState, type ComponentType, type JSX, type ReactNode } from 'react'
 import { useStore } from '../core/StoreProvider'
+import { assetUrl } from '../core/images'
 import { IconFullscreen, IconFullscreenExit, IconHelpCircle, IconInfo, IconSwap, IconTrophy } from './icons'
 
 /** Opaca kabuğu — üst bar, footer, arka plan (kaynak `ui/chrome.tsx` portu; E2 §7.3/§8 S8).
@@ -16,8 +17,7 @@ import { IconFullscreen, IconFullscreenExit, IconHelpCircle, IconInfo, IconSwap,
  *    modalleri bağlar).
  *  - Oyunlaştırma çipi §7.7 gereği bayrak kapalıyken çizilmez; bayrak `gamiEnabled` prop'udur
  *    (G4'te `gamification/flag` portu gelince bağlanır).
- *  - Marka görselleri kaynaktaki göreli yollardan (`brand/...`) yüklenir; platform taban yolu
- *    S19'da bağlanır. */
+ *  - Marka görselleri `assetUrl` ile platform taban yoluna (`assetBase`, S19) çözümlenir. */
 
 /** A1 "F" kısayolunun kullandığı klavye olayı yüzeyi (kaynak: `KeyboardEvent`). */
 export interface ChromeKeyEvent {
@@ -102,7 +102,7 @@ export interface HeaderProps {
 }
 
 export function BrandMark({ size = 30 }: { size?: number }) {
-  return <img src="brand/logo-icon-white-web.png" alt="" width={size} height={size} className="brand-mark" />
+  return <img src={assetUrl('brand/logo-icon-white-web.png')} alt="" width={size} height={size} className="brand-mark" />
 }
 
 export function Header({ embedded = false, env = NOOP_CHROME_ENV, modals, gamiEnabled = false }: HeaderProps): JSX.Element {
@@ -300,7 +300,7 @@ export function Footer({ embedded = false }: FooterProps): ReactNode {
   return (
     <footer className="eg-footer">
       <div className="footer-left">
-        <img src="brand/logo-icon-web.png" alt="" className="footer-seal" />
+        <img src={assetUrl('brand/logo-icon-web.png')} alt="" className="footer-seal" />
         <span className="footer-text">
           <span className="footer-brand">EGEMED Opaca<sup className="tm">™</sup></span>
           <span className="footer-sub"> Radyolojik Görüntüleme Simülatörü</span>

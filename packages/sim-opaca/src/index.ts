@@ -67,6 +67,7 @@ export {
   expertPositive,
   getImage,
   isExpertSource,
+  assetUrl,
   resolveAssetUrl,
   resetAssetBase,
   setAssetBase,

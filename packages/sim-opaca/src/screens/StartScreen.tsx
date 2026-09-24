@@ -4,6 +4,7 @@ import { loadFsPromptDone, saveFsPromptDone } from '../core/reducer'
 import type { WindowLike } from '../core/lifecycle'
 import { computeMetrics } from '../data/metrics'
 import sourcesData from '../data/sources.json'
+import { assetUrl } from '../core/images'
 import { Footer } from '../ui/chrome'
 import { ConfirmModal } from '../ui/ConfirmModal'
 import { IconArrowRight, IconInfo } from '../ui/icons'
@@ -123,11 +124,11 @@ export function StartScreen({
       <div className="start-hero">
         <div className="start-card">
           <div className="start-card-inner">
-            <img className="hero-logo" src="brand/logo-horizontal-web.png" alt="EGEMED Opaca — Radyolojik Görüntüleme Simülatörü" />
+            <img className="hero-logo" src={assetUrl('brand/logo-horizontal-web.png')} alt="EGEMED Opaca — Radyolojik Görüntüleme Simülatörü" />
             <h1 className="hero-title">Radyolojik görüntüyü sistematik okumayı gerçek verilerle öğrenin.</h1>
             <p className="hero-sub">
               Akciğer grafisi ve toraks BT; {M.libraryItems} konu başlığı, ABCDE okuma rehberi ve görüntü
-              üzerinde işaretleme; SCORM uyumlu ölçme ve değerlendirme.
+              üzerinde işaretleme; {embedded ? 'ölçme ve değerlendirme' : 'SCORM uyumlu ölçme ve değerlendirme'}.
             </p>
             <button className="hero-cta" onClick={begin}>
               Simülatörü başlat <IconArrowRight />
