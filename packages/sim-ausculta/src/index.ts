@@ -132,6 +132,19 @@ export type {
 } from "./ui/PatientStage";
 export { Chestpiece } from "./ui/stethoscope";
 export { TorsoPediatricBack, TorsoPediatricFront } from "./ui/torso-pediatric";
+export {
+  QUESTION_JUMP_SELECTOR,
+  Toolbar,
+  ToolbarAudioProvider,
+  createNoopToolbarEnv,
+  performToolbar,
+  showHintControl,
+} from "./ui/Toolbar";
+export type { ToolbarAudio, ToolbarEnv, ToolbarIntent, ToolbarPorts, ToolbarProps, ToolbarScrollTarget, ToolbarStageRef } from "./ui/Toolbar";
+export { RegionChipList, visibleRegionPoints } from "./ui/RegionChips";
+export type { RegionChipListProps } from "./ui/RegionChips";
+export { FeedbackCard, QuestionCard, nextOptionIndex, toggleOptionValues } from "./ui/Questions";
+export type { FeedbackCardProps, QuestionCardProps } from "./ui/Questions";
 export { AUDIO_CONFIG } from "./audio/config";
 export { createAudioEngine } from "./audio/engine";
 export type { AudioEngine, AudioEngineDeps, EngineState } from "./audio/engine";
