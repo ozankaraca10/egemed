@@ -724,12 +724,9 @@ function detailBody(record: AdminUserRecord) {
   };
 }
 
-/** Audit özeti: yalnız kodlu/özet alanlar; sır, belirteç ve ham veri yoktur. */
+/** Audit özeti: kodlu alanlar. Ad, kullanıcı adı ve e-posta kişisel veridir; yazılmaz. */
 function userSummary(record: AdminUserRecord): Record<string, string> {
   return {
-    displayName: record.displayName,
-    username: record.username ?? "",
-    email: record.email ?? "",
     unitId: record.unitId ?? "",
     status: record.status,
     authMethod: record.authMethod,

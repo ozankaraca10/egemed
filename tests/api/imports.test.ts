@@ -454,12 +454,12 @@ describe("hata raporu CSV'si (E3 §f)", () => {
     const lines = errorsCsv.trimEnd().split("\n");
     expect(lines[0]).toBe("satir_no;kolon;kod;aciklama");
     expect(lines[1]).toBe("1;birim_kodu;unknown_unit;Bilinmeyen birim kodu");
-    // Hücre içindeki ayraç RFC 4180 gereği tırnaklanır.
-    expect(lines[2]).toBe('2;rol;invalid_value;"Geçersiz değer: a;b"');
+    expect(lines[2]).toBe("2;rol;invalid_value;Geçersiz değer");
+    expect(errorsCsv).not.toContain("a;b");
   });
 
   it("formül benzeri hücreleri kaçırır", () => {
-    for (const value of ["=1+1", "+1", "-1", "@toplam", "\tx"]) {
+    for (const value of ["=1+1", "+1", "-1", "@toplam", "\tx", " =1+1"]) {
       expect(escapeCsvCell(value)).toBe(`'${value}`);
     }
     expect(escapeCsvCell('a"b')).toBe('"a""b"');

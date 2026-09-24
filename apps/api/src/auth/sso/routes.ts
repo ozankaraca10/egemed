@@ -1,6 +1,8 @@
 import type { Context, Hono } from "hono";
 import { deleteCookie, getCookie, setCookie } from "hono/cookie";
-import { jsonError, type AppEnv } from "../../http";
+import { z } from "zod";
+import { jsonError, validationDetails, type AppEnv } from "../../http";
+import { createLoginRateLimiter, loginRateKey } from "../rate-limit";
 import type { AuthDeps } from "../routes";
 import { csrfCookieOptions, sessionCookieOptions } from "../routes";
 import {
@@ -30,14 +32,19 @@ import {
  * HttpOnly çerezdedir; oturum yalnız doğrulama ve eşleme başarılıysa kurulur.
  */
 
+const returnToSchema = z.string().max(512);
+const callbackQuerySchema = z
+  .record(z.string().max(64), z.string().max(4096))
+  .refine((query) => Object.keys(query).length <= 16);
+
 /** Callback parametreleri protokolden bağımsız olarak ham hâlde adaptöre geçer. */
-function callbackParams(c: Context<AppEnv>): Record<string, string> {
+function callbackParams(c: Context<AppEnv>) {
   const params: Record<string, string> = {};
   for (const [key, values] of Object.entries(c.req.queries())) {
     const value = values[0];
     if (value !== undefined) params[key] = value;
   }
-  return params;
+  return callbackQuerySchema.safeParse(params);
 }
 
 export function registerSsoRoutes(app: Hono<AppEnv>, deps: AuthDeps, now: () => number): void {
@@ -52,9 +59,12 @@ export function registerSsoRoutes(app: Hono<AppEnv>, deps: AuthDeps, now: () => 
     absoluteMs: deps.sessionAbsoluteMs,
   });
   const secureCookies = deps.nodeEnv === "production";
+  const loginRate = createLoginRateLimiter();
 
   app.get("/auth/sso/start", (c) => {
-    const returnTo = safeReturnTo(c.req.query("returnTo"));
+    const rawReturnTo = c.req.query("returnTo");
+    const parsedReturnTo = rawReturnTo === undefined ? undefined : returnToSchema.safeParse(rawReturnTo);
+    const returnTo = safeReturnTo(parsedReturnTo?.success === true ? parsedReturnTo.data : undefined);
     const payload = {
       state: createSsoToken(),
       nonce: createSsoToken(),
@@ -71,8 +81,12 @@ export function registerSsoRoutes(app: Hono<AppEnv>, deps: AuthDeps, now: () => 
   });
 
   app.get("/auth/sso/callback", async (c) => {
+    const params = callbackParams(c);
+    if (!params.success) return jsonError(c, "invalid_request", validationDetails(params.error));
+    const state = params.data.state;
+    const rateKey = loginRateKey("sso", state ?? "");
+    if (!loginRate.consume(rateKey, now())) return jsonError(c, "rate_limited");
     const payload = verifySsoState(getCookie(c, SSO_STATE_COOKIE), sso.stateSecret, now());
-    const state = c.req.query("state");
     if (payload === null || state === undefined || !safeTokenEquals(state, payload.state)) {
       // state uyuşmazlığında IdP yanıtı işlenmez, oturum kurulmaz (E3 §a).
       return jsonError(c, "auth_state_invalid");
@@ -89,7 +103,7 @@ export function registerSsoRoutes(app: Hono<AppEnv>, deps: AuthDeps, now: () => 
       requestId: c.get("requestId"),
     };
 
-    const identity = await sso.provider.exchange(callbackParams(c));
+    const identity = await sso.provider.exchange(params.data);
     if (identity === null || identity.subject.trim() === "") {
       await recordSsoDenied(flowDeps, {
         reason: "invalid_assertion",

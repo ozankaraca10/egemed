@@ -168,12 +168,12 @@ describe("seed:admin — ilk admin tohumu (E3 §i/5)", () => {
       requestId: null,
     });
     expect(entry?.summaryAfter).toEqual({
-      username: "kurucu.admin",
       status: "invited",
       authMethod: "sso",
       roles: "admin",
       source: "seed:admin",
     });
+    expect(JSON.stringify(entry)).not.toContain("kurucu.admin");
   });
 
   it("idempotenttir: ikinci çalıştırma yalnız 'existing' döner, audit büyümez", async () => {
