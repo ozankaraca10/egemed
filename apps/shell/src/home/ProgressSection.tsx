@@ -1,5 +1,15 @@
 import { useEffect, useState, type JSX } from "react";
-import { Badge, Tabs, type TabItem } from "@egemed/ui";
+import { DEFAULT_RULES, type WeeklyGoal } from "@egemed/gamification-core";
+import {
+  defaultGamiIcons,
+  GamiProfileStrip,
+  GamiRecentBadges,
+  GamiWeeklyGoals,
+  levelFromServer,
+  type GamiAvatarOf,
+  type GamiBadgeModel,
+} from "@egemed/gami-ui";
+import { Tabs, type TabItem } from "@egemed/ui";
 import { t } from "@egemed/ui/i18n";
 import { useShellDataSources, type LeaderboardPreferencesSource } from "../dataSources";
 import type { ShellSession } from "../session";
@@ -12,124 +22,140 @@ import {
   type GamificationSource,
   type GamiSimSummary,
 } from "./gamificationSource";
-import { badgeCatalogSize, catalogBadge } from "./badgeCatalog";
+import { catalogBadge } from "./badgeCatalog";
 
 export type ProgressLoadStatus = "loading" | "ready" | "error";
 
-/**
- * API oturumunun rozet listesi (T114, ADR-008 S4): sunucu anahtarları katalog
- * tanımıyla ad/kısa açıklama/kazanılma tarihi olarak gösterilir; katalogda
- * olmayan anahtar sessizce atlanır. Sayaç yalnız kendi siminin katalog
- * uzunluğunu kullanır — simler arası toplam yoktur (ADR-006).
- */
-function ServerBadgeList({
-  simId,
-  badges,
-}: {
-  readonly simId: SimId;
-  readonly badges: GamiSimSummary["badges"];
-}): JSX.Element {
-  const matched = badges.flatMap((badge) => {
+const AVATAR_OF: GamiAvatarOf = () => ({ text: "S", tone: "t-blue" });
+
+function openSim(simId: SimId): void {
+  if (typeof location === "undefined") return;
+  location.hash = simHref(simId);
+}
+
+/** Katalog adı ve açıklaması. Katalogda olmayan anahtar (API ve sahte oturum) atlanır. */
+function recentBadges(simId: SimId, summary: GamiSimSummary): GamiBadgeModel[] {
+  const views: GamiBadgeModel[] = [];
+  for (const badge of summary.badges) {
     const def = catalogBadge(simId, badge.key);
-    return def === undefined ? [] : [{ def, awardedAt: badge.awardedAt }];
-  });
-  if (matched.length === 0) {
-    return <p>{t("home.progress.badges.empty")}</p>;
+    if (def === undefined) continue;
+    views.push({
+      assessmentOnly: false,
+      category: def.category,
+      categoryLabel: "Rozet",
+      description: def.description,
+      earnedLabel: `${t("home.progress.badges.awarded")} ${formatTrDate(badge.awardedAt)}`,
+      iconName: "Star",
+      id: def.id,
+      lockedNote: null,
+      max: 1,
+      name: def.name,
+      rule: "",
+      state: "earned",
+      studyKey: null,
+      tier: null,
+      tierLabel: null,
+      value: 1,
+    });
   }
+  return views;
+}
+
+function weeklyXpGoal(summary: GamiSimSummary): WeeklyGoal {
+  const target = summary.weeklyGoal.targetXp;
+  const current = summary.weeklyGoal.currentXp;
+  const max = target > 0 ? target : 1;
+  return {
+    done: target > 0 && current >= target,
+    id: "weekly-assessments",
+    label: t("home.progress.weeklyGoal"),
+    max,
+    value: target > 0 ? Math.min(current, target) : 0,
+  };
+}
+
+function SimOpenLink({ simId }: { readonly simId: SimId }): JSX.Element {
   return (
-    <>
-      <p className="eg-shell-progress__badgeCount">
-        {matched.length}/{badgeCatalogSize(simId)} {t("home.progress.badges.unit")}
-      </p>
-      <ul className="eg-shell-progress__badgeList">
-        {matched.map(({ def, awardedAt }) => (
-          <li className="eg-shell-progress__badgeCard" key={def.id}>
-            <p className="eg-shell-progress__badgeName">{def.name}</p>
-            <p className="eg-shell-progress__badgeDesc">{def.description}</p>
-            <p className="eg-shell-progress__badgeDate">
-              {t("home.progress.badges.awarded")} {formatTrDate(awardedAt)}
-            </p>
-          </li>
-        ))}
-      </ul>
-    </>
+    <a className="eg-shell-progress__tabEmptyLink" href={simHref(simId)}>
+      {t("home.progress.openInSim")}
+    </a>
   );
 }
 
 /**
- * Tek sim sekmesinin içeriği (E3 §e.8): kayıt yoksa boş durum + sim
- * bağlantısı; kayıt varsa XP/seviye/seri/haftalık hedef/liderlik özet
- * kutuları (framework `results-summary-strip` deseni) ve son rozetler.
- * Simler arası toplam YOKTUR — her panel yalnız kendi `summary`sini okur.
- * API oturumunda (`badgeCatalog`) rozetler katalog adlarıyla gösterilir (T114);
- * sahte oturumda mevcut ham anahtar davranışı korunur.
+ * Tek sim sekmesi (ADR-006): yalnız bu simin özeti. Kayıt varsa ortak
+ * gami-ui şeridi, haftalık hedef ve son rozetler; yoksa boş durum.
+ * Rozet adı katalogdan gelir; katalogda olmayan anahtar gösterilmez.
  */
 function SimProgressPanel({
   simId,
   summary,
-  badgeCatalog = false,
 }: {
   readonly simId: SimId;
   readonly summary: GamiSimSummary | undefined;
-  readonly badgeCatalog?: boolean;
 }): JSX.Element {
   if (summary === undefined) {
     return (
       <div className="eg-shell-progress__tabEmpty">
         <p>{t("home.progress.tab.empty")}</p>
-        <a className="eg-shell-progress__tabEmptyLink" href={simHref(simId)}>
-          {t("sims.open")}
-        </a>
+        <SimOpenLink simId={simId} />
       </div>
     );
   }
+  const level = levelFromServer(summary.xp, summary.level, DEFAULT_RULES);
+  const scored = summary.attempts.filter(
+    (attempt) => attempt.score !== null && attempt.maxScore !== null && attempt.maxScore > 0,
+  );
+  const periodAvg =
+    scored.length === 0
+      ? null
+      : scored.reduce((sum, attempt) => sum + ((attempt.score ?? 0) / (attempt.maxScore ?? 1)) * 100, 0) / scored.length;
   return (
-    <div className="eg-shell-progress__panel">
-      <div className="eg-shell-progress__boxes">
-        <div className="eg-shell-progress__box">
-          <p className="eg-shell-progress__num">{summary.xp}</p>
-          <p className="eg-shell-progress__lbl">{t("home.progress.xp")}</p>
-        </div>
-        <div className="eg-shell-progress__box">
-          <p className="eg-shell-progress__num">{summary.level}</p>
-          <p className="eg-shell-progress__lbl">{t("home.progress.level")}</p>
-        </div>
-        <div className="eg-shell-progress__box">
-          <p className="eg-shell-progress__num">{summary.streak.current}</p>
-          <p className="eg-shell-progress__sub">
-            {t("home.progress.streak.best")} {summary.streak.best}
-          </p>
-          <p className="eg-shell-progress__lbl">{t("home.progress.streak")}</p>
-        </div>
-        <div className="eg-shell-progress__box">
-          <p className="eg-shell-progress__num">
-            {summary.weeklyGoal.currentXp}/{summary.weeklyGoal.targetXp}
-          </p>
-          <p className="eg-shell-progress__lbl">{t("home.progress.weeklyGoal")}</p>
-        </div>
-        <div className="eg-shell-progress__box">
-          <p className="eg-shell-progress__num">
-            {summary.leaderboard.rank}/{summary.leaderboard.total}
-          </p>
-          <p className="eg-shell-progress__lbl">{t("home.progress.leaderboard")}</p>
-        </div>
-      </div>
-      <div className="eg-shell-progress__badges">
-        <p className="eg-shell-progress__badgesTitle">{t("home.progress.badges")}</p>
-        {badgeCatalog ? (
-          <ServerBadgeList simId={simId} badges={summary.badges} />
-        ) : summary.badges.length === 0 ? (
-          <p>{t("home.progress.badges.empty")}</p>
-        ) : (
-          <ul className="eg-shell-progress__badgeList">
-            {summary.badges.map((badge) => (
-              <li key={badge.key}>
-                <Badge tone="info">{badge.key}</Badge>
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
+    <div className="eg-shell-progress__panel eg-gami-page eg-gami-dash" data-sim-id={simId} data-xp={summary.xp}>
+      <GamiProfileStrip
+        avatarOf={AVATAR_OF}
+        icons={{
+          check: defaultGamiIcons.checkCircle({ height: 16, width: 16 }),
+          chevron: defaultGamiIcons.chevronRight({ height: 14, width: 14 }),
+          flame: defaultGamiIcons.flame({ height: 20, width: 20 }),
+        }}
+        onLeaderboard={() => openSim(simId)}
+        profile={{
+          avatarId: "me",
+          avatarName: null,
+          level: level.level,
+          periodAssessments: summary.attempts.length,
+          periodAvg,
+          periodLabel: "kayıtlar",
+          periodPractice: 0,
+          streakCurrent: summary.streak.current,
+          streakLongest: summary.streak.best,
+          weekRank: summary.leaderboard.rank,
+          weekRanked: summary.leaderboard.total,
+          xpInto: level.xpIntoLevel,
+          xpSpan: level.levelEndXp - level.levelStartXp,
+          xpToNext: level.xpToNext,
+        }}
+      />
+      <section aria-labelledby={`eg-progress-goals-${simId}`}>
+        <h3 id={`eg-progress-goals-${simId}`}>{t("home.progress.weeklyGoal")}</h3>
+        <GamiWeeklyGoals
+          doneIcon={defaultGamiIcons.check({ height: 16, width: 16 })}
+          goals={[weeklyXpGoal(summary)]}
+          iconFor={() => defaultGamiIcons.target({ height: 16, width: 16 })}
+        />
+      </section>
+      <section aria-labelledby={`eg-progress-badges-${simId}`}>
+        <h3 id={`eg-progress-badges-${simId}`}>{t("home.progress.badges")}</h3>
+        <GamiRecentBadges
+          emptyNote={t("home.progress.badges.empty")}
+          icons={defaultGamiIcons}
+          onAll={() => openSim(simId)}
+          onStudy={() => openSim(simId)}
+          views={recentBadges(simId, summary)}
+        />
+      </section>
+      <SimOpenLink simId={simId} />
     </div>
   );
 }
@@ -192,14 +218,14 @@ export interface ProgressSectionViewProps {
   readonly summaries: readonly GamiSimSummary[];
   readonly onRetry: () => void;
   readonly leaderboard?: LeaderboardVisibilityView | null;
-  /** API oturumunda rozet anahtarları katalog adlarıyla gösterilir (T114). */
+  /** Çağıranlar geçebilir; rozet adı her durumda katalogdan gelir (katalog dışı anahtar atlanır). */
   readonly badgeCatalog?: boolean;
 }
 
 /**
  * Oturumun API oturumu mu kararı (T114): `simAccess` yalnız API oturumunda
- * doludur, sahte oturumda `null` kalır (bkz. `session.ts`); API oturumunda
- * rozetler katalog adlarıyla gösterilir, sahte oturum ham anahtarı korur.
+ * doludur, sahte oturumda `null` kalır (bkz. `session.ts`). Rozet adı her iki
+ * oturumda katalogdan gelir; katalogda olmayan anahtar atlanır.
  */
 export function usesBadgeCatalog(session: ShellSession | null): boolean {
   return session !== null && session.simAccess !== null;
@@ -212,7 +238,6 @@ export function usesBadgeCatalog(session: ShellSession | null): boolean {
  * `UsersListView` deseni).
  */
 export function ProgressSectionView({
-  badgeCatalog = false,
   leaderboard = null,
   onRetry,
   status,
@@ -222,7 +247,7 @@ export function ProgressSectionView({
     id,
     label: t(`sims.${id}.name`),
     panel: (
-      <SimProgressPanel badgeCatalog={badgeCatalog} simId={id} summary={summaryForSim(summaries, id)} />
+      <SimProgressPanel simId={id} summary={summaryForSim(summaries, id)} />
     ),
   }));
   return (

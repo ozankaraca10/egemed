@@ -11,7 +11,7 @@
 .eg-gami-span-12{ grid-column: span 12; }
 .eg-gami-card-head{ display: flex; align-items: center; justify-content: space-between; gap: var(--sp-3); margin-bottom: var(--sp-3); flex-wrap: wrap; }
 .eg-gami-card-head h3{ margin: 0; font-size: var(--fs-lg); color: var(--ink-900); }
-.eg-gami-note{ font-size: var(--fs-xs); color: var(--ink-500); margin: var(--sp-3) 0 0; }
+.eg-gami-note{ font-size: var(--fs-xs); color: var(--ink-700); margin: var(--sp-3) 0 0; }
 .eg-gami-link{ background: none; border: 0; padding: 0; color: var(--blue-700); font-weight: 700; font-size: var(--fs-sm); display: inline-flex; align-items: center; gap: 4px; }
 .eg-gami-link:hover{ text-decoration: underline; }
 .eg-gami-num{ font-variant-numeric: tabular-nums; }
@@ -389,3 +389,57 @@
 .eg-gami-page .btn.outline{ background: var(--card); color: var(--ink-700); border: 1.5px solid var(--border-strong); }
 .eg-gami-page .btn.outline:hover{ background: var(--blue-50); }
 .eg-gami-page .btn.small{ padding: 8px 14px; font-size: var(--fs-sm); border-radius: var(--r-md); }
+
+/* Kabuk paneli (.eg-gami-dash): sim CSS'i yok. Seçiciler .eg-sim-* kurallarından
+   daha dar; Opaca/Ausculta/Pulse İlerlemem bu sınıfı taşımaz. */
+.eg-gami-dash{ min-width: 0; }
+.eg-gami-dash .eg-gami-profile{
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 14px;
+  margin: 0;
+  min-width: 0;
+}
+.eg-gami-dash .rs-box{
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-card);
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+}
+.eg-gami-dash .rs-lbl{ font-size: var(--fs-xs); color: var(--ink-600); text-transform: uppercase; letter-spacing: .5px; font-weight: 700; }
+.eg-gami-dash .rs-num{ display: inline-flex; align-items: center; gap: 6px; font-weight: 800; font-size: var(--fs-xl); color: var(--navy-900); font-variant-numeric: tabular-nums; }
+.eg-gami-dash .rs-status{ display: inline-flex; align-items: center; gap: 6px; font-weight: 800; font-size: var(--fs-lg); }
+.eg-gami-dash .rs-status.pass{ color: var(--green-600); }
+.eg-gami-dash .rs-status.fail{ color: var(--red-500); }
+.eg-gami-dash .badge{ display: inline-flex; align-items: center; padding: 4px 12px; border-radius: var(--r-pill); font-size: var(--fs-sm); font-weight: 700; }
+.eg-gami-dash .badge.green{ background: var(--green-100); color: var(--green-600); }
+.eg-gami-dash .badge.gray{ background: var(--blue-50); color: var(--ink-600); }
+.eg-gami-dash .badge.orange{ background: var(--orange-100); color: var(--amber-700); }
+.eg-gami-dash .domain-bar{ height: 9px; border-radius: var(--r-pill); background: var(--blue-100); overflow: hidden; }
+.eg-gami-dash .domain-bar > i{ display: block; height: 100%; background: linear-gradient(90deg, var(--blue-500), var(--blue-700)); border-radius: var(--r-pill); }
+.eg-gami-dash .card{ background: var(--card); border: 1px solid var(--border); border-radius: var(--r-lg); box-shadow: var(--shadow-card); padding: 16px var(--sp-4); }
+.eg-gami-dash .modal-overlay{ position: fixed; inset: 0; z-index: 60; background: color-mix(in srgb, var(--navy-900) 42%, transparent); display: flex; align-items: center; justify-content: center; padding: 20px; }
+.eg-gami-dash .modal-card{ background: var(--card); color: var(--ink-900); border-radius: var(--r-lg); box-shadow: var(--shadow-pop); width: min(680px, 100%); max-height: min(78vh, 640px); display: flex; flex-direction: column; overflow: hidden; }
+.eg-gami-dash .modal-head{ display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 14px 16px; border-bottom: 1px solid var(--border); }
+.eg-gami-dash .modal-head h3{ margin: 0; font-size: var(--fs-lg); color: var(--navy-800); }
+.eg-gami-dash .modal-close{ width: 44px; height: 44px; border-radius: var(--r-md); border: 1px solid var(--border-strong); background: var(--card); color: var(--ink-600); display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; }
+.eg-gami-dash .modal-close svg{ width: 18px; height: 18px; }
+.eg-gami-dash .modal-body{ padding: 14px 16px var(--sp-4); overflow-y: auto; }
+@media (max-width: 1023px){
+  .eg-gami-dash .eg-gami-profile{ grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+@media (max-width: 767px){
+  .eg-gami-dash .eg-gami-profile{ grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 420px){
+  .eg-gami-dash .eg-gami-profile{ grid-template-columns: 1fr; }
+  .eg-gami-dash .eg-gami-profile .rs-box:first-child{ grid-column: auto; }
+}

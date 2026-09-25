@@ -17,7 +17,6 @@ import {
 import { simHref } from "../../apps/shell/src/routes";
 import { SIM_IDS } from "../../apps/shell/src/SimCard";
 import { gamiAllResponseSchema, gamiSimSummarySchema } from "../../packages/contracts/src/index";
-import { PULSE_BADGES } from "../../packages/gami-catalogs/src/index";
 import { t } from "../../packages/ui/i18n/tr";
 import { describe, expect, it, vi } from "vitest";
 
@@ -60,6 +59,8 @@ describe("gamificationSource: sentetik kaynak (E3 §e.8)", () => {
     const summaries = await source.getSummaries();
     expect(summaries).toHaveLength(SIM_IDS.length);
     expect(new Set(summaries.map((summary) => summary.simId))).toEqual(new Set(SIM_IDS));
+    expect(summaries.find((summary) => summary.simId === "pulse")?.badges[0]?.key).toBe("rhythm-streak-3");
+    expect(summaries.find((summary) => summary.simId === "opaca")?.badges[0]?.key).toBe("first-step");
     for (const summary of summaries) {
       expect(() => gamiSimSummarySchema.parse(summary), summary.simId).not.toThrow();
     }
@@ -147,7 +148,7 @@ describe("ProgressSectionView (durumsuz görünüm)", () => {
     const html = renderToStaticMarkup(createElement(ProgressSectionView, baseViewProps({ status: "ready", summaries: [] })));
     expect((html.match(/role="tab"/g) ?? []).length).toBe(SIM_IDS.length);
     expect(count(html, t("home.progress.tab.empty"))).toBe(SIM_IDS.length);
-    expect(count(html, t("sims.open"))).toBe(SIM_IDS.length);
+    expect(count(html, "Simülatörde İlerlemem")).toBe(SIM_IDS.length);
     for (const id of SIM_IDS) {
       expect(html, id).toContain(`href="${simHref(id)}"`);
       expect(html, id).toContain(`>${t(`sims.${id}.name`)}</button>`);
@@ -163,7 +164,7 @@ describe("ProgressSectionView (durumsuz görünüm)", () => {
         level: 4,
         streak: { current: 3, best: 7, lastDate: "2026-09-22" },
         weeklyGoal: { targetXp: 300, currentXp: 120 },
-        badges: [{ key: "ritim-ustasi", awardedAt: "2026-09-20T10:15:00.000+03:00" }],
+        badges: [{ key: "rhythm-streak-3", awardedAt: "2026-09-20T10:15:00.000+03:00" }],
         leaderboard: { rank: 5, total: 42 },
         attempts: [],
       },
@@ -171,15 +172,19 @@ describe("ProgressSectionView (durumsuz görünüm)", () => {
     const html = renderToStaticMarkup(
       createElement(ProgressSectionView, baseViewProps({ status: "ready", summaries })),
     );
-    expect(html).toContain("1450");
-    expect(html).toContain(t("home.progress.xp"));
-    expect(html).toContain(t("home.progress.level"));
-    expect(html).toContain(t("home.progress.streak"));
-    expect(html).toContain("120/300");
+    expect(html).toContain("eg-gami-profile");
+    expect(html).toContain("data-xp=\"1450\"");
+    expect(html).toContain("Seviye 4");
+    expect(html).toContain("Günlük seri");
+    expect(html).toContain("120 / 300");
     expect(html).toContain(t("home.progress.weeklyGoal"));
-    expect(html).toContain("5/42");
+    expect(html).toContain("5.");
+    expect(html).toContain("/ 42");
     expect(html).toContain(t("home.progress.leaderboard"));
-    expect(html).toContain("ritim-ustasi");
+    expect(html).toContain("Ritim izleyicisi");
+    expect(html).not.toContain("rhythm-streak-3");
+    expect(html).toContain("Simülatörde İlerlemem");
+    expect(html).toContain(`href="${simHref("pulse")}"`);
     // Ausculta ve Opaca özeti taşımaz: boş durum korunur (simler arası birleştirme yok).
     expect(count(html, t("home.progress.tab.empty"))).toBe(SIM_IDS.length - 1);
   });
@@ -249,7 +254,8 @@ describe("ProgressSectionView: sunucu rozet kataloğu (T114, ADR-008 S4)", () =>
     expect(html).toContain("3 EKG örüntüsünü art arda doğru tanı.");
     expect(html).toContain(t("home.progress.badges.awarded"));
     expect(html).toContain("20 Eyl 2026");
-    expect(html).toContain(`1/${PULSE_BADGES.length} ${t("home.progress.badges.unit")}`);
+    expect(html).toContain("eg-gami-profile");
+    expect(html).toContain("data-xp=\"60\"");
     // Ham anahtarlar gösterilmez; katalogda olmayan anahtar sessizce atlanır.
     expect(html).not.toContain("rhythm-streak-3");
     expect(html).not.toContain("bilinmeyen-anahtar");
@@ -278,13 +284,13 @@ describe("ProgressSectionView: sunucu rozet kataloğu (T114, ADR-008 S4)", () =>
     expect(html).not.toContain("eg-shell-progress__badgeCount");
   });
 
-  it("sahte oturum davranışı korunur: anahtar ham metin olarak çip içinde görünür", () => {
+  it("katalog dışı anahtar sahte görünümde de atlanır; katalog adı görünür", () => {
     const html = renderToStaticMarkup(
       createElement(ProgressSectionView, baseViewProps({ status: "ready", summaries: [pulseSummary] })),
     );
-    expect(html).toContain("rhythm-streak-3");
-    expect(html).toContain("bilinmeyen-anahtar");
-    expect(html).not.toContain("Ritim izleyicisi");
+    expect(html).toContain("Ritim izleyicisi");
+    expect(html).not.toContain("rhythm-streak-3");
+    expect(html).not.toContain("bilinmeyen-anahtar");
     expect(html).not.toContain("eg-shell-progress__badgeCount");
   });
 });

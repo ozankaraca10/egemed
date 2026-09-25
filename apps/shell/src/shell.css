@@ -510,7 +510,7 @@ html, body { margin: 0; }
   background: var(--blue-700); border-radius: var(--r-md); color: var(--card);
   font-weight: 600; text-decoration: none;
 }
-.eg-shell-progress__panel { display: grid; gap: var(--sp-4); }
+.eg-shell-progress__panel { display: grid; gap: var(--sp-4); min-width: 0; }
 .eg-shell-progress__boxes { display: flex; flex-wrap: wrap; gap: var(--sp-3); }
 .eg-shell-progress__box {
   box-sizing: border-box; display: grid; gap: var(--sp-1); justify-items: center;

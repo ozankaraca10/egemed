@@ -83,6 +83,12 @@ importers:
       '@egemed/gami-catalogs':
         specifier: workspace:*
         version: link:../../packages/gami-catalogs
+      '@egemed/gami-ui':
+        specifier: workspace:*
+        version: link:../../packages/gami-ui
+      '@egemed/gamification-core':
+        specifier: workspace:*
+        version: link:../../packages/gamification-core
       '@egemed/sim-ausculta':
         specifier: workspace:*
         version: link:../../packages/sim-ausculta
