@@ -64,9 +64,8 @@ test.describe("Ausculta kayıt izolasyonu", () => {
     await expect(practiceCard.locator(".mode-best-score")).toContainText("En iyi puan: 91");
     // Bir işlem yap: mod seç (öğrenme moduna yönlendirir) ve ekran değişsin.
     await practiceCard.locator("button").click();
-    await expect(
-      page.getByRole("heading", { name: /^(Kalp Sesleri|Akciğer Sesleri|Kombine Sesler)$/ }).first(),
-    ).toBeVisible();
+    // Kütüphane başlığı (h2) mobil düzende gizli (T133) — görünür ilk kayıt yeterli.
+    await expect(page.locator(".lib-col .lib-item").first()).toBeVisible();
 
     const adminKeys = await localStorageKeys(page);
     expect(adminKeys.some((key) => key.startsWith(namespaceOf(ADMIN.actorId)))).toBe(true);
