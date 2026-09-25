@@ -214,7 +214,7 @@ test.describe("API oturumu (dev sağlayıcı)", () => {
       await page.goto("/#/sims/pulse");
       await expect(page.getByText("Bu simülatöre erişiminiz yok")).toBeVisible();
       await expect(page.getByRole("heading", { name: "Erişim yok" })).toBeVisible();
-      await expect(page.getByRole("link", { name: "Simülatörlere dön" })).toBeVisible();
+      await expect(page.locator("main").getByRole("link", { name: "Simülatörlere dön" })).toBeVisible();
       await expect(page.locator(".egemed-pulse-runtime")).toHaveCount(0);
       // T129: duyuru kartı 360/768/1440'ta yatay taşma üretmez; ekran görüntüsü
       // yalnız erişim reddi için alınır (hata durumu, yükleyici zorlanmadan oluşmaz).
