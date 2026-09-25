@@ -482,6 +482,22 @@ describe("UserDetailView işaretlemesi ('ayrıntı markup', E3 §e.3)", () => {
     expect(deleted).not.toMatch(/<button[^>]*>Sil<\/button>/);
   });
 
+  it("T150: görüntülenen kullanıcı oturumdaki admin ise Askıya al/Sil çizilmez, yerine bilgi notu görünür", () => {
+    const self = render(
+      createElement(UserDetailView, baseDetailViewProps({ currentUserId: DETAIL_ACTIVE.id })),
+    );
+    expect(self).not.toContain(t("admin.users.detail.action.suspend"));
+    expect(self).not.toMatch(/<button[^>]*>Sil<\/button>/);
+    expect(self).toContain(t("admin.users.detail.selfNote"));
+
+    const other = render(
+      createElement(UserDetailView, baseDetailViewProps({ currentUserId: "baska-admin" })),
+    );
+    expect(other).toContain(t("admin.users.detail.action.suspend"));
+    expect(other).toMatch(/<button[^>]*>Sil<\/button>/);
+    expect(other).not.toContain(t("admin.users.detail.selfNote"));
+  });
+
   it("onay diyaloğu: askıya alma/etkinleştirme/silme için başlık ve gövde metni gösterir", () => {
     const suspend = render(createElement(UserDetailView, baseDetailViewProps({ pendingAction: "suspend" })));
     expect(suspend).toContain(t("admin.users.detail.confirm.suspend.title"));

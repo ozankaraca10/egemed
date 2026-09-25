@@ -429,6 +429,31 @@ describe("UsersListView işaretlemesi", () => {
       expect(calls).toEqual(["user-001", "user-002"]);
     }
   });
+
+  it("T150: oturumdaki adminin kendi satırında toplu seçim kutusu devre dışıdır ve not içerir; diğer satır etkin kalır", () => {
+    for (const Rows of [UsersTable, UsersCards]) {
+      const html = renderToStaticMarkup(
+        Rows({
+          currentUserId: "user-001",
+          onToggleSelect: () => {
+            // yalnız zorunlu prop; bu testte çağrılmaz
+          },
+          selected: new Set(),
+          units: ADMIN_UNITS,
+          users: SAMPLE_USERS,
+        }),
+      );
+      // `aria-label` içinde de görünen ad geçtiği için sınır olarak benzersiz
+      // profil bağlantısı kullanılır (ad metninin kendisi değil).
+      const firstLinkAt = html.indexOf(`href="${adminUserDetailHref("user-001")}"`);
+      const secondLinkAt = html.indexOf(`href="${adminUserDetailHref("user-002")}"`);
+      const checkboxHtml = html.slice(0, firstLinkAt);
+      expect(checkboxHtml).toContain("disabled");
+      expect(checkboxHtml).toContain(t("admin.users.detail.selfNote"));
+      const secondCheckboxHtml = html.slice(firstLinkAt, secondLinkAt);
+      expect(secondCheckboxHtml).not.toContain("disabled");
+    }
+  });
 });
 
 describe("UsersPage kabı", () => {

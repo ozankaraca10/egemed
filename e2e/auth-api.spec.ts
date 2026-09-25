@@ -202,6 +202,11 @@ test.describe("API oturumu (dev sağlayıcı)", () => {
     await expect(page).toHaveURL(/#\/$/);
     const toggle = page.getByRole("switch", { name: "Liderlik tablosunda görün" });
     await expect(toggle).toBeVisible();
+    // T145: tercih GET /me/preferences ile eşzamansız yüklenir; anahtar yüklenene
+    // dek devre dışı ve işaretsiz başlar. Beklemeden `uncheck()` no-op olur (zaten
+    // işaretsiz) ve PATCH hiç gönderilmez — bu da aşağıdaki `waitForResponse`'u
+    // asılı bırakan bir yarışa yol açar.
+    await expect(toggle).toBeEnabled();
     const saved = page.waitForResponse(
       (response) =>
         response.url().includes("/me/preferences") && response.request().method() === "PATCH" && response.ok(),

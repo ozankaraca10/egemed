@@ -214,6 +214,7 @@ export const tr = {
   "admin.users.detail.actionError": "internal_error — işlem uygulanamadı.",
   "admin.users.detail.notFound.title": "Kullanıcı bulunamadı",
   "admin.users.detail.notFound.body": "Bu kullanıcı mevcut değil veya silinmiş olabilir.",
+  "admin.users.detail.selfNote": "Kendi hesabınızı askıya alamaz, silemez veya admin rolünü kaldıramazsınız.",
   "admin.import.open": "İçe aktarmayı aç",
   "admin.import.title": "Toplu içe aktarma",
   "admin.import.steps.label": "İçe aktarma adımları",

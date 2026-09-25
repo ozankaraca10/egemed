@@ -828,3 +828,5 @@ html, body { margin: 0; }
 .eg-shell-vitrin__grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)); gap: var(--sp-4); align-items: start; }
 .eg-shell-vitrin__card { display: grid; gap: var(--sp-2); padding: var(--sp-4); border: 1px solid var(--border); border-radius: var(--r-lg); background: var(--surface); box-shadow: var(--elev-2); }
 body { font-family: var(--font); }
+/* T150: admin kendi hesabında yıkıcı eylemlerin yerine gösterilen bilgi notu. */
+.eg-shell-userform__note { margin: 0; padding: 10px 12px; border: 1px solid var(--border); border-radius: var(--r-md); background: var(--card-soft); color: var(--ink-700); font-size: var(--fs-sm); }
