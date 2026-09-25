@@ -405,6 +405,8 @@ export const tr = {
   "home.progress.leaderboard": "Liderlik",
   "home.progress.badges": "Son rozetler",
   "home.progress.badges.empty": "Henüz rozet yok.",
+  "home.progress.badges.unit": "rozet",
+  "home.progress.badges.awarded": "Kazanıldı",
   "home.progress.error.title": "İlerleme yüklenemedi",
   "home.progress.error.body": "internal_error — ilerlemeniz getirilemedi.",
   "home.progress.error.retry": "Yeniden dene",

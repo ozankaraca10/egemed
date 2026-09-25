@@ -1,5 +1,5 @@
 import { createElement, type ReactElement } from "react";
-import { shellSessionFromDev } from "../../apps/shell/src/session";
+import { shellSessionFromDev, shellSessionFromMe } from "../../apps/shell/src/session";
 import { renderToStaticMarkup } from "react-dom/server";
 import type { DevSession } from "../../apps/shell/src/devAuth";
 import {
@@ -11,11 +11,13 @@ import {
 import {
   ProgressSection,
   ProgressSectionView,
+  usesBadgeCatalog,
   type ProgressSectionViewProps,
 } from "../../apps/shell/src/home/ProgressSection";
 import { simHref } from "../../apps/shell/src/routes";
 import { SIM_IDS } from "../../apps/shell/src/SimCard";
 import { gamiAllResponseSchema, gamiSimSummarySchema } from "../../packages/contracts/src/index";
+import { PULSE_BADGES } from "../../packages/gami-catalogs/src/index";
 import { t } from "../../packages/ui/i18n/tr";
 import { describe, expect, it, vi } from "vitest";
 
@@ -199,6 +201,91 @@ describe("ProgressSectionView (durumsuz görünüm)", () => {
       createElement(ProgressSectionView, baseViewProps({ status: "ready", summaries })),
     );
     expect(html).toContain(t("home.progress.badges.empty"));
+  });
+});
+
+describe("usesBadgeCatalog: API oturumu kararı (T114)", () => {
+  it("sahte oturum ve oturumsuz durumda katalog görünümü kapalıdır", () => {
+    expect(usesBadgeCatalog(shellSessionFromDev(STUDENT))).toBe(false);
+    expect(usesBadgeCatalog(null)).toBe(false);
+  });
+
+  it("API oturumunda (simAccess dolu) katalog görünümü açılır", () => {
+    const apiSession = shellSessionFromMe({
+      id: "u-api-1",
+      displayName: "API Öğrencisi",
+      roles: [{ role: "kullanici" }],
+      simAccess: ["pulse", "ausculta"],
+    });
+    expect(usesBadgeCatalog(apiSession)).toBe(true);
+    // simAccess boş dizi de API oturumudur (görünüm yine katalog modunda).
+    expect(usesBadgeCatalog(shellSessionFromMe({ id: "u-api-2", displayName: "x", roles: [], simAccess: [] }))).toBe(true);
+  });
+});
+
+describe("ProgressSectionView: sunucu rozet kataloğu (T114, ADR-008 S4)", () => {
+  const pulseSummary: GamiSimSummary = {
+    simId: "pulse",
+    xp: 60,
+    level: 2,
+    streak: { current: 10, best: 10, lastDate: "2026-09-24" },
+    weeklyGoal: { targetXp: 300, currentXp: 60 },
+    badges: [
+      { key: "rhythm-streak-3", awardedAt: "2026-09-20T10:15:00.000+03:00" },
+      { key: "bilinmeyen-anahtar", awardedAt: "2026-09-21T10:15:00.000+03:00" },
+    ],
+    leaderboard: { rank: 5, total: 42 },
+    attempts: [],
+  };
+
+  it("rozet adı/kısa açıklama/kazanılma tarihi katalogdan gelir; sayacı katalog uzunluğuyla yazar", () => {
+    const html = renderToStaticMarkup(
+      createElement(
+        ProgressSectionView,
+        baseViewProps({ status: "ready", badgeCatalog: true, summaries: [pulseSummary] }),
+      ),
+    );
+    expect(html).toContain("Ritim izleyicisi");
+    expect(html).toContain("3 EKG örüntüsünü art arda doğru tanı.");
+    expect(html).toContain(t("home.progress.badges.awarded"));
+    expect(html).toContain("20 Eyl 2026");
+    expect(html).toContain(`1/${PULSE_BADGES.length} ${t("home.progress.badges.unit")}`);
+    // Ham anahtarlar gösterilmez; katalogda olmayan anahtar sessizce atlanır.
+    expect(html).not.toContain("rhythm-streak-3");
+    expect(html).not.toContain("bilinmeyen-anahtar");
+  });
+
+  it("hiçbir anahtar katalogda yoksa boş durum gösterir, sayaç çizmez", () => {
+    const unknownOnly: GamiSimSummary = { ...pulseSummary, badges: pulseSummary.badges };
+    const html = renderToStaticMarkup(
+      createElement(
+        ProgressSectionView,
+        baseViewProps({ status: "ready", badgeCatalog: true, summaries: [{ ...unknownOnly, badges: [{ key: "yok-boyle", awardedAt: "2026-09-20T10:15:00.000+03:00" }] }] }),
+      ),
+    );
+    expect(html).toContain(t("home.progress.badges.empty"));
+    expect(html).not.toContain("eg-shell-progress__badgeCount");
+  });
+
+  it("rozetsiz özette katalog modunda da 'Henüz rozet yok' gösterir", () => {
+    const html = renderToStaticMarkup(
+      createElement(
+        ProgressSectionView,
+        baseViewProps({ status: "ready", badgeCatalog: true, summaries: [{ ...pulseSummary, badges: [] }] }),
+      ),
+    );
+    expect(html).toContain(t("home.progress.badges.empty"));
+    expect(html).not.toContain("eg-shell-progress__badgeCount");
+  });
+
+  it("sahte oturum davranışı korunur: anahtar ham metin olarak çip içinde görünür", () => {
+    const html = renderToStaticMarkup(
+      createElement(ProgressSectionView, baseViewProps({ status: "ready", summaries: [pulseSummary] })),
+    );
+    expect(html).toContain("rhythm-streak-3");
+    expect(html).toContain("bilinmeyen-anahtar");
+    expect(html).not.toContain("Ritim izleyicisi");
+    expect(html).not.toContain("eg-shell-progress__badgeCount");
   });
 });
 

@@ -524,6 +524,15 @@ html, body { margin: 0; }
 .eg-shell-progress__badges { display: grid; gap: var(--sp-2); }
 .eg-shell-progress__badgesTitle { margin: 0; color: var(--navy-800); font-weight: 700; }
 .eg-shell-progress__badgeList { display: flex; flex-wrap: wrap; gap: var(--sp-2); margin: 0; padding: 0; list-style: none; }
+.eg-shell-progress__badgeCount { margin: 0; color: var(--navy-800); font-size: var(--fs-sm); font-weight: 700; }
+.eg-shell-progress__badgeCard {
+  box-sizing: border-box; display: grid; gap: var(--sp-1);
+  padding: var(--sp-2) var(--sp-3); background: var(--card-soft);
+  border: 1px solid var(--border); border-radius: var(--r-md);
+}
+.eg-shell-progress__badgeName { margin: 0; color: var(--navy-900); font-size: var(--fs-sm); font-weight: 700; }
+.eg-shell-progress__badgeDesc { margin: 0; color: var(--muted); font-size: var(--fs-xs); }
+.eg-shell-progress__badgeDate { margin: 0; color: var(--muted); font-size: var(--fs-xs); font-weight: 600; }
 .eg-shell-progress__optout { display: grid; gap: var(--sp-2); margin-bottom: var(--sp-3); }
 .eg-shell-progress__optoutLabel {
   display: inline-flex; align-items: center; gap: var(--sp-2); min-height: var(--eg-shell-touch-min);
