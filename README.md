@@ -84,6 +84,50 @@ yönetici `#/giris/admin` → `admin` / `egemed`; test öğrencisi `#/giris/test
 - **Tarayıcı erişimi:** Sim paketlerinde doğrudan `window`/`document`/`localStorage` yoktur; yapısal tipli "env"/"port" arayüzleri
   enjekte edilir (test edilebilirlik ve sızıntısız yaşam döngüsü). Kök tsconfig DOM lib'i taşımaz.
 
+### Kabuk ve sim bütünleşmesi (UX mimarisi)
+
+**İlke (25 Eylül 2026, depo sahibi):** kabuk ve simler yek vücuttur; öğrenci sim içindeyken uygulama değiştirdiğini
+hissetmez. Veri ayrılığı korunur ama kullanıcıya hissettirilmez: her kayıt tek `SimulatorId` taşır, simler arası toplam
+veya karşılaştırma üretilmez (ADR-006). Sim rotasında EGEMED barı simin barıdır.
+
+**SimChrome sözleşmesi.** Sim, barını kabuğa `packages/sim-host/src/SimHost.ts` içindeki kanalla bildirir: `SimChrome`
+(`steps`/`chips`/`actions`), `SimChromeAction` (`label`, `SimChromeIcon`, isteğe bağlı `pressed`), `SimChromeChip`
+(`tone`) ve `SimMountContext.setChrome` (durum değiştikçe yeniden çağrılır; `null` barı temizler). Barı kabuk çizer
+(`apps/shell/src/SimBar.tsx`: konum, tek `h1`, adım göstergesi, çipler, ikon düğmeleri). Akış: `App` → `SimRoute`
+`onChrome` → `ShellLayout` `simChrome`. Kurallar: sim kendi üst barını/footer'ını çizmez; dispose'ta `setChrome(null)`
+ile barı temizler; arayüz metinleri sözlükten (`packages/ui/i18n/tr.ts`) gelir.
+
+**Sim başına uygulama.**
+- **Pulse:** kaynak runtime gölge DOM'da çalışır; `packages/sim-pulse/src/runtime/chrome.ts` kaynağın gizli düğmelerini
+  tıklayarak davranışı birebir korur, adımları `activeView`ten eşler ve `MutationObserver` ile yeniden yayınlar.
+  `host.ts` `unifiedChrome` ile kaynağın topbar/footer/landing'i ve içerik içi stepper'ı gizlenir; kaynağın açılış
+  sayfası `CardAILanding.enter` ile atlanır (`runtime/module.ts`).
+- **Opaca ve Ausculta (T108):** `EmbeddedContext` üzerinden `setChrome` ekranlara taşınır; içerik içi stepper/toolbar
+  çizilmez, modaller sim içinde kalır. Gömülü modda simin kendi üst barı/footer'ı çizilmez.
+
+**Bar düzeni ve öncelik (`apps/shell/src/shell.css`, "Birleşik sim barı").** <768 px: yalnız geri + başlık + eylem
+simgeleri (marka ve oturum gizli); ≥768 px: geri etiketi; ≥1024 px: adım göstergesi + geliştirme çipi; ≥1280 px:
+eylem etiketleri + rol; ≥1600 px: çipler. Öncelik başlık > eylemler > adımlar > çipler; ≥768 px'te başlık küçülmez ve
+yatay taşma olmaz. Sim tam alandır (`eg-shell-main--sim`), host çerçevesizdir ve hazır olunca opaklık geçişiyle
+görünür; sim rotasında ana gezinme ve footer yoktur. Sim kartına gelme/odaklanma/dokunmada modül önceden yüklenir
+(`apps/shell/src/sims/loaders.ts` `prefetchSimModule`, `SimCard.tsx`).
+
+**Yeni sim eklerken kontrol listesi.**
+1. Modülü `SimModule` (`id` + `mount(target, context) → dispose`) olarak yaz; `apps/shell/src/sims/loaders.ts`
+   tablosuna tek satır ekle (`SimHost` `id` eşleşmesini doğrular).
+2. Yalnız verilen `target` altına çiz; dispose'ta kendi DOM'unu, zamanlayıcı ve dinleyicilerini temizle.
+3. Adım/çip/eylemleri `context.setChrome` ile yayınla, dispose'ta `setChrome(null)` çağır; kendi üst barını çizme.
+4. React simlerinde `setChrome`'u kendi context'inle (`EmbeddedContext`) ekranlara taşı; içerik içi stepper/toolbar ve
+   footer çizme; modalleri sim içinde tut.
+5. `SimChromeIcon` kümesinin dışına çıkma; eylemler etiketli ve dokunma hedefi ≥44 px olsun; renk dışında işaret
+   kullan (WCAG 2.2 AA, tam klavye gezinmesi).
+6. Kayıtları `egemed:u:<actorId>:<sim>:` (anonimde `egemed:anon:<sim>:`) ad alanında tut; simler arası veri
+   birleştirme (ADR-006).
+7. 360/768/1440 px'te yatay kaydırma olmadığını doğrula; `pnpm turbo lint typecheck test` kapısını yeşil tut.
+
+**Oyunlaştırma tasarım birliği.** Ortak bileşen paketi `@egemed/gami-ui` (T115) hazırlanıyor: referans tasarım Opaca;
+Pulse ve Ausculta aynı bileşenleri kullanacak; birleşik bardaki oyunlaştırma eyleminin etiketi tek: **İlerlemem**.
+
 ---
 
 ## 4. Eğitsel akış (pedagoji)
@@ -157,7 +201,8 @@ uygulanması.
   `SimHost` `setChrome` kanalıyla (`SimChrome`) bara yazar. Sim tam alan ve çerçevesiz; sim rotasında ana gezinme ve footer yok
   (`ShellLayout.tsx`). Dar ekranda (<768 px) bar kademeli: geri + başlık + eylem simgeleri. Pulse kaynağının açılış sayfası
   platformda atlanır (`CardAILanding.enter`), kaynak üst çubuğu/footer'ı gizlenir (`packages/sim-pulse/src/runtime/chrome.ts`).
-  Opaca/Ausculta birleşik bar uyarlaması T108 ile sürüyor.
+  Opaca/Ausculta birleşik bar uyarlaması T108 ile tamamlandı (`EmbeddedContext` üzerinden `setChrome`; içerik içi
+  stepper/toolbar kalktı). Ayrıntılar §3 "Kabuk ve sim bütünleşmesi" altındadır.
 - **Opaca:** port tamam ve kabukta canlı (`#/sims/opaca`); röntgen görselleri git dışı yerel kaynaktan `sync:xray` ile alınır.
   Kayıtlar kullanıcı×sim ad alanında tutulur (`egemed:u:<actorId>:opaca:`; anonimde `egemed:anon:opaca:`).
 - **Pulse:** kabukta canlı (`#/sims/pulse`); platform kaynak runtime'ı EGEMED_PULSE/cardai betiklerini değiştirmeden gölge DOM'da
@@ -188,9 +233,19 @@ uygulanması.
   (`apps/shell/src/dataSources.ts`, `apiShellSources.ts`); sahte `1450` XP sentetiği yalnız sahte dev oturumunda kalır
   (PLATFORM-02). Dashboard'daki liderlik görünürlüğü anahtarı API tercihini yazar (T106). API-03 UI kapısı: erişimi olmayan
   sim rotası hiç mount edilmez, erişim reddi sayfası gösterilir (`SimRoute.tsx`, `allowed`).
+- **Modül önyükleme (T111):** sim kartına gelme/odaklanma/dokunmada lazy chunk önceden indirilir
+  (`apps/shell/src/sims/loaders.ts` `prefetchSimModule`, `SimCard.tsx`); rota açılışında iskelet neredeyse görünmez.
+- **Pulse birleşik bar (T112):** birleşik barda adım göstergesi varken kaynağın içerik içi stepper'ı gizlenir
+  (`packages/sim-pulse/src/runtime/host.ts`, `:host(.pulse-unified) .stepper`).
+- **Dashboard rozetleri (T114):** sim sekmeleri sunucudan gelen rozetleri katalog adlarıyla gösterir (ADR-008 S4).
+- **Ausculta kataloğu (T109):** rozet kataloğu `@egemed/gami-catalogs`'a taşındı; kabuk deneme raporu üç sim
+  kodlayıcısıyla çalışır (ADR-008 S2).
+- **Birleşik bar önceliği (T117):** öncelik başlık > eylemler > adımlar > çipler; ≥768 px'te başlık küçülmez, adımlar
+  tek satırda kalır, çipler yalnız ≥1600 px'te görünür (§3 "Bar düzeni ve öncelik").
 - **Erişilebilirlik (PULSE-10):** Pulse iç ekranları (`e2e/pulse-a11y.spec.ts`) 360/768/1440'ta axe ve 44 px dokunma hedefi
   kapısından geçer; kaynaktan devralınan ihlaller `e2e/pulse-a11y-allowlist.json` ile izlenir ve liste yalnız küçülür.
-  Kaynak yeşili WCAG AA için koyulaştırıldı (`--green-600: #15803d`, birleşik bar uyarlaması T102).
+  Kaynak yeşili WCAG AA için koyulaştırıldı (`--green-600: #15803d`, birleşik bar uyarlaması T102). T113 kaynak kontrast
+  tokenlarını ve 44 px hedefleri genişletti: izin listesi 17→5 ihlal, 55→8 hedefe indi.
 - **E2E:** Playwright + axe her koşuda JSON özeti ve ekran görüntülerini `e2e-artifacts/<run-id>/` altına yazar. README'deki
   önceki 77/80 sonucu tarihsel koşuya aittir; güncel yayın kapısı olarak değerlendirilmemelidir.
 - **24 Eylül geri almaları:** Impeccable beceri/referans paketi (T76) ve arayüz denetimi belgeleri (T77; `DESIGN.md`,

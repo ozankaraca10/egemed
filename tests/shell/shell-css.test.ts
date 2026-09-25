@@ -60,6 +60,11 @@ describe("shell.css token sözleşmesi", () => {
     expect(shellCss).toMatch(/html\s*,\s*body\s*\{[^}]*margin:\s*0/);
     expect(shellCss).toMatch(/:focus:not\(:focus-visible\)[^{]*\{[^}]*outline:\s*none/);
   });
+  it("kompakt hesap menüsünü dokunma hedefi ve kapalı panel gizlemesiyle tanımlar (T120)", () => {
+    expect(shellCss).toMatch(/\.eg-shell-account__button\s*\{[^}]*min-height:\s*var\(--eg-shell-touch-min\)/);
+    expect(shellCss).toMatch(/\.eg-shell-account__panel\[hidden\]\s*\{[^}]*display:\s*none/);
+    expect(shellCss).toMatch(/\.eg-shell-account__item\s*\{[^}]*min-height:\s*var\(--eg-shell-touch-min\)/);
+  });
   it("footer'ı alt çubuk boşluğuyla, adımları mod kimliği renkleriyle tanımlar", () => {
     expect(shellCss).toMatch(/\.eg-shell \.eg-shell-footer\s*\{[^}]*padding-bottom:\s*calc\(/);
     expect(shellCss).toMatch(/\.eg-shell-footer--small\s*\{/);
