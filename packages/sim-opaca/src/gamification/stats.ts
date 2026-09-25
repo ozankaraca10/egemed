@@ -2,6 +2,7 @@
 
 import type { EarnedBadge, LearnActivity } from "@egemed/gamification-core";
 import { computeStreak, levelForXp, totalXpFor } from "@egemed/gamification-core";
+import type { OpacaStats as OpacaBadgeStats } from "@egemed/gami-catalogs";
 import { FINDINGS, LIBRARY_ITEMS } from "../data/terminology";
 import type { OpacaAttemptRecord } from "./attempt";
 import { CT_STACKS_ITEM_KEY } from "./attempt";
@@ -19,26 +20,12 @@ export const TOPIC_BADGE_MATCH: Record<string, (findingId: string) => boolean> =
   vascular: (id) => FINDINGS[id]?.group === "vascular",
 };
 
-export interface OpacaStats {
+/** UI'nin tükettiği tam istatistik: rozet alanları `@egemed/gami-catalogs`'tan (ADR-008),
+ *  XP/düzey/seri/rozet sayısı sim'e özgü kalan alanlar. */
+export interface OpacaStats extends OpacaBadgeStats {
   totalXp: number;
   level: number;
   streakCurrent: number;
-  streakLongest: number;
-  assessmentCount: number;
-  practiceCaseTotal: number;
-  localizationHits: number;
-  abcdeCompleteCount: number;
-  qualityCorrect: number;
-  interpretationCorrect: number;
-  fastPerfectCount: number;
-  bestAssessmentScore: number;
-  perfectSessionCount: number;
-  noHintPracticeSessionCount: number;
-  topicCorrect: Record<string, number>;
-  learnTopicsCount: number;
-  ctStacksCompletedCount: number;
-  allTopicsCoveredCount: number;
-  allTopicsTotal: number;
   earnedBadgeCount: number;
 }
 

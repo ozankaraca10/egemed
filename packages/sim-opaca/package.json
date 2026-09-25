@@ -16,6 +16,7 @@
     "react-dom": "^19"
   },
   "dependencies": {
+    "@egemed/gami-catalogs": "workspace:*",
     "@egemed/gamification-core": "workspace:*",
     "@egemed/sim-host": "workspace:*",
     "@egemed/tokens": "workspace:*"

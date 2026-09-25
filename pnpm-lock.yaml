@@ -177,6 +177,9 @@ importers:
 
   packages/sim-opaca:
     dependencies:
+      '@egemed/gami-catalogs':
+        specifier: workspace:*
+        version: link:../gami-catalogs
       '@egemed/gamification-core':
         specifier: workspace:*
         version: link:../gamification-core
