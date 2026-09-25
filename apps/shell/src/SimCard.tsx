@@ -1,6 +1,7 @@
 import type { JSX } from "react";
 import { Card } from "@egemed/ui";
 import { t } from "@egemed/ui/i18n";
+import { prefetchSimModule } from "./sims/loaders";
 
 /** Simülatör kimlikleri; sıra AGENTS.md'deki Pulse → Ausculta → Opaca sırasıdır. */
 export const SIM_IDS = ["pulse", "ausculta", "opaca"] as const;
@@ -79,7 +80,13 @@ export function SimCard({
         <p className="eg-shell-sim__body">{t(`sims.${id}.body`)}</p>
         {denied ? <p className="eg-shell-sim__noaccess">{t("sims.access.none")}</p> : null}
         {href === undefined ? null : (
-          <a className="eg-shell-sim__link" href={href}>
+          <a
+            className="eg-shell-sim__link"
+            href={href}
+            onFocus={() => prefetchSimModule(id)}
+            onMouseEnter={() => prefetchSimModule(id)}
+            onTouchStart={() => prefetchSimModule(id)}
+          >
             {t("sims.open")}
           </a>
         )}

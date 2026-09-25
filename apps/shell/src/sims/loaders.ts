@@ -17,3 +17,18 @@ const SIM_CHUNKS: Record<SimulatorId, SimChunkLoader> = {
 
 /** `SimModuleLoader`: istenen simin lazy modülünü döndürür. */
 export const loadSimModule: SimModuleLoader = (simId) => SIM_CHUNKS[simId]();
+
+const prefetched = new Set<SimulatorId>();
+
+/**
+ * Yumuşak geçiş: kullanıcı sim kartına yaklaştığında (üzerine gelme, odak,
+ * dokunma başlangıcı) modülün lazy chunk'ı önceden indirilir; rota açılınca
+ * iskelet neredeyse görünmez. Hata sessizdir; asıl yükleme yine dener.
+ */
+export function prefetchSimModule(simId: SimulatorId): void {
+  if (prefetched.has(simId)) return;
+  prefetched.add(simId);
+  void SIM_CHUNKS[simId]().catch(() => {
+    prefetched.delete(simId);
+  });
+}
