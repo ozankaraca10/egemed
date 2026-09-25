@@ -7,7 +7,7 @@ modüller olarak sunan, mobil uyumlu bir tıp eğitimi uygulamasıdır. Eski mod
 
 > Bu dosya repoya yeni gelen bir insanın veya yapay zekâ ajanının **her şeyi buradan başlayarak anlayabilmesi** için yazılmıştır.
 > Bağlayıcı kurallar `AGENTS.md`'dedir; kararlar `docs/adr/`, planlar `docs/specs/` içindedir. Bu README onların haritasıdır ve
-> düzenli güncellenir (son güncelleme: 24 Eylül 2026).
+> düzenli güncellenir (son güncelleme: 25 Eylül 2026).
 
 ---
 
@@ -33,13 +33,14 @@ yönetici `#/giris/admin` → `admin` / `egemed`; test öğrencisi `#/giris/test
 
 | Yol | Ne | Not |
 |---|---|---|
-| `apps/shell` | React 19 + Vite 8 **web kabuğu**: üst bar/alt sekme, hash yönlendirici, ana sayfa (dashboard), simülatörler sayfası, giriş ekranları, `/admin` taslağı, sim rotaları (`#/sims/<id>`) | Metinler `packages/ui/i18n/tr.ts`'ten; renkler `packages/tokens` |
-| `apps/api` | Hono + PostgreSQL API (ADR-002): migration'lar (`migrations/`; append-only denetim tetikleyicisi), oturum/CSRF, admin uçları (`/admin/users`, toplu işlem, CSV içe aktarma, rol, `/admin/audit`), `/me/gamification` (sim erişimi ve sunucu XP'si; migration 005), `migrate:up` ve `seed:admin`; SSO adaptör iskeleti | SSO protokolü kararı bekliyor |
-| `packages/sim-host` | **SimHost sözleşmesi**: `mount(target, context) → dispose`, lazy yükleme, epoch iptali, tek etkin oturum | Tüm simler bu sözleşmeyle bağlanır |
+| `apps/shell` | React 19 + Vite 8 **web kabuğu**: üst bar/alt sekme, hash yönlendirici, ana sayfa (dashboard), simülatörler sayfası, giriş ekranları, `/admin` taslağı, sim rotaları (`#/sims/<id>`; birleşik bar, ana gezinme/footer yok) | Metinler `packages/ui/i18n/tr.ts`'ten; renkler `packages/tokens` |
+| `apps/api` | Hono + PostgreSQL API (ADR-002): migration'lar (`migrations/`; append-only denetim tetikleyicisi), oturum/CSRF, admin uçları (`/admin/users`, toplu işlem, CSV içe aktarma, rol, `/admin/audit`), `/me/gamification` (sim erişimi, sunucu XP'si ve rozet değerlendirmesi; migration 005 + ADR-008), `/me/preferences` (liderlik görünürlüğü; migration 006), `migrate:up` ve `seed:admin`; SSO adaptör iskeleti | SSO protokolü kararı bekliyor |
+| `packages/sim-host` | **SimHost sözleşmesi**: `mount(target, context) → dispose`, lazy yükleme, epoch iptali, tek etkin oturum, birleşik bar kanalı (`SimChrome`/`setChrome`) | Tüm simler bu sözleşmeyle bağlanır |
 | `packages/sim-opaca` | Opaca modülü: çekirdek, veri, UI ve SimHost adaptörü | Kabukta canlı; röntgen `public/assets/xray/runtime/` git dışı, `sync:xray` ile yerel kaynaktan alınır |
-| `packages/sim-pulse` | Pulse modülü: kaynak runtime (`src/runtime/host.ts`, `module.ts`, `gami.ts`, `vendor/`) ile EKG motoru, durum ve müfredat; eski `src/mount.ts` + `ui/*` ekranları kabukta kullanılmıyor | Kabukta canlı; vendor dosyaları `pnpm --filter @egemed/sim-pulse sync:runtime` ile kaynaktan üretilir |
-| `packages/sim-ausculta` | Ausculta modülü: çekirdek, ses motoru, store/runtime, UI, ekranlar ve SimHost adaptörü | Adaptör hazır; ses varlıkları git dışı, `sync:audio` ile yerel kaynaktan alınır |
+| `packages/sim-pulse` | Pulse modülü: kaynak runtime (`src/runtime/host.ts`, `module.ts`, `chrome.ts`, `gami.ts`, `vendor/`) ile EKG motoru, durum ve müfredat; eski `src/mount.ts` + `ui/*` ekranları kabukta kullanılmıyor | Kabukta canlı; vendor dosyaları `pnpm --filter @egemed/sim-pulse sync:runtime` ile kaynaktan üretilir |
+| `packages/sim-ausculta` | Ausculta modülü: çekirdek, ses motoru, store/runtime, UI, ekranlar ve SimHost adaptörü | Kabukta canlı; ses varlıkları git dışı, `sync:audio` ile yerel kaynaktan alınır |
 | `packages/gamification-core` | **Sim-bağımsız oyunlaştırma çekirdeği**: XP, seviye, seri, haftalık hedef, zaman (Europe/Istanbul), jenerik rozet motoru, sıralama, ödül, grafik | Rozet kataloğu ve kurallar her simde ayrı (parametre) |
+| `packages/gami-catalogs` | Sime özgü rozet katalogları, kuralları ve kodlu deneme özeti/istatistiği (ADR-008; Pulse + Opaca); simler ve API aynı paketi kullanır | Ausculta kataloğu (S2) sırada |
 | `packages/contracts` | Paylaşılan sözleşmeler (zod): kimlik, kullanıcı, CSV içe aktarma, oyunlaştırma, hata kodları | API ve UI aynı şemayı kullanır |
 | `packages/api-client` | Tipli API istemcisi: `contracts` şemalarıyla yanıt doğrulama, CSRF başlığı, oturum/admin/içe aktarma/oyunlaştırma uçları | Kabuk veri kaynakları (admin, dashboard) buradan beslenir |
 | `packages/ui` | Ortak bileşenler (Card, Badge, Tabs, Table, Modal, ModeCard) + **Türkçe sözlük** `i18n/tr.ts` | Tüm arayüz metni buradan |
@@ -49,7 +50,7 @@ yönetici `#/giris/admin` → `admin` / `egemed`; test öğrencisi `#/giris/test
 | `tests/` | Vitest birim/sözleşme testleri (paket başına klasör) — DOM yok; `renderToStaticMarkup` + saf fonksiyonlar | `tests/config/*` yapı sözleşmeleri |
 | `e2e/` · `e2e-artifacts/` | Playwright + axe testleri ve her koşuya ait JSON özet/ekran görüntüsü çıktıları | `playwright.config.ts` dev (5199) ve prod önizleme (5198) sunucusu kurar; artefaktlar git dışıdır |
 | `infra/` · `infra/prod/` | Geliştirme Postgres/LRS compose'u; üretim API/Postgres compose'u, Dockerfile ve nginx örneği | Sırlar yalnız yerel env dosyalarında |
-| `docs/adr/` | Mimari karar kayıtları 001–007 | Durum: Önerildi / Kabul |
+| `docs/adr/` | Mimari karar kayıtları 001–008 | Durum: Önerildi / Kabul |
 | `docs/specs/` | Epik ve plan belgeleri (E0–E3) | Aşağıda §5 |
 | `docs/agentic/` | Ajan devir/kurulum notları (`CODEX-DEVIR.md`) | Tarihsel bağlam |
 | `docs/ops/` · `docs/audits/` | Üretim işletim kılavuzu ve denetim raporları (güvenlik, test bulguları) | Yayın hazırlığı ve denetim kaydı |
@@ -70,8 +71,10 @@ yönetici `#/giris/admin` → `admin` / `egemed`; test öğrencisi `#/giris/test
 - **Veri izolasyonu:** Simler arası durum veya veri birleştirilmez; her kayıt/ifade tek `SimulatorId` taşır. Dashboard simleri
   **sekmelerle** ayrı gösterir, toplam puan üretmez.
 - **Gömülü mod:** Sim modülleri platform içinde kendi üst bar/footer'ını çizmez (tek üst bar kuralı); sim kapsayıcısı React çocuğu
-  içermez (vanilla modül güvenle `appendChild`/temizlik yapar). Kaynak Pulse'un ilk girişte açtığı kalıcı tam ekran önerisi gömülü
-  modda kapalıdır (`pulse.fsPromptDone` varsayılanı); tam ekran düğmesi kalır.
+  içermez (vanilla modül güvenle `appendChild`/temizlik yapar). Birleşik bar kararıyla (25 Eylül) sim rotasında bar EGEMED barıdır:
+  simler adım/çip/eylemlerini `SimHost` kanalıyla (`setChrome`, `SimChrome`) kabuğa yazar; Pulse kaynağının açılış sayfası atlanır
+  ve kaynak üst çubuğu/footer'ı gizlenir (`packages/sim-pulse/src/runtime/chrome.ts`). Kaynak Pulse'un ilk girişte açtığı kalıcı tam
+  ekran önerisi gömülü modda kapalıdır (`pulse.fsPromptDone` varsayılanı); tam ekran düğmesi barın eylemi olarak kalır.
 - **Kimlik ve veri (ADR-007, Kabul):** EGEMED kullanıcı kaydı tutar; kullanıcıları admin kaydeder (tek tek ve toplu CSV); giriş tipi
   **SSO** (protokol henüz belirlenmedi; o zamana kadar geliştirme sağlayıcısı). EGEMED parola saklamaz. Roller şimdilik yalnız
   **admin** ve **kullanıcı** (diğerleri park edildi). Oyunlaştırma verisi EGEMED veritabanında kullanıcı×sim başına tutulur.
@@ -94,8 +97,9 @@ Her simülatör aynı öğrenme döngüsünü izler (framework `docs/03-mod-akis
 Bağlayıcı kurallar: **kilit ≠ öneri** (mod sırası önerilir, gönderim hiçbir zaman gizli kilide bağlanmaz); seçenek sırası madde
 kimliğinden tohumlanır; stem bulguyu anlatmaz, arayüz ipucu sızdırmaz; geri bildirim doğru/yanlış + çeldirici açıklaması içerir;
 çeldiriciler yalnız "yok" olduğu kanıtlanmış bulgulardan seçilir. **Oyunlaştırma** üç simde de vardır: aynı mantık
-(`gamification-core`), sim başına farklı rozet ve hedefler; kullanıcı ilerlemesini hem modül içinden hem ana sayfa dashboard'undan
-(sim sekmeleri) izler.
+(`gamification-core`) ve aynı tasarım (referans Opaca; ortak bileşen paketi U3 planı), sim başına farklı rozet ve hedefler;
+kullanıcı ilerlemesini hem modül içinden hem ana sayfa dashboard'undan (sim sekmeleri) izler. Simler arası toplam puan/sıralama
+üretilmez (ADR-006).
 
 ---
 
@@ -111,12 +115,15 @@ kimliğinden tohumlanır; stem bulguyu anlatmaz, arayüz ipucu sızdırmaz; geri
 | `docs/specs/E2-pulse-port-inventory.md` | Pulse port dilimleri (S0a–S15b), bayt/40 boyut yöntemi |
 | `docs/specs/E3-kullanici-yonetimi.md` | Kimlik akışı, DB şeması, API, 8 ekran (dashboard dahil), CSV şablonu, uygulama dilimleri T60–T76 |
 | `docs/audits/2026-09-24-TEST-BULGULARI-VE-GOREVLER.md` | 24 Eylül test denetimi bulguları ve açık görev listesi (PULSE-00…11, PLATFORM-01…04, API-01…07, TEST-01, KAYNAK-01) |
-| `docs/adr/001…007` | Monorepo, yığın (Hono/Postgres), gömme (geçersiz), LRS, kimlik (007 ile güncellendi), tek platform, kullanıcı verisi |
+| `docs/adr/001…008` | Monorepo, yığın (Hono/Postgres), gömme (geçersiz), LRS, kimlik (007 ile güncellendi), tek platform, kullanıcı verisi, rozetler sunucuda (008, Öneri) |
 
 ### Alınan önemli kararlar (depo sahibi)
 - **K-P1:** simler `packages/sim-<id>` altında.
+- **UX (25 Eylül):** kabuk + simler yek vücut. Sim rotasında EGEMED barı simin barıdır (konum, tek `h1`, adım göstergesi, çipler,
+  eylemler); sim tam alan ve çerçevesiz, ana gezinme ve footer yok. Dar ekranda (<768) bar kademeli: geri + başlık + eylem simgeleri.
 - **Opaca:** röntgen görselleri yerel kopyadan (git dışı); import/SCORM betik hattı taşınmaz, platform hedefi 153 çalışma zamanı testi.
-- **Oyunlaştırma:** üç simde; çekirdek `gamification-core`, rozet/hedef sim başına.
+- **Oyunlaştırma:** üç simde; çekirdek `gamification-core`, rozet/hedef sim başına, tasarım ortak (U3). Liderlik tablosu katılımı
+  kullanıcı tercihidir (opt-out; `users.leaderboard_visible`): çıkan kullanıcı başkalarının listesinde görünmez, kendi satırını görür.
 - **ADR-007 kabul;** onaylı bağımlılıklar: `pg`, `node-pg-migrate`, `zod`, `@playwright/test`, `@axe-core/playwright`.
 - **Roller:** yalnız admin + kullanıcı. **Görsel dil:** `egemed-sim-ui-ux-framework` bileşenleri ve renk kartelası; yeni renk yok.
 
@@ -143,33 +150,47 @@ uygulanması.
 
 ---
 
-## 7. Durum (24 Eylül 2026, akşam)
+## 7. Durum (25 Eylül 2026)
 
+- **UX — birleşik kabuk (25 Eylül):** sim rotasında EGEMED barı simin barıdır (`apps/shell/src/SimBar.tsx`): konum
+  ("Simülatörler › Sim"), tek `h1`, adım göstergesi, çipler ve simin eylemleri. Simler kendi üst barını çizmez; adım/çip/eylemleri
+  `SimHost` `setChrome` kanalıyla (`SimChrome`) bara yazar. Sim tam alan ve çerçevesiz; sim rotasında ana gezinme ve footer yok
+  (`ShellLayout.tsx`). Dar ekranda (<768 px) bar kademeli: geri + başlık + eylem simgeleri. Pulse kaynağının açılış sayfası
+  platformda atlanır (`CardAILanding.enter`), kaynak üst çubuğu/footer'ı gizlenir (`packages/sim-pulse/src/runtime/chrome.ts`).
+  Opaca/Ausculta birleşik bar uyarlaması T108 ile sürüyor.
 - **Opaca:** port tamam ve kabukta canlı (`#/sims/opaca`); röntgen görselleri git dışı yerel kaynaktan `sync:xray` ile alınır.
   Kayıtlar kullanıcı×sim ad alanında tutulur (`egemed:u:<actorId>:opaca:`; anonimde `egemed:anon:opaca:`).
 - **Pulse:** kabukta canlı (`#/sims/pulse`); platform kaynak runtime'ı EGEMED_PULSE/cardai betiklerini değiştirmeden gölge DOM'da
   çalıştırır (`packages/sim-pulse/src/runtime/host.ts`, `module.ts`, `vendor/`). Vendor dosyaları
   `pnpm --filter @egemed/sim-pulse sync:runtime` ile kaynaktan üretilir; kaynaktan bilinçli sapmalar yalnız
   `vendor/manifest.json`'daki yamalardır. Oyunlaştırma köprüsü (`src/runtime/gami.ts`) kaynağın kendi kayıt çağrısını izler;
-  görünür tek ek, üst çubuktaki **İlerlemem** düğmesi/diyaloğu ve sonuç ekranındaki kazanım kartıdır. Kaynağın yerel liderlik
+  görünür tek ek, birleşik bardaki **İlerlemem** eylemi/diyaloğu ve sonuç ekranındaki kazanım kartıdır. Kaynağın yerel liderlik
   tablosu demo akran verisi içerdiği için gösterilmez (gerçek sıralama API'den gelecektir). Kayıtlar kullanıcı×sim ad alanında
   tutulur (`egemed:u:<actorId>:pulse:`; anonimde `egemed:anon:pulse:`) ve SimHost `release(token)` ertelenen temizliğin yeni mount'u
-  iptal etmesini önler (PLATFORM-01). Eski `src/mount.ts` ve `ui/*` ekranları kabukta kullanılmıyor; müfredattaki T04 kaynak
-  bulgusu testte `it.fails`, insan kararı bekliyor.
-- **Ausculta:** çekirdek, ses, store/runtime, UI ve ekranlar ile SimHost adaptörü hazır. Kabuk lazy rotasına henüz bağlanmadı;
-  mevcut rota yer tutucu gösteriyor. Kayıtlar kullanıcı×sim ad alanında tutulur (`egemed:u:<actorId>:ausculta:`; anonimde
-  `egemed:anon:ausculta:`). Ses varlıkları `sync:audio` ile git-dışı yerel kaynaktan alınır.
+  iptal etmesini önler (PLATFORM-01). KAYNAK-01 düzeltildi: sınav başarısı 80 puan eşiğine bağlıdır, modül tamamlama ayrı not
+  olarak gösterilir (T105; `e2e/pulse-runtime.spec.ts`). Eski `src/mount.ts` ve `ui/*` ekranları kabukta kullanılmıyor;
+  müfredattaki T04 kaynak bulgusu testte `it.fails`, insan kararı bekliyor.
+- **Ausculta:** çekirdek, ses, store/runtime, UI ve ekranlar ile SimHost adaptörü hazır; kabukta canlı (`#/sims/ausculta`, T14e).
+  Kayıtlar kullanıcı×sim ad alanında tutulur (`egemed:u:<actorId>:ausculta:`; anonimde `egemed:anon:ausculta:`). Ses varlıkları
+  `sync:audio` ile git-dışı yerel kaynaktan alınır.
 - **Platform API:** Hono/PostgreSQL, migration'lar, oturum/CSRF, admin kullanıcı ve denetim uçları, oyunlaştırma ve seed akışı
   mevcut. `/me/gamification` uçlarında sim erişimi her istekte DB'den doğrulanır; erişimi olmayan sim 403 `forbidden`, bilinmeyen
   sim 404 döner (API-03; `seed:dev` yöneticisi tüm simlere erişir). Deneme yazma kullanıcı×sim kapsamında idempotenttir: aynı `id`
   farklı gövdeyle veya aynı `attemptNo` başka istemci kimliğiyle gelirse 409 `conflict` (API-04). XP sunucuda hesaplanır —
   migration 005 `gami_attempts`e `mode/case_count/hints_used/xp` ekler, üç simde ortak `DEFAULT_RULES` geçerlidir ve deneme ile
-  profil XP/düzey/seri tek SQL ifadesinde yazılır; istemcinin kodlu özetindeki `xp` yetkili değildir (API-05). Üretim
-  compose/Dockerfile/nginx yapılandırması `infra/prod/`, işletim adımları `docs/ops/ISLETIM.md` içindedir; yayın hazırlığı sürüyor
-  ve SSO protokolü kararı bekliyor.
+  profil XP/düzey/seri tek SQL ifadesinde yazılır; istemcinin kodlu özetindeki `xp` yetkili değildir (API-05). Rozetler sunucuda
+  değerlendirilir: yeni deneme yazılınca `@egemed/gami-catalogs` kataloğuyla (`SIM_BADGE_EVALUATORS`) kodlu özetten istatistik
+  türetilir ve rozet satırları idempotent yazılır (ADR-008 S1–S3; Pulse T101/T103, Opaca T104). Liderlik tablosu katılımı
+  `GET/PATCH /me/preferences` ile yönetilir (migration 006, `users.leaderboard_visible`); opt-out kullanıcı başkalarının
+  listesinde görünmez, kendi satırını görür (T100). Üretim compose/Dockerfile/nginx yapılandırması `infra/prod/`, işletim adımları
+  `docs/ops/ISLETIM.md` içindedir; yayın hazırlığı sürüyor ve SSO protokolü kararı bekliyor.
 - **Kabuk veri kaynakları:** Admin ve ana sayfa (dashboard) sayfaları API oturumunda gerçek uçlara bağlanır
   (`apps/shell/src/dataSources.ts`, `apiShellSources.ts`); sahte `1450` XP sentetiği yalnız sahte dev oturumunda kalır
-  (PLATFORM-02).
+  (PLATFORM-02). Dashboard'daki liderlik görünürlüğü anahtarı API tercihini yazar (T106). API-03 UI kapısı: erişimi olmayan
+  sim rotası hiç mount edilmez, erişim reddi sayfası gösterilir (`SimRoute.tsx`, `allowed`).
+- **Erişilebilirlik (PULSE-10):** Pulse iç ekranları (`e2e/pulse-a11y.spec.ts`) 360/768/1440'ta axe ve 44 px dokunma hedefi
+  kapısından geçer; kaynaktan devralınan ihlaller `e2e/pulse-a11y-allowlist.json` ile izlenir ve liste yalnız küçülür.
+  Kaynak yeşili WCAG AA için koyulaştırıldı (`--green-600: #15803d`, birleşik bar uyarlaması T102).
 - **E2E:** Playwright + axe her koşuda JSON özeti ve ekran görüntülerini `e2e-artifacts/<run-id>/` altına yazar. README'deki
   önceki 77/80 sonucu tarihsel koşuya aittir; güncel yayın kapısı olarak değerlendirilmemelidir.
 - **24 Eylül geri almaları:** Impeccable beceri/referans paketi (T76) ve arayüz denetimi belgeleri (T77; `DESIGN.md`,
@@ -179,6 +200,10 @@ uygulanması.
 
 ## CI
 
-`dev` dalına push ve `dev`'i hedefleyen PR'larda GitHub Actions `gates` işi `pnpm turbo run lint typecheck test` kapısını çalıştırır
-(`.github/workflows/ci.yml`). Node sürümü `.nvmrc`'den, pnpm sürümü `packageManager`'dan okunur; bağımlılıklar `--frozen-lockfile` ile
-kurulur, eylemler commit SHA'sına sabitlidir. Branch protection depo sahibinin adımıdır (`CI / gates` zorunlu). e2e henüz CI'da değil.
+`dev` dalına push ve `dev`'i hedefleyen PR'larda GitHub Actions (`.github/workflows/ci.yml`) dört iş çalıştırır: `gates`
+(`pnpm turbo run lint typecheck test`), `e2e` (Playwright mobil, axe), `api-e2e` (gerçek API + PostgreSQL; migration + `seed:dev`
+sonrası `pnpm e2e:api`) ve `api-db` (migration turu). Artefaktlar (`e2e-artifacts/`, `playwright-report/`, `api-e2e.log`) her
+koşuda yüklenir. Node sürümü `.nvmrc`'den, pnpm sürümü `packageManager`'dan okunur; bağımlılıklar `--frozen-lockfile` ile kurulur,
+eylemler commit SHA'sına sabitlidir. **Risk:** git-dışı sim varlıkları (Opaca xray, Ausculta ses) CI'da yoktur; bu varlıklara
+bağlı e2e senaryoları CI'da tam doğrulanamaz (bkz. `docs/ops/ISLETIM.md` §8). Branch protection depo sahibinin adımıdır
+(`CI / gates` zorunlu).
