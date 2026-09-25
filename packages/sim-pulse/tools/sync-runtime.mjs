@@ -76,6 +76,12 @@ const PATCHES = {
       find: "form.querySelectorAll('label.opt').forEach((label,j)=>label.setAttribute('aria-checked',String(j===state.answers[i])));",
       replace: "",
     },
+    {
+      id: "PULSE-ADR006-SCORM-TEXT",
+      why: "ADR-006 ile SCORM/iframe LMS modeli kalktı; platform kendi API'siyle ilerlemeyi kaydeder. Sınav mod kartındaki kullanıcıya görünen 'SCORM puanı' ifadesi öğrenciyi artık var olmayan bir SCORM kaydına yönlendirmesin diye nötr bir ifadeyle değiştirilir.",
+      find: "SCORM puanı",
+      replace: "Puan kaydedilir",
+    },
   ],
   model: [
     {

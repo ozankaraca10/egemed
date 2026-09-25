@@ -87,6 +87,12 @@
       "why": "Rolü kaldırılan etikette aria-checked geçersiz olur (aria-allowed-attr); seçim durumu yerel girdide kalır."
     },
     {
+      "file": "app.js",
+      "id": "PULSE-ADR006-SCORM-TEXT",
+      "matches": 1,
+      "why": "ADR-006 ile SCORM/iframe LMS modeli kalktı; platform kendi API'siyle ilerlemeyi kaydeder. Sınav mod kartındaki kullanıcıya görünen 'SCORM puanı' ifadesi öğrenciyi artık var olmayan bir SCORM kaydına yönlendirmesin diye nötr bir ifadeyle değiştirilir."
+    },
+    {
       "file": "features.js",
       "id": "PULSE-ASSET-BASE",
       "matches": 1,
