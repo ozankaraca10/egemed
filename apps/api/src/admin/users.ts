@@ -942,6 +942,9 @@ export function registerAdminUserRoutes(app: Hono<AppEnv>, deps: AdminDeps, now:
   app.post("/admin/users/:id/suspend", async (c) => {
     const existing = await findLivingUser(c, userIdFrom(c));
     if (existing === null) return jsonError(c, "not_found");
+    // T149 kilitlenme koruması: admin kendi hesabını askıya alamaz; eylemi yapan aktif
+    // admin kaldığı için sistemde her zaman en az bir aktif admin olur (E3 §b).
+    if (existing.id === c.get("adminActor").userId) return jsonError(c, "role_not_permitted");
     const at = now();
     if (existing.status !== "suspended") {
       await deps.users.setStatus(existing.id, existing.institutionId, {
@@ -992,6 +995,8 @@ export function registerAdminUserRoutes(app: Hono<AppEnv>, deps: AdminDeps, now:
     const record = await loadScopedUser(c, userIdFrom(c));
     if (record === null) return jsonError(c, "not_found");
     if (record.status === "deleted") return jsonError(c, "already_deleted");
+    // T149 kilitlenme koruması: admin kendi hesabını silemez.
+    if (record.id === c.get("adminActor").userId) return jsonError(c, "role_not_permitted");
     const at = now();
     await deps.users.setStatus(record.id, record.institutionId, {
       status: "deleted",

@@ -10,7 +10,7 @@ import {
   type GamiPeriod,
   type SimId,
 } from "@egemed/contracts";
-import { SIM_BADGE_EVALUATORS } from "@egemed/gami-catalogs";
+import { SIM_BADGE_EVALUATORS, opacaDayIndex } from "@egemed/gami-catalogs";
 import { DEFAULT_RULES, assessmentXp, practiceXp, type Period } from "@egemed/gamification-core";
 import {
   buildLeaderboardRows,
@@ -21,6 +21,7 @@ import {
 } from "./leaderboard";
 import { jsonError, validationDetails, type AppEnv } from "../http";
 import { csrfGuard, type AuthDeps } from "../auth/routes";
+import { createLoginRateLimiter } from "../auth/rate-limit";
 import { SESSION_COOKIE, createSessionService } from "../auth/session";
 import { toIstanbulIso } from "../admin/users";
 
@@ -387,7 +388,8 @@ export function createPgGamificationRepo(db: GamiDb): GamificationRepo {
             input.caseCount,
             input.hintsUsed,
             serverAttemptXp(input),
-            trDate(input.finishedAt),
+            // T149: seri günü sunucunun alım zamanından (istemci saati seri üretemez/donduramaz).
+            trDate(input.createdAt),
             DEFAULT_RULES.level.unitXp,
           ],
         );
@@ -819,7 +821,8 @@ export function createMemoryGamificationRepo(
       };
       profile.xp += xp;
       profile.level = levelForXpClosedForm(profile.xp);
-      profile.streak = nextStreak(profile.streak, trDate(input.finishedAt));
+      // T149: seri günü sunucunun alım zamanından; yalnız ilk yazımda güncellenir (idempotent).
+      profile.streak = nextStreak(profile.streak, trDate(input.createdAt));
       profile.updatedAt = input.createdAt;
       profiles.set(key, profile);
       // ADR-008: rozetler PG yoluyla aynı kuralla özetlerden değerlendirilir.
@@ -979,11 +982,35 @@ function isScoreIssue(error: { readonly issues: readonly { readonly message: str
   return error.issues.some((issue) => issue.message === "score_exceeds_max");
 }
 
+/** T149: deneme `finishedAt` kabul penceresi (sunucu saatine göre). */
+export const ATTEMPT_CLOCK_SKEW_MS = 5 * 60 * 1000;
+export const ATTEMPT_MAX_AGE_MS = 48 * 60 * 60 * 1000;
+/** T149: kullanıcı başına saatlik deneme yazımı üst sınırı (XP şişirmesine karşı). */
+export const ATTEMPT_RATE_MAX = 60;
+export const ATTEMPT_RATE_WINDOW_MS = 60 * 60 * 1000;
+/** Kabuğun genel kodları (`codedAttemptSummary`); diğer kodlar yalnız `<simId>.` önekli olabilir. */
+const GENERIC_SUMMARY_KEYS: ReadonlySet<string> = new Set(["score", "correct", "total"]);
+
+/**
+ * Gün kodu istemci beyanı değildir: `opaca.day` varsa deneme `finishedAt`'inden yeniden
+ * hesaplanır (idempotent tekrarlarda aynı değer). Sahte gün koduyla seri rozeti üretilemez.
+ */
+export function anchorSummaryDay(
+  simId: string,
+  summary: Readonly<Record<string, number>>,
+  finishedAt: number,
+): Record<string, number> {
+  const key = `${simId}.day`;
+  if (simId !== "opaca" || !(key in summary)) return { ...summary };
+  return { ...summary, [key]: opacaDayIndex(new Date(finishedAt)) };
+}
+
 export function registerMeGamificationRoutes(
   app: Hono<AppEnv>,
   deps: MeGamificationDeps,
   now: () => number,
 ): void {
+  const attemptRate = createLoginRateLimiter(deps.auth.attemptRateMax ?? ATTEMPT_RATE_MAX, ATTEMPT_RATE_WINDOW_MS);
   const sessions = createSessionService({
     sessions: deps.auth.sessions,
     now,
@@ -1091,6 +1118,25 @@ export function registerMeGamificationRoutes(
         : jsonError(c, "invalid_request", validationDetails(parsed.error));
     }
     const actor = c.get("meActor");
+    const at = now();
+    // T149 (güvenlik denetimi): seri/gün tabanlı rozetler istemci saatine bağlanamaz.
+    // Gelecek tarihli deneme seriyi yıllarca dondururdu; geçmişe yayılan denemeler 30 günlük
+    // sahte seri üretiyordu. Kabul penceresi: son 48 saat, en fazla 5 dk saat kayması.
+    const finishedAt = new Date(parsed.data.finishedAt).getTime();
+    if (finishedAt > at + ATTEMPT_CLOCK_SKEW_MS) {
+      return jsonError(c, "validation_failed", { issues: [{ code: "finished_in_future", path: ["finishedAt"] }] });
+    }
+    if (finishedAt < at - ATTEMPT_MAX_AGE_MS) {
+      return jsonError(c, "validation_failed", { issues: [{ code: "finished_too_old", path: ["finishedAt"] }] });
+    }
+    const foreignKey = Object.keys(parsed.data.summary).find(
+      (key) => !GENERIC_SUMMARY_KEYS.has(key) && !key.startsWith(`${parsedSim.data}.`),
+    );
+    if (foreignKey !== undefined) {
+      return jsonError(c, "validation_failed", { issues: [{ code: "summary_key_not_allowed", path: ["summary", foreignKey] }] });
+    }
+    if (!attemptRate.consume(`attempt:${actor.userId}`, at)) return jsonError(c, "rate_limited");
+    const summary = anchorSummaryDay(parsedSim.data, parsed.data.summary, finishedAt);
     const result = await deps.gamification.writeAttempt({
       id: parsed.data.id,
       // Kimlik yalnız oturumdan gelir; gövdedeki hiçbir alan kullanıcıyı seçemez.
@@ -1102,8 +1148,8 @@ export function registerMeGamificationRoutes(
       score: parsed.data.score ?? null,
       maxScore: parsed.data.maxScore ?? null,
       passed: parsed.data.passed ?? null,
-      summary: parsed.data.summary,
-      createdAt: now(),
+      summary,
+      createdAt: at,
       institutionId: actor.institutionId,
       mode: parsed.data.mode ?? "assessment",
       caseCount: parsed.data.caseCount ?? 1,

@@ -25,6 +25,7 @@ const envSchema = z.object({
   // Giriş hız sınırı (T81): anahtar başına 15 dakikada deneme sayısı. Üretimde
   // varsayılan 8 kalmalı; e2e/CI aynı tohum kullanıcıyla sık giriş yaptığı için yükseltir.
   AUTH_LOGIN_RATE_MAX: z.coerce.number().int().min(1).max(1000).default(8),
+  ATTEMPT_RATE_MAX: z.coerce.number().int().min(1).max(10000).default(60),
   SESSION_ABSOLUTE_HOURS: z.coerce.number().int().min(1).max(168).default(12),
   // T64 — SSO adaptörü: protokol (§i) seçilene dek `none` kalır ve uçlar 404
   // döner. Seçim yapıldığında bu değer adaptörü belirler.
@@ -55,6 +56,7 @@ export function loadEnv(source: Record<string, string | undefined>): Env {
     AUTH_DEV_ENABLED: emptyAsUndefined(source.AUTH_DEV_ENABLED),
     SESSION_IDLE_MINUTES: emptyAsUndefined(source.SESSION_IDLE_MINUTES),
     AUTH_LOGIN_RATE_MAX: emptyAsUndefined(source.AUTH_LOGIN_RATE_MAX),
+    ATTEMPT_RATE_MAX: emptyAsUndefined(source.ATTEMPT_RATE_MAX),
     SESSION_ABSOLUTE_HOURS: emptyAsUndefined(source.SESSION_ABSOLUTE_HOURS),
     SSO_PROVIDER: emptyAsUndefined(source.SSO_PROVIDER),
     SSO_STATE_SECRET: emptyAsUndefined(source.SSO_STATE_SECRET),

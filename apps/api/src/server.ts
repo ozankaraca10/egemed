@@ -38,6 +38,7 @@ const auth = {
   nodeEnv: env.NODE_ENV,
   devEnabled: env.AUTH_DEV_ENABLED,
   loginRateMax: env.AUTH_LOGIN_RATE_MAX,
+  attemptRateMax: env.ATTEMPT_RATE_MAX,
   sessionIdleMs: env.SESSION_IDLE_MINUTES * 60_000,
   sessionAbsoluteMs: env.SESSION_ABSOLUTE_HOURS * 3_600_000,
   // T64 — SSO adaptörü protokol kararına bağlıdır (§i). Protokol seçilene dek

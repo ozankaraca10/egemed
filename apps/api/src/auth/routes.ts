@@ -40,6 +40,8 @@ export interface AuthDeps {
   readonly sessionAbsoluteMs: number;
   /** T81 giriş hız sınırı; verilmezse LOGIN_RATE_MAX (8). */
   readonly loginRateMax?: number;
+  /** T149 kullanıcı başına saatlik deneme yazımı sınırı; verilmezse ATTEMPT_RATE_MAX (60). */
+  readonly attemptRateMax?: number;
   /** T64 — SSO adaptörü; enjekte edilmezse `/auth/sso/*` uçları 404'tür. */
   readonly sso?: SsoDeps | null | undefined;
 }

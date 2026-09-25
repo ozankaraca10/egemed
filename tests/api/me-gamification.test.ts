@@ -118,7 +118,8 @@ function attemptBody(overrides: Record<string, unknown> = {}) {
     score: 80,
     maxScore: 100,
     passed: true,
-    summary: { ritim: 80, tani: 60 },
+    // Kabuğun genel kodları (`codedAttemptSummary`); T149'dan beri diğer kodlar `<simId>.` önekli olmalı.
+    summary: { score: 80, correct: 8, total: 10 },
     ...overrides,
   };
 }
@@ -270,7 +271,7 @@ describe("POST /me/gamification/:simId/attempts", () => {
     expect(created.status).toBe(201);
     const createdBody = (await created.json()) as { data: { attemptNo: number; summary: unknown } };
     expect(createdBody.data.attemptNo).toBe(3);
-    expect(createdBody.data.summary).toEqual({ ritim: 80, tani: 60 });
+    expect(createdBody.data.summary).toEqual({ score: 80, correct: 8, total: 10 });
     expect(testHarness.gamificationStore.attempts.size).toBe(4);
 
     const repeated = await postAttempt(testHarness, ali.headers, body);
@@ -475,7 +476,7 @@ describe("sunucu yetkili XP, düzey ve seri (API-05)", () => {
         method: "POST",
         headers: { ...ali.headers, "content-type": "application/json" },
         body: JSON.stringify(
-          attemptBody({ caseCount: 10, maxScore: 100, mode: "assessment", score: 80, summary: { xp: 999_999, ritim: 80 } }),
+          attemptBody({ caseCount: 10, maxScore: 100, mode: "assessment", score: 80, summary: { score: 80, "opaca.xp": 999_999 } }),
         ),
       });
     expect((await post()).status).toBe(201);

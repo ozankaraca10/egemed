@@ -21,6 +21,7 @@ const ERROR_STATUS_BY_CODE = {
   already_deleted: 409,
   validation_failed: 422,
   import_validation_failed: 422,
+  payload_too_large: 413,
   rate_limited: 429,
   internal_error: 500,
 } as const;
@@ -48,6 +49,7 @@ function groupCodesByStatus(): Readonly<Record<ErrorStatus, readonly ErrorCode[]
     403: [],
     404: [],
     409: [],
+    413: [],
     422: [],
     429: [],
     500: [],

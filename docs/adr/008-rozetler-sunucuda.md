@@ -49,3 +49,8 @@ ustalığı; Opaca/Ausculta: kendi alanları).
 - Rozetler hesap ve cihazlar arası kalıcıdır; istemci rozet üretemez.
 - Katalog değişikliği hem sim hem API sürümünü etkiler; paket tek kaynaktır.
 - Değerlendirme maliyeti kullanıcı×sim deneme sayısıyla doğrusal; deneme sayısı sınırlı tutulur.
+- Güven modeli (T149 güvenlik denetimi): kodlu özet ve puan istemci beyanıdır; sunucu oyun akışını yeniden
+  oynatmaz. Bu yüzden sunucu zamana dayalı kodları kendi saatine bağlar (seri günü alım gününden, `finishedAt`
+  48 saat/5 dk penceresi, `opaca.day` yeniden hesaplanır), özet kodlarını sime ve 64 anahtara sınırlar ve kullanıcı
+  başına saatlik deneme sınırı uygular. Kalan risk: kötü niyetli bir öğrenci puanı/kodları uydurarak kendi rozet
+  ve XP'sini şişirebilir (saatlik sınırla yavaşlar); bu biçimlendirici bir öğrenme ortamında kabul edilmiştir.

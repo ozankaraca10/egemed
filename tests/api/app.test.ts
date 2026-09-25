@@ -187,6 +187,7 @@ describe("ortam doğrulaması", () => {
       AUTH_DEV_ENABLED: false,
       SESSION_IDLE_MINUTES: 30,
       AUTH_LOGIN_RATE_MAX: 8,
+      ATTEMPT_RATE_MAX: 60,
       SESSION_ABSOLUTE_HOURS: 12,
       SSO_PROVIDER: "none",
     });

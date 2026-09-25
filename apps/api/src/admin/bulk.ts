@@ -247,6 +247,10 @@ export function registerAdminBulkRoutes(app: Hono<AppEnv>, deps: AdminDeps, now:
     }
     const actor = c.get("adminActor");
     const userIds = [...new Set(rawIds)];
+    // T149 kilitlenme koruması: toplu askıya almada eylemi yapan admin hedef olamaz.
+    if (operation === "set_status" && value === "suspended" && userIds.includes(actor.userId)) {
+      return jsonError(c, "role_not_permitted");
+    }
 
     if (operation === "set_unit" && value !== null) {
       const unit = await deps.users.findUnit(actor.institutionId, value);

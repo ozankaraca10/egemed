@@ -200,6 +200,17 @@ veritabanı `docker exec egemed-local-postgres-1 createdb ...` ile açılır,
 kapatılır. CI'da `api-db` işi aynı `test:db` komutunu çalıştırır; yeni test
 dosyaları include deseniyle kapsam içindedir, ayrı bir iş gerekmez.
 
+### Deneme yazımı korumaları (T149)
+
+Güvenlik denetimi (25 Eylül 2026) sonrası `POST /me/gamification/:simId/attempts` şu kuralları uygular:
+`finishedAt` son **48 saat** içinde ve en fazla **5 dk** ileride olmalıdır (`422 finished_in_future` /
+`finished_too_old`); seri günü istemci saatinden değil **sunucunun alım gününden** hesaplanır; özet kodları
+`score`/`correct`/`total` ya da `<simId>.` önekli olmalı ve en fazla 64 kod taşır; `opaca.day` sunucuda
+`finishedAt`'ten yeniden hesaplanır. Kullanıcı başına saatlik deneme sınırı `ATTEMPT_RATE_MAX` (1–10000;
+**varsayılan 60**; bellek içi, süreç başına) ile ayarlanır; aşımda `429 rate_limited`. İstek gövdesi 1 MB ile
+sınırlıdır (CSV içe aktarma ucu 3 MB); aşımda `413 payload_too_large`. Admin kendi hesabını askıya alamaz,
+silemez ve toplu askıya almaya dahil edemez (`403 role_not_permitted`).
+
 ### Giriş hız sınırı (T81; T124)
 
 Giriş hız sınırı kullanıcı adı başına **15 dakikada 8 denemedir** ve API
