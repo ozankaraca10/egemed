@@ -75,6 +75,18 @@
       "why": "Kaynak hatası: önbellek dışındaki kısa aralıkta between() aynı girdilerle kendini çağırıp yığın taşırıyor (~30 adım sonra). Port düzeltmesiyle (T18b-FIX, engine/beats.ts) aynı: taşan uçtan önbelleği yenile."
     },
     {
+      "file": "app.js",
+      "id": "PULSE-A11Y-QUIZ-OPT-ROLE",
+      "matches": 1,
+      "why": "Kaynak erişilebilirlik kusuru (PULSE-10): seçenek etiketi role=radio taşıyor ve içinde yerel radyo girdisi var (axe nested-interactive). Anlam ve klavye (ok tuşları) zaten yerel girdiden gelir; etiketteki rol ve aria-checked kaldırılır."
+    },
+    {
+      "file": "app.js",
+      "id": "PULSE-A11Y-QUIZ-OPT-SYNC",
+      "matches": 1,
+      "why": "Rolü kaldırılan etikette aria-checked geçersiz olur (aria-allowed-attr); seçim durumu yerel girdide kalır."
+    },
+    {
       "file": "features.js",
       "id": "PULSE-ASSET-BASE",
       "matches": 1,
@@ -91,6 +103,18 @@
       "id": "KAYNAK-01-MODULE-NOTE",
       "matches": 1,
       "why": "Modül tamamlama koşulu puan eşiğinden ayrı gösterilir (KAYNAK-01)."
+    },
+    {
+      "file": "features.js",
+      "id": "PULSE-A11Y-CASE-OPT-ROLE",
+      "matches": 1,
+      "why": "Kaynak erişilebilirlik kusuru (PULSE-10): seçenek etiketi role=radio taşıyor ve içinde yerel radyo girdisi var (axe nested-interactive). Anlam ve klavye (ok tuşları) zaten yerel girdiden gelir; etiketteki rol ve aria-checked kaldırılır."
+    },
+    {
+      "file": "features.js",
+      "id": "PULSE-A11Y-CASE-OPT-SYNC",
+      "matches": 1,
+      "why": "Rolü kaldırılan etikette aria-checked geçersiz olur (aria-allowed-attr); seçim durumu yerel girdide kalır."
     },
     {
       "file": "index.html",

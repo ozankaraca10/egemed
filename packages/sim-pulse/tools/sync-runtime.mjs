@@ -63,6 +63,20 @@ const ENV_NAMES = [
  * @type {Record<string, {id: string, why: string, find: string, replace: string, all?: boolean}[]>}
  */
 const PATCHES = {
+  app: [
+    {
+      id: "PULSE-A11Y-QUIZ-OPT-ROLE",
+      why: "Kaynak erişilebilirlik kusuru (PULSE-10): seçenek etiketi role=radio taşıyor ve içinde yerel radyo girdisi var (axe nested-interactive). Anlam ve klavye (ok tuşları) zaten yerel girdiden gelir; etiketteki rol ve aria-checked kaldırılır.",
+      find: ' role="radio" aria-checked="${state.answers[i]===j}"',
+      replace: "",
+    },
+    {
+      id: "PULSE-A11Y-QUIZ-OPT-SYNC",
+      why: "Rolü kaldırılan etikette aria-checked geçersiz olur (aria-allowed-attr); seçim durumu yerel girdide kalır.",
+      find: "form.querySelectorAll('label.opt').forEach((label,j)=>label.setAttribute('aria-checked',String(j===state.answers[i])));",
+      replace: "",
+    },
+  ],
   model: [
     {
       id: "PULSE-NEXTEVENT-RECURSION",
@@ -94,6 +108,18 @@ const PATCHES = {
       find: '<span class="rs-lbl">Durum (eşik 80)</span></div>`]',
       replace:
         '<span class="rs-lbl">Durum (eşik 80)</span>${moduleDone?\'\':\'<span class="rs-lbl" data-egemed-module-note>Modül henüz tamamlanmadı: tüm ritimleri inceleyip vakaları bitirin.</span>\'}</div>`]',
+    },
+    {
+      id: "PULSE-A11Y-CASE-OPT-ROLE",
+      why: "Kaynak erişilebilirlik kusuru (PULSE-10): seçenek etiketi role=radio taşıyor ve içinde yerel radyo girdisi var (axe nested-interactive). Anlam ve klavye (ok tuşları) zaten yerel girdiden gelir; etiketteki rol ve aria-checked kaldırılır.",
+      find: ' role="radio" aria-checked="${answer===j}"',
+      replace: "",
+    },
+    {
+      id: "PULSE-A11Y-CASE-OPT-SYNC",
+      why: "Rolü kaldırılan etikette aria-checked geçersiz olur (aria-allowed-attr); seçim durumu yerel girdide kalır.",
+      find: "$('casePager').querySelectorAll('label.opt').forEach((label,j)=>label.setAttribute('aria-checked',String(j===Number(input.value))));",
+      replace: "",
     },
   ],
 };
