@@ -710,12 +710,12 @@ html, body { margin: 0; }
 .eg-shell-simbar__backLabel { display: none; }
 .eg-shell-simbar__sep { display: none; color: var(--blue-300); }
 .eg-shell-simbar__title {
-  overflow: hidden; margin: 0; color: var(--card); font-size: var(--fs-lg); font-weight: 800;
+  flex: 0 0 auto; overflow: hidden; margin: 0; color: var(--card); font-size: var(--fs-lg); font-weight: 800;
   letter-spacing: .01em; text-overflow: ellipsis; white-space: nowrap;
 }
 .eg-shell-simbar__icon { flex: 0 0 auto; width: 1.25rem; height: 1.25rem; }
 .eg-shell-simbar__steps { display: none; align-items: center; gap: var(--sp-1); margin: 0 0 0 var(--sp-3); padding: 0; list-style: none; }
-.eg-shell-simbar__step { display: inline-flex; align-items: center; gap: var(--sp-1); color: var(--blue-200); font-size: var(--fs-xs); font-weight: 600; }
+.eg-shell-simbar__step { display: inline-flex; align-items: center; gap: var(--sp-1); color: var(--blue-200); font-size: var(--fs-xs); font-weight: 600; white-space: nowrap; }
 .eg-shell-simbar__step + .eg-shell-simbar__step::before {
   content: ""; display: inline-block; width: 1.25rem; height: 2px; margin-right: var(--sp-1);
   background: var(--navy-600); border-radius: var(--r-pill);
@@ -729,7 +729,7 @@ html, body { margin: 0; }
 .eg-shell-simbar__step--current .eg-shell-simbar__stepNum { background: var(--blue-600); border-color: var(--blue-300); color: var(--card); }
 .eg-shell-simbar__spacer { flex: 1 1 auto; }
 .eg-shell-simbar__chip {
-  display: none; flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; align-items: center; min-height: 1.75rem; padding: 0 var(--sp-2);
+  display: none; flex: 0 1 auto; min-width: 0; max-width: 13rem; overflow: hidden; text-overflow: ellipsis; align-items: center; min-height: 1.75rem; padding: 0 var(--sp-2);
   background: var(--navy-700); border: 1px solid var(--navy-600); border-radius: var(--r-pill);
   color: var(--card); font-size: var(--fs-xs); font-weight: 700; white-space: nowrap;
 }
@@ -766,9 +766,12 @@ html, body { margin: 0; }
   .eg-shell-session__dev { display: inline-flex; }
 }
 @media (min-width: 1280px) {
-  .eg-shell-simbar__chip { display: inline-flex; }
   .eg-shell-simbar__actionLabel { display: inline; }
   .eg-shell-header--sim .eg-shell-session__role { display: inline-flex; }
+}
+/* Çipler (mod, ilerleme) en geniş ekranda; bar önceliği: başlık > eylemler > adımlar > çipler. */
+@media (min-width: 1600px) {
+  .eg-shell-simbar__chip { display: inline-flex; }
 }
 @media (prefers-reduced-motion: reduce) {
   .eg-shell-sim-page__host { transition: none; }
