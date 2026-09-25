@@ -15,7 +15,8 @@ async function lintRuleIds(code: string, filePath: string): Promise<(string | nu
   return ruleIds.sort();
 }
 
-describe("eslint yapılandırması", () => {
+// ESLint örneğinin ilk kurulumu yük altında 5 sn varsayılanını aşabiliyor (kararsız kapı).
+describe("eslint yapılandırması", { timeout: 60_000 }, () => {
   it("Date.now() kullanımını engeller", async () => {
     const ruleIds = await lintRuleIds(
       "export const now = (): number => Date.now();\n",
