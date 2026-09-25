@@ -1,0 +1,373 @@
+{
+  "note": "T102/PULSE-10 — Pulse iç ekranlarında kaynaktan devralınmış erişilebilirlik borcu. Kayıtlar yalnız küçülür: düzeltilen bir kayıt testi 'düzeltildi — listeden çıkar' diye başarısız eder.",
+  "violations": [
+    {
+      "screen": "about",
+      "rule": "color-contrast",
+      "target": ".ds-card:nth-child(1) > dl > dt"
+    },
+    {
+      "screen": "about",
+      "rule": "color-contrast",
+      "target": ".ds-card:nth-child(2) > dl > dt"
+    },
+    {
+      "screen": "about",
+      "rule": "color-contrast",
+      "target": ".ds-card:nth-child(3) > dl > dt"
+    },
+    {
+      "screen": "about",
+      "rule": "color-contrast",
+      "target": ".ds-card:nth-child(4) > dl > dt"
+    },
+    {
+      "screen": "about",
+      "rule": "color-contrast",
+      "target": ".ds-card:nth-child(5) > dl > dt"
+    },
+    {
+      "screen": "about",
+      "rule": "color-contrast",
+      "target": ".ds-card:nth-child(6) > dl > dt"
+    },
+    {
+      "screen": "about",
+      "rule": "color-contrast",
+      "target": ".ds-card:nth-child(7) > dl > dt"
+    },
+    {
+      "screen": "about",
+      "rule": "color-contrast",
+      "target": ".ds-card:nth-child(8) > dl > dt"
+    },
+    {
+      "screen": "case",
+      "rule": "color-contrast",
+      "target": "#caseContinue"
+    },
+    {
+      "screen": "case",
+      "rule": "color-contrast",
+      "target": "section[aria-label=\"Vaka EKG sahnesi\"] > .stage-top > .stage-id"
+    },
+    {
+      "screen": "quiz",
+      "rule": "color-contrast",
+      "target": "section[aria-label=\"Soru EKG sahnesi\"] > .stage-top > .stage-id"
+    },
+    {
+      "screen": "quiz",
+      "rule": "nested-interactive",
+      "target": ".quiz-card > fieldset > .opt[role=\"radio\"]:nth-child(2)"
+    },
+    {
+      "screen": "quiz",
+      "rule": "nested-interactive",
+      "target": ".quiz-card > fieldset > .opt[role=\"radio\"]:nth-child(3)"
+    },
+    {
+      "screen": "quiz",
+      "rule": "nested-interactive",
+      "target": ".quiz-card > fieldset > .opt[role=\"radio\"]:nth-child(4)"
+    },
+    {
+      "screen": "quiz",
+      "rule": "nested-interactive",
+      "target": ".quiz-card > fieldset > .opt[role=\"radio\"]:nth-child(5)"
+    },
+    {
+      "screen": "quiz",
+      "rule": "nested-interactive",
+      "target": ".quiz-card > fieldset > .opt[role=\"radio\"]:nth-child(6)"
+    },
+    {
+      "screen": "results",
+      "rule": "scrollable-region-focusable",
+      "target": ".table-scroll",
+      "projects": [
+        "mobile-360"
+      ]
+    }
+  ],
+  "smallTargets": [
+    {
+      "screen": "about",
+      "selector": "#aboutContent > section.about-section:nth-of-type(*) > div.ds-grid > article.ds-card:nth-of-type(*) > dl > dd > a",
+      "size": "27x16"
+    },
+    {
+      "screen": "about",
+      "selector": "#aboutContent > section.about-section:nth-of-type(*) > div.inst-card > div > p.inst-evidence:nth-of-type(*) > span.inst-cite > a",
+      "size": "233x16"
+    },
+    {
+      "screen": "about",
+      "selector": "#aboutContent > section.about-section:nth-of-type(*) > div.inst-card > div > p.inst-evidence:nth-of-type(*) > sup > a",
+      "size": "17x13"
+    },
+    {
+      "screen": "about",
+      "selector": "#aboutView > div.results-actions:nth-of-type(*) > button.secondary-btn.back-sim",
+      "size": "69x37"
+    },
+    {
+      "screen": "about",
+      "selector": "#downloadReport",
+      "size": "136x37"
+    },
+    {
+      "screen": "about",
+      "selector": "#resetProgress",
+      "size": "133x37"
+    },
+    {
+      "screen": "case",
+      "selector": "#caseCaliperBtn",
+      "size": "74x32"
+    },
+    {
+      "screen": "case",
+      "selector": "#caseCompareBtn",
+      "size": "145x32"
+    },
+    {
+      "screen": "case",
+      "selector": "#caseExpand",
+      "size": "141x37"
+    },
+    {
+      "screen": "case",
+      "selector": "#caseGoQuestion",
+      "size": "91x32",
+      "projects": [
+        "mobile-360"
+      ]
+    },
+    {
+      "screen": "case",
+      "selector": "#caseNext",
+      "size": "121x36"
+    },
+    {
+      "screen": "case",
+      "selector": "#casePager > article.case-detail > section.stage-card:nth-of-type(*) > div.case-ecg-wrap:nth-of-type(*) > div.lead-chips:nth-of-type(*) > div.lead-chip-group:nth-of-type(*) > button.lead-chip:nth-of-type(*)",
+      "size": "24x30"
+    },
+    {
+      "screen": "case",
+      "selector": "#casePager > article.case-detail > section.stage-card:nth-of-type(*) > div.toolbar.case-toolbar:nth-of-type(*) > div.tool-group > span.zoom-group:nth-of-type(*) > button.tool-btn:nth-of-type(*)",
+      "size": "26x32"
+    },
+    {
+      "screen": "case",
+      "selector": "#casePrev",
+      "size": "117x36"
+    },
+    {
+      "screen": "case",
+      "selector": "#caseQuestionCard > fieldset.q-body > label.opt:nth-of-type(*) > input",
+      "size": "1x1"
+    },
+    {
+      "screen": "case",
+      "selector": "#newCaseSessionBar",
+      "size": "169x36"
+    },
+    {
+      "screen": "case",
+      "selector": "#retryCaseSessionBar",
+      "size": "177x36"
+    },
+    {
+      "screen": "gami",
+      "selector": "div.dialog-actions > button.btn.primary",
+      "size": "53x27"
+    },
+    {
+      "screen": "gami",
+      "selector": "section.card > button.btn.primary",
+      "size": "147x27"
+    },
+    {
+      "screen": "quiz",
+      "selector": "#checkBtn",
+      "size": "207x37"
+    },
+    {
+      "screen": "quiz",
+      "selector": "#newQuizSession",
+      "size": "178x37"
+    },
+    {
+      "screen": "quiz",
+      "selector": "#quizForm > article.quiz-item > section.case-side:nth-of-type(*) > article.q-card-dark.quiz-card:nth-of-type(*) > fieldset.q-body > label.opt:nth-of-type(*) > input",
+      "size": "1x1"
+    },
+    {
+      "screen": "quiz",
+      "selector": "#quizForm > article.quiz-item > section.stage-card:nth-of-type(*) > div.case-ecg-wrap:nth-of-type(*) > div.lead-chips:nth-of-type(*) > div.lead-chip-group:nth-of-type(*) > button.lead-chip:nth-of-type(*)",
+      "size": "24x30"
+    },
+    {
+      "screen": "quiz",
+      "selector": "#quizForm > article.quiz-item > section.stage-card:nth-of-type(*) > div.stage-top:nth-of-type(*) > span.zoom-group:nth-of-type(*) > button.tool-btn:nth-of-type(*)",
+      "size": "26x32"
+    },
+    {
+      "screen": "quiz",
+      "selector": "#quizNext",
+      "size": "92x37"
+    },
+    {
+      "screen": "quiz",
+      "selector": "#quizPrev",
+      "size": "88x37"
+    },
+    {
+      "screen": "results",
+      "selector": "#egemedGamiGains > section.card.mt-12 > button.btn.primary",
+      "size": "116x27"
+    },
+    {
+      "screen": "results",
+      "selector": "#resultsExit",
+      "size": "134x37"
+    },
+    {
+      "screen": "results",
+      "selector": "#resultsNew",
+      "size": "178x37"
+    },
+    {
+      "screen": "results",
+      "selector": "#resultsRetry",
+      "size": "105x37"
+    },
+    {
+      "screen": "results",
+      "selector": "#resultsStudy",
+      "size": "188x37"
+    },
+    {
+      "screen": "sim",
+      "selector": "#caliperBtn",
+      "size": "74x32"
+    },
+    {
+      "screen": "sim",
+      "selector": "#compareBtn",
+      "size": "145x32"
+    },
+    {
+      "screen": "sim",
+      "selector": "#coronaryToggle",
+      "size": "15x15"
+    },
+    {
+      "screen": "sim",
+      "selector": "#electricToggle",
+      "size": "15x15"
+    },
+    {
+      "screen": "sim",
+      "selector": "#flowToggle",
+      "size": "15x15"
+    },
+    {
+      "screen": "sim",
+      "selector": "#guideBtn",
+      "size": "109x32"
+    },
+    {
+      "screen": "sim",
+      "selector": "#labelsToggle",
+      "size": "15x15"
+    },
+    {
+      "screen": "sim",
+      "selector": "#leadSelect1",
+      "size": "64x32"
+    },
+    {
+      "screen": "sim",
+      "selector": "#leadSelect2",
+      "size": "64x32"
+    },
+    {
+      "screen": "sim",
+      "selector": "#leadSelect3",
+      "size": "64x32"
+    },
+    {
+      "screen": "sim",
+      "selector": "#measureBtn",
+      "size": "81x32"
+    },
+    {
+      "screen": "sim",
+      "selector": "#mechanismPanel > div.phase-chips:nth-of-type(*) > button:nth-of-type(*)",
+      "size": "48x30"
+    },
+    {
+      "screen": "sim",
+      "selector": "#playBtn",
+      "size": "70x32"
+    },
+    {
+      "screen": "sim",
+      "selector": "#resetBtn",
+      "size": "36x36"
+    },
+    {
+      "screen": "sim",
+      "selector": "#speed",
+      "size": "60x34"
+    },
+    {
+      "screen": "sim",
+      "selector": "#splitFocusBtn",
+      "size": "79x30"
+    },
+    {
+      "screen": "sim",
+      "selector": "#stepBtn",
+      "size": "112x32"
+    },
+    {
+      "screen": "sim",
+      "selector": "#timeline",
+      "size": "175x20"
+    },
+    {
+      "screen": "sim",
+      "selector": "#transportFullscreen",
+      "size": "94x30"
+    },
+    {
+      "screen": "sim",
+      "selector": "#valveToggle",
+      "size": "15x15"
+    },
+    {
+      "screen": "sim",
+      "selector": "#workspace > div.right-column > section.panel.ecg-panel:nth-of-type(*) > div.panel-head.compact-head:nth-of-type(*) > div.head-tools:nth-of-type(*) > button.panel-focus:nth-of-type(*)",
+      "size": "32x32"
+    },
+    {
+      "screen": "sim",
+      "selector": "#workspace > div.right-column > section.panel.explanation-panel:nth-of-type(*) > div.explain-tabs:nth-of-type(*) > button:nth-of-type(*)",
+      "size": "79x30"
+    },
+    {
+      "screen": "sim",
+      "selector": "#workspace > div.right-column > section.panel.explanation-panel:nth-of-type(*) > div.explanation-head:nth-of-type(*) > div.head-tools:nth-of-type(*) > button.panel-focus",
+      "size": "32x32"
+    },
+    {
+      "screen": "sim",
+      "selector": "#workspace > section.panel.anatomy-panel > div.panel-head.compact-head:nth-of-type(*) > div.head-tools:nth-of-type(*) > button.panel-focus",
+      "size": "32x32"
+    }
+  ]
+}
