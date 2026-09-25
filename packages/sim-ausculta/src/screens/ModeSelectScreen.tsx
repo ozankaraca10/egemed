@@ -90,8 +90,8 @@ export function ModeSelectScreen({ embedded = false }: ModeSelectScreenProps): J
                   ? `${assessmentCases.length} doğrulanmış vakalık havuzdan rastgele ${SESSION_SIZE} vaka ile maksimum zorlukta ölçülün.`
                   : "Değerlendirme havuzu boş."
               }
-              items={["Rastgele 10 vaka", "İpuçsuz + tek dinleme", "SCORM puanı"]}
-              rules="İpucu yok · tek dinleme · SCORM'a puan yazılır"
+              items={["Rastgele 10 vaka", "İpuçsuz + tek dinleme", embedded ? "Puan kaydedilir" : "SCORM puanı"]}
+              rules={embedded ? "İpucu yok · tek dinleme · puan kaydedilir" : "İpucu yok · tek dinleme · SCORM'a puan yazılır"}
               cta={assessmentLocked ? "Öğrenmeye git" : "Değerlendirmeye gir"}
               disabled={assessmentCases.length === 0}
               recommendLocked={assessmentLocked}
