@@ -819,3 +819,6 @@ html, body { margin: 0; }
 @media (prefers-reduced-motion: reduce) {
   .eg-shell-sim-page__host { transition: none; }
 }
+
+/* T150: admin kendi hesabında yıkıcı eylemlerin yerine gösterilen bilgi notu. */
+.eg-shell-userform__note { margin: 0; padding: 10px 12px; border: 1px solid var(--border); border-radius: var(--r-md); background: var(--card-soft); color: var(--ink-700); font-size: var(--fs-sm); }

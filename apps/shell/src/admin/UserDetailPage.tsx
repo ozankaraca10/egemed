@@ -224,19 +224,25 @@ export function UserDetailView({
             <h1 className="eg-shell-page__title">{detail.displayName}</h1>
             {detail.status !== "deleted" && (
               <div className="eg-shell-userdetail__actions">
-                {detail.status === "suspended" ? (
+                {detail.status === "suspended" && (
                   <button onClick={() => onRequestAction("activate")} type="button">
                     {t("admin.users.detail.action.activate")}
                   </button>
-                ) : (
+                )}
+                {detail.status !== "suspended" && detail.id !== currentUserId && (
                   <button onClick={() => onRequestAction("suspend")} type="button">
                     {t("admin.users.detail.action.suspend")}
                   </button>
                 )}
-                <button className="eg-shell-userdetail__delete" onClick={() => onRequestAction("delete")} type="button">
-                  {t("admin.users.detail.action.delete")}
-                </button>
+                {detail.id !== currentUserId && (
+                  <button className="eg-shell-userdetail__delete" onClick={() => onRequestAction("delete")} type="button">
+                    {t("admin.users.detail.action.delete")}
+                  </button>
+                )}
               </div>
+            )}
+            {detail.status !== "deleted" && detail.id === currentUserId && (
+              <p className="eg-shell-userform__note">{t("admin.users.detail.selfNote")}</p>
             )}
           </div>
           <Tabs

@@ -49,7 +49,7 @@ function contentFor(
 ): ReactNode {
   if (route.kind === "page") return pageFor(route.route.id, session);
   if (route.kind === "admin") return <AdminPage />;
-  if (route.kind === "adminUsers") return <UsersPage />;
+  if (route.kind === "adminUsers") return <UsersPage currentUserId={session?.actorId ?? null} />;
   if (route.kind === "adminUserCreate") return <UserFormPage />;
   if (route.kind === "adminUserDetail") return <UserDetailPage currentUserId={session?.actorId ?? null} userId={route.userId} />;
   if (route.kind === "adminImport") return <ImportWizardPage />;
