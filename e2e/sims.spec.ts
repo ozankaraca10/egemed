@@ -1,4 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
+import { captureRouteScreenshot } from "./artifacts";
 import { openRoute, trackErrors } from "./helpers";
 
 const NAV = "nav";
@@ -100,4 +101,21 @@ test.describe("Opaca sim rotası (gerçek modül)", () => {
 
     expect(errors, "konsol/sayfa hatası (dispose sonrası)").toEqual([]);
   });
+});
+
+test.describe("birleşik bar (Opaca ve Ausculta)", () => {
+  for (const simId of ["opaca", "ausculta"] as const) {
+    test(`${simId}: adımlar, sim araç çubuğu yok, Yardım modalı`, async ({ page }, testInfo) => {
+      const errors = trackErrors(page);
+      await openRoute(page, `#/sims/${simId}`);
+      const width = testInfo.project.use.viewport?.width ?? 0;
+      const steps = page.locator(".eg-shell-simbar__steps");
+      if (width >= 1024) await expect(steps).toBeVisible();
+      await expect(page.locator(".eg-sim-toolbar")).toHaveCount(0);
+      await page.getByRole("button", { name: "Yardım" }).click();
+      await expect(page.getByRole("dialog", { name: "Yardım" })).toBeVisible();
+      await captureRouteScreenshot(page, testInfo.project.name, `#/sims/${simId} birleşik bar`);
+      expect(errors, "konsol/sayfa hatası").toEqual([]);
+    });
+  }
 });

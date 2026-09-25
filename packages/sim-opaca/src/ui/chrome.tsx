@@ -1,7 +1,57 @@
-import { useEffect, useState, type ComponentType, type JSX, type ReactNode } from 'react'
+import { useEffect, useRef, useState, type ComponentType, type JSX, type ReactNode } from 'react'
+import type { SimChrome, SimChromeAction, SimChromeChip } from '@egemed/sim-host'
 import { useStore } from '../core/StoreProvider'
+import type { Mode, Screen } from '../core/types'
 import { assetUrl } from '../core/images'
+import { useSetChrome } from '../EmbeddedContext'
 import { IconFullscreen, IconFullscreenExit, IconHelpCircle, IconInfo, IconSwap, IconTrophy } from './icons'
+
+const STEP_LABELS = ['Mod seçimi', 'Çalışma', 'Tamamla'] as const
+
+function stepFor(screen: Screen, previous: number): number {
+  if (screen === 'modes') return 0
+  if (screen === 'learn' || screen === 'simulation') return 1
+  if (screen === 'results') return 2
+  return previous
+}
+
+function modeTone(mode: Mode): NonNullable<SimChromeChip['tone']> {
+  if (mode === 'learn') return 'learn'
+  if (mode === 'practice') return 'practice'
+  return 'assessment'
+}
+
+function chromeKey(chrome: SimChrome): string {
+  return JSON.stringify({
+    steps: chrome.steps,
+    chips: chrome.chips,
+    actions: (chrome.actions ?? []).map((action) => ({ id: action.id, label: action.label, pressed: action.pressed ?? false })),
+  })
+}
+
+/** Aynı içerik tekrar gönderilmez. Kapanış, bekleyen gönderimi düşürür. */
+function usePublishChrome(chrome: SimChrome | null): void {
+  const setChrome = useSetChrome()
+  const token = useRef(0)
+  const lastKey = useRef('')
+  const key = chrome === null ? '' : chromeKey(chrome)
+  if (setChrome && chrome && key !== lastKey.current) {
+    lastKey.current = key
+    const ticket = ++token.current
+    const publish = setChrome
+    const snapshot = chrome
+    void Promise.resolve().then(() => {
+      if (token.current === ticket) publish(snapshot)
+    })
+  }
+  useEffect(() => {
+    if (!setChrome) return
+    return () => {
+      token.current += 1
+      setChrome(null)
+    }
+  }, [setChrome])
+}
 
 /** Opaca kabuğu — üst bar, footer, arka plan (kaynak `ui/chrome.tsx` portu; E2 §7.3/§8 S8).
  *
@@ -149,6 +199,36 @@ export function Header({ embedded = false, env = NOOP_CHROME_ENV, modals, gamiEn
     setExitTarget(null)
   }
 
+  const setChrome = useSetChrome()
+  const unified = embedded && setChrome !== undefined
+  const stepRef = useRef(0)
+  const step = stepFor(state.screen, stepRef.current)
+  stepRef.current = step
+  const chips: SimChromeChip[] = []
+  if (unified && inWorkScreen) chips.push({ id: 'mode', label: modeLabel, tone: modeTone(state.mode) })
+  if (unified && inAssessment) chips.push({ id: 'timer', label: fmtTimer(state.assessmentTimer), tone: 'neutral' })
+  const actions: SimChromeAction[] = []
+  if (unified && inWorkScreen) actions.push({ id: 'modes', icon: 'swap', label: 'Mod değiştir', onSelect: goModes })
+  if (unified && gamiEnabled) {
+    actions.push({
+      id: 'progress',
+      icon: 'progress',
+      label: 'Başarılarım',
+      onSelect: () => dispatch({ type: 'goto', screen: 'achievements' }),
+    })
+  }
+  if (unified) {
+    actions.push({
+      id: 'fullscreen',
+      icon: 'fullscreen',
+      label: fs ? 'Tam ekrandan çık' : 'Tam ekran',
+      pressed: fs,
+      onSelect: toggleFs,
+    })
+    actions.push({ id: 'help', icon: 'help', label: 'Yardım', onSelect: () => setHelpOpen(true) })
+  }
+  usePublishChrome(unified ? { actions, chips, steps: { current: step, labels: STEP_LABELS } } : null)
+
   const HelpModal = modals?.help
   const ConfirmModal = modals?.confirm
   const helpModal = HelpModal ? <HelpModal open={helpOpen} onClose={() => setHelpOpen(false)} /> : null
@@ -164,7 +244,10 @@ export function Header({ embedded = false, env = NOOP_CHROME_ENV, modals, gamiEn
     />
   ) : null
 
-  // Gömülü mod: kabuğun üst barı tek kalır; sim içi kontroller kompakt çubukta sürer.
+  // Birleşik bar: araç çubuğu çizilmez; Yardım ve çıkış onayı sim içinde kalır.
+  if (unified) return <>{helpModal}{confirmModal}</>
+
+  // Gömülü mod (setChrome yok): kabuğun üst barı tek kalır; sim içi kontroller kompakt çubukta sürer.
   if (embedded) {
     return (
       <nav className="eg-sim-toolbar" aria-label="Simülatör araç çubuğu">

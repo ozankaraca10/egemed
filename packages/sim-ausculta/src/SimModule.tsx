@@ -1,6 +1,6 @@
 import { createElement, type ReactNode } from "react";
 import { createRoot as reactCreateRoot } from "react-dom/client";
-import type { SimDispose, SimModule, SimMountContext, SimMountTarget } from "@egemed/sim-host";
+import type { SimChrome, SimDispose, SimModule, SimMountContext, SimMountTarget } from "@egemed/sim-host";
 import { App, type AuscultaAudio } from "./App";
 import { createAudioEngine, type AudioBufferLike, type AudioContextLike, type AudioEngine, type AudioEngineDeps } from "./audio/engine";
 import type { WindowLike } from "./core/lifecycle";
@@ -12,6 +12,7 @@ import type { LearnScreenEnv } from "./screens/LearnScreen";
 import type { ResultsScreenEnv } from "./screens/ResultsScreen";
 import type { SimulationScreenEnv } from "./screens/simulation/runtime";
 import type { ModalEnv } from "./ui/modal-env";
+import { createNoopFullscreenEnv, type FullscreenEnv } from "./ui/chrome";
 
 /** Platform varlık tabanı. Göreli ses yolları bu önekle çözülür. */
 export const DEFAULT_AUSCULTA_ASSET_BASE = "/sims/ausculta/";
@@ -45,6 +46,7 @@ export interface AuscultaModuleDeps {
   readonly simulationEnv?: SimulationScreenEnv;
   readonly modalEnv?: ModalEnv;
   readonly resultsEnv?: ResultsScreenEnv;
+  readonly fullscreenEnv?: FullscreenEnv;
 }
 
 export function resolveAuscultaAssetUrl(assetBase: string, path: string): string {
@@ -147,6 +149,34 @@ function productionEngine(assetBase: string, now: () => number): AudioEngine {
   });
 }
 
+function browserFullscreenEnv(): FullscreenEnv {
+  const doc = (globalThis as { document?: {
+    readonly fullscreenElement: unknown;
+    readonly documentElement?: { requestFullscreen?: () => void };
+    exitFullscreen?: () => void;
+    addEventListener(type: string, handler: () => void): void;
+    removeEventListener(type: string, handler: () => void): void;
+  } }).document;
+  if (!doc) return createNoopFullscreenEnv();
+  return {
+    get fullscreenElement() {
+      return doc.fullscreenElement;
+    },
+    requestFullscreen() {
+      doc.documentElement?.requestFullscreen?.();
+    },
+    exitFullscreen() {
+      doc.exitFullscreen?.();
+    },
+    addEventListener(type, handler) {
+      doc.addEventListener(type, handler);
+    },
+    removeEventListener(type, handler) {
+      doc.removeEventListener(type, handler);
+    },
+  };
+}
+
 function defaultProductionDeps(): AuscultaModuleDeps {
   const win = globalThis as unknown as { scrollTo?(x: number, y: number): void };
   return {
@@ -157,6 +187,7 @@ function defaultProductionDeps(): AuscultaModuleDeps {
     runtime: createNoopRuntimeAdapter(),
     assetBase: DEFAULT_AUSCULTA_ASSET_BASE,
     scrollToTop: () => win.scrollTo?.(0, 0),
+    fullscreenEnv: browserFullscreenEnv(),
   };
 }
 
@@ -173,9 +204,18 @@ export function createAuscultaModule(deps?: AuscultaModuleDeps): SimModule {
       target.appendChild(container.node);
       const root = resolved.createRoot(container.node);
 
+      const hostChrome = context.setChrome;
+      let chromeOpen = true;
+      const setChrome = hostChrome
+        ? (chrome: SimChrome | null) => {
+            if (chromeOpen) hostChrome(chrome);
+          }
+        : undefined;
       const appProps = {
         embedded: true as const,
         audio: engine,
+        ...(setChrome === undefined ? {} : { setChrome }),
+        ...(resolved.fullscreenEnv ? { fullscreenEnv: resolved.fullscreenEnv } : {}),
         ...(resolved.scrollToTop ? { scrollToTop: resolved.scrollToTop } : {}),
         ...(resolved.learnEnv ? { learnEnv: resolved.learnEnv } : {}),
         ...(resolved.simulationEnv ? { simulationEnv: resolved.simulationEnv } : {}),
@@ -199,6 +239,8 @@ export function createAuscultaModule(deps?: AuscultaModuleDeps): SimModule {
       return () => {
         if (disposed) return;
         disposed = true;
+        chromeOpen = false;
+        hostChrome?.(null);
         root.unmount();
         engine.dispose();
         container.remove();

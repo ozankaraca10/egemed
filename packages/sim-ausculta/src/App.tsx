@@ -1,4 +1,5 @@
 import type { AttemptRecord } from "@egemed/gamification-core";
+import type { SimChrome } from "@egemed/sim-host";
 import { useEffect, useRef, type JSX } from "react";
 import { useStore } from "./core/StoreProvider";
 import { gamiStoragePort } from "./core/storage";
@@ -13,6 +14,7 @@ import { StartScreen } from "./screens/StartScreen";
 import type { VolumeCheckAudio, VolumeToneContext } from "./screens/tone";
 import { TutorialScreen, type TutorialAudio } from "./screens/TutorialScreen";
 import type { ModalEnv } from "./ui/modal-env";
+import { UnifiedChrome, type FullscreenEnv } from "./ui/chrome";
 import { EmbeddedProvider } from "./ui/ScreenHeading";
 import { ProgressScreen } from "./screens/ProgressScreen";
 import { LocalGamiRepository } from "./gamification/repo";
@@ -40,6 +42,8 @@ export interface AppProps {
   readonly resultsEnv?: ResultsScreenEnv;
   readonly scrollToTop?: () => void;
   readonly reportAttempt?: (attempt: AttemptRecord) => void;
+  readonly setChrome?: (chrome: SimChrome | null) => void;
+  readonly fullscreenEnv?: FullscreenEnv;
 }
 
 function Shell({
@@ -51,6 +55,8 @@ function Shell({
   resultsEnv,
   scrollToTop,
   reportAttempt,
+  setChrome,
+  fullscreenEnv,
 }: AppProps & { embedded: boolean }): JSX.Element {
   const { state, dispatch, bus, now, storage } = useStore();
   const gamiRef = useRef<LocalGamiRepository | null>(null);
@@ -100,8 +106,13 @@ function Shell({
 
   const doc = DOC_SCREENS.has(screen);
   return (
-    <EmbeddedProvider embedded={embedded}>
+    <EmbeddedProvider embedded={embedded} {...(setChrome === undefined ? {} : { setChrome })}>
       <div className={`eg-sim-ausculta app-shell${doc ? " app-shell--doc" : ""}`}>
+        <UnifiedChrome
+          audio={audio}
+          {...(fullscreenEnv ? { fullscreen: fullscreenEnv } : {})}
+          {...(modalEnv ? { modalEnv } : {})}
+        />
         <main className="app-content">
           {screen === "start" ? <StartScreen embedded={embedded} audio={volumeAudio(audio)} /> : null}
           {screen === "modes" ? <ModeSelectScreen embedded={embedded} /> : null}

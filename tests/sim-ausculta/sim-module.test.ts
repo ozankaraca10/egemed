@@ -1,7 +1,7 @@
 import { createElement, type ReactNode } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
-import type { SimMountContext, SimMountTarget } from "../../packages/sim-host/src/SimHost";
+import type { SimChrome, SimMountContext, SimMountTarget } from "../../packages/sim-host/src/SimHost";
 import {
   DEFAULT_AUSCULTA_ASSET_BASE,
   EmbeddedProvider,
@@ -204,5 +204,26 @@ describe("createAuscultaModule (SimHost adaptörü)", () => {
       }),
     );
     expect(embedded).toBe('<h2 class="mode-title">Başlık</h2>');
+  });
+
+  it("setChrome varken adımı ve eylemleri gönderir, araç çubuğu ile adım göstergesini çizmez", async () => {
+    const { deps } = createTestDeps();
+    const target = fakeTarget();
+    const sent: Array<SimChrome | null> = [];
+    const dispose = createAuscultaModule(deps).mount(target, {
+      ...CONTEXT,
+      setChrome: (chrome) => {
+        sent.push(chrome);
+      },
+    });
+    const html = renderToStaticMarkup(target.children[0]?.tree as ReactNode);
+    await Promise.resolve();
+    expect(html).not.toContain("eg-sim-toolbar");
+    expect(html).not.toContain('class="stepper"');
+    const chrome = sent.at(-1);
+    expect(chrome?.steps).toEqual({ current: 0, labels: ["Mod seçimi", "Çalışma", "Tamamla"] });
+    expect(chrome?.actions?.map((action) => action.id)).toEqual(["progress", "fullscreen", "sound", "help"]);
+    dispose();
+    expect(sent.at(-1)).toBeNull();
   });
 });

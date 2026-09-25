@@ -1,5 +1,7 @@
+import { type ReactNode } from "react";
+import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
-import type { SimMountContext, SimMountTarget } from "../../packages/sim-host/src/SimHost";
+import type { SimChrome, SimMountContext, SimMountTarget } from "../../packages/sim-host/src/SimHost";
 import type { GamiRepository } from "../../packages/gamification-core/src/repository";
 import type { OpacaAttemptRecord } from "../../packages/sim-opaca/src/gamification/attempt";
 import {
@@ -187,5 +189,35 @@ describe("createOpacaModule (SimHost adaptörü)", () => {
     const dispose = createOpacaModule(deps).mount(fakeTarget(), CONTEXT);
     dispose();
     expect(createOpacaModule(deps).id).toBe("opaca");
+  });
+
+  it("setChrome varken adımı ve eylemleri gönderir, araç çubuğu ile adım göstergesini çizmez", async () => {
+    let tree: ReactNode = null;
+    const sent: Array<SimChrome | null> = [];
+    const deps = createTestDeps({
+      createRoot: () => ({
+        render(next) {
+          tree = next;
+        },
+        unmount() {
+          tree = null;
+        },
+      }),
+    });
+    const dispose = createOpacaModule(deps).mount(fakeTarget(), {
+      ...CONTEXT,
+      setChrome: (chrome) => {
+        sent.push(chrome);
+      },
+    });
+    const html = renderToStaticMarkup(tree);
+    await Promise.resolve();
+    expect(html).not.toContain("eg-sim-toolbar");
+    expect(html).not.toContain('class="stepper"');
+    const chrome = sent.at(-1);
+    expect(chrome?.steps).toEqual({ current: 0, labels: ["Mod seçimi", "Çalışma", "Tamamla"] });
+    expect(chrome?.actions?.map((action) => action.id)).toEqual(["progress", "fullscreen", "help"]);
+    dispose();
+    expect(sent.at(-1)).toBeNull();
   });
 });
