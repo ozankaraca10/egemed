@@ -51,5 +51,11 @@ export async function openRoute(page: Page, hash: string): Promise<void> {
     // Kaynak paket kapsayıcısı ve gerçek modül kökü aynı sınıfı paylaşabilir
     // (iç içe); `.first()` ilkini görünür bekler.
     await expect(page.locator(liveRootSelector).first()).toBeVisible();
+    // Sim host hazır olunca opaklık geçişiyle belirir (T107); axe/renk ölçümleri
+    // geçiş sırasında yarı saydam okuyup kararsızlaşmasın diye tam opaklık beklenir.
+    await page.waitForFunction(() => {
+      const host = document.querySelector(".eg-shell-sim-page__host");
+      return host === null || getComputedStyle(host).opacity === "1";
+    });
   }
 }
