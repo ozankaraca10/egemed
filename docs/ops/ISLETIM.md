@@ -199,17 +199,20 @@ veritabanı `docker exec egemed-local-postgres-1 createdb ...` ile açılır,
 kapatılır. CI'da `api-db` işi aynı `test:db` komutunu çalıştırır; yeni test
 dosyaları include deseniyle kapsam içindedir, ayrı bir iş gerekmez.
 
-### Giriş hız sınırı (T81)
+### Giriş hız sınırı (T81; T124)
 
 Giriş hız sınırı kullanıcı adı başına **15 dakikada 8 denemedir** ve API
 sürecinin belleğinde tutulur (`apps/api/src/auth/rate-limit.ts`; anahtar ham
-kullanıcı adı taşımaz, SHA-256'dır). CI'daki `e2e` ve `api-e2e` işleri her
-koşuda **taze bir API süreci** başlattığı için bu sınır sorun değildir:
-hız sınırı penceresi her koşuda boş başlar. Yerelde ise `pnpm e2e:api`'yi
-tekrar koşmadan önce API'yi **yeniden başlatın** (`pnpm --filter @egemed/api
-dev` sürecini durdurup yeniden açın): bellek içi sayaç süreci yaşamaya devam
-ettiği sürece silinmez ve bir önceki koşumun denemeleri 15 dakikalık pencerede
-birikmiş olabilir; aksi hâlde giriş uçları `429` döndürür.
+kullanıcı adı taşımaz, SHA-256'dır). Sınır `AUTH_LOGIN_RATE_MAX` ile
+ayarlanabilir (1–1000; **varsayılan 8**; üretimde varsayılan kalmalıdır).
+CI'daki `api-e2e` işi seri api-dev senaryoları aynı tohum kullanıcılarla sık
+giriş yaptığı için değişkeni `200` verir; `e2e` işi her koşuda **taze bir API
+süreci** başlattığı için bu sınır sorun değildir: hız sınırı penceresi her
+koşuda boş başlar. Yerelde ise `pnpm e2e:api`'yi tekrar koşmadan önce API'yi
+**yeniden başlatın** (`pnpm --filter @egemed/api dev` sürecini durdurup yeniden
+açın) veya sınırı geçici olarak yükseltin: bellek içi sayaç süreci yaşamaya
+devam ettiği sürece silinmez ve bir önceki koşumun denemeleri 15 dakikalık
+pencerede birikmiş olabilir; aksi hâlde giriş uçları `429` döndürür.
 
 ## 9. KVKK notu
 
