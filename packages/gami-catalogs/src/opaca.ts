@@ -373,9 +373,13 @@ export const OPACA_SUMMARY_VERSION = 1;
 const clampInt = (value: number, min: number, max: number): number =>
   Math.min(max, Math.max(min, Math.round(Number.isFinite(value) ? value : 0)));
 
-/** TR takvim günü indeksi — `computeStreak`'in gün tanımıyla aynı (Europe/Istanbul, UTC+3). */
-const dayIndexOf = (iso: string): number =>
-  Math.floor(startOfDayTr(new Date(iso)).getTime() / 86_400_000);
+/**
+ * TR takvim günü indeksi — `computeStreak`'in gün tanımıyla aynı (Europe/Istanbul, UTC+3).
+ * Sunucu `opaca.day` kodunu deneme `finishedAt`'inden bununla yeniden hesaplar (T149).
+ */
+export const opacaDayIndex = (at: Date): number => Math.floor(startOfDayTr(at).getTime() / 86_400_000);
+
+const dayIndexOf = (iso: string): number => opacaDayIndex(new Date(iso));
 
 /** Denemeyi sözleşmedeki kodlu özete çevirir (kod → sınırlı tam sayı; serbest metin yok). */
 export function encodeOpacaSummary(input: OpacaSummaryInput): Record<string, number> {

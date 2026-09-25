@@ -15,6 +15,7 @@ export {
   OPACA_TOPICS,
   STUDY_KEY,
   encodeOpacaSummary,
+  opacaDayIndex,
   opacaStatsFromSummaries,
 } from "./opaca";
 export type { OpacaBadgeContext, OpacaStats, OpacaSummaryInput, OpacaTopic } from "./opaca";

@@ -80,10 +80,14 @@ export type GamiAllResponse = z.infer<typeof gamiAllResponseSchema>;
 export const ATTEMPT_SUMMARY_MAX = 1_000_000;
 
 /** Kodlu özet: anahtar kod, değer sınırlı tam sayı; serbest metin ve ham yanıt yasak. */
-export const attemptSummarySchema = z.record(
-  z.string().regex(CODE_PATTERN),
-  z.number().int().min(0).max(ATTEMPT_SUMMARY_MAX),
-);
+/** T149: özet en fazla bu kadar kod taşır (sim kodları ~25; depolama şişirmesine karşı). */
+export const ATTEMPT_SUMMARY_MAX_KEYS = 64;
+
+export const attemptSummarySchema = z
+  .record(z.string().regex(CODE_PATTERN), z.number().int().min(0).max(ATTEMPT_SUMMARY_MAX))
+  .refine((summary) => Object.keys(summary).length <= ATTEMPT_SUMMARY_MAX_KEYS, {
+    message: "summary_too_many_keys",
+  });
 
 /** POST /me/gamification/:simId/attempts gövdesi (E3 §d): `id` istemci üretir,
  *  yazma idempotenttir; bilinmeyen alanlar (serbest metin/ham yanıt) reddedilir. */

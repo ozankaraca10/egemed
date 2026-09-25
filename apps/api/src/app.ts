@@ -1,3 +1,4 @@
+import { bodyLimit } from "hono/body-limit";
 import { Hono } from "hono";
 import type { Context } from "hono";
 import { statusForErrorCode, type ErrorCode } from "@egemed/contracts";
@@ -10,7 +11,7 @@ import { registerAdminRoleRoutes } from "./admin/roles";
 import { registerAdminUserRoutes, type AdminDeps } from "./admin/users";
 import { registerAuthRoutes, type AuthDeps } from "./auth/routes";
 import { registerSsoRoutes } from "./auth/sso/routes";
-import { errorBody, validationDetails, type AppEnv } from "./http";
+import { errorBody, jsonError, validationDetails, type AppEnv } from "./http";
 import {
   registerMeGamificationRoutes,
   type GamificationRepo,
@@ -85,6 +86,10 @@ function applySecurityHeaders(c: Context): void {
   }
 }
 
+/** T149: JSON uçları için gövde sınırı; içe aktarma ucu 2 MB CSV + pay. */
+export const BODY_LIMIT_BYTES = 1024 * 1024;
+export const IMPORT_BODY_LIMIT_BYTES = 3 * 1024 * 1024;
+
 export function createApp(deps: AppDeps): Hono<AppEnv> {
   const app = new Hono<AppEnv>();
 
@@ -112,6 +117,15 @@ export function createApp(deps: AppDeps): Hono<AppEnv> {
     } finally {
       c.header("x-request-id", requestId);
     }
+  });
+
+  // T149: istek gövdesi sınırı (bellek tüketimine karşı). CSV içe aktarma 2 MB dosya kabul
+  // eder (E3 §f); yalnız o uç için pay bırakılır. Aşımda 413 `payload_too_large`.
+  const jsonBodyLimit = bodyLimit({ maxSize: BODY_LIMIT_BYTES, onError: (c) => jsonError(c, "payload_too_large") });
+  const importBodyLimit = bodyLimit({ maxSize: IMPORT_BODY_LIMIT_BYTES, onError: (c) => jsonError(c, "payload_too_large") });
+  app.use("*", async (c, next) => {
+    if (c.req.method === "GET" || c.req.method === "HEAD") return next();
+    return c.req.method === "POST" && c.req.path === "/admin/imports" ? importBodyLimit(c, next) : jsonBodyLimit(c, next);
   });
 
   app.get("/health", (c) => c.json({ status: "ok" }));

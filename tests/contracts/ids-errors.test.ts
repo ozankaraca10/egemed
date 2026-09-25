@@ -60,7 +60,7 @@ describe("hata kodu kataloğu (§d)", () => {
     expect(statusForErrorCode("import_validation_failed")).toBe(422);
     expect(statusForErrorCode("rate_limited")).toBe(429);
     expect(statusForErrorCode("internal_error")).toBe(500);
-    expect(ERROR_CODE_LIST).toHaveLength(17);
+    expect(ERROR_CODE_LIST).toHaveLength(18);
   });
 
   it("ters indeks her durumun kodlarını tutarlı taşır", () => {
