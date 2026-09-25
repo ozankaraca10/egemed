@@ -13,6 +13,8 @@ export { GamiProgressChart } from "./GamiProgressChart";
 export { GamiSeg } from "./GamiSeg";
 export type { GamiSegOption } from "./GamiSeg";
 export { GamiSyncErrorBanner } from "./GamiSyncErrorBanner";
+export { earnedFromServer, GamiServerFrame, gamiLoadingStatus, levelFromServer, serverHasActivity, streakFromServer } from "./server";
+export type { GamiServerSource, ServerGamiData, ServerGamiSummary } from "./server";
 export { GamiWeeklyGoals } from "./GamiWeeklyGoals";
 export { NOOP_GAMI_MODAL_ENV, createNoopGamiModalEnv, gamiTabTrapTarget } from "./modal";
 export type { GamiFocusable, GamiKeyEvent, GamiModalEnv, GamiTabTrapTarget } from "./modal";

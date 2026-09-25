@@ -17,6 +17,7 @@ import { emptyPulseGamiState, pulseLearnTopic } from "../gamification/repo";
 import type { PulseGamiRepo, PulseGamiState, PulseGamiWriteResult } from "../gamification/repo";
 import { pulseSessionGains } from "../gamification/gains";
 import { gamiUiStyles } from "@egemed/gami-ui";
+import type { GamiServerSource } from "@egemed/gami-ui";
 import { mountPulseGains } from "./gains";
 import { mountPulseProgress } from "./progress";
 import type { Lead, Mode } from "../engine/shapes";
@@ -70,6 +71,7 @@ export interface PulseGamiBridgeOptions {
   readonly now: () => number;
   /** Yerel yazım başarıyla bitince kabuğa iletilir; hata akışı bozmaz. */
   readonly reportAttempt?: (attempt: PulseAttemptRecord) => void;
+  readonly gamification?: GamiServerSource;
 }
 
 /** Köprüyü kurar; dönen işlev izlemeyi bırakır ve eklenen öğeleri kaldırır. */
@@ -140,7 +142,7 @@ export function attachPulseGamification(handle: PulseRuntimeHandle, options: Pul
       closeProgress();
       showSourceView("sim");
     },
-  });
+  }, options.gamification);
   const renderProgress = (): void => {
     progress.update(gamiState ?? emptyPulseGamiState(), nowDate());
   };
@@ -158,7 +160,11 @@ export function attachPulseGamification(handle: PulseRuntimeHandle, options: Pul
   gains.hidden = true;
   shadow.getElementById("resultsView")?.append(gains);
   // Kazanım kartı da ortak tasarım: React kökü model geldikçe güncellenir.
-  const gainsView = mountPulseGains(gains, { onAchievements: openDialog, onLeaderboard: openDialog });
+  const gainsView = mountPulseGains(gains, {
+    onAchievements: openDialog,
+    onLeaderboard: openDialog,
+    serverData: options.gamification !== undefined,
+  });
 
   // --- Kayıt izleme ------------------------------------------------------------
   const applyWrite = (result: PulseGamiWriteResult, record: PulseAttemptRecord, showGains: boolean): void => {

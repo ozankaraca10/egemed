@@ -3,6 +3,8 @@ export {
   isSimulatorId,
   SIMULATOR_IDS,
   type SimChrome,
+  type SimGamificationSource,
+  type SimGamificationSummary,
   type SimChromeAction,
   type SimChromeChip,
   type SimChromeIcon,

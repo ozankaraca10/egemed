@@ -10,6 +10,7 @@ export function GamiGainsView({ gains, icons, onAchievements, onLeaderboard, dem
   icons: Pick<GamiIcons, "badge" | "lock" | "star" | "chart" | "arrowRight" | "arrowUp">;
   onAchievements: () => void;
   onLeaderboard: () => void;
+  /** Boş/verilmezse varsayılan; API oturumunda sim "" geçer ve etiket çizilmez. */
   demoLabel?: string;
 }) {
   const b = gains.badge;
@@ -17,7 +18,7 @@ export function GamiGainsView({ gains, icons, onAchievements, onLeaderboard, dem
     <section className="card eg-gami-gains" aria-labelledby="gami-gains-t">
       <div className="eg-gami-card-head">
         <h3 id="gami-gains-t">Bu oturumda kazandıkların</h3>
-        <span className="badge orange">{demoLabel}</span>
+        {demoLabel ? <span className="badge orange">{demoLabel}</span> : null}
       </div>
       {gains.confetti && <div className="eg-gami-confetti" aria-hidden="true">{Array.from({ length: 14 }, (_, i) => <i key={i} />)}</div>}
       <div className="eg-gami-gains-row">

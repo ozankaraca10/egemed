@@ -149,6 +149,7 @@ export function createOpacaModule(deps?: OpacaModuleDeps): SimModule {
           ...(context.reportAttempt === undefined
             ? {}
             : { reportAttempt: (attempt: OpacaAttemptRecord) => context.reportAttempt?.(attempt) }),
+          ...(context.gamification === undefined ? {} : { gamification: context.gamification }),
           children: createElement(StoreProvider, {
             now: context.now,
             storage,

@@ -27,7 +27,8 @@ interface PerformanceClock {
 
 function serverNow(): number {
   const perf = (globalThis as { performance?: PerformanceClock }).performance;
-  return perf === undefined ? 0 : perf.timeOrigin + perf.now();
+  // Tam milisaniye: kesirli değer ISO/zaman damgası biçimlerini bozar (T124 bulgusu).
+  return perf === undefined ? 0 : Math.floor(perf.timeOrigin + perf.now());
 }
 
 const env = loadEnv(process.env);
@@ -36,6 +37,7 @@ const auth = {
   ...createPgAuthRepos(db),
   nodeEnv: env.NODE_ENV,
   devEnabled: env.AUTH_DEV_ENABLED,
+  loginRateMax: env.AUTH_LOGIN_RATE_MAX,
   sessionIdleMs: env.SESSION_IDLE_MINUTES * 60_000,
   sessionAbsoluteMs: env.SESSION_ABSOLUTE_HOURS * 3_600_000,
   // T64 — SSO adaptörü protokol kararına bağlıdır (§i). Protokol seçilene dek

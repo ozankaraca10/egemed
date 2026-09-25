@@ -77,12 +77,14 @@ export function createPulseRuntimeModule(deps: PulseRuntimeModuleDeps = {}): Sim
       if (deps.gamiEnabled !== false) {
         try {
           const reportAttempt = context.reportAttempt;
+          const gamification = context.gamification;
           detachGami = attachPulseGamification(handle, {
             now: context.now,
             repo: deps.gamiRepository ?? createStorageGamiRepo(handle.storage),
             ...(reportAttempt === undefined
               ? {}
               : { reportAttempt: (record: PulseAttemptRecord) => reportAttempt(record) }),
+            ...(gamification === undefined ? {} : { gamification }),
           });
         } catch {
           // Oyunlaştırma kurulamasa da simülatör çalışmaya devam eder.

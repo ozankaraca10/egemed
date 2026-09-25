@@ -7,7 +7,7 @@ import { sampleSession, SESSION_SIZE } from '../core/session'
 import { sessionSeedFromNow } from './simulation-core'
 import { Footer } from '../ui/chrome'
 import { ScreenHeading } from '../ui/ScreenHeading'
-import { buildLeaderboardModel, GamiLeaderboardView, GamiProgressPage, type GamiModalEnv } from '@egemed/gami-ui'
+import { buildLeaderboardModel, GamiLeaderboardView, GamiProgressPage, GamiServerFrame, gamiLoadingStatus, type GamiModalEnv, type ServerGamiData } from '@egemed/gami-ui'
 import { useGami, useLeaderboard } from '../gamification/useGami'
 import { useGamiContext } from '../gamification/GamiContext'
 import { gamiDemoFrom } from '../gamification/flag'
@@ -17,14 +17,30 @@ import type { CohortFilter, MonthlyReward, Period, RewardWinner } from '@egemed/
 import { opacaAvatarOf, opacaGamiIcons } from '../ui/opacaGami'
 
 /** Liderlik Tahtası + Ayın Ödülü (tasarım promptu §5, §5.1). Yalnız oyunlaştırma bayrağı açıkken erişilir. */
-export function LeaderboardScreen({ embedded = false, devBuild = false, modalEnv }: { embedded?: boolean; devBuild?: boolean; modalEnv?: ModalEnv }) {
+function LeaderboardBody({
+  embedded = false,
+  devBuild = false,
+  modalEnv,
+  server,
+  period,
+  setPeriod,
+  cohort,
+  setCohort,
+}: {
+  embedded?: boolean
+  devBuild?: boolean
+  modalEnv?: ModalEnv
+  server: ServerGamiData | null
+  period: Period
+  setPeriod: (period: Period) => void
+  cohort: CohortFilter
+  setCohort: (cohort: CohortFilter) => void
+}) {
   const { dispatch, now } = useStore()
   const { reportSyncError } = useGamiContext()
   const [version, setVersion] = useState(0)
   const demo = gamiDemoFrom(locationSearch(), devBuild)
   const view = useGami(version, demo)
-  const [period, setPeriod] = useState<Period>('week')
-  const [cohort, setCohort] = useState<CohortFilter>('all')
   const [clock, setClock] = useState(view.now)
   const [terms, setTerms] = useState<ModalFocusable | null | false>(false)
   const [reward, setReward] = useState<MonthlyReward | null>(null)
@@ -51,12 +67,12 @@ export function LeaderboardScreen({ embedded = false, devBuild = false, modalEnv
     clock,
     period,
     cohort,
-    rows: board?.rows ?? [],
-    prevRows: prevBoard?.rows ?? null,
-    monthRows: monthAll?.rows ?? null,
+    rows: server?.rows ?? board?.rows ?? [],
+    prevRows: server ? null : prevBoard?.rows ?? null,
+    monthRows: server ? null : monthAll?.rows ?? null,
     reward,
-    boardReady: Boolean(board),
-  }), [board, clock, cohort, monthAll, period, prevBoard, reward, view.now])
+    boardReady: server ? true : Boolean(board),
+  }), [board, clock, cohort, monthAll, period, prevBoard, reward, server, view.now])
   const profile = view.state.profile
   const me = model.rows.find((r) => r.isMe)
 
@@ -75,7 +91,7 @@ export function LeaderboardScreen({ embedded = false, devBuild = false, modalEnv
   return (
     <>
       <div className="screen">
-        <GamiProgressPage active="leaderboard" onTab={(id) => dispatch({ type: 'goto', screen: id })} icons={opacaGamiIcons}>
+        <GamiProgressPage active="leaderboard" demo={server === null} onTab={(id) => dispatch({ type: 'goto', screen: id })} icons={opacaGamiIcons}>
           <GamiLeaderboardView
             title={<ScreenHeading className="results-title-v2">Liderlik Tahtası</ScreenHeading>}
             subtitle="Değerlendirme modundaki en iyi 3 denemenin ortalamasıyla sıralanır (en az 2 deneme)."
@@ -117,5 +133,35 @@ export function LeaderboardScreen({ embedded = false, devBuild = false, modalEnv
       </div>
       <Footer embedded={embedded} />
     </>
+  )
+}
+
+export function LeaderboardScreen({ embedded = false, devBuild = false, modalEnv }: { embedded?: boolean; devBuild?: boolean; modalEnv?: ModalEnv }) {
+  const { gamification } = useGamiContext()
+  const [period, setPeriod] = useState<Period>('week')
+  const [cohort, setCohort] = useState<CohortFilter>('all')
+  const body = (server: ServerGamiData | null) => (
+    <LeaderboardBody
+      cohort={cohort}
+      devBuild={devBuild}
+      embedded={embedded}
+      period={period}
+      server={server}
+      setCohort={setCohort}
+      setPeriod={setPeriod}
+      {...(modalEnv ? { modalEnv } : {})}
+    />
+  )
+  if (gamification === undefined) return body(null)
+  return (
+    <GamiServerFrame
+      cohort={cohort}
+      fallback={gamiLoadingStatus()}
+      icon={opacaGamiIcons.info({ width: 16, height: 16 })}
+      period={period}
+      source={gamification}
+    >
+      {body}
+    </GamiServerFrame>
   )
 }

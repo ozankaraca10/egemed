@@ -9,9 +9,10 @@ import { OPACA_BADGES } from '../gamification/catalog'
 import { OPACA_RULES } from '../gamification/rules'
 import { Footer } from '../ui/chrome'
 import { ScreenHeading } from '../ui/ScreenHeading'
-import { buildAchievementsModel, GamiAchievementsView, GamiProgressPage, type GamiModalEnv } from '@egemed/gami-ui'
+import { buildAchievementsModel, earnedFromServer, GamiAchievementsView, GamiProgressPage, GamiServerFrame, gamiLoadingStatus, levelFromServer, serverHasActivity, streakFromServer, type GamiModalEnv, type ServerGamiData } from '@egemed/gami-ui'
 import { monthKeyTr, type AchievementsPeriod } from '@egemed/gamification-core'
 import { useGami, useLeaderboard } from '../gamification/useGami'
+import { useGamiContext } from '../gamification/GamiContext'
 import { gamiDemoFrom } from '../gamification/flag'
 import { monthlyRewardFor } from '../gamification/rewards'
 import { DOMAIN_META, WEAK_DOMAIN_PCT } from '../ui/gami/domainMeta'
@@ -25,7 +26,7 @@ const goalIcon = (id: WeeklyGoal['id']) => {
 }
 
 /** Başarılarım (tasarım promptu §4). Yalnız oyunlaştırma bayrağı açıkken erişilir. */
-export function AchievementsScreen({ embedded = false, devBuild = false, modalEnv }: { embedded?: boolean; devBuild?: boolean; modalEnv?: ModalEnv }) {
+function AchievementsBody({ embedded = false, devBuild = false, modalEnv, server }: { embedded?: boolean; devBuild?: boolean; modalEnv?: ModalEnv; server: ServerGamiData | null }) {
   const { dispatch, now } = useStore()
   const demo = gamiDemoFrom(locationSearch(), devBuild)
   const view = useGami(0, demo)
@@ -40,6 +41,7 @@ export function AchievementsScreen({ embedded = false, devBuild = false, modalEn
     const MONTHS = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık']
     return { monthName: `${MONTHS[Number(r.month.slice(5, 7)) - 1]} ${r.month.slice(0, 4)}`, title: r.title, sponsor: r.sponsor }
   }, [demo, view.now])
+  const earned = server ? earnedFromServer(OPACA_BADGES, server.summary.badges) : view.state.earned
   const model = useMemo(() => buildAchievementsModel({
     now: view.now,
     period,
@@ -47,18 +49,19 @@ export function AchievementsScreen({ embedded = false, devBuild = false, modalEn
     rules: OPACA_RULES,
     catalog: OPACA_BADGES,
     stats: view.stats,
-    earned: view.state.earned,
+    earned,
     badgeContext: { now: view.now },
-    level: view.level,
-    streak: view.streak,
+    level: server ? levelFromServer(server.summary.xp, server.summary.level, OPACA_RULES) : view.level,
+    streak: server ? streakFromServer(server.summary.streak) : view.streak,
     goals: view.goals,
     profile: view.state.profile,
-    weekRows: week?.rows ?? null,
+    weekRows: server?.rows ?? week?.rows ?? null,
     domainMeta: DOMAIN_META,
     weakPct: WEAK_DOMAIN_PCT,
     lockedNote: (id) => (id === 'podium' ? 'Sunucu bağlantısı gelince kazanılabilir (şu an demo sıralama).' : null),
     congrats,
-  }), [congrats, period, view, week])
+    ...(server ? { activity: serverHasActivity(server.summary, view.state.attempts.length) } : {}),
+  }), [congrats, earned, period, server, view, week])
   const study = (key: string) => {
     dispatch({ type: 'setLearnFocus', key })
     dispatch({ type: 'startMode', mode: 'learn' })
@@ -80,7 +83,7 @@ export function AchievementsScreen({ embedded = false, devBuild = false, modalEn
   return (
     <>
       <div className="screen">
-        <GamiProgressPage active="achievements" onTab={(id) => dispatch({ type: 'goto', screen: id })} icons={opacaGamiIcons}>
+        <GamiProgressPage active="achievements" demo={server === null} onTab={(id) => dispatch({ type: 'goto', screen: id })} icons={opacaGamiIcons}>
           <GamiAchievementsView
             title={<ScreenHeading className="results-title-v2">Başarılarım</ScreenHeading>}
             subtitle="Değerlendirme ve uygulama oturumlarından kazandığın ilerleme."
@@ -113,5 +116,24 @@ export function AchievementsScreen({ embedded = false, devBuild = false, modalEn
       </div>
       <Footer embedded={embedded} />
     </>
+  )
+}
+
+export function AchievementsScreen({ embedded = false, devBuild = false, modalEnv }: { embedded?: boolean; devBuild?: boolean; modalEnv?: ModalEnv }) {
+  const { gamification } = useGamiContext()
+  const body = (server: ServerGamiData | null) => (
+    <AchievementsBody devBuild={devBuild} embedded={embedded} server={server} {...(modalEnv ? { modalEnv } : {})} />
+  )
+  if (gamification === undefined) return body(null)
+  return (
+    <GamiServerFrame
+      cohort="all"
+      fallback={gamiLoadingStatus()}
+      icon={opacaGamiIcons.info({ width: 16, height: 16 })}
+      period="week"
+      source={gamification}
+    >
+      {body}
+    </GamiServerFrame>
   )
 }

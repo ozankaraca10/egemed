@@ -275,4 +275,23 @@ describe("SimHost release ve aktör bağlamı", () => {
     expect(seen).toEqual(["yerel-1"]);
     expect(pulse.contexts[1] !== undefined && "reportAttempt" in pulse.contexts[1]).toBe(false);
   });
+
+  it("gamification bağlama taşınır; verilmezse alan hiç yoktur", async () => {
+    const pulse = fake("pulse");
+    const source = {
+      async summary() {
+        return { xp: 1, level: 1, streak: { current: 0, best: 0 }, badges: [] };
+      },
+      async leaderboard() {
+        return { rows: [] };
+      },
+    };
+    const { host, target } = harness(() => Promise.resolve(pulse.module));
+    host.mount(target, "pulse", { gamification: source });
+    await flush();
+    host.mount(target, "pulse");
+    await flush();
+    expect(pulse.contexts[0]?.gamification).toBe(source);
+    expect(pulse.contexts[1] !== undefined && "gamification" in pulse.contexts[1]).toBe(false);
+  });
 });

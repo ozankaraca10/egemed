@@ -11,6 +11,7 @@ import { decodeMark } from '../core/geometry'
 import { GamiGainsView } from '@egemed/gami-ui'
 import { useOpacaSessionGains } from '../gamification/sessionGains'
 import { opacaGamiIcons } from '../ui/opacaGami'
+import { useGamiContext } from '../gamification/GamiContext'
 import { caseById, getGamiRepo } from '../gamification/bindings'
 import {
   IconScan,
@@ -67,6 +68,8 @@ export function ResultsScreen({
   gains,
 }: ResultsScreenProps): JSX.Element {
   const { state, dispatch, runtime, now } = useStore()
+  // API oturumunda veri sunucudan: kazanım kartında “Demo verisi” etiketi yok.
+  const gamiServer = useGamiContext().gamification !== undefined
   const isAssessment = state.mode === 'assessment'
   const agg = aggregateResults(state.caseResults)
   const total = agg.total
@@ -149,6 +152,7 @@ export function ResultsScreen({
       icons={opacaGamiIcons}
       onAchievements={() => dispatch({ type: 'goto', screen: 'achievements' })}
       onLeaderboard={() => dispatch({ type: 'goto', screen: 'leaderboard' })}
+      {...(gamiServer ? { demoLabel: '' } : {})}
     />
   ) : null
 

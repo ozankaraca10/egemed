@@ -3,7 +3,7 @@ import { createSimHost, type SimChrome, type SimHost, type SimulatorId } from "@
 import { t } from "@egemed/ui/i18n";
 import { shellNow } from "./now";
 import { routeHref, simTitleKey } from "./routes";
-import { createBrowserAttemptReporter, type ReportedAttempt } from "./reportAttempt";
+import { createBrowserAttemptReporter, createBrowserGamification, type ReportedAttempt } from "./reportAttempt";
 import { loadSimModule } from "./sims/loaders";
 
 /** Sim host kapsayıcısı; kök tsconfig DOM lib'i taşımadığı için tip yapısaldır. */
@@ -106,9 +106,11 @@ function SimRouteHost({ actorId, apiBaseUrl = null, onChrome, simId }: Omit<SimR
           : (attempt: ReportedAttempt) => {
               void reporter(simId, attempt).catch(() => undefined);
             };
+      const gamification = apiBaseUrl === null ? null : createBrowserGamification(apiBaseUrl, simId);
       const options = {
         ...(actorId === undefined ? {} : { actorId }),
         ...(reportAttempt === undefined ? {} : { reportAttempt }),
+        ...(gamification === null ? {} : { gamification }),
         setChrome: (chrome: SimChrome | null) => chromeRef.current?.(chrome),
       };
       return host.mount(container, simId, options);

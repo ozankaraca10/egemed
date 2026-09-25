@@ -2,7 +2,7 @@ import type { JSX, ReactNode } from "react";
 import { useMemo, useState } from "react";
 import type { AchievementsPeriod, Cohort, CohortFilter, Period, WeeklyGoal } from "@egemed/gamification-core";
 import { periodRangeTr } from "@egemed/gamification-core";
-import { buildAchievementsModel, buildLeaderboardModel, defaultGamiIcons, GamiAchievementsView, GamiLeaderboardView, GamiProgressPage, type GamiModalEnv, type GamiPageTab } from "@egemed/gami-ui";
+import { buildAchievementsModel, buildLeaderboardModel, defaultGamiIcons, earnedFromServer, GamiAchievementsView, GamiLeaderboardView, GamiProgressPage, GamiServerFrame, gamiLoadingStatus, levelFromServer, serverHasActivity, streakFromServer, type GamiModalEnv, type GamiPageTab, type GamiServerSource, type ServerGamiData } from "@egemed/gami-ui";
 import { poolFor } from "../data/pool";
 import { sampleSession, SESSION_SIZE } from "../core/session";
 import { useStore } from "../core/StoreProvider";
@@ -44,18 +44,36 @@ const goalIcon = (id: WeeklyGoal["id"]) => {
   return defaultGamiIcons.award({ width: 16, height: 16 });
 };
 
-export function ProgressScreen({
+function ProgressBody({
   embedded = false,
   repository,
   modalEnv,
   tab,
   onTab,
+  server,
+  period,
+  setPeriod,
+  boardPeriod,
+  setBoardPeriod,
+  cohort,
+  setCohort,
+  privacy,
+  setPrivacy,
 }: {
   embedded?: boolean;
   repository: LocalGamiRepository;
   modalEnv?: ModalEnv;
   tab?: GamiPageTab;
   onTab?: (tab: GamiPageTab) => void;
+  server: ServerGamiData | null;
+  period: AchievementsPeriod;
+  setPeriod: (period: AchievementsPeriod) => void;
+  boardPeriod: Period;
+  setBoardPeriod: (period: Period) => void;
+  cohort: CohortFilter;
+  setCohort: (cohort: CohortFilter) => void;
+  privacy: { public: boolean; displayName: string | null; cohort: Cohort | null };
+  setPrivacy: (update: (current: { public: boolean; displayName: string | null; cohort: Cohort | null }) => { public: boolean; displayName: string | null; cohort: Cohort | null }) => void;
 }): JSX.Element {
   const { dispatch, now } = useStore();
   const at = new Date(now());
@@ -66,19 +84,13 @@ export function ProgressScreen({
     setLocalTab(next);
     onTab?.(next);
   };
-  const [period, setPeriod] = useState<AchievementsPeriod>("last30");
-  const [boardPeriod, setBoardPeriod] = useState<Period>("week");
-  const [cohort, setCohort] = useState<CohortFilter>("all");
-  const [privacy, setPrivacy] = useState<{ public: boolean; displayName: string | null; cohort: Cohort | null }>({
-    public: false,
-    displayName: null,
-    cohort: null,
-  });
 
-  const weekRows = useMemo(
+  const localWeek = useMemo(
     () => localLeaderboardRows(progress.state.attempts, AUSCULTA_RULES, at, "week", "all", privacy),
     [at, privacy, progress.state.attempts],
   );
+  const weekRows = server && activeTab !== "leaderboard" ? server.rows : localWeek;
+  const earned = server ? earnedFromServer(AUSCULTA_BADGES, server.summary.badges) : progress.state.earned;
   const achievements = useMemo(() => buildAchievementsModel({
     now: at,
     period,
@@ -86,19 +98,21 @@ export function ProgressScreen({
     rules: AUSCULTA_RULES,
     catalog: AUSCULTA_BADGES,
     stats: progress.state.stats,
-    earned: progress.state.earned,
+    earned,
     badgeContext: { now: at },
-    level: progress.level,
-    streak: progress.streak,
+    level: server ? levelFromServer(server.summary.xp, server.summary.level, AUSCULTA_RULES) : progress.level,
+    streak: server ? streakFromServer(server.summary.streak) : progress.streak,
     goals: progress.goals,
     profile: privacy,
     weekRows,
     domainMeta: DOMAIN_META,
-  }), [at, period, privacy, progress, weekRows]);
-  const rows = useMemo(
+    ...(server ? { activity: serverHasActivity(server.summary, progress.state.attempts.length) } : {}),
+  }), [at, earned, period, privacy, progress, server, weekRows]);
+  const localBoard = useMemo(
     () => localLeaderboardRows(progress.state.attempts, AUSCULTA_RULES, at, boardPeriod, cohort, privacy),
     [at, boardPeriod, cohort, privacy, progress.state.attempts],
   );
+  const rows = server && activeTab === "leaderboard" ? server.rows : localBoard;
   const prevRows = useMemo(() => {
     const prev = new Date(periodRangeTr(boardPeriod, at).start.getTime() - 1);
     return localLeaderboardRows(progress.state.attempts, AUSCULTA_RULES, prev, boardPeriod, cohort, privacy);
@@ -109,11 +123,11 @@ export function ProgressScreen({
     period: boardPeriod,
     cohort,
     rows,
-    prevRows,
+    prevRows: server && activeTab === "leaderboard" ? null : prevRows,
     monthRows: null,
     reward: null,
     boardReady: true,
-  }), [at, boardPeriod, cohort, prevRows, rows]);
+  }), [activeTab, at, boardPeriod, cohort, prevRows, rows, server]);
 
   const startAssessment = () => {
     const seed = sessionSeed(now());
@@ -129,7 +143,7 @@ export function ProgressScreen({
   return (
     <>
       <div className="screen">
-        <GamiProgressPage active={activeTab} onTab={selectTab} icons={defaultGamiIcons}>
+        <GamiProgressPage active={activeTab} demo={server === null} onTab={selectTab} icons={defaultGamiIcons}>
           {activeTab === "achievements" ? (
             <GamiAchievementsView
               title={<ScreenHeading className="results-title-v2">Başarılarım</ScreenHeading>}
@@ -206,5 +220,61 @@ export function ProgressScreen({
       </div>
       <Footer embedded={embedded} />
     </>
+  );
+}
+
+export function ProgressScreen({
+  embedded = false,
+  repository,
+  modalEnv,
+  tab,
+  onTab,
+  gamification,
+}: {
+  embedded?: boolean;
+  repository: LocalGamiRepository;
+  modalEnv?: ModalEnv;
+  tab?: GamiPageTab;
+  onTab?: (tab: GamiPageTab) => void;
+  gamification?: GamiServerSource;
+}): JSX.Element {
+  const [period, setPeriod] = useState<AchievementsPeriod>("last30");
+  const [boardPeriod, setBoardPeriod] = useState<Period>("week");
+  const [cohort, setCohort] = useState<CohortFilter>("all");
+  const [privacy, setPrivacy] = useState<{ public: boolean; displayName: string | null; cohort: Cohort | null }>({
+    public: false,
+    displayName: null,
+    cohort: null,
+  });
+  const activeTab = tab ?? "achievements";
+  const body = (server: ServerGamiData | null) => (
+    <ProgressBody
+      boardPeriod={boardPeriod}
+      cohort={cohort}
+      embedded={embedded}
+      period={period}
+      privacy={privacy}
+      repository={repository}
+      server={server}
+      setBoardPeriod={setBoardPeriod}
+      setCohort={setCohort}
+      setPeriod={setPeriod}
+      setPrivacy={setPrivacy}
+      {...(modalEnv ? { modalEnv } : {})}
+      {...(tab === undefined ? {} : { tab })}
+      {...(onTab === undefined ? {} : { onTab })}
+    />
+  );
+  if (gamification === undefined) return body(null);
+  return (
+    <GamiServerFrame
+      cohort={activeTab === "leaderboard" ? cohort : "all"}
+      fallback={gamiLoadingStatus()}
+      icon={defaultGamiIcons.info({ height: 16, width: 16 })}
+      period={activeTab === "leaderboard" ? boardPeriod : "week"}
+      source={gamification}
+    >
+      {body}
+    </GamiServerFrame>
   );
 }

@@ -32,6 +32,9 @@ function sessionRole(page: Page) {
 }
 
 test.describe("API oturumu (dev sağlayıcı)", () => {
+  // Testler aynı tohum kullanıcılarını (admin/ogrenci) ve aynı DB’yi paylaşır; erişim
+  // kaldırma gibi durum değiştiren senaryolar paralel koşuda birbirini bozar.
+  test.describe.configure({ mode: "serial" });
   test("öğrenci girişi sunucu oturumu kurar, yenilemede korunur", async ({ page }, testInfo) => {
     const errors = trackErrors(page);
     await page.goto(STUDENT_ENTRY);
@@ -275,5 +278,35 @@ test.describe("API oturumu (dev sağlayıcı)", () => {
     await expect(page.locator(".eg-shell-progress__num").first()).toHaveText(String(pulseXp));
     // T114: sunucu rozetleri katalog adlarıyla gösterilir (ADR-008 S4).
     await expect(page.getByText("Ritim izleyicisi")).toBeVisible();
+  });
+
+  test("Pulse sınavı bitince İlerlemem sunucu rozetini gösterir ve demo bandı yoktur", async ({ page }) => {
+    await page.goto(STUDENT_ENTRY);
+    await signIn(page, "ogrenci");
+    await expect(page).toHaveURL(/#\/$/);
+    const posted = page.waitForResponse(
+      (response) =>
+        response.url().includes("/me/gamification/pulse/attempts") &&
+        response.request().method() === "POST" &&
+        (response.status() === 200 || response.status() === 201),
+    );
+    await page.goto("/#/sims/pulse");
+    const root = page.locator(".egemed-pulse-runtime");
+    await expect(root.locator("#appRoot")).toBeVisible({ timeout: 20_000 });
+    if (await root.locator("#tutorialSkip").isVisible().catch(() => false)) await root.locator("#tutorialSkip").click();
+    await root.locator('#modeCards [data-view="quiz"]').click();
+    for (let i = 0; i < 10; i += 1) {
+      const id = /Q\d{3}/.exec(await root.locator("#quizForm").innerText())?.[0];
+      expect(id, `soru ${i + 1} kimliği`).toBeDefined();
+      const item = curriculum.byId[id ?? ""];
+      expect(item, id).toBeDefined();
+      await root.locator(`#quizForm input[value="${item?.correct ?? ""}"]`).check();
+      await root.locator("#quizSubmit").click();
+      if (i < 9) await root.locator("#quizItemNext").click();
+    }
+    await posted;
+    await page.locator(".eg-shell-simbar").getByRole("button", { name: "İlerlemem" }).click();
+    await expect(page.getByRole("button", { name: /Ritim izleyicisi.*kazanıldı/i }).first()).toBeVisible();
+    await expect(page.getByText("Demo verisi")).toHaveCount(0);
   });
 });

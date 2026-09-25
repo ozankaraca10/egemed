@@ -117,6 +117,8 @@ jobs:
         env:
           PORT: "3100"
           AUTH_DEV_ENABLED: "true"
+          # Seri api-dev senaryoları aynı tohum kullanıcılarıyla sık giriş yapar.
+          AUTH_LOGIN_RATE_MAX: "200"
         run: pnpm --filter @egemed/api start >api-e2e.log 2>&1 &
       - name: /health yanıtını bekle
         run: |
