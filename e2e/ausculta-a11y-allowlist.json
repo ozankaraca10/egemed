@@ -1,39 +1,5 @@
 {
-  "note": "T116/T116b — Ausculta iç ekranlarında kaynaktan devralınmış erişilebilirlik borcu. T116b: İlerlemem sayfası @egemed/gami-ui yüzeyini kullanır (T122); sonuç ekranı kapı bütçesi için yalnız desktop-1440 projesinde taranır. T131: S1/S2 rozetleri ve rapor 'Başarısız' hücresi kontrastı, Dinleme noktaları onay kutusu, tüm .btn ve sekmeler 44 px, yardım kaydırması karta taşındı, rapor satırındaki geçersiz aria-expanded açılır düğmeye taşındı — 7→2 ihlal, 8→3 küçük hedef. Kalanlar @egemed/gami-ui yüzeyine aittir (rozet .ft kontrastı, sekme/segment düğmeleri). Kayıtlar yalnız küçülür: düzeltilen bir kayıt testi 'düzeltildi — listeden çıkar' diye başarısız eder.",
-  "violations": [
-    {
-      "screen": "gami",
-      "rule": "color-contrast",
-      "target": ".eg-gami-badge.eg-gami-cat-skill:nth-child(*) > .ft"
-    },
-    {
-      "screen": "gami",
-      "rule": "color-contrast",
-      "target": ".eg-gami-badge.eg-gami-cat-topic:nth-child(*) > .ft"
-    }
-  ],
-  "smallTargets": [
-    {
-      "screen": "gami",
-      "selector": "div.eg-sim-ausculta.app-shell > main.app-content > div.screen > div.results-wrap-v2.eg-gami-page > div.eg-gami-pagetabs:nth-of-type(*) > button:nth-of-type(*)",
-      "size": "149x33",
-      "projects": [
-        "mobile-360"
-      ]
-    },
-    {
-      "screen": "gami",
-      "selector": "div.eg-sim-ausculta.app-shell > main.app-content > div.screen > div.results-wrap-v2.eg-gami-page > div.eg-gami-pagetabs:nth-of-type(*) > button:nth-of-type(*)",
-      "size": "134x33",
-      "projects": [
-        "tablet-768",
-        "desktop-1440"
-      ]
-    },
-    {
-      "screen": "gami",
-      "selector": "#gami-badges > div.eg-gami-card-head:nth-of-type(*) > div.eg-gami-seg > button:nth-of-type(*)",
-      "size": "57x28"
-    }
-  ]
+  "note": "T116/T116b — Ausculta iç ekranlarında kaynaktan devralınmış erişilebilirlik borcu. T116b: İlerlemem sayfası @egemed/gami-ui yüzeyini kullanır (T122); sonuç ekranı kapı bütçesi için yalnız desktop-1440 projesinde taranır. T131: S1/S2 rozetleri ve rapor 'Başarısız' hücresi kontrastı, Dinleme noktaları onay kutusu, tüm .btn ve sekmeler 44 px, yardım kaydırması karta taşındı, rapor satırındaki geçersiz aria-expanded açılır düğmeye taşındı — 7→2 ihlal, 8→3 küçük hedef. Kayıtlar yalnız küçülür: düzeltilen bir kayıt testi 'düzeltildi — listeden çıkar' diye başarısız eder. T135: @egemed/gami-ui rozet .ft kontrastı ve sekme/segment 44 px düzeltildi — liste boş.",
+  "violations": [],
+  "smallTargets": []
 }

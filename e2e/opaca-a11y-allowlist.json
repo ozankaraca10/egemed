@@ -1,59 +1,11 @@
 {
-  "note": "T116/T116b — Opaca iç ekranlarında kaynaktan devralınmış erişilebilirlik borcu. T116b: birleşik bardaki eylem 'İlerlemem' oldu ve sayfa @egemed/gami-ui yüzeyine taşındı (T122); eski sim-içi gami kayıtları kaldırıldı, yeni yüzeyin ölçümleri gerçek koşudan girildi. Kayıtlar yalnız küçülür: düzeltilen bir kayıt testi 'düzeltildi — listeden çıkar' diye başarısız eder. T130: sim-içi kontrast (.good-text, .lib-count), select adı (mobilde görsel gizli etiket), yardım gövdesi odaklanabilir, tüm .btn/film araçları/bölge çipleri/sekme/modal kapat 44 px — 11→5 ihlal, 37→4 küçük hedef. Kalan ihlaller @egemed/gami-ui rozet .ft kontrastı; kalan küçük hedefler gami-ui sekme/segment düğmeleri ve paragraf içi .gami-link (WCAG 2.5.8 satır içi istisnası).",
-  "violations": [
-    {
-      "screen": "gami",
-      "rule": "color-contrast",
-      "target": ".eg-gami-cat-learn.eg-gami-badge:nth-child(*) > .ft"
-    },
-    {
-      "screen": "gami",
-      "rule": "color-contrast",
-      "target": ".eg-gami-cat-milestone.eg-gami-badge:nth-child(*) > .ft"
-    },
-    {
-      "screen": "gami",
-      "rule": "color-contrast",
-      "target": ".eg-gami-cat-skill.eg-gami-badge:nth-child(*) > .ft"
-    },
-    {
-      "screen": "gami",
-      "rule": "color-contrast",
-      "target": ".eg-gami-cat-streak.eg-gami-badge:nth-child(*) > .ft"
-    },
-    {
-      "screen": "gami",
-      "rule": "color-contrast",
-      "target": ".eg-gami-cat-topic.eg-gami-badge:nth-child(*) > .ft"
-    }
-  ],
+  "note": "T116/T116b — Opaca iç ekranlarında kaynaktan devralınmış erişilebilirlik borcu. T116b: birleşik bardaki eylem 'İlerlemem' oldu ve sayfa @egemed/gami-ui yüzeyine taşındı (T122); eski sim-içi gami kayıtları kaldırıldı, yeni yüzeyin ölçümleri gerçek koşudan girildi. Kayıtlar yalnız küçülür: düzeltilen bir kayıt testi 'düzeltildi — listeden çıkar' diye başarısız eder. T130: sim-içi kontrast (.good-text, .lib-count), select adı (mobilde görsel gizli etiket), yardım gövdesi odaklanabilir, tüm .btn/film araçları/bölge çipleri/sekme/modal kapat 44 px — 11→5 ihlal, 37→4 küçük hedef. T135: @egemed/gami-ui rozet .ft kontrastı ve sekme/segment 44 px düzeltildi — 5→0 ihlal, 4→1 küçük hedef. Kalan tek kayıt paragraf içi .gami-link (WCAG 2.5.8 satır içi istisnası).",
+  "violations": [],
   "smallTargets": [
     {
       "screen": "modes",
       "selector": "div.eg-sim-opaca.app-shell > main.app-content > div.screen > div.container.screen-body > div.mode-cards > div.mode-card.assessment:nth-of-type(*) > p.mode-rules:nth-of-type(*) > button.gami-link",
       "size": "186x16"
-    },
-    {
-      "screen": "gami",
-      "selector": "div.eg-sim-opaca.app-shell > main.app-content > div.screen > div.results-wrap-v2.eg-gami-page > div.eg-gami-pagetabs:nth-of-type(*) > button:nth-of-type(*)",
-      "size": "149x33",
-      "projects": [
-        "mobile-360"
-      ]
-    },
-    {
-      "screen": "gami",
-      "selector": "div.eg-sim-opaca.app-shell > main.app-content > div.screen > div.results-wrap-v2.eg-gami-page > div.eg-gami-pagetabs:nth-of-type(*) > button:nth-of-type(*)",
-      "size": "134x33",
-      "projects": [
-        "tablet-768",
-        "desktop-1440"
-      ]
-    },
-    {
-      "screen": "gami",
-      "selector": "#gami-badges > div.eg-gami-card-head:nth-of-type(*) > div.eg-gami-seg > button:nth-of-type(*)",
-      "size": "57x28"
     }
   ]
 }
