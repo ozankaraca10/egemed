@@ -130,9 +130,10 @@ const DEFAULT_QUERY: UsersListQuery = {
   sort: DEFAULT_SORT,
 };
 
-/** Seçim satırı erişilebilir adı: "{ad} — Seç". */
-function selectLabel(displayName: string): string {
-  return `${displayName} — ${t("admin.users.table.select")}`;
+/** Seçim satırı erişilebilir adı: "{ad} — Seç"; kendi hesabında not eklenir (T150). */
+function selectLabel(displayName: string, isSelf: boolean): string {
+  const base = `${displayName} — ${t("admin.users.table.select")}`;
+  return isSelf ? `${base} — ${t("admin.users.detail.selfNote")}` : base;
 }
 
 function UserStatusBadge({ status }: { readonly status: UserStatus }): JSX.Element {
@@ -144,10 +145,12 @@ interface RowsProps {
   readonly units: readonly AdminUnit[];
   readonly selected: ReadonlySet<string>;
   readonly onToggleSelect: (id: string) => void;
+  /** Oturumdaki adminin kendi satırında toplu seçim kutusu devre dışıdır (T150: kilitlenme koruması). */
+  readonly currentUserId?: string | null;
 }
 
 /** ≥768 px tablo görünümü (E3 §e.1); 360 px'te CSS ile gizlenir. */
-export function UsersTable({ users, units, selected, onToggleSelect }: RowsProps): JSX.Element {
+export function UsersTable({ users, units, selected, onToggleSelect, currentUserId = null }: RowsProps): JSX.Element {
   return (
     <table className="eg-shell-users__table" role="table">
       <caption className="eg-shell-users__caption">{t("admin.users.table.caption")}</caption>
@@ -164,61 +167,71 @@ export function UsersTable({ users, units, selected, onToggleSelect }: RowsProps
         </tr>
       </thead>
       <tbody>
-        {users.map((user) => (
-          <tr key={user.id} role="row">
-            <td role="cell">
-              <input
-                aria-label={selectLabel(user.displayName)}
-                checked={selected.has(user.id)}
-                onChange={() => onToggleSelect(user.id)}
-                type="checkbox"
-              />
-            </td>
-            <td role="cell">
-              <a className="eg-shell-users__name-link" href={adminUserDetailHref(user.id)}>
-                {user.displayName}
-              </a>
-            </td>
-            <td role="cell">{user.username}</td>
-            <td role="cell">{t(ROLE_KEYS[user.role])}</td>
-            <td role="cell">{unitNameFor(user.unitId, units)}</td>
-            <td role="cell">
-              <UserStatusBadge status={user.status} />
-            </td>
-          </tr>
-        ))}
+        {users.map((user) => {
+          const isSelf = user.id === currentUserId;
+          return (
+            <tr key={user.id} role="row">
+              <td role="cell">
+                <input
+                  aria-label={selectLabel(user.displayName, isSelf)}
+                  checked={selected.has(user.id)}
+                  disabled={isSelf}
+                  onChange={() => onToggleSelect(user.id)}
+                  title={isSelf ? t("admin.users.detail.selfNote") : undefined}
+                  type="checkbox"
+                />
+              </td>
+              <td role="cell">
+                <a className="eg-shell-users__name-link" href={adminUserDetailHref(user.id)}>
+                  {user.displayName}
+                </a>
+              </td>
+              <td role="cell">{user.username}</td>
+              <td role="cell">{t(ROLE_KEYS[user.role])}</td>
+              <td role="cell">{unitNameFor(user.unitId, units)}</td>
+              <td role="cell">
+                <UserStatusBadge status={user.status} />
+              </td>
+            </tr>
+          );
+        })}
       </tbody>
     </table>
   );
 }
 
 /** 360 px kart listesi (E3 §e.1); ≥768 px'te CSS ile gizlenir. */
-export function UsersCards({ users, units, selected, onToggleSelect }: RowsProps): JSX.Element {
+export function UsersCards({ users, units, selected, onToggleSelect, currentUserId = null }: RowsProps): JSX.Element {
   return (
     <ul aria-label={t("admin.users.cards.label")} className="eg-shell-users__cards">
-      {users.map((user) => (
-        <li className="eg-shell-users__card" key={user.id}>
-          <input
-            aria-label={selectLabel(user.displayName)}
-            checked={selected.has(user.id)}
-            className="eg-shell-users__card-select"
-            onChange={() => onToggleSelect(user.id)}
-            type="checkbox"
-          />
-          <div className="eg-shell-users__card-body">
-            <a className="eg-shell-users__card-name" href={adminUserDetailHref(user.id)}>
-              {user.displayName}
-            </a>
-            <p className="eg-shell-users__card-meta">
-              {t(ROLE_KEYS[user.role])} · {unitNameFor(user.unitId, units)}
-            </p>
-            <div className="eg-shell-users__card-badges">
-              <UserStatusBadge status={user.status} />
-              <Badge>{t(AUTH_KEYS[user.authMethod])}</Badge>
+      {users.map((user) => {
+        const isSelf = user.id === currentUserId;
+        return (
+          <li className="eg-shell-users__card" key={user.id}>
+            <input
+              aria-label={selectLabel(user.displayName, isSelf)}
+              checked={selected.has(user.id)}
+              className="eg-shell-users__card-select"
+              disabled={isSelf}
+              onChange={() => onToggleSelect(user.id)}
+              title={isSelf ? t("admin.users.detail.selfNote") : undefined}
+              type="checkbox"
+            />
+            <div className="eg-shell-users__card-body">
+              <a className="eg-shell-users__card-name" href={adminUserDetailHref(user.id)}>
+                {user.displayName}
+              </a>
+              <p className="eg-shell-users__card-meta">
+                {t(ROLE_KEYS[user.role])} · {unitNameFor(user.unitId, units)}
+              </p>
+              <div className="eg-shell-users__card-badges">
+                <UserStatusBadge status={user.status} />
+                <Badge>{t(AUTH_KEYS[user.authMethod])}</Badge>
+              </div>
             </div>
-          </div>
-        </li>
-      ))}
+          </li>
+        );
+      })}
     </ul>
   );
 }
@@ -472,6 +485,8 @@ export interface UsersListViewProps {
   readonly onToggleSelect: (id: string) => void;
   readonly onClearSelection: () => void;
   readonly onRetry: () => void;
+  /** Geçerli oturumun kimliği; kendi hesabını toplu seçimde devre dışı bırakmak için (T150, `App.tsx` `session.actorId` geçirir). */
+  readonly currentUserId?: string | null;
   /** Toplu düzenleme diyaloğu (E3 §e.5, T73). */
   readonly bulkOpen: boolean;
   readonly bulkOperation: BulkOperation;
@@ -506,6 +521,7 @@ export function UsersListView({
   onToggleSelect,
   onClearSelection,
   onRetry,
+  currentUserId = null,
   bulkOpen,
   bulkOperation,
   bulkValue,
@@ -574,8 +590,20 @@ export function UsersListView({
         )}
         {status === "ready" && result !== null && result.meta.total > 0 && (
           <>
-            <UsersTable onToggleSelect={onToggleSelect} selected={selected} units={units} users={result.data} />
-            <UsersCards onToggleSelect={onToggleSelect} selected={selected} units={units} users={result.data} />
+            <UsersTable
+              currentUserId={currentUserId}
+              onToggleSelect={onToggleSelect}
+              selected={selected}
+              units={units}
+              users={result.data}
+            />
+            <UsersCards
+              currentUserId={currentUserId}
+              onToggleSelect={onToggleSelect}
+              selected={selected}
+              units={units}
+              users={result.data}
+            />
             <UsersPagination meta={result.meta} onPageChange={onPageChange} />
           </>
         )}
@@ -610,6 +638,8 @@ export function UsersListView({
 export interface UsersPageProps {
   /** Testte/gelecekte gerçek API kaynağıyla değiştirmek için enjekte edilir. */
   readonly dataSource?: UsersDataSource;
+  /** Geçerli oturumun kimliği; kendi hesabını toplu seçimde devre dışı bırakmak için (T150, `App.tsx` `session.actorId` geçirir). */
+  readonly currentUserId?: string | null;
 }
 
 /**
@@ -618,7 +648,7 @@ export interface UsersPageProps {
  * döngüsünü (yükleniyor/hazır/hata) ve sorgu durumunu yönetir, çizim
  * `UsersListView`'dedir.
  */
-export function UsersPage({ dataSource }: UsersPageProps): JSX.Element {
+export function UsersPage({ dataSource, currentUserId = null }: UsersPageProps): JSX.Element {
   const source = useShellSource(dataSource, (sources) => sources.users, () => createMockUsersSource(DEFAULT_MOCK_SEED));
 
   const [query, setQuery] = useState<UsersListQuery>(DEFAULT_QUERY);
@@ -708,6 +738,7 @@ export function UsersPage({ dataSource }: UsersPageProps): JSX.Element {
       bulkPreview={bulkPreview}
       bulkPreviewStatus={bulkPreviewStatus}
       bulkValue={bulkValue}
+      currentUserId={currentUserId}
       onBulkApply={applyBulk}
       onBulkOperationChange={(operation) => {
         setBulkOperation(operation);
