@@ -89,7 +89,8 @@ function collect(file: string, source: ts.SourceFile): Finding[] {
   return findings;
 }
 
-const SHELL_TSX_FILES = ts.sys.readDirectory("apps/shell/src", [".tsx"], ["**/node_modules/**"]);
+// `src/dev/` yalnız geliştirme vitrinidir (T151, üretim paketine girmez); denetim dışıdır.
+const SHELL_TSX_FILES = ts.sys.readDirectory("apps/shell/src", [".tsx"], ["**/node_modules/**", "**/dev/**"]);
 
 describe("T121 — kabuk i18n sabit metin denetimi", () => {
   it("apps/shell/src içindeki .tsx dosyalarında düz JSX metni ya da metin özniteliği sabiti kalmaz", () => {

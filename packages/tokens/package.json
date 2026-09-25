@@ -6,6 +6,7 @@
   "exports": {
     "./family-tokens.css": "./family-tokens.css",
     "./opaca.css": "./opaca.css",
-    "./ausculta.css": "./ausculta.css"
+    "./ausculta.css": "./ausculta.css",
+    "./platform-tokens.css": "./platform-tokens.css"
   }
 }

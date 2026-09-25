@@ -6,7 +6,8 @@
   "exports": {
     ".": "./src/index.ts",
     "./i18n": "./i18n/tr.ts",
-    "./components.css": "./styles/components.css"
+    "./components.css": "./styles/components.css",
+    "./primitives.css": "./styles/primitives.css"
   },
   "scripts": {
     "typecheck": "tsc --noEmit"
@@ -15,7 +16,9 @@
     "react": "^19"
   },
   "dependencies": {
-    "@egemed/tokens": "workspace:*"
+    "@egemed/tokens": "workspace:*",
+    "lucide-react": "1.48.0",
+    "radix-ui": "1.6.7"
   },
   "devDependencies": {
     "@types/react": "19.3.0",

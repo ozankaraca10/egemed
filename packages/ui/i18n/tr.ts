@@ -5,6 +5,8 @@ export const tr = {
   "badge.tone.warning": "Uyarı",
   "badge.tone.danger": "Hata",
   "modal.close": "Kapat",
+  "toast.label": "Bildirim",
+  "toast.region": "Bildirimler ({hotkey})",
   "table.empty": "Kayıt bulunamadı",
   "entry.brand": "EGEMED",
   "entry.tagline": "Klinik öğrenme deneyimi tek platformda.",

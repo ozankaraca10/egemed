@@ -28,7 +28,8 @@ describe("shell.css token sözleşmesi", () => {
     const classes = capture(shellCss.replace(/url\([^)]*\)/g, ""), /\.([A-Za-z][\w-]*)/g);
     expect(classes.length).toBeGreaterThan(0);
     for (const name of classes) expect(name.startsWith("eg-shell"), name).toBe(true);
-    const family = defined(read("packages/tokens/family-tokens.css"));
+    // T151: kabuk aile token'larına ek olarak platform katmanını da yükler (platform-tokens.css).
+    const family = new Set([...defined(read("packages/tokens/family-tokens.css")), ...defined(read("packages/tokens/platform-tokens.css"))]);
     const local = defined(shellCss);
     const used = capture(shellCss, /var\(\s*(--[\w-]+)\s*[,)]/g);
     expect(used.length).toBeGreaterThan(0);

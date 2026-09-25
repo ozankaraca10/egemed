@@ -1,0 +1,38 @@
+/*
+ * EGEMED platform token katmanı (T151, premium arayüz temeli — 25 Eylül 2026).
+ * Aile token'larının (family-tokens.css) ÜSTÜNE eklenir; yeni renk tonu içermez:
+ * gölgeler mevcut --shadow-* ile aynı lacivert tabandan, yüzeyler ve bindirme
+ * mevcut renk token'larından türetilir. Yalnız platform kabuğu (apps/shell) yükler;
+ * simler aile token'larıyla kalır.
+ */
+:root{
+  /* --- Yükselti: kart < açılır öğe < diyalog --- */
+  --elev-1:0 1px 2px rgba(13,52,111,.06);
+  --elev-2:var(--shadow-card);
+  --elev-3:0 4px 12px rgba(13,52,111,.08),0 16px 32px rgba(13,52,111,.10);
+  --elev-4:var(--shadow-pop);
+
+  /* --- Hareket (azaltılmış harekette sıfırlanır) --- */
+  --dur-1:120ms; --dur-2:180ms; --dur-3:260ms;
+  --ease-out:cubic-bezier(.2,.8,.2,1); --ease-in-out:cubic-bezier(.4,0,.2,1);
+
+  /* --- Odak halkası: 2px çizgi + yumuşak hale (WCAG 2.4.13 görünürlüğü) --- */
+  --focus-color:var(--blue-600);
+  --focus-halo:0 0 0 4px color-mix(in srgb,var(--blue-500) 28%,transparent);
+
+  /* --- Denetim ölçüleri: dokunma hedefi en az 44 px --- */
+  --ctl-h:44px; --ctl-h-lg:48px; --ctl-px:16px; --ctl-radius:var(--r-md);
+
+  /* --- Yüzeyler --- */
+  --surface:var(--card); --surface-2:var(--card-soft); --surface-page:var(--bg-grad-b);
+  --overlay:color-mix(in srgb,var(--navy-900) 48%,transparent);
+  --hover-tint:color-mix(in srgb,var(--blue-600) 7%,transparent);
+  --press-tint:color-mix(in srgb,var(--blue-600) 12%,transparent);
+
+  /* --- Tipografi --- */
+  --fw-regular:400; --fw-medium:500; --fw-semibold:600; --fw-bold:700;
+  --lh-tight:1.25; --lh-base:1.5; --tracking-tight:-.01em; --tracking-caps:.06em;
+}
+@media (prefers-reduced-motion:reduce){
+  :root{ --dur-1:0ms; --dur-2:0ms; --dur-3:0ms; }
+}
