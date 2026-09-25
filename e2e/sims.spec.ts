@@ -148,6 +148,9 @@ test.describe("Opaca ilerleme sayfası", () => {
     await page.getByRole("tab", { name: "Liderlik Tahtası" }).click();
     await expect(page.getByRole("heading", { name: "Liderlik Tahtası" })).toBeVisible();
     await captureRouteScreenshot(page, testInfo.project.name, "#/sims/opaca liderlik");
+    expect(errors, "konsol/sayfa hatası").toEqual([]);
+  });
+});
 
 test.describe("kompakt hesap menüsü (T120)", () => {
   // Plan gereği 360 px doğrulaması: düğme ve panel yatay taşma üretmez.
