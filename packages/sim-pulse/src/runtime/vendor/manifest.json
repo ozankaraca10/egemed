@@ -11,8 +11,8 @@
   ],
   "files": {
     "model.js": {
-      "sha256": "9c04522574968b11fc01dc35f619d692e87d1d8d90e4b2c9ec0a4285b023d873",
-      "bytes": 12538
+      "sha256": "8fea77c6995fdb907c1befc54bd7954b75a1ad43cf0f9b77547e42db4b3a8b85",
+      "bytes": 12655
     },
     "scorm.js": {
       "sha256": "3a2cf98b0f1daf11514b92320439adf28f3fbbc15c202479586970fc6f3641fd",
@@ -68,12 +68,6 @@
     }
   },
   "patches": [
-    {
-      "file": "model.js",
-      "id": "PULSE-NEXTEVENT-RECURSION",
-      "matches": 1,
-      "why": "Kaynak hatası: önbellek dışındaki kısa aralıkta between() aynı girdilerle kendini çağırıp yığın taşırıyor (~30 adım sonra). Port düzeltmesiyle (T18b-FIX, engine/beats.ts) aynı: taşan uçtan önbelleği yenile."
-    },
     {
       "file": "app.js",
       "id": "PULSE-A11Y-QUIZ-OPT-ROLE",
