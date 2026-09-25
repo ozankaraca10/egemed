@@ -90,4 +90,32 @@ describe("liderlik görünürlüğü", () => {
     const saved = await commitLeaderboardVisibility(true, false, () => Promise.resolve(false));
     expect(saved).toEqual({ failed: false, visible: false });
   });
+
+  // T145: tercih yüklenirken (ilk yükleme ya da yenileme) anahtar devre dışı
+  // + aria-busy olur; tıklama yükleme bitmeden kaybolmaz/geri yazılmaz.
+  it("yükleme sürerken (pending) anahtar devre dışı ve aria-busy olur", () => {
+    const html = renderToStaticMarkup(
+      createElement(LeaderboardVisibilityControl, {
+        error: false,
+        onToggle: () => undefined,
+        pending: true,
+        visible: false,
+      }),
+    );
+    expect(html).toContain('aria-busy="true"');
+    expect(html).toContain("disabled=\"\"");
+  });
+
+  it("yükleme bitince anahtar etkinleşir; aria-busy kalkar", () => {
+    const html = renderToStaticMarkup(
+      createElement(LeaderboardVisibilityControl, {
+        error: false,
+        onToggle: () => undefined,
+        pending: false,
+        visible: true,
+      }),
+    );
+    expect(html).toContain('aria-busy="false"');
+    expect(html).not.toContain("disabled=\"\"");
+  });
 });

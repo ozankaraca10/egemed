@@ -156,8 +156,8 @@ test.describe("API oturumu (dev sağlayıcı)", () => {
     await page.getByRole("button", { name: "İleri" }).click();
     await page.getByRole("button", { name: "İleri" }).click();
     await expect(page.getByText("1 geçerli · 1 hatalı")).toBeVisible();
-    // Sunucu doğrulaması: hatalı satır ve alan raporlanır (ileti metni sunucudan gelir).
-    await expect(page.getByText(/^satır 2 · E-posta · /).first()).toBeVisible();
+    // Sunucu doğrulaması: iletiler sahte kaynakla aynı, alana özgü Türkçe metindir (T144).
+    await expect(page.getByText("satır 2 · E-posta · E-posta biçimi geçersiz.")).toBeVisible();
     await page.getByRole("button", { name: "İleri" }).click();
     await page.getByRole("button", { name: "İleri" }).click();
     await page.getByRole("button", { name: "Uygula" }).click();
@@ -209,12 +209,17 @@ test.describe("API oturumu (dev sağlayıcı)", () => {
     await toggle.uncheck();
     await saved;
     await page.reload();
-    await expect(page.getByRole("switch", { name: "Liderlik tablosunda görün" })).not.toBeChecked();
+    const reloaded = page.getByRole("switch", { name: "Liderlik tablosunda görün" });
+    await expect(reloaded).not.toBeChecked();
+    // T145: tercih GET /me/preferences ile eşzamansız yüklenir; anahtar yüklenene
+    // dek devre dışı kalır (bkz. ProgressSection). Tıklamadan önce etkin olmasını
+    // bekleriz ki yükleme bitmeden gelen bir tıklama kayıp/kararsız olmasın.
+    await expect(reloaded).toBeEnabled();
     const restored = page.waitForResponse(
       (response) =>
         response.url().includes("/me/preferences") && response.request().method() === "PATCH" && response.ok(),
     );
-    await page.getByRole("switch", { name: "Liderlik tablosunda görün" }).check();
+    await reloaded.check();
     await restored;
   });
 
