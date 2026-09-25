@@ -1,57 +1,210 @@
-import type { JSX } from "react";
+import type { JSX, ReactNode } from "react";
+import { useMemo, useState } from "react";
+import type { AchievementsPeriod, Cohort, CohortFilter, Period, WeeklyGoal } from "@egemed/gamification-core";
+import { periodRangeTr } from "@egemed/gamification-core";
+import { buildAchievementsModel, buildLeaderboardModel, defaultGamiIcons, GamiAchievementsView, GamiLeaderboardView, GamiProgressPage, type GamiModalEnv, type GamiPageTab } from "@egemed/gami-ui";
+import { poolFor } from "../data/pool";
+import { sampleSession, SESSION_SIZE } from "../core/session";
 import { useStore } from "../core/StoreProvider";
-import { useGamiProgress } from "../gamification/useGami";
+import type { ScoringWeights } from "../core/types";
 import { AUSCULTA_BADGES } from "../gamification/catalog";
-import { badgeProgress } from "@egemed/gamification-core";
+import { localLeaderboardRows } from "../gamification/leaderboard";
 import type { LocalGamiRepository } from "../gamification/repo";
-import { Footer, touchTarget } from "../ui/chrome";
+import { AUSCULTA_RULES } from "../gamification/rules";
+import { useGamiProgress } from "../gamification/useGami";
+import { sessionSeed } from "./entry";
+import { Footer } from "../ui/chrome";
+import { IconCheckCircle, IconDoc, IconLungs, IconStethoscope, IconWave } from "../ui/icons";
+import type { ModalEnv } from "../ui/modal-env";
 import { ScreenHeading } from "../ui/ScreenHeading";
 
-export function ProgressScreen({ embedded = false, repository }: { embedded?: boolean; repository: LocalGamiRepository }): JSX.Element {
+const DOMAIN_META: { key: keyof ScoringWeights; label: string; icon: ReactNode }[] = [
+  { key: "technique", label: "Oskültasyon tekniği", icon: <IconStethoscope /> },
+  { key: "localization", label: "Anatomik lokalizasyon", icon: <IconLungs /> },
+  { key: "recognition", label: "Ses tanımlama", icon: <IconWave /> },
+  { key: "interpretation", label: "Klinik yorum", icon: <IconDoc /> },
+  { key: "diagnosis", label: "Tanı (varsa)", icon: <IconCheckCircle /> },
+  { key: "systematic", label: "Sistematik muayene", icon: <IconStethoscope /> },
+];
+
+const TONES = ["t-blue", "t-purple", "t-green", "t-amber"] as const;
+
+function avatarOf(id: string, name: string | null) {
+  if (!name) return { tone: "t-anon" as const, text: "AÖ" };
+  let hash = 7;
+  for (const ch of id) hash = (Math.imul(hash, 31) + ch.charCodeAt(0)) >>> 0;
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  const letters = parts.length > 1 ? `${parts[0]?.[0] ?? ""}${parts[parts.length - 1]?.[0] ?? ""}` : parts[0]?.[0] ?? "";
+  return { tone: TONES[hash % TONES.length] ?? "t-blue", text: letters.toLocaleUpperCase("tr-TR") };
+}
+
+const goalIcon = (id: WeeklyGoal["id"]) => {
+  if (id === "weekly-assessments") return defaultGamiIcons.chart({});
+  if (id === "weekly-avg-score") return defaultGamiIcons.checkCircle({ width: 16, height: 16 });
+  return defaultGamiIcons.award({ width: 16, height: 16 });
+};
+
+export function ProgressScreen({
+  embedded = false,
+  repository,
+  modalEnv,
+  tab,
+  onTab,
+}: {
+  embedded?: boolean;
+  repository: LocalGamiRepository;
+  modalEnv?: ModalEnv;
+  tab?: GamiPageTab;
+  onTab?: (tab: GamiPageTab) => void;
+}): JSX.Element {
   const { dispatch, now } = useStore();
-  const progress = useGamiProgress(new Date(now()), repository);
-  const attempts = progress.state.attempts;
-  const latest = [...attempts].sort((a, b) => b.finishedAt.localeCompare(a.finishedAt))[0];
-  const earnedIds = new Set(progress.state.earned.map((badge) => badge.id));
+  const at = new Date(now());
+  const progress = useGamiProgress(at, repository);
+  const [localTab, setLocalTab] = useState<GamiPageTab>("achievements");
+  const activeTab = tab ?? localTab;
+  const selectTab = (next: GamiPageTab) => {
+    setLocalTab(next);
+    onTab?.(next);
+  };
+  const [period, setPeriod] = useState<AchievementsPeriod>("last30");
+  const [boardPeriod, setBoardPeriod] = useState<Period>("week");
+  const [cohort, setCohort] = useState<CohortFilter>("all");
+  const [privacy, setPrivacy] = useState<{ public: boolean; displayName: string | null; cohort: Cohort | null }>({
+    public: false,
+    displayName: null,
+    cohort: null,
+  });
+
+  const weekRows = useMemo(
+    () => localLeaderboardRows(progress.state.attempts, AUSCULTA_RULES, at, "week", "all", privacy),
+    [at, privacy, progress.state.attempts],
+  );
+  const achievements = useMemo(() => buildAchievementsModel({
+    now: at,
+    period,
+    attempts: progress.state.attempts,
+    rules: AUSCULTA_RULES,
+    catalog: AUSCULTA_BADGES,
+    stats: progress.state.stats,
+    earned: progress.state.earned,
+    badgeContext: { now: at },
+    level: progress.level,
+    streak: progress.streak,
+    goals: progress.goals,
+    profile: privacy,
+    weekRows,
+    domainMeta: DOMAIN_META,
+  }), [at, period, privacy, progress, weekRows]);
+  const rows = useMemo(
+    () => localLeaderboardRows(progress.state.attempts, AUSCULTA_RULES, at, boardPeriod, cohort, privacy),
+    [at, boardPeriod, cohort, privacy, progress.state.attempts],
+  );
+  const prevRows = useMemo(() => {
+    const prev = new Date(periodRangeTr(boardPeriod, at).start.getTime() - 1);
+    return localLeaderboardRows(progress.state.attempts, AUSCULTA_RULES, prev, boardPeriod, cohort, privacy);
+  }, [at, boardPeriod, cohort, privacy, progress.state.attempts]);
+  const leaderboard = useMemo(() => buildLeaderboardModel({
+    now: at,
+    clock: at,
+    period: boardPeriod,
+    cohort,
+    rows,
+    prevRows,
+    monthRows: null,
+    reward: null,
+    boardReady: true,
+  }), [at, boardPeriod, cohort, prevRows, rows]);
+
+  const startAssessment = () => {
+    const seed = sessionSeed(now());
+    dispatch({
+      type: "startSession",
+      practiceIds: sampleSession(poolFor("practice"), seed, SESSION_SIZE),
+      assessmentIds: sampleSession(poolFor("assessment"), seed + 1, SESSION_SIZE),
+      seed,
+    });
+    dispatch({ type: "startMode", mode: "assessment" });
+  };
+
   return (
-    <div className="screen eg-ausculta-progress">
-      <main className="container screen-body">
-        <ScreenHeading>İlerleme</ScreenHeading>
-        <p className="eg-ausculta-progress__intro">Oskültasyon çalışmanızın özeti bu cihazda saklanır.</p>
-        <section className="eg-ausculta-progress__summary" aria-label="Çalışma özeti">
-          <div><strong>{progress.streak.current}</strong><span>günlük seri</span></div>
-          <div><strong>{progress.level.level}</strong><span>seviye</span></div>
-          <div><strong>{attempts.length}</strong><span>tamamlanan vaka</span></div>
-        </section>
-        <section className="eg-ausculta-progress__section" aria-labelledby="ausculta-goals-title">
-          <h2 id="ausculta-goals-title">Bu haftaki hedefler</h2>
-          {progress.goals.goals.map((goal) => (
-            <div className="eg-ausculta-progress__goal" key={goal.id}>
-              <div><span>{goal.label}</span><b>{goal.value}/{goal.max}</b></div>
-              <progress value={goal.value} max={goal.max} aria-label={goal.label} />
-            </div>
-          ))}
-        </section>
-        <section className="eg-ausculta-progress__section" aria-labelledby="ausculta-badges-title">
-          <h2 id="ausculta-badges-title">Rozetler</h2>
-          <ul className="eg-ausculta-progress__badges">
-            {AUSCULTA_BADGES.map((badge) => {
-              const earned = earnedIds.has(badge.id);
-              const badgeState = badgeProgress(badge, progress.state.stats, { now: new Date(now()) });
-              const value = Math.max(0, Math.min(badgeState.value, badgeState.max));
-              const max = badgeState.max;
-              return <li className={earned ? "is-earned" : ""} key={badge.id}>
-                <span className="eg-ausculta-progress__badge-mark" aria-hidden="true">{earned ? "✓" : "·"}</span>
-                <div><strong>{badge.name}</strong><p>{badge.description}</p><progress value={value} max={max} aria-label={`${badge.name}: ${value}/${max}`} /></div>
-                <span>{earned ? "Kazanıldı" : `${value}/${max}`}</span>
-              </li>;
-            })}
-          </ul>
-        </section>
-        <p className="eg-ausculta-progress__recent">{latest ? `Son çalışma: ${latest.score} puan · ${latest.mode === "assessment" ? "Değerlendirme" : "Uygulama"}` : "Henüz tamamlanmış vaka yok. İlk vakanızdan sonra ilerlemeniz burada görünür."}</p>
-        <button className="eg-ausculta-progress__back" style={touchTarget()} onClick={() => dispatch({ type: "goto", screen: "start" })}>Başlangıca dön</button>
-      </main>
+    <>
+      <div className="screen">
+        <GamiProgressPage active={activeTab} onTab={selectTab} icons={defaultGamiIcons}>
+          {activeTab === "achievements" ? (
+            <GamiAchievementsView
+              title={<ScreenHeading className="results-title-v2">Başarılarım</ScreenHeading>}
+              subtitle="Değerlendirme ve uygulama oturumlarından kazandığın ilerleme."
+              period={achievements.hasAttempts ? period : null}
+              periods={achievements.periods}
+              onPeriod={setPeriod}
+              congrats={achievements.congrats}
+              congratsIcon={defaultGamiIcons.award({ width: 28, height: 28 })}
+              hasAttempts={achievements.hasAttempts}
+              profile={achievements.profile}
+              avatarOf={avatarOf}
+              onLeaderboard={() => selectTab("leaderboard")}
+              onAssessment={startAssessment}
+              points={achievements.points}
+              rangeLabel={achievements.rangeLabel}
+              goals={achievements.goals}
+              goalIcon={goalIcon}
+              doneIcon={defaultGamiIcons.check({ width: 16, height: 16 })}
+              weekLabel={achievements.weekLabel}
+              domains={achievements.domains}
+              domainRange={achievements.domainRange}
+              badges={achievements.badges}
+              categories={achievements.categories}
+              onStudy={(key) => {
+                dispatch({ type: "setLearnFocus", key });
+                dispatch({ type: "startMode", mode: "learn" });
+                dispatch({ type: "goto", screen: "learn" });
+              }}
+              onScrollBadges={() => undefined}
+              {...(modalEnv ? { modalEnv: modalEnv as GamiModalEnv } : {})}
+              icons={defaultGamiIcons}
+            />
+          ) : (
+            <GamiLeaderboardView
+              title={<ScreenHeading className="results-title-v2">Liderlik Tahtası</ScreenHeading>}
+              subtitle="Değerlendirme modundaki en iyi 3 denemenin ortalamasıyla sıralanır (en az 2 deneme)."
+              reward={null}
+              period={boardPeriod}
+              periods={leaderboard.periods}
+              onPeriod={setBoardPeriod}
+              cohort={cohort}
+              cohorts={leaderboard.cohorts}
+              onCohort={setCohort}
+              periodLabel={leaderboard.periodLabel}
+              countdown={leaderboard.countdown}
+              status={leaderboard.status}
+              onTerms={() => undefined}
+              onStatusAction={(action) => {
+                if (action === "assess") startAssessment();
+              }}
+              rankedEmpty={leaderboard.rankedEmpty}
+              rows={leaderboard.rows}
+              candidates={leaderboard.candidates}
+              items={leaderboard.items}
+              meDelta={leaderboard.meDelta}
+              qualify={leaderboard.qualify}
+              onQualify={startAssessment}
+              privacy={{ name: privacy.displayName, isPublic: privacy.public, cohort: privacy.cohort }}
+              onPrivacy={(patch) => setPrivacy((current) => ({
+                public: patch.public ?? current.public,
+                displayName: current.displayName,
+                cohort: patch.cohort === undefined ? current.cohort : patch.cohort,
+              }))}
+              winners={[]}
+              terms={false}
+              onCloseTerms={() => undefined}
+              {...(modalEnv ? { modalEnv: modalEnv as GamiModalEnv } : {})}
+              avatarOf={avatarOf}
+              icons={defaultGamiIcons}
+            />
+          )}
+        </GamiProgressPage>
+      </div>
       <Footer embedded={embedded} />
-    </div>
+    </>
   );
 }
