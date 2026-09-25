@@ -440,6 +440,121 @@
 .eg-empty__desc { margin: 0; max-inline-size: 420px; font-size: var(--fs-md); color: var(--ink-600); line-height: var(--lh-base); }
 .eg-empty__action { margin-block-start: var(--sp-3); }
 
+/* ---------- Veri tablosu ---------- */
+.eg-dtable {
+  inline-size: 100%;
+  border-collapse: collapse;
+  color: var(--ink-900);
+  font-size: var(--fs-md);
+}
+.eg-dtable__head th {
+  position: sticky;
+  inset-block-start: 0;
+  z-index: 1;
+  background: var(--surface-2);
+  text-align: start;
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-semibold);
+  color: var(--ink-700);
+}
+.eg-dtable th,
+.eg-dtable td {
+  padding: var(--sp-3);
+  border-block-end: 1px solid var(--border);
+}
+.eg-dtable--compact th,
+.eg-dtable--compact td { padding: var(--sp-2) var(--sp-3); }
+.eg-dtable__th--center, .eg-dtable__td--center { text-align: center; }
+.eg-dtable__th--end, .eg-dtable__td--end { text-align: end; }
+.eg-dtable__select-col { inline-size: var(--ctl-h); padding-inline-end: 0; }
+.eg-dtable tbody tr { transition: background-color var(--dur-2) var(--ease-out); }
+.eg-dtable tbody tr:hover { background: var(--hover-tint); }
+.eg-dtable__row--selected { background: var(--press-tint); }
+.eg-dtable__sort {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-block-size: var(--ctl-h);
+  margin: 0 calc(var(--sp-3) * -1);
+  padding: 0 var(--sp-3);
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-weight: inherit;
+  cursor: pointer;
+}
+.eg-dtable__sort:hover { color: var(--blue-700); }
+.eg-dtable__sort:focus-visible { outline: 2px solid var(--focus-color); outline-offset: -2px; box-shadow: var(--focus-halo); }
+.eg-dtable__sort-icon { display: inline-flex; color: var(--ink-500); }
+th[aria-sort="ascending"] .eg-dtable__sort-icon,
+th[aria-sort="descending"] .eg-dtable__sort-icon { color: var(--blue-600); }
+.eg-dtable__empty { padding: 0; border-block-end: 0; }
+
+/* 768 px altı: yatay kaydırma yok; satır kart olur, hücre "başlık: değer". */
+@media (max-width: 767.98px) {
+  .eg-dtable--stack,
+  .eg-dtable--stack tbody,
+  .eg-dtable--stack tr {
+    display: block;
+    inline-size: 100%;
+    /* content-box varsayılanı kart satırının padding+border'ını %100'e ekleyip yatay
+       taşma üretir (bkz. Table.tsx'teki aynı düzeltme); kutu ölçüsü border-box'a alınır. */
+    box-sizing: border-box;
+  }
+  .eg-dtable--stack thead {
+    position: absolute;
+    inline-size: 1px;
+    block-size: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+  .eg-dtable--stack tbody tr {
+    position: relative;
+    margin-block-end: var(--sp-3);
+    padding: var(--sp-3);
+    border: 1px solid var(--border);
+    border-radius: var(--r-lg);
+    background: var(--surface);
+    box-shadow: var(--elev-1);
+  }
+  .eg-dtable--stack td {
+    display: flex;
+    align-items: baseline;
+    gap: var(--sp-2);
+    box-sizing: border-box;
+    padding: 6px 0;
+    border-block-end: 0;
+  }
+  .eg-dtable--stack td[data-label]::before {
+    content: attr(data-label);
+    flex: 0 0 42%;
+    color: var(--ink-600);
+    font-size: var(--fs-sm);
+  }
+  .eg-dtable--stack .eg-dtable__select-col {
+    position: absolute;
+    inset-block-start: 6px;
+    inset-inline-end: 6px;
+    padding: 0;
+  }
+  .eg-dtable--stack .eg-dtable__empty { padding: 0; }
+}
+
+/* ---------- Sayfalama ---------- */
+.eg-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-3);
+  flex-wrap: wrap;
+}
+.eg-pagination__summary { font-size: var(--fs-sm); color: var(--ink-600); white-space: nowrap; }
+@media (max-width: 480px) {
+  .eg-pagination { justify-content: center; }
+  .eg-pagination__summary { order: 3; inline-size: 100%; text-align: center; }
+}
+
 /* ---------- Hareket ---------- */
 @keyframes eg-fade-in { from { opacity: 0; } to { opacity: 1; } }
 @keyframes eg-fade-out { from { opacity: 1; } to { opacity: 0; } }

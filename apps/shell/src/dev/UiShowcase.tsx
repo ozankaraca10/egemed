@@ -1,13 +1,15 @@
-import { useState, type JSX } from "react";
+import { useMemo, useState, type JSX } from "react";
 import {
   Avatar,
   Button,
   Checkbox,
+  DataTable,
   Dialog,
   EmptyState,
   Field,
   IconButton,
   Menu,
+  Pagination,
   RadioGroup,
   Select,
   Skeleton,
@@ -17,7 +19,28 @@ import {
   ToastProvider,
   icons,
   useToast,
+  type DataTableSort,
 } from "@egemed/ui";
+
+interface ShowcaseRow {
+  readonly id: string;
+  readonly ad: string;
+  readonly rol: "Öğrenci" | "Yönetici";
+  readonly durum: "Etkin" | "Askıda";
+}
+
+/** 12 satırlık sentetik veri; gerçek öğrenci verisi yok. */
+const SHOWCASE_ROWS: readonly ShowcaseRow[] = Array.from({ length: 12 }, (_, index) => {
+  const n = index + 1;
+  return {
+    id: `u${String(n).padStart(3, "0")}`,
+    ad: `Örnek Kullanıcı ${String(n).padStart(3, "0")}`,
+    rol: n % 5 === 0 ? "Yönetici" : "Öğrenci",
+    durum: n % 4 === 0 ? "Askıda" : "Etkin",
+  };
+});
+
+const TABLE_PAGE_SIZE = 5;
 
 /** T151 — premium bileşen vitrini (yalnız geliştirme). e2e: erişilebilirlik, klavye, ekran görüntüsü. */
 function Showcase(): JSX.Element {
@@ -29,7 +52,23 @@ function Showcase(): JSX.Element {
   const [visible, setVisible] = useState(true);
   const [open, setOpen] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [tableSort, setTableSort] = useState<DataTableSort | undefined>(undefined);
+  const [selected, setSelected] = useState<ReadonlySet<string>>(new Set());
+  const [tablePage, setTablePage] = useState(1);
   const invalid = name.length > 0 && name.length < 2;
+
+  const sortedRows = useMemo(() => {
+    if (tableSort === undefined) return SHOWCASE_ROWS;
+    const factor = tableSort.direction === "asc" ? 1 : -1;
+    return [...SHOWCASE_ROWS].sort((a, b) => {
+      const av = tableSort.key === "durum" ? a.durum : a.ad;
+      const bv = tableSort.key === "durum" ? b.durum : b.ad;
+      return av.localeCompare(bv, "tr") * factor;
+    });
+  }, [tableSort]);
+  const pageCount = Math.max(1, Math.ceil(sortedRows.length / TABLE_PAGE_SIZE));
+  const pageRows = sortedRows.slice((tablePage - 1) * TABLE_PAGE_SIZE, tablePage * TABLE_PAGE_SIZE);
+
   return (
     <main className="eg-shell-vitrin">
       <h1>Bileşen vitrini</h1>
@@ -110,6 +149,41 @@ function Showcase(): JSX.Element {
             action={<Button variant="secondary" icon={<icons.UserPlus />}>Kullanıcı ekle</Button>}
           />
         </div>
+      </section>
+      <section aria-labelledby="v-table">
+        <h2 id="v-table">Tablo</h2>
+        <DataTable<ShowcaseRow>
+          caption="Örnek kullanıcı tablosu"
+          columns={[
+            { key: "ad", header: "Ad Soyad", cell: (row) => row.ad, sortable: true },
+            { key: "rol", header: "Rol", cell: (row) => row.rol },
+            { key: "durum", header: "Durum", cell: (row) => row.durum, sortable: true },
+          ]}
+          rows={pageRows}
+          rowKey={(row) => row.id}
+          {...(tableSort !== undefined ? { sort: tableSort } : {})}
+          onSortChange={setTableSort}
+          selection={{
+            selected,
+            onToggle: (key) => {
+              const next = new Set(selected);
+              if (next.has(key)) next.delete(key);
+              else next.add(key);
+              setSelected(next);
+            },
+            onToggleAll: () => {
+              const allOnPage = pageRows.every((row) => selected.has(row.id));
+              const next = new Set(selected);
+              for (const row of pageRows) {
+                if (allOnPage) next.delete(row.id);
+                else next.add(row.id);
+              }
+              setSelected(next);
+            },
+            label: (row) => `${row.ad} satırını seç`,
+          }}
+        />
+        <Pagination page={tablePage} pageCount={pageCount} onPageChange={setTablePage} total={sortedRows.length} pageSize={TABLE_PAGE_SIZE} />
       </section>
       <Dialog
         open={open}

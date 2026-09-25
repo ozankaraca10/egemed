@@ -110,4 +110,36 @@ test.describe("premium bileşen temeli (T151)", () => {
     await page.getByRole("button", { name: "Bildirim göster" }).click();
     await expect(page.getByRole("region", { name: /Bildirimler/ }).getByText("Kaydedildi")).toBeVisible();
   });
+
+  test("tablo: aria-sort klavyeyle sıralanır, seçim çalışır, 360 px'te yatay taşma yok, tüm hedefler ≥ 44 px", async ({ page }) => {
+    const errors = trackErrors(page);
+    await openShowcase(page);
+    const table = page.getByRole("table", { name: "Örnek kullanıcı tablosu" });
+    await expect(table).toBeVisible();
+
+    const nameHeader = page.getByRole("columnheader", { name: /Ad Soyad/ });
+    await expect(nameHeader).toHaveAttribute("aria-sort", "none");
+    const sortButton = nameHeader.getByRole("button", { name: /Ad Soyad/ });
+    await sortButton.focus();
+    await page.keyboard.press("Enter");
+    await expect(nameHeader).toHaveAttribute("aria-sort", "ascending");
+    await page.keyboard.press("Enter");
+    await expect(nameHeader).toHaveAttribute("aria-sort", "descending");
+
+    const firstRowCheckbox = page.getByRole("checkbox", { name: /satırını seç/ }).first();
+    await firstRowCheckbox.focus();
+    await page.keyboard.press("Space");
+    await expect(firstRowCheckbox).toBeChecked();
+    const selectAll = page.getByRole("checkbox", { name: "Tümünü seç" });
+    await expect(selectAll).toBeVisible();
+
+    expect(await axeViolations(page)).toEqual([]);
+
+    await page.setViewportSize({ width: 360, height: 800 });
+    const overflow = await page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth);
+    expect(overflow).toBe(false);
+    expect(await smallTargets(page)).toEqual([]);
+    await page.setViewportSize({ width: 1280, height: 800 });
+    expect(errors).toEqual([]);
+  });
 });

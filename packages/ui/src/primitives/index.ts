@@ -8,4 +8,6 @@ export { Tooltip, type TooltipProps } from "./Tooltip";
 export { ToastProvider, useToast, type ToastInput, type ToastTone } from "./Toast";
 export { Avatar, EmptyState, Skeleton, initialsOf, type AvatarProps, type EmptyStateProps } from "./Display";
 export { Spinner } from "./Spinner";
+export { DataTable, type DataTableColumn, type DataTableProps, type DataTableSelection, type DataTableSort } from "./DataTable";
+export { Pagination, type PaginationProps } from "./Pagination";
 export { cx } from "./props";
