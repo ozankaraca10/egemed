@@ -19,4 +19,10 @@ test.describe("üretim önizlemesi güvenlik kontrolleri", () => {
     await expect(page.getByText("Kimlik doğrulama henüz bağlı değil")).toBeVisible();
     await expect(page.getByText("Geliştirme hesabı")).toHaveCount(0);
   });
+
+  test("geliştirme bileşen vitrini üretim paketinde yoktur (T151)", async ({ page }) => {
+    await page.goto("/#/_vitrin");
+    await page.waitForLoadState("networkidle");
+    await expect(page.getByRole("heading", { name: "Bileşen vitrini" })).toHaveCount(0);
+  });
 });

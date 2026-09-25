@@ -819,3 +819,12 @@ html, body { margin: 0; }
 @media (prefers-reduced-motion: reduce) {
   .eg-shell-sim-page__host { transition: none; }
 }
+
+/* T151 — geliştirme vitrini (#/_vitrin); üretimde çizilmez. */
+.eg-shell-vitrin { max-inline-size: 1100px; margin: 0 auto; padding: var(--sp-5) var(--sp-4) var(--sp-6); display: grid; gap: var(--sp-6); }
+.eg-shell-vitrin h1 { margin: 0; font-size: var(--fs-2xl); color: var(--ink-900); }
+.eg-shell-vitrin h2 { margin: 0 0 var(--sp-3); font-size: var(--fs-lg); color: var(--ink-800); }
+.eg-shell-vitrin__row { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-3); }
+.eg-shell-vitrin__grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)); gap: var(--sp-4); align-items: start; }
+.eg-shell-vitrin__card { display: grid; gap: var(--sp-2); padding: var(--sp-4); border: 1px solid var(--border); border-radius: var(--r-lg); background: var(--surface); box-shadow: var(--elev-2); }
+body { font-family: var(--font); }

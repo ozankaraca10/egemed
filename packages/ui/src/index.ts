@@ -13,4 +13,6 @@ export {
   type ModeCardProps,
   type ModeTone,
 } from "./ModeCard";
+export * from "./primitives";
+export * as icons from "./icons";
 export { t, tr, type TrKey } from "../i18n/tr";
