@@ -6,13 +6,22 @@ import { defineConfig } from "@playwright/test";
  * API'li geliştirme (T57) ayrı bir kabuk sunucusudur ve yalnız API ayaktayken
  * eklenir; mevcut projeler bu yüzden değişmez.
  */
-const DEV_URL = "http://127.0.0.1:5199";
-/** Üretim önizlemesi: `vite preview`; yalnız üretim güvenlik kontrolleri için. */
-const PROD_URL = "http://127.0.0.1:5198";
-/** T57 — API oturumlu kabuk; Vite proxy'siyle API ile aynı kökenden konuşur. */
-const API_SHELL_URL = "http://127.0.0.1:5197";
-
 const env = (globalThis as { process?: { env?: Record<string, string | undefined> } }).process?.env ?? {};
+
+/**
+ * Portlar ortamla değiştirilebilir (E2E_PORT_BASE): paralel worktree/ajan koşuları
+ * aynı sunucuyu yeniden kullanıp yanlış kodu test etmesin. Varsayılan 5197–5199.
+ */
+const PORT_BASE = Number(env["E2E_PORT_BASE"] ?? "5197");
+const API_SHELL_PORT = PORT_BASE;
+const PROD_PORT = PORT_BASE + 1;
+const DEV_PORT = PORT_BASE + 2;
+const DEV_URL = `http://127.0.0.1:${DEV_PORT}`;
+/** Üretim önizlemesi: `vite preview`; yalnız üretim güvenlik kontrolleri için. */
+const PROD_URL = `http://127.0.0.1:${PROD_PORT}`;
+/** T57 — API oturumlu kabuk; Vite proxy'siyle API ile aynı kökenden konuşur. */
+const API_SHELL_URL = `http://127.0.0.1:${API_SHELL_PORT}`;
+
 const isCI = env["CI"] === "true";
 
 /** T57 — yoklanan API kökü; `EGEMED_E2E_API_URL` ile değiştirilebilir. */
@@ -104,14 +113,14 @@ export default defineConfig({
   ],
   webServer: [
     {
-      command: "pnpm --filter @egemed/shell dev --port 5199 --strictPort --host 127.0.0.1",
+      command: `pnpm --filter @egemed/shell dev --port ${DEV_PORT} --strictPort --host 127.0.0.1`,
       reuseExistingServer: !isCI,
       timeout: 120_000,
       url: DEV_URL,
     },
     {
       command:
-        "pnpm --filter @egemed/shell build && pnpm --filter @egemed/shell exec vite preview --port 5198 --strictPort --host 127.0.0.1",
+        `pnpm --filter @egemed/shell build && pnpm --filter @egemed/shell exec vite preview --port ${PROD_PORT} --strictPort --host 127.0.0.1`,
       reuseExistingServer: !isCI,
       timeout: 180_000,
       url: PROD_URL,
@@ -119,7 +128,7 @@ export default defineConfig({
     ...(apiRunning
       ? [
           {
-            command: "pnpm --filter @egemed/shell dev --port 5197 --strictPort --host 127.0.0.1",
+            command: `pnpm --filter @egemed/shell dev --port ${API_SHELL_PORT} --strictPort --host 127.0.0.1`,
             env: { VITE_API_BASE_URL: "/api", VITE_API_PROXY_TARGET: API_URL },
             reuseExistingServer: !isCI,
             timeout: 120_000,

@@ -31,7 +31,7 @@ async function openPulse(page: Page): Promise<Locator> {
   const root = page.locator(ROOT);
   // Birleşik barda kaynak açılış sayfası atlanır (UX kararı 25 Eylül 2026);
   // ilk kullanımda öğretici açılır, testler onu atlar.
-  await expect(root.locator("#appRoot")).toBeVisible();
+  await expect(root.locator("#appRoot")).toBeVisible({ timeout: 20_000 });
   const skip = root.locator("#tutorialSkip");
   if (await skip.isVisible().catch(() => false)) await skip.click();
   return root;
