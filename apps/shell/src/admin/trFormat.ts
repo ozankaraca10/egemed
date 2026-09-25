@@ -22,3 +22,11 @@ export function formatTrDateTime(iso: string): string {
   const mm = pad2(wall.getUTCMinutes());
   return `${day} ${month} ${year} ${hh}:${mm}`;
 }
+
+/** ISO anı → "20 Eyl 2026" (TR duvar saati, tarih yalnız — rozet kazanılma günü). */
+export function formatTrDate(iso: string): string {
+  const wall = new Date(Date.parse(iso) + TR_OFFSET_MS);
+  const day = wall.getUTCDate();
+  const month = TR_MONTHS_SHORT[wall.getUTCMonth()] ?? "";
+  return `${day} ${month} ${wall.getUTCFullYear()}`;
+}

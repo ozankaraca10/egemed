@@ -273,5 +273,7 @@ test.describe("API oturumu (dev sağlayıcı)", () => {
     expect(badgeKeys).toContain("rhythm-streak-10");
     await expect(page.getByRole("heading", { name: "İlerlemem" })).toBeVisible();
     await expect(page.locator(".eg-shell-progress__num").first()).toHaveText(String(pulseXp));
+    // T114: sunucu rozetleri katalog adlarıyla gösterilir (ADR-008 S4).
+    await expect(page.getByText("Ritim izleyicisi")).toBeVisible();
   });
 });
