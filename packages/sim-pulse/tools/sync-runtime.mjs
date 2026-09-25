@@ -91,16 +91,6 @@ const PATCHES = {
       replace: "Puan kaydedilir",
     },
   ],
-  model: [
-    {
-      id: "PULSE-NEXTEVENT-RECURSION",
-      why:
-        "Kaynak hatası: önbellek dışındaki kısa aralıkta between() aynı girdilerle kendini çağırıp yığın taşırıyor (~30 adım sonra). Port düzeltmesiyle (T18b-FIX, engine/beats.ts) aynı: taşan uçtan önbelleği yenile.",
-      find: "if(a<this.cacheFrom-1.2||b>this.cacheTo+1.2){const result=[];",
-      replace:
-        "if(a<this.cacheFrom-1.2||b>this.cacheTo+1.2){if(b-a<=6){this.ensure(b>this.cacheTo+1.2?b:a);return this.beats.slice(this.lowerBound(a),this.lowerBound(b+1e-10));}const result=[];",
-    },
-  ],
   features: [
     {
       id: "PULSE-ASSET-BASE",
