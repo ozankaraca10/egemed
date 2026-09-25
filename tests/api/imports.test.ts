@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { CSV_MAX_BYTES, CSV_MAX_ROWS } from "../../packages/contracts/src/index";
 import {
@@ -197,6 +198,79 @@ describe("yükleme ve doğrulama (E3 §d, §f)", () => {
     expect(codes.get(7)).toEqual(["mapping_key_required"]);
     expect(codes.get(8)).toEqual(["malformed_row"]);
     expect(codes.get(9)).toEqual(["invalid_value"]);
+  });
+
+  // T144 — sunucu iletileri sahte kaynakla (apps/shell/src/admin/importsDataSource.ts)
+  // alan bazında birebir aynı olmalı; `code` değerleri sözleşme, değişmez.
+  it("alana özgü Türkçe iletiler sahte kaynakla aynıdır", async () => {
+    const harness = createAdminHarness();
+    const admin = await login(harness, "ornek.yonetici");
+    const csv = buildCsv([
+      ["gecersiz.eposta", "gecersiz-eposta", "Test Kullanici", "kullanici", "", "", ""],
+      ["", "", "Kimliksiz Kisi", "kullanici", "", "", ""],
+      ["kisa.ad", "kisa.ad@example.invalid", "A", "kullanici", "", "", ""],
+      ["yanlis.giris", "yanlis.giris@example.invalid", "Yanlış Giriş", "kullanici", "", "", "yanlis"],
+      ["sim.hatali", "sim.hatali@example.invalid", "Sim Hatalı", "kullanici", "", "bilinmeyen-sim", ""],
+      ["ali.veli", "farkli@example.invalid", "Var Olan Kisi", "kullanici", "", "", ""],
+    ]);
+    const id = await uploadOk(harness, admin, csv);
+    const validated = await validateBatch(harness, admin, id);
+    expect(validated.status).toBe(200);
+
+    const rowsResponse = await harness.app.request(
+      `/admin/imports/${id}/rows?status=error&pageSize=100`,
+      { headers: admin.headers },
+    );
+    const rowsBody = await readJson(rowsResponse);
+    const rows = rowsBody.data as unknown as {
+      rowNo: number;
+      errors: { column: string; code: string; message: string }[];
+    }[];
+    const errorsByRow = new Map(rows.map((row) => [row.rowNo, row.errors]));
+
+    expect(errorsByRow.get(1)).toEqual([
+      { column: "eposta", code: "invalid_format", message: "E-posta biçimi geçersiz." },
+    ]);
+    expect(errorsByRow.get(2)).toEqual([
+      { column: "kullanici_adi", code: "mapping_key_required", message: "Kullanıcı adı veya e-posta girin." },
+    ]);
+    expect(errorsByRow.get(3)).toEqual([
+      { column: "ad_soyad", code: "invalid_length", message: "Ad soyad 2-120 karakter olmalıdır." },
+    ]);
+    expect(errorsByRow.get(4)).toEqual([
+      { column: "giris_tipi", code: "invalid_value", message: "giris_tipi yalnız sso veya dev olabilir." },
+    ]);
+    expect(errorsByRow.get(5)).toEqual([
+      { column: "sim_erisimi", code: "invalid_value", message: "Bilinmeyen sim: bilinmeyen-sim" },
+    ]);
+    expect(errorsByRow.get(6)).toEqual([
+      { column: "kullanici_adi", code: "duplicate_mapping_key", message: "Bu kullanıcı zaten kayıtlı." },
+    ]);
+  });
+
+  it("dosya içi yinelenen anahtar iletisi, mevcut kullanıcı çakışmasından ayrılır", async () => {
+    const harness = createAdminHarness();
+    const admin = await login(harness, "ornek.yonetici");
+    const csv = buildCsv([
+      ["tekrar.eden", "tekrar.bir@example.invalid", "Birinci", "kullanici", "", "", ""],
+      ["tekrar.eden", "tekrar.iki@example.invalid", "İkinci", "kullanici", "", "", ""],
+    ]);
+    const id = await uploadOk(harness, admin, csv);
+    await validateBatch(harness, admin, id);
+    const rowsResponse = await harness.app.request(
+      `/admin/imports/${id}/rows?status=error&pageSize=100`,
+      { headers: admin.headers },
+    );
+    const rowsBody = await readJson(rowsResponse);
+    const rows = rowsBody.data as unknown as {
+      rowNo: number;
+      errors: { column: string; code: string; message: string }[];
+    }[];
+    for (const row of rows) {
+      expect(row.errors).toEqual([
+        { column: "kullanici_adi", code: "duplicate_mapping_key", message: "Bu anahtar dosyada tekrar ediyor." },
+      ]);
+    }
   });
 
   it("BOM ve tırnaklı alanları RFC 4180 ile çözer", async () => {
@@ -453,7 +527,7 @@ describe("hata raporu CSV'si (E3 §f)", () => {
     const errorsCsv = body.errorsCsv as string;
     const lines = errorsCsv.trimEnd().split("\n");
     expect(lines[0]).toBe("satir_no;kolon;kod;aciklama");
-    expect(lines[1]).toBe("1;birim_kodu;unknown_unit;Bilinmeyen birim kodu");
+    expect(lines[1]).toBe("1;birim_kodu;unknown_unit;Bilinmeyen birim kodu.");
     expect(lines[2]).toBe("2;rol;invalid_value;Geçersiz değer");
     expect(errorsCsv).not.toContain("a;b");
   });
@@ -479,6 +553,33 @@ describe("hata raporu CSV'si (E3 §f)", () => {
     };
     const report = buildErrorReportCsv([row]);
     expect(report.split("\n")[1]).toContain(`'=HYPERLINK`);
+  });
+});
+
+// T144 — sunucu (apps/api) ve sahte (apps/shell) doğrulama iletileri
+// birebir aynı Türkçe metni taşımalı; bu, iki kaynağın senkron kalmasını
+// sağlayan basit bir dize denetimidir (davranış değil, metin karşılaştırması).
+describe("sahte kaynakla ileti tutarlılığı (T144)", () => {
+  it("alan bazlı Türkçe iletiler apps/api ve apps/shell arasında birebir eşleşir", () => {
+    // Göreli yol: vitest kök `package.json`'daki `"test": "vitest run"` kökten
+    // çalışır (bkz. `tests/api/strip-only-import.test.ts` `process.cwd()` kullanımı).
+    const serverSource = readFileSync("apps/api/src/admin/imports.ts", "utf8");
+    const mockSource = readFileSync("apps/shell/src/admin/importsDataSource.ts", "utf8");
+    const sharedMessages = [
+      "Kullanıcı adı biçimi geçersiz.",
+      "E-posta biçimi geçersiz.",
+      "Ad soyad 2-120 karakter olmalıdır.",
+      "giris_tipi yalnız sso veya dev olabilir.",
+      "Kullanıcı adı veya e-posta girin.",
+      "Bilinmeyen birim kodu.",
+      "admin rolü CSV ile atanamaz.",
+      "Bu anahtar dosyada tekrar ediyor.",
+      "Bu kullanıcı zaten kayıtlı.",
+    ];
+    for (const message of sharedMessages) {
+      expect(serverSource, `sunucu iletisi eksik: ${message}`).toContain(message);
+      expect(mockSource, `sahte kaynak iletisi eksik: ${message}`).toContain(message);
+    }
   });
 });
 
