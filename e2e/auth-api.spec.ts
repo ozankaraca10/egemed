@@ -2,6 +2,7 @@ import { expect, test, type Page } from "@playwright/test";
 import { curriculum } from "../packages/sim-pulse/src/data/curriculum";
 import { captureRouteScreenshot } from "./artifacts";
 import { trackErrors } from "./helpers";
+import { completeTopicPractice, startTopicPractice } from "./sim-flows";
 
 /**
  * T57 — API oturumu (dev sağlayıcı, E3 §a). Bu spec yalnız `api-dev`
@@ -133,6 +134,48 @@ test.describe("API oturumu (dev sağlayıcı)", () => {
     await page.reload();
     await page.getByLabel("Ara").fill(username);
     await expect(page.getByRole("link", { name: displayName }).filter({ visible: true })).toBeVisible();
+  });
+
+  test("CSV içe aktarma gerçek API'de uygulanır; geçerli satır kalıcı, hatalı satır raporlanır (TEST-01, T143)", async ({ page }) => {
+    const tag = crypto.randomUUID().slice(0, 8);
+    const username = `t143.${tag}`;
+    const displayName = `T143 Ice Aktarim ${tag}`;
+    const csv = [
+      "kullanici_adi;eposta;ad_soyad;rol;birim_kodu;sim_erisimi;giris_tipi",
+      `${username};;${displayName};;;pulse;`,
+      `t143.hata.${tag};gecersiz-eposta;T143 Hatali Satir;;;;`,
+    ].join("\n");
+    await page.goto(ADMIN_ENTRY);
+    await signIn(page, "admin");
+    await expect(page).toHaveURL(/#\/admin$/);
+    await page.goto("/#/admin/ice-aktar");
+    await page.getByRole("button", { name: "İleri" }).click();
+    await page.getByLabel("CSV içeriği").fill(csv);
+    await page.getByRole("button", { name: "Yükle" }).click();
+    await expect(page.getByText("2 satır algılandı")).toBeVisible();
+    await page.getByRole("button", { name: "İleri" }).click();
+    await page.getByRole("button", { name: "İleri" }).click();
+    await expect(page.getByText("1 geçerli · 1 hatalı")).toBeVisible();
+    // Sunucu doğrulaması: hatalı satır ve alan raporlanır (ileti metni sunucudan gelir).
+    await expect(page.getByText(/^satır 2 · E-posta · /).first()).toBeVisible();
+    await page.getByRole("button", { name: "İleri" }).click();
+    await page.getByRole("button", { name: "İleri" }).click();
+    await page.getByRole("button", { name: "Uygula" }).click();
+    const applied = page.waitForResponse(
+      (response) => response.url().includes("/admin/imports") && response.request().method() === "POST" && response.ok() && response.url().includes("apply"),
+    );
+    await page.getByRole("dialog").getByRole("button", { name: "Uygula" }).click();
+    await applied;
+    await expect(page.getByText("1 uygulandı · 1 hatalı")).toBeVisible();
+    // Kalıcılık: kullanıcı listede ve yenilemeden sonra da var.
+    await page.goto("/#/admin/kullanicilar");
+    await page.getByLabel("Ara").fill(username);
+    await expect(page.getByRole("link", { name: displayName }).filter({ visible: true })).toBeVisible();
+    await page.reload();
+    await page.getByLabel("Ara").fill(username);
+    await expect(page.getByRole("link", { name: displayName }).filter({ visible: true })).toBeVisible();
+    await page.getByLabel("Ara").fill(`t143.hata.${tag}`);
+    await expect(page.getByRole("link", { name: "T143 Hatali Satir" })).toHaveCount(0);
   });
 
   test("dashboard gerçek oturumda demo 1450 XP göstermez", async ({ page }) => {
@@ -290,6 +333,28 @@ test.describe("API oturumu (dev sağlayıcı)", () => {
     await expect(page.locator("[data-sim-id='pulse']")).toHaveAttribute("data-xp", String(pulseXp));
     // T114: sunucu rozetleri katalog adlarıyla gösterilir (ADR-008 S4).
     await expect(page.getByText("Ritim izleyicisi")).toBeVisible();
+  });
+
+  test("Opaca konu oturumu API oturumunda öğrenme sayaçlarıyla sunucuya yazılır (ADR-008 S4, T143)", async ({ page }) => {
+    await page.goto(STUDENT_ENTRY);
+    await signIn(page, "ogrenci");
+    await expect(page).toHaveURL(/#\/$/);
+    const posted = page.waitForRequest(
+      (request) => request.url().includes("/me/gamification/opaca/attempts") && request.method() === "POST",
+    );
+    await page.goto("/#/sims/opaca");
+    const root = page.locator(".eg-sim-opaca").first();
+    await expect(page.getByRole("heading", { name: "Çalışma modunu seçin" })).toBeVisible({ timeout: 20_000 });
+    // Öğrenme ekranında konu açmak öğrenme etkinliği yazar; ardından konu uygulaması biter.
+    await startTopicPractice(root);
+    await completeTopicPractice(root, "opaca");
+    const request = await posted;
+    const body = request.postDataJSON() as { summary?: Record<string, number> };
+    expect(body.summary?.["opaca.v"]).toBe(1);
+    expect(body.summary?.["opaca.mode"]).toBe(0);
+    expect(body.summary?.["opaca.learn"] ?? 0, "birikimli öğrenme konusu").toBeGreaterThanOrEqual(1);
+    expect(body.summary?.["opaca.lib"] ?? 0, "kütüphane konu toplamı").toBeGreaterThan(0);
+    expect((await request.response())?.ok(), "deneme yazımı").toBe(true);
   });
 
   test("Pulse sınavı bitince İlerlemem sunucu rozetini gösterir ve demo bandı yoktur", async ({ page }) => {
