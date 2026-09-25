@@ -7,7 +7,7 @@ import {
 } from "../../packages/contracts/src/index";
 import { WEEKLY_XP_TARGET, levelForXpClosedForm, nextStreak } from "../../apps/api/src/me/gamification";
 import { DEFAULT_RULES, levelForXp } from "../../packages/gamification-core/src/index";
-import { encodeOpacaSummary, encodePulseSummary } from "../../packages/gami-catalogs/src/index";
+import { encodeAuscultaSummary, encodeOpacaSummary, encodePulseSummary } from "../../packages/gami-catalogs/src/index";
 import {
   ALI_ID,
   FIXED_NOW,
@@ -591,5 +591,43 @@ describe("sunucu rozet değerlendirmesi (ADR-008)", () => {
     expect(keys).not.toContain("pleura");
     expect(keys).not.toContain("podium");
     expect(keys.filter((key) => key === "first-step")).toHaveLength(1);
+  });
+
+  it("Ausculta denemesinin kodlu özetinden rozetler sunucuda verilir; tekrar rozet çoğaltmaz", async () => {
+    const testHarness = harness({ [ALI_ID]: ["pulse", "ausculta"] });
+    const ali = await login(testHarness, "ali.veli");
+    const summary = encodeAuscultaSummary({
+      listenDisciplineCases: 3,
+      systematicExams: 1,
+      cardiacFociExams: 5,
+      posteriorLungExams: 5,
+      heartCorrect: { normal: 3, extraSounds: 3, murmurTiming: 5, rhythm: 3 },
+      lungCorrect: { vesicular: 3, continuous: 5, crackles: 5, pleuralRub: 3 },
+      pediatricCorrect: 5,
+      mixedCorrect: 3,
+      headChoiceCorrect: 5,
+      correctDiagnosisCount: 3,
+    });
+    const post = () =>
+      testHarness.app.request("/me/gamification/ausculta/attempts", {
+        method: "POST",
+        headers: { ...ali.headers, "content-type": "application/json" },
+        body: JSON.stringify(attemptBody({ summary })),
+      });
+    expect((await post()).status).toBe(201);
+    expect((await post()).status).toBe(200);
+    const response = await testHarness.app.request("/me/gamification/ausculta", { headers: ali.headers });
+    const keys = ((await response.json()) as { data: { badges: readonly { key: string }[] } }).data.badges.map((badge) => badge.key);
+    expect(keys).toContain("listen-3");
+    expect(keys).toContain("systematic-1");
+    expect(keys).toContain("cardiac-foci");
+    expect(keys).toContain("posterior-lung");
+    expect(keys).toContain("heart-normal");
+    expect(keys).toContain("lung-continuous");
+    expect(keys).toContain("mixed-sounds");
+    expect(keys).toContain("diagnosis-3");
+    expect(keys).not.toContain("listen-8");
+    expect(keys).not.toContain("systematic-5");
+    expect(keys.filter((key) => key === "diagnosis-3")).toHaveLength(1);
   });
 });

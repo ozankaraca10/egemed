@@ -7,6 +7,7 @@ import { evaluateBadges } from "@egemed/gamification-core";
 import type { BadgeDef } from "@egemed/gamification-core";
 import { PULSE_BADGES, pulseStatsFromSummaries } from "./pulse";
 import { OPACA_BADGES, opacaStatsFromSummaries } from "./opaca";
+import { AUSCULTA_BADGES, auscultaStatsFromSummaries } from "./ausculta";
 
 export type GamiCatalogSimId = "pulse" | "ausculta" | "opaca";
 
@@ -32,8 +33,9 @@ export function createSimBadgeEvaluator<TStats>(
   };
 }
 
-/** Rozet değerlendirmesi yalnız kaydı olan simler için yapılır (S2: Ausculta eklenecek). */
+/** Rozet değerlendirmesi yalnız kaydı olan simler için yapılır (ADR-008 S2: üç sim kayıtlı). */
 export const SIM_BADGE_EVALUATORS: Partial<Record<GamiCatalogSimId, SimBadgeEvaluator>> = {
   pulse: createSimBadgeEvaluator(PULSE_BADGES, pulseStatsFromSummaries),
+  ausculta: createSimBadgeEvaluator(AUSCULTA_BADGES, auscultaStatsFromSummaries),
   opaca: createSimBadgeEvaluator(OPACA_BADGES, opacaStatsFromSummaries),
 };

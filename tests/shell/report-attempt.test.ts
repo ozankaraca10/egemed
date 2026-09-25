@@ -29,4 +29,56 @@ describe("sime özgü kodlu özet (ADR-008)", () => {
     expect(simSummaryCodes("pulse", { score: 90, extra: { ecgMode: "yok" } })).toEqual({});
     expect(simSummaryCodes("opaca", { score: 90, extra: {} })).toEqual({});
   });
+
+  it("Opaca denemesi opaca.* kodlarını taşır; sim verisi gerektiren konu/öğrenme kodları yazılmaz", () => {
+    const codes = simSummaryCodes("opaca", {
+      mode: "assessment",
+      finishedAt: "2026-09-24T09:00:00.000Z",
+      score: 90,
+      caseCount: 10,
+      hintsUsed: 0,
+      extra: {
+        findings: [{ finding: "pneumothorax", correct: true }],
+        localizationHits: 10,
+        abcdeComplete: 1,
+        qualityCorrect: 2,
+        interpretationCorrect: 3,
+        fastPerfect: true,
+      },
+    });
+    expect(codes["opaca.v"]).toBe(1);
+    expect(codes["opaca.mode"]).toBe(1);
+    expect(codes["opaca.loc"]).toBe(10);
+    expect(codes["opaca.abcde"]).toBe(1);
+    expect(codes["opaca.fast"]).toBe(1);
+    expect(codes["opaca.t.pleura"]).toBeUndefined();
+    expect(codes["opaca.learn"]).toBeUndefined();
+    expect(simSummaryCodes("opaca", { score: 90, extra: { findings: "yok" } })).toEqual({});
+  });
+
+  it("Ausculta denemesi birikimli ausculta.* kodlarını taşır; bozuk extra kodsuz kalır", () => {
+    const codes = simSummaryCodes("ausculta", {
+      score: 70,
+      extra: {
+        listenDisciplineCases: 3,
+        systematicExams: 1,
+        cardiacFociExams: 0,
+        posteriorLungExams: 0,
+        heartCorrect: { normal: 2, extraSounds: 0, murmurTiming: 0, rhythm: 0 },
+        lungCorrect: { vesicular: 0, continuous: 0, crackles: 0, pleuralRub: 0 },
+        pediatricCorrect: 0,
+        mixedCorrect: 0,
+        headChoiceCorrect: 1,
+        correctDiagnosisCount: 2,
+      },
+    });
+    expect(codes["ausculta.v"]).toBe(1);
+    expect(codes["ausculta.listen"]).toBe(3);
+    expect(codes["ausculta.sys"]).toBe(1);
+    expect(codes["ausculta.diag"]).toBe(2);
+    expect(codes["ausculta.h.normal"]).toBe(2);
+    expect(codes["ausculta.h.extraSounds"]).toBeUndefined();
+    expect(codes["ausculta.l.vesicular"]).toBeUndefined();
+    expect(simSummaryCodes("ausculta", { score: 70, extra: { heartCorrect: {} } })).toEqual({});
+  });
 });
