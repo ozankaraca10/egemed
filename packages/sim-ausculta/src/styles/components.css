@@ -35,7 +35,7 @@
 .eg-sim-ausculta .eg-footer .brand { font-weight: 700; color: var(--ink-700); }
 .eg-sim-ausculta .eg-footer .sep { color: var(--border-strong); }
 .eg-sim-ausculta .eg-footer .spacer { flex: 1; }
-.eg-sim-ausculta .btn { display: inline-flex; align-items: center; justify-content: center; gap: 9px; border: 0; border-radius: var(--r-lg); font-weight: 700; font-size: var(--fs-lg); padding: 12px var(--sp-5); transition: transform .06s ease, filter .15s; text-decoration: none; }
+.eg-sim-ausculta .btn { display: inline-flex; align-items: center; justify-content: center; gap: 9px; border: 0; border-radius: var(--r-lg); font-weight: 700; font-size: var(--fs-lg); padding: 12px var(--sp-5); transition: transform .06s ease, filter .15s; text-decoration: none; min-height: 44px; /* T131: tüm varyantlarda 44 px hedef */ }
 .eg-sim-ausculta .btn:active { transform: translateY(1px); }
 .eg-sim-ausculta .btn.primary { background: linear-gradient(180deg, var(--blue-500), var(--blue-700)); color: var(--card); box-shadow: 0 8px 22px rgba(22,115,230,.35); }
 .eg-sim-ausculta .btn.primary:hover { filter: brightness(1.06); }
@@ -223,7 +223,14 @@
 .eg-sim-ausculta .strict-banner.compact { padding: 6px var(--sp-3); font-size: var(--fs-xs); }
 .eg-sim-ausculta .strict-note { font-size: var(--fs-xs); color: var(--amber-700); background: var(--orange-100); border: 1px solid var(--orange-500); padding: 6px 11px; border-radius: var(--r-md); font-weight: 600; cursor: help; }
 .eg-sim-ausculta .points-toggle { display: flex; align-items: center; gap: 8px; font-size: var(--fs-sm); color: var(--ink-600); background: var(--card); border: 1px solid var(--border); padding: 7px 11px; border-radius: var(--r-md); }
-.eg-sim-ausculta .points-toggle input { accent-color: var(--blue-600); }
+/* T131: 13x13 yerel onay kutusu WCAG 2.2 hedef boyutunu (44 px) karşılamıyordu.
+   Görünür kutu aynı boyutta ::before ile çizilir; girdi etiketin tüm alanını
+   kaplar, böylece ölçülen dokunma hedefi 44 px olur. */
+.eg-sim-ausculta .points-toggle { position: relative; min-height: 44px; }
+.eg-sim-ausculta .points-toggle::before { content: ''; box-sizing: border-box; width: 15px; height: 15px; flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; border: 1.5px solid var(--border-strong); border-radius: var(--r-xs); background: var(--card); color: var(--card); font-size: 11px; font-weight: 800; line-height: 1; }
+.eg-sim-ausculta .points-toggle:has(input:checked)::before { content: '✓' / ''; background: var(--blue-600); border-color: var(--blue-600); }
+.eg-sim-ausculta .points-toggle:has(input:focus-visible)::before { outline: 2px solid var(--eg-ausculta-focus); outline-offset: 2px; }
+.eg-sim-ausculta .points-toggle input { position: absolute; inset: -1px; margin: 0; opacity: 0; }
 .eg-sim-ausculta .stage { position: relative; flex: 1; min-height: 0; display: flex; align-items: center; justify-content: center; border-radius: var(--r-md); background: radial-gradient(120% 90% at 50% 20%, var(--card) 0%, var(--blue-50) 100%); overflow: hidden; user-select: none; touch-action: none; }
 .eg-sim-ausculta .stage.dragging { cursor: grabbing; }
 .eg-sim-ausculta .stage-fit { position: absolute; inset: 6px; display: flex; align-items: center; justify-content: center; }
@@ -325,7 +332,7 @@
 .eg-sim-ausculta .lib-item .lib-main > span { font-size: var(--fs-xs); color: var(--ink-600); display: block; margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .eg-sim-ausculta .lib-item .chev { color: var(--ink-300); font-weight: 700; font-size: var(--fs-lg); }
 .eg-sim-ausculta .tabbar { display: flex; gap: 4px; background: var(--card-soft); border: 1px solid var(--border); border-radius: var(--r-md); padding: 4px; margin-bottom: 11px; }
-.eg-sim-ausculta .tabbar button { flex: 1; border: 0; background: transparent; border-radius: var(--r-md); padding: 8px 6px; font-size: var(--fs-sm); font-weight: 600; color: var(--ink-600); display: flex; align-items: center; justify-content: center; gap: 7px; white-space: nowrap; }
+.eg-sim-ausculta .tabbar button { flex: 1; border: 0; background: transparent; border-radius: var(--r-md); padding: 8px 6px; min-height: 44px; font-size: var(--fs-sm); font-weight: 600; color: var(--ink-600); display: flex; align-items: center; justify-content: center; gap: 7px; white-space: nowrap; }
 .eg-sim-ausculta .tabbar button.active { background: var(--blue-600); color: var(--card); box-shadow: 0 2px 8px rgba(22,115,230,.3); }
 .eg-sim-ausculta .info-body { font-size: var(--fs-md); color: var(--ink-700); line-height: 1.58; }
 .eg-sim-ausculta .metaphor-card { display: flex; gap: 11px; align-items: flex-start; background: linear-gradient(90deg, rgba(253,238,205,.75), rgba(255,250,240,.6)); border: 1px solid var(--orange-100); border-radius: var(--r-md); padding: 11px var(--sp-3); }
@@ -337,8 +344,10 @@
 .eg-sim-ausculta .exp-cards { display: flex; flex-direction: column; gap: 8px; }
 .eg-sim-ausculta .exp-card { border: 1px solid var(--border); border-radius: var(--r-md); padding: 8px 12px; display: flex; gap: 11px; align-items: center; background: var(--card); min-width: 0; cursor: default; }
 .eg-sim-ausculta .exp-card .chip { min-width: 32px; width: 32px; height: 32px; flex-shrink: 0; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: var(--fs-xs); }
-.eg-sim-ausculta .exp-card .chip.s1 { background: var(--red-100); color: var(--red-500); }
-.eg-sim-ausculta .exp-card .chip.s2 { background: var(--blue-100); color: var(--blue-600); }
+/* T131: S1/S2 rozetleri AA altındaydı (--red-500 3.93:1, --blue-600 3.72:1).
+   Tokenlar koyulaştırılır: --red-600 5.41:1, --blue-700 4.58:1. */
+.eg-sim-ausculta .exp-card .chip.s1 { background: var(--red-100); color: var(--red-600); }
+.eg-sim-ausculta .exp-card .chip.s2 { background: var(--blue-100); color: var(--blue-700); }
 .eg-sim-ausculta .exp-card .chip.s3 { background: var(--purple-100); color: var(--purple-600); }
 .eg-sim-ausculta .exp-card .chip.s4 { background: var(--orange-100); color: var(--amber-700); }
 .eg-sim-ausculta .exp-card p { margin: 0; font-size: var(--fs-lg); color: var(--ink-700); line-height: 1.3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
@@ -435,10 +444,15 @@
 .eg-sim-ausculta .report-table th, .eg-sim-ausculta .report-table td { border-bottom: 1px solid var(--border); padding: 8px 9px; }
 .eg-sim-ausculta .report-table th { color: var(--ink-600); font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: .6px; }
 .eg-sim-ausculta .report-table td.ok { color: var(--green-600); font-weight: 700; }
-.eg-sim-ausculta .report-table td.no { color: var(--red-500); font-weight: 700; }
+/* T131: "Başarısız" hücresi hover zemininde (--blue-50) 4.32:1 kalıyordu;
+   --red-600 ile 5.95:1 (masaüstü taramasında color-contrast). */
+.eg-sim-ausculta .report-table td.no { color: var(--red-600); font-weight: 700; }
 .eg-sim-ausculta .report-table-v2 .report-row { cursor: pointer; }
 .eg-sim-ausculta .report-table-v2 .report-row:hover { background: var(--blue-50); }
-.eg-sim-ausculta .report-chev { width: 20px; }
+.eg-sim-ausculta .report-table td.report-chev { width: 48px; padding: 0 2px; }
+/* T131: satırın açılır düğmesi (aria-expanded) — 44 px hedef */
+.eg-sim-ausculta .report-toggle { display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; border: 0; background: transparent; color: var(--ink-600); cursor: pointer; border-radius: var(--r-md); }
+.eg-sim-ausculta .report-toggle:focus-visible { outline: 2px solid var(--eg-ausculta-focus); outline-offset: -2px; }
 .eg-sim-ausculta .report-chev svg { transition: transform .15s ease; }
 .eg-sim-ausculta .report-chev svg.rot { transform: rotate(90deg); }
 .eg-sim-ausculta .report-detail-row td { background: var(--card-soft); padding: 10px 14px; }
@@ -529,13 +543,16 @@
 .eg-sim-ausculta .eg-header :focus-visible, .eg-sim-ausculta .eg-footer :focus-visible { outline-color: var(--card); }
 .eg-sim-ausculta .modal-overlay { position: fixed; inset: 0; z-index: 60; background: rgba(9,26,52,.42); backdrop-filter: blur(2px); display: flex; align-items: center; justify-content: center; padding: 20px; animation: eg-ausculta-modal-fade .16s ease-out; }
 @keyframes eg-ausculta-modal-fade { from { opacity: 0 } to { opacity: 1 } }
-.eg-sim-ausculta .modal-card { background: var(--card); color: var(--ink-900); border-radius: var(--r-lg); box-shadow: 0 24px 60px rgba(9,26,52,.28); width: min(680px, 100%); max-height: min(78vh, 640px); display: flex; flex-direction: column; overflow: hidden; }
-.eg-sim-ausculta .modal-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 14px 16px; border-bottom: 1px solid var(--border); }
+.eg-sim-ausculta .modal-card { background: var(--card); color: var(--ink-900); border-radius: var(--r-lg); box-shadow: 0 24px 60px rgba(9,26,52,.28); width: min(680px, 100%); max-height: min(78vh, 640px); display: flex; flex-direction: column; overflow-y: auto; }
+.eg-sim-ausculta .modal-head { position: sticky; top: 0; z-index: 2; background: var(--card); display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 14px 16px; border-bottom: 1px solid var(--border); }
 .eg-sim-ausculta .modal-head h3 { margin: 0; font-size: var(--fs-lg); color: var(--navy-800); }
 .eg-sim-ausculta .modal-close { width: 34px; height: 34px; border-radius: var(--r-md); border: 1px solid var(--border-strong); background: var(--card); color: var(--ink-600); display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; }
 .eg-sim-ausculta .modal-close:hover { background: var(--card-soft); color: var(--ink-900); }
 .eg-sim-ausculta .modal-close svg { width: 18px; height: 18px; }
-.eg-sim-ausculta .modal-body { padding: 14px 16px var(--sp-4); overflow-y: auto; }
+/* T131: Yardım gövdesi kaydırılabilir ama odaklanabilir değildi
+   (scrollable-region-focusable). Kaydırma karta taşınır; karttaki kapatma
+   düğmesi klavye erişimi sağlar, başlık yapışkan kalır. */
+.eg-sim-ausculta .modal-body { padding: 14px 16px var(--sp-4); overflow-y: visible; }
 .eg-sim-ausculta .confirm-modal { width: min(440px, 100%); }
 .eg-sim-ausculta .confirm-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 16px; }
 .eg-sim-ausculta .help-steps { list-style: none; margin: 0 0 14px; padding: 0; display: flex; flex-direction: column; gap: 12px; }

@@ -1,34 +1,6 @@
 {
-  "note": "T116/T116b — Ausculta iç ekranlarında kaynaktan devralınmış erişilebilirlik borcu. T116b: İlerlemem sayfası @egemed/gami-ui yüzeyini kullanır (T122); sonuç ekranı kapı bütçesi için yalnız desktop-1440 projesinde taranır. Kayıtlar yalnız küçülür: düzeltilen bir kayıt testi 'düzeltildi — listeden çıkar' diye başarısız eder.",
+  "note": "T116/T116b — Ausculta iç ekranlarında kaynaktan devralınmış erişilebilirlik borcu. T116b: İlerlemem sayfası @egemed/gami-ui yüzeyini kullanır (T122); sonuç ekranı kapı bütçesi için yalnız desktop-1440 projesinde taranır. T131: S1/S2 rozetleri ve rapor 'Başarısız' hücresi kontrastı, Dinleme noktaları onay kutusu, tüm .btn ve sekmeler 44 px, yardım kaydırması karta taşındı, rapor satırındaki geçersiz aria-expanded açılır düğmeye taşındı — 7→2 ihlal, 8→3 küçük hedef. Kalanlar @egemed/gami-ui yüzeyine aittir (rozet .ft kontrastı, sekme/segment düğmeleri). Kayıtlar yalnız küçülür: düzeltilen bir kayıt testi 'düzeltildi — listeden çıkar' diye başarısız eder.",
   "violations": [
-    {
-      "screen": "learn",
-      "rule": "color-contrast",
-      "target": ".chip.s1"
-    },
-    {
-      "screen": "learn",
-      "rule": "color-contrast",
-      "target": ".chip.s2"
-    },
-    {
-      "screen": "results",
-      "rule": "aria-conditional-attr",
-      "target": ".report-row:nth-child(*)"
-    },
-    {
-      "screen": "results",
-      "rule": "color-contrast",
-      "target": ".report-row:nth-child(*) > .no",
-      "projects": [
-        "desktop-1440"
-      ]
-    },
-    {
-      "screen": "help",
-      "rule": "scrollable-region-focusable",
-      "target": ".modal-body"
-    },
     {
       "screen": "gami",
       "rule": "color-contrast",
@@ -41,31 +13,6 @@
     }
   ],
   "smallTargets": [
-    {
-      "screen": "case",
-      "selector": "div.eg-sim-ausculta.app-shell > main.app-content > div.screen > div.container.tall > div.sim-grid.mode-practice > div.sim-main:nth-of-type(*) > div.stage-card:nth-of-type(*) > div.stage-top.stage-top-right:nth-of-type(*) > label.points-toggle > input",
-      "size": "13x13"
-    },
-    {
-      "screen": "learn",
-      "selector": "div.eg-sim-ausculta.app-shell > main.app-content > div.screen > div.container.tall > div.learn-grid > div.sim-side:nth-of-type(*) > div.card > div.card-title-row:nth-of-type(*) > div.card-title-actions:nth-of-type(*) > button.btn.outline",
-      "size": "169x34"
-    },
-    {
-      "screen": "learn",
-      "selector": "div.eg-sim-ausculta.app-shell > main.app-content > div.screen > div.container.tall > div.learn-grid > div.sim-side:nth-of-type(*) > div.card > div.tabbar.info-tabs:nth-of-type(*) > button:nth-of-type(*)",
-      "size": "141x34"
-    },
-    {
-      "screen": "results",
-      "selector": "div.eg-sim-ausculta.app-shell > main.app-content > div.screen > div.results-wrap-v2.screen-body > section.card.eg-gami-gains > div.eg-gami-gains-actions:nth-of-type(*) > button.btn.outline:nth-of-type(*)",
-      "size": "128x34"
-    },
-    {
-      "screen": "results",
-      "selector": "div.eg-sim-ausculta.app-shell > main.app-content > div.screen > div.results-wrap-v2.screen-body > section.card.eg-gami-gains > div.eg-gami-gains-actions:nth-of-type(*) > button.btn.primary:nth-of-type(*)",
-      "size": "153x34"
-    },
     {
       "screen": "gami",
       "selector": "div.eg-sim-ausculta.app-shell > main.app-content > div.screen > div.results-wrap-v2.eg-gami-page > div.eg-gami-pagetabs:nth-of-type(*) > button:nth-of-type(*)",
