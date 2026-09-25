@@ -12,9 +12,11 @@
  */
 import { buildAttemptRecord, rhythmStreakAfter } from "../gamification/attempt";
 import type { PulseAttemptRecord } from "../gamification/attempt";
-import { pulseLearnTopic } from "../gamification/repo";
+import { emptyPulseGamiState, pulseLearnTopic } from "../gamification/repo";
 import type { PulseGamiRepo, PulseGamiState, PulseGamiWriteResult } from "../gamification/repo";
-import { achievementsMarkup, createPulseAchievementsView, createPulseGainsView, gainsMarkup } from "../gamification/ui";
+import { createPulseGainsView, gainsMarkup } from "../gamification/ui";
+import { gamiUiStyles } from "@egemed/gami-ui";
+import { mountPulseProgress } from "./progress";
 import type { Lead, Mode } from "../engine/shapes";
 import type { PulseRuntimeHandle } from "./host";
 
@@ -46,7 +48,7 @@ interface SourceScorm {
 const STUDY_SECONDS = 16;
 
 const GAMI_BUTTON_ID = "egemedGamiBtn";
-const GAMI_DIALOG_ID = "egemedGamiDialog";
+const GAMI_PROGRESS_ID = "egemedGamiProgress";
 const GAMI_GAINS_ID = "egemedGamiGains";
 
 function correctness(session: SourceSession, curriculum: SourceCurriculum): boolean[] {
@@ -84,7 +86,10 @@ export function attachPulseGamification(handle: PulseRuntimeHandle, options: Pul
   const studied = new Set<string>();
   const sessionStart = new Map<string, number>();
   void repo.load().then((state) => {
-    if (!detached && gamiState === null) gamiState = state;
+    if (!detached && gamiState === null) {
+      gamiState = state;
+      if (!progressHost.hidden) renderProgress();
+    }
   });
 
   // --- Görünür ekler (kaynak işaretlemesine dokunmadan) -----------------------
@@ -95,40 +100,56 @@ export function attachPulseGamification(handle: PulseRuntimeHandle, options: Pul
   button.type = "button";
   button.className = "eg-navbtn";
   button.title = "İlerlemem: rozetler, seri ve haftalık hedefler";
-  button.setAttribute("aria-haspopup", "dialog");
   button.innerHTML =
     '<svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="9" r="5"/><path d="M8.5 13.5 7 21l5-3 5 3-1.5-7.5"/></svg><span class="lbl">İlerlemem</span>';
   button.setAttribute("aria-label", "İlerlemem");
   const helpBtn = shadow.getElementById("helpBtn");
   helpBtn?.parentElement?.insertBefore(button, helpBtn);
 
-  const dialog = doc.createElement("dialog");
-  dialog.id = GAMI_DIALOG_ID;
-  dialog.setAttribute("aria-labelledby", `${GAMI_DIALOG_ID}-title`);
-  shadow.querySelector(".pulse-body")?.append(dialog);
-
-  const renderDialog = (): void => {
-    const state = gamiState;
-    const body =
-      state === null
-        ? "<p>İlerleme yükleniyor…</p>"
-        : achievementsMarkup(createPulseAchievementsView(state, nowDate()));
-    dialog.innerHTML =
-      `<h2 id="${GAMI_DIALOG_ID}-title" data-h1>İlerlemem</h2>` +
-      `<p>Rozetler, seri ve haftalık hedefler yalnız Pulse içindir; diğer simülatörlerle birleştirilmez.</p>` +
-      body +
-      '<div class="dialog-actions"><button type="button" class="btn primary" data-egemed-gami-close>Kapat</button></div>';
+  // Ortak tasarım (@egemed/gami-ui): İlerlemem, Pulse alanını kaplayan tam sayfa
+  // görünümdür (Opaca/Ausculta ile aynı). Stiller gölge köke bir kez eklenir.
+  const style = doc.createElement("style");
+  style.textContent = `${gamiUiStyles}
+.egemed-pulse-progress-host{position:absolute;inset:0;z-index:60;overflow:auto;background:var(--bg-grad-a,#eef4fb)}
+.egemed-pulse-progress-host[hidden]{display:none}
+.egemed-pulse-progress{max-width:1200px;margin:0 auto;padding:16px}
+.egemed-pulse-progress__bar{display:flex;justify-content:flex-start;margin-bottom:8px}
+.egemed-pulse-progress__close{min-height:44px;padding:0 14px;border:1px solid var(--line,#cfdcee);border-radius:10px;background:#fff;color:var(--navy-900,#0a2a5e);font:inherit;font-weight:700;cursor:pointer}`;
+  shadow.append(style);
+  const progressHost = doc.createElement("section");
+  progressHost.id = GAMI_PROGRESS_ID;
+  progressHost.className = "egemed-pulse-progress-host";
+  progressHost.setAttribute("aria-label", "İlerlemem");
+  progressHost.hidden = true;
+  shadow.querySelector(".pulse-body")?.append(progressHost);
+  const showSourceView = (view: string): void => {
+    (handle.global("CardAIController") as { showView?: (view: string) => void } | undefined)?.showView?.(view);
+  };
+  const closeProgress = (): void => {
+    progressHost.hidden = true;
+  };
+  const progress = mountPulseProgress(progressHost, {
+    onAssessment: () => {
+      closeProgress();
+      showSourceView("quiz");
+    },
+    onClose: closeProgress,
+    onStudy: () => {
+      closeProgress();
+      showSourceView("sim");
+    },
+  });
+  const renderProgress = (): void => {
+    progress.update(gamiState ?? emptyPulseGamiState(), nowDate());
   };
   const openDialog = (): void => {
-    renderDialog();
-    if (!dialog.open) dialog.showModal();
-    dialog.querySelector<HTMLButtonElement>("[data-egemed-gami-close]")?.focus();
+    renderProgress();
+    progressHost.hidden = false;
+    progressHost.scrollTop = 0;
+    // React kökü bir sonraki karede çizer; odak “Simülatöre dön” düğmesine taşınır.
+    requestAnimationFrame(() => progressHost.querySelector<HTMLButtonElement>(".egemed-pulse-progress__close")?.focus());
   };
   button.addEventListener("click", openDialog);
-  dialog.addEventListener("click", (event) => {
-    const target = event.target as Element | null;
-    if (target?.closest("[data-egemed-gami-close]")) dialog.close();
-  });
 
   const gains = doc.createElement("div");
   gains.id = GAMI_GAINS_ID;
@@ -147,7 +168,7 @@ export function attachPulseGamification(handle: PulseRuntimeHandle, options: Pul
       gains.innerHTML = gainsMarkup(createPulseGainsView(result.state, result.earnedIds, nowDate()));
       gains.hidden = false;
     }
-    if (dialog.open) renderDialog();
+    if (!progressHost.hidden) renderProgress();
   };
 
   const durationOf = (sessionId: string): number => {
@@ -255,8 +276,9 @@ export function attachPulseGamification(handle: PulseRuntimeHandle, options: Pul
     detached = true;
     if (scorm.save === wrappedSave) scorm.save = originalSave;
     button.remove();
-    if (dialog.open) dialog.close();
-    dialog.remove();
+    progress.dispose();
+    progressHost.remove();
+    style.remove();
     gains.remove();
   };
 }

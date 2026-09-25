@@ -86,7 +86,7 @@
 .eg-gami-goal.done{ background: var(--green-50); border-color: var(--green-100); }
 .eg-gami-goal.done .dr-ic{ background: var(--green-100); color: var(--green-600); }
 .eg-gami-goal.done .domain-bar > i{ background: var(--green-600); }
-@media (min-width: 721px){.eg-gami-domains .domain-row{ grid-template-columns: 30px minmax(0, 1fr) 1fr 48px;}
+@media (min-width: 721px){.eg-gami-domains .domain-row{ grid-template-columns: 30px minmax(0, 1fr) 1fr 48px;} }
 
 .eg-gami-domains .dr-lbl{ display: inline-flex; align-items: center; gap: var(--sp-2); flex-wrap: wrap; }
 .eg-gami-domains .badge{ font-size: var(--fs-xs); padding: 1px 8px; }
@@ -178,9 +178,10 @@
 .eg-gami-badge .ds{ font-size: var(--fs-xs); color: var(--ink-600); line-height: 1.35; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; min-height: 2.7em; }
 .eg-gami-badge .ft{ margin-top: auto; width: 100%; font-size: var(--fs-xs); color: var(--ink-500); font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 6px; font-variant-numeric: tabular-nums; }
 .eg-gami-badge .ft svg{ width: 13px; height: 13px; }
+/* WCAG AA: kilitli rozet metni ≥4.5:1 (ink-400 beyazda ≈3.2:1 idi); kilit simgesi ve çerçeve durumu işaretler. */
 .eg-gami-badge.is-locked .nm,
-.eg-gami-badge.is-locked .cat{ color: var(--ink-400); }
-.eg-gami-badge.is-locked .ds{ color: var(--ink-400); }
+.eg-gami-badge.is-locked .cat{ color: var(--ink-600); }
+.eg-gami-badge.is-locked .ds{ color: var(--ink-600); }
 .eg-gami-recent{ display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--sp-3); }
 .eg-gami-recent .eg-gami-badge{ padding: var(--sp-3); }
 .eg-gami-count{ font-size: var(--fs-sm); color: var(--ink-600); font-weight: 700; font-variant-numeric: tabular-nums; }
@@ -311,13 +312,13 @@
 .eg-gami-skel{ height: 14px; border-radius: var(--r-sm); background: var(--blue-50); animation: eg-gami-pulse 1.2s ease-in-out infinite alternate; }
 @keyframes eg-gami-pulse{ from { background: var(--blue-50); } to { background: var(--card); } }
 
-@media (prefers-reduced-motion: reduce){.eg-gami-gain, .eg-gami-skel{ animation: none;}
+@media (prefers-reduced-motion: reduce){.eg-gami-gain, .eg-gami-skel{ animation: none;} }
 
-@media (max-width: 1023px){.eg-gami-span-4, .eg-gami-span-6, .eg-gami-span-8{ grid-column: span 12;}
+@media (max-width: 1023px){.eg-gami-span-4, .eg-gami-span-6, .eg-gami-span-8{ grid-column: span 12;} }
 
 @media (max-width: 768px){.eg-gami-empty-steps{ grid-template-columns: repeat(2, minmax(0, 1fr));}
 .eg-gami-recent{ grid-template-columns: repeat(3, minmax(0, 1fr)); }
-.eg-gami-period-row .eg-gami-range{ margin-left: 0; width: 100%; }
+.eg-gami-period-row .eg-gami-range{ margin-left: 0; width: 100%; } }
 
 @media (max-width: 599px){.eg-gami-badge-grid{ grid-template-columns: repeat(auto-fill, minmax(132px, 1fr));}
 .eg-gami-chart-wide{ display: none; }
@@ -353,7 +354,7 @@
 .eg-gami-period-row .eg-gami-seg{ display: grid; grid-template-columns: 1fr 1fr; width: 100%; }
 .eg-gami-reward.compact{ flex-wrap: wrap; }
 .eg-gami-reward.compact .txt{ flex: 1 1 200px; }
-.eg-gami-reward.compact .eg-gami-link{ margin-left: 44px; }
+.eg-gami-reward.compact .eg-gami-link{ margin-left: 44px; } }
 
 .eg-gami-gains{ position: relative; overflow: hidden; }
 .eg-eg-gami-confetti{ position: absolute; inset: 0; pointer-events: none; }
@@ -378,5 +379,13 @@
 .eg-eg-gami-confetti i:nth-child(14){ left: 96%; animation-delay: 150ms; }
 @keyframes eg-gami-confetti{ 0% { opacity: 1; transform: translateY(0) rotate(0); } 100% { opacity: 0; transform: translateY(150px) rotate(300deg); } }
 
-@media (prefers-reduced-motion: reduce){.eg-eg-gami-confetti{ display: none;}
+@media (prefers-reduced-motion: reduce){.eg-eg-gami-confetti{ display: none;}}
 
+/* Düğmeler: sayfa hangi simde çizilirse çizilsin aynı görünür (Opaca .btn ile aynı değerler). */
+.eg-gami-page .btn{ display: inline-flex; align-items: center; justify-content: center; gap: 9px; min-height: 44px; border: 0; border-radius: var(--r-lg); font: inherit; font-weight: 700; font-size: var(--fs-lg); padding: 12px var(--sp-5); text-decoration: none; cursor: pointer; }
+.eg-gami-page .btn.primary{ background: linear-gradient(180deg, var(--blue-500), var(--blue-700)); color: var(--card); }
+.eg-gami-page .btn.green{ background: linear-gradient(180deg, var(--green-500), var(--green-600)); color: var(--card); }
+.eg-gami-page .btn.purple{ background: linear-gradient(180deg, var(--purple-600), var(--purple-700)); color: var(--card); }
+.eg-gami-page .btn.outline{ background: var(--card); color: var(--ink-700); border: 1.5px solid var(--border-strong); }
+.eg-gami-page .btn.outline:hover{ background: var(--blue-50); }
+.eg-gami-page .btn.small{ padding: 8px 14px; font-size: var(--fs-sm); border-radius: var(--r-md); }
