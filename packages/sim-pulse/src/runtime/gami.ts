@@ -5,8 +5,9 @@
  * Kaynak uygulamada oyunlaştırma yoktur; platform kararı gereği (üç simde ortak
  * çekirdek, sime özgü rozet/hedef) köprü kaynağın kendi kayıt çağrısını
  * (`CardAIScorm.save`) izler ve tamamlanan oturumları `buildAttemptRecord`
- * ile yazar. Kaynak betiklere dokunulmaz; tek görünür ek, üst çubuğa eklenen
- * "İlerlemem" düğmesi, onun diyaloğu ve sonuç ekranındaki kazanım kartıdır.
+ * ile yazar. Kaynak betiklere dokunulmaz; görünür ekler üst çubuğa eklenen
+ * "İlerlemem" düğmesi, onun diyaloğu ve sonuç ekranındaki kazanım kartıdır —
+ * son ikisi Opaca/Ausculta ile ortak `@egemed/gami-ui` tasarımıdır.
  * Yerel liderlik tablosu demo akran verisi içerdiği için gösterilmez; gerçek
  * sıralama API ucundan gelecektir.
  */
@@ -14,9 +15,10 @@ import { buildAttemptRecord, rhythmStreakAfter } from "../gamification/attempt";
 import type { PulseAttemptRecord } from "../gamification/attempt";
 import { emptyPulseGamiState, pulseLearnTopic } from "../gamification/repo";
 import type { PulseGamiRepo, PulseGamiState, PulseGamiWriteResult } from "../gamification/repo";
-import { createPulseGainsView, gainsMarkup } from "../gamification/ui";
+import { pulseSessionGains } from "../gamification/gains";
 import { gamiUiStyles } from "@egemed/gami-ui";
 import type { GamiServerSource } from "@egemed/gami-ui";
+import { mountPulseGains } from "./gains";
 import { mountPulseProgress } from "./progress";
 import type { Lead, Mode } from "../engine/shapes";
 import type { PulseRuntimeHandle } from "./host";
@@ -157,17 +159,15 @@ export function attachPulseGamification(handle: PulseRuntimeHandle, options: Pul
   gains.id = GAMI_GAINS_ID;
   gains.hidden = true;
   shadow.getElementById("resultsView")?.append(gains);
-  gains.addEventListener("click", (event) => {
-    const target = event.target as Element | null;
-    if (target?.closest('[data-pulse-view="achievements"]')) openDialog();
-  });
+  // Kazanım kartı da ortak tasarım: React kökü model geldikçe güncellenir.
+  const gainsView = mountPulseGains(gains, { onAchievements: openDialog, onLeaderboard: openDialog });
 
   // --- Kayıt izleme ------------------------------------------------------------
-  const applyWrite = (result: PulseGamiWriteResult, showGains: boolean): void => {
+  const applyWrite = (result: PulseGamiWriteResult, record: PulseAttemptRecord, showGains: boolean): void => {
     if (detached) return;
     gamiState = result.state;
     if (showGains) {
-      gains.innerHTML = gainsMarkup(createPulseGainsView(result.state, result.earnedIds, nowDate()));
+      gainsView.update(pulseSessionGains({ attempt: record, earnedIds: result.earnedIds, now: nowDate(), state: result.state }));
       gains.hidden = false;
     }
     if (!progressHost.hidden) renderProgress();
@@ -212,7 +212,7 @@ export function attachPulseGamification(handle: PulseRuntimeHandle, options: Pul
       });
       if (record !== null) {
         void repo.recordAttempt(record, nowDate()).then((result) => {
-          applyWrite(result, true);
+          applyWrite(result, record, true);
           reportRecord(record);
         });
       }
@@ -240,7 +240,7 @@ export function attachPulseGamification(handle: PulseRuntimeHandle, options: Pul
       });
       if (record !== null) {
         void repo.recordAttempt(record, nowDate()).then((result) => {
-          applyWrite(result, false);
+          applyWrite(result, record, false);
           reportRecord(record);
         });
       }
@@ -280,7 +280,8 @@ export function attachPulseGamification(handle: PulseRuntimeHandle, options: Pul
     button.remove();
     progress.dispose();
     progressHost.remove();
-    style.remove();
+    gainsView.dispose();
     gains.remove();
+    style.remove();
   };
 }
