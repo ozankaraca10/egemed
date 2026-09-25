@@ -17,6 +17,7 @@
   },
   "dependencies": {
     "@egemed/gami-catalogs": "workspace:*",
+    "@egemed/gami-ui": "workspace:*",
     "@egemed/gamification-core": "workspace:*",
     "@egemed/sim-host": "workspace:*",
     "@egemed/tokens": "workspace:*"

@@ -690,12 +690,6 @@ html, body { margin: 0; }
 .eg-shell-header--sim .eg-shell-brand { flex: 0 0 auto; justify-content: center; min-width: var(--eg-shell-touch-min); }
 .eg-shell-header--sim .eg-shell-logo__mark { width: 2.25rem; height: 2.25rem; }
 .eg-shell-header--sim .eg-shell-logo__copy { display: none; }
-.eg-shell-header--sim .eg-shell-header__side { flex-wrap: nowrap; }
-.eg-shell-header--sim .eg-shell-session__role { display: none; }
-.eg-shell-header--sim .eg-shell-session__logout {
-  background: none; border-color: var(--blue-400); color: var(--card); font-size: var(--fs-xs);
-}
-.eg-shell-header--sim .eg-shell-session__logout:hover { background: var(--navy-700); }
 .eg-shell-main--sim { max-width: none; margin: 0; padding: 0; }
 .eg-shell-simbar { display: flex; flex: 1 1 auto; align-items: center; gap: var(--sp-2); min-width: 0; }
 .eg-shell-simbar__crumbs { display: flex; flex: 0 0 auto; align-items: center; gap: var(--sp-1); }
@@ -710,12 +704,12 @@ html, body { margin: 0; }
 .eg-shell-simbar__backLabel { display: none; }
 .eg-shell-simbar__sep { display: none; color: var(--blue-300); }
 .eg-shell-simbar__title {
-  overflow: hidden; margin: 0; color: var(--card); font-size: var(--fs-lg); font-weight: 800;
+  flex: 0 1 auto; min-width: 0; overflow: hidden; margin: 0; color: var(--card); font-size: var(--fs-lg); font-weight: 800;
   letter-spacing: .01em; text-overflow: ellipsis; white-space: nowrap;
 }
 .eg-shell-simbar__icon { flex: 0 0 auto; width: 1.25rem; height: 1.25rem; }
 .eg-shell-simbar__steps { display: none; align-items: center; gap: var(--sp-1); margin: 0 0 0 var(--sp-3); padding: 0; list-style: none; }
-.eg-shell-simbar__step { display: inline-flex; align-items: center; gap: var(--sp-1); color: var(--blue-200); font-size: var(--fs-xs); font-weight: 600; }
+.eg-shell-simbar__step { display: inline-flex; align-items: center; gap: var(--sp-1); color: var(--blue-200); font-size: var(--fs-xs); font-weight: 600; white-space: nowrap; }
 .eg-shell-simbar__step + .eg-shell-simbar__step::before {
   content: ""; display: inline-block; width: 1.25rem; height: 2px; margin-right: var(--sp-1);
   background: var(--navy-600); border-radius: var(--r-pill);
@@ -729,7 +723,7 @@ html, body { margin: 0; }
 .eg-shell-simbar__step--current .eg-shell-simbar__stepNum { background: var(--blue-600); border-color: var(--blue-300); color: var(--card); }
 .eg-shell-simbar__spacer { flex: 1 1 auto; }
 .eg-shell-simbar__chip {
-  display: none; flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; align-items: center; min-height: 1.75rem; padding: 0 var(--sp-2);
+  display: none; flex: 0 1 auto; min-width: 0; max-width: 13rem; overflow: hidden; text-overflow: ellipsis; align-items: center; min-height: 1.75rem; padding: 0 var(--sp-2);
   background: var(--navy-700); border: 1px solid var(--navy-600); border-radius: var(--r-pill);
   color: var(--card); font-size: var(--fs-xs); font-weight: 700; white-space: nowrap;
 }
@@ -746,29 +740,70 @@ html, body { margin: 0; }
 .eg-shell-simbar__action:hover { background: var(--navy-700); }
 .eg-shell-simbar__action[aria-pressed="true"] { background: var(--navy-700); box-shadow: inset 0 0 0 1px var(--blue-400); }
 .eg-shell-simbar__actionLabel { display: none; }
-.eg-shell-session__dev {
-  display: none; align-items: center; min-height: 1.75rem; padding: 0 var(--sp-2);
-  background: var(--amber-700); border-radius: var(--r-pill);
-  color: var(--card); font-size: var(--fs-xs); font-weight: 700; white-space: nowrap;
+/* Hesap menüsü (T120): sim barının sağında tek düğme; baş harf dairesi ve
+   aşağı ok. Panel koyu barın altında açılır; dar ekranda yalnız baş harf
+   dairesi kalır (bar taşmaz). */
+.eg-shell-account { position: relative; flex: 0 0 auto; }
+.eg-shell-account__button {
+  box-sizing: border-box; display: inline-flex; align-items: center; justify-content: center; gap: var(--sp-1);
+  min-width: var(--eg-shell-touch-min); min-height: var(--eg-shell-touch-min); padding: 0 var(--sp-1);
+  background: none; border: 1px solid var(--blue-400); border-radius: var(--r-pill);
+  color: var(--card); font: inherit; cursor: pointer;
 }
-/* Dar ekranda bar yalnız geri, başlık ve eylem simgelerini taşır (yatay taşma yok);
-   genişledikçe marka, adımlar, çipler ve etiketler kademeli açılır. */
+.eg-shell-account__button:hover { background: var(--navy-700); }
+.eg-shell-account__button:focus-visible { outline: 2px solid var(--blue-300); outline-offset: 2px; }
+.eg-shell-account__initials {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 1.75rem; height: 1.75rem;
+  background: var(--blue-600); border-radius: var(--r-pill);
+  color: var(--card); font-size: var(--fs-xs); font-weight: 700; letter-spacing: .02em;
+}
+.eg-shell-account__chev { display: block; width: 1rem; height: 1rem; }
+.eg-shell-account__panel {
+  position: absolute; top: calc(100% + var(--sp-2)); right: 0; z-index: 40;
+  display: flex; flex-direction: column; min-width: 12rem; padding: var(--sp-2);
+  background: var(--card); border: 1px solid var(--border-strong); border-radius: var(--r-md);
+  box-shadow: var(--shadow-pop);
+}
+.eg-shell-account__panel[hidden] { display: none; }
+.eg-shell-account__name {
+  overflow: hidden; margin: 0; padding: var(--sp-2);
+  color: var(--navy-900); font-size: var(--fs-sm); font-weight: 700;
+  text-overflow: ellipsis; white-space: nowrap;
+}
+.eg-shell-account__note {
+  margin: 0; padding: 0 var(--sp-2) var(--sp-2);
+  color: var(--muted); font-size: var(--fs-xs);
+}
+.eg-shell-account__menu { display: flex; flex-direction: column; }
+.eg-shell-account__item {
+  box-sizing: border-box; display: flex; align-items: center; width: 100%;
+  min-height: var(--eg-shell-touch-min); padding: 0 var(--sp-2);
+  background: none; border: 0; border-radius: var(--r-sm);
+  color: var(--text); font: inherit; font-size: var(--fs-sm); font-weight: 600; text-align: left; cursor: pointer;
+}
+.eg-shell-account__item:hover { background: var(--blue-50); }
+/* Dar ekranda bar yalnız geri, başlık, eylem simgelerini ve hesap düğmesini
+   taşır (yatay taşma yok); hesap düğmesi baş harf dairesine iner. Genişledikçe
+   marka, adımlar, çipler ve etiketler kademeli açılır. */
 @media (max-width: 767.98px) {
-  .eg-shell-header--sim .eg-shell-brand,
-  .eg-shell-header--sim .eg-shell-header__side { display: none; }
+  .eg-shell-header--sim .eg-shell-brand { display: none; }
+  .eg-shell-account__chev { display: none; }
 }
 @media (min-width: 768px) {
+  .eg-shell-simbar__title { flex-shrink: 0; }
   .eg-shell-simbar__backLabel { display: inline; }
   .eg-shell-simbar__sep { display: inline; }
 }
 @media (min-width: 1024px) {
   .eg-shell-simbar__steps { display: flex; }
-  .eg-shell-session__dev { display: inline-flex; }
 }
 @media (min-width: 1280px) {
-  .eg-shell-simbar__chip { display: inline-flex; }
   .eg-shell-simbar__actionLabel { display: inline; }
-  .eg-shell-header--sim .eg-shell-session__role { display: inline-flex; }
+}
+/* Çipler (mod, ilerleme) en geniş ekranda; bar önceliği: başlık > eylemler > adımlar > çipler. */
+@media (min-width: 1600px) {
+  .eg-shell-simbar__chip { display: inline-flex; }
 }
 @media (prefers-reduced-motion: reduce) {
   .eg-shell-sim-page__host { transition: none; }

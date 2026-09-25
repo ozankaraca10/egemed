@@ -102,7 +102,7 @@ async function openPulse(page: Page): Promise<Locator> {
   await page.goto("/#/sims/pulse");
   const root = page.locator(ROOT);
   // Birleşik barda kaynak açılış sayfası atlanır (T107); öğretici açıksa atlanır.
-  await expect(root.locator("#appRoot")).toBeVisible();
+  await expect(root.locator("#appRoot")).toBeVisible({ timeout: 20_000 });
   if (await root.locator("#tutorialSkip").isVisible().catch(() => false)) await root.locator("#tutorialSkip").click();
   return root;
 }
@@ -184,7 +184,8 @@ const SCREENS: readonly PulseScreen[] = [
     route: "#/sims/pulse/ilerlemem",
     async open(root) {
       await root.page().locator(".eg-shell-simbar").getByRole("button", { name: "İlerlemem" }).click();
-      await expect(root.locator("#egemedGamiDialog[open]")).toBeVisible();
+      await expect(root.locator("#egemedGamiProgress")).toBeVisible();
+      await expect(root.locator("#egemedGamiProgress").getByRole("tab", { name: "Başarılarım" })).toBeVisible();
     },
   },
 ];

@@ -1027,3 +1027,5 @@ flex: 0 1 auto;
 @media (max-width: 720px) {
   .eg-sim-opaca .eg-sim-toolbar { padding: 6px 10px; gap: 6px; }
 }
+
+.eg-sim-opaca .eg-header-chip.gami-chip[aria-current="page"]{ background: rgba(255, 255, 255, .14); color: var(--card); }

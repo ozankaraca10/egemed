@@ -78,6 +78,7 @@ describe("tsconfig sözleşmesi", () => {
       "packages/api-client/tsconfig.json",
       "packages/contracts/tsconfig.json",
       "packages/gami-catalogs/tsconfig.json",
+      "packages/gami-ui/tsconfig.json",
       "packages/gamification-core/tsconfig.json",
       "packages/sim-ausculta/tsconfig.json",
       "packages/sim-host/tsconfig.json",

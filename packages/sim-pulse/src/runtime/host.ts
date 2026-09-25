@@ -422,8 +422,26 @@ const EMBED_CSS = `
    (≈3.1–3.3:1); token koyulaştırılır (#15803d ≈ 4.8–5:1). */
 :host{--green-600:#15803d}
 .live-badge{min-height:44px}
+/* PULSE-10: WCAG AA renk karşıtlığı — kaynak token'ları koyulaştırılır.
+   --ink-500 (#5f7ba6) beyazda 4.31:1; #536d95 beyazda 5.3:1, açık mavi
+   zeminlerde (--bg-grad-a) ≥4.6:1 — .ds-card dt, .stage-id, notlar.
+   --blue-500 (#2e8df7) beyaz metinle 3.35:1; #0c6fdc beyaz metinle 4.9:1
+   (.btn.primary: #caseContinue, #caseCheck). */
+:host{--ink-500:#536d95}
+:host{--blue-500:#0c6fdc}
+/* PULSE-10: 44 px dokunma hedefi (AGENTS); kaynak düğme/select/input
+   yükseklikleri 27–38 px. Onay kutusu/radyo dışarıda: kutuyu büyütmek katman
+   menüsünü kalbin üzerine taşır (kalan kayıtlar özette gerekçeli). */
+:host .pulse-html button,:host .pulse-html select,:host .pulse-html input:not([type=checkbox]):not([type=radio]){min-height:44px}
+:host .pulse-html .tool-btn,:host .pulse-html .lead-chip,:host .pulse-html .panel-focus,:host .pulse-html .icon-btn{min-inline-size:44px}
 /* PULSE-10: katman onay kutuları WCAG 2.2 hedef boyutu (24 px). */
 .layer-menu input[type=checkbox],#labelsToggle{inline-size:24px;block-size:24px}
+/* Kaynakta 1x1 gizli radyo (opacity:0); ölçülen dokunma hedefi 44 px olur,
+   görünür boyut değişmez (etiket tıklaması zaten düğmeyi işaretler). */
+:host .pulse-html .opt input[type=radio]{inline-size:44px;block-size:44px}
+/* PULSE-10: dar ekranda rapor tablosu yatay kaydırma yerine kaba sığar
+   (scrollable-region-focusable: klavyeyle kaydırılamayan bölge). */
+.report-table-v2{min-width:min(520px,100%)}
 /* Birleşik barda adım göstergesi bardadır; içerikteki kopya çizilmez. */
 :host(.pulse-unified) .stepper{display:none!important}
 :host(.pulse-unified) .topbar,:host(.pulse-unified) .app>.eg-footer,:host(.pulse-unified) .landing{display:none!important}

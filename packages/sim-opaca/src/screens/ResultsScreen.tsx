@@ -8,7 +8,9 @@ import { sampleSession, SESSION_SIZE } from '../core/session'
 import { firstWeakLibraryKey, weakDomainKeys } from '../core/flow'
 import { libraryKeyForFinding } from '../data/terminology'
 import { decodeMark } from '../core/geometry'
-import { GamiGains } from '../ui/gami/GamiGains'
+import { GamiGainsView } from '@egemed/gami-ui'
+import { useOpacaSessionGains } from '../gamification/sessionGains'
+import { opacaGamiIcons } from '../ui/opacaGami'
 import { caseById, getGamiRepo } from '../gamification/bindings'
 import {
   IconScan,
@@ -128,20 +130,27 @@ export function ResultsScreen({
   }
 
   const repo = useMemo(() => getGamiRepo(), [])
-  const defaultGains =
-    gamiEnabled && state.mode !== 'learn' && state.caseResults.length > 0 ? (
-      <GamiGains
-        repo={repo}
-        mode={state.mode === 'assessment' ? 'assessment' : 'practice'}
-        results={state.caseResults}
-        caseById={caseById}
-        seed={state.session.seed}
-        durationMs={state.assessmentTimer}
-        finishedAt={new Date(now())}
-        onAchievements={() => dispatch({ type: 'goto', screen: 'achievements' })}
-        onLeaderboard={() => dispatch({ type: 'goto', screen: 'leaderboard' })}
-      />
-    ) : null
+  const gainsModel = useOpacaSessionGains(
+    gamiEnabled && state.mode !== 'learn' && state.caseResults.length > 0
+      ? {
+          repo,
+          mode: state.mode === 'assessment' ? 'assessment' : 'practice',
+          results: state.caseResults,
+          caseById,
+          seed: state.session.seed,
+          durationMs: state.assessmentTimer,
+          finishedAt: new Date(now()),
+        }
+      : null,
+  )
+  const defaultGains = gainsModel ? (
+    <GamiGainsView
+      gains={gainsModel}
+      icons={opacaGamiIcons}
+      onAchievements={() => dispatch({ type: 'goto', screen: 'achievements' })}
+      onLeaderboard={() => dispatch({ type: 'goto', screen: 'leaderboard' })}
+    />
+  ) : null
 
   return (
     <>

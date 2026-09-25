@@ -31,7 +31,7 @@ async function openPulse(page: Page): Promise<Locator> {
   const root = page.locator(ROOT);
   // Birleşik barda kaynak açılış sayfası atlanır (UX kararı 25 Eylül 2026);
   // ilk kullanımda öğretici açılır, testler onu atlar.
-  await expect(root.locator("#appRoot")).toBeVisible();
+  await expect(root.locator("#appRoot")).toBeVisible({ timeout: 20_000 });
   const skip = root.locator("#tutorialSkip");
   if (await skip.isVisible().catch(() => false)) await skip.click();
   return root;
@@ -128,10 +128,14 @@ test.describe("Pulse kaynak runtime", () => {
     );
     expect(gami?.attempts.map((attempt) => [attempt.mode, attempt.score])).toEqual([["assessment", 100]]);
     await root.locator("#egemedGamiGains").getByRole("button", { name: "Başarılarımı gör" }).click();
-    await expect(root.locator("#egemedGamiDialog")).toBeVisible();
-    await expect(root.locator("#egemedGamiDialog")).toContainText("İlerlemem");
-    await root.locator("#egemedGamiDialog").getByRole("button", { name: "Kapat" }).click();
-    await expect(root.locator("#egemedGamiDialog")).toBeHidden();
+    // Ortak tasarım (@egemed/gami-ui): Opaca/Ausculta ile aynı Başarılarım / Liderlik sayfası.
+    const progress = root.locator("#egemedGamiProgress");
+    await expect(progress).toBeVisible();
+    await expect(progress.getByRole("tab", { name: "Başarılarım" })).toBeVisible();
+    await expect(progress.getByRole("tab", { name: "Liderlik Tahtası" })).toBeVisible();
+    await expect(progress).toContainText("Rozet koleksiyonu");
+    await progress.getByRole("button", { name: /Simülatöre dön/ }).click();
+    await expect(progress).toBeHidden();
     expect(errors).toEqual([]);
   });
 

@@ -81,8 +81,13 @@ test.describe("Ausculta kayıt izolasyonu", () => {
     await asUser(page, STUDENT);
     await page.reload({ waitUntil: "networkidle" });
     await expect(page.locator(`${ROOT}.app-shell`)).toHaveCount(1);
-    // Birleşik barda rol etiketi dar ekranda gizlenir; oturum kimliği metinle doğrulanır.
-    await expect(page.locator(".eg-shell-session__role")).toHaveText("Sahte test öğrencisi");
+    // Birleşik barda oturum kimliği kompakt hesap düğmesinde baş harflerle
+    // durur (T120); görünen ad menüde doğrulanır.
+    const account = page.getByRole("button", { name: /Hesap menüsü/ });
+    await expect(account).toContainText("ST");
+    await account.click();
+    await expect(page.getByText("Sahte test öğrencisi")).toBeVisible();
+    await page.keyboard.press("Escape");
     await expect(page.getByRole("heading", { name: "Çalışma Modunu Seçin" })).toBeVisible();
     await expect(practiceCard.locator(".mode-best-score")).toContainText("Henüz denenmedi");
     await expect
