@@ -32,41 +32,39 @@ describe("accountInitials", () => {
   });
 });
 
-describe("kompakt hesap menüsü (T120)", () => {
-  it("sim rotasında baş harf düğmesini ve menü öğelerini çizer; çip/rol/çıkış bloğu kalkar", () => {
+describe("hesap menüsü (T120 → T152)", () => {
+  // Menü içeriği Radix ile yalnız açıkken çizilir (statik render'da yok); öğeler, not ve klavye
+  // davranışı e2e/sims.spec.ts ve e2e/app-frame.spec.ts'te doğrulanır.
+  it("sim rotasında baş harfli tek hesap düğmesi çizer; çip/rol/çıkış bloğu yoktur", () => {
     const html = renderLayout(simHref("ausculta"), shellSessionFromDev(STUDENT));
     expect(html).toContain('aria-haspopup="menu"');
     expect(html).toContain('aria-expanded="false"');
     expect(html).toContain(`aria-label="${t("shell.account.label")}: ${t("shell.session.student")}"`);
     expect(html).toContain('class="eg-shell-account__initials">ST<');
-    expect(html).toMatch(/<div class="eg-shell-account__panel"[^>]*hidden=""/);
-    expect(html).toContain('role="menu"');
-    expect(html).toContain('role="menuitem"');
-    expect(html).toContain(t("shell.session.logout"));
-    expect(html).toContain(t("shell.session.devChip"));
+    expect(html).not.toContain('role="menu"');
     expect(html).not.toContain("eg-shell-session__role");
     expect(html).not.toContain("eg-shell-session__logout");
-    expect(html).not.toContain("eg-shell-session__dev");
   });
 
-  it("API oturumunda görünen adı baş harfe çevirir, geliştirme notunu çizmez", () => {
+  it("API oturumunda görünen adı baş harfe çevirir; ad ve rol düğmede yer alır", () => {
     const html = renderLayout(simHref("pulse"), API_ADMIN);
     expect(html).toContain('class="eg-shell-account__initials">GY<');
     expect(html).toContain("Geliştirme Yöneticisi");
-    expect(html).not.toContain(t("shell.session.devChip"));
+    expect(html).toContain(t("shell.account.role.admin"));
     expect(html).not.toContain(t("shell.session.admin"));
   });
 
   it("oturum yokken hesap düğmesi çizilmez", () => {
     expect(renderLayout(simHref("ausculta"), null)).not.toContain("eg-shell-account");
+    expect(renderLayout("#/", null)).not.toContain("eg-shell-account");
   });
 
-  it("sim dışı sayfalar mevcut rol etiketi ve çıkış düğmesini korur", () => {
+  it("sim dışı sayfalarda da rol çipi + ayrı çıkış düğmesi yerine hesap menüsü ve ana gezinme vardır (T152)", () => {
     const html = renderLayout("#/", shellSessionFromDev(STUDENT));
-    expect(html).toContain('class="eg-shell-session__role"');
-    expect(html).toContain(t("shell.session.student"));
-    expect(html).toContain('class="eg-shell-session__logout"');
+    expect(html).toContain('class="eg-shell-account__button"');
+    expect(html).toContain('aria-haspopup="menu"');
     expect(html).toContain('class="eg-shell-nav"');
-    expect(html).not.toContain("eg-shell-account");
+    expect(html).not.toContain("eg-shell-session__role");
+    expect(html).not.toContain("eg-shell-session__logout");
   });
 });

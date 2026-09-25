@@ -85,7 +85,7 @@ test.describe("Ausculta kayıt izolasyonu", () => {
     const account = page.getByRole("button", { name: /Hesap menüsü/ });
     await expect(account).toContainText("ST");
     await account.click();
-    await expect(page.getByText("Sahte test öğrencisi")).toBeVisible();
+    await expect(page.getByRole("button", { name: "Hesap menüsü: Sahte test öğrencisi" })).toBeVisible();
     await page.keyboard.press("Escape");
     await expect(page.getByRole("heading", { name: "Çalışma Modunu Seçin" })).toBeVisible();
     await expect(practiceCard.locator(".mode-best-score")).toContainText("Henüz denenmedi");

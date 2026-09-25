@@ -1,25 +1,13 @@
-import { useEffect, useRef, useState, type JSX, type KeyboardEvent as ReactKeyboardEvent } from "react";
+import type { JSX } from "react";
+import { Menu, icons, type MenuEntry } from "@egemed/ui";
 import { t } from "@egemed/ui/i18n";
 
 /**
- * T120 — birleşik sim barının kompakt hesap menüsü. Sim rotasında geliştirme
- * çipi + rol etiketi + "Çıkış yap" düğmesi yerine tek düğme çizilir: baş
- * harfler ve aşağı ok; menüde görünen ad/rol, sahte oturum notu ve çıkış
- * öğesi. Klavye: Enter/Space açar, Esc kapatıp odağı düğmeye döndürür, ok
- * tuşları öğeler arasında gezer; dışarı tıklama kapatır.
- *
- * Kök tsconfig programı DOM lib'i taşımadığı için (bkz. SimRoute) dokunulan
- * düğüm yüzeyi yapısaldır; gerçek düğümler çalışma zamanında bu sözleşmeleri
- * karşılar.
+ * Hesap menüsü (T120 → T152): tüm sayfalarda tek hesap düğmesi. Baş harf dairesi (masaüstünde
+ * ad ve rol de) ve aşağı ok; menüde ad/rol, sahte oturum notu, admin için "Yönetim paneli"
+ * ve "Çıkış yap". Davranış Radix DropdownMenu'dur (@egemed/ui `Menu`): Enter/Space/↓ açar,
+ * ok tuşları ve tür-ara gezinir, Esc kapatıp odağı düğmeye döndürür, dışarı tıklama kapatır.
  */
-interface FocusableNode { focus(): void }
-interface MenuListNode { querySelectorAll(selector: string): ArrayLike<FocusableNode> }
-interface AccountRootNode { contains(target: unknown): boolean }
-interface AccountDocument {
-  readonly activeElement: unknown;
-  addEventListener(type: string, listener: (event: { readonly target: unknown }) => void): void;
-  removeEventListener(type: string, listener: (event: { readonly target: unknown }) => void): void;
-}
 
 /**
  * Görünen ad ya da rol etiketinden iki harfli baş harfi üretir: iki sözcük
@@ -39,116 +27,57 @@ export function accountInitials(label: string): string {
 export interface AccountMenuProps {
   /** Menüde ve baş harflerde gösterilen ad; sahte oturumda rol etiketidir. */
   readonly displayName: string;
+  /** Ad altında gösterilen rol ("Öğrenci" / "Yönetici"); sahte oturumda ad zaten rol olduğundan boş. */
+  readonly roleLabel?: string | undefined;
   /** "Geliştirme oturumu" notu yalnız sahte (sentetik) oturumda çizilir. */
   readonly synthetic: boolean;
+  /** Admin oturumunda "Yönetim paneli" bağlantısı. */
+  readonly adminHref?: `#${string}` | null | undefined;
   readonly onLogout?: (() => void) | undefined;
 }
 
-/** Menü adı ile başlık ilişkisi; sayfada tek hesap menüsü vardır. */
-const NAME_ID = "eg-shell-account-name";
+/** Hash gezinmesi; kök tsc DOM'suz olduğundan yapısal erişim. */
+function navigate(href: `#${string}`): void {
+  const scope = globalThis as { location?: { hash: string } };
+  if (scope.location !== undefined) scope.location.hash = href;
+}
 
-export function AccountMenu({ displayName, synthetic, onLogout }: AccountMenuProps): JSX.Element {
-  const [open, setOpen] = useState(false);
-  const rootRef = useRef<AccountRootNode | null>(null);
-  const buttonRef = useRef<FocusableNode | null>(null);
-  const menuRef = useRef<MenuListNode | null>(null);
-
-  // Dışarı tıklama menüyü kapatır; dinleyici yalnız açıkken bağlanır.
-  useEffect(() => {
-    if (!open) return undefined;
-    const doc = (globalThis as { document?: AccountDocument }).document;
-    const root = rootRef.current;
-    if (doc === undefined || root === null) return undefined;
-    const closeOnOutside = (event: { readonly target: unknown }): void => {
-      if (event.target !== null && !root.contains(event.target)) setOpen(false);
-    };
-    doc.addEventListener("pointerdown", closeOnOutside);
-    return () => doc.removeEventListener("pointerdown", closeOnOutside);
-  }, [open]);
-
-  // Açılışta odak ilk menü öğesine taşınır; ok tuşları öğeler arasında gezer.
-  useEffect(() => {
-    if (!open) return undefined;
-    const menu = menuRef.current;
-    menu?.querySelectorAll('[role="menuitem"]')[0]?.focus();
-    return undefined;
-  }, [open]);
-
-  function handleKeyDown(event: ReactKeyboardEvent<HTMLDivElement>): void {
-    if (event.key === "Escape") {
-      if (!open) return;
-      event.preventDefault();
-      setOpen(false);
-      buttonRef.current?.focus();
-      return;
-    }
-    if (event.key !== "ArrowDown" && event.key !== "ArrowUp") return;
-    if (!open) {
-      event.preventDefault();
-      setOpen(true);
-      return;
-    }
-    const items = menuRef.current?.querySelectorAll('[role="menuitem"]');
-    if (items === undefined || items.length === 0) return;
-    event.preventDefault();
-    const active = (globalThis as { document?: AccountDocument }).document?.activeElement;
-    let current = -1;
-    for (let index = 0; index < items.length; index += 1) {
-      if (items[index] === active) current = index;
-    }
-    const delta = event.key === "ArrowDown" ? 1 : -1;
-    const next = current === -1 ? (delta === 1 ? 0 : items.length - 1) : (current + delta + items.length) % items.length;
-    items[next]?.focus();
+export function AccountMenu({ displayName, roleLabel, synthetic, adminHref, onLogout }: AccountMenuProps): JSX.Element {
+  const initials = accountInitials(displayName);
+  const items: MenuEntry[] = [];
+  if (adminHref !== undefined && adminHref !== null) {
+    items.push(
+      { key: "admin", label: t("shell.account.admin"), icon: <icons.ShieldCheck />, onSelect: () => navigate(adminHref) },
+      { kind: "separator", key: "sep" },
+    );
   }
-
+  items.push({ key: "logout", label: t("shell.session.logout"), icon: <icons.LogOut />, tone: "danger", onSelect: () => onLogout?.() });
   return (
-    <div
-      className="eg-shell-account"
-      onKeyDown={handleKeyDown}
-      ref={(node: unknown) => { rootRef.current = node as AccountRootNode | null; }}
-    >
-      <button
-        aria-expanded={open}
-        aria-haspopup="menu"
-        aria-label={`${t("shell.account.label")}: ${displayName}`}
-        className="eg-shell-account__button"
-        onClick={() => setOpen((value) => !value)}
-        ref={(node: unknown) => { buttonRef.current = node as FocusableNode | null; }}
-        type="button"
-      >
-        <span aria-hidden="true" className="eg-shell-account__initials">{accountInitials(displayName)}</span>
-        <svg
-          aria-hidden="true"
-          className="eg-shell-account__chev"
-          fill="none"
-          stroke="currentColor"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth={2}
-          viewBox="0 0 24 24"
-        >
-          <path d="m6 9 6 6 6-6" />
-        </svg>
-      </button>
-      <div className="eg-shell-account__panel" hidden={!open}>
-        <p className="eg-shell-account__name" id={NAME_ID}>{displayName}</p>
-        {synthetic && <p className="eg-shell-account__note">{t("shell.session.devChip")}</p>}
-        <div
-          aria-labelledby={NAME_ID}
-          className="eg-shell-account__menu"
-          ref={(node: unknown) => { menuRef.current = node as MenuListNode | null; }}
-          role="menu"
-        >
-          <button
-            className="eg-shell-account__item"
-            onClick={() => { setOpen(false); onLogout?.(); }}
-            role="menuitem"
-            type="button"
-          >
-            {t("shell.session.logout")}
+    <div className="eg-shell-account">
+      <Menu
+        className="eg-shell-account__menu"
+        trigger={
+          <button aria-label={`${t("shell.account.label")}: ${displayName}`} className="eg-shell-account__button" type="button">
+            <span aria-hidden="true" className="eg-shell-account__initials">{initials}</span>
+            <span aria-hidden="true" className="eg-shell-account__who">
+              <span className="eg-shell-account__whoName">{displayName}</span>
+              {roleLabel !== undefined && roleLabel !== "" && <span className="eg-shell-account__whoRole">{roleLabel}</span>}
+            </span>
+            <icons.ChevronDown aria-hidden="true" className="eg-shell-account__chev" />
           </button>
-        </div>
-      </div>
+        }
+        header={
+          <div className="eg-shell-account__head">
+            <span aria-hidden="true" className="eg-shell-account__initials eg-shell-account__initials--lg">{initials}</span>
+            <div className="eg-shell-account__headText">
+              <p className="eg-shell-account__name">{displayName}</p>
+              {roleLabel !== undefined && roleLabel !== "" && <p className="eg-shell-account__role">{roleLabel}</p>}
+              {synthetic && <p className="eg-shell-account__note">{t("shell.session.devChip")}</p>}
+            </div>
+          </div>
+        }
+        items={items}
+      />
     </div>
   );
 }
