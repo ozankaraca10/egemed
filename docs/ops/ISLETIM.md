@@ -176,10 +176,28 @@ atlandı" uyarısı basılır.
 
 `.github/workflows/ci.yml` dört iş çalıştırır: `gates` (lint/typecheck/test),
 `e2e` (Playwright mobil), `api-e2e` (bu bölümdeki `pnpm e2e:api`; gerçek API +
-PostgreSQL) ve `api-db` (migration turu). Git-dışı sim varlıkları (Opaca xray,
-Ausculta ses) CI'da yoktur; bu varlıklara bağlı e2e senaryoları CI'da tam
-doğrulanamaz ve risk olarak izlenir. Yerelde eksik varlıkla koşmadan önce
-§2'deki `sync:xray` / `sync:audio` adımlarını çalıştırın.
+PostgreSQL) ve `api-db` (migration turu + gerçek PostgreSQL testleri). Git-dışı
+sim varlıkları (Opaca xray, Ausculta ses) CI'da yoktur; bu varlıklara bağlı e2e
+senaryoları CI'da tam doğrulanamaz ve risk olarak izlenir. Yerelde eksik
+varlıkla koşmadan önce §2'deki `sync:xray` / `sync:audio` adımlarını çalıştırın.
+
+### Gerçek PostgreSQL testleri (`pnpm --filter @egemed/api test:db`, T126)
+
+`apps/api/vitest.db.config.ts`, `apps/api/test/db/**/*.test.ts` dosyalarını
+koşar: migration turunun yanında oyunlaştırma SQL'i (deneme + profil tek
+ifadesi, API-05), ADR-008 rozet değerlendirmesi, liderlik katılım tercihi
+(T100) ve toplu işlem kimlikleri (API-07) gerçek PostgreSQL'de doğrulanır.
+`DATABASE_URL` tanımlı değilse suite açık mesajla atlanır (FAIL etmez). Her
+test dosyası kendi geçici şemasını (`t126_*`) kurar, migration'ları o şemaya
+uygular ve sonunda `drop schema ... cascade` ile siler; public şema, migration
+tablosu ve mevcut veriye dokunulmaz — bu yüzden dosyalar paralel koşabilir.
+
+Yerel koşum: `egemed-local-postgres` konteyneri ayakta olmalı. Geçici
+veritabanı `docker exec egemed-local-postgres-1 createdb ...` ile açılır,
+`DATABASE_URL` yalnız ortamdan verilir (sır yazdırılmaz; `pg` eksik parolayı
+`PGPASSWORD`'den okur, bkz. §8 CI notu) ve koşum sonunda `dropdb --force` ile
+kapatılır. CI'da `api-db` işi aynı `test:db` komutunu çalıştırır; yeni test
+dosyaları include deseniyle kapsam içindedir, ayrı bir iş gerekmez.
 
 ### Giriş hız sınırı (T81)
 
