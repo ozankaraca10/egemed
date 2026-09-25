@@ -15,8 +15,8 @@ Bu kılavuz, platformun tek sunucu dağıtımını (egemed.ege.edu.tr) kurmayı,
   vekile açıktır. İmaj çalışma zamanında tamdır: prod `node_modules` deps
   aşamasından kopyalanır, `ts-register.mjs`/`ts-resolve.mjs` kancası,
   `apps/api/src` + `migrations` ve workspace paket kaynakları
-  (`@egemed/contracts`, `@egemed/gamification-core`) imajdadır; derleme
-  makinesinin node_modules'ına bağımlı değildir. Sunucu Node 22'nin yerleşik
+  (`@egemed/contracts`, `@egemed/gamification-core`, `@egemed/gami-catalogs`)
+  imajdadır; derleme makinesinin node_modules'ına bağımlı değildir. Sunucu Node 22'nin yerleşik
   TypeScript desteğiyle bayraksız başlar (`CMD ["node", "--import",
   "./ts-register.mjs", "src/server.ts"]`); API-01 düzeltmesiyle (T85)
   gamification-core'daki parametre property'si kaldırıldı, strip-only kip
@@ -174,9 +174,10 @@ atlandı" uyarısı basılır.
 
 ### CI koşuları
 
-`.github/workflows/ci.yml` dört iş çalıştırır: `gates` (lint/typecheck/test),
+`.github/workflows/ci.yml` beş iş çalıştırır: `gates` (lint/typecheck/test),
 `e2e` (Playwright mobil), `api-e2e` (bu bölümdeki `pnpm e2e:api`; gerçek API +
-PostgreSQL) ve `api-db` (migration turu + gerçek PostgreSQL testleri). Git-dışı
+PostgreSQL), `api-db` (migration turu + gerçek PostgreSQL testleri) ve
+`prod-image` (temiz checkout imajı; yukarıdaki betik). Git-dışı
 sim varlıkları (Opaca xray, Ausculta ses) CI'da yoktur; bu varlıklara bağlı e2e
 senaryoları CI'da tam doğrulanamaz ve risk olarak izlenir. Yerelde eksik
 varlıkla koşmadan önce §2'deki `sync:xray` / `sync:audio` adımlarını çalıştırın.
