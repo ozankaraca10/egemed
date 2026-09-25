@@ -88,7 +88,7 @@ export function ModeSelectScreen({ embedded = false, gamiEnabled = false }: Mode
               icon={<IconChart />}
               title="Değerlendirme Modu"
               text={assessmentCount ? `${assessmentCount} radyolog etiketli vakalık havuzdan rastgele ${Math.min(SESSION_SIZE, assessmentCount)} vaka.` : 'Değerlendirme havuzu boş: radyolog etiketli veri seti içe aktarılmalı.'}
-              items={['Okuma bölgesi ve uzman katmanı yok', 'Vaka başına süre sınırı', 'SCORM puanı']}
+              items={['Okuma bölgesi ve uzman katmanı yok', 'Vaka başına süre sınırı', embedded ? 'Puan kaydedilir' : 'SCORM puanı']}
               rules="İpucu yok · geri bildirim yalnız sonunda · puan LMS'e yazılır"
               cta={recommendLearn && assessmentCount ? 'Öğrenmeye git' : 'Değerlendirmeye gir'}
               disabled={!assessmentCount}

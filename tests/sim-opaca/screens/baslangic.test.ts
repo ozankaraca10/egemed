@@ -101,6 +101,17 @@ describe("ModeSelectScreen (statik render)", () => {
     expect(html).not.toContain("<footer");
     expect(html).not.toContain('class="app-bg"');
   });
+
+  it("gömülü modda SCORM ifadesi yoktur (ADR-006, T137)", () => {
+    const html = renderInStore(createElement(ModeSelectScreen, { embedded: true }));
+    expect(html).not.toContain("SCORM");
+    expect(html).toContain("Puan kaydedilir");
+  });
+
+  it("gömülü olmayan modda SCORM puanı maddesi görünür", () => {
+    const html = renderInStore(createElement(ModeSelectScreen));
+    expect(html).toContain("SCORM puanı");
+  });
 });
 
 describe("TutorialScreen (statik render)", () => {
