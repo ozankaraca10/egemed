@@ -125,8 +125,14 @@ görünür; sim rotasında ana gezinme ve footer yoktur. Sim kartına gelme/odak
    birleştirme (ADR-006).
 7. 360/768/1440 px'te yatay kaydırma olmadığını doğrula; `pnpm turbo lint typecheck test` kapısını yeşil tut.
 
-**Oyunlaştırma tasarım birliği.** Ortak bileşen paketi `@egemed/gami-ui` (T115) hazırlanıyor: referans tasarım Opaca;
-Pulse ve Ausculta aynı bileşenleri kullanacak; birleşik bardaki oyunlaştırma eyleminin etiketi tek: **İlerlemem**.
+**Oyunlaştırma tasarım birliği.** Ortak bileşen paketi `@egemed/gami-ui` (T115; referans tasarım Opaca) üç simde de
+kullanılır: `views.tsx` (`GamiProgressPage`, `GamiAchievementsView`, `GamiLeaderboardView`), `model.ts`
+(`buildAchievementsModel`, `buildLeaderboardModel`), `icons.tsx` (`defaultGamiIcons`), `styles.css` ve gölge DOM için
+`styles-inline.ts` (`gamiUiStyles`), `server.tsx` (`GamiServerFrame`; sunucu vaatleri `Suspense` sınırının DIŞINDA
+üretilir). Opaca (T115/T119), Ausculta (T119) ve Pulse (T122; gölge DOM'da React kökü) bu paketi kullanır; Pulse sonuç
+ekranındaki kazanım kartı da ortaktır (T125). API oturumunda `SimMountContext.gamification` (T124) ile sunucu
+rozet/XP/seri/liderlik verisi okunur, "Demo verisi" bandı ve demo etiketleri gizlenir. Birleşik bardaki oyunlaştırma
+eyleminin etiketi tek: **İlerlemem**.
 
 ---
 
@@ -242,6 +248,18 @@ uygulanması.
   kodlayıcısıyla çalışır (ADR-008 S2).
 - **Birleşik bar önceliği (T117):** öncelik başlık > eylemler > adımlar > çipler; ≥768 px'te başlık küçülmez, adımlar
   tek satırda kalır, çipler yalnız ≥1600 px'te görünür (§3 "Bar düzeni ve öncelik").
+- **Oyunlaştırma birliği (T115–T125):** ortak `@egemed/gami-ui` paketi (Opaca tasarımı) Opaca, Ausculta ve Pulse'ta
+  canlı (§3 "Oyunlaştırma tasarım birliği"). API oturumunda kabuk `SimMountContext.gamification` (T124) ile sunucu
+  rozet/XP/seri/liderlik verisini simlere verir; "Demo verisi" bandı ve demo etiketleri gizlenir. gami-ui CSS'indeki
+  kapanmamış `@media` blokları ve kilitli rozet metni kontrastı T122'de düzeltildi.
+- **Hesap menüsü (T120):** birleşik barda kompakt hesap menüsü; baş harf düğmesi + klavye erişilebilir açılır menü.
+- **API ve test altyapısı (T123/T124/T126):** sunucu zaman damgaları tam milisaniye taşır (`toIstanbulIso`); giriş hız
+  sınırı `AUTH_LOGIN_RATE_MAX` ile ayarlanabilir (varsayılan 8; CI `api-e2e` işi 200 verir) ve `e2e/auth-api.spec.ts`
+  seri koşar; Playwright portları `E2E_PORT_BASE` ile kaydırılabilir (T123); gerçek PostgreSQL testleri
+  `apps/api/test/db` altında ve `pnpm --filter @egemed/api test:db` ile koşar (T126).
+- **Erişilebilirlik kapıları (T116):** Opaca ve Ausculta iç ekranları `e2e/sims-a11y.spec.ts` ile axe kapısından geçer;
+  devralınan ihlaller `e2e/opaca-a11y-allowlist.json` ve `e2e/ausculta-a11y-allowlist.json` ile izlenir. Pulse kapısı
+  `e2e/pulse-a11y.spec.ts` (+ `e2e/pulse-a11y-allowlist.json`) yukarıdaki PULSE-10 maddesindedir.
 - **Erişilebilirlik (PULSE-10):** Pulse iç ekranları (`e2e/pulse-a11y.spec.ts`) 360/768/1440'ta axe ve 44 px dokunma hedefi
   kapısından geçer; kaynaktan devralınan ihlaller `e2e/pulse-a11y-allowlist.json` ile izlenir ve liste yalnız küçülür.
   Kaynak yeşili WCAG AA için koyulaştırıldı (`--green-600: #15803d`, birleşik bar uyarlaması T102). T113 kaynak kontrast
