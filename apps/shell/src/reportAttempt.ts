@@ -104,6 +104,27 @@ function isOpacaExtra(extra: unknown): extra is OpacaSummaryInput["extra"] {
 
 const isFiniteCount = (value: unknown): value is number => typeof value === "number" && Number.isFinite(value);
 
+/** Sim'in raporladığı birikimli öğrenme sayaçları (S4); eksik/bozuksa kodlanmaz. */
+function opacaLearnOf(extra: unknown): OpacaSummaryInput["learn"] | undefined {
+  if (typeof extra !== "object" || extra === null) return undefined;
+  const learn = (extra as Record<string, unknown>)["learn"];
+  if (typeof learn !== "object" || learn === null) return undefined;
+  const value = learn as Record<string, unknown>;
+  const topicsCount = value["topicsCount"];
+  const stacksCount = value["stacksCount"];
+  const libraryTopicsTotal = value["libraryTopicsTotal"];
+  const libraryTopicsCovered = value["libraryTopicsCovered"];
+  if (
+    !isFiniteCount(topicsCount) ||
+    !isFiniteCount(stacksCount) ||
+    !isFiniteCount(libraryTopicsTotal) ||
+    !isFiniteCount(libraryTopicsCovered)
+  ) {
+    return undefined;
+  }
+  return { topicsCount, stacksCount, libraryTopicsTotal, libraryTopicsCovered };
+}
+
 function isAuscultaStats(extra: unknown): extra is AuscultaStats {
   if (typeof extra !== "object" || extra === null) return false;
   const value = extra as Record<string, unknown>;
@@ -128,9 +149,9 @@ function isAuscultaStats(extra: unknown): extra is AuscultaStats {
 
 /**
  * ADR-008: sunucu rozetleri sime özgü kodlu özetten değerlendirir. Kodlayıcısı
- * olmayan sim yalnız genel özeti gönderir. Opaca özetinde öğrenme sayaçları
- * ve konu kodları sim verisi gerektirdiğinden kodlanmaz; rozetlerin bu bölümü
- * yerel değerlendirmede kalır.
+ * olmayan sim yalnız genel özeti gönderir. Opaca'nın konu ve öğrenme sayaçları
+ * sim verisi gerektirdiğinden sim tarafından raporlanan denemeye eklenir
+ * (`extra.topicCorrect`, `extra.learn`; S4) ve burada koda çevrilir.
  */
 export function simSummaryCodes(
   simId: SimId,
@@ -148,6 +169,7 @@ export function simSummaryCodes(
     attempt.caseCount !== undefined &&
     attempt.hintsUsed !== undefined
   ) {
+    const learn = opacaLearnOf(attempt.extra);
     return encodeOpacaSummary({
       mode: attempt.mode,
       finishedAt: attempt.finishedAt,
@@ -155,6 +177,7 @@ export function simSummaryCodes(
       caseCount: attempt.caseCount,
       hintsUsed: attempt.hintsUsed,
       extra: attempt.extra,
+      ...(learn === undefined ? {} : { learn }),
     });
   }
   if (simId === "ausculta" && isAuscultaStats(attempt.extra)) {

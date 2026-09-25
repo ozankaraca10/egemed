@@ -9,7 +9,7 @@ import { useGamiContext } from "./GamiContext";
 import { daysLeft } from "./leaderboardView";
 import { isLocalRepo, type OpacaGamiRepo } from "./repo";
 import { OPACA_RULES } from "./rules";
-import { computeStats, type OpacaStats } from "./stats";
+import { computeStats, withServerCounters, type OpacaStats } from "./stats";
 import type { OpacaGamiState } from "./storage";
 
 type OpacaBadgeView = BadgeView<OpacaStats, OpacaBadgeContext>;
@@ -64,14 +64,24 @@ export function useOpacaSessionGains(input: {
         const beforeEarned = new Set(beforeState.earned.map((e) => e.id));
         const before = mode === "assessment" ? await rankOf(repo, period, at) : null;
         await repo.recordAttempt(attempt);
+        const report = (reportedAttempt: typeof attempt): void => {
+          try {
+            const reported = reportAttempt?.(reportedAttempt) as void | Promise<void>;
+            if (reported instanceof Promise) void reported.catch(() => undefined);
+          } catch {
+            // Rapor hatası sonuç ekranını bozmaz.
+          }
+        };
+        let afterState: OpacaGamiState;
         try {
-          const reported = reportAttempt?.(attempt) as void | Promise<void>;
-          if (reported instanceof Promise) void reported.catch(() => undefined);
-        } catch {
-          // Rapor hatası sonuç ekranını bozmaz.
+          afterState = await loadRepoState(repo);
+        } catch (error: unknown) {
+          report(attempt);
+          throw error;
         }
-        const afterState = await loadRepoState(repo);
         const stats = computeStats(afterState.attempts, afterState.learn, afterState.earned, at);
+        // ADR-008 S4: konu ve öğrenme rozetleri için sunucuya sim verisinden sayaçlar gider.
+        report(withServerCounters(attempt, stats, isLocalRepo(repo)));
         const views: OpacaBadgeView[] = badgeViews(OPACA_BADGES, stats, afterState.earned, { now: at });
         const fresh = already ? [] : views.filter((v) => v.state === "earned" && !beforeEarned.has(v.def.id));
         const next = views.filter((v) => v.state === "progress").sort((a, b) => b.value / b.max - a.value / a.max)[0] ?? null;

@@ -30,7 +30,7 @@ describe("sime özgü kodlu özet (ADR-008)", () => {
     expect(simSummaryCodes("opaca", { score: 90, extra: {} })).toEqual({});
   });
 
-  it("Opaca denemesi opaca.* kodlarını taşır; sim verisi gerektiren konu/öğrenme kodları yazılmaz", () => {
+  it("Opaca denemesi opaca.* kodlarını taşır; sim konu/öğrenme sayacı eklemediyse o kodlar yazılmaz", () => {
     const codes = simSummaryCodes("opaca", {
       mode: "assessment",
       finishedAt: "2026-09-24T09:00:00.000Z",
@@ -54,6 +54,37 @@ describe("sime özgü kodlu özet (ADR-008)", () => {
     expect(codes["opaca.t.pleura"]).toBeUndefined();
     expect(codes["opaca.learn"]).toBeUndefined();
     expect(simSummaryCodes("opaca", { score: 90, extra: { findings: "yok" } })).toEqual({});
+  });
+
+  it("sim'in eklediği konu ve öğrenme sayaçları kodlanır; bozuk öğrenme sayacı yok sayılır (S4, T140)", () => {
+    const base = {
+      mode: "assessment" as const,
+      finishedAt: "2026-09-24T09:00:00.000Z",
+      score: 90,
+      caseCount: 10,
+      hintsUsed: 0,
+    };
+    const extra = {
+      findings: [{ finding: "pneumothorax", correct: true }],
+      localizationHits: 1,
+      abcdeComplete: 0,
+      qualityCorrect: 0,
+      interpretationCorrect: 0,
+      fastPerfect: false,
+      topicCorrect: { pleura: 2 },
+    };
+    const codes = simSummaryCodes("opaca", {
+      ...base,
+      extra: { ...extra, learn: { topicsCount: 4, stacksCount: 1, libraryTopicsTotal: 30, libraryTopicsCovered: 6 } },
+    });
+    expect(codes["opaca.t.pleura"]).toBe(2);
+    expect(codes["opaca.learn"]).toBe(4);
+    expect(codes["opaca.stacks"]).toBe(1);
+    expect(codes["opaca.lib"]).toBe(30);
+    expect(codes["opaca.cov"]).toBe(6);
+    const broken = simSummaryCodes("opaca", { ...base, extra: { ...extra, learn: { topicsCount: "4" } } });
+    expect(broken["opaca.learn"]).toBeUndefined();
+    expect(broken["opaca.t.pleura"]).toBe(2);
   });
 
   it("Ausculta denemesi birikimli ausculta.* kodlarını taşır; bozuk extra kodsuz kalır", () => {
