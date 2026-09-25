@@ -1,7 +1,7 @@
 import ts from "typescript";
 import { describe, expect, it } from "vitest";
 
-/** Ausculta CSS sözleşmesi — E2 §6 ve §9 S17a–S17c. S17d (responsive) bu dilimde yok. */
+/** Ausculta CSS sözleşmesi — E2 §6 ve §9 S17a–S17d (S17d responsive: T133). */
 
 const tokenCssPath = "packages/tokens/ausculta.css";
 const bridgePath = "packages/sim-ausculta/src/styles/tokens.css";
@@ -59,7 +59,7 @@ const familyTokens = new Set(capture(read("packages/tokens/family-tokens.css"), 
 const auscultaTokens = new Set(capture(auscultaCss, /(--[\w-]+)\s*:/g));
 const localTokens = new Set(capture(bridgeCss, /(--[\w-]+)\s*:/g));
 
-describe("Ausculta CSS kapsam sözleşmesi (S17a–S17c)", () => {
+describe("Ausculta CSS kapsam sözleşmesi (S17a–S17d)", () => {
   it("ausculta.css özel renkleri dışa açar ve hex taşır", () => {
     expect(auscultaCss).toMatch(/:root\s*\{/);
     expect(auscultaCss).toMatch(/--navy-950:\s*#061e44/);
@@ -114,7 +114,13 @@ describe("Ausculta CSS kapsam sözleşmesi (S17a–S17c)", () => {
     expect(components).toMatch(/\.eg-sim-ausculta \.card\s*\{/);
     expect(components).toMatch(/\.eg-sim-ausculta \.badge\s*\{/);
     expect(components).toMatch(/\.eg-sim-ausculta \.eg-footer\s*\{/);
-    expect(base + components).not.toMatch(/@media\b/);
+    // S17d (T133): kaynağın kırılımları taşındı — mobilde tek sütun mod kartları ve simülasyon ızgarası
+    expect(base).not.toMatch(/@media\b/);
+    for (const query of ["(max-width: 1280px)", "(max-width: 1080px)", "(max-width: 720px)", "(max-width: 480px)", "(prefers-reduced-motion: reduce)"]) {
+      expect(components, query).toContain(`@media ${query}`);
+    }
+    expect(components).toMatch(/\.eg-sim-ausculta \.mode-cards \{ grid-template-columns: 1fr;/);
+    expect(components).toMatch(/\.eg-sim-ausculta \.sim-grid, \.eg-sim-ausculta \.sim-grid\.wide-left \{ grid-template-columns: minmax\(0, 1fr\); \}/);
     const entry = read("packages/sim-ausculta/src/index.ts");
     expect(entry).toContain('import "@egemed/tokens/family-tokens.css"');
     expect(entry).toContain('import "@egemed/tokens/ausculta.css"');

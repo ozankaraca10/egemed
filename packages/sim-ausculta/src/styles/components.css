@@ -616,3 +616,188 @@
 .eg-sim-ausculta .eg-footer { justify-content: center; }
 .eg-sim-ausculta .footer-left { flex: 0 1 auto; justify-content: center; }
 .eg-sim-ausculta .footer-text { flex: 0 1 auto; }
+
+/*
+ * Responsive (E2 §9 S17d, T133) — kaynak egemed-ausculta/src/styles.css içindeki @media blokları,
+ * kaynak sırasıyla, .eg-sim-ausculta kapsamına alınarak taşındı (Opaca portundaki desenle aynı).
+ * Kaynakta olup portta karşılığı olmayan seçiciler (body, .brand-slogan*, .chip-text, .lbl-full,
+ * .results-grid, .start-links-sep) alınmadı. Değerleri elle değiştirmeyin; kaynağa göre güncelleyin.
+ */
+@media (max-width: 720px) {
+  .eg-sim-ausculta .brand-card { flex-direction: column; text-align: center; }
+  .eg-sim-ausculta .brand-card img { width: 220px; }
+}
+@media (max-width: 720px) {
+  .eg-sim-ausculta .why-grid { grid-template-columns: 1fr; }
+}
+@media (max-width: 1024px) {
+  .eg-sim-ausculta .hero-inst-top img { width: 72px; height: 72px; }
+}
+@media (max-width: 1024px) {
+  .eg-sim-ausculta .hero-logo { width: min(480px, 82vw); }
+}
+@media (max-width: 480px) {
+  .eg-sim-ausculta .hero-logo { width: min(380px, 86vw); }
+}
+@media (max-width: 1280px) {
+  .eg-sim-ausculta .footer-right { display: none; }
+}
+@media (max-width: 860px) {
+  .eg-sim-ausculta .footer-sub, .eg-sim-ausculta .footer-attr2 { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .eg-sim-ausculta .tut-highlight::after { animation: none; box-shadow: 0 0 0 3px rgba(46,141,247,.4); }
+}
+@media (max-width: 720px) {
+  .eg-sim-ausculta .footer-copy { display: none; }
+  .eg-sim-ausculta .domain-row { grid-template-columns: 1fr auto; grid-template-areas: "lbl pct" "bar bar"; row-gap: 4px; }
+  .eg-sim-ausculta .domain-row .dr-ic { display: none; }
+  .eg-sim-ausculta .domain-row .dr-lbl { grid-area: lbl; }
+  .eg-sim-ausculta .domain-row .dr-pct { grid-area: pct; }
+  .eg-sim-ausculta .domain-row .domain-bar { grid-area: bar; }
+}
+@media (max-height: 860px) {
+  .eg-sim-ausculta { --head-h: 56px; --foot-h: 44px; }
+  .eg-sim-ausculta .mode-card { padding: var(--sp-4) var(--sp-4) 14px; }
+  .eg-sim-ausculta .learn-grid { grid-template-columns: 20fr 45fr 35fr; }
+}
+@media (max-width: 1280px) {
+  .eg-sim-ausculta .learn-grid { grid-template-columns: 25fr 40fr 35fr; gap: 12px; }
+}
+@media (max-width: 1080px) {
+  .eg-sim-ausculta .app-shell { height: auto; min-height: 100dvh; overflow: visible; }
+  .eg-sim-ausculta .screen-body.no-scroll { overflow: visible; }
+  .eg-sim-ausculta .eg-header { position: sticky; top: 0; flex-wrap: wrap; height: auto; min-height: var(--head-h); row-gap: 4px; }
+  .eg-sim-ausculta .eg-dev-badge { display: none; }
+  .eg-sim-ausculta .sim-grid, .eg-sim-ausculta .sim-grid.wide-left { grid-template-columns: 1fr; }
+  .eg-sim-ausculta .sim-side { overflow: visible; }
+  .eg-sim-ausculta .stage { min-height: min(58vh, 520px); }
+  .eg-sim-ausculta .toolbar { flex-wrap: wrap; }
+  .eg-sim-ausculta .learn-grid { display: block; }
+  .eg-sim-ausculta .learn-grid > * + * { margin-top: 14px; }
+  .eg-sim-ausculta .lib-col { overflow: visible; }
+  .eg-sim-ausculta .lib-group .lib-items { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+  .eg-sim-ausculta .lib-col { overflow: visible; }
+  .eg-sim-ausculta .lib-item b, .eg-sim-ausculta .lib-item .lib-main > span { white-space: normal; }
+  .eg-sim-ausculta .sim-grid .toolbar { position: sticky; bottom: 8px; z-index: 12; }
+  .eg-sim-ausculta .tutorial-wrap { grid-template-columns: 1fr; min-height: auto; }
+  .eg-sim-ausculta .tutorial-wrap .tut-stage-col { order: 1; }
+  .eg-sim-ausculta .tutorial-wrap .stage-card.tut-stage-col { height: auto; }
+  .eg-sim-ausculta .tutorial-wrap .stage-card.tut-stage-col .stage { flex: 0 0 min(46dvh, 360px); min-height: 220px; }
+  .eg-sim-ausculta .tutorial-wrap .tut-text-col { order: 2; }
+  .eg-sim-ausculta .stepper { max-width: 100%; }
+  .eg-sim-ausculta .step { width: auto; flex: 1; min-width: 0; padding: 0 2px; }
+  .eg-sim-ausculta .step .lbl { font-size: var(--fs-xs); text-align: center; }
+}
+@media (max-width: 720px) {
+  .eg-sim-ausculta .container { padding: 0 14px; }
+  .eg-sim-ausculta .hide-mobile { display: none; }
+  .eg-sim-ausculta .eg-header { padding: 6px 10px; gap: 6px; flex-wrap: wrap; height: auto; min-height: var(--head-h); row-gap: 2px; }
+  .eg-sim-ausculta .eg-header .spacer { flex: 1 0 24px; }
+  .eg-sim-ausculta .brand-top { display: none; }
+  .eg-sim-ausculta .brand-name { font-size: var(--fs-lg); }
+  .eg-sim-ausculta .eg-header .divider-v { display: none; }
+  .eg-sim-ausculta .eg-header-chip { padding: 6px 7px; }
+  .eg-sim-ausculta .eg-mode-chip { padding: 6px 10px; font-size: var(--fs-xs); }
+  .eg-sim-ausculta .eg-timer { font-size: var(--fs-xs); gap: 4px; }
+  .eg-sim-ausculta .eg-header-context { gap: 6px; }
+  .eg-sim-ausculta .mode-cards { grid-template-columns: 1fr; max-width: 420px; }
+  .eg-sim-ausculta .btn.large { padding: var(--sp-3) var(--sp-5); font-size: var(--fs-lg); width: 100%; }
+  .eg-sim-ausculta .stage { min-height: 48vh; }
+  .eg-sim-ausculta .toolbar { gap: 8px; padding: 8px 10px; }
+  .eg-sim-ausculta .vol-group input[type='range'] { width: 84px; }
+  .eg-sim-ausculta .exp-cards { grid-template-columns: 1fr; }
+  .eg-sim-ausculta .tut-step .ic { display: none; }
+  .eg-sim-ausculta .q-text { font-size: var(--fs-lg); }
+  .eg-sim-ausculta .container { padding: 0 12px; }
+  .eg-sim-ausculta .card { padding: var(--sp-3) 14px; }
+  .eg-sim-ausculta .view-toggle button { padding: 7px 11px; font-size: var(--fs-sm); }
+  .eg-sim-ausculta .head-toggle button { padding: 7px 12px; font-size: var(--fs-sm); }
+  .eg-sim-ausculta .btn { padding: 11px var(--sp-4); font-size: var(--fs-md); }
+  .eg-sim-ausculta .btn.small { padding: 8px 12px; }
+  .eg-sim-ausculta .tool-sep { display: none; }
+  .eg-sim-ausculta .lib-item { min-width: 200px; }
+  .eg-sim-ausculta .mode-title { font-size: var(--fs-2xl); }
+  .eg-sim-ausculta .step .dot { width: 22px; height: 22px; font-size: var(--fs-xs); }
+  .eg-sim-ausculta .step .lbl { font-size: var(--fs-xs); }
+  .eg-sim-ausculta .results-title { font-size: var(--fs-2xl); }
+  .eg-sim-ausculta .lib-col { flex-direction: row; overflow-x: auto; overflow-y: hidden; min-height: 0; gap: var(--sp-3); padding: var(--sp-2) var(--sp-1) var(--sp-3); position: sticky; top: var(--head-h); z-index: 6; background: var(--card-soft); border-bottom: 1px solid var(--border); scroll-snap-type: x proximity; -webkit-overflow-scrolling: touch; }
+  .eg-sim-ausculta .lib-col h2, .eg-sim-ausculta .lib-col .lib-sub { display: none; }
+  .eg-sim-ausculta .lib-group { display: flex; flex-direction: row; align-items: center; gap: var(--sp-2); margin-bottom: 0; flex-shrink: 0; }
+  .eg-sim-ausculta .lib-group .g-title { position: static; flex-shrink: 0; white-space: nowrap; margin: 0; background: var(--blue-50); border-radius: var(--r-pill); padding: 5px var(--sp-2); backdrop-filter: none; }
+  .eg-sim-ausculta .lib-group .g-title svg { display: none; }
+  .eg-sim-ausculta .lib-group .lib-items { display: flex; flex-direction: row; gap: var(--sp-2); }
+  .eg-sim-ausculta .lib-item { width: 158px; min-width: 158px; flex-shrink: 0; min-height: 44px; scroll-snap-align: center; }
+  .eg-sim-ausculta .lib-item .chev { display: none; }
+  .eg-sim-ausculta .sim-grid .sim-main, .eg-sim-ausculta .sim-grid .sim-side { display: contents; }
+  .eg-sim-ausculta .sim-grid { row-gap: var(--sp-3); }
+  .eg-sim-ausculta .sim-grid, .eg-sim-ausculta .sim-grid.wide-left { grid-template-columns: minmax(0, 1fr); }
+  .eg-sim-ausculta .sim-grid .sim-main > *, .eg-sim-ausculta .sim-grid .sim-side > * { min-width: 0; max-width: 100%; }
+  .eg-sim-ausculta .sim-grid .toolbar { flex-wrap: wrap; }
+  .eg-sim-ausculta .sim-grid .strict-banner { order: 1; padding: 6px 13px; font-size: var(--fs-xs); flex-wrap: nowrap; overflow: hidden; }
+  .eg-sim-ausculta .strict-banner-detail { display: none; }
+  .eg-sim-ausculta .sim-grid .sim-side > .card:first-child { order: 2; }
+  .eg-sim-ausculta .case-history-full { display: none; }
+  .eg-sim-ausculta .kv-grid { display: flex; flex-direction: row; overflow-x: auto; gap: var(--sp-2); scroll-snap-type: x proximity; -webkit-overflow-scrolling: touch; padding-bottom: 2px; }
+  .eg-sim-ausculta .kv { flex-shrink: 0; min-width: 84px; scroll-snap-align: start; }
+  .eg-sim-ausculta .sim-grid .sim-main > .stage-card { order: 3; min-height: min(55dvh, 420px); }
+  .eg-sim-ausculta .sim-grid .sim-main > .hint-box, .eg-sim-ausculta .sim-grid .sim-main > .toolbar { order: 4; }
+  .eg-sim-ausculta .sim-grid .toolbar { bottom: calc(var(--sp-2) + env(safe-area-inset-bottom, 0px)); }
+  .eg-sim-ausculta .jump-to-q { display: inline-flex; }
+  .eg-sim-ausculta .sim-grid .sim-side .q-card-dark { order: 5; }
+  .eg-sim-ausculta .sim-grid .sim-side > .note-strip { order: 6; }
+  .eg-sim-ausculta .region-list button, .eg-sim-ausculta .head-toggle button, .eg-sim-ausculta .view-toggle button, .eg-sim-ausculta .body-toggle button, .eg-sim-ausculta .toolbar .btn.small, .eg-sim-ausculta .opt, .eg-sim-ausculta .lib-item { min-height: 44px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .eg-sim-ausculta *, .eg-sim-ausculta *::before, .eg-sim-ausculta *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
+  .eg-sim-ausculta .eq i { animation: none !important; height: 3px !important; }
+}
+@media (max-width: 480px) {
+  .eg-sim-ausculta .eg-header { gap: 6px; padding-left: 10px; padding-right: 10px; flex-wrap: nowrap; }
+  .eg-sim-ausculta .eg-header .brand-top { display: none; }
+  .eg-sim-ausculta .eg-header .eg-mode-chip { padding: 4px 8px; font-size: var(--fs-xs); white-space: nowrap; }
+  .eg-sim-ausculta .eg-header .eg-mode-chip .lbl-short { display: inline; }
+  .eg-sim-ausculta .eg-header .eg-brand { min-width: 0; }
+  .eg-sim-ausculta .eg-header .brand-name { font-size: var(--fs-md); }
+  .eg-sim-ausculta .eg-header .eg-mode-chip { margin-left: 6px; }
+  .eg-sim-ausculta .eg-header .eg-header-chip { padding: 6px; }
+  .eg-sim-ausculta .eg-header .eg-timer { font-size: var(--fs-xs); }
+}
+@media (max-width: 1500px) {
+  .eg-sim-ausculta .footer-attr2 { display: none; }
+}
+@media (max-width: 1100px) {
+  .eg-sim-ausculta .footer-inst { display: none; }
+}
+@media (max-width: 720px) {
+  .eg-sim-ausculta .footer-sub { display: none; }
+}
+@media (max-width: 1024px) {
+  .eg-sim-ausculta .credit-groups { grid-template-columns: 1fr; }
+}
+@media (max-width: 720px) {
+  .eg-sim-ausculta .inst-card { flex-direction: column; text-align: center; }
+}
+@media (max-height: 820px) and (min-width: 721px) {
+  .eg-sim-ausculta .hero-logo { width: min(220px, 30vw); }
+  .eg-sim-ausculta .hero-inst-top { margin-bottom: 2px; }
+  .eg-sim-ausculta .hero-inst-top img { width: 44px; height: 44px; }
+  .eg-sim-ausculta .hero-inst-top span { font-size: var(--fs-xs); }
+  .eg-sim-ausculta .start-hero { padding-top: 6px; padding-bottom: 6px; gap: 0; }
+  .eg-sim-ausculta .hero-title { font-size: clamp(22px, 2.4vw, 30px); margin: 4px 0 4px; }
+  .eg-sim-ausculta .hero-sub { margin: 0 0 8px; }
+  .eg-sim-ausculta .hero-links { margin: 4px 0 8px; }
+  .eg-sim-ausculta .why-grid { margin-top: 4px; }
+  .eg-sim-ausculta .why-grid > * { padding-top: 6px; padding-bottom: 6px; }
+  .eg-sim-ausculta .hero-audio-hint { margin-top: 4px; }
+}
+@media (max-width: 1500px) {
+  .eg-sim-ausculta .eg-footer .footer-attr2 { display: none; }
+}
+
+/* T133: kaynakta .kv-grid mobilde yatay kaydırılan şeritti; kaydırma alanı klavyeyle
+   odaklanamadığı için (axe scrollable-region-focusable) satıra sarar — tüm bulgular görünür kalır. */
+@media (max-width: 720px) {
+  .eg-sim-ausculta .kv-grid { flex-wrap: wrap; overflow-x: visible; }
+  .eg-sim-ausculta .kv { flex: 1 1 84px; }
+}

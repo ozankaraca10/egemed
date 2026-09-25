@@ -559,9 +559,8 @@ const AUSCULTA_SCREENS: readonly Screen[] = [
     route: "#/sims/ausculta/ogrenme",
     async open(root) {
       await root.locator(".mode-card.learn button.btn").first().click();
-      await expect(
-        root.getByRole("heading", { name: /^(Kalp Sesleri|Akciğer Sesleri|Kombine Sesler)$/ }).first(),
-      ).toBeVisible();
+      // Kütüphane başlığı (h2) kaynağın mobil düzeninde gizlidir (T133) — görünür ilk kayıt yeterli.
+      await expect(root.locator(".lib-col .lib-item").first()).toBeVisible();
     },
   },
   {
