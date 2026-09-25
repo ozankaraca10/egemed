@@ -198,6 +198,27 @@ describe("createApiUsersSource", () => {
     expect(mock.calls[0]?.url).toContain("pageSize=10");
   });
 
+  it("GET ve PATCH /me/preferences liderlik görünürlüğünü taşır ve CSRF ekler", async () => {
+    const mock = createFetchMock([
+      { status: 200, json: { data: { leaderboardVisible: true } } },
+      { status: 200, json: { data: { leaderboardVisible: false } } },
+    ]);
+    const client = createApiClient({
+      baseUrl: "https://api.example.invalid",
+      fetch: mock.fetch,
+      readCsrfToken: () => "csrf-token-1",
+    });
+    await expect(client.preferences.getPreferences()).resolves.toEqual({ data: { leaderboardVisible: true } });
+    await expect(client.preferences.setPreferences({ leaderboardVisible: false })).resolves.toEqual({
+      data: { leaderboardVisible: false },
+    });
+    expect(mock.calls[0]?.url).toBe("https://api.example.invalid/me/preferences");
+    expect(mock.calls[0]?.init.method).toBe("GET");
+    expect(mock.calls[1]?.init.method).toBe("PATCH");
+    expect(mock.calls[1]?.init.headers).toMatchObject({ "X-CSRF-Token": "csrf-token-1" });
+    expect(mock.calls[1]?.init.body).toBe(JSON.stringify({ leaderboardVisible: false }));
+  });
+
   it("get() için 404 not_found durumunu null döndürür", async () => {
     const mock = createFetchMock([{ status: 404, json: { error: { code: "not_found" } } }]);
     const client = createApiClient({

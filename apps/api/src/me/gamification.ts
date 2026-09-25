@@ -10,6 +10,7 @@ import {
   type GamiPeriod,
   type SimId,
 } from "@egemed/contracts";
+import { SIM_BADGE_EVALUATORS } from "@egemed/gami-catalogs";
 import { DEFAULT_RULES, assessmentXp, practiceXp, type Period } from "@egemed/gamification-core";
 import {
   buildLeaderboardRows,
@@ -45,7 +46,8 @@ import { toIstanbulIso } from "../admin/users";
 
 /** Haftalık XP hedefi; oyunlaştırma kuralları `gamification-core` kararıdır. */
 export const WEEKLY_XP_TARGET = 300;
-const BADGE_LIMIT = 10;
+/** Özet yanıtındaki rozet sayısı; katalog boyutunun üstünde tutulur (ADR-008: tam liste). */
+const BADGE_LIMIT = 100;
 const ATTEMPT_LIMIT = 20;
 
 /** Türkiye sabit ofseti: 2016'dan beri UTC+3 (DST yok). */
@@ -390,7 +392,10 @@ export function createPgGamificationRepo(db: GamiDb): GamificationRepo {
           ],
         );
         const row = inserted.rows[0] as GamiAttemptRow | undefined;
-        if (row !== undefined) return { kind: "created", attempt: toAttemptRecord(row) };
+        if (row !== undefined) {
+          await awardPgBadges(db, input);
+          return { kind: "created", attempt: toAttemptRecord(row) };
+        }
       } catch (error) {
         if (isCheckViolation(error)) return { kind: "invalid" };
         if (!isUniqueViolation(error)) throw error;
@@ -437,6 +442,32 @@ export function createPgGamificationRepo(db: GamiDb): GamificationRepo {
       return { leaderboardVisible: row?.leaderboard_visible !== false };
     },
   };
+}
+
+/**
+ * ADR-008: yeni denemeden sonra kullanıcı×sim özetlerinden rozetler sunucuda
+ * değerlendirilir. Yazım idempotenttir (`on conflict do nothing`); hata deneme
+ * kaydını bozmaz, sonraki denemede eksik rozet tamamlanır.
+ */
+async function awardPgBadges(db: GamiDb, input: GamiAttemptInput): Promise<void> {
+  const evaluator = SIM_BADGE_EVALUATORS[input.simId];
+  if (evaluator === undefined) return;
+  try {
+    const [summaryRows, badgeRows] = await Promise.all([
+      db.query("select summary from gami_attempts where user_id = $1 and sim_id = $2 order by finished_at asc", [input.userId, input.simId]),
+      db.query("select badge_key from gami_badges where user_id = $1 and sim_id = $2", [input.userId, input.simId]),
+    ]);
+    const summaries = summaryRows.rows.map((row) => (row as { readonly summary: Readonly<Record<string, number>> }).summary);
+    const earned = badgeRows.rows.map((row) => (row as { readonly badge_key: string }).badge_key);
+    const awarded = evaluator.newlyEarned(summaries, earned, new Date(input.createdAt));
+    if (awarded.length === 0) return;
+    await db.query(
+      "insert into gami_badges (user_id, sim_id, badge_key, awarded_at) select $1, $2, key, $4 from unnest($3::text[]) as key on conflict (user_id, sim_id, badge_key) do nothing",
+      [input.userId, input.simId, awarded, new Date(input.createdAt)],
+    );
+  } catch {
+    // Rozet yazımı deneme kaydını geri almaz; bir sonraki denemede yeniden değerlendirilir.
+  }
 }
 
 interface PgLeaderboardSourceRow {
@@ -791,6 +822,17 @@ export function createMemoryGamificationRepo(
       profile.streak = nextStreak(profile.streak, trDate(input.finishedAt));
       profile.updatedAt = input.createdAt;
       profiles.set(key, profile);
+      // ADR-008: rozetler PG yoluyla aynı kuralla özetlerden değerlendirilir.
+      const evaluator = SIM_BADGE_EVALUATORS[input.simId];
+      if (evaluator !== undefined) {
+        const own = [...attempts.values()]
+          .filter((candidate) => candidate.userId === input.userId && candidate.simId === input.simId)
+          .sort((a, b) => a.finishedAt - b.finishedAt);
+        const earned = badges.filter((badge) => badge.userId === input.userId && badge.simId === input.simId).map((badge) => badge.key);
+        for (const badgeKey of evaluator.newlyEarned(own.map((candidate) => candidate.summary), earned, new Date(input.createdAt))) {
+          badges.push({ userId: input.userId, simId: input.simId, key: badgeKey, awardedAt: input.createdAt });
+        }
+      }
       return { kind: "created", attempt };
     },
 

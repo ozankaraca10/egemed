@@ -1,4 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
+import { curriculum } from "../packages/sim-pulse/src/data/curriculum";
 import { captureRouteScreenshot } from "./artifacts";
 import { trackErrors } from "./helpers";
 
@@ -146,6 +147,131 @@ test.describe("API oturumu (dev sağlayıcı)", () => {
     expect(JSON.stringify(payload)).not.toContain("1450");
     await expect(page.getByRole("heading", { name: "İlerlemem" })).toBeVisible();
     await expect(page.getByText("1450", { exact: true })).toHaveCount(0);
+    await expect(page.locator(".eg-shell-progress__num").first()).toHaveText(String(pulseXp));
+  });
+
+  test("öğrenci liderlik anahtarını kapatır ve yenilemede kapalı kalır", async ({ page }) => {
+    await page.goto(STUDENT_ENTRY);
+    await signIn(page, "ogrenci");
+    await expect(page).toHaveURL(/#\/$/);
+    const toggle = page.getByRole("switch", { name: "Liderlik tablosunda görün" });
+    await expect(toggle).toBeVisible();
+    const saved = page.waitForResponse(
+      (response) =>
+        response.url().includes("/me/preferences") && response.request().method() === "PATCH" && response.ok(),
+    );
+    await toggle.uncheck();
+    await saved;
+    await page.reload();
+    await expect(page.getByRole("switch", { name: "Liderlik tablosunda görün" })).not.toBeChecked();
+    const restored = page.waitForResponse(
+      (response) =>
+        response.url().includes("/me/preferences") && response.request().method() === "PATCH" && response.ok(),
+    );
+    await page.getByRole("switch", { name: "Liderlik tablosunda görün" }).check();
+    await restored;
+  });
+
+  test("admin pulse erişimini kaldırınca öğrenci simi açamaz", async ({ page, browser, baseURL }) => {
+    await page.goto(STUDENT_ENTRY);
+    await signIn(page, "ogrenci");
+    await expect(page).toHaveURL(/#\/$/);
+    const studentId = await page.evaluate(async () => {
+      const response = await fetch("/api/auth/me", { credentials: "include" });
+      const body = (await response.json()) as { data?: { id?: string } };
+      return body.data?.id ?? "";
+    });
+    expect(studentId).not.toBe("");
+
+    const adminContext = await browser.newContext({ baseURL });
+    const adminPage = await adminContext.newPage();
+    try {
+      await adminPage.goto(ADMIN_ENTRY);
+      await signIn(adminPage, "admin");
+      await expect(adminPage).toHaveURL(/#\/admin$/);
+      const revoked = await adminPage.evaluate(async (userId) => {
+        const csrf = document.cookie
+          .split(";")
+          .map((part) => part.trim())
+          .find((part) => part.startsWith("egemed_csrf="))
+          ?.slice("egemed_csrf=".length);
+        const response = await fetch("/api/admin/users/bulk", {
+          body: JSON.stringify({ operation: "revoke_sim", userIds: [userId], value: "pulse" }),
+          credentials: "include",
+          headers: {
+            "content-type": "application/json",
+            ...(csrf === undefined ? {} : { "X-CSRF-Token": decodeURIComponent(csrf) }),
+          },
+          method: "POST",
+        });
+        return response.ok;
+      }, studentId);
+      expect(revoked).toBe(true);
+      await page.reload();
+      await page.goto("/#/sims/pulse");
+      await expect(page.getByText("Bu simülatöre erişiminiz yok")).toBeVisible();
+      await expect(page.locator(".egemed-pulse-runtime")).toHaveCount(0);
+    } finally {
+      await adminPage.evaluate(async (userId) => {
+        const csrf = document.cookie
+          .split(";")
+          .map((part) => part.trim())
+          .find((part) => part.startsWith("egemed_csrf="))
+          ?.slice("egemed_csrf=".length);
+        await fetch("/api/admin/users/bulk", {
+          body: JSON.stringify({ operation: "grant_sim", userIds: [userId], value: "pulse" }),
+          credentials: "include",
+          headers: {
+            "content-type": "application/json",
+            ...(csrf === undefined ? {} : { "X-CSRF-Token": decodeURIComponent(csrf) }),
+          },
+          method: "POST",
+        });
+      }, studentId).catch(() => undefined);
+      await adminContext.close();
+    }
+  });
+
+  test("Pulse sınavı API oturumunda sunucuya yazılır ve dashboard XP eşleşir", async ({ page }) => {
+    await page.goto(STUDENT_ENTRY);
+    await signIn(page, "ogrenci");
+    await expect(page).toHaveURL(/#\/$/);
+    const posted = page.waitForResponse(
+      (response) =>
+        response.url().includes("/me/gamification/pulse/attempts") &&
+        response.request().method() === "POST" &&
+        (response.status() === 200 || response.status() === 201),
+    );
+    await page.goto("/#/sims/pulse");
+    const root = page.locator(".egemed-pulse-runtime");
+    await expect(root.locator("#appRoot")).toBeVisible();
+    if (await root.locator("#tutorialSkip").isVisible().catch(() => false)) await root.locator("#tutorialSkip").click();
+    await root.locator('#modeCards [data-view="quiz"]').click();
+    for (let i = 0; i < 10; i += 1) {
+      const id = /Q\d{3}/.exec(await root.locator("#quizForm").innerText())?.[0];
+      expect(id, `soru ${i + 1} kimliği`).toBeDefined();
+      const item = curriculum.byId[id ?? ""];
+      expect(item, id).toBeDefined();
+      await root.locator(`#quizForm input[value="${item?.correct ?? ""}"]`).check();
+      await root.locator("#quizSubmit").click();
+      if (i < 9) await root.locator("#quizItemNext").click();
+    }
+    await posted;
+    const summary = page.waitForResponse(
+      (response) => response.url().includes("/me/gamification") && !response.url().includes("/attempts") && response.request().method() === "GET" && response.ok(),
+    );
+    await page.goto("/#/");
+    const payload = (await (await summary).json()) as {
+      data?: { sims?: readonly { simId?: string; xp?: number; badges?: readonly { key?: string }[] }[] };
+    };
+    const pulse = payload.data?.sims?.find((sim) => sim.simId === "pulse");
+    const pulseXp = pulse?.xp ?? 0;
+    expect(pulseXp).toBeGreaterThan(0);
+    // ADR-008: 10/10 sınav → 10'luk ritim serisi; rozetler sunucuda kodlu özetten verilir.
+    const badgeKeys = (pulse?.badges ?? []).map((badge) => badge.key);
+    expect(badgeKeys).toContain("rhythm-streak-3");
+    expect(badgeKeys).toContain("rhythm-streak-10");
+    await expect(page.getByRole("heading", { name: "İlerlemem" })).toBeVisible();
     await expect(page.locator(".eg-shell-progress__num").first()).toHaveText(String(pulseXp));
   });
 });

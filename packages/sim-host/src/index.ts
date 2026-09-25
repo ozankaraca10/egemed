@@ -2,6 +2,10 @@ export {
   createSimHost,
   isSimulatorId,
   SIMULATOR_IDS,
+  type SimChrome,
+  type SimChromeAction,
+  type SimChromeChip,
+  type SimChromeIcon,
   type SimDispose,
   type SimHost,
   type SimHostEvents,
@@ -9,6 +13,7 @@ export {
   type SimModule,
   type SimModuleLoader,
   type SimMountContext,
+  type SimMountOptions,
   type SimMountTarget,
   type SimulatorId,
 } from "./SimHost";

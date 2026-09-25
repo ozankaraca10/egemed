@@ -14,6 +14,7 @@ export interface GamiContextValue {
   readonly syncError: GamiSyncError | null;
   readonly reportSyncError: (error: unknown, kind?: "read" | "write") => void;
   readonly clearSyncError: () => void;
+  readonly reportAttempt?: (attempt: OpacaAttemptRecord) => void;
 }
 
 const GamiContext = createContext<GamiContextValue | null>(null);
@@ -21,10 +22,12 @@ const GamiContext = createContext<GamiContextValue | null>(null);
 export function GamiProvider({
   repository = null,
   now,
+  reportAttempt,
   children,
 }: {
   readonly repository?: GamiRepository<OpacaAttemptRecord> | null;
   readonly now: () => number;
+  readonly reportAttempt?: (attempt: OpacaAttemptRecord) => void;
   readonly children: ReactNode;
 }): JSX.Element {
   const [syncError, setSyncError] = useState<GamiSyncError | null>(null);
@@ -37,15 +40,15 @@ export function GamiProvider({
     setSyncError(null);
   }, []);
 
-  const value = useMemo(
-    () => ({
+  const value = useMemo((): GamiContextValue => {
+    const base = {
       repository: repository ?? null,
       syncError,
       reportSyncError,
       clearSyncError,
-    }),
-    [repository, syncError, reportSyncError, clearSyncError],
-  );
+    };
+    return reportAttempt === undefined ? base : { ...base, reportAttempt };
+  }, [clearSyncError, reportAttempt, reportSyncError, repository, syncError]);
 
   return <GamiContext.Provider value={value}>{children}</GamiContext.Provider>;
 }

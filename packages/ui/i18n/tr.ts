@@ -57,6 +57,11 @@ export const tr = {
   "shell.session.student": "Sahte test öğrencisi",
   "shell.session.logout": "Çıkış yap",
   "shell.session.banner": "Geliştirme oturumu: gerçek kimlik doğrulama yok, veri kaydedilmez.",
+  "shell.session.devChip": "Geliştirme oturumu",
+  "shell.sim.crumbs": "Konum",
+  "shell.sim.steps": "Adımlar",
+  "shell.sim.actions": "Simülatör eylemleri",
+  "shell.sim.back": "Simülatörlere dön",
   "admin.title": "Yönetici paneli",
   "admin.intro":
     "Kullanıcıları, simülatör erişimini ve denetim kayıtlarını buradan yöneteceksiniz. Bölümler kullanıcı yönetimi altyapısıyla birlikte açılacak.",
@@ -403,6 +408,10 @@ export const tr = {
   "home.progress.error.title": "İlerleme yüklenemedi",
   "home.progress.error.body": "internal_error — ilerlemeniz getirilemedi.",
   "home.progress.error.retry": "Yeniden dene",
+  "home.progress.leaderboardVisible": "Liderlik tablosunda görün",
+  "home.progress.leaderboardVisible.hint":
+    "Kapalıyken diğer öğrencilerin listelerinde görünmezsiniz; kendi sıranızı görmeye devam edersiniz.",
+  "home.progress.leaderboardVisible.error": "Tercih kaydedilemedi.",
   "home.trust.title": "Neden güvenilir?",
   "home.trust.data.title": "Açık ve atıflı veri",
   "home.trust.data.body":
@@ -423,6 +432,8 @@ export const tr = {
   "sims.opaca.tagline": "Radyolojik Görüntüleme Simülatörü",
   "sims.opaca.body": "Akciğer grafisi ve toraks BT'yi sistematik okumayı öğrenin.",
   "sims.open": "Simülatörü aç",
+  "sims.access.none": "Erişim yok",
+  "sims.access.denied": "Bu simülatöre erişiminiz yok",
   "sims.loading": "Simülatör yükleniyor…",
   "sims.error.title": "Simülatör açılamadı",
   "sims.error.body":

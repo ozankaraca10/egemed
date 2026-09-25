@@ -15,12 +15,19 @@ import {
 } from "./home/gamificationSource";
 import type { ShellSession } from "./session";
 
+export interface LeaderboardPreferencesSource {
+  getVisible(): Promise<boolean>;
+  setVisible(visible: boolean): Promise<boolean>;
+}
+
 export interface ShellDataSources {
   readonly users: UsersDataSource;
   readonly imports: ImportsDataSource;
   readonly audit: AuditDataSource;
   /** API oturumunda `session === null` iken boş döner; `1450` XP üretmez. */
   gamification(session: ShellSession | null): GamificationSource;
+  /** Sahte oturumda `null`; API oturumunda liderlik görünürlüğü. */
+  leaderboardPreferences(session: ShellSession | null): LeaderboardPreferencesSource | null;
 }
 
 const ShellDataSourcesContext = createContext<ShellDataSources | null>(null);
@@ -62,6 +69,9 @@ export function createMockShellDataSources(): ShellDataSources {
     audit,
     gamification(session) {
       return createSyntheticGamificationSource(session !== null);
+    },
+    leaderboardPreferences() {
+      return null;
     },
     imports,
     users,

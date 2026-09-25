@@ -50,7 +50,7 @@ export function GamiGains({ repo, mode, results, caseById, seed, durationMs, fin
   repo: OpacaGamiRepo; mode: GamiMode; results: CaseResult[]; caseById: (id: string) => CaseDef | undefined
   seed: number; durationMs: number; finishedAt: Date; onAchievements: () => void; onLeaderboard: () => void
 }) {
-  const { reportSyncError } = useGamiContext()
+  const { reportAttempt, reportSyncError } = useGamiContext()
   const [gains, setGains] = useState<Gains | null>(null)
   useEffect(() => {
     let alive = true
@@ -65,6 +65,12 @@ export function GamiGains({ repo, mode, results, caseById, seed, durationMs, fin
         const beforeEarned = new Set(beforeState.earned.map((e) => e.id))
         const before = mode === 'assessment' ? await rankOf(repo, period, at) : null
         await repo.recordAttempt(attempt)
+        try {
+          const reported = reportAttempt?.(attempt) as void | Promise<void>
+          if (reported instanceof Promise) void reported.catch(() => undefined)
+        } catch {
+          // Rapor hatası sonuç ekranını bozmaz.
+        }
         const afterState = await loadRepoState(repo)
         const stats = computeStats(afterState.attempts, afterState.learn, afterState.earned, at)
         const views = badgeViews(OPACA_BADGES, stats, afterState.earned, { now: at })
@@ -88,7 +94,7 @@ export function GamiGains({ repo, mode, results, caseById, seed, durationMs, fin
       }
     })()
     return () => { alive = false }
-  }, [caseById, durationMs, finishedAt, mode, repo, reportSyncError, results, seed])
+  }, [caseById, durationMs, finishedAt, mode, repo, reportAttempt, reportSyncError, results, seed])
 
   if (!gains) return null
   const span = gains.level.levelEndXp - gains.level.levelStartXp

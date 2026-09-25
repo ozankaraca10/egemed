@@ -56,6 +56,11 @@ export interface PulseRuntimeOptions {
   readonly bridge?: PulseRuntimeBridge;
   /** Ad alanında yoksa yazılan kaynak tercihleri (ör. gömülü modda kapalı tam ekran önerisi). */
   readonly defaultPreferences?: Readonly<Record<string, string>>;
+  /**
+   * Birleşik bar (UX kararı, 25 Eylül 2026): true ise kaynağın üst çubukları ve
+   * footer'ı gizlenir; kontroller kabuğun barına taşınır (`chrome.ts`).
+   */
+  readonly unifiedChrome?: boolean;
 }
 
 export interface PulseRuntimeHandle {
@@ -125,7 +130,7 @@ export function mountPulseRuntime(target: HTMLElement, options: PulseRuntimeOpti
 
   // --- Gölge kök ve kaynak işaretlemesi -------------------------------------
   const host = realDocument.createElement("div");
-  host.className = "egemed-pulse-runtime";
+  host.className = options.unifiedChrome === true ? "egemed-pulse-runtime pulse-unified" : "egemed-pulse-runtime";
   host.style.display = "block";
   host.style.position = "relative";
   const shadow = host.attachShadow({ mode: "open" });
@@ -413,4 +418,9 @@ const EMBED_CSS = `
 .transport,.case-toolbar{bottom:calc(8px + var(--pulse-bottom-inset,0px))}
 .pulse-html:fullscreen .transport,.pulse-html:fullscreen .case-toolbar{bottom:8px}
 .landing{overflow-y:auto}
+/* PULSE-10: kaynak yeşil metin (#16a34a / #ecfaf1 ≈ 3.1:1) WCAG AA altında. */
+.live-badge,.teaching-note,.teaching-note b{color:#15803d}
+/* PULSE-10: katman onay kutuları WCAG 2.2 hedef boyutu (24 px). */
+.layer-menu input[type=checkbox],#labelsToggle{inline-size:24px;block-size:24px}
+:host(.pulse-unified) .topbar,:host(.pulse-unified) .app>.eg-footer,:host(.pulse-unified) .landing{display:none!important}
 `;

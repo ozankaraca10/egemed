@@ -138,6 +138,9 @@ export function createOpacaModule(deps?: OpacaModuleDeps): SimModule {
         createElement(GamiProvider, {
           repository: resolved.gamiRepository ?? null,
           now: context.now,
+          ...(context.reportAttempt === undefined
+            ? {}
+            : { reportAttempt: (attempt: OpacaAttemptRecord) => context.reportAttempt?.(attempt) }),
           children: createElement(StoreProvider, {
             now: context.now,
             storage,

@@ -1,3 +1,4 @@
+import type { AttemptRecord } from "@egemed/gamification-core";
 import { useEffect, useRef, type JSX } from "react";
 import { useStore } from "./core/StoreProvider";
 import { gamiStoragePort } from "./core/storage";
@@ -38,6 +39,7 @@ export interface AppProps {
   readonly modalEnv?: ModalEnv;
   readonly resultsEnv?: ResultsScreenEnv;
   readonly scrollToTop?: () => void;
+  readonly reportAttempt?: (attempt: AttemptRecord) => void;
 }
 
 function Shell({
@@ -48,6 +50,7 @@ function Shell({
   modalEnv,
   resultsEnv,
   scrollToTop,
+  reportAttempt,
 }: AppProps & { embedded: boolean }): JSX.Element {
   const { state, dispatch, bus, now, storage } = useStore();
   const gamiRef = useRef<LocalGamiRepository | null>(null);
@@ -62,14 +65,27 @@ function Shell({
   }, [audio, state.screen]);
 
   useEffect(() => bus.subscribe((event) => {
+    const write = (payload: Parameters<LocalGamiRepository["recordEvent"]>[0]): void => {
+      const seen = gami.snapshot().seenEvents.includes(payload.id);
+      gami.recordEvent(payload);
+      if (seen || payload.type !== "case_completed" || reportAttempt === undefined) return;
+      const record = gami.snapshot().attempts.find((item) => item.id === payload.id);
+      if (record === undefined) return;
+      try {
+        const reported = reportAttempt(record) as void | Promise<void>;
+        if (reported instanceof Promise) void reported.catch(() => undefined);
+      } catch {
+        // Rapor hatası dinleme akışını bozmaz.
+      }
+    };
     if (event.type === "case_completed" && event.mode === "practice") {
-      gami.recordEvent({ type: "case_completed", id: `${event.caseId}:${event.mode}:${event.at}`, finishedAt: new Date(event.at).toISOString(), mode: event.mode, score: event.score, mastery: event.mastery, hintsUsed: event.hintsUsed, domains: event.domains });
+      write({ type: "case_completed", id: `${event.caseId}:${event.mode}:${event.at}`, finishedAt: new Date(event.at).toISOString(), mode: event.mode, score: event.score, mastery: event.mastery, hintsUsed: event.hintsUsed, domains: event.domains });
     } else if (event.type === "assessment_completed") {
-      gami.recordEvent({ type: "case_completed", id: `assessment:${event.at}`, finishedAt: new Date(event.at).toISOString(), mode: "assessment", score: event.total, mastery: event.total >= 80, hintsUsed: 0, domains: {} });
+      write({ type: "case_completed", id: `assessment:${event.at}`, finishedAt: new Date(event.at).toISOString(), mode: "assessment", score: event.total, mastery: event.total >= 80, hintsUsed: 0, domains: {} });
     } else if (event.type === "correct_diagnosis") {
       gami.recordEvent({ type: "correct_diagnosis", id: `${event.caseId}:${event.qid}:${event.at}`, finishedAt: new Date(event.at).toISOString() });
     }
-  }), [bus, gami]);
+  }), [bus, gami, reportAttempt]);
 
   useEffect(() => {
     scrollToTop?.();

@@ -14,6 +14,8 @@ import {
   gamiSimIdParamSchema,
   gamiSummaryResponseSchema,
   isoDateTimeSchema,
+  mePreferencesResponseSchema,
+  mePreferencesSchema,
   pageMetaSchema,
   roleSchema,
   simIdSchema,
@@ -32,6 +34,7 @@ import {
   type GamiLeaderboardQuery,
   type GamiLeaderboardResponse,
   type GamiSummaryResponse,
+  type MePreferences,
   type Role,
   type SimId,
   type UpdateUserRequest,
@@ -282,6 +285,10 @@ export interface ApiClient {
     getSummary(simId: SimId): Promise<GamiSummaryResponse>;
     getLeaderboard(simId: SimId, query?: GamiLeaderboardQuery): Promise<GamiLeaderboardResponse>;
     writeAttempt(simId: SimId, input: AttemptWriteRequest): Promise<void>;
+  };
+  readonly preferences: {
+    getPreferences(): Promise<{ readonly data: MePreferences }>;
+    setPreferences(input: MePreferences): Promise<{ readonly data: MePreferences }>;
   };
 }
 
@@ -664,6 +671,25 @@ export function createApiClient(options: CreateApiClientOptions): ApiClient {
             [],
           );
         }
+      },
+    },
+    preferences: {
+      async getPreferences(): Promise<{ readonly data: MePreferences }> {
+        return requestJson({
+          method: "GET",
+          path: "/me/preferences",
+          parse: (value, context) => parseSchema(mePreferencesResponseSchema, value, `${context} response`),
+        });
+      },
+      async setPreferences(input): Promise<{ readonly data: MePreferences }> {
+        const parsed = parseSchema(mePreferencesSchema, input, "PATCH /me/preferences request");
+        return requestJson({
+          method: "PATCH",
+          path: "/me/preferences",
+          contentType: "application/json",
+          body: JSON.stringify(parsed),
+          parse: (value, context) => parseSchema(mePreferencesResponseSchema, value, `${context} response`),
+        });
       },
     },
   };

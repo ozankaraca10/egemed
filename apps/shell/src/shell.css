@@ -19,7 +19,9 @@ html, body { margin: 0; }
 /* B2: programatik odak hedefi (`tabindex=-1`) sayfa açılışında görünür mavi
    çerçeve çiziyordu. Fare/komut odağında çerçeve kapatılır; klavye odağı
    (:focus-visible) yukarıdaki kuralla korunur (WCAG 2.4.7). */
-.eg-shell-main:focus:not(:focus-visible),
+/* `main` rota değişiminde programla odaklanır (ekran okuyucu); etkileşimli
+   değildir, odak halkası çizilmez (sim rotasında kenar çizgisi oluşturuyordu). */
+.eg-shell-main:focus,
 .eg-shell-entry__main:focus:not(:focus-visible) { outline: none; }
 .eg-shell-skip {
   position: absolute; top: var(--sp-2); left: var(--sp-2); z-index: 30;
@@ -426,6 +428,7 @@ html, body { margin: 0; }
 .eg-shell-sim--large .eg-shell-sim__logo { height: 8rem; }
 .eg-shell-sim__tagline { margin: 0; color: var(--navy-800); font-weight: 600; }
 .eg-shell-sim__body { margin: 0; color: var(--muted); }
+.eg-shell-sim__noaccess { margin: 0; color: var(--red-600); font-size: var(--fs-sm); font-weight: 700; }
 .eg-shell-sim__link {
   justify-self: start; display: inline-flex; align-items: center; box-sizing: border-box;
   min-height: var(--eg-shell-touch-min); margin-top: var(--sp-1); padding: 0 var(--sp-4);
@@ -450,21 +453,12 @@ html, body { margin: 0; }
    boş kalır, hazır olduğunda vanilla sim modülü kendi kökünü buraya ekler. */
 .eg-shell-sim-page__stage { display: grid; }
 .eg-shell-sim-page__stage > * { grid-area: 1 / 1; min-width: 0; }
+/* Sim tam alan ve çerçevesiz (UX kararı 25 Eylül 2026); hazır olunca yumuşak belirir. */
 .eg-shell-sim-page__host {
-  box-sizing: border-box; min-height: 20rem; padding: var(--sp-4);
-  background: var(--card); border: 1px solid var(--border);
-  border-radius: var(--radius); box-shadow: var(--shadow-card);
+  box-sizing: border-box; min-height: calc(100dvh - 3.75rem);
+  isolation: isolate; opacity: 0; transition: opacity .28s ease;
 }
-/* Tam genişlik simler (Pulse): kaynak runtime kendi kartlarını ve kenarlarını çizer. */
-/* Sim kökü kendi yığın bağlamında kalır; iç öğeler kabuk gezinmesinin üstüne çıkmaz.
-   Mobilde sabit alt sekme çubuğu kadar alt boşluk sime değişkenle iletilir. */
-.eg-shell-sim-page--bleed .eg-shell-sim-page__host { isolation: isolate; }
-@media (max-width: 767.98px) {
-  .eg-shell-sim-page--bleed .eg-shell-sim-page__host { --pulse-bottom-inset: calc(53px + env(safe-area-inset-bottom)); }
-}
-.eg-shell-sim-page--bleed .eg-shell-sim-page__host {
-  padding: 0; background: none; border: 0; border-radius: 0; box-shadow: none;
-}
+.eg-shell-sim-page__host--ready { opacity: 1; }
 .eg-shell-sim-page__skeleton { display: grid; align-content: start; gap: var(--sp-3); padding: var(--sp-4); }
 .eg-shell-sim-page__skeleton-block {
   display: block; height: 5.5rem; background: var(--card-soft);
@@ -476,6 +470,10 @@ html, body { margin: 0; }
   border: 1px solid var(--red-500); border-radius: var(--radius);
 }
 .eg-shell-sim-page__error-title { margin: 0; color: var(--red-600); font-weight: 700; }
+.eg-shell-sim-page__denied {
+  box-sizing: border-box; margin: 0; padding: var(--sp-4); background: var(--red-100);
+  border: 1px solid var(--red-500); border-radius: var(--radius); color: var(--red-600); font-weight: 700;
+}
 .eg-shell-sim-page__retry {
   box-sizing: border-box; display: inline-flex; align-items: center; justify-content: center;
   min-height: var(--eg-shell-touch-min); padding: 0 var(--sp-4);
@@ -526,6 +524,14 @@ html, body { margin: 0; }
 .eg-shell-progress__badges { display: grid; gap: var(--sp-2); }
 .eg-shell-progress__badgesTitle { margin: 0; color: var(--navy-800); font-weight: 700; }
 .eg-shell-progress__badgeList { display: flex; flex-wrap: wrap; gap: var(--sp-2); margin: 0; padding: 0; list-style: none; }
+.eg-shell-progress__optout { display: grid; gap: var(--sp-2); margin-bottom: var(--sp-3); }
+.eg-shell-progress__optoutLabel {
+  display: inline-flex; align-items: center; gap: var(--sp-2); min-height: var(--eg-shell-touch-min);
+  color: var(--navy-900); font-weight: 700;
+}
+.eg-shell-progress__optoutLabel input { width: 1.25rem; height: 1.25rem; }
+.eg-shell-progress__optoutHint { margin: 0; color: var(--muted); font-size: var(--fs-sm); }
+.eg-shell-progress__optoutError { margin: 0; color: var(--red-600); font-size: var(--fs-sm); font-weight: 700; }
 .eg-shell-trust { display: grid; gap: var(--sp-3); margin: 0; padding: 0; list-style: none; }
 .eg-shell-trust__item {
   box-sizing: border-box; padding: var(--sp-4); background: var(--card);
@@ -657,11 +663,104 @@ html, body { margin: 0; }
     box-shadow: inset 0 -3px 0 var(--blue-400); color: var(--card);
   }
   .eg-shell-main { max-width: 72rem; margin: 0 auto; padding: var(--sp-5); }
-  .eg-shell-main--wide { max-width: 120rem; }
   /* Gezinme üst bara döndüğü için footer'ın alt çubuk boşluğu gerekmez. */
   .eg-shell .eg-shell-footer { padding-bottom: var(--sp-4); }
   .eg-shell-cards { grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr)); }
   .eg-shell-how { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .eg-shell-trust { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .eg-shell-hero { padding: var(--sp-6); }
+}
+
+/* --- Birleşik sim barı (UX kararı, 25 Eylül 2026) ---------------------------
+   Sim rotasında kabuk barı simin barıdır: konum, tek h1, adım göstergesi,
+   çipler ve simin eylemleri. Ana gezinme ve footer çizilmez; sim tam alandır. */
+.eg-shell-header--sim {
+  position: sticky; top: 0; z-index: 30; flex-wrap: nowrap;
+  gap: var(--sp-2); padding: var(--sp-1) var(--sp-3);
+}
+.eg-shell-header--sim .eg-shell-brand { flex: 0 0 auto; justify-content: center; min-width: var(--eg-shell-touch-min); }
+.eg-shell-header--sim .eg-shell-logo__mark { width: 2.25rem; height: 2.25rem; }
+.eg-shell-header--sim .eg-shell-logo__copy { display: none; }
+.eg-shell-header--sim .eg-shell-header__side { flex-wrap: nowrap; }
+.eg-shell-header--sim .eg-shell-session__role { display: none; }
+.eg-shell-header--sim .eg-shell-session__logout {
+  background: none; border-color: var(--blue-400); color: var(--card); font-size: var(--fs-xs);
+}
+.eg-shell-header--sim .eg-shell-session__logout:hover { background: var(--navy-700); }
+.eg-shell-main--sim { max-width: none; margin: 0; padding: 0; }
+.eg-shell-simbar { display: flex; flex: 1 1 auto; align-items: center; gap: var(--sp-2); min-width: 0; }
+.eg-shell-simbar__crumbs { display: flex; flex: 0 0 auto; align-items: center; gap: var(--sp-1); }
+.eg-shell-simbar__back {
+  box-sizing: border-box; display: inline-flex; align-items: center; gap: var(--sp-1);
+  min-width: var(--eg-shell-touch-min); min-height: var(--eg-shell-touch-min); padding: 0 var(--sp-2);
+  border-radius: var(--r-md); color: var(--blue-100); font-size: var(--fs-sm); font-weight: 600; text-decoration: none;
+}
+.eg-shell-simbar__back:hover { background: var(--navy-700); color: var(--card); }
+.eg-shell-simbar__back:focus-visible,
+.eg-shell-simbar__action:focus-visible { outline: 2px solid var(--blue-300); outline-offset: 2px; }
+.eg-shell-simbar__backLabel { display: none; }
+.eg-shell-simbar__sep { display: none; color: var(--blue-300); }
+.eg-shell-simbar__title {
+  overflow: hidden; margin: 0; color: var(--card); font-size: var(--fs-lg); font-weight: 800;
+  letter-spacing: .01em; text-overflow: ellipsis; white-space: nowrap;
+}
+.eg-shell-simbar__icon { flex: 0 0 auto; width: 1.25rem; height: 1.25rem; }
+.eg-shell-simbar__steps { display: none; align-items: center; gap: var(--sp-1); margin: 0 0 0 var(--sp-3); padding: 0; list-style: none; }
+.eg-shell-simbar__step { display: inline-flex; align-items: center; gap: var(--sp-1); color: var(--blue-200); font-size: var(--fs-xs); font-weight: 600; }
+.eg-shell-simbar__step + .eg-shell-simbar__step::before {
+  content: ""; display: inline-block; width: 1.25rem; height: 2px; margin-right: var(--sp-1);
+  background: var(--navy-600); border-radius: var(--r-pill);
+}
+.eg-shell-simbar__stepNum {
+  display: inline-flex; align-items: center; justify-content: center; width: 1.375rem; height: 1.375rem;
+  border: 1.5px solid var(--blue-300); border-radius: var(--r-pill); font-size: var(--fs-xs);
+}
+.eg-shell-simbar__step--done .eg-shell-simbar__stepNum { background: var(--green-600); border-color: var(--green-600); color: var(--card); }
+.eg-shell-simbar__step--current { color: var(--card); font-weight: 800; }
+.eg-shell-simbar__step--current .eg-shell-simbar__stepNum { background: var(--blue-600); border-color: var(--blue-300); color: var(--card); }
+.eg-shell-simbar__spacer { flex: 1 1 auto; }
+.eg-shell-simbar__chip {
+  display: none; flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; align-items: center; min-height: 1.75rem; padding: 0 var(--sp-2);
+  background: var(--navy-700); border: 1px solid var(--navy-600); border-radius: var(--r-pill);
+  color: var(--card); font-size: var(--fs-xs); font-weight: 700; white-space: nowrap;
+}
+.eg-shell-simbar__chip--learn { border-color: var(--green-500); }
+.eg-shell-simbar__chip--practice { border-color: var(--blue-400); }
+.eg-shell-simbar__chip--assessment { border-color: var(--purple-600); }
+.eg-shell-simbar__actions { display: flex; flex: 0 0 auto; gap: var(--sp-1); }
+.eg-shell-simbar__action {
+  box-sizing: border-box; display: inline-flex; align-items: center; justify-content: center; gap: var(--sp-1);
+  min-width: var(--eg-shell-touch-min); min-height: var(--eg-shell-touch-min); padding: 0 var(--sp-2);
+  background: none; border: 0; border-radius: var(--r-md);
+  color: var(--card); font: inherit; font-size: var(--fs-sm); font-weight: 600; cursor: pointer;
+}
+.eg-shell-simbar__action:hover { background: var(--navy-700); }
+.eg-shell-simbar__action[aria-pressed="true"] { background: var(--navy-700); box-shadow: inset 0 0 0 1px var(--blue-400); }
+.eg-shell-simbar__actionLabel { display: none; }
+.eg-shell-session__dev {
+  display: none; align-items: center; min-height: 1.75rem; padding: 0 var(--sp-2);
+  background: var(--amber-700); border-radius: var(--r-pill);
+  color: var(--card); font-size: var(--fs-xs); font-weight: 700; white-space: nowrap;
+}
+/* Dar ekranda bar yalnız geri, başlık ve eylem simgelerini taşır (yatay taşma yok);
+   genişledikçe marka, adımlar, çipler ve etiketler kademeli açılır. */
+@media (max-width: 767.98px) {
+  .eg-shell-header--sim .eg-shell-brand,
+  .eg-shell-header--sim .eg-shell-header__side { display: none; }
+}
+@media (min-width: 768px) {
+  .eg-shell-simbar__backLabel { display: inline; }
+  .eg-shell-simbar__sep { display: inline; }
+}
+@media (min-width: 1024px) {
+  .eg-shell-simbar__steps { display: flex; }
+  .eg-shell-session__dev { display: inline-flex; }
+}
+@media (min-width: 1280px) {
+  .eg-shell-simbar__chip { display: inline-flex; }
+  .eg-shell-simbar__actionLabel { display: inline; }
+  .eg-shell-header--sim .eg-shell-session__role { display: inline-flex; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .eg-shell-sim-page__host { transition: none; }
 }

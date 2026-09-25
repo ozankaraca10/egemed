@@ -41,6 +41,8 @@ export interface SimCardProps {
    * (`simHref`) gider, verilmezse bağlantı çizilmez.
    */
   readonly href?: `#${string}`;
+  /** API oturumunda sim listede yoksa kart işaretlenir; bağlantı açık kalır. */
+  readonly denied?: boolean;
 }
 
 /**
@@ -56,6 +58,7 @@ export function SimCard({
   size = "default",
   headingLevel = 3,
   href,
+  denied = false,
 }: SimCardProps): JSX.Element {
   const logo = SIM_LOGOS[id];
   const Heading = headingTags[headingLevel];
@@ -74,6 +77,7 @@ export function SimCard({
         />
         <p className="eg-shell-sim__tagline">{t(`sims.${id}.tagline`)}</p>
         <p className="eg-shell-sim__body">{t(`sims.${id}.body`)}</p>
+        {denied ? <p className="eg-shell-sim__noaccess">{t("sims.access.none")}</p> : null}
         {href === undefined ? null : (
           <a className="eg-shell-sim__link" href={href}>
             {t("sims.open")}

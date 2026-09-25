@@ -247,4 +247,32 @@ describe("SimHost release ve aktör bağlamı", () => {
     expect(pulse.contexts[0]?.actorId).toBe("dev-student-0001");
     expect(pulse.contexts[1] !== undefined && "actorId" in pulse.contexts[1]).toBe(false);
   });
+
+  it("reportAttempt bağlama taşınır; verilmezse alan hiç yoktur", async () => {
+    const pulse = fake("pulse");
+    const seen: string[] = [];
+    const { host, target } = harness(() => Promise.resolve(pulse.module));
+    host.mount(target, "pulse", {
+      reportAttempt: (attempt) => {
+        seen.push(attempt.id);
+      },
+    });
+    await flush();
+    host.mount(target, "pulse", { actorId: "dev-student-0001" });
+    await flush();
+    pulse.contexts[0]?.reportAttempt?.({
+      id: "yerel-1",
+      mode: "assessment",
+      finishedAt: "2026-09-24T12:00:00.000Z",
+      score: 100,
+      mastery: true,
+      caseCount: 10,
+      hintsUsed: 0,
+      durationMs: 1_000,
+      domains: {},
+      extra: {},
+    });
+    expect(seen).toEqual(["yerel-1"]);
+    expect(pulse.contexts[1] !== undefined && "reportAttempt" in pulse.contexts[1]).toBe(false);
+  });
 });

@@ -2,7 +2,7 @@ import type { JSX, ReactNode } from "react";
 import { t, type TrKey } from "@egemed/ui/i18n";
 import { ProgressSection } from "./home/ProgressSection";
 import { routeHref, simHref, type RouteId } from "./routes";
-import type { ShellSession } from "./session";
+import { sessionAllowsSim, type ShellSession } from "./session";
 import { SIM_IDS, SimCard } from "./SimCard";
 
 const TRUST_KEYS = ["data", "faculty", "privacy"] as const;
@@ -95,7 +95,7 @@ export function HomePage({ session = null }: HomePageProps): JSX.Element {
         <ul className="eg-shell-cards">
           {SIM_IDS.map((id) => (
             <li key={id}>
-              <SimCard href={simHref(id)} id={id} />
+              <SimCard denied={!sessionAllowsSim(session, id)} href={simHref(id)} id={id} />
             </li>
           ))}
         </ul>
@@ -143,7 +143,7 @@ export function NotFoundPage(): JSX.Element {
 }
 
 /** Kartlar yalnız logo/ad/tanıtım gösterir; iframe yoktur (gömme T09 sonrası). */
-export function SimulatorsPage(): JSX.Element {
+export function SimulatorsPage({ session = null }: { readonly session?: ShellSession | null }): JSX.Element {
   return (
     <section className="eg-shell-page">
       <h1 className="eg-shell-page__title">{t("shell.simulators.title")}</h1>
@@ -151,7 +151,7 @@ export function SimulatorsPage(): JSX.Element {
       <ul className="eg-shell-cards">
         {SIM_IDS.map((id) => (
           <li key={id}>
-            <SimCard headingLevel={2} href={simHref(id)} id={id} size="large" />
+            <SimCard denied={!sessionAllowsSim(session, id)} headingLevel={2} href={simHref(id)} id={id} size="large" />
           </li>
         ))}
       </ul>
@@ -160,12 +160,13 @@ export function SimulatorsPage(): JSX.Element {
 }
 
 /** Ana sayfa dışındaki sayfalar; eksik sayfa derleme zamanında yakalanır. */
-const PAGES: Record<Exclude<RouteId, "home">, () => JSX.Element> = {
+const PAGES: Record<Exclude<RouteId, "home" | "simulators">, () => JSX.Element> = {
   notebook: NotebookPage,
-  simulators: SimulatorsPage,
   tasks: TasksPage,
 };
 
 export function pageFor(id: RouteId, session: ShellSession | null = null): JSX.Element {
-  return id === "home" ? <HomePage session={session} /> : PAGES[id]();
+  if (id === "home") return <HomePage session={session} />;
+  if (id === "simulators") return <SimulatorsPage session={session} />;
+  return PAGES[id]();
 }

@@ -4,7 +4,8 @@ import { ROUTES, routeHref, type ResolvedRoute, type RouteId } from "./routes";
 import type { ShellSession } from "./session";
 import { ShellFooter } from "./ShellFooter";
 import { EgemedLogo } from "./brand/EgemedLogo";
-import { FULL_BLEED_SIMS } from "./sims/layout";
+import type { SimChrome } from "@egemed/sim-host";
+import { SimBar } from "./SimBar";
 
 export interface ShellLayoutProps {
   /** Çözümlenmiş rota; etkin bağlantı işaretlemesi bundan türetilir. */
@@ -13,6 +14,8 @@ export interface ShellLayoutProps {
   session?: ShellSession | null;
   /** "Çıkış yap" işleyicisi; oturum silme ve yönlendirme `App`'te yapılır. */
   onLogout?: () => void;
+  /** Sim rotasında simin birleşik bara verdiği adım/çip/eylemler. */
+  simChrome?: SimChrome | null;
   children: ReactNode;
 }
 
@@ -66,10 +69,11 @@ const NAV_ICONS: Record<RouteId, ReactNode> = {
  * `main#icerik`. Render DOM'a dokunmaz; yalnız atlama bağlantısının olay
  * işleyicisi dokunur. Tek `nav` CSS ile <768 px alt sekme, >=768 px üst bar olur.
  */
-export function ShellLayout({ route, session, onLogout, children }: ShellLayoutProps): JSX.Element {
+export function ShellLayout({ route, session, onLogout, simChrome = null, children }: ShellLayoutProps): JSX.Element {
   const activeId = route.kind === "page" ? route.route.id : undefined;
-  // Kaynak runtime'ı tam genişlik için tasarlanmış simler (Pulse, PULSE-04).
-  const wideMain = route.kind === "sim" && FULL_BLEED_SIMS.has(route.simId);
+  // UX kararı (25 Eylül 2026): sim rotasında tek birleşik bar ve tam alan;
+  // ana gezinme, sayfa başlığı, kart ve footer çizilmez.
+  const simMode = route.kind === "sim";
   // API oturumunda görünen ad sunucudan gelir; sahte oturumda rol etiketi çizilir.
   const roleLabel = session === undefined || session === null
     ? null
@@ -80,11 +84,13 @@ export function ShellLayout({ route, session, onLogout, children }: ShellLayoutP
   return (
     <div className="eg-shell">
       <a className="eg-shell-skip" href="#icerik" onClick={focusMain}>{t("shell.skip")}</a>
-      <header className="eg-shell-header">
-        <a className="eg-shell-brand" href={routeHref("home")}>
-          <EgemedLogo variant="on-dark" />
+      <header className={simMode ? "eg-shell-header eg-shell-header--sim" : "eg-shell-header"}>
+        <a aria-label={simMode ? t("shell.brand") : undefined} className="eg-shell-brand" href={routeHref("home")}>
+          <EgemedLogo compact={simMode} variant="on-dark" />
         </a>
+        {route.kind === "sim" && <SimBar chrome={simChrome} title={t(route.titleKey)} />}
         <div className="eg-shell-header__side">
+          {simMode && synthetic && <span className="eg-shell-session__dev">{t("shell.session.devChip")}</span>}
           {roleLabel !== null && (
             <div className="eg-shell-session">
               <span className="eg-shell-session__role">{roleLabel}</span>
@@ -93,6 +99,7 @@ export function ShellLayout({ route, session, onLogout, children }: ShellLayoutP
               </button>
             </div>
           )}
+          {!simMode && (
           <nav aria-label={t("shell.nav.label")} className="eg-shell-nav">
             {ROUTES.map((item) => (
               <a
@@ -104,13 +111,14 @@ export function ShellLayout({ route, session, onLogout, children }: ShellLayoutP
               </a>
             ))}
           </nav>
+          )}
         </div>
       </header>
-      <main className={wideMain ? "eg-shell-main eg-shell-main--wide" : "eg-shell-main"} id="icerik" tabIndex={-1}>
-        {synthetic && <p className="eg-shell-session-banner">{t("shell.session.banner")}</p>}
+      <main className={simMode ? "eg-shell-main eg-shell-main--sim" : "eg-shell-main"} id="icerik" tabIndex={-1}>
+        {synthetic && !simMode && <p className="eg-shell-session-banner">{t("shell.session.banner")}</p>}
         {children}
       </main>
-      <ShellFooter />
+      {!simMode && <ShellFooter />}
     </div>
   );
 }

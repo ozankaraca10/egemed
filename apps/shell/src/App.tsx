@@ -17,9 +17,10 @@ import { createSessionStore, sessionWhenEnabled } from "./devAuth";
 import { EntryPage } from "./EntryPage";
 import { NotFoundPage, pageFor } from "./pages";
 import { adminGuardHref, entryHref, isAdminProtected, type ResolvedRoute } from "./routes";
-import { shellSessionFromDev, type ShellSession } from "./session";
+import { sessionAllowsSim, shellSessionFromDev, type ShellSession } from "./session";
 import { ShellLayout } from "./ShellLayout";
 import { SimRoute } from "./SimRoute";
+import type { SimChrome } from "@egemed/sim-host";
 import { useHashRoute } from "./useHashRoute";
 
 /**
@@ -40,7 +41,12 @@ function titleKeyFor(route: ResolvedRoute): TrKey {
 }
 
 /** Rota içeriğini seçer; üst bar (`ShellLayout`) tüm iç sayfalarda ortaktır. */
-function contentFor(route: ResolvedRoute, session: ShellSession | null): ReactNode {
+function contentFor(
+  route: ResolvedRoute,
+  session: ShellSession | null,
+  apiBaseUrl: string | null,
+  onChrome?: (chrome: SimChrome | null) => void,
+): ReactNode {
   if (route.kind === "page") return pageFor(route.route.id, session);
   if (route.kind === "admin") return <AdminPage />;
   if (route.kind === "adminUsers") return <UsersPage />;
@@ -49,7 +55,17 @@ function contentFor(route: ResolvedRoute, session: ShellSession | null): ReactNo
   if (route.kind === "adminImport") return <ImportWizardPage />;
   if (route.kind === "adminRoles") return <RolesPage />;
   if (route.kind === "adminAudit") return <AuditPage />;
-  if (route.kind === "sim") return <SimRoute actorId={session?.actorId} simId={route.simId} />;
+  if (route.kind === "sim") {
+    return (
+      <SimRoute
+        actorId={session?.actorId}
+        allowed={sessionAllowsSim(session, route.simId)}
+        apiBaseUrl={apiBaseUrl}
+        onChrome={onChrome}
+        simId={route.simId}
+      />
+    );
+  }
   return <NotFoundPage />;
 }
 
@@ -61,6 +77,8 @@ function contentFor(route: ResolvedRoute, session: ShellSession | null): ReactNo
  */
 export function App(): JSX.Element | null {
   const route = useHashRoute();
+  // Birleşik bar: simin adım/çip/eylemleri (yalnız sim rotasında çizilir).
+  const [simChrome, setSimChrome] = useState<SimChrome | null>(null);
   // `apiSessionBaseUrl` üretimde (DEV false) daima null döner; aşağıdaki
   // `import.meta.env.DEV` kapıları sayesinde dinamik içe aktarmalar dâhil API
   // oturum kodu üretim paketine girmez.
@@ -80,6 +98,9 @@ export function App(): JSX.Element | null {
       ? readDevSession()
       : null;
   const apiPending = apiEnabled && !apiReady;
+  const apiSessionRef = useRef(apiSession);
+  apiSessionRef.current = apiSession;
+  const routeKey = route.kind === "sim" ? `sim:${route.simId}` : route.kind === "page" ? route.route.id : route.kind;
   const guardHref = !apiPending && isAdminProtected(route) ? adminGuardHref(session) : null;
 
   useEffect(() => {
@@ -122,6 +143,22 @@ export function App(): JSX.Element | null {
       cancelled = true;
     };
   }, [apiBaseUrl]);
+
+  useEffect(() => {
+    // Oturum açıkken rota değişince `/auth/me` yenilenir; sim erişimi güncellenir.
+    if (apiBaseUrl === null || !import.meta.env.DEV || !apiReady || apiSessionRef.current === null) return undefined;
+    let cancelled = false;
+    void import("./apiAuth")
+      .then(async (module) => {
+        const auth = module.createShellApiAuth(apiBaseUrl);
+        const restored = auth === null ? null : await auth.restore();
+        if (!cancelled && restored !== null && apiSessionRef.current !== null) setApiSession(restored);
+      })
+      .catch(() => undefined);
+    return () => {
+      cancelled = true;
+    };
+  }, [apiBaseUrl, apiReady, routeKey]);
 
   useEffect(() => {
     document.title = `${t(titleKey)} · ${t("shell.brand")}`;
@@ -186,8 +223,8 @@ export function App(): JSX.Element | null {
   if (apiEnabled && (sources === null || !apiReady)) return null;
   if (isAdminProtected(route) && (apiPending || guardHref !== null)) return null;
   return frame(
-    <ShellLayout onLogout={logout} route={route} session={session}>
-      {contentFor(route, session)}
+    <ShellLayout onLogout={logout} route={route} session={session} simChrome={route.kind === "sim" ? simChrome : null}>
+      {contentFor(route, session, apiEnabled && session !== null ? apiBaseUrl : null, setSimChrome)}
     </ShellLayout>,
   );
 }

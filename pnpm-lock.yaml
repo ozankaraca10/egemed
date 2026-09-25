@@ -50,6 +50,9 @@ importers:
       '@egemed/contracts':
         specifier: workspace:*
         version: link:../../packages/contracts
+      '@egemed/gami-catalogs':
+        specifier: workspace:*
+        version: link:../../packages/gami-catalogs
       '@egemed/gamification-core':
         specifier: workspace:*
         version: link:../../packages/gamification-core
@@ -77,6 +80,9 @@ importers:
       '@egemed/contracts':
         specifier: workspace:*
         version: link:../../packages/contracts
+      '@egemed/gami-catalogs':
+        specifier: workspace:*
+        version: link:../../packages/gami-catalogs
       '@egemed/sim-ausculta':
         specifier: workspace:*
         version: link:../../packages/sim-ausculta
@@ -130,6 +136,12 @@ importers:
         specifier: 4.6.5
         version: 4.6.5
 
+  packages/gami-catalogs:
+    dependencies:
+      '@egemed/gamification-core':
+        specifier: workspace:*
+        version: link:../gamification-core
+
   packages/gamification-core: {}
 
   packages/sim-ausculta:
@@ -157,10 +169,17 @@ importers:
         specifier: 19.3.0
         version: 19.3.0(react@19.3.0)
 
-  packages/sim-host: {}
+  packages/sim-host:
+    dependencies:
+      '@egemed/gamification-core':
+        specifier: workspace:*
+        version: link:../gamification-core
 
   packages/sim-opaca:
     dependencies:
+      '@egemed/gami-catalogs':
+        specifier: workspace:*
+        version: link:../gami-catalogs
       '@egemed/gamification-core':
         specifier: workspace:*
         version: link:../gamification-core
@@ -186,6 +205,9 @@ importers:
 
   packages/sim-pulse:
     dependencies:
+      '@egemed/gami-catalogs':
+        specifier: workspace:*
+        version: link:../gami-catalogs
       '@egemed/gamification-core':
         specifier: workspace:*
         version: link:../gamification-core
