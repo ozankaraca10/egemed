@@ -94,6 +94,12 @@
     },
     {
       "file": "index.html",
+      "id": "PULSE-A11Y-EXPLAIN-TABS-ROLE",
+      "matches": 1,
+      "why": "Açıklama sekmeleri role=tablist taşıyor ama çocukları role=tab değil (axe aria-required-children); düğmeler aç/kapa grubu olarak işaretlenir."
+    },
+    {
+      "file": "index.html",
       "id": "PULSE-A11Y-LANDING-HELP-NAME",
       "matches": 1,
       "why": "Mobilde etiket gizlenince düğmenin erişilebilir adı kalmıyor (axe button-name)."

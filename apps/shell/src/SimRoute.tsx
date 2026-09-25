@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState, type JSX } from "react";
-import { createSimHost, type SimHost, type SimulatorId } from "@egemed/sim-host";
-import { FULL_BLEED_SIMS } from "./sims/layout";
+import { createSimHost, type SimChrome, type SimHost, type SimulatorId } from "@egemed/sim-host";
 import { t } from "@egemed/ui/i18n";
 import { shellNow } from "./now";
 import { routeHref, simTitleKey } from "./routes";
@@ -26,17 +25,16 @@ export interface SimRouteProps {
   readonly apiBaseUrl?: string | null;
   /** API oturumunda sim `simAccess` dışında ise modül mount edilmez. */
   readonly allowed?: boolean;
+  /** Birleşik bar kanalı: simin adım/çip/eylemleri kabuğun üst barına gider. */
+  readonly onChrome?: ((chrome: SimChrome | null) => void) | undefined;
 }
 
-function SimAccessDenied({ simId }: { readonly simId: SimulatorId }): JSX.Element {
+function SimAccessDenied(): JSX.Element {
   return (
     <section className="eg-shell-sim-page">
-      <div className="eg-shell-sim-page__bar">
-        <h1 className="eg-shell-sim-page__title">{t(simTitleKey(simId))}</h1>
-        <a className="eg-shell-sim-page__exit" href={routeHref("simulators")}>
-          {t("shell.nav.simulators")}
-        </a>
-      </div>
+      <a className="eg-shell-sim-page__exit" href={routeHref("simulators")}>
+        {t("shell.nav.simulators")}
+      </a>
       <p className="eg-shell-sim-page__denied" role="status">
         {t("sims.access.denied")}
       </p>
@@ -53,17 +51,6 @@ export function simErrorTitle(simId: SimulatorId): string {
   return `${t(simTitleKey(simId))} · ${t("badge.tone.danger")}`;
 }
 
-/**
- * Gömülü modda sayfa `<h1>`ini taşıyan sim modülleri. Hazır olduklarında
- * kabuk çubuğu aynı metni `<h1>` yerine düz metin çizer; sayfada tek `<h1>`
- * kalır (WCAG 2.4.6/1.3.1). Opaca (T15b-S25) ve Ausculta (T14e) gömülü modda
- * ekran başlıklarını `h2` olarak çizdiği için kabuk `<h1>`i korur — bu
- * kümeye girmez. Pulse (T14d) her ekranında (modlar/inceleme/uygulama/
- * değerlendirme/hakkında) tek bir `<h1>` çizer; kabuk çubuğu bu kümede
- * olduğu için hazır durumda kendi `<h1>`ini bırakır.
- */
-/** Hazır durumda kendi h1'ini veren simler; Pulse kaynak runtime'ı gölge DOM'da h2 kullanır (PULSE-00). */
-const SIMS_WITH_OWN_HEADING: ReadonlySet<SimulatorId> = new Set([]);
 
 /**
  * Sim rotası React host'u (ADR-006): `SimHost` bileşen ömrü boyunca tek
@@ -78,12 +65,15 @@ const SIMS_WITH_OWN_HEADING: ReadonlySet<SimulatorId> = new Set([]);
  * kutusu host'un kardeşidir; yükleniyor/hata sırasında host gizlenmez, boş
  * kalır ve aşama ızgarasında aynı hücreyi paylaşır.
  */
-export function SimRoute({ actorId, allowed = true, apiBaseUrl = null, simId }: SimRouteProps): JSX.Element {
-  if (!allowed) return <SimAccessDenied simId={simId} />;
-  return <SimRouteHost actorId={actorId} apiBaseUrl={apiBaseUrl} simId={simId} />;
+export function SimRoute({ actorId, allowed = true, apiBaseUrl = null, onChrome, simId }: SimRouteProps): JSX.Element {
+  if (!allowed) return <SimAccessDenied />;
+  return <SimRouteHost actorId={actorId} apiBaseUrl={apiBaseUrl} onChrome={onChrome} simId={simId} />;
 }
 
-function SimRouteHost({ actorId, apiBaseUrl = null, simId }: Omit<SimRouteProps, "allowed">): JSX.Element {
+function SimRouteHost({ actorId, apiBaseUrl = null, onChrome, simId }: Omit<SimRouteProps, "allowed">): JSX.Element {
+  // Kanal ref'te tutulur: üst bileşen yeniden çizilince sim yeniden mount edilmez.
+  const chromeRef = useRef(onChrome);
+  chromeRef.current = onChrome;
   const containerRef = useRef<SimContainer | null>(null);
   const hostRef = useRef<SimHost | null>(null);
   const [status, setStatus] = useState<SimRouteStatus>("loading");
@@ -119,8 +109,9 @@ function SimRouteHost({ actorId, apiBaseUrl = null, simId }: Omit<SimRouteProps,
       const options = {
         ...(actorId === undefined ? {} : { actorId }),
         ...(reportAttempt === undefined ? {} : { reportAttempt }),
+        setChrome: (chrome: SimChrome | null) => chromeRef.current?.(chrome),
       };
-      return host.mount(container, simId, Object.keys(options).length === 0 ? undefined : options);
+      return host.mount(container, simId, options);
     });
     return () => {
       // Gerçek React tabanlı modüller (Opaca) dispose'ta kendi kökünü
@@ -134,31 +125,18 @@ function SimRouteHost({ actorId, apiBaseUrl = null, simId }: Omit<SimRouteProps,
       // Ertelenmiş cleanup yalnız KENDİ mount'unu bırakır: sim doğrudan
       // değiştirildiğinde yeni mount'u iptal etmez (PLATFORM-01).
       void mounted.then((token) => host.release(token));
+      chromeRef.current?.(null);
     };
   }, [simId, actorId, apiBaseUrl, attempt]);
 
-  const title = t(simTitleKey(simId));
-  const ownsHeading = status === "ready" && SIMS_WITH_OWN_HEADING.has(simId);
+  // Başlık (h1) ve konum birleşik bardadır; sim tam alanı çerçevesiz kaplar.
   return (
-    <section
-      aria-busy={status === "loading"}
-      className={FULL_BLEED_SIMS.has(simId) ? "eg-shell-sim-page eg-shell-sim-page--bleed" : "eg-shell-sim-page"}
-    >
-      <div className="eg-shell-sim-page__bar">
-        {ownsHeading ? (
-          <p className="eg-shell-sim-page__title">{title}</p>
-        ) : (
-          <h1 className="eg-shell-sim-page__title">{title}</h1>
-        )}
-        <a className="eg-shell-sim-page__exit" href={routeHref("simulators")}>
-          {t("shell.nav.simulators")}
-        </a>
-      </div>
+    <section aria-busy={status === "loading"} aria-label={t(simTitleKey(simId))} className="eg-shell-sim-page">
       <div className="eg-shell-sim-page__stage">
         {/* Kök program DOM lib'i taşımaz (boş `HTMLDivElement`); gerçek düğüm
             çalışma zamanında host sözleşmesini karşılar. */}
         <div
-          className="eg-shell-sim-page__host"
+          className={status === "ready" ? "eg-shell-sim-page__host eg-shell-sim-page__host--ready" : "eg-shell-sim-page__host"}
           ref={(node: unknown) => {
             containerRef.current = node as SimContainer | null;
           }}

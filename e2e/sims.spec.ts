@@ -36,6 +36,8 @@ test.describe("sim rotaları yaşam döngüsü", () => {
     await expect(page.locator(".eg-sim-ausculta.app-shell")).toHaveCount(1);
     await expect(page.locator(PULSE_ROOT)).toHaveCount(0);
 
+    // Birleşik barda ana gezinme yoktur: önce konumdan Simülatörler'e, oradan Ana sayfaya.
+    await page.locator('a[href="#/simulatorler"]').first().click();
     await page.locator(`${NAV} a[href="#/"]`).click();
     await expect(page).toHaveURL(/#\/$/);
     await expect(page.locator(".eg-sim-ausculta")).toHaveCount(0);

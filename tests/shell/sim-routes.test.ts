@@ -4,6 +4,7 @@ import { shellNow } from "../../apps/shell/src/now";
 import { HomePage, SimulatorsPage } from "../../apps/shell/src/pages";
 import { resolveRoute, routeHref, SIM_PATHS, simHref, simTitleKey } from "../../apps/shell/src/routes";
 import { SIM_IDS, SimCard } from "../../apps/shell/src/SimCard";
+import { ShellLayout } from "../../apps/shell/src/ShellLayout";
 import { SimRoute, simErrorTitle } from "../../apps/shell/src/SimRoute";
 import { loadSimModule } from "../../apps/shell/src/sims/loaders";
 import { SIMULATOR_IDS } from "../../packages/sim-host/src/SimHost";
@@ -104,12 +105,11 @@ describe("SimCard erişilebilir başlık düzeni", () => {
 });
 
 describe("SimRoute yükleniyor durumu", () => {
-  it("tek h1, aria-busy ve çıkış bağlantısıyla host kapsayıcısını çizer", () => {
+  it("başlık ve konum birleşik bardadır: SimRoute h1 çizmez, aria-busy ve etiketli bölüm verir", () => {
     const html = renderToStaticMarkup(createElement(SimRoute, { simId: "ausculta" }));
-    expect((html.match(/<h1\b/g) ?? []).length).toBe(1);
-    expect(html).toContain(`<h1 class="eg-shell-sim-page__title">${t("sims.ausculta.name")}</h1>`);
+    expect(html).not.toMatch(/<h1\b/);
     expect(html).toContain('aria-busy="true"');
-    expect(html).toContain(`href="${routeHref("simulators")}"`);
+    expect(html).toContain(`aria-label="${t("sims.ausculta.name")}"`);
     expect(html).toContain('class="eg-shell-sim-page__host"');
     expect(html).not.toContain('role="alert"');
   });
@@ -125,14 +125,25 @@ describe("SimRoute yükleniyor durumu", () => {
     expect(html).toContain("eg-shell-sim-page__stage");
   });
 
-  it("opaca ve ausculta için de çubuk tek h1'i korur (S25/T14e: gömülü ekranlar h2)", () => {
-    // SSR effect çalıştırmaz; durum hep "loading" kalır. Opaca ve Ausculta
-    // gömülü modda `ScreenHeading` ile h2 kullandığı için kabuk hazır durumda
-    // da `<h1>`i korur (bkz. e2e/sims.spec.ts).
-    for (const simId of ["opaca", "ausculta"] as const) {
-      const html = renderToStaticMarkup(createElement(SimRoute, { simId }));
+  it("sim rotasında birleşik bar tek h1, konum bağlantısı ve simin eylemlerini çizer; ana gezinme ve footer yok", () => {
+    for (const simId of SIMULATOR_IDS) {
+      const html = renderToStaticMarkup(
+        createElement(ShellLayout, {
+          children: null,
+          route: resolveRoute(simHref(simId)),
+          simChrome: {
+            actions: [{ icon: "help", id: "help", label: "Yardım", onSelect: () => undefined }],
+            steps: { current: 1, labels: ["Mod seçimi", "Çalışma", "Tamamla"] },
+          },
+        }),
+      );
       expect((html.match(/<h1\b/g) ?? []).length, simId).toBe(1);
-      expect(html).toContain(`<h1 class="eg-shell-sim-page__title">${t(`sims.${simId}.name`)}</h1>`);
+      expect(html, simId).toContain(`<h1 class="eg-shell-simbar__title">${t(`sims.${simId}.name`)}</h1>`);
+      expect(html, simId).toContain(`href="${routeHref("simulators")}"`);
+      expect(html, simId).toContain('aria-current="step"');
+      expect(html, simId).toContain('aria-label="Yardım"');
+      expect(html, simId).not.toContain('class="eg-shell-nav"');
+      expect(html, simId).not.toContain("eg-shell-footer");
     }
   });
 });

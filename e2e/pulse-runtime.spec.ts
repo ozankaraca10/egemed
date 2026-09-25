@@ -29,8 +29,11 @@ async function suppressFullscreenPrompt(page: Page, actorIds: readonly (string |
 async function openPulse(page: Page): Promise<Locator> {
   await page.goto("/#/sims/pulse");
   const root = page.locator(ROOT);
-  await root.locator("#startSimulator").click();
-  if (await root.locator("#tutorialSkip").isVisible()) await root.locator("#tutorialSkip").click();
+  // Birleşik barda kaynak açılış sayfası atlanır (UX kararı 25 Eylül 2026);
+  // ilk kullanımda öğretici açılır, testler onu atlar.
+  await expect(root.locator("#appRoot")).toBeVisible();
+  const skip = root.locator("#tutorialSkip");
+  if (await skip.isVisible().catch(() => false)) await skip.click();
   return root;
 }
 
