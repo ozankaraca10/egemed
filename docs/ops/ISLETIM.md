@@ -86,6 +86,19 @@ dönüştürmez: 005 öncesi denemeler `xp = 0` alır, bu yüzden o satırlar ha
 hedefin `currentXp` toplamına katkı vermez (profil XP'si değişmez). Geri alma
 kolonları düşürür (§6 kuralı: yalnız yedekten sonra).
 
+Migration 006 (T100): `users` tablosuna `leaderboard_visible`
+(`boolean not null default true`) eklenir. Kullanıcı `PATCH /me/preferences`
+ile `false` yaparak liderlik tablosundan çıkar; opt-out yalnız başkalarının
+listelerinden gizler, kullanıcı kendi satırını ve sıralama özetini görmeye
+devam eder. Tercih üç simde ortaktır ve veri dönüşümü yoktur. Geri alma
+kolonu düşürür; yeniden uygulanırsa tercihler varsayılana (`true`) döner
+(§6 kuralı).
+
+Rozetler sunucuda değerlendirilir (ADR-008) ve bu yeni migration gerektirmez:
+yeni deneme yazılınca `@egemed/gami-catalogs` kataloğuyla kodlu özetten
+türetilen istatistik `gami_badges`e idempotent (`on conflict do nothing`)
+yazılır; kaçan bir yazım sonraki denemede tamamlanır.
+
 ## 4. İlk admin tohumu (seed:admin)
 
 Üretimde `--allow-production` (veya `SEED_ALLOW_PRODUCTION=true`) zorunludur;
@@ -159,6 +172,15 @@ açıkça durur. Bu koşum için kök betik: `pnpm e2e:api` (API'yi önce
 verilmediğinde bugünkü davranış korunur; yalnız konsola "api-dev projesi
 atlandı" uyarısı basılır.
 
+### CI koşuları
+
+`.github/workflows/ci.yml` dört iş çalıştırır: `gates` (lint/typecheck/test),
+`e2e` (Playwright mobil), `api-e2e` (bu bölümdeki `pnpm e2e:api`; gerçek API +
+PostgreSQL) ve `api-db` (migration turu). Git-dışı sim varlıkları (Opaca xray,
+Ausculta ses) CI'da yoktur; bu varlıklara bağlı e2e senaryoları CI'da tam
+doğrulanamaz ve risk olarak izlenir. Yerelde eksik varlıkla koşmadan önce
+§2'deki `sync:xray` / `sync:audio` adımlarını çalıştırın.
+
 ### Giriş hız sınırı (T81)
 
 Giriş hız sınırı kullanıcı adı başına **15 dakikada 8 denemedir** ve API
@@ -181,6 +203,9 @@ kılavuz hukuki tavsiye değildir. Uygulama notları:
   tutulmaz (ADR-004).
 - Yedekler kişisel veri içerir: erişimi sınırlı, şifreli ve süreli tutulur;
   imha kaydı tutulur.
+- Liderlik tablosu görünürlüğü kullanıcı tercihidir (`users.leaderboard_visible`,
+  migration 006): çıkan kullanıcı başkalarının listelerinde görünmez, kendi
+  satırını görür; tercih üç simde ortaktır ve yedeklerde de bulunur.
 - Silme/anonimleştirme akışı (yumuşak silme → erişim kesme → saklama
   penceresi → anonimleştirme) `docs/specs/E3-kullanici-yonetimi.md`
   ve ADR-007'de tanımlıdır; süreler insan kararıdır.
