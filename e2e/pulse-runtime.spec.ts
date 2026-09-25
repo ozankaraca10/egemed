@@ -121,7 +121,8 @@ test.describe("Pulse kaynak runtime", () => {
 
     // Platform oyunlaştırması: deneme kullanıcı×sim ad alanına tek kez yazılır,
     // sonuç ekranında kazanım kartı ve "İlerlemem" diyaloğu açılır.
-    await expect(root.locator("#egemedGamiGains")).toContainText("Kazanımlar");
+    // Kart Opaca/Ausculta ile ortak tasarımdır (@egemed/gami-ui GamiGainsView).
+    await expect(root.locator("#egemedGamiGains")).toContainText("Bu oturumda kazandıkların");
     const gami = await page.evaluate(
       (key) => JSON.parse(localStorage.getItem(key) ?? "null") as { attempts: { score: number; mode: string }[] } | null,
       `${namespaceOf(null)}egemed-pulse-gami-1.0`,
