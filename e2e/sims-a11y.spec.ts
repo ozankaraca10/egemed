@@ -73,9 +73,11 @@ const AUSCULTA_CORRECT_BY_PROMPT = practiceQuestions(
  * kayıt da "düzeltildi — listeden çıkar" diye başarısız olur. Her ekran axe
  * JSON'u ve tam sayfa ekran görüntüsü artefaktı üretir.
  *
- * Ekran notları (plan §3):
- * - Değerlendirme ekranı (Opaca): birleşik bardaki "Başarılarım" eyleminin boş
- *   durumundaki "Değerlendirmeye gir" ile açılır; oturum yanıtlanmaz.
+ * Ekran notları (plan §3, T116b güncellemesi):
+ * - Birleşik bardaki ilerleme eylemi "İlerlemem"dir; açtığı sayfa @egemed/gami-ui
+ *   GamiProgressPage'tir (sekmeler: Başarılarım / Liderlik Tahtası, role=tab).
+ * - Değerlendirme ekranı (Opaca): "İlerlemem" sayfasındaki boş durum kartındaki
+ *   "Değerlendirmeye gir" ile açılır; oturum yanıtlanmaz.
  * - Değerlendirme ekranı (Ausculta): bu kapı kapsamaz. Mod kartlarındaki öneri
  *   kilidi `tutorialSeen` bekler; gömülü modda öğretici açılmaz (App yalnız
  *   bağımsız modda yönlendirir) ve boş-durum değerlendirme girişi yoktur.
@@ -86,7 +88,9 @@ const AUSCULTA_CORRECT_BY_PROMPT = practiceQuestions(
  *   ekranın tam akışını (kütüphane → uygulama → sonuç) bu durumdayken doğrular.
  * - Sonuç ekranı en kısa yoldan açılır: öğrenme ekranındaki konu uygulaması
  *   (5 vakalık oturum) tamamlandığında "Vaka Raporu" görünür. Değerlendirme
- *   oturumu (10 vaka) süre sınırlarıyla kapıyı şişirir; kullanılmaz.
+ *   oturumu (10 vaka) süre sınırlarıyla kapıyı şişirir; kullanılmaz. Uzun
+ *   akış kapı bütçesini şişirdiği için sonuç ekranı yalnız desktop-1440
+ *   projesinde taranır (T116b §3); kısa ekranlar üç genişlikte kalır.
  */
 const TAGS = ["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"];
 const MIN_TARGET_PX = 44;
@@ -247,33 +251,39 @@ async function submitAnswer(root: Locator): Promise<void> {
 
 /** 5 vakalık konu oturumunu uçtan uca çözüp sonuç ekranına getirir. */
 async function completeTopicPractice(root: Locator, sim: SimId): Promise<void> {
-  const resultsHeading = root.page().getByRole("heading", { name: "Vaka Raporu", exact: true });
+  const page = root.page();
+  const resultsHeading = page.getByRole("heading", { name: "Vaka Raporu", exact: true });
   const endCard = root.locator(".case-end-card");
   const options = root.locator(".opt");
   const filmStage = root.locator(".film-stage");
-  const anyState = resultsHeading.or(endCard).or(options.first()).or(filmStage.first()).first();
   for (let round = 0; round < 80; round += 1) {
     if ((await resultsHeading.count()) > 0) return;
     // Ekranlar arası tek karelik render boşlukları beklenir; dört durumdan biri
     // görünür olana dek otomatik yeniden denenir.
+    const anyState = resultsHeading.or(endCard).or(options.first()).or(filmStage.first()).first();
     await expect(anyState, `konu oturumunda beklenmeyen ekran durumu (tur ${round})`).toBeVisible();
-    if ((await endCard.count()) > 0) {
-      await endCard.locator(".q-nav button.btn.primary").click();
-      continue;
+    // expect ile dal seçimi arasında ekran değişebilir (ör. son vakadan sonuca
+    // geçiş); hiçbir dal eşleşmezse kısa bekleyip aynı turda yeniden bakılır.
+    for (let attempt = 0; attempt < 6; attempt += 1) {
+      if ((await resultsHeading.count()) > 0) return;
+      if ((await endCard.count()) > 0) {
+        await endCard.locator(".q-nav button.btn.primary").click();
+        break;
+      }
+      if ((await options.count()) > 0) {
+        await options.first().click();
+        await submitAnswer(root);
+        await root.locator(".q-nav button.btn.primary").click();
+        break;
+      }
+      if (sim === "opaca" && (await filmStage.count()) > 0) {
+        await filmStage.click();
+        await submitAnswer(root);
+        await root.locator(".q-nav button.btn.primary").click();
+        break;
+      }
+      await page.waitForTimeout(150);
     }
-    if ((await options.count()) > 0) {
-      await options.first().click();
-      await submitAnswer(root);
-      await root.locator(".q-nav button.btn.primary").click();
-      continue;
-    }
-    if (sim === "opaca" && (await filmStage.count()) > 0) {
-      await filmStage.click();
-      await submitAnswer(root);
-      await root.locator(".q-nav button.btn.primary").click();
-      continue;
-    }
-    throw new Error(`Konu oturumunda beklenmeyen ekran durumu (tur ${round})`);
   }
   throw new Error("Konu oturumu sürede tamamlanamadı");
 }
@@ -475,12 +485,12 @@ const OPACA_SCREENS: readonly Screen[] = [
   },
   {
     id: "gami",
-    label: "Başarılarım (boş durum)",
-    route: "#/sims/opaca/basarilarim",
+    label: "İlerlemem (boş durum)",
+    route: "#/sims/opaca/ilerlemem",
     async open(root) {
-      await openSimBarAction(root, "Başarılarım");
-      await expect(root.getByRole("heading", { name: "Başarılarım" }).first()).toBeVisible();
-      await expect(root.locator(".gami-empty")).toBeVisible();
+      await openSimBarAction(root, "İlerlemem");
+      await expect(root.getByRole("tab", { name: "Başarılarım" })).toBeVisible();
+      await expect(root.locator(".eg-gami-empty")).toBeVisible();
     },
   },
   {
@@ -488,9 +498,9 @@ const OPACA_SCREENS: readonly Screen[] = [
     label: "Değerlendirme",
     route: "#/sims/opaca/degerlendirme",
     async open(root) {
-      await openSimBarAction(root, "Başarılarım");
-      await expect(root.locator(".gami-empty")).toBeVisible();
-      await root.locator(".gami-empty").getByRole("button", { name: "Değerlendirmeye gir" }).click();
+      await openSimBarAction(root, "İlerlemem");
+      await expect(root.locator(".eg-gami-empty")).toBeVisible();
+      await root.locator(".eg-gami-empty").getByRole("button", { name: "Değerlendirmeye gir" }).click();
       await expect(root.locator(".strict-banner")).toBeVisible();
     },
   },
@@ -580,7 +590,7 @@ const AUSCULTA_SCREENS: readonly Screen[] = [
     route: "#/sims/ausculta/ilerlemem",
     async open(root) {
       await openSimBarAction(root, "İlerlemem");
-      await expect(root.getByRole("heading", { name: "İlerleme" })).toBeVisible();
+      await expect(root.getByRole("tab", { name: "Başarılarım" })).toBeVisible();
     },
   },
   {
@@ -611,12 +621,24 @@ const SIMS: readonly SimConfig[] = [
   },
 ];
 
+/**
+ * Uzun akışlı ekranlar: 5 vakalık konu oturumunu uçtan uca çözdükleri için
+ * yalnız desktop-1440 projesinde taranır (T116b §3: spec toplamı ≤ 6 dk).
+ * Kısa ekranlar üç genişlikte kalmaya devam eder.
+ */
+const LONG_SCREENS: readonly ScreenId[] = ["results"];
+
 for (const sim of SIMS) {
   test.describe(`${sim.id} iç ekran erişilebilirliği (WCAG 2.2 AA + 44 px)`, () => {
     test.describe.configure({ timeout: 180_000 });
 
     for (const screen of sim.screens) {
       test(`${screen.label} (${screen.route})`, async ({ page }, testInfo: TestInfo) => {
+        if (LONG_SCREENS.includes(screen.id)) {
+          // Sonuç akışı tek genişlikte yeterli: 5 vakalık oturum her genişlikte
+          // koşulursa kapı bütçesi (T116b §3) şişer; kısa ekranlar üç genişlikte.
+          test.skip(testInfo.project.name !== "desktop-1440", "sonuç akışı yalnız desktop-1440 (kapı bütçesi)");
+        }
         const errors = trackErrors(page);
         const root = await openSim(page, sim);
         await screen.open(root);

@@ -1,5 +1,5 @@
 {
-  "note": "T116 — Ausculta iç ekranlarında kaynaktan devralınmış erişilebilirlik borcu. Kayıtlar yalnız küçülür: düzeltilen bir kayıt testi 'düzeltildi — listeden çıkar' diye başarısız eder.",
+  "note": "T116/T116b — Ausculta iç ekranlarında kaynaktan devralınmış erişilebilirlik borcu. T116b: İlerlemem sayfası @egemed/gami-ui yüzeyini kullanır (T122); sonuç ekranı kapı bütçesi için yalnız desktop-1440 projesinde taranır. Kayıtlar yalnız küçülür: düzeltilen bir kayıt testi 'düzeltildi — listeden çıkar' diye başarısız eder.",
   "violations": [
     {
       "screen": "learn",
@@ -21,13 +21,23 @@
       "rule": "color-contrast",
       "target": ".report-row:nth-child(*) > .no",
       "projects": [
-        "tablet-768"
+        "desktop-1440"
       ]
     },
     {
       "screen": "help",
       "rule": "scrollable-region-focusable",
       "target": ".modal-body"
+    },
+    {
+      "screen": "gami",
+      "rule": "color-contrast",
+      "target": ".eg-gami-badge.eg-gami-cat-skill:nth-child(*) > .ft"
+    },
+    {
+      "screen": "gami",
+      "rule": "color-contrast",
+      "target": ".eg-gami-badge.eg-gami-cat-topic:nth-child(*) > .ft"
     }
   ],
   "smallTargets": [
@@ -45,6 +55,38 @@
       "screen": "learn",
       "selector": "div.eg-sim-ausculta.app-shell > main.app-content > div.screen > div.container.tall > div.learn-grid > div.sim-side:nth-of-type(*) > div.card > div.tabbar.info-tabs:nth-of-type(*) > button:nth-of-type(*)",
       "size": "141x34"
+    },
+    {
+      "screen": "results",
+      "selector": "div.eg-sim-ausculta.app-shell > main.app-content > div.screen > div.results-wrap-v2.screen-body > section.card.eg-gami-gains > div.eg-gami-gains-actions:nth-of-type(*) > button.btn.outline:nth-of-type(*)",
+      "size": "128x34"
+    },
+    {
+      "screen": "results",
+      "selector": "div.eg-sim-ausculta.app-shell > main.app-content > div.screen > div.results-wrap-v2.screen-body > section.card.eg-gami-gains > div.eg-gami-gains-actions:nth-of-type(*) > button.btn.primary:nth-of-type(*)",
+      "size": "153x34"
+    },
+    {
+      "screen": "gami",
+      "selector": "div.eg-sim-ausculta.app-shell > main.app-content > div.screen > div.results-wrap-v2.eg-gami-page > div.eg-gami-pagetabs:nth-of-type(*) > button:nth-of-type(*)",
+      "size": "149x33",
+      "projects": [
+        "mobile-360"
+      ]
+    },
+    {
+      "screen": "gami",
+      "selector": "div.eg-sim-ausculta.app-shell > main.app-content > div.screen > div.results-wrap-v2.eg-gami-page > div.eg-gami-pagetabs:nth-of-type(*) > button:nth-of-type(*)",
+      "size": "134x33",
+      "projects": [
+        "tablet-768",
+        "desktop-1440"
+      ]
+    },
+    {
+      "screen": "gami",
+      "selector": "#gami-badges > div.eg-gami-card-head:nth-of-type(*) > div.eg-gami-seg > button:nth-of-type(*)",
+      "size": "57x28"
     }
   ]
 }

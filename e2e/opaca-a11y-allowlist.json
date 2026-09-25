@@ -1,186 +1,6 @@
 {
-  "note": "T116 — Opaca iç ekranlarında kaynaktan devralınmış erişilebilirlik borcu. Kayıtlar yalnız küçülür: düzeltilen bir kayıt testi 'düzeltildi — listeden çıkar' diye başarısız eder.",
+  "note": "T116/T116b — Opaca iç ekranlarında kaynaktan devralınmış erişilebilirlik borcu. T116b: birleşik bardaki eylem 'İlerlemem' oldu ve sayfa @egemed/gami-ui yüzeyine taşındı (T122); eski sim-içi gami kayıtları kaldırıldı, yeni yüzeyin ölçümleri gerçek koşudan girildi. Kayıtlar yalnız küçülür: düzeltilen bir kayıt testi 'düzeltildi — listeden çıkar' diye başarısız eder.",
   "violations": [
-    {
-      "screen": "gami",
-      "rule": "color-contrast",
-      "target": ".gami-cat-learn.gami-badge:nth-child(*) > .cat",
-      "projects": [
-        "tablet-768",
-        "desktop-1440"
-      ]
-    },
-    {
-      "screen": "gami",
-      "rule": "color-contrast",
-      "target": ".gami-cat-learn.gami-badge:nth-child(*) > .ds",
-      "projects": [
-        "tablet-768",
-        "desktop-1440"
-      ]
-    },
-    {
-      "screen": "gami",
-      "rule": "color-contrast",
-      "target": ".gami-cat-learn.gami-badge:nth-child(*) > .ft",
-      "projects": [
-        "tablet-768",
-        "desktop-1440"
-      ]
-    },
-    {
-      "screen": "gami",
-      "rule": "color-contrast",
-      "target": ".gami-cat-learn.gami-badge:nth-child(*) > .nm",
-      "projects": [
-        "tablet-768",
-        "desktop-1440"
-      ]
-    },
-    {
-      "screen": "gami",
-      "rule": "color-contrast",
-      "target": ".gami-cat-milestone.gami-badge:nth-child(*) > .cat",
-      "projects": [
-        "tablet-768",
-        "desktop-1440"
-      ]
-    },
-    {
-      "screen": "gami",
-      "rule": "color-contrast",
-      "target": ".gami-cat-milestone.gami-badge:nth-child(*) > .ds",
-      "projects": [
-        "tablet-768",
-        "desktop-1440"
-      ]
-    },
-    {
-      "screen": "gami",
-      "rule": "color-contrast",
-      "target": ".gami-cat-milestone.gami-badge:nth-child(*) > .ft",
-      "projects": [
-        "tablet-768",
-        "desktop-1440"
-      ]
-    },
-    {
-      "screen": "gami",
-      "rule": "color-contrast",
-      "target": ".gami-cat-milestone.gami-badge:nth-child(*) > .nm",
-      "projects": [
-        "tablet-768",
-        "desktop-1440"
-      ]
-    },
-    {
-      "screen": "gami",
-      "rule": "color-contrast",
-      "target": ".gami-cat-skill.gami-badge:nth-child(*) > .cat",
-      "projects": [
-        "tablet-768",
-        "desktop-1440"
-      ]
-    },
-    {
-      "screen": "gami",
-      "rule": "color-contrast",
-      "target": ".gami-cat-skill.gami-badge:nth-child(*) > .ds",
-      "projects": [
-        "tablet-768",
-        "desktop-1440"
-      ]
-    },
-    {
-      "screen": "gami",
-      "rule": "color-contrast",
-      "target": ".gami-cat-skill.gami-badge:nth-child(*) > .ft",
-      "projects": [
-        "tablet-768",
-        "desktop-1440"
-      ]
-    },
-    {
-      "screen": "gami",
-      "rule": "color-contrast",
-      "target": ".gami-cat-skill.gami-badge:nth-child(*) > .nm",
-      "projects": [
-        "tablet-768",
-        "desktop-1440"
-      ]
-    },
-    {
-      "screen": "gami",
-      "rule": "color-contrast",
-      "target": ".gami-cat-streak.gami-badge:nth-child(*) > .cat",
-      "projects": [
-        "tablet-768",
-        "desktop-1440"
-      ]
-    },
-    {
-      "screen": "gami",
-      "rule": "color-contrast",
-      "target": ".gami-cat-streak.gami-badge:nth-child(*) > .ds",
-      "projects": [
-        "tablet-768",
-        "desktop-1440"
-      ]
-    },
-    {
-      "screen": "gami",
-      "rule": "color-contrast",
-      "target": ".gami-cat-streak.gami-badge:nth-child(*) > .ft",
-      "projects": [
-        "tablet-768",
-        "desktop-1440"
-      ]
-    },
-    {
-      "screen": "gami",
-      "rule": "color-contrast",
-      "target": ".gami-cat-streak.gami-badge:nth-child(*) > .nm",
-      "projects": [
-        "tablet-768",
-        "desktop-1440"
-      ]
-    },
-    {
-      "screen": "gami",
-      "rule": "color-contrast",
-      "target": ".gami-cat-topic.gami-badge:nth-child(*) > .cat",
-      "projects": [
-        "tablet-768",
-        "desktop-1440"
-      ]
-    },
-    {
-      "screen": "gami",
-      "rule": "color-contrast",
-      "target": ".gami-cat-topic.gami-badge:nth-child(*) > .ds",
-      "projects": [
-        "tablet-768",
-        "desktop-1440"
-      ]
-    },
-    {
-      "screen": "gami",
-      "rule": "color-contrast",
-      "target": ".gami-cat-topic.gami-badge:nth-child(*) > .ft",
-      "projects": [
-        "tablet-768",
-        "desktop-1440"
-      ]
-    },
-    {
-      "screen": "gami",
-      "rule": "color-contrast",
-      "target": ".gami-cat-topic.gami-badge:nth-child(*) > .nm",
-      "projects": [
-        "tablet-768",
-        "desktop-1440"
-      ]
-    },
     {
       "screen": "learn",
       "rule": "color-contrast",
@@ -216,25 +36,34 @@
       ]
     },
     {
-      "screen": "results",
-      "rule": "scrollable-region-focusable",
-      "target": ".table-scroll",
-      "projects": [
-        "mobile-360"
-      ]
-    },
-    {
-      "screen": "results",
-      "rule": "color-contrast",
-      "target": ".report-row:nth-child(*) > .no",
-      "projects": [
-        "tablet-768"
-      ]
-    },
-    {
       "screen": "help",
       "rule": "scrollable-region-focusable",
       "target": ".modal-body"
+    },
+    {
+      "screen": "gami",
+      "rule": "color-contrast",
+      "target": ".eg-gami-cat-learn.eg-gami-badge:nth-child(*) > .ft"
+    },
+    {
+      "screen": "gami",
+      "rule": "color-contrast",
+      "target": ".eg-gami-cat-milestone.eg-gami-badge:nth-child(*) > .ft"
+    },
+    {
+      "screen": "gami",
+      "rule": "color-contrast",
+      "target": ".eg-gami-cat-skill.eg-gami-badge:nth-child(*) > .ft"
+    },
+    {
+      "screen": "gami",
+      "rule": "color-contrast",
+      "target": ".eg-gami-cat-streak.eg-gami-badge:nth-child(*) > .ft"
+    },
+    {
+      "screen": "gami",
+      "rule": "color-contrast",
+      "target": ".eg-gami-cat-topic.eg-gami-badge:nth-child(*) > .ft"
     }
   ],
   "smallTargets": [
@@ -261,29 +90,6 @@
       "screen": "modes",
       "selector": "div.eg-sim-opaca.app-shell > main.app-content > div.screen > div.container.screen-body > div.mode-cards > div.mode-card.assessment:nth-of-type(*) > button.btn.purple",
       "size": "302x39"
-    },
-    {
-      "screen": "gami",
-      "selector": "div.eg-sim-opaca.app-shell > main.app-content > div.screen > div.results-wrap-v2.gami-page > div.gami-pagetabs:nth-of-type(*) > button:nth-of-type(*)",
-      "size": "134x33"
-    },
-    {
-      "screen": "gami",
-      "selector": "div.eg-sim-opaca.app-shell > main.app-content > div.screen > div.results-wrap-v2.gami-page > div.card.gami-empty:nth-of-type(*) > button.btn.purple",
-      "size": "198x39"
-    },
-    {
-      "screen": "gami",
-      "selector": "#gami-badges > div.gami-card-head:nth-of-type(*) > div.gami-seg > button:nth-of-type(*)",
-      "size": "57x28"
-    },
-    {
-      "screen": "gami",
-      "selector": "#gami-badges > div.gami-badge-grid:nth-of-type(*) > button.gami-badge.gami-cat-streak:nth-of-type(*)",
-      "size": "282x43",
-      "projects": [
-        "mobile-360"
-      ]
     },
     {
       "screen": "learn",
@@ -429,35 +235,41 @@
       "size": "306x40"
     },
     {
-      "screen": "results",
-      "selector": "div.eg-sim-opaca.app-shell > main.app-content > div.screen > div.results-wrap-v2.screen-body > section.card.gami-gains > div.gami-gains-actions:nth-of-type(*) > button.btn.outline:nth-of-type(*)",
-      "size": "128x34"
-    },
-    {
-      "screen": "results",
-      "selector": "div.eg-sim-opaca.app-shell > main.app-content > div.screen > div.results-wrap-v2.screen-body > section.card.gami-gains > div.gami-gains-actions:nth-of-type(*) > button.btn.primary:nth-of-type(*)",
-      "size": "153x34"
-    },
-    {
       "screen": "help",
       "selector": "div.modal-head:nth-of-type(*) > button.modal-close",
       "size": "34x34"
     },
     {
       "screen": "results",
-      "selector": "div.eg-sim-opaca.app-shell > main.app-content > div.screen > div.results-wrap-v2.screen-body > div.results-actions:nth-of-type(*) > button.btn.primary:nth-of-type(*)",
-      "size": "153x41",
+      "selector": "div.eg-sim-opaca.app-shell > main.app-content > div.screen > div.results-wrap-v2.screen-body > section.card.eg-gami-gains > div.eg-gami-gains-actions:nth-of-type(*) > button.btn.outline:nth-of-type(*)",
+      "size": "128x34"
+    },
+    {
+      "screen": "results",
+      "selector": "div.eg-sim-opaca.app-shell > main.app-content > div.screen > div.results-wrap-v2.screen-body > section.card.eg-gami-gains > div.eg-gami-gains-actions:nth-of-type(*) > button.btn.primary:nth-of-type(*)",
+      "size": "153x34"
+    },
+    {
+      "screen": "gami",
+      "selector": "div.eg-sim-opaca.app-shell > main.app-content > div.screen > div.results-wrap-v2.eg-gami-page > div.eg-gami-pagetabs:nth-of-type(*) > button:nth-of-type(*)",
+      "size": "149x33",
       "projects": [
         "mobile-360"
       ]
     },
     {
-      "screen": "results",
-      "selector": "div.eg-sim-opaca.app-shell > main.app-content > div.screen > div.results-wrap-v2.screen-body > div.results-actions:nth-of-type(*) > button.btn.outline:nth-of-type(*)",
-      "size": "116x41",
+      "screen": "gami",
+      "selector": "div.eg-sim-opaca.app-shell > main.app-content > div.screen > div.results-wrap-v2.eg-gami-page > div.eg-gami-pagetabs:nth-of-type(*) > button:nth-of-type(*)",
+      "size": "134x33",
       "projects": [
-        "mobile-360"
+        "tablet-768",
+        "desktop-1440"
       ]
+    },
+    {
+      "screen": "gami",
+      "selector": "#gami-badges > div.eg-gami-card-head:nth-of-type(*) > div.eg-gami-seg > button:nth-of-type(*)",
+      "size": "57x28"
     }
   ]
 }

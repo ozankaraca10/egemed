@@ -130,6 +130,9 @@ export function ResultsScreen({
   }
 
   const repo = useMemo(() => getGamiRepo(), [])
+  // useOpacaSessionGains etkisi finishedAt'ı bağımlılık okur; her render'da yeni
+  // Date kimliği etkiyi sonsuz döngüye sokup sonuç ekranını kilitler (T116b).
+  const finishedAt = useMemo(() => new Date(now()), [now])
   const gainsModel = useOpacaSessionGains(
     gamiEnabled && state.mode !== 'learn' && state.caseResults.length > 0
       ? {
@@ -139,7 +142,7 @@ export function ResultsScreen({
           caseById,
           seed: state.session.seed,
           durationMs: state.assessmentTimer,
-          finishedAt: new Date(now()),
+          finishedAt,
         }
       : null,
   )
