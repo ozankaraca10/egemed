@@ -232,3 +232,12 @@ kılavuz hukuki tavsiye değildir. Uygulama notları:
   ve ADR-007'de tanımlıdır; süreler insan kararıdır.
 - Aydınlatma metninin sahibi ve hukuki dayanak insan kararıdır; admin
   kayıt ekranındaki KVKK bağlantısı bu metne gider.
+
+## Üretim imajı doğrulaması (API-02)
+
+`bash scripts/ops/verify-prod-image.sh` (depo kökü, docker gerekir): temiz checkout'tan
+(`git archive`, host `node_modules` kullanılmaz) `infra/prod/Dockerfile` ile imajı derler; imajın
+root olmayan kullanıcıyla çalıştığını, geçici PostgreSQL 18'de migration'ların uygulandığını,
+`/health` ve `/health/db` uçlarının 200 döndüğünü ve `NODE_ENV=production` ile
+`AUTH_DEV_ENABLED=true` birleşiminin reddedildiğini doğrular; geçici ağ/konteyner/imajı siler.
+CI'da `prod-image` işi aynı betiği koşar. 25 Eylül 2026 yerel doğrulama: imaj 262 MB, uid 1000.
