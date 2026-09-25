@@ -442,12 +442,6 @@ html, body { margin: 0; }
   gap: var(--sp-3);
 }
 .eg-shell-sim-page__title { margin: 0; color: var(--navy-900); font-size: var(--fs-2xl); }
-.eg-shell-sim-page__exit {
-  display: inline-flex; align-items: center; box-sizing: border-box;
-  min-height: var(--eg-shell-touch-min); padding: 0 var(--sp-4);
-  background: var(--blue-50); border: 1px solid var(--blue-600); border-radius: var(--r-md);
-  color: var(--navy-900); font-weight: 600; text-decoration: none;
-}
 /* Aşama: host ile iskelet/hata aynı ızgara hücresini paylaşır (üst üste
    çizilir). Host React çocuğu taşımaz ve gizlenmez; yükleniyor/hata sırasında
    boş kalır, hazır olduğunda vanilla sim modülü kendi kökünü buraya ekler. */
@@ -464,21 +458,38 @@ html, body { margin: 0; }
   display: block; height: 5.5rem; background: var(--card-soft);
   border: 1px dashed var(--border-strong); border-radius: var(--radius);
 }
-.eg-shell-sim-page__error {
-  box-sizing: border-box; display: grid; gap: var(--sp-3); justify-items: start;
-  padding: var(--sp-4); background: var(--red-100);
-  border: 1px solid var(--red-500); border-radius: var(--radius);
+/* --- Sim duyuru kartı (T129): erişim reddi ve yükleme hatası ---------------
+   Birleşik bar sonrası sim rotası çerçevesiz tam alandır; eski tam genişlik
+   bağlantı ve kırmızı şerit bu düzende bozuk görünüyordu. Duyurular artık sim
+   alanının ortasında, en çok 32rem genişliğinde bir karttır (kabuk kart
+   stili); dokunma hedefleri 44 px, renkler yalnız aile token'larından gelir. */
+.eg-shell-sim-page--notice {
+  box-sizing: border-box; display: grid; min-height: calc(100dvh - 3.75rem);
+  padding: var(--sp-5) var(--sp-4);
 }
-.eg-shell-sim-page__error-title { margin: 0; color: var(--red-600); font-weight: 700; }
-.eg-shell-sim-page__denied {
-  box-sizing: border-box; margin: 0; padding: var(--sp-4); background: var(--red-100);
-  border: 1px solid var(--red-500); border-radius: var(--radius); color: var(--red-600); font-weight: 700;
+.eg-shell-sim-notice {
+  box-sizing: border-box; display: grid; gap: var(--sp-3); justify-items: center;
+  place-self: center; width: min(32rem, calc(100% - 2 * var(--sp-4)));
+  padding: var(--sp-5) var(--sp-4); background: var(--card);
+  border: 1px solid var(--border); border-radius: var(--radius);
+  box-shadow: var(--shadow-card); text-align: center;
 }
-.eg-shell-sim-page__retry {
+.eg-shell-sim-notice__icon { width: 2.5rem; height: 2.5rem; color: var(--navy-800); }
+.eg-shell-sim-notice__icon--warning { color: var(--red-600); }
+.eg-shell-sim-notice__title { margin: 0; color: var(--navy-900); font-size: var(--fs-xl); }
+.eg-shell-sim-notice__body { margin: 0; color: var(--muted); }
+.eg-shell-sim-notice__actions { display: flex; flex-wrap: wrap; gap: var(--sp-2); justify-content: center; }
+.eg-shell-sim-notice__primary,
+.eg-shell-sim-notice__secondary {
   box-sizing: border-box; display: inline-flex; align-items: center; justify-content: center;
-  min-height: var(--eg-shell-touch-min); padding: 0 var(--sp-4);
-  background: var(--blue-700); border: 0; border-radius: var(--r-md);
-  color: var(--card); font: inherit; font-weight: 600; cursor: pointer;
+  min-height: var(--eg-shell-touch-min); padding: 0 var(--sp-4); border-radius: var(--r-md);
+  font: inherit; font-weight: 600; text-decoration: none;
+}
+.eg-shell-sim-notice__primary {
+  background: var(--blue-700); border: 1px solid var(--blue-700); color: var(--card); cursor: pointer;
+}
+.eg-shell-sim-notice__secondary {
+  background: var(--card); border: 1px solid var(--border-strong); color: var(--navy-900);
 }
 .eg-shell-progress__empty {
   box-sizing: border-box; margin: 0; padding: var(--sp-5) var(--sp-4);

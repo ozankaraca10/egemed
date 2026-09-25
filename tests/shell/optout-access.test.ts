@@ -63,7 +63,7 @@ describe("sim kartı ve rotası erişim kapısı", () => {
     const html = renderToStaticMarkup(createElement(SimRoute, { allowed: false, simId: "pulse" }));
     expect(html).toContain(t("sims.access.denied"));
     expect(html).toContain(`href="${routeHref("simulators")}"`);
-    expect(html).toContain(t("shell.nav.simulators"));
+    expect(html).toContain(t("sims.back"));
     expect(html).not.toContain("eg-shell-sim-page__host");
   });
 });
