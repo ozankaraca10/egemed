@@ -1,6 +1,6 @@
 # E2 — Tek platform uygulama yol haritası
 
-Durum: Uygulama planı. ADR-006 kabul edildi; kimlik kararı ADR-007 (Önerildi) ile yeniden tanımlandı; xAPI profil sabitlemesi ve üretim LRS bağlantısı için aşağıdaki karar kapıları geçerlidir.
+Durum: Uygulama planı. ADR-006 ve ADR-007 kabul edildi; K2 (xAPI profili) ve K3 (LRS yolu) 25 Eylül 2026'da kabul edildi (aşağıda). Açık kapı: üretim SSO protokolü (PLATFORM-04, ertelendi).
 
 ## Ürün sınırları
 
@@ -12,8 +12,8 @@ Durum: Uygulama planı. ADR-006 kabul edildi; kimlik kararı ADR-007 (Önerildi)
 ## Karar kapıları
 
 1. **K1 Kimlik ve admin verisi:** **ADR-007 ile yeniden tanımlandı** (Önerildi). EGEMED kendi kullanıcı kaydını tutar; kullanıcılar admin tarafından tek tek ve toplu kaydedilir; üretim girişi kurum SSO'sudur ve EGEMED parola saklamaz. Rol modeli yalnız `admin` ve `kullanici`'dir; ek roller ve kurum/birim kapsamlı yetki park edildi (E3 §b). Oyunlaştırma verisi kullanıcı+sim başına EGEMED veritabanındadır ve üç simde de vardır (Opaca, Pulse, Ausculta); rozet kataloğu ve hedefler sim başına farklıdır. Kullanıcı ilerlemesini modül içinden ve platform dashboard'undan sim sekmeleriyle görür; simler arası toplam yoktur. xAPI ifadeleri kurum LRS'sine gitmeye devam eder ve aktör opak kalır (ADR-005'in xAPI kısmı geçerli). Ayrıntı ve açık insan kararları: `docs/specs/E3-kullanici-yonetimi.md`. ADR-007 kabul edilmeden kimlik uygulama görevleri Running'e alınmaz.
-2. **K2 xAPI profili:** `PROFILE_IRI`, activity base, `terminated` fiili, opak aktör kaynağı ve olay sözlüğü insan tarafından kabul edilir. K2 geçmeden üretim xAPI istemcisi/sim olay eşlemesi Running'e alınmaz.
-3. **K3 LRS yolu:** tarayıcıdan doğrudan iletim veya API vekili; sır dağıtımı, token süresi, CORS ve kurum LRS yetkileri kararlaştırılır. Öneri: kısa ömürlü kurum yetkisiyle API vekili; EGEMED veritabanında ifade/yeniden deneme kuyruğu yok.
+2. **K2 xAPI profili — KABUL (25 Eylül 2026):** `PROFILE_IRI`, activity base, `terminated` fiili, opak aktör kaynağı ve olay sözlüğü insan tarafından kabul edilir. K2 geçmeden üretim xAPI istemcisi/sim olay eşlemesi Running'e alınmaz.
+3. **K3 LRS yolu — KABUL (25 Eylül 2026, öneri seçildi):** tarayıcıdan doğrudan iletim veya API vekili; sır dağıtımı, token süresi, CORS ve kurum LRS yetkileri kararlaştırılır. Öneri: kısa ömürlü kurum yetkisiyle API vekili; EGEMED veritabanında ifade/yeniden deneme kuyruğu yok.
 4. **K4 Admin yetkileri:** iki rollü yetki matrisi (`admin`, `kullanici`) E3 §b'dedir; kimlerin kullanıcı rolü atayacağı ve ilk `admin` kurulum tohumu kurumca onaylanır. `platform_admin`, `kurum_admin`, `egitmen`, `denetci` ve içerik yöneticisi rolleri ile kurum/birim kapsamlı yetki park edildi; şemada/API'de/ekranda uygulanmaz.
 
 ## Alınan kararlar (23 Eylül 2026)
@@ -37,6 +37,23 @@ port envanterleri) işlendi.
   sim paketinde kalır.
 - **Açık (insan onayı):** oyunlaştırma ve `bestScore` verisinin localStorage'da tutulması ADR-005 ile
   gerilimli; K-P3 kararına kadar depolama bir port arkasında kalır.
+
+## Alınan kararlar (25 Eylül 2026)
+
+Depo sahibi canlı oturumda bekleyen kararların hepsini kabul etti ("hepsi kabul"); SSO protokolü ertelendi.
+
+- **ADR-008 Kabul:** rozetler sunucuda değerlendirilir; S1–S4 uygulandı.
+- **K2 xAPI profili Kabul:** `packages/xapi-profile` v0 — `PROFILE_IRI` `https://egemed.ege.edu.tr/xapi/v0`, activity
+  tabanı bu IRI altında, `terminated` fiili v0'da, aktör opak (ADR-005), olay sözlüğü sim olaylarından (T21). Üretim xAPI
+  istemcisi ve sim olay eşlemesi (T22/T23) artık Running'e alınabilir.
+- **K3 LRS yolu Kabul:** kısa ömürlü kurum yetkisiyle **API vekili**; tarayıcıya LRS sırrı verilmez; EGEMED veritabanında
+  ifade/yeniden deneme kuyruğu yok; vekil ifade gövdesini kalıcı kayda veya uygulama günlüğüne yazmaz (ADR-004 Astra notu).
+  Kurum LRS uç noktası ve kimlik bilgisi yapılandırmayla gelir; bilinene kadar geliştirme LRS'si kullanılır.
+- **Pulse kaynak düzeltmesi:** `nextEvent` özyineleme düzeltmesi (sync yaması `PULSE-NEXTEVENT-RECURSION`) kaynak depoya da
+  uygulanır; kaynağa uygulanınca yama listeden düşer.
+- **Pulse T04 içerik tekrarı:** kaynak müfredattaki yinelenen VF içeriği çözülür (bkz. `E2-pulse-port-inventory.md` T04 kapısı).
+- **"CLIX" adı:** klasör ve veritabanı adlarındaki eski ad değiştirilir.
+- **SSO protokolü:** ertelendi (PLATFORM-04 açık).
 
 ## İş sırası ve görev sınırları
 
