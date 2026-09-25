@@ -445,4 +445,7 @@ const EMBED_CSS = `
 /* Birleşik barda adım göstergesi bardadır; içerikteki kopya çizilmez. */
 :host(.pulse-unified) .stepper{display:none!important}
 :host(.pulse-unified) .topbar,:host(.pulse-unified) .app>.eg-footer,:host(.pulse-unified) .landing{display:none!important}
+/* T139 (kullanıcı kararı, 25 Eylül 2026): tam ekran yalnız birleşik bardaki ikondan; oynatma
+   çubuğundaki ikinci "↗ Tam ekran" düğmesi çizilmez (panel büyütme ↗ düğmeleri tam ekran değildir, kalır). */
+:host(.pulse-unified) #transportFullscreen{display:none!important}
 `;

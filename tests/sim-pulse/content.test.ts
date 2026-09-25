@@ -25,6 +25,11 @@ describe("Pulse mod içerikleri", () => {
 });
 
 describe("Pulse vendor çıktısı (T138)", () => {
+  it("açılış kodu tam ekran önerisini göstermez (T139)", () => {
+    const landingVendor = readFileSync("packages/sim-pulse/src/runtime/vendor/landing.js", "utf8");
+    expect(landingVendor).not.toContain("$('fullscreenPrompt')?.showModal()");
+  });
+
   it("sınav mod kartında kullanıcıya görünen SCORM ifadesi yok", () => {
     const appVendor = readFileSync("packages/sim-pulse/src/runtime/vendor/app.js", "utf8");
     expect(appVendor).not.toContain("SCORM");

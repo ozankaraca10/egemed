@@ -63,6 +63,14 @@ const ENV_NAMES = [
  * @type {Record<string, {id: string, why: string, find: string, replace: string, all?: boolean}[]>}
  */
 const PATCHES = {
+  landing: [
+    {
+      id: "EGEMED-NO-FULLSCREEN-PROMPT",
+      why: "Kullanıcı kararı (25 Eylül 2026): platformda zorla tam ekran önerisi (popup) açılmaz; tam ekran yalnız birleşik bardaki ikondan. Depo tercihine (pulse.fsPromptDone) bağlı kalmadan istem hiç gösterilmez.",
+      find: "if(fsPromptDone())return;$('fullscreenPrompt')?.showModal();",
+      replace: "",
+    },
+  ],
   app: [
     {
       id: "PULSE-A11Y-QUIZ-OPT-ROLE",

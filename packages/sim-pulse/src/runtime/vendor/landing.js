@@ -28,7 +28,7 @@ const FS_PROMPT_KEY='pulse.fsPromptDone';
 function fsPromptDone(){try{return localStorage.getItem(FS_PROMPT_KEY)==='1';}catch{return false;}}
 function markFsPromptDone(){try{localStorage.setItem(FS_PROMPT_KEY,'1');}catch{}}
 function ackFsPromptChoice(){if($('fullscreenPromptDontAsk')?.checked)markFsPromptDone();}
-function maybeShowFullscreenPrompt(){const fsEnabled=document.fullscreenEnabled||document.webkitFullscreenEnabled;if(!fsEnabled)return;if(document.fullscreenElement||document.webkitFullscreenElement)return;if(document.querySelector('dialog[open]'))return;if(fsPromptDone())return;$('fullscreenPrompt')?.showModal();}
+function maybeShowFullscreenPrompt(){const fsEnabled=document.fullscreenEnabled||document.webkitFullscreenEnabled;if(!fsEnabled)return;if(document.fullscreenElement||document.webkitFullscreenElement)return;if(document.querySelector('dialog[open]'))return;}
 $('confirmFullscreenPrompt')?.addEventListener('click',async()=>{ackFsPromptChoice();$('fullscreenPrompt').close();try{if(document.documentElement.requestFullscreen)await document.documentElement.requestFullscreen();else if(document.documentElement.webkitRequestFullscreen)document.documentElement.webkitRequestFullscreen();}catch{}});
 $('cancelFullscreenPrompt')?.addEventListener('click',()=>{ackFsPromptChoice();$('fullscreenPrompt').close();});
 $('closeFullscreenPrompt')?.addEventListener('click',()=>{ackFsPromptChoice();$('fullscreenPrompt').close();});
