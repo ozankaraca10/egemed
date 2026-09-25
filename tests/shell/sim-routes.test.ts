@@ -5,7 +5,7 @@ import { HomePage, SimulatorsPage } from "../../apps/shell/src/pages";
 import { resolveRoute, routeHref, SIM_PATHS, simHref, simTitleKey } from "../../apps/shell/src/routes";
 import { SIM_IDS, SimCard } from "../../apps/shell/src/SimCard";
 import { ShellLayout } from "../../apps/shell/src/ShellLayout";
-import { SimRoute, simErrorTitle } from "../../apps/shell/src/SimRoute";
+import { SimErrorNotice, SimRoute } from "../../apps/shell/src/SimRoute";
 import { loadSimModule } from "../../apps/shell/src/sims/loaders";
 import { SIMULATOR_IDS } from "../../packages/sim-host/src/SimHost";
 import { auscultaModule } from "../../packages/sim-ausculta/src/index";
@@ -148,13 +148,37 @@ describe("SimRoute yükleniyor durumu", () => {
   });
 });
 
-describe("simErrorTitle", () => {
-  it("sim adı ve hata etiketini mevcut anahtarlardan birleştirir", () => {
-    for (const simId of SIMULATOR_IDS) {
-      expect(simErrorTitle(simId), simId).toBe(
-        `${t(`sims.${simId}.name`)} · ${t("badge.tone.danger")}`,
-      );
-    }
+describe("SimRoute erişim reddi kartı (T129)", () => {
+  it("kilit simgesi, h2 başlık, açıklama ve Simülatörlere dön bağlantısını ortalanmış kartta çizer", () => {
+    const html = renderToStaticMarkup(createElement(SimRoute, { allowed: false, simId: "pulse" }));
+    expect(html).toContain('class="eg-shell-sim-page eg-shell-sim-page--notice"');
+    expect(html).toContain('class="eg-shell-sim-notice"');
+    expect(html).toContain('role="status"');
+    expect(html).toContain('aria-hidden="true"');
+    expect(html).toContain(`<h2 class="eg-shell-sim-notice__title">${t("sims.access.none")}</h2>`);
+    expect(html).toContain(`<p class="eg-shell-sim-notice__body">${t("sims.access.denied")}</p>`);
+    expect(html).toContain('class="eg-shell-sim-notice__primary"');
+    expect(html).toContain(`href="${routeHref("simulators")}"`);
+    expect(html).toContain(t("sims.back"));
+    expect(html).not.toContain("eg-shell-sim-page__host");
+    expect(html).not.toMatch(/<h1\b/);
+  });
+});
+
+describe("SimErrorNotice kartı (T129)", () => {
+  it("uyarı simgesi, h2 başlık, gövde, birincil Tekrar dene ve ikincil Simülatörlere dön çizer", () => {
+    const html = renderToStaticMarkup(createElement(SimErrorNotice, { onRetry: () => undefined }));
+    expect(html).toContain("eg-shell-sim-notice eg-shell-sim-notice--error");
+    expect(html).toContain('class="eg-shell-sim-notice__icon eg-shell-sim-notice__icon--warning"');
+    expect(html).toContain('role="alert"');
+    expect(html).toContain(`<h2 class="eg-shell-sim-notice__title">${t("sims.error.title")}</h2>`);
+    expect(html).toContain(`<p class="eg-shell-sim-notice__body">${t("sims.error.body")}</p>`);
+    expect(html).toContain('class="eg-shell-sim-notice__primary"');
+    expect(html).toContain(`>${t("sims.error.retry")}</button>`);
+    expect(html).toContain('class="eg-shell-sim-notice__secondary"');
+    expect(html).toContain(`href="${routeHref("simulators")}"`);
+    expect(html).toContain(t("sims.back"));
+    expect(html).not.toMatch(/<h1\b/);
   });
 });
 

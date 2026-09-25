@@ -175,7 +175,7 @@ test.describe("API oturumu (dev sağlayıcı)", () => {
     await restored;
   });
 
-  test("admin pulse erişimini kaldırınca öğrenci simi açamaz", async ({ page, browser, baseURL }) => {
+  test("admin pulse erişimini kaldırınca öğrenci simi açamaz", async ({ page, browser, baseURL }, testInfo) => {
     await page.goto(STUDENT_ENTRY);
     await signIn(page, "ogrenci");
     await expect(page).toHaveURL(/#\/$/);
@@ -213,7 +213,19 @@ test.describe("API oturumu (dev sağlayıcı)", () => {
       await page.reload();
       await page.goto("/#/sims/pulse");
       await expect(page.getByText("Bu simülatöre erişiminiz yok")).toBeVisible();
+      await expect(page.getByRole("heading", { name: "Erişim yok" })).toBeVisible();
+      await expect(page.getByRole("link", { name: "Simülatörlere dön" })).toBeVisible();
       await expect(page.locator(".egemed-pulse-runtime")).toHaveCount(0);
+      // T129: duyuru kartı 360/768/1440'ta yatay taşma üretmez; ekran görüntüsü
+      // yalnız erişim reddi için alınır (hata durumu, yükleyici zorlanmadan oluşmaz).
+      for (const width of [360, 768, 1440]) {
+        await page.setViewportSize({ height: width === 360 ? 780 : 900, width });
+        const overflow = await page.evaluate(
+          () => document.documentElement.scrollWidth > window.innerWidth + 1,
+        );
+        expect(overflow, `yatay kaydırma (${width}px)`).toBe(false);
+      }
+      await captureRouteScreenshot(page, testInfo.project.name, "#/sims/pulse erişim reddi");
     } finally {
       await adminPage.evaluate(async (userId) => {
         const csrf = document.cookie

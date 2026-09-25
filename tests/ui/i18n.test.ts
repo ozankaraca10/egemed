@@ -207,6 +207,7 @@ const simErrorKeys: TrKey[] = [
   "sims.loading",
   "sims.access.none",
   "sims.access.denied",
+  "sims.back",
 ];
 
 const homeProgressKeys: TrKey[] = [
@@ -374,6 +375,7 @@ describe("i18n/tr sözlüğü", () => {
     );
     expect(t("sims.error.retry")).toBe("Tekrar dene");
     expect(t("sims.loading")).toBe("Simülatör yükleniyor…");
+    expect(t("sims.back")).toBe("Simülatörlere dön");
   });
 
   it("premium platform anahtarları tanımlı ve boş değil", () => {

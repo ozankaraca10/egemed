@@ -438,6 +438,7 @@ export const tr = {
   "sims.open": "Simülatörü aç",
   "sims.access.none": "Erişim yok",
   "sims.access.denied": "Bu simülatöre erişiminiz yok",
+  "sims.back": "Simülatörlere dön",
   "sims.loading": "Simülatör yükleniyor…",
   "sims.error.title": "Simülatör açılamadı",
   "sims.error.body":
