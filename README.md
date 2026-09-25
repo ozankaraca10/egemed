@@ -17,7 +17,7 @@ modüller olarak sunan, mobil uyumlu bir tıp eğitimi uygulamasıdır. Eski mod
 pnpm i                               # Node ≥ 22 (.nvmrc), pnpm 10 (packageManager pin); --frozen-lockfile kırılmaz
 pnpm turbo lint typecheck test       # ana kalite kapısı (her görevde yeşil olmalı)
 pnpm dev                             # kabuk: http://localhost:5173
-pnpm e2e:mobile                      # Playwright + axe: 360/768/1440 px, WCAG 2.2 AA, giriş/güvenlik akışları (artefakt: e2e-artifacts/<git-sha>/)
+pnpm e2e:mobile                      # Playwright + axe: 360/768/1440 px, WCAG 2.2 AA, giriş/güvenlik akışları (artefakt: e2e-artifacts/<run-id>/)
 pnpm infra:up / pnpm infra:down      # geliştirme Postgres 18 (5432) + SQL LRS (8080) — colima/docker; değerler .env.local
 pnpm --filter @egemed/sim-opaca sync:xray   # git-dışı Opaca röntgen görsellerini yerel kaynak depodan kopyalar
 ```
@@ -40,7 +40,8 @@ yönetici `#/giris/admin` → `admin` / `egemed`; test öğrencisi `#/giris/test
 | `packages/sim-pulse` | Pulse modülü: kaynak runtime (`src/runtime/host.ts`, `module.ts`, `chrome.ts`, `gami.ts`, `vendor/`) ile EKG motoru, durum ve müfredat; eski `src/mount.ts` + `ui/*` ekranları kabukta kullanılmıyor | Kabukta canlı; vendor dosyaları `pnpm --filter @egemed/sim-pulse sync:runtime` ile kaynaktan üretilir |
 | `packages/sim-ausculta` | Ausculta modülü: çekirdek, ses motoru, store/runtime, UI, ekranlar ve SimHost adaptörü | Kabukta canlı; ses varlıkları git dışı, `sync:audio` ile yerel kaynaktan alınır |
 | `packages/gamification-core` | **Sim-bağımsız oyunlaştırma çekirdeği**: XP, seviye, seri, haftalık hedef, zaman (Europe/Istanbul), jenerik rozet motoru, sıralama, ödül, grafik | Rozet kataloğu ve kurallar her simde ayrı (parametre) |
-| `packages/gami-catalogs` | Sime özgü rozet katalogları, kuralları ve kodlu deneme özeti/istatistiği (ADR-008; Pulse + Opaca); simler ve API aynı paketi kullanır | Ausculta kataloğu (S2) sırada |
+| `packages/gami-catalogs` | Sime özgü rozet katalogları, kuralları ve kodlu deneme özeti/istatistiği (ADR-008; Pulse, Opaca, Ausculta); simler ve API aynı paketi kullanır | S2 (Ausculta kataloğu) tamamlandı (T109) |
+| `packages/gami-ui` | Ortak oyunlaştırma bileşenleri (T115; referans tasarım Opaca): `views.tsx`, `model.ts`, `icons.tsx`, `styles.css`, gölge DOM için `styles-inline.ts`, `server.tsx` | Opaca, Ausculta ve Pulse'ta kullanılır |
 | `packages/contracts` | Paylaşılan sözleşmeler (zod): kimlik, kullanıcı, CSV içe aktarma, oyunlaştırma, hata kodları | API ve UI aynı şemayı kullanır |
 | `packages/api-client` | Tipli API istemcisi: `contracts` şemalarıyla yanıt doğrulama, CSRF başlığı, oturum/admin/içe aktarma/oyunlaştırma uçları | Kabuk veri kaynakları (admin, dashboard) buradan beslenir |
 | `packages/ui` | Ortak bileşenler (Card, Badge, Tabs, Table, Modal, ModeCard) + **Türkçe sözlük** `i18n/tr.ts` | Tüm arayüz metni buradan |
@@ -74,7 +75,8 @@ yönetici `#/giris/admin` → `admin` / `egemed`; test öğrencisi `#/giris/test
   içermez (vanilla modül güvenle `appendChild`/temizlik yapar). Birleşik bar kararıyla (25 Eylül) sim rotasında bar EGEMED barıdır:
   simler adım/çip/eylemlerini `SimHost` kanalıyla (`setChrome`, `SimChrome`) kabuğa yazar; Pulse kaynağının açılış sayfası atlanır
   ve kaynak üst çubuğu/footer'ı gizlenir (`packages/sim-pulse/src/runtime/chrome.ts`). Kaynak Pulse'un ilk girişte açtığı kalıcı tam
-  ekran önerisi gömülü modda kapalıdır (`pulse.fsPromptDone` varsayılanı); tam ekran düğmesi barın eylemi olarak kalır.
+  ekran önerisi (popup) platformda hiç açılmaz (25 Eylül kararı, T139; kaynak yaması `vendor/manifest.json`
+  `EGEMED-NO-FULLSCREEN-PROMPT`, `landing.js`); tam ekran yalnız birleşik bardaki ikondan tetiklenir.
 - **Kimlik ve veri (ADR-007, Kabul):** EGEMED kullanıcı kaydı tutar; kullanıcıları admin kaydeder (tek tek ve toplu CSV); giriş tipi
   **SSO** (protokol henüz belirlenmedi; o zamana kadar geliştirme sağlayıcısı). EGEMED parola saklamaz. Roller şimdilik yalnız
   **admin** ve **kullanıcı** (diğerleri park edildi). Oyunlaştırma verisi EGEMED veritabanında kullanıcı×sim başına tutulur.
@@ -273,9 +275,10 @@ uygulanması.
 
 ## CI
 
-`dev` dalına push ve `dev`'i hedefleyen PR'larda GitHub Actions (`.github/workflows/ci.yml`) dört iş çalıştırır: `gates`
+`dev` dalına push ve `dev`'i hedefleyen PR'larda GitHub Actions (`.github/workflows/ci.yml`) beş iş çalıştırır: `gates`
 (`pnpm turbo run lint typecheck test`), `e2e` (Playwright mobil, axe), `api-e2e` (gerçek API + PostgreSQL; migration + `seed:dev`
-sonrası `pnpm e2e:api`) ve `api-db` (migration turu). Artefaktlar (`e2e-artifacts/`, `playwright-report/`, `api-e2e.log`) her
+sonrası `pnpm e2e:api`), `api-db` (migration turu) ve `prod-image` (temiz checkout imajı; `scripts/ops/verify-prod-image.sh`,
+API-02 kabulü). Artefaktlar (`e2e-artifacts/`, `playwright-report/`, `api-e2e.log`) her
 koşuda yüklenir. Node sürümü `.nvmrc`'den, pnpm sürümü `packageManager`'dan okunur; bağımlılıklar `--frozen-lockfile` ile kurulur,
 eylemler commit SHA'sına sabitlidir. **Risk:** git-dışı sim varlıkları (Opaca xray, Ausculta ses) CI'da yoktur; bu varlıklara
 bağlı e2e senaryoları CI'da tam doğrulanamaz (bkz. `docs/ops/ISLETIM.md` §8). Branch protection depo sahibinin adımıdır
