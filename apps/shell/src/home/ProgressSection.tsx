@@ -1,4 +1,4 @@
-import { useEffect, useState, type JSX } from "react";
+import { useEffect, useRef, useState, type JSX } from "react";
 import { DEFAULT_RULES, type WeeklyGoal } from "@egemed/gamification-core";
 import {
   defaultGamiIcons,
@@ -191,6 +191,7 @@ export function LeaderboardVisibilityControl({
     <div className="eg-shell-progress__optout">
       <label className="eg-shell-progress__optoutLabel">
         <input
+          aria-busy={pending}
           aria-checked={visible}
           aria-describedby="eg-leaderboard-visible-hint"
           checked={visible}
@@ -306,6 +307,24 @@ export function ProgressSection({
   const [summaries, setSummaries] = useState<readonly GamiSimSummary[]>([]);
   const [attempt, setAttempt] = useState(0);
   const [leaderboard, setLeaderboard] = useState<LeaderboardVisibilityView | null>(null);
+  // T145: kullanıcının PATCH'i sürerken (yenileme tetiklediği) bir GET
+  // yanıtı gelirse bu bayrak o yanıtın üzerine yazmasını engeller; en son
+  // kullanıcı niyeti (tıklama) korunur.
+  const patchPendingRef = useRef(false);
+  // Tıklama anındaki güncel görünüm (setState güncelleyicisi tembel çalışabilir;
+  // önceki değer ondan okunmaz). Efekt yeniden koşsa da PATCH sonucu bileşen
+  // bağlıyken yazılır — aksi hâlde anahtar `pending` durumunda takılı kalırdı.
+  const leaderboardRef = useRef<LeaderboardVisibilityView | null>(null);
+  const mountedRef = useRef(true);
+  useEffect(() => {
+    leaderboardRef.current = leaderboard;
+  }, [leaderboard]);
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+    };
+  }, []);
 
   useEffect(() => {
     const activeSession = actorId.length > 0 ? session : null;
@@ -336,35 +355,44 @@ export function ProgressSection({
       return undefined;
     }
     let active = true;
+    const onToggle = (next: boolean): void => {
+      // Yükleme sürerken (pending) ya da zaten bir PATCH varken tıklama yok
+      // sayılır; anahtar zaten `disabled` olduğu için bu ikinci koruma katmanıdır.
+      const current = leaderboardRef.current;
+      if (current === null || current.pending || patchPendingRef.current) return;
+      const previous = current.visible;
+      patchPendingRef.current = true;
+      setLeaderboard((latest) => (latest === null ? latest : { ...latest, error: false, pending: true, visible: next }));
+      void commitLeaderboardVisibility(previous, next, (value) => preferenceSource.setVisible(value)).then(
+        (result) => {
+          patchPendingRef.current = false;
+          if (!mountedRef.current) return;
+          setLeaderboard((latest) =>
+            latest === null ? latest : { ...latest, error: result.failed, pending: false, visible: result.visible },
+          );
+        },
+      );
+    };
+    // Anahtar veri gelmeden hemen çizilir: yükleme bitene dek `pending: true`
+    // (devre dışı + aria-busy). Önceki değer varsa (yenileme) korunur.
+    setLeaderboard((current) => ({
+      error: false,
+      onToggle,
+      pending: true,
+      visible: current?.visible ?? false,
+    }));
     preferenceSource.getVisible().then(
       (visible) => {
         if (!active) return;
-        setLeaderboard({
-          error: false,
-          onToggle: (next) => {
-            let previous = visible;
-            setLeaderboard((current) => {
-              if (current === null || current.pending) return current;
-              previous = current.visible;
-              return { ...current, error: false, pending: true, visible: next };
-            });
-            void commitLeaderboardVisibility(previous, next, (value) => preferenceSource.setVisible(value)).then(
-              (result) => {
-                if (!active) return;
-                setLeaderboard((current) =>
-                  current === null
-                    ? current
-                    : { ...current, error: result.failed, pending: false, visible: result.visible },
-                );
-              },
-            );
-          },
-          pending: false,
-          visible,
+        setLeaderboard((current) => {
+          // T145: bu yükleme, kullanıcının o sırada sürmekte olan PATCH'inin
+          // üzerine yazmaz — en son kullanıcı niyeti korunur (bkz. yukarı).
+          if (patchPendingRef.current) return current;
+          return { error: false, onToggle, pending: false, visible };
         });
       },
       () => {
-        if (active) setLeaderboard(null);
+        if (active && !patchPendingRef.current) setLeaderboard(null);
       },
     );
     return () => {
