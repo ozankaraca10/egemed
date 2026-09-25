@@ -37,14 +37,17 @@ test.describe("dev giriş akışları", () => {
     await expect(page).toHaveURL(/#\/admin$/);
     await expect(page.getByRole("heading", { name: "Yönetici paneli" })).toBeVisible();
     await expect(page.getByText("Geliştirme oturumu")).toBeVisible();
-    await expect(page.getByText("Sahte yönetici")).toBeVisible();
+    // T152: oturum adı hesap menüsü düğmesinin erişilebilir adındadır (dar ekranda yalnız baş harf görünür).
+    await expect(page.getByRole("button", { name: "Hesap menüsü: Sahte yönetici" })).toBeVisible();
   });
 
   test("çıkış oturumu kapatır, admin kapalı kalır", async ({ page }) => {
     await page.goto(ADMIN_ENTRY);
     await signIn(page, "admin", "egemed");
     await expect(page).toHaveURL(/#\/admin$/);
-    await page.getByRole("button", { name: "Çıkış yap" }).click();
+    // T152: çıkış hesap menüsündedir.
+    await page.getByRole("button", { name: /Hesap menüsü/ }).click();
+    await page.getByRole("menuitem", { name: "Çıkış yap" }).click();
     await expect(page.getByRole("heading", { name: "Yönetici girişi" })).toBeVisible();
     await page.goto("/#/admin");
     await expect(page).toHaveURL(/#\/giris\/admin$/);

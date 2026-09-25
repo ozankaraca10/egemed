@@ -244,7 +244,7 @@ describe("ShellLayout oturum göstergesi", () => {
       }),
     );
 
-  it("göstergeyi yalnız oturum varken çizer; rol etiketi, çıkış ve şerit birlikte gelir", () => {
+  it("göstergeyi yalnız oturum varken çizer; rol etiketi (hesap menüsü düğmesinde) ve şerit birlikte gelir", () => {
     const none = layout(null);
     const admin = layout(ADMIN);
     const student = layout(STUDENT);
@@ -258,7 +258,8 @@ describe("ShellLayout oturum göstergesi", () => {
     }
     expect(admin).toContain(t("shell.session.admin"));
     expect(admin).not.toContain(t("shell.session.student"));
-    expect(admin).toContain(t("shell.session.logout"));
+    // T152: "Çıkış yap" hesap menüsündedir (Radix; yalnız açıkken çizilir — e2e/app-frame.spec.ts).
+    expect(admin).toContain('aria-haspopup="menu"');
     expect(admin).toContain(t("shell.session.banner"));
     expect(admin).toContain('type="button"');
     expect(student).toContain(t("shell.session.student"));

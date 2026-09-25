@@ -27,9 +27,9 @@ async function signIn(page: Page, username: string, password = "egemed"): Promis
   await page.click("button[type=submit]");
 }
 
-/** Üst bardaki oturum göstergesi; API oturumunda sunucudan gelen görünen adı taşır. */
+/** Üst bardaki hesap menüsü düğmesi (T152); erişilebilir adı sunucudan gelen görünen adı taşır. */
 function sessionRole(page: Page) {
-  return page.locator(".eg-shell-session__role");
+  return page.getByRole("button", { name: /Hesap menüsü/ });
 }
 
 test.describe("API oturumu (dev sağlayıcı)", () => {
@@ -41,7 +41,7 @@ test.describe("API oturumu (dev sağlayıcı)", () => {
     await page.goto(STUDENT_ENTRY);
     await signIn(page, "ogrenci");
     await expect(page).toHaveURL(/#\/$/);
-    await expect(sessionRole(page)).toHaveText(STUDENT_NAME);
+    await expect(sessionRole(page)).toHaveAccessibleName(`Hesap menüsü: ${STUDENT_NAME}`);
 
     // Oturum sessionStorage'da değil, sunucu çerezinde: `egemed_session` HttpOnly
     // olduğu için `document.cookie`'de görünmez, double-submit CSRF çerezi görünür.
@@ -51,7 +51,7 @@ test.describe("API oturumu (dev sağlayıcı)", () => {
     expect(await page.evaluate(() => sessionStorage.getItem("egemed.devSession"))).toBeNull();
 
     await page.reload();
-    await expect(sessionRole(page)).toHaveText(STUDENT_NAME);
+    await expect(sessionRole(page)).toHaveAccessibleName(`Hesap menüsü: ${STUDENT_NAME}`);
     await captureRouteScreenshot(page, testInfo.project.name, "#/");
     expect(errors.filter((line) => !EXPECTED_401.test(line)), "konsol/sayfa hatası").toEqual([]);
   });
@@ -67,7 +67,7 @@ test.describe("API oturumu (dev sağlayıcı)", () => {
     await signIn(page, "admin");
     await expect(page).toHaveURL(/#\/admin$/);
     await expect(page.getByRole("heading", { name: "Yönetici paneli" })).toBeVisible();
-    await expect(sessionRole(page)).toHaveText(ADMIN_NAME);
+    await expect(sessionRole(page)).toHaveAccessibleName(`Hesap menüsü: ${ADMIN_NAME}`);
     // Sentetik oturum uyarısı API oturumunda çizilmez.
     await expect(page.getByText("Geliştirme oturumu")).toHaveCount(0);
   });
@@ -77,9 +77,10 @@ test.describe("API oturumu (dev sağlayıcı)", () => {
     await signIn(page, "admin");
     await expect(page).toHaveURL(/#\/admin$/);
     await page.reload();
-    await expect(sessionRole(page)).toHaveText(ADMIN_NAME);
+    await expect(sessionRole(page)).toHaveAccessibleName(`Hesap menüsü: ${ADMIN_NAME}`);
 
-    await page.getByRole("button", { name: "Çıkış yap" }).click();
+    await sessionRole(page).click();
+    await page.getByRole("menuitem", { name: "Çıkış yap" }).click();
     await expect(page.getByRole("heading", { name: "Yönetici girişi" })).toBeVisible();
     await page.reload();
     await expect(sessionRole(page)).toHaveCount(0);

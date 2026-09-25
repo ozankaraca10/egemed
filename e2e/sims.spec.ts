@@ -175,8 +175,7 @@ test.describe("kompakt hesap menüsü (T120)", () => {
     await expect(page.getByRole("menu")).toBeVisible();
     const logout = page.getByRole("menuitem", { name: "Çıkış yap" });
     await expect(logout).toBeVisible();
-    await expect(logout).toBeFocused();
-    await expect(page.getByText("Sahte test öğrencisi")).toBeVisible();
+    await expect(page.getByRole("menu").getByText("Sahte test öğrencisi")).toBeVisible();
     await expect(page.getByText("Geliştirme oturumu", { exact: true })).toBeVisible();
 
     const overflow = await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth + 1);
@@ -187,6 +186,8 @@ test.describe("kompakt hesap menüsü (T120)", () => {
     await expect(page.getByRole("menu")).toBeHidden();
     await account.press("Enter");
     await expect(page.getByRole("menu")).toBeVisible();
+    // Klavyeyle açılınca odak ilk öğeye gider (Radix); öğrencide tek öğe "Çıkış yap".
+    await expect(logout).toBeFocused();
     await page.keyboard.press("Escape");
     await expect(page.getByRole("menu")).toBeHidden();
     await expect(account).toBeFocused();

@@ -1,3 +1,5 @@
+import { ToastProvider } from "@egemed/ui";
+import { AdminFrame } from "./admin/AdminFrame";
 import { useEffect, useMemo, useRef, useState, type JSX, type ReactNode } from "react";
 import { t, type TrKey } from "@egemed/ui/i18n";
 import { AdminPage } from "./AdminPage";
@@ -48,13 +50,16 @@ function contentFor(
   onChrome?: (chrome: SimChrome | null) => void,
 ): ReactNode {
   if (route.kind === "page") return pageFor(route.route.id, session);
-  if (route.kind === "admin") return <AdminPage />;
-  if (route.kind === "adminUsers") return <UsersPage currentUserId={session?.actorId ?? null} />;
-  if (route.kind === "adminUserCreate") return <UserFormPage />;
-  if (route.kind === "adminUserDetail") return <UserDetailPage currentUserId={session?.actorId ?? null} userId={route.userId} />;
-  if (route.kind === "adminImport") return <ImportWizardPage />;
-  if (route.kind === "adminRoles") return <RolesPage />;
-  if (route.kind === "adminAudit") return <AuditPage />;
+  // T152: yönetim sayfaları ortak çerçevede (sol menü / dar ekranda sekme şeridi).
+  if (route.kind === "admin") return <AdminFrame active="overview"><AdminPage /></AdminFrame>;
+  if (route.kind === "adminUsers") return <AdminFrame active="users"><UsersPage currentUserId={session?.actorId ?? null} /></AdminFrame>;
+  if (route.kind === "adminUserCreate") return <AdminFrame active="users"><UserFormPage /></AdminFrame>;
+  if (route.kind === "adminUserDetail") {
+    return <AdminFrame active="users"><UserDetailPage currentUserId={session?.actorId ?? null} userId={route.userId} /></AdminFrame>;
+  }
+  if (route.kind === "adminImport") return <AdminFrame active="import"><ImportWizardPage /></AdminFrame>;
+  if (route.kind === "adminRoles") return <AdminFrame active="roles"><RolesPage /></AdminFrame>;
+  if (route.kind === "adminAudit") return <AdminFrame active="audit"><AuditPage /></AdminFrame>;
   if (route.kind === "sim") {
     return (
       <SimRoute
@@ -205,7 +210,12 @@ export function App(): JSX.Element | null {
   }
   function frame(node: ReactNode): JSX.Element | null {
     if (sources === null) return null;
-    return <ShellDataSourcesProvider sources={sources}>{node}</ShellDataSourcesProvider>;
+    // T152: geçici bildirimler (useToast) tüm kabuk sayfalarında kullanılabilir.
+    return (
+      <ShellDataSourcesProvider sources={sources}>
+        <ToastProvider>{node}</ToastProvider>
+      </ShellDataSourcesProvider>
+    );
   }
 
   if (route.kind === "entry") {

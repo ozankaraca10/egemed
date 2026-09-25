@@ -1,6 +1,6 @@
 import type { JSX, ReactNode } from "react";
 import { t } from "@egemed/ui/i18n";
-import { ROUTES, routeHref, type ResolvedRoute, type RouteId } from "./routes";
+import { ADMIN_PATH, ROUTES, routeHref, type ResolvedRoute, type RouteId } from "./routes";
 import type { ShellSession } from "./session";
 import { ShellFooter } from "./ShellFooter";
 import { EgemedLogo } from "./brand/EgemedLogo";
@@ -82,6 +82,20 @@ export function ShellLayout({ route, session, onLogout, simChrome = null, childr
   // "Geliştirme oturumu" uyarısı yalnız sentetik oturum içindir (T35b); API
   // oturumu sunucuda kayıt üretir, bu yüzden uyarı çizilmez.
   const synthetic = session !== undefined && session !== null && session.displayName === null;
+  // T152: API oturumunda ad altında rol; sahte oturumda ad zaten rol etiketidir.
+  const accountRole = session !== undefined && session !== null && !synthetic
+    ? t(session.role === "admin" ? "shell.account.role.admin" : "shell.account.role.student")
+    : undefined;
+  const adminHref = session?.role === "admin" ? (`#${ADMIN_PATH}` as const) : null;
+  const account = roleLabel !== null && (
+    <AccountMenu
+      adminHref={adminHref}
+      displayName={roleLabel}
+      onLogout={onLogout}
+      roleLabel={accountRole}
+      synthetic={synthetic}
+    />
+  );
   return (
     <div className="eg-shell">
       <a className="eg-shell-skip" href="#icerik" onClick={focusMain}>{t("shell.skip")}</a>
@@ -91,22 +105,10 @@ export function ShellLayout({ route, session, onLogout, simChrome = null, childr
         </a>
         {route.kind === "sim" && <SimBar chrome={simChrome} title={t(route.titleKey)} />}
         {simMode ? (
-          // T120: sim rotasında tek hesap düğmesi; çip, rol etiketi ve çıkış
-          // düğmesi menünün içine taşındı. Düğme `header__side` dışındadır:
-          // mobilde side gizlense de hesap düğmesi görünür kalır.
-          roleLabel !== null && (
-            <AccountMenu displayName={roleLabel} onLogout={onLogout} synthetic={synthetic} />
-          )
+          // T120: sim rotasında tek hesap düğmesi; menüde ad, not ve çıkış.
+          account
         ) : (
           <div className="eg-shell-header__side">
-            {roleLabel !== null && (
-              <div className="eg-shell-session">
-                <span className="eg-shell-session__role">{roleLabel}</span>
-                <button className="eg-shell-session__logout" onClick={onLogout} type="button">
-                  {t("shell.session.logout")}
-                </button>
-              </div>
-            )}
             <nav aria-label={t("shell.nav.label")} className="eg-shell-nav">
               {ROUTES.map((item) => (
                 <a
@@ -118,6 +120,8 @@ export function ShellLayout({ route, session, onLogout, simChrome = null, childr
                 </a>
               ))}
             </nav>
+            {/* T152: rol çipi + ayrı "Çıkış yap" düğmesi yerine tüm sayfalarda tek hesap menüsü. */}
+            {account}
           </div>
         )}
       </header>
