@@ -5,7 +5,9 @@ import { useStore } from "./core/StoreProvider";
 import type { Screen } from "./core/types";
 import { DevPanel } from "./DevPanel";
 import { useLearnGamiPort, useSimulationGamiPort } from "./gamification/bindings";
-import { GamiSyncErrorBanner } from "./ui/gami/GamiSyncErrorBanner";
+import { GamiSyncErrorBanner } from "@egemed/gami-ui";
+import { useGamiContext } from "./gamification/GamiContext";
+import { IconInfo } from "./ui/icons";
 import { AchievementsScreen } from "./screens/AchievementsScreen";
 import { LeaderboardScreen } from "./screens/LeaderboardScreen";
 import { LearnScreen } from "./screens/LearnScreen";
@@ -160,11 +162,12 @@ export function App({
   devBuild = false,
   setChrome,
 }: AppProps): JSX.Element {
+  const { syncError, clearSyncError } = useGamiContext();
   return (
     <EmbeddedProvider embedded={embedded} {...(setChrome === undefined ? {} : { setChrome })}>
       <div className="eg-sim-opaca app-shell">
         <Header embedded={embedded} env={chromeEnv} modals={{ help: HelpModal, confirm: ConfirmModal }} gamiEnabled={gamiEnabled} />
-        {gamiEnabled ? <GamiSyncErrorBanner /> : null}
+        {gamiEnabled && syncError ? <GamiSyncErrorBanner message={syncError.message} onDismiss={clearSyncError} icon={<IconInfo width={16} height={16} />} /> : null}
         <main className="app-content">
           {timing ? (
             <ScreenBody

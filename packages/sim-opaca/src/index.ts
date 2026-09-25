@@ -2,7 +2,7 @@ import "@egemed/tokens/opaca.css";
 import "./styles/shell.css";
 import "./styles/film.css";
 import "./styles/rest.css";
-import "./styles/gami.css";
+import "@egemed/gami-ui/styles.css";
 
 import type { SimulatorId } from "@egemed/sim-host";
 

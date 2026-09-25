@@ -8,7 +8,6 @@ const moduleCssPaths = [
   "packages/sim-opaca/src/styles/shell.css",
   "packages/sim-opaca/src/styles/film.css",
   "packages/sim-opaca/src/styles/rest.css",
-  "packages/sim-opaca/src/styles/gami.css",
 ] as const;
 
 const forbiddenBareSelectors = [":root", "html", "body", "#root", "button", "*", ":focus-visible"];
@@ -147,5 +146,6 @@ describe("Opaca CSS sözleşmesi (S20–S23)", () => {
     expect(index).toContain('import "./styles/shell.css"');
     expect(index).toContain('import "./styles/film.css"');
     expect(index).toContain('import "./styles/rest.css"');
+    expect(index).toContain('import "@egemed/gami-ui/styles.css"');
   });
 });
