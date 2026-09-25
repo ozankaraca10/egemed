@@ -1,20 +1,34 @@
 import { createContext, useContext, type JSX, type ReactNode } from "react";
+import type { SimChrome } from "@egemed/sim-host";
 
-/** Platform kabuğu içinde gömülü mod; ekran başlıkları h2 olarak çizilir (kabuk h1 tek kalır). */
-const EmbeddedContext = createContext(false);
+/** Platform kabuğu: gömülü mod ve, verilmişse, birleşik bar kanalı. */
+interface EmbeddedValue {
+  readonly embedded: boolean;
+  readonly setChrome?: (chrome: SimChrome | null) => void;
+}
+
+const EmbeddedContext = createContext<EmbeddedValue>({ embedded: false });
 
 export function EmbeddedProvider({
   embedded,
+  setChrome,
   children,
 }: {
   readonly embedded: boolean;
+  readonly setChrome?: (chrome: SimChrome | null) => void;
   readonly children: ReactNode;
 }): JSX.Element {
-  return <EmbeddedContext.Provider value={embedded}>{children}</EmbeddedContext.Provider>;
+  const value: EmbeddedValue = setChrome === undefined ? { embedded } : { embedded, setChrome };
+  return <EmbeddedContext.Provider value={value}>{children}</EmbeddedContext.Provider>;
 }
 
 export function useEmbedded(): boolean {
-  return useContext(EmbeddedContext);
+  return useContext(EmbeddedContext).embedded;
+}
+
+/** Birleşik bar kanalı. Yoksa ekran içi adım göstergesi kalır. */
+export function useSetChrome(): ((chrome: SimChrome | null) => void) | undefined {
+  return useContext(EmbeddedContext).setChrome;
 }
 
 export interface ScreenHeadingProps {

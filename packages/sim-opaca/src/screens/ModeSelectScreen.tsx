@@ -5,6 +5,7 @@ import { poolFor } from '../data/pool'
 import { LIBRARY_ITEMS } from '../data/terminology'
 import { sampleSession, SESSION_SIZE } from '../core/session'
 import { Footer, EcgDeco } from '../ui/chrome'
+import { useSetChrome } from '../EmbeddedContext'
 import { ScreenHeading } from '../ui/ScreenHeading'
 import { IconGraduation, IconFilm, IconChart, IconCheck, IconGift, IconLock } from '../ui/icons'
 
@@ -28,6 +29,7 @@ export interface ModeSelectScreenProps {
 /** Mod seçim ekranı: Öğrenme (İnceleme) / Uygulama / Değerlendirme. */
 export function ModeSelectScreen({ embedded = false, gamiEnabled = false }: ModeSelectScreenProps): JSX.Element {
   const { state, dispatch, now } = useStore()
+  const unified = useSetChrome() !== undefined
   const practiceCount = poolFor('practice').length
   const assessmentCount = poolFor('assessment').length
   const recommendLearn = !state.tutorialSeen
@@ -56,7 +58,7 @@ export function ModeSelectScreen({ embedded = false, gamiEnabled = false }: Mode
       <EcgDeco embedded={embedded} />
       <div className="screen" style={{ position: 'relative', zIndex: 1 }}>
         <div className="container screen-body">
-          <Stepper active={1} labels={['Mod seçimi', 'Çalışma', 'Tamamla']} />
+          {unified ? null : <Stepper active={1} labels={['Mod seçimi', 'Çalışma', 'Tamamla']} />}
           <ScreenHeading className="mode-title">Çalışma modunu seçin</ScreenHeading>
           <p className="mode-sub">Önce öğrenme modunda okuma sırasını oturtmanız önerilir.</p>
           <div className="mode-cards">

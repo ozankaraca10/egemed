@@ -1,6 +1,6 @@
 import { createElement, type ReactNode } from "react";
 import { createRoot as reactCreateRoot } from "react-dom/client";
-import type { SimDispose, SimModule, SimMountContext, SimMountTarget } from "@egemed/sim-host";
+import type { SimChrome, SimDispose, SimModule, SimMountContext, SimMountTarget } from "@egemed/sim-host";
 import { App } from "./App";
 import { StoreProvider } from "./core/StoreProvider";
 import { DEFAULT_ASSET_BASE, resetAssetBase, setAssetBase } from "./core/images";
@@ -121,11 +121,19 @@ export function createOpacaModule(deps?: OpacaModuleDeps): SimModule {
       const root = resolved.createRoot(container.node);
       const showDevPanel = Boolean(resolved.devBuild && resolved.chromeEnv?.devQuery);
 
+      const hostChrome = context.setChrome;
+      let chromeOpen = true;
+      const setChrome = hostChrome
+        ? (chrome: SimChrome | null) => {
+            if (chromeOpen) hostChrome(chrome);
+          }
+        : undefined;
       const appProps = {
         embedded: true as const,
         gamiEnabled: resolved.gamiEnabled ?? true,
         showDevPanel,
         devBuild: Boolean(resolved.devBuild),
+        ...(setChrome === undefined ? {} : { setChrome }),
         ...(resolved.chromeEnv ? { chromeEnv: resolved.chromeEnv } : {}),
         ...(resolved.modalEnv ? { modalEnv: resolved.modalEnv } : {}),
         ...(resolved.startEnv ? { startEnv: resolved.startEnv } : {}),
@@ -158,6 +166,8 @@ export function createOpacaModule(deps?: OpacaModuleDeps): SimModule {
       return () => {
         if (disposed) return;
         disposed = true;
+        chromeOpen = false;
+        hostChrome?.(null);
         bindGamiRepository(null);
         bindGamiStorage(null);
         root.unmount();

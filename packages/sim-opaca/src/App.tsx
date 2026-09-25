@@ -1,5 +1,6 @@
 import { type JSX } from "react";
 import { EmbeddedProvider } from "./EmbeddedContext";
+import type { SimChrome } from "@egemed/sim-host";
 import { useStore } from "./core/StoreProvider";
 import type { Screen } from "./core/types";
 import { DevPanel } from "./DevPanel";
@@ -42,6 +43,8 @@ export interface AppProps {
   readonly gamiEnabled?: boolean;
   readonly showDevPanel?: boolean;
   readonly devBuild?: boolean;
+  /** Birleşik bar kanalı. Verilirse sim araç çubuğu çizilmez. */
+  readonly setChrome?: (chrome: SimChrome | null) => void;
 }
 
 function PendingScreen({ screen, embedded }: { screen: Screen; embedded: boolean }): JSX.Element {
@@ -155,9 +158,10 @@ export function App({
   gamiEnabled = true,
   showDevPanel = false,
   devBuild = false,
+  setChrome,
 }: AppProps): JSX.Element {
   return (
-    <EmbeddedProvider embedded={embedded}>
+    <EmbeddedProvider embedded={embedded} {...(setChrome === undefined ? {} : { setChrome })}>
       <div className="eg-sim-opaca app-shell">
         <Header embedded={embedded} env={chromeEnv} modals={{ help: HelpModal, confirm: ConfirmModal }} gamiEnabled={gamiEnabled} />
         {gamiEnabled ? <GamiSyncErrorBanner /> : null}

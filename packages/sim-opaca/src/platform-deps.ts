@@ -125,7 +125,9 @@ export function createBrowserChromeEnv(doc: {
       }
       doc.removeEventListener(type, handler as (...args: never[]) => void);
     },
-    fullscreenElement: doc.fullscreenElement,
+    get fullscreenElement() {
+      return doc.fullscreenElement;
+    },
     requestFullscreen: () => {
       win.requestFullscreen?.();
     },

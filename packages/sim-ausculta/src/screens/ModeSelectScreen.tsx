@@ -5,7 +5,7 @@ import type { Mode } from "../core/types";
 import libraryData from "../data/library.json";
 import { poolFor } from "../data/pool";
 import { EcgDeco, Footer, touchTarget } from "../ui/chrome";
-import { ScreenHeading } from "../ui/ScreenHeading";
+import { ScreenHeading, useSetChrome } from "../ui/ScreenHeading";
 import { IconArrowRight, IconChart, IconCheck, IconGraduation, IconHeadphones, IconLock, IconStethoscope } from "../ui/icons";
 import { modePickTarget, modeRecommendLocked, sessionSeed } from "./entry";
 
@@ -21,6 +21,7 @@ export interface ModeSelectScreenProps {
 /** Mod seçimi: Öğrenme / Uygulama / Değerlendirme. Öneri kilidi gönderimi kapatmaz. */
 export function ModeSelectScreen({ embedded = false }: ModeSelectScreenProps): JSX.Element {
   const { state, dispatch, now } = useStore();
+  const unified = useSetChrome() !== undefined;
   const pick = (mode: Mode) => {
     const target = modePickTarget(mode, state.tutorialSeen, poolReady(mode));
     if (target !== "learn") {
@@ -42,7 +43,7 @@ export function ModeSelectScreen({ embedded = false }: ModeSelectScreenProps): J
       <EcgDeco embedded={embedded} />
       <div className="screen" style={{ position: "relative", zIndex: 1 }}>
         <div className="container screen-body">
-          <Stepper active={1} labels={["Mod Seçimi", "Çalışma", "Tamamla"]} />
+          {unified ? null : <Stepper active={1} labels={["Mod Seçimi", "Çalışma", "Tamamla"]} />}
           <ScreenHeading className="mode-title">Çalışma Modunu Seçin</ScreenHeading>
           <p className="mode-sub">Hangi modda çalışmak istersiniz?</p>
           <div className="mode-note">
