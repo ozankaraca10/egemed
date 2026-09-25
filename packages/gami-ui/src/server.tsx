@@ -45,21 +45,21 @@ export function serverHasActivity(summary: ServerGamiSummary, attemptCount: numb
   return summary.xp > 0 || summary.badges.length > 0 || attemptCount > 0;
 }
 
+/**
+ * Askıya alınan bileşen yalnız hazır vaatleri okur. Vaatler Suspense sınırının
+ * DIŞINDA (GamiServerFrame) üretilir: askıya alınan ilk çizimde bileşen durumu
+ * atıldığından, içeride useMemo her denemede yeni istek açıp sonsuz
+ * “Yükleniyor”a düşüyordu (T124 bulgusu).
+ */
 function ServerRead({
-  source,
-  period,
-  cohort,
-  attempt,
+  summaryPromise,
+  boardPromise,
   children,
 }: {
-  source: GamiServerSource;
-  period: Period;
-  cohort: CohortFilter;
-  attempt: number;
+  summaryPromise: Promise<ServerGamiSummary>;
+  boardPromise: Promise<{ readonly rows: readonly GamiLeaderboardRow[] }>;
   children: (data: ServerGamiData) => ReactNode;
 }) {
-  const summaryPromise = useMemo(() => source.summary(), [source, attempt]);
-  const boardPromise = useMemo(() => source.leaderboard(period, cohort), [source, period, cohort, attempt]);
   const summary = use(summaryPromise);
   const board = use(boardPromise);
   return children({ summary, rows: board.rows });
@@ -105,10 +105,12 @@ export function GamiServerFrame({
   children: (data: ServerGamiData) => ReactNode;
 }) {
   const [attempt, setAttempt] = useState(0);
+  const summaryPromise = useMemo(() => source.summary(), [source, attempt]);
+  const boardPromise = useMemo(() => source.leaderboard(period, cohort), [source, period, cohort, attempt]);
   return (
     <GamiLoadBoundary key={attempt} icon={icon} onDismiss={() => setAttempt((value) => value + 1)}>
       <Suspense fallback={fallback}>
-        <ServerRead attempt={attempt} cohort={cohort} period={period} source={source}>
+        <ServerRead boardPromise={boardPromise} summaryPromise={summaryPromise}>
           {children}
         </ServerRead>
       </Suspense>

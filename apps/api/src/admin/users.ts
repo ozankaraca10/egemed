@@ -199,7 +199,7 @@ export function toIstanbulIso(epochMs: number): string {
   const sign = offsetMinutes < 0 ? "-" : "+";
   const absolute = Math.abs(offsetMinutes);
   const offset = `${sign}${String(Math.floor(absolute / 60)).padStart(2, "0")}:${String(absolute % 60).padStart(2, "0")}`;
-  const millis = String(((epochMs % 1000) + 1000) % 1000).padStart(3, "0");
+  const millis = String(((Math.floor(epochMs) % 1000) + 1000) % 1000).padStart(3, "0");
   return `${year}-${month}-${day}T${hour}:${minute}:${second}.${millis}${offset}`;
 }
 

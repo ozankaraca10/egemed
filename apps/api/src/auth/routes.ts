@@ -38,6 +38,8 @@ export interface AuthDeps {
   readonly devEnabled: boolean;
   readonly sessionIdleMs: number;
   readonly sessionAbsoluteMs: number;
+  /** T81 giriş hız sınırı; verilmezse LOGIN_RATE_MAX (8). */
+  readonly loginRateMax?: number;
   /** T64 — SSO adaptörü; enjekte edilmezse `/auth/sso/*` uçları 404'tür. */
   readonly sso?: SsoDeps | null | undefined;
 }
@@ -160,7 +162,7 @@ export function registerAuthRoutes(app: Hono<AppEnv>, deps: AuthDeps, now: () =>
     absoluteMs: deps.sessionAbsoluteMs,
   });
   const secureCookies = deps.nodeEnv === "production";
-  const loginRate = createLoginRateLimiter();
+  const loginRate = createLoginRateLimiter(deps.loginRateMax);
 
   // Tüm `/auth/*` mutasyonları CSRF korumalıdır; dev girişi oturum öncesidir
   // (CSRF çerezi henüz yoktur) ve yalnız Origin kontrolü taşır.

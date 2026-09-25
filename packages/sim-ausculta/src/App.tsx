@@ -143,6 +143,7 @@ function Shell({
               repository={gami}
               onAchievements={() => openProgress("achievements")}
               onLeaderboard={() => openProgress("leaderboard")}
+              serverData={gamification !== undefined}
               {...(resultsEnv ? { env: resultsEnv } : {})}
             />
           ) : null}

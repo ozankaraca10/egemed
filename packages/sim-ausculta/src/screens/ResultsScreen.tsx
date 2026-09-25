@@ -72,9 +72,11 @@ export interface ResultsScreenProps {
   readonly repository?: LocalGamiRepository;
   readonly onAchievements?: () => void;
   readonly onLeaderboard?: () => void;
+  /** API oturumunda veri sunucudan: kazanım kartında “Demo verisi” etiketi yok. */
+  readonly serverData?: boolean;
 }
 
-export function ResultsScreen({ embedded = false, env = NOOP_RESULTS_ENV, repository, onAchievements, onLeaderboard }: ResultsScreenProps): JSX.Element {
+export function ResultsScreen({ embedded = false, env = NOOP_RESULTS_ENV, repository, onAchievements, onLeaderboard, serverData = false }: ResultsScreenProps): JSX.Element {
   const { state, dispatch, runtime, now } = useStore();
   const isAssessment = state.mode === "assessment";
   const agg = aggregateResults(state.caseResults);
@@ -337,6 +339,7 @@ export function ResultsScreen({ embedded = false, env = NOOP_RESULTS_ENV, reposi
               icons={defaultGamiIcons}
               onAchievements={onAchievements ?? (() => dispatch({ type: "goto", screen: "progress" }))}
               onLeaderboard={onLeaderboard ?? (() => dispatch({ type: "goto", screen: "progress" }))}
+              {...(serverData ? { demoLabel: "" } : {})}
             />
           ) : null}
 

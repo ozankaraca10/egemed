@@ -13,6 +13,8 @@ import type { GamiGainsModel } from "@egemed/gami-ui";
 export interface PulseGainsActions {
   /** "Başarılarımı gör": İlerlemem sayfasını (Başarılarım) açar. */
   readonly onAchievements: () => void;
+  /** API oturumunda veriler sunucudan: “Demo verisi” etiketi çizilmez. */
+  readonly serverData?: boolean;
   /** "Sıralamaya bak": İlerlemem sayfasını (Liderlik) açar. */
   readonly onLeaderboard: () => void;
 }
@@ -29,6 +31,7 @@ function PulseGainsCard({ model, actions }: { model: GamiGainsModel; actions: Pu
       icons={defaultGamiIcons}
       onAchievements={actions.onAchievements}
       onLeaderboard={actions.onLeaderboard}
+      {...(actions.serverData ? { demoLabel: "" } : {})}
     />
   );
 }

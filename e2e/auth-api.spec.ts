@@ -32,6 +32,9 @@ function sessionRole(page: Page) {
 }
 
 test.describe("API oturumu (dev sağlayıcı)", () => {
+  // Testler aynı tohum kullanıcılarını (admin/ogrenci) ve aynı DB’yi paylaşır; erişim
+  // kaldırma gibi durum değiştiren senaryolar paralel koşuda birbirini bozar.
+  test.describe.configure({ mode: "serial" });
   test("öğrenci girişi sunucu oturumu kurar, yenilemede korunur", async ({ page }, testInfo) => {
     const errors = trackErrors(page);
     await page.goto(STUDENT_ENTRY);
@@ -303,7 +306,7 @@ test.describe("API oturumu (dev sağlayıcı)", () => {
     }
     await posted;
     await page.locator(".eg-shell-simbar").getByRole("button", { name: "İlerlemem" }).click();
-    await expect(page.getByRole("button", { name: /Ritim izleyicisi.*kazanıldı/i })).toBeVisible();
+    await expect(page.getByRole("button", { name: /Ritim izleyicisi.*kazanıldı/i }).first()).toBeVisible();
     await expect(page.getByText("Demo verisi")).toHaveCount(0);
   });
 });

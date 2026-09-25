@@ -160,7 +160,11 @@ export function attachPulseGamification(handle: PulseRuntimeHandle, options: Pul
   gains.hidden = true;
   shadow.getElementById("resultsView")?.append(gains);
   // Kazanım kartı da ortak tasarım: React kökü model geldikçe güncellenir.
-  const gainsView = mountPulseGains(gains, { onAchievements: openDialog, onLeaderboard: openDialog });
+  const gainsView = mountPulseGains(gains, {
+    onAchievements: openDialog,
+    onLeaderboard: openDialog,
+    serverData: options.gamification !== undefined,
+  });
 
   // --- Kayıt izleme ------------------------------------------------------------
   const applyWrite = (result: PulseGamiWriteResult, record: PulseAttemptRecord, showGains: boolean): void => {
