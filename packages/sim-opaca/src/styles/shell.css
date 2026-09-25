@@ -184,6 +184,8 @@ display: inline-flex; align-items: center; justify-content: center; gap: 9px;
   border: 0; border-radius: var(--r-lg); font-weight: 700; font-size: var(--fs-lg);
   padding: 12px var(--sp-5); transition: transform .06s ease, filter .15s;
   text-decoration: none;
+  /* T130: tüm düğme varyantlarında dokunma hedefi en az 44 px (önce outline/small 34–40 px) */
+  min-height: 44px;
 }
 .eg-sim-opaca .btn:active {
 transform: translateY(1px);

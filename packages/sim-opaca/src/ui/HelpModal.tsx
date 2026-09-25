@@ -68,7 +68,8 @@ export function HelpModal({ open, onClose, env = NOOP_MODAL_ENV }: HelpModalProp
             <IconClose />
           </button>
         </div>
-        <div className="modal-body">
+        {/* T130: kaydırılabilir gövde klavyeyle de kaydırılabilsin (axe scrollable-region-focusable) */}
+        <div className="modal-body" tabIndex={0} role="region" aria-label="Yardım içeriği">
           <TutorialSteps />
           <div className="help-tips">
             <b>İpuçları</b>

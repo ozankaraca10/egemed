@@ -81,7 +81,8 @@
 .eg-sim-opaca .lib-item .lib-main > span{ font-size: var(--fs-xs); color: var(--ink-600); display: block; margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .eg-sim-opaca .lib-item .chev{ color: var(--ink-300); font-weight: 700; font-size: var(--fs-lg); }
 .eg-sim-opaca .tabbar{ display: flex; gap: 4px; background: var(--card-soft); border: 1px solid var(--border); border-radius: var(--r-md); padding: 4px; margin-bottom: 11px; }
-.eg-sim-opaca .tabbar button{ flex: 1; border: 0; background: transparent; border-radius: var(--r-md); padding: 8px 6px; font-size: var(--fs-sm); font-weight: 600; color: var(--ink-600); display: flex; align-items: center; justify-content: center; gap: 7px; white-space: nowrap; }
+/* T130: erişilebilirlik — sekme düğmesi yüksekliği 44 px'e çıkarıldı (önce 34 px) */
+.eg-sim-opaca .tabbar button{ flex: 1; border: 0; background: transparent; border-radius: var(--r-md); padding: 12px 6px; font-size: var(--fs-sm); font-weight: 600; color: var(--ink-600); display: flex; align-items: center; justify-content: center; gap: 7px; white-space: nowrap; min-height: 44px; }
 .eg-sim-opaca .tabbar button.active{ background: var(--blue-600); color: var(--card); box-shadow: 0 2px 8px rgba(22,115,230,.3); }
 .eg-sim-opaca .info-body{ font-size: var(--fs-md); color: var(--ink-700); line-height: 1.58; }
 .eg-sim-opaca .metaphor-card{ display: flex; gap: 11px; align-items: flex-start; background: linear-gradient(90deg, rgba(253,238,205,.75), rgba(255,250,240,.6)); border: 1px solid var(--orange-100); border-radius: var(--r-md); padding: 11px var(--sp-3); }
@@ -118,7 +119,8 @@
 .eg-sim-opaca .q-text{ font-size: var(--fs-lg); font-weight: 800; color: var(--ink-900); margin: 0 0 4px; line-height: 1.28; }
 .eg-sim-opaca .q-help{ color: var(--ink-600); font-size: var(--fs-sm); margin: 0 0 12px; }
 .eg-sim-opaca .opt-list{ display: flex; flex-direction: column; gap: 8px; }
-.eg-sim-opaca .opt{ display: flex; align-items: center; gap: 11px; text-align: left; width: 100%; background: var(--card); border: 1.5px solid var(--border); border-radius: var(--r-md); padding: 11px var(--sp-3); font-size: var(--fs-md); color: var(--ink-900); transition: border-color .12s ease, background .12s ease; }
+/* T130: erişilebilirlik — yanıt seçeneği yüksekliği 44 px'e çıkarıldı (önce 43 px, tablet/masaüstü) */
+.eg-sim-opaca .opt{ display: flex; align-items: center; gap: 11px; text-align: left; width: 100%; background: var(--card); border: 1.5px solid var(--border); border-radius: var(--r-md); padding: 11px var(--sp-3); font-size: var(--fs-md); color: var(--ink-900); transition: border-color .12s ease, background .12s ease; min-height: 44px; }
 .eg-sim-opaca .opt:hover{ border-color: var(--blue-400); background: var(--blue-50); }
 .eg-sim-opaca .opt.selected{ border-color: var(--blue-600); background: var(--blue-50); box-shadow: 0 0 0 1px var(--blue-600); }
 
@@ -431,10 +433,13 @@
 .eg-sim-opaca .modal-card{ background: var(--card); color: var(--ink-900); border-radius: var(--r-lg); box-shadow: 0 24px 60px rgba(9,26,52,.28); width: min(680px, 100%); max-height: min(78vh, 640px); display: flex; flex-direction: column; overflow: hidden; }
 .eg-sim-opaca .modal-head{ display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 14px 16px; border-bottom: 1px solid var(--border); }
 .eg-sim-opaca .modal-head h3{ margin: 0; font-size: var(--fs-lg); color: var(--navy-800); }
-.eg-sim-opaca .modal-close{ width: 34px; height: 34px; border-radius: var(--r-md); border: 1px solid var(--border-strong); background: var(--card); color: var(--ink-600); display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; }
+/* T130: erişilebilirlik — modal kapatma düğmesi 44 px'e çıkarıldı (önce 34 px) */
+.eg-sim-opaca .modal-close{ width: 44px; height: 44px; border-radius: var(--r-md); border: 1px solid var(--border-strong); background: var(--card); color: var(--ink-600); display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; }
 .eg-sim-opaca .modal-close:hover{ background: var(--card-soft); color: var(--ink-900); }
 .eg-sim-opaca .modal-close svg{ width: 18px; height: 18px; }
 .eg-sim-opaca .modal-body{ padding: 14px 16px var(--sp-4); overflow-y: auto; }
+/* T130: HelpModal gövdesi tabIndex=0 (scrollable-region-focusable) — odak halkası */
+.eg-sim-opaca .modal-body:focus-visible{ outline: 2.5px solid var(--blue-600); outline-offset: -2px; }
 .eg-sim-opaca .confirm-modal{ width: min(440px, 100%); }
 .eg-sim-opaca .confirm-actions{ display: flex; justify-content: flex-end; gap: 10px; margin-top: 16px; }
 .eg-sim-opaca .help-steps{ list-style: none; margin: 0 0 14px; padding: 0; display: flex; flex-direction: column; gap: 12px; }
@@ -490,7 +495,8 @@
 .eg-sim-opaca .credit-group .credit-people{ flex-direction: column; align-items: stretch; }
 .eg-sim-opaca .credit-group .credit-person{ justify-content: flex-start; }
 .eg-sim-opaca .link-btn{ background: none; border: 0; padding: 0; color: inherit; text-decoration: underline; cursor: pointer; font: inherit; font-weight: 600; }
-.eg-sim-opaca .icon-btn{ display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: var(--r-sm); border: 1px solid var(--border); background: var(--card); color: var(--ink-700); cursor: pointer; }
+/* T130: erişilebilirlik — simge düğmesi 44 px'e çıkarıldı (önce 32 px) */
+.eg-sim-opaca .icon-btn{ display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; border-radius: var(--r-sm); border: 1px solid var(--border); background: var(--card); color: var(--ink-700); cursor: pointer; }
 .eg-sim-opaca .icon-btn:disabled{ opacity: .4; cursor: not-allowed; }
 .eg-sim-opaca .example-nav{ display: inline-flex; align-items: center; gap: 8px; }
 .eg-sim-opaca .example-count{ font-size: var(--fs-sm); font-weight: 600; color: var(--ink-700); min-width: 11ch; text-align: center; font-variant-numeric: tabular-nums; }
@@ -498,11 +504,13 @@
 .eg-sim-opaca .case-timer{ display: inline-flex; align-items: center; gap: 4px; font-variant-numeric: tabular-nums; }
 
 .eg-sim-opaca .sim-resample-row{ display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--border); }
-.eg-sim-opaca .good-text{ color: var(--green-600); }
+/* T130: green-600 beyazda ~3.3:1 (AA altı). Token anlık görüntüsü elle düzenlenmediği için tokenlardan türetildi: %70 green-600 + %30 ink-900 ≈ 5.1:1. */
+.eg-sim-opaca .good-text{ color: color-mix(in srgb, var(--green-600) 70%, var(--ink-900)); }
 .eg-sim-opaca .feedback-card .feedback-head .ic svg{ width: 22px; height: 22px; }
 
 
-.eg-sim-opaca .lib-count{ font-size: var(--fs-xs); font-weight: 700; color: var(--ink-500); background: var(--card-soft); border: 1px solid var(--border); border-radius: var(--r-pill); padding: 1px 7px; font-variant-numeric: tabular-nums; }
+/* T130: kontrast — ink-500 → ink-700 (card-soft üstünde AA) */
+.eg-sim-opaca .lib-count{ font-size: var(--fs-xs); font-weight: 700; color: var(--ink-700); background: var(--card-soft); border: 1px solid var(--border-strong); border-radius: var(--r-pill); padding: 1px 7px; font-variant-numeric: tabular-nums; }
 .eg-sim-opaca .film-meta{ display: grid; grid-template-columns: max-content 1fr; gap: 6px 14px; margin: 0; font-size: var(--fs-md); }
 .eg-sim-opaca .film-meta dt{ color: var(--ink-500); font-weight: 600; }
 .eg-sim-opaca .film-meta dd{ margin: 0; overflow-wrap: anywhere; }
