@@ -1,0 +1,463 @@
+{
+  "note": "T116 — Opaca iç ekranlarında kaynaktan devralınmış erişilebilirlik borcu. Kayıtlar yalnız küçülür: düzeltilen bir kayıt testi 'düzeltildi — listeden çıkar' diye başarısız eder.",
+  "violations": [
+    {
+      "screen": "gami",
+      "rule": "color-contrast",
+      "target": ".gami-cat-learn.gami-badge:nth-child(*) > .cat",
+      "projects": [
+        "tablet-768",
+        "desktop-1440"
+      ]
+    },
+    {
+      "screen": "gami",
+      "rule": "color-contrast",
+      "target": ".gami-cat-learn.gami-badge:nth-child(*) > .ds",
+      "projects": [
+        "tablet-768",
+        "desktop-1440"
+      ]
+    },
+    {
+      "screen": "gami",
+      "rule": "color-contrast",
+      "target": ".gami-cat-learn.gami-badge:nth-child(*) > .ft",
+      "projects": [
+        "tablet-768",
+        "desktop-1440"
+      ]
+    },
+    {
+      "screen": "gami",
+      "rule": "color-contrast",
+      "target": ".gami-cat-learn.gami-badge:nth-child(*) > .nm",
+      "projects": [
+        "tablet-768",
+        "desktop-1440"
+      ]
+    },
+    {
+      "screen": "gami",
+      "rule": "color-contrast",
+      "target": ".gami-cat-milestone.gami-badge:nth-child(*) > .cat",
+      "projects": [
+        "tablet-768",
+        "desktop-1440"
+      ]
+    },
+    {
+      "screen": "gami",
+      "rule": "color-contrast",
+      "target": ".gami-cat-milestone.gami-badge:nth-child(*) > .ds",
+      "projects": [
+        "tablet-768",
+        "desktop-1440"
+      ]
+    },
+    {
+      "screen": "gami",
+      "rule": "color-contrast",
+      "target": ".gami-cat-milestone.gami-badge:nth-child(*) > .ft",
+      "projects": [
+        "tablet-768",
+        "desktop-1440"
+      ]
+    },
+    {
+      "screen": "gami",
+      "rule": "color-contrast",
+      "target": ".gami-cat-milestone.gami-badge:nth-child(*) > .nm",
+      "projects": [
+        "tablet-768",
+        "desktop-1440"
+      ]
+    },
+    {
+      "screen": "gami",
+      "rule": "color-contrast",
+      "target": ".gami-cat-skill.gami-badge:nth-child(*) > .cat",
+      "projects": [
+        "tablet-768",
+        "desktop-1440"
+      ]
+    },
+    {
+      "screen": "gami",
+      "rule": "color-contrast",
+      "target": ".gami-cat-skill.gami-badge:nth-child(*) > .ds",
+      "projects": [
+        "tablet-768",
+        "desktop-1440"
+      ]
+    },
+    {
+      "screen": "gami",
+      "rule": "color-contrast",
+      "target": ".gami-cat-skill.gami-badge:nth-child(*) > .ft",
+      "projects": [
+        "tablet-768",
+        "desktop-1440"
+      ]
+    },
+    {
+      "screen": "gami",
+      "rule": "color-contrast",
+      "target": ".gami-cat-skill.gami-badge:nth-child(*) > .nm",
+      "projects": [
+        "tablet-768",
+        "desktop-1440"
+      ]
+    },
+    {
+      "screen": "gami",
+      "rule": "color-contrast",
+      "target": ".gami-cat-streak.gami-badge:nth-child(*) > .cat",
+      "projects": [
+        "tablet-768",
+        "desktop-1440"
+      ]
+    },
+    {
+      "screen": "gami",
+      "rule": "color-contrast",
+      "target": ".gami-cat-streak.gami-badge:nth-child(*) > .ds",
+      "projects": [
+        "tablet-768",
+        "desktop-1440"
+      ]
+    },
+    {
+      "screen": "gami",
+      "rule": "color-contrast",
+      "target": ".gami-cat-streak.gami-badge:nth-child(*) > .ft",
+      "projects": [
+        "tablet-768",
+        "desktop-1440"
+      ]
+    },
+    {
+      "screen": "gami",
+      "rule": "color-contrast",
+      "target": ".gami-cat-streak.gami-badge:nth-child(*) > .nm",
+      "projects": [
+        "tablet-768",
+        "desktop-1440"
+      ]
+    },
+    {
+      "screen": "gami",
+      "rule": "color-contrast",
+      "target": ".gami-cat-topic.gami-badge:nth-child(*) > .cat",
+      "projects": [
+        "tablet-768",
+        "desktop-1440"
+      ]
+    },
+    {
+      "screen": "gami",
+      "rule": "color-contrast",
+      "target": ".gami-cat-topic.gami-badge:nth-child(*) > .ds",
+      "projects": [
+        "tablet-768",
+        "desktop-1440"
+      ]
+    },
+    {
+      "screen": "gami",
+      "rule": "color-contrast",
+      "target": ".gami-cat-topic.gami-badge:nth-child(*) > .ft",
+      "projects": [
+        "tablet-768",
+        "desktop-1440"
+      ]
+    },
+    {
+      "screen": "gami",
+      "rule": "color-contrast",
+      "target": ".gami-cat-topic.gami-badge:nth-child(*) > .nm",
+      "projects": [
+        "tablet-768",
+        "desktop-1440"
+      ]
+    },
+    {
+      "screen": "learn",
+      "rule": "color-contrast",
+      "target": "button > .lib-right > .lib-count"
+    },
+    {
+      "screen": "learn",
+      "rule": "select-name",
+      "target": "select",
+      "projects": [
+        "mobile-360"
+      ]
+    },
+    {
+      "screen": "case",
+      "rule": "color-contrast",
+      "target": ".good-text"
+    },
+    {
+      "screen": "case",
+      "rule": "select-name",
+      "target": "select",
+      "projects": [
+        "mobile-360"
+      ]
+    },
+    {
+      "screen": "assessment",
+      "rule": "select-name",
+      "target": "select",
+      "projects": [
+        "mobile-360"
+      ]
+    },
+    {
+      "screen": "results",
+      "rule": "scrollable-region-focusable",
+      "target": ".table-scroll",
+      "projects": [
+        "mobile-360"
+      ]
+    },
+    {
+      "screen": "results",
+      "rule": "color-contrast",
+      "target": ".report-row:nth-child(*) > .no",
+      "projects": [
+        "tablet-768"
+      ]
+    },
+    {
+      "screen": "help",
+      "rule": "scrollable-region-focusable",
+      "target": ".modal-body"
+    }
+  ],
+  "smallTargets": [
+    {
+      "screen": "modes",
+      "selector": "div.eg-sim-opaca.app-shell > main.app-content > div.screen > div.container.screen-body > div.mode-cards > div.mode-card.learn:nth-of-type(*) > button.btn.green",
+      "size": "302x39",
+      "projects": [
+        "mobile-360",
+        "desktop-1440"
+      ]
+    },
+    {
+      "screen": "modes",
+      "selector": "div.eg-sim-opaca.app-shell > main.app-content > div.screen > div.container.screen-body > div.mode-cards > div.mode-card.practice:nth-of-type(*) > button.btn.primary",
+      "size": "302x39"
+    },
+    {
+      "screen": "modes",
+      "selector": "div.eg-sim-opaca.app-shell > main.app-content > div.screen > div.container.screen-body > div.mode-cards > div.mode-card.assessment:nth-of-type(*) > p.mode-rules:nth-of-type(*) > button.gami-link",
+      "size": "186x16"
+    },
+    {
+      "screen": "modes",
+      "selector": "div.eg-sim-opaca.app-shell > main.app-content > div.screen > div.container.screen-body > div.mode-cards > div.mode-card.assessment:nth-of-type(*) > button.btn.purple",
+      "size": "302x39"
+    },
+    {
+      "screen": "gami",
+      "selector": "div.eg-sim-opaca.app-shell > main.app-content > div.screen > div.results-wrap-v2.gami-page > div.gami-pagetabs:nth-of-type(*) > button:nth-of-type(*)",
+      "size": "134x33"
+    },
+    {
+      "screen": "gami",
+      "selector": "div.eg-sim-opaca.app-shell > main.app-content > div.screen > div.results-wrap-v2.gami-page > div.card.gami-empty:nth-of-type(*) > button.btn.purple",
+      "size": "198x39"
+    },
+    {
+      "screen": "gami",
+      "selector": "#gami-badges > div.gami-card-head:nth-of-type(*) > div.gami-seg > button:nth-of-type(*)",
+      "size": "57x28"
+    },
+    {
+      "screen": "gami",
+      "selector": "#gami-badges > div.gami-badge-grid:nth-of-type(*) > button.gami-badge.gami-cat-streak:nth-of-type(*)",
+      "size": "282x43",
+      "projects": [
+        "mobile-360"
+      ]
+    },
+    {
+      "screen": "learn",
+      "selector": "div.eg-sim-opaca.app-shell > main.app-content > div.screen > div.container.tall > div.learn-grid > div.sim-main:nth-of-type(*) > div.stage-card.film-card > div.film-card-head:nth-of-type(*) > div.example-nav > button.icon-btn:nth-of-type(*)",
+      "size": "32x32"
+    },
+    {
+      "screen": "learn",
+      "selector": "div.eg-sim-opaca.app-shell > main.app-content > div.screen > div.container.tall > div.learn-grid > div.sim-main:nth-of-type(*) > div.stage-card.film-card > div.film-viewer:nth-of-type(*) > div.film-tools:nth-of-type(*) > div.seg:nth-of-type(*) > button:nth-of-type(*)",
+      "size": "30x32"
+    },
+    {
+      "screen": "learn",
+      "selector": "div.eg-sim-opaca.app-shell > main.app-content > div.screen > div.container.tall > div.learn-grid > div.sim-main:nth-of-type(*) > div.stage-card.film-card > div.film-viewer:nth-of-type(*) > div.film-tools:nth-of-type(*) > label.film-select > select",
+      "size": "101x32"
+    },
+    {
+      "screen": "learn",
+      "selector": "div.eg-sim-opaca.app-shell > main.app-content > div.screen > div.container.tall > div.learn-grid > div.sim-main:nth-of-type(*) > div.stage-card.film-card > div.film-viewer:nth-of-type(*) > div.film-tools:nth-of-type(*) > div.popover-wrap:nth-of-type(*) > button.tool-btn",
+      "size": "142x34"
+    },
+    {
+      "screen": "learn",
+      "selector": "div.eg-sim-opaca.app-shell > main.app-content > div.screen > div.container.tall > div.learn-grid > div.sim-main:nth-of-type(*) > div.stage-card.film-card > div.film-viewer:nth-of-type(*) > div.film-tools:nth-of-type(*) > button.tool-btn:nth-of-type(*)",
+      "size": "71x34"
+    },
+    {
+      "screen": "learn",
+      "selector": "div.eg-sim-opaca.app-shell > main.app-content > div.screen > div.container.tall > div.learn-grid > div.sim-main:nth-of-type(*) > div.stage-card.film-card > div.zone-chips:nth-of-type(*) > div.zone-step:nth-of-type(*) > span.zone-step-list:nth-of-type(*) > button.zone-chip",
+      "size": "62x26"
+    },
+    {
+      "screen": "learn",
+      "selector": "div.eg-sim-opaca.app-shell > main.app-content > div.screen > div.container.tall > div.learn-grid > div.sim-main:nth-of-type(*) > div.stage-card.film-card > div.zone-chips:nth-of-type(*) > div.zone-step:nth-of-type(*) > span.zone-step-list:nth-of-type(*) > button.zone-chip:nth-of-type(*)",
+      "size": "48x26"
+    },
+    {
+      "screen": "learn",
+      "selector": "div.eg-sim-opaca.app-shell > main.app-content > div.screen > div.container.tall > div.learn-grid > div.sim-side:nth-of-type(*) > div.card > div.tabbar.info-tabs:nth-of-type(*) > button:nth-of-type(*)",
+      "size": "141x34"
+    },
+    {
+      "screen": "assessment",
+      "selector": "div.eg-sim-opaca.app-shell > main.app-content > div.screen > div.container.tall > div.sim-grid.mode-assessment > div.sim-main:nth-of-type(*) > div.stage-card.film-card:nth-of-type(*) > div.film-viewer:nth-of-type(*) > div.film-tools:nth-of-type(*) > div.seg:nth-of-type(*) > button:nth-of-type(*)",
+      "size": "30x32"
+    },
+    {
+      "screen": "assessment",
+      "selector": "div.eg-sim-opaca.app-shell > main.app-content > div.screen > div.container.tall > div.sim-grid.mode-assessment > div.sim-main:nth-of-type(*) > div.stage-card.film-card:nth-of-type(*) > div.film-viewer:nth-of-type(*) > div.film-tools:nth-of-type(*) > label.film-select > select",
+      "size": "101x32"
+    },
+    {
+      "screen": "assessment",
+      "selector": "div.eg-sim-opaca.app-shell > main.app-content > div.screen > div.container.tall > div.sim-grid.mode-assessment > div.sim-main:nth-of-type(*) > div.stage-card.film-card:nth-of-type(*) > div.film-viewer:nth-of-type(*) > div.film-tools:nth-of-type(*) > div.popover-wrap:nth-of-type(*) > button.tool-btn",
+      "size": "142x34"
+    },
+    {
+      "screen": "assessment",
+      "selector": "div.eg-sim-opaca.app-shell > main.app-content > div.screen > div.container.tall > div.sim-grid.mode-assessment > div.sim-main:nth-of-type(*) > div.stage-card.film-card:nth-of-type(*) > div.film-viewer:nth-of-type(*) > div.film-tools:nth-of-type(*) > button.tool-btn",
+      "size": "71x34"
+    },
+    {
+      "screen": "assessment",
+      "selector": "div.eg-sim-opaca.app-shell > main.app-content > div.screen > div.container.tall > div.sim-grid.mode-assessment > div.sim-main:nth-of-type(*) > div.stage-card.film-card:nth-of-type(*) > div.zone-chips.sr-only-until-focus:nth-of-type(*) > div.zone-step:nth-of-type(*) > span.zone-step-list:nth-of-type(*) > button.zone-chip",
+      "size": "62x26"
+    },
+    {
+      "screen": "assessment",
+      "selector": "div.eg-sim-opaca.app-shell > main.app-content > div.screen > div.container.tall > div.sim-grid.mode-assessment > div.sim-main:nth-of-type(*) > div.stage-card.film-card:nth-of-type(*) > div.zone-chips.sr-only-until-focus:nth-of-type(*) > div.zone-step:nth-of-type(*) > span.zone-step-list:nth-of-type(*) > button.zone-chip:nth-of-type(*)",
+      "size": "48x26"
+    },
+    {
+      "screen": "assessment",
+      "selector": "div.eg-sim-opaca.app-shell > main.app-content > div.screen > div.container.tall > div.sim-grid.mode-assessment > div.sim-side:nth-of-type(*) > div.card.q-card-dark:nth-of-type(*) > div.q-block:nth-of-type(*) > div.opt-list:nth-of-type(*) > button.opt:nth-of-type(*)",
+      "size": "526x43",
+      "projects": [
+        "tablet-768",
+        "desktop-1440"
+      ]
+    },
+    {
+      "screen": "assessment",
+      "selector": "div.eg-sim-opaca.app-shell > main.app-content > div.screen > div.container.tall > div.sim-grid.mode-assessment > div.sim-side:nth-of-type(*) > div.card.q-card-dark:nth-of-type(*) > div.q-nav:nth-of-type(*) > button.btn.purple",
+      "size": "306x40"
+    },
+    {
+      "screen": "case",
+      "selector": "div.eg-sim-opaca.app-shell > main.app-content > div.screen > div.container.tall > div.sim-grid.mode-practice > div.sim-main:nth-of-type(*) > div.stage-card.film-card > div.film-viewer:nth-of-type(*) > div.film-tools:nth-of-type(*) > div.seg:nth-of-type(*) > button:nth-of-type(*)",
+      "size": "30x32"
+    },
+    {
+      "screen": "case",
+      "selector": "div.eg-sim-opaca.app-shell > main.app-content > div.screen > div.container.tall > div.sim-grid.mode-practice > div.sim-main:nth-of-type(*) > div.stage-card.film-card > div.film-viewer:nth-of-type(*) > div.film-tools:nth-of-type(*) > label.film-select > select",
+      "size": "101x32"
+    },
+    {
+      "screen": "case",
+      "selector": "div.eg-sim-opaca.app-shell > main.app-content > div.screen > div.container.tall > div.sim-grid.mode-practice > div.sim-main:nth-of-type(*) > div.stage-card.film-card > div.film-viewer:nth-of-type(*) > div.film-tools:nth-of-type(*) > div.popover-wrap:nth-of-type(*) > button.tool-btn",
+      "size": "142x34"
+    },
+    {
+      "screen": "case",
+      "selector": "div.eg-sim-opaca.app-shell > main.app-content > div.screen > div.container.tall > div.sim-grid.mode-practice > div.sim-main:nth-of-type(*) > div.stage-card.film-card > div.film-viewer:nth-of-type(*) > div.film-tools:nth-of-type(*) > button.tool-btn:nth-of-type(*)",
+      "size": "71x34"
+    },
+    {
+      "screen": "case",
+      "selector": "div.eg-sim-opaca.app-shell > main.app-content > div.screen > div.container.tall > div.sim-grid.mode-practice > div.sim-main:nth-of-type(*) > div.stage-card.film-card > div.zone-chips:nth-of-type(*) > div.zone-step:nth-of-type(*) > span.zone-step-list:nth-of-type(*) > button.zone-chip",
+      "size": "62x26"
+    },
+    {
+      "screen": "case",
+      "selector": "div.eg-sim-opaca.app-shell > main.app-content > div.screen > div.container.tall > div.sim-grid.mode-practice > div.sim-main:nth-of-type(*) > div.stage-card.film-card > div.zone-chips:nth-of-type(*) > div.zone-step:nth-of-type(*) > span.zone-step-list:nth-of-type(*) > button.zone-chip:nth-of-type(*)",
+      "size": "48x26"
+    },
+    {
+      "screen": "case",
+      "selector": "div.eg-sim-opaca.app-shell > main.app-content > div.screen > div.container.tall > div.sim-grid.mode-practice > div.sim-side:nth-of-type(*) > button.btn.outline",
+      "size": "336x34"
+    },
+    {
+      "screen": "case",
+      "selector": "div.eg-sim-opaca.app-shell > main.app-content > div.screen > div.container.tall > div.sim-grid.mode-practice > div.sim-side:nth-of-type(*) > div.card.case-card:nth-of-type(*) > div.card-title-row:nth-of-type(*) > div.card-title-actions:nth-of-type(*) > div.popover-wrap > button.btn.outline",
+      "size": "155x34"
+    },
+    {
+      "screen": "case",
+      "selector": "div.eg-sim-opaca.app-shell > main.app-content > div.screen > div.container.tall > div.sim-grid.mode-practice > div.sim-side:nth-of-type(*) > div.card.case-card:nth-of-type(*) > div.sim-resample-row:nth-of-type(*) > button.btn.outline:nth-of-type(*)",
+      "size": "173x34"
+    },
+    {
+      "screen": "case",
+      "selector": "div.eg-sim-opaca.app-shell > main.app-content > div.screen > div.container.tall > div.sim-grid.mode-practice > div.sim-side:nth-of-type(*) > div.card.q-card-dark:nth-of-type(*) > div.q-block:nth-of-type(*) > div.opt-list:nth-of-type(*) > button.opt:nth-of-type(*)",
+      "size": "526x43",
+      "projects": [
+        "tablet-768",
+        "desktop-1440"
+      ]
+    },
+    {
+      "screen": "case",
+      "selector": "div.eg-sim-opaca.app-shell > main.app-content > div.screen > div.container.tall > div.sim-grid.mode-practice > div.sim-side:nth-of-type(*) > div.card.q-card-dark:nth-of-type(*) > div.q-nav:nth-of-type(*) > button.btn.primary",
+      "size": "306x40"
+    },
+    {
+      "screen": "results",
+      "selector": "div.eg-sim-opaca.app-shell > main.app-content > div.screen > div.results-wrap-v2.screen-body > section.card.gami-gains > div.gami-gains-actions:nth-of-type(*) > button.btn.outline:nth-of-type(*)",
+      "size": "128x34"
+    },
+    {
+      "screen": "results",
+      "selector": "div.eg-sim-opaca.app-shell > main.app-content > div.screen > div.results-wrap-v2.screen-body > section.card.gami-gains > div.gami-gains-actions:nth-of-type(*) > button.btn.primary:nth-of-type(*)",
+      "size": "153x34"
+    },
+    {
+      "screen": "help",
+      "selector": "div.modal-head:nth-of-type(*) > button.modal-close",
+      "size": "34x34"
+    },
+    {
+      "screen": "results",
+      "selector": "div.eg-sim-opaca.app-shell > main.app-content > div.screen > div.results-wrap-v2.screen-body > div.results-actions:nth-of-type(*) > button.btn.primary:nth-of-type(*)",
+      "size": "153x41",
+      "projects": [
+        "mobile-360"
+      ]
+    },
+    {
+      "screen": "results",
+      "selector": "div.eg-sim-opaca.app-shell > main.app-content > div.screen > div.results-wrap-v2.screen-body > div.results-actions:nth-of-type(*) > button.btn.outline:nth-of-type(*)",
+      "size": "116x41",
+      "projects": [
+        "mobile-360"
+      ]
+    }
+  ]
+}
