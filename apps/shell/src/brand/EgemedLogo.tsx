@@ -27,8 +27,8 @@ export function EgemedLogo({ variant, compact = false }: EgemedLogoProps): JSX.E
         />
       </svg>
       <span aria-hidden="true" className="eg-shell-logo__copy">
-        <strong className="eg-shell-logo__name">EGEMED</strong>
-        {!compact && <span className="eg-shell-logo__tagline">Klinik Öğrenme Deneyimi Platformu</span>}
+        <strong className="eg-shell-logo__name">{t("shell.brand.name")}</strong>
+        {!compact && <span className="eg-shell-logo__tagline">{t("shell.brand.tagline")}</span>}
       </span>
     </span>
   );
