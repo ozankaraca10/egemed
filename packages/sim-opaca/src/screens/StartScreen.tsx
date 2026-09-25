@@ -157,7 +157,8 @@ export function StartScreen({
         </div>
       </div>
       <Footer embedded={embedded} />
-      <FullscreenPrompt env={env} modalEnv={modalEnv} timing={timing ?? inertTiming} />
+      {/* Platformda tam ekran önerisi açılmaz; yalnız birleşik bardaki ikon kalır (kullanıcı kararı, 25 Eylül 2026). */}
+      {embedded ? null : <FullscreenPrompt env={env} modalEnv={modalEnv} timing={timing ?? inertTiming} />}
     </div>
   )
 }

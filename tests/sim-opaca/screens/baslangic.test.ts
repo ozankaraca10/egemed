@@ -106,6 +106,7 @@ describe("ModeSelectScreen (statik render)", () => {
     const html = renderInStore(createElement(ModeSelectScreen, { embedded: true }));
     expect(html).not.toContain("SCORM");
     expect(html).toContain("Puan kaydedilir");
+    expect(html).not.toContain("LMS");
   });
 
   it("gömülü olmayan modda SCORM puanı maddesi görünür", () => {
