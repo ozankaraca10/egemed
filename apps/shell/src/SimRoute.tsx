@@ -29,28 +29,87 @@ export interface SimRouteProps {
   readonly onChrome?: ((chrome: SimChrome | null) => void) | undefined;
 }
 
-function SimAccessDenied(): JSX.Element {
+/** Duyuru kartı simgesi: erişim reddi (kilit) ve hata (uyarı). Dekoratiftir. */
+function SimNoticeIcon({ kind }: { readonly kind: "lock" | "warning" }): JSX.Element {
   return (
-    <section className="eg-shell-sim-page">
-      <a className="eg-shell-sim-page__exit" href={routeHref("simulators")}>
-        {t("shell.nav.simulators")}
-      </a>
-      <p className="eg-shell-sim-page__denied" role="status">
-        {t("sims.access.denied")}
-      </p>
-    </section>
+    <svg
+      aria-hidden="true"
+      className={
+        kind === "warning"
+          ? "eg-shell-sim-notice__icon eg-shell-sim-notice__icon--warning"
+          : "eg-shell-sim-notice__icon"
+      }
+      fill="none"
+      stroke="currentColor"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth={1.8}
+      viewBox="0 0 24 24"
+    >
+      {kind === "lock" ? (
+        <>
+          <rect height="10" rx="2" width="14" x="5" y="11" />
+          <path d="M8 11V7.5a4 4 0 0 1 8 0V11" />
+        </>
+      ) : (
+        <>
+          <path d="M12 3.5 2.5 20.5h19z" />
+          <path d="M12 10v4.5" />
+          <path d="M12 17.5h.01" />
+        </>
+      )}
+    </svg>
   );
 }
 
 /**
- * Hata kutusu başlığı: sim adı + hata etiketi. Mevcut sözlük anahtarlarından
- * türetilir; "tekrar dene" düğmesi aynı kutuda yer alır. Özel bir "Tekrar
- * dene" anahtarı sözlükte yoktur (bkz. T38c summary — ayrı copy görevi).
+ * Erişim reddi kartı (T129): sim alanının ortasında, en çok 32rem; kilit
+ * simgesi, başlık, açıklama ve "Simülatörlere dön" bağlantısı. Sayfanın tek
+ * h1'i birleşik bardadır; kart h2 taşır.
  */
-export function simErrorTitle(simId: SimulatorId): string {
-  return `${t(simTitleKey(simId))} · ${t("badge.tone.danger")}`;
+function SimAccessDenied(): JSX.Element {
+  return (
+    <section className="eg-shell-sim-page eg-shell-sim-page--notice">
+      <div className="eg-shell-sim-notice" role="status">
+        <SimNoticeIcon kind="lock" />
+        <h2 className="eg-shell-sim-notice__title">{t("sims.access.none")}</h2>
+        <p className="eg-shell-sim-notice__body">{t("sims.access.denied")}</p>
+        <div className="eg-shell-sim-notice__actions">
+          <a className="eg-shell-sim-notice__primary" href={routeHref("simulators")}>
+            {t("sims.back")}
+          </a>
+        </div>
+      </div>
+    </section>
+  );
 }
 
+export interface SimErrorNoticeProps {
+  /** "Tekrar dene": aynı sim oturumunu yeniden kurar. */
+  readonly onRetry: () => void;
+}
+
+/**
+ * Sim yükleme hatası kartı (T129): uyarı simgesi, başlık, açıklama ve
+ * birincil "Tekrar dene" + ikincil "Simülatörlere dön".
+ */
+export function SimErrorNotice({ onRetry }: SimErrorNoticeProps): JSX.Element {
+  return (
+    <div className="eg-shell-sim-notice eg-shell-sim-notice--error" role="alert">
+      <SimNoticeIcon kind="warning" />
+      <h2 className="eg-shell-sim-notice__title">{t("sims.error.title")}</h2>
+      <p className="eg-shell-sim-notice__body">{t("sims.error.body")}</p>
+      <div className="eg-shell-sim-notice__actions">
+        <button className="eg-shell-sim-notice__primary" onClick={onRetry} type="button">
+          {t("sims.error.retry")}
+        </button>
+        <a className="eg-shell-sim-notice__secondary" href={routeHref("simulators")}>
+          {t("sims.back")}
+        </a>
+      </div>
+    </div>
+  );
+}
 
 /**
  * Sim rotası React host'u (ADR-006): `SimHost` bileşen ömrü boyunca tek
@@ -149,18 +208,7 @@ function SimRouteHost({ actorId, apiBaseUrl = null, onChrome, simId }: Omit<SimR
             <span className="eg-shell-sim-page__skeleton-block" />
           </div>
         )}
-        {status === "error" && (
-          <div className="eg-shell-sim-page__error" role="alert">
-            <p className="eg-shell-sim-page__error-title">{simErrorTitle(simId)}</p>
-            <button
-              className="eg-shell-sim-page__retry"
-              onClick={() => setAttempt((value) => value + 1)}
-              type="button"
-            >
-              {t("sims.open")}
-            </button>
-          </div>
-        )}
+        {status === "error" && <SimErrorNotice onRetry={() => setAttempt((value) => value + 1)} />}
       </div>
     </section>
   );
