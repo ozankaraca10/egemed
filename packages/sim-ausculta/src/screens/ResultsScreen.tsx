@@ -272,19 +272,21 @@ export function ResultsScreen({ embedded = false, env = NOOP_RESULTS_ENV, reposi
                     const isOpen = expanded === result.caseId;
                     return (
                       <Fragment key={result.caseId}>
-                        <tr
-                          className="report-row"
-                          tabIndex={0}
-                          aria-expanded={isOpen}
-                          onClick={() => toggle(result.caseId, isOpen)}
-                          onKeyDown={(event) => {
-                            if (event.key !== "Enter" && event.key !== " ") return;
-                            event.preventDefault();
-                            toggle(result.caseId, isOpen);
-                          }}
-                        >
+                        {/* T131: aria-expanded satırda (tr) geçersiz — açılır düğme ilk hücrede; satır tıklaması fare kolaylığı olarak kalır. */}
+                        <tr className="report-row" onClick={() => toggle(result.caseId, isOpen)}>
                           <td className="report-chev">
-                            <IconChevronRight className={isOpen ? "rot" : ""} width={14} height={14} />
+                            <button
+                              type="button"
+                              className="report-toggle"
+                              aria-expanded={isOpen}
+                              aria-label={`${caseDef?.title ?? result.caseId} ayrıntıları`}
+                              onClick={(event) => {
+                                event.stopPropagation();
+                                toggle(result.caseId, isOpen);
+                              }}
+                            >
+                              <IconChevronRight className={isOpen ? "rot" : ""} width={14} height={14} />
+                            </button>
                           </td>
                           <td>{caseDef?.title ?? result.caseId}</td>
                           <td>
