@@ -124,7 +124,7 @@ export function GamiAchievementsView({
           }}
         />
       ) : (
-        <GamiEmptyCard onAssessment={onAssessment} icons={icons} {...(badgeCount !== undefined ? { badgeCount } : {})} />
+        <GamiEmptyCard onAssessment={onAssessment} icons={icons} badgeCount={badgeCount ?? badges.length} />
       )}
       {hasAttempts && (
         <div className="eg-gami-grid">

@@ -1,6 +1,7 @@
 import type { AttemptRecord } from "@egemed/gamification-core";
+import type { GamiPageTab } from "@egemed/gami-ui";
 import type { SimChrome } from "@egemed/sim-host";
-import { useEffect, useRef, type JSX } from "react";
+import { useEffect, useRef, useState, type JSX } from "react";
 import { useStore } from "./core/StoreProvider";
 import { gamiStoragePort } from "./core/storage";
 import { resolveEntryScreen } from "./screens/entry";
@@ -64,6 +65,11 @@ function Shell({
     gamiRef.current = new LocalGamiRepository({ storage: gamiStoragePort(storage), now: () => new Date(now()) });
   }
   const gami = gamiRef.current;
+  const [progressTab, setProgressTab] = useState<GamiPageTab>("achievements");
+  const openProgress = (tab: GamiPageTab) => {
+    setProgressTab(tab);
+    dispatch({ type: "goto", screen: "progress" });
+  };
   const screen = resolveEntryScreen(state.screen, embedded);
 
   useEffect(() => {
@@ -129,9 +135,17 @@ function Shell({
             />
           ) : null}
           {screen === "results" ? (
-            <ResultsScreen embedded={embedded} {...(resultsEnv ? { env: resultsEnv } : {})} />
+            <ResultsScreen
+              embedded={embedded}
+              repository={gami}
+              onAchievements={() => openProgress("achievements")}
+              onLeaderboard={() => openProgress("leaderboard")}
+              {...(resultsEnv ? { env: resultsEnv } : {})}
+            />
           ) : null}
-          {screen === "progress" ? <ProgressScreen embedded={embedded} repository={gami} /> : null}
+          {screen === "progress" ? (
+            <ProgressScreen embedded={embedded} repository={gami} tab={progressTab} onTab={setProgressTab} {...(modalEnv ? { modalEnv } : {})} />
+          ) : null}
           {screen === "sources" ? <SourcesScreen embedded={embedded} /> : null}
         </main>
       </div>

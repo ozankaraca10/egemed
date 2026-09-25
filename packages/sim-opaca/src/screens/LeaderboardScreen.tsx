@@ -7,23 +7,14 @@ import { sampleSession, SESSION_SIZE } from '../core/session'
 import { sessionSeedFromNow } from './simulation-core'
 import { Footer } from '../ui/chrome'
 import { ScreenHeading } from '../ui/ScreenHeading'
-import { GamiLeaderboardView, GamiProgressPage, type GamiModalEnv } from '@egemed/gami-ui'
+import { buildLeaderboardModel, GamiLeaderboardView, GamiProgressPage, type GamiModalEnv } from '@egemed/gami-ui'
 import { useGami, useLeaderboard } from '../gamification/useGami'
 import { useGamiContext } from '../gamification/GamiContext'
 import { gamiDemoFrom } from '../gamification/flag'
-import { countdownText, meRewardStatus, periodLabel, previousPeriodNow, tableItems } from '../gamification/leaderboardView'
-import { rewardStandings } from '@egemed/gamification-core'
+import { previousPeriodNow } from '../gamification/leaderboardView'
 import { monthKeyTr } from '@egemed/gamification-core'
 import type { CohortFilter, MonthlyReward, Period, RewardWinner } from '@egemed/gamification-core'
 import { opacaAvatarOf, opacaGamiIcons } from '../ui/opacaGami'
-
-const PERIODS: { id: Period; label: string }[] = [
-  { id: 'today', label: 'Bugün' }, { id: 'week', label: 'Bu hafta' }, { id: 'month', label: 'Bu ay' }, { id: 'academic_year', label: 'Akademik yıl' },
-]
-const COHORTS: { id: CohortFilter; label: string }[] = [
-  { id: 'all', label: 'Tüm dönemler' },
-  ...([1, 2, 3, 4, 5, 6] as const).map((c) => ({ id: c, label: `Dönem ${c}` })),
-]
 
 /** Liderlik Tahtası + Ayın Ödülü (tasarım promptu §5, §5.1). Yalnız oyunlaştırma bayrağı açıkken erişilir. */
 export function LeaderboardScreen({ embedded = false, devBuild = false, modalEnv }: { embedded?: boolean; devBuild?: boolean; modalEnv?: ModalEnv }) {
@@ -55,23 +46,19 @@ export function LeaderboardScreen({ embedded = false, devBuild = false, modalEnv
   const prevBoard = useLeaderboard(period, cohort, prevNow, view.repo, version)
   const monthAll = useLeaderboard('month', 'all', view.now, view.repo, version)
 
-  const standings = useMemo(() => {
-    if (!reward || !monthAll) return null
-    return rewardStandings([...monthAll.rows].map((r) => ({
-      id: r.id, cohort: r.cohort, public: r.isPublic, periodScore: r.periodScore, attemptsCount: r.attemptsCount, reachedAt: r.reachedAt,
-    })), reward)
-  }, [reward, monthAll])
-  const candidates = period === 'month' && cohort === 'all' && standings ? new Set(standings.rows.filter((r) => r.candidate).map((r) => r.id)) : null
-  const status = reward && standings ? meRewardStatus(standings, reward) : null
-
-  const rows = board?.rows ?? []
-  const ranked = rows.filter((r) => r.rank !== null)
-  const withPodium = ranked.length >= 3
-  const items = tableItems([...rows], withPodium)
-  const me = rows.find((r) => r.isMe)
-  const prevMe = prevBoard?.rows.find((r) => r.isMe)
-  const meDelta = me?.rank && prevMe?.rank ? prevMe.rank - me.rank : null
+  const model = useMemo(() => buildLeaderboardModel({
+    now: view.now,
+    clock,
+    period,
+    cohort,
+    rows: board?.rows ?? [],
+    prevRows: prevBoard?.rows ?? null,
+    monthRows: monthAll?.rows ?? null,
+    reward,
+    boardReady: Boolean(board),
+  }), [board, clock, cohort, monthAll, period, prevBoard, reward, view.now])
   const profile = view.state.profile
+  const me = model.rows.find((r) => r.isMe)
 
   const startAssessment = () => {
     const seed = sessionSeedFromNow(now())
@@ -94,22 +81,22 @@ export function LeaderboardScreen({ embedded = false, devBuild = false, modalEnv
             subtitle="Değerlendirme modundaki en iyi 3 denemenin ortalamasıyla sıralanır (en az 2 deneme)."
             reward={reward}
             period={period}
-            periods={PERIODS}
+            periods={model.periods}
             onPeriod={setPeriod}
             cohort={cohort}
-            cohorts={COHORTS}
+            cohorts={model.cohorts}
             onCohort={setCohort}
-            periodLabel={periodLabel(period, view.now)}
-            countdown={countdownText(clock)}
-            status={status}
+            periodLabel={model.periodLabel}
+            countdown={model.countdown}
+            status={model.status}
             onTerms={(el) => setTerms(el)}
             onStatusAction={statusAction}
-            rankedEmpty={Boolean(board) && ranked.length === 0}
-            rows={rows}
-            candidates={candidates}
-            items={items}
-            meDelta={meDelta}
-            qualify={me && me.rank === null ? { left: Math.max(1, 2 - me.attemptsCount) } : null}
+            rankedEmpty={model.rankedEmpty}
+            rows={model.rows}
+            candidates={model.candidates}
+            items={model.items}
+            meDelta={model.meDelta}
+            qualify={model.qualify}
             onQualify={startAssessment}
             privacy={{
               name: profile.displayName ?? (me?.isPublic ? me.displayName : null),

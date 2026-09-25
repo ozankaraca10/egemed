@@ -120,6 +120,38 @@ test.describe("birleşik bar (Opaca ve Ausculta)", () => {
   }
 });
 
+test.describe("Ausculta ilerleme sayfası", () => {
+  test("İlerlemem Başarılarım ve Liderlik sekmelerini açar", async ({ page }, testInfo) => {
+    const errors = trackErrors(page);
+    await openRoute(page, "#/sims/ausculta");
+    await page.locator(".eg-shell-simbar").getByRole("button", { name: "İlerlemem" }).click();
+    await expect(page.getByRole("tab", { name: "Başarılarım" })).toBeVisible();
+    await expect(page.getByRole("tab", { name: "Liderlik Tahtası" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Başarılarım", exact: true })).toBeVisible();
+    await expect(page.getByText("Demo verisi", { exact: false }).first()).toBeVisible();
+    await captureRouteScreenshot(page, testInfo.project.name, "#/sims/ausculta ilerleme");
+    await page.getByRole("tab", { name: "Liderlik Tahtası" }).click();
+    await expect(page.getByRole("heading", { name: "Liderlik Tahtası" })).toBeVisible();
+    await captureRouteScreenshot(page, testInfo.project.name, "#/sims/ausculta liderlik");
+    expect(errors, "konsol/sayfa hatası").toEqual([]);
+  });
+});
+
+test.describe("Opaca ilerleme sayfası", () => {
+  test("İlerlemem Başarılarım ve Liderlik sekmelerini açar", async ({ page }, testInfo) => {
+    const errors = trackErrors(page);
+    await openRoute(page, "#/sims/opaca");
+    await page.locator(".eg-shell-simbar").getByRole("button", { name: "İlerlemem" }).click();
+    await expect(page.getByRole("tab", { name: "Başarılarım" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Başarılarım", exact: true })).toBeVisible();
+    await captureRouteScreenshot(page, testInfo.project.name, "#/sims/opaca basarilarim");
+    await page.getByRole("tab", { name: "Liderlik Tahtası" }).click();
+    await expect(page.getByRole("heading", { name: "Liderlik Tahtası" })).toBeVisible();
+    await captureRouteScreenshot(page, testInfo.project.name, "#/sims/opaca liderlik");
+    expect(errors, "konsol/sayfa hatası").toEqual([]);
+  });
+});
+
 test.describe("kompakt hesap menüsü (T120)", () => {
   // Plan gereği 360 px doğrulaması: düğme ve panel yatay taşma üretmez.
   test.use({ viewport: { width: 360, height: 780 } });

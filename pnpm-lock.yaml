@@ -168,6 +168,9 @@ importers:
       '@egemed/gami-catalogs':
         specifier: workspace:*
         version: link:../gami-catalogs
+      '@egemed/gami-ui':
+        specifier: workspace:*
+        version: link:../gami-ui
       '@egemed/gamification-core':
         specifier: workspace:*
         version: link:../gamification-core
