@@ -12,6 +12,8 @@
     "@egemed/api-client": "workspace:*",
     "@egemed/contracts": "workspace:*",
     "@egemed/gami-catalogs": "workspace:*",
+    "@egemed/gami-ui": "workspace:*",
+    "@egemed/gamification-core": "workspace:*",
     "@egemed/sim-ausculta": "workspace:*",
     "@egemed/sim-host": "workspace:*",
     "@egemed/sim-opaca": "workspace:*",

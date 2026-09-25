@@ -2,10 +2,11 @@
  * T114 — sunucu rozet anahtarını katalog tanımıyla eşler (ADR-008 S4, kabuk
  * kısmı). API oturumunda dashboard, rozet anahtarını katalog adı/kısa
  * açıklamasıyla gösterir; katalogda olmayan anahtar sessizce atlanır.
- * Sahte oturum bu modülü kullanmaz (mevcut ham anahtar davranışı korunur).
+ * Katalogda olmayan anahtar hem API hem sahte oturumda atlanır.
  * Simler arası toplam yoktur (ADR-006): her kayıt yalnız kendi siminin
  * kataloğuna bakar.
  */
+import type { BadgeCategory } from "@egemed/gamification-core";
 import { AUSCULTA_BADGES, OPACA_BADGES, PULSE_BADGES } from "@egemed/gami-catalogs";
 import type { SimId } from "@egemed/contracts";
 
@@ -14,6 +15,7 @@ export interface BadgeCatalogEntry {
   readonly id: string;
   readonly name: string;
   readonly description: string;
+  readonly category: BadgeCategory;
 }
 
 const CATALOGS: Readonly<Record<SimId, readonly BadgeCatalogEntry[]>> = {

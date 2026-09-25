@@ -1,6 +1,7 @@
 import { createRoot } from "react-dom/client";
 import "@egemed/tokens/family-tokens.css";
 import "@egemed/ui/components.css";
+import "@egemed/gami-ui/styles.css";
 import "./shell.css";
 import { App } from "./App";
 

@@ -415,6 +415,7 @@ export const tr = {
   "home.progress.leaderboardVisible.hint":
     "Kapalıyken diğer öğrencilerin listelerinde görünmezsiniz; kendi sıranızı görmeye devam edersiniz.",
   "home.progress.leaderboardVisible.error": "Tercih kaydedilemedi.",
+  "home.progress.openInSim": "Simülatörde İlerlemem'i aç",
   "home.trust.title": "Neden güvenilir?",
   "home.trust.data.title": "Açık ve atıflı veri",
   "home.trust.data.body":

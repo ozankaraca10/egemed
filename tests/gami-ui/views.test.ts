@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import { createElement, type ReactNode } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
@@ -39,6 +40,8 @@ describe("gami-ui görünüm sözleşmesi", () => {
     expect(gamiUiStyles).toContain("var(--ink-900)");
     expect(gamiUiStyles).not.toMatch(/#[0-9a-f]{3,8}/i);
     expect(gamiUiStyles).not.toMatch(/rgba\(/);
+    const css = readFileSync("packages/gami-ui/src/styles.css", "utf8");
+    expect(gamiUiStyles).toBe(css);
   });
 
   it("sekmeli sayfa Başarılarım ve Liderlik Tahtası sekmelerini çizer", () => {
