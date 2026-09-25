@@ -418,8 +418,10 @@ const EMBED_CSS = `
 .transport,.case-toolbar{bottom:calc(8px + var(--pulse-bottom-inset,0px))}
 .pulse-html:fullscreen .transport,.pulse-html:fullscreen .case-toolbar{bottom:8px}
 .landing{overflow-y:auto}
-/* PULSE-10: kaynak yeşil metin (#16a34a / #ecfaf1 ≈ 3.1:1) WCAG AA altında. */
-.live-badge,.teaching-note,.teaching-note b{color:#15803d}
+/* PULSE-10: kaynak yeşili (#16a34a) açık zeminde ve beyaz metinle WCAG AA altında
+   (≈3.1–3.3:1); token koyulaştırılır (#15803d ≈ 4.8–5:1). */
+:host{--green-600:#15803d}
+.live-badge{min-height:44px}
 /* PULSE-10: katman onay kutuları WCAG 2.2 hedef boyutu (24 px). */
 .layer-menu input[type=checkbox],#labelsToggle{inline-size:24px;block-size:24px}
 :host(.pulse-unified) .topbar,:host(.pulse-unified) .app>.eg-footer,:host(.pulse-unified) .landing{display:none!important}

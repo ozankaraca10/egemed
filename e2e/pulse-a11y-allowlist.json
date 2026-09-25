@@ -49,26 +49,7 @@
     {
       "screen": "case",
       "rule": "color-contrast",
-      "target": "#caseStageBadge"
-    },
-    {
-      "screen": "case",
-      "rule": "color-contrast",
       "target": "section[aria-label=\"Vaka EKG sahnesi\"] > .stage-top > .stage-id"
-    },
-    {
-      "screen": "gami",
-      "rule": "color-contrast",
-      "target": "button[data-view=\"sim\"]",
-      "projects": [
-        "tablet-768",
-        "desktop-1440"
-      ]
-    },
-    {
-      "screen": "quiz",
-      "rule": "color-contrast",
-      "target": "section[aria-label=\"Soru EKG sahnesi\"] > .stage-top > .stage-badge"
     },
     {
       "screen": "quiz",
@@ -102,56 +83,14 @@
     },
     {
       "screen": "results",
-      "rule": "color-contrast",
-      "target": "tr[data-report-toggle=\"Q*\"] > .ok",
-      "projects": [
-        "tablet-768",
-        "desktop-1440"
-      ]
-    },
-    {
-      "screen": "results",
       "rule": "scrollable-region-focusable",
       "target": ".table-scroll",
       "projects": [
         "mobile-360"
       ]
-    },
-    {
-      "screen": "sim",
-      "rule": "aria-required-children",
-      "target": ".explain-tabs"
-    },
-    {
-      "screen": "sim",
-      "rule": "color-contrast",
-      "target": "#liveBadge"
-    },
-    {
-      "screen": "sim",
-      "rule": "color-contrast",
-      "target": "#teachingNote",
-      "projects": [
-        "mobile-360",
-        "tablet-768"
-      ]
-    },
-    {
-      "screen": "sim",
-      "rule": "color-contrast",
-      "target": "#teachingNote > b",
-      "projects": [
-        "mobile-360",
-        "tablet-768"
-      ]
     }
   ],
   "smallTargets": [
-    {
-      "screen": "about",
-      "selector": "#aboutBtn",
-      "size": "38x34"
-    },
     {
       "screen": "about",
       "selector": "#aboutContent > section.about-section:nth-of-type(*) > div.ds-grid > article.ds-card:nth-of-type(*) > dl > dd > a",
@@ -174,53 +113,13 @@
     },
     {
       "screen": "about",
-      "selector": "#brandHome",
-      "size": "112x42",
-      "projects": [
-        "mobile-360"
-      ]
-    },
-    {
-      "screen": "about",
       "selector": "#downloadReport",
       "size": "136x37"
     },
     {
       "screen": "about",
-      "selector": "#egemedGamiBtn",
-      "size": "38x34"
-    },
-    {
-      "screen": "about",
-      "selector": "#fullscreenBtn",
-      "size": "111x36",
-      "projects": [
-        "tablet-768",
-        "desktop-1440"
-      ]
-    },
-    {
-      "screen": "about",
-      "selector": "#helpBtn",
-      "size": "38x34"
-    },
-    {
-      "screen": "about",
       "selector": "#resetProgress",
       "size": "133x37"
-    },
-    {
-      "screen": "case",
-      "selector": "#aboutBtn",
-      "size": "38x34"
-    },
-    {
-      "screen": "case",
-      "selector": "#brandHome",
-      "size": "112x42",
-      "projects": [
-        "mobile-360"
-      ]
     },
     {
       "screen": "case",
@@ -272,34 +171,6 @@
     },
     {
       "screen": "case",
-      "selector": "#egemedGamiBtn",
-      "size": "38x34"
-    },
-    {
-      "screen": "case",
-      "selector": "#fullscreenBtn",
-      "size": "111x36",
-      "projects": [
-        "tablet-768",
-        "desktop-1440"
-      ]
-    },
-    {
-      "screen": "case",
-      "selector": "#helpBtn",
-      "size": "38x34"
-    },
-    {
-      "screen": "case",
-      "selector": "#modeSwitch",
-      "size": "127x36",
-      "projects": [
-        "tablet-768",
-        "desktop-1440"
-      ]
-    },
-    {
-      "screen": "case",
       "selector": "#newCaseSessionBar",
       "size": "169x36"
     },
@@ -320,49 +191,8 @@
     },
     {
       "screen": "quiz",
-      "selector": "#aboutBtn",
-      "size": "38x34"
-    },
-    {
-      "screen": "quiz",
-      "selector": "#brandHome",
-      "size": "112x42",
-      "projects": [
-        "mobile-360"
-      ]
-    },
-    {
-      "screen": "quiz",
       "selector": "#checkBtn",
       "size": "207x37"
-    },
-    {
-      "screen": "quiz",
-      "selector": "#egemedGamiBtn",
-      "size": "38x34"
-    },
-    {
-      "screen": "quiz",
-      "selector": "#fullscreenBtn",
-      "size": "111x36",
-      "projects": [
-        "tablet-768",
-        "desktop-1440"
-      ]
-    },
-    {
-      "screen": "quiz",
-      "selector": "#helpBtn",
-      "size": "38x34"
-    },
-    {
-      "screen": "quiz",
-      "selector": "#modeSwitch",
-      "size": "127x36",
-      "projects": [
-        "tablet-768",
-        "desktop-1440"
-      ]
     },
     {
       "screen": "quiz",
@@ -396,40 +226,8 @@
     },
     {
       "screen": "results",
-      "selector": "#aboutBtn",
-      "size": "38x34"
-    },
-    {
-      "screen": "results",
-      "selector": "#brandHome",
-      "size": "112x42",
-      "projects": [
-        "mobile-360"
-      ]
-    },
-    {
-      "screen": "results",
-      "selector": "#egemedGamiBtn",
-      "size": "38x34"
-    },
-    {
-      "screen": "results",
       "selector": "#egemedGamiGains > section.card.mt-12 > button.btn.primary",
       "size": "116x27"
-    },
-    {
-      "screen": "results",
-      "selector": "#fullscreenBtn",
-      "size": "111x36",
-      "projects": [
-        "tablet-768",
-        "desktop-1440"
-      ]
-    },
-    {
-      "screen": "results",
-      "selector": "#helpBtn",
-      "size": "38x34"
     },
     {
       "screen": "results",
@@ -453,19 +251,6 @@
     },
     {
       "screen": "sim",
-      "selector": "#aboutBtn",
-      "size": "38x34"
-    },
-    {
-      "screen": "sim",
-      "selector": "#brandHome",
-      "size": "112x42",
-      "projects": [
-        "mobile-360"
-      ]
-    },
-    {
-      "screen": "sim",
       "selector": "#caliperBtn",
       "size": "74x32"
     },
@@ -481,11 +266,6 @@
     },
     {
       "screen": "sim",
-      "selector": "#egemedGamiBtn",
-      "size": "38x34"
-    },
-    {
-      "screen": "sim",
       "selector": "#electricToggle",
       "size": "15x15"
     },
@@ -496,22 +276,8 @@
     },
     {
       "screen": "sim",
-      "selector": "#fullscreenBtn",
-      "size": "111x36",
-      "projects": [
-        "tablet-768",
-        "desktop-1440"
-      ]
-    },
-    {
-      "screen": "sim",
       "selector": "#guideBtn",
       "size": "109x32"
-    },
-    {
-      "screen": "sim",
-      "selector": "#helpBtn",
-      "size": "38x34"
     },
     {
       "screen": "sim",
@@ -535,15 +301,6 @@
     },
     {
       "screen": "sim",
-      "selector": "#liveBadge",
-      "size": "71x32",
-      "projects": [
-        "tablet-768",
-        "desktop-1440"
-      ]
-    },
-    {
-      "screen": "sim",
       "selector": "#measureBtn",
       "size": "81x32"
     },
@@ -551,15 +308,6 @@
       "screen": "sim",
       "selector": "#mechanismPanel > div.phase-chips:nth-of-type(*) > button:nth-of-type(*)",
       "size": "48x30"
-    },
-    {
-      "screen": "sim",
-      "selector": "#modeSwitch",
-      "size": "127x36",
-      "projects": [
-        "tablet-768",
-        "desktop-1440"
-      ]
     },
     {
       "screen": "sim",

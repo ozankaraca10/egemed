@@ -101,8 +101,9 @@ function correctOf(id: string): number {
 async function openPulse(page: Page): Promise<Locator> {
   await page.goto("/#/sims/pulse");
   const root = page.locator(ROOT);
-  await root.locator("#startSimulator").click();
-  if (await root.locator("#tutorialSkip").isVisible()) await root.locator("#tutorialSkip").click();
+  // Birleşik barda kaynak açılış sayfası atlanır (T107); öğretici açıksa atlanır.
+  await expect(root.locator("#appRoot")).toBeVisible();
+  if (await root.locator("#tutorialSkip").isVisible().catch(() => false)) await root.locator("#tutorialSkip").click();
   return root;
 }
 
@@ -171,7 +172,8 @@ const SCREENS: readonly PulseScreen[] = [
     label: "Hakkında",
     route: "#/sims/pulse/hakkinda",
     async open(root) {
-      await root.locator("#aboutBtn").click();
+      // Birleşik bar (T107): kaynak üst çubuğu gizli; eylem kabuk barındadır.
+      await root.page().locator(".eg-shell-simbar").getByRole("button", { name: "Hakkında" }).click();
       await expect(root.locator("#aboutView")).toBeVisible();
       await expect(root.locator("#aboutContent")).toBeVisible();
     },
@@ -181,7 +183,7 @@ const SCREENS: readonly PulseScreen[] = [
     label: "İlerlemem diyaloğu",
     route: "#/sims/pulse/ilerlemem",
     async open(root) {
-      await root.locator("#egemedGamiBtn").click();
+      await root.page().locator(".eg-shell-simbar").getByRole("button", { name: "İlerlemem" }).click();
       await expect(root.locator("#egemedGamiDialog[open]")).toBeVisible();
     },
   },
