@@ -5,6 +5,7 @@ import type { ShellSession } from "./session";
 import { ShellFooter } from "./ShellFooter";
 import { EgemedLogo } from "./brand/EgemedLogo";
 import type { SimChrome } from "@egemed/sim-host";
+import { AccountMenu } from "./AccountMenu";
 import { SimBar } from "./SimBar";
 
 export interface ShellLayoutProps {
@@ -89,30 +90,36 @@ export function ShellLayout({ route, session, onLogout, simChrome = null, childr
           <EgemedLogo compact={simMode} variant="on-dark" />
         </a>
         {route.kind === "sim" && <SimBar chrome={simChrome} title={t(route.titleKey)} />}
-        <div className="eg-shell-header__side">
-          {simMode && synthetic && <span className="eg-shell-session__dev">{t("shell.session.devChip")}</span>}
-          {roleLabel !== null && (
-            <div className="eg-shell-session">
-              <span className="eg-shell-session__role">{roleLabel}</span>
-              <button className="eg-shell-session__logout" onClick={onLogout} type="button">
-                {t("shell.session.logout")}
-              </button>
-            </div>
-          )}
-          {!simMode && (
-          <nav aria-label={t("shell.nav.label")} className="eg-shell-nav">
-            {ROUTES.map((item) => (
-              <a
-                aria-current={item.id === activeId ? "page" : undefined}
-                className="eg-shell-nav__link" href={routeHref(item.id)} key={item.id}
-              >
-                <span aria-hidden="true" className="eg-shell-nav__icon">{NAV_ICONS[item.id]}</span>
-                <span className="eg-shell-nav__label">{t(item.labelKey)}</span>
-              </a>
-            ))}
-          </nav>
-          )}
-        </div>
+        {simMode ? (
+          // T120: sim rotasında tek hesap düğmesi; çip, rol etiketi ve çıkış
+          // düğmesi menünün içine taşındı. Düğme `header__side` dışındadır:
+          // mobilde side gizlense de hesap düğmesi görünür kalır.
+          roleLabel !== null && (
+            <AccountMenu displayName={roleLabel} onLogout={onLogout} synthetic={synthetic} />
+          )
+        ) : (
+          <div className="eg-shell-header__side">
+            {roleLabel !== null && (
+              <div className="eg-shell-session">
+                <span className="eg-shell-session__role">{roleLabel}</span>
+                <button className="eg-shell-session__logout" onClick={onLogout} type="button">
+                  {t("shell.session.logout")}
+                </button>
+              </div>
+            )}
+            <nav aria-label={t("shell.nav.label")} className="eg-shell-nav">
+              {ROUTES.map((item) => (
+                <a
+                  aria-current={item.id === activeId ? "page" : undefined}
+                  className="eg-shell-nav__link" href={routeHref(item.id)} key={item.id}
+                >
+                  <span aria-hidden="true" className="eg-shell-nav__icon">{NAV_ICONS[item.id]}</span>
+                  <span className="eg-shell-nav__label">{t(item.labelKey)}</span>
+                </a>
+              ))}
+            </nav>
+          </div>
+        )}
       </header>
       <main className={simMode ? "eg-shell-main eg-shell-main--sim" : "eg-shell-main"} id="icerik" tabIndex={-1}>
         {synthetic && !simMode && <p className="eg-shell-session-banner">{t("shell.session.banner")}</p>}

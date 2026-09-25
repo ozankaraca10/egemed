@@ -58,6 +58,7 @@ export const tr = {
   "shell.session.logout": "Çıkış yap",
   "shell.session.banner": "Geliştirme oturumu: gerçek kimlik doğrulama yok, veri kaydedilmez.",
   "shell.session.devChip": "Geliştirme oturumu",
+  "shell.account.label": "Hesap menüsü",
   "shell.sim.crumbs": "Konum",
   "shell.sim.steps": "Adımlar",
   "shell.sim.actions": "Simülatör eylemleri",

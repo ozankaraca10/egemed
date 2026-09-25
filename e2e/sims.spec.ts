@@ -119,3 +119,46 @@ test.describe("birleşik bar (Opaca ve Ausculta)", () => {
     });
   }
 });
+
+test.describe("kompakt hesap menüsü (T120)", () => {
+  // Plan gereği 360 px doğrulaması: düğme ve panel yatay taşma üretmez.
+  test.use({ viewport: { width: 360, height: 780 } });
+
+  test("baş harf düğmesi menüyü açar, çıkış görünür, Esc odağı geri verir", async ({ page }) => {
+    const errors = trackErrors(page);
+    await page.goto("/#/");
+    await page.evaluate(() => {
+      sessionStorage.setItem("egemed.devSession", JSON.stringify({ actorId: "dev-student-0001", role: "student" }));
+    });
+    await openRoute(page, "#/sims/ausculta");
+
+    const account = page.getByRole("button", { name: /Hesap menüsü/ });
+    await expect(account).toBeVisible();
+    await expect(account).toContainText("ST");
+    await expect(account).toHaveAttribute("aria-expanded", "false");
+    await expect(page.getByRole("menu")).toBeHidden();
+
+    await account.click();
+    await expect(account).toHaveAttribute("aria-expanded", "true");
+    await expect(page.getByRole("menu")).toBeVisible();
+    const logout = page.getByRole("menuitem", { name: "Çıkış yap" });
+    await expect(logout).toBeVisible();
+    await expect(logout).toBeFocused();
+    await expect(page.getByText("Sahte test öğrencisi")).toBeVisible();
+    await expect(page.getByText("Geliştirme oturumu", { exact: true })).toBeVisible();
+
+    const overflow = await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth + 1);
+    expect(overflow, "yatay kaydırma").toBe(false);
+
+    // Dışarı tıklama kapatır; Esc kapatıp odağı düğmeye döndürür.
+    await page.locator(".eg-shell-simbar__title").click();
+    await expect(page.getByRole("menu")).toBeHidden();
+    await account.press("Enter");
+    await expect(page.getByRole("menu")).toBeVisible();
+    await page.keyboard.press("Escape");
+    await expect(page.getByRole("menu")).toBeHidden();
+    await expect(account).toBeFocused();
+
+    expect(errors, "konsol/sayfa hatası").toEqual([]);
+  });
+});
