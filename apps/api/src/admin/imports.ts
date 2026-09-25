@@ -291,12 +291,39 @@ const CSV_ERROR_MESSAGES: Readonly<Record<string, string>> = {
   dev_not_allowed: "dev giriş tipi yalnız geliştirme ortamında kabul edilir",
 };
 
-function messageFor(code: string): string {
-  return CSV_ERROR_MESSAGES[code] ?? "Doğrulama hatası";
+/**
+ * Sütun+kod özel iletiler; sahte kaynaktaki (`apps/shell/src/admin/importsDataSource.ts`)
+ * metinlerle birebir aynı tutulur. Eşleşmeyen sütun+kod için `CSV_ERROR_MESSAGES`
+ * genel iletisi kullanılır.
+ */
+const CSV_FIELD_ERROR_MESSAGES: Readonly<Record<string, Readonly<Record<string, string>>>> = {
+  kullanici_adi: {
+    invalid_format: "Kullanıcı adı biçimi geçersiz.",
+    mapping_key_required: "Kullanıcı adı veya e-posta girin.",
+  },
+  eposta: {
+    invalid_format: "E-posta biçimi geçersiz.",
+  },
+  ad_soyad: {
+    invalid_length: "Ad soyad 2-120 karakter olmalıdır.",
+  },
+  giris_tipi: {
+    invalid_value: "giris_tipi yalnız sso veya dev olabilir.",
+  },
+  birim_kodu: {
+    unknown_unit: "Bilinmeyen birim kodu.",
+  },
+  rol: {
+    role_not_permitted: "admin rolü CSV ile atanamaz.",
+  },
+};
+
+function messageFor(column: string, code: string): string {
+  return CSV_FIELD_ERROR_MESSAGES[column]?.[code] ?? CSV_ERROR_MESSAGES[code] ?? "Doğrulama hatası";
 }
 
 function rowError(column: string, code: string, message?: string): ImportRowError {
-  return { column, code, message: message ?? messageFor(code) };
+  return { column, code, message: message ?? messageFor(column, code) };
 }
 
 function cellAt(fields: readonly string[], column: CsvColumn): string {
@@ -311,7 +338,17 @@ function buildValues(fields: readonly string[]): Record<string, string> {
   return values;
 }
 
-function toImportError(issue: z.ZodIssue): ImportRowError {
+/** `sim_erisimi` dizisinde geçersiz olan token'ı, ham hücreyi bölerek geri kazanır. */
+function simTokenAt(values: Record<string, string>, index: number | undefined): string | undefined {
+  if (index === undefined) return undefined;
+  const tokens = (values.sim_erisimi ?? "")
+    .split(",")
+    .map((token) => token.trim())
+    .filter((token) => token.length > 0);
+  return tokens[index];
+}
+
+function toImportError(issue: z.ZodIssue, values: Record<string, string>): ImportRowError {
   if (issue.message === "mapping_key_required") {
     return rowError("kullanici_adi", "mapping_key_required");
   }
@@ -324,6 +361,14 @@ function toImportError(issue: z.ZodIssue): ImportRowError {
       return rowError(column, "invalid_length");
     case "invalid_type":
     case "invalid_value":
+      if (column === "sim_erisimi") {
+        const token = simTokenAt(values, typeof issue.path[1] === "number" ? issue.path[1] : undefined);
+        return rowError(
+          column,
+          "invalid_value",
+          token !== undefined ? `Bilinmeyen sim: ${token}` : "Bilinmeyen sim erişimi değeri.",
+        );
+      }
       return rowError(column, "invalid_value");
     default:
       return rowError(column, issue.code);
@@ -380,7 +425,7 @@ async function validateRow(
   }
   const parsed = csvRowSchema.safeParse(values);
   if (!parsed.success) {
-    for (const issue of parsed.error.issues) draft.errors.push(toImportError(issue));
+    for (const issue of parsed.error.issues) draft.errors.push(toImportError(issue, values));
     draft.status = "error";
     return draft;
   }
@@ -406,8 +451,13 @@ async function validateRow(
   const matched = matchedUsername ?? matchedEmail ?? null;
   if (matched !== null) {
     if (context.mode === "ekle") {
+      // Sahte kaynaktaki "already_exists" karşılığı: dosya içi tekrardan ayrı ileti.
       draft.errors.push(
-        rowError(matchedUsername !== undefined ? "kullanici_adi" : "eposta", "duplicate_mapping_key"),
+        rowError(
+          matchedUsername !== undefined ? "kullanici_adi" : "eposta",
+          "duplicate_mapping_key",
+          "Bu kullanıcı zaten kayıtlı.",
+        ),
       );
     } else {
       draft.matchedUserId = matched.id;
@@ -428,7 +478,7 @@ function markInFileDuplicates(drafts: readonly MutableDraft[]): void {
   const mark = (first: MutableDraft, second: MutableDraft, column: string) => {
     for (const draft of [first, second]) {
       if (!draft.errors.some((issue) => issue.code === "duplicate_mapping_key")) {
-        draft.errors.push(rowError(column, "duplicate_mapping_key"));
+        draft.errors.push(rowError(column, "duplicate_mapping_key", "Bu anahtar dosyada tekrar ediyor."));
       }
       draft.status = "error";
       draft.normalized = null;
