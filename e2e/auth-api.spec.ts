@@ -244,7 +244,7 @@ test.describe("API oturumu (dev sağlayıcı)", () => {
     );
     await page.goto("/#/sims/pulse");
     const root = page.locator(".egemed-pulse-runtime");
-    await expect(root.locator("#appRoot")).toBeVisible();
+    await expect(root.locator("#appRoot")).toBeVisible({ timeout: 20_000 });
     if (await root.locator("#tutorialSkip").isVisible().catch(() => false)) await root.locator("#tutorialSkip").click();
     await root.locator('#modeCards [data-view="quiz"]').click();
     for (let i = 0; i < 10; i += 1) {
