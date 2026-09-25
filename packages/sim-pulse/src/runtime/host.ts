@@ -424,5 +424,7 @@ const EMBED_CSS = `
 .live-badge{min-height:44px}
 /* PULSE-10: katman onay kutuları WCAG 2.2 hedef boyutu (24 px). */
 .layer-menu input[type=checkbox],#labelsToggle{inline-size:24px;block-size:24px}
+/* Birleşik barda adım göstergesi bardadır; içerikteki kopya çizilmez. */
+:host(.pulse-unified) .stepper{display:none!important}
 :host(.pulse-unified) .topbar,:host(.pulse-unified) .app>.eg-footer,:host(.pulse-unified) .landing{display:none!important}
 `;
