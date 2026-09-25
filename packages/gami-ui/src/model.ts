@@ -144,6 +144,8 @@ export interface AchievementsModelInput<TStats, TContext extends BadgeContext, T
   lockedNote?: (id: string) => string | null;
   assessmentOnly?: (category: BadgeCategory) => boolean;
   congrats?: GamiCongrats | null;
+  /** Sunucu özeti varken yerel deneme olmasa da profil şeridi açılır. */
+  activity?: boolean;
 }
 
 export interface AchievementsModel {
@@ -178,7 +180,7 @@ export function buildAchievementsModel<TStats, TContext extends BadgeContext, TD
   const assessmentOnly = input.assessmentOnly ?? ((category: BadgeCategory) => category === "topic" || category === "skill");
   const me = input.weekRows?.find((r) => r.isMe);
   const ranked = input.weekRows?.filter((r) => r.rank !== null).length ?? 0;
-  const hasAttempts = input.attempts.length > 0;
+  const hasAttempts = input.activity ?? input.attempts.length > 0;
   const domains: GamiDomainItem[] = [];
   for (const d of input.domainMeta) {
     const vals = assessments.map((a) => a.domains[d.key]).filter((v): v is number => typeof v === "number");

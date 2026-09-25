@@ -17,7 +17,8 @@ import {
   type OpacaSummaryInput,
   type PulseSummaryInput,
 } from "@egemed/gami-catalogs";
-import type { SimId } from "@egemed/contracts";
+import type { GamiCohortFilter, GamiPeriod, SimId } from "@egemed/contracts";
+import type { SimGamificationSource } from "@egemed/sim-host";
 import { browserApiWindow, csrfTokenFromCookie } from "./apiAuth";
 
 export interface ReportedAttempt {
@@ -183,14 +184,33 @@ export async function reportSimAttempt(client: Pick<ApiClient, "gamification">, 
   await repo.recordAttempt(attempt);
 }
 
-/** Tarayıcı çerez oturumuyla raporlar; DOM yoksa `null`. */
-export function createBrowserAttemptReporter(baseUrl: string): ((simId: SimId, attempt: ReportedAttempt) => Promise<void>) | null {
+function browserClient(baseUrl: string): ApiClient | null {
   const win = browserApiWindow();
   if (win === null) return null;
-  const client = createApiClient({
+  return createApiClient({
     baseUrl,
     fetch: (input, init) => win.fetch(input, init),
     readCsrfToken: () => csrfTokenFromCookie(win.document.cookie),
   });
+}
+
+/** Tarayıcı çerez oturumuyla raporlar; DOM yoksa `null`. */
+export function createBrowserAttemptReporter(baseUrl: string): ((simId: SimId, attempt: ReportedAttempt) => Promise<void>) | null {
+  const client = browserClient(baseUrl);
+  if (client === null) return null;
   return (simId, attempt) => reportSimAttempt(client, simId, attempt);
+}
+
+/** API oturumunda İlerlemem okuması; DOM yoksa `null`. */
+export function createBrowserGamification(baseUrl: string, simId: SimId): SimGamificationSource | null {
+  const client = browserClient(baseUrl);
+  if (client === null) return null;
+  return {
+    async summary() {
+      return (await client.gamification.getSummary(simId)).data;
+    },
+    async leaderboard(period: GamiPeriod, cohort: GamiCohortFilter) {
+      return (await client.gamification.getLeaderboard(simId, { period, cohort, page: 1, pageSize: 50 })).data;
+    },
+  };
 }

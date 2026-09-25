@@ -13,16 +13,18 @@ import { GamiWeeklyGoals } from "./GamiWeeklyGoals";
 import type { GamiFocusable, GamiModalEnv } from "./modal";
 import type { GamiAvatarOf, GamiBadgeModel, GamiCongrats, GamiDomainItem, GamiIcons, GamiMeStatus, GamiProfileModel, GamiTableItem } from "./types";
 
-export function GamiProgressPage({ active, onTab, icons, demoIcon, children }: {
+export function GamiProgressPage({ active, onTab, icons, demoIcon, demo = true, children }: {
   active: GamiPageTab;
   onTab: (id: GamiPageTab) => void;
   icons: Pick<GamiIcons, "award" | "chart" | "info">;
   demoIcon?: ReactNode;
+  /** API oturumunda sunucu verisi varken bant gizlenir. */
+  demo?: boolean;
   children: ReactNode;
 }) {
   return (
     <div className="results-wrap-v2 eg-gami-page">
-      <GamiDemoBanner icon={demoIcon ?? icons.info({ width: 16, height: 16 })} />
+      {demo ? <GamiDemoBanner icon={demoIcon ?? icons.info({ width: 16, height: 16 })} /> : null}
       <GamiPageTabs
         active={active}
         onChange={onTab}

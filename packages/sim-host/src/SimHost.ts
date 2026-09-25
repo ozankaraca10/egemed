@@ -1,4 +1,4 @@
-import type { AttemptRecord } from "@egemed/gamification-core";
+import type { AttemptRecord, CohortFilter, GamiLeaderboardRow, Period } from "@egemed/gamification-core";
 
 /**
  * SimHost sözleşmesi (ADR-006): tek React kabuk içindeki sim modülleri için
@@ -65,6 +65,22 @@ export interface SimChrome {
   readonly actions?: readonly SimChromeAction[];
 }
 
+/**
+ * API oturumundaki sunucu oyunlaştırması. `summary` `GamiSimSummary`,
+ * `leaderboard` `GamiLeaderboardResponse["data"]` ile yapısal olarak örtüşür.
+ */
+export interface SimGamificationSummary {
+  readonly xp: number;
+  readonly level: number;
+  readonly streak: { readonly current: number; readonly best: number };
+  readonly badges: readonly { readonly key: string; readonly awardedAt: string }[];
+}
+
+export interface SimGamificationSource {
+  summary(): Promise<SimGamificationSummary>;
+  leaderboard(period: Period, cohort: CohortFilter): Promise<{ readonly rows: readonly GamiLeaderboardRow[] }>;
+}
+
 /** Modüle taşınan oturum bağlamı; sim başına ayrıktır (veri izolasyonu). */
 export interface SimMountContext {
   readonly simId: SimulatorId;
@@ -80,6 +96,11 @@ export interface SimMountContext {
    * başarıyla bitince sim bunu çağırır; yoksa alan hiç yoktur.
    */
   readonly reportAttempt?: (attempt: AttemptRecord) => void;
+  /**
+   * API oturumunda kabuğun verdiği okuma hattı. Varsa İlerlemem sunucudan gelir;
+   * yoksa alan hiç yoktur ve yerel davranış sürer.
+   */
+  readonly gamification?: SimGamificationSource;
   /**
    * Birleşik bar kanalı: verilmişse sim kendi üst barını çizmez, `SimChrome`
    * gönderir (durum değiştikçe yeniden çağrılır; `null` barı temizler).
@@ -118,6 +139,7 @@ export interface SimHostOptions {
 export interface SimMountOptions {
   readonly actorId?: string;
   readonly reportAttempt?: (attempt: AttemptRecord) => void;
+  readonly gamification?: SimGamificationSource;
   readonly setChrome?: (chrome: SimChrome | null) => void;
 }
 
@@ -152,12 +174,14 @@ interface PendingLoad {
 function mountContext(simId: SimulatorId, now: () => number, mountOptions: SimMountOptions | undefined): SimMountContext {
   const actorId = mountOptions?.actorId;
   const reportAttempt = mountOptions?.reportAttempt;
+  const gamification = mountOptions?.gamification;
   const setChrome = mountOptions?.setChrome;
   return {
     now,
     simId,
     ...(actorId === undefined ? {} : { actorId }),
     ...(reportAttempt === undefined ? {} : { reportAttempt }),
+    ...(gamification === undefined ? {} : { gamification }),
     ...(setChrome === undefined ? {} : { setChrome }),
   };
 }

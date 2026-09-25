@@ -16,6 +16,7 @@ import { emptyPulseGamiState, pulseLearnTopic } from "../gamification/repo";
 import type { PulseGamiRepo, PulseGamiState, PulseGamiWriteResult } from "../gamification/repo";
 import { createPulseGainsView, gainsMarkup } from "../gamification/ui";
 import { gamiUiStyles } from "@egemed/gami-ui";
+import type { GamiServerSource } from "@egemed/gami-ui";
 import { mountPulseProgress } from "./progress";
 import type { Lead, Mode } from "../engine/shapes";
 import type { PulseRuntimeHandle } from "./host";
@@ -68,6 +69,7 @@ export interface PulseGamiBridgeOptions {
   readonly now: () => number;
   /** Yerel yazım başarıyla bitince kabuğa iletilir; hata akışı bozmaz. */
   readonly reportAttempt?: (attempt: PulseAttemptRecord) => void;
+  readonly gamification?: GamiServerSource;
 }
 
 /** Köprüyü kurar; dönen işlev izlemeyi bırakır ve eklenen öğeleri kaldırır. */
@@ -138,7 +140,7 @@ export function attachPulseGamification(handle: PulseRuntimeHandle, options: Pul
       closeProgress();
       showSourceView("sim");
     },
-  });
+  }, options.gamification);
   const renderProgress = (): void => {
     progress.update(gamiState ?? emptyPulseGamiState(), nowDate());
   };

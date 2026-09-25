@@ -222,6 +222,7 @@ export function createAuscultaModule(deps?: AuscultaModuleDeps): SimModule {
         ...(resolved.modalEnv ? { modalEnv: resolved.modalEnv } : {}),
         ...(resolved.resultsEnv ? { resultsEnv: resolved.resultsEnv } : {}),
         ...(context.reportAttempt === undefined ? {} : { reportAttempt: context.reportAttempt }),
+        ...(context.gamification === undefined ? {} : { gamification: context.gamification }),
       };
 
       root.render(

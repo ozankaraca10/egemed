@@ -3,8 +3,8 @@
  * Pulse "İlerlemem" sayfası — Opaca ve Ausculta ile AYNI tasarım (depo sahibi
  * kararı, 25 Eylül 2026). `@egemed/gami-ui` görünümleri kaynak runtime'ın gölge
  * kökünde bir React kökünde çizilir; veri Pulse'un kullanıcı×sim ad alanlı yerel
- * oyunlaştırma deposundan gelir. Yerel sıralama yalnız oturum sahibini içerir
- * (demo akran yok); sayfa "Demo verisi" bandını diğer simlerle aynı gösterir.
+ * oyunlaştırma deposundan gelir. API oturumunda kabuk `gamification` verirse
+ * rozet, XP ve liderlik sunucudan okunur ve "Demo verisi" bandı gizlenir.
  */
 import type { JSX, ReactNode } from "react";
 import { useMemo, useState } from "react";
@@ -29,10 +29,18 @@ import {
   buildAchievementsModel,
   buildLeaderboardModel,
   defaultGamiIcons,
+  earnedFromServer,
   GamiAchievementsView,
   GamiLeaderboardView,
   GamiProgressPage,
+  GamiServerFrame,
+  gamiLoadingStatus,
+  levelFromServer,
+  serverHasActivity,
+  streakFromServer,
   type GamiPageTab,
+  type GamiServerSource,
+  type ServerGamiData,
 } from "@egemed/gami-ui";
 import { PULSE_BADGES } from "../gamification/catalog";
 import type { PulseAttemptRecord, PulseDomain } from "../gamification/attempt";
@@ -98,31 +106,59 @@ export interface PulseProgressActions {
   readonly onClose: () => void;
 }
 
-function PulseProgressPage({ state, now, actions }: { state: PulseGamiState; now: Date; actions: PulseProgressActions }): JSX.Element {
-  const [tab, setTab] = useState<GamiPageTab>("achievements");
-  const [period, setPeriod] = useState<AchievementsPeriod>("last30");
-  const [boardPeriod, setBoardPeriod] = useState<Period>("week");
-  const [cohort, setCohort] = useState<CohortFilter>("all");
-  const [privacy, setPrivacy] = useState<Profile>({ cohort: null, displayName: null, public: false });
-
+function PulseProgressBody({
+  state,
+  now,
+  actions,
+  server,
+  tab,
+  setTab,
+  period,
+  setPeriod,
+  boardPeriod,
+  setBoardPeriod,
+  cohort,
+  setCohort,
+  privacy,
+  setPrivacy,
+}: {
+  state: PulseGamiState;
+  now: Date;
+  actions: PulseProgressActions;
+  server: ServerGamiData | null;
+  tab: GamiPageTab;
+  setTab: (tab: GamiPageTab) => void;
+  period: AchievementsPeriod;
+  setPeriod: (period: AchievementsPeriod) => void;
+  boardPeriod: Period;
+  setBoardPeriod: (period: Period) => void;
+  cohort: CohortFilter;
+  setCohort: (cohort: CohortFilter) => void;
+  privacy: Profile;
+  setPrivacy: (update: (current: Profile) => Profile) => void;
+}): JSX.Element {
   const summary = useMemo(() => {
-    const xp = totalXpFor(state.attempts, state.learn, PULSE_RULES);
+    const xp = server ? server.summary.xp : totalXpFor(state.attempts, state.learn, PULSE_RULES);
+    const earned = server ? earnedFromServer(PULSE_BADGES, server.summary.badges) : state.earned;
     return {
-      goals: computeWeeklyGoals(state.attempts, state.earned, now, PULSE_RULES),
-      level: levelForXp(xp, PULSE_RULES),
+      earned,
+      goals: computeWeeklyGoals(state.attempts, earned, now, PULSE_RULES),
+      level: server ? levelFromServer(xp, server.summary.level, PULSE_RULES) : levelForXp(xp, PULSE_RULES),
       stats: computePulseStats(state.attempts),
-      streak: computeStreak(state.attempts, now),
+      streak: server ? streakFromServer(server.summary.streak) : computeStreak(state.attempts, now),
     };
-  }, [now, state]);
-  const weekRows = useMemo(() => localRows(state.attempts, now, "week", "all", privacy), [now, privacy, state.attempts]);
+  }, [now, server, state]);
+  const localWeek = useMemo(() => localRows(state.attempts, now, "week", "all", privacy), [now, privacy, state.attempts]);
+  const weekRows = server && tab !== "leaderboard" ? server.rows : localWeek;
   const achievements = useMemo(
     () =>
       buildAchievementsModel({
         attempts: state.attempts,
         badgeContext: { now },
+        ...(server ? { activity: serverHasActivity(server.summary, state.attempts.length) } : {}),
         catalog: PULSE_BADGES,
         domainMeta: DOMAIN_META,
-        earned: state.earned,
+        earned: summary.earned,
         goals: summary.goals,
         level: summary.level,
         now,
@@ -135,7 +171,8 @@ function PulseProgressPage({ state, now, actions }: { state: PulseGamiState; now
       }),
     [now, period, privacy, state, summary, weekRows],
   );
-  const rows = useMemo(() => localRows(state.attempts, now, boardPeriod, cohort, privacy), [boardPeriod, cohort, now, privacy, state.attempts]);
+  const localBoard = useMemo(() => localRows(state.attempts, now, boardPeriod, cohort, privacy), [boardPeriod, cohort, now, privacy, state.attempts]);
+  const rows = server && tab === "leaderboard" ? server.rows : localBoard;
   const prevRows = useMemo(() => {
     const prev = new Date(periodRangeTr(boardPeriod, now).start.getTime() - 1);
     return localRows(state.attempts, prev, boardPeriod, cohort, privacy);
@@ -149,11 +186,11 @@ function PulseProgressPage({ state, now, actions }: { state: PulseGamiState; now
         monthRows: null,
         now,
         period: boardPeriod,
-        prevRows,
+        prevRows: server && tab === "leaderboard" ? null : prevRows,
         reward: null,
         rows,
       }),
-    [boardPeriod, cohort, now, prevRows, rows],
+    [boardPeriod, cohort, now, prevRows, rows, server, tab],
   );
 
   return (
@@ -163,7 +200,7 @@ function PulseProgressPage({ state, now, actions }: { state: PulseGamiState; now
           ← Simülatöre dön
         </button>
       </div>
-      <GamiProgressPage active={tab} icons={defaultGamiIcons} onTab={setTab}>
+      <GamiProgressPage active={tab} demo={server === null} icons={defaultGamiIcons} onTab={setTab}>
         {tab === "achievements" ? (
           <GamiAchievementsView
             avatarOf={avatarOf}
@@ -237,16 +274,77 @@ function PulseProgressPage({ state, now, actions }: { state: PulseGamiState; now
   );
 }
 
+export function PulseProgressPage({
+  state,
+  now,
+  actions,
+  gamification,
+}: {
+  state: PulseGamiState;
+  now: Date;
+  actions: PulseProgressActions;
+  gamification?: GamiServerSource;
+}): JSX.Element {
+  const [tab, setTab] = useState<GamiPageTab>("achievements");
+  const [period, setPeriod] = useState<AchievementsPeriod>("last30");
+  const [boardPeriod, setBoardPeriod] = useState<Period>("week");
+  const [cohort, setCohort] = useState<CohortFilter>("all");
+  const [privacy, setPrivacy] = useState<Profile>({ cohort: null, displayName: null, public: false });
+  const body = (server: ServerGamiData | null) => (
+    <PulseProgressBody
+      actions={actions}
+      boardPeriod={boardPeriod}
+      cohort={cohort}
+      now={now}
+      period={period}
+      privacy={privacy}
+      server={server}
+      setBoardPeriod={setBoardPeriod}
+      setCohort={setCohort}
+      setPeriod={setPeriod}
+      setPrivacy={setPrivacy}
+      setTab={setTab}
+      state={state}
+      tab={tab}
+    />
+  );
+  if (gamification === undefined) return body(null);
+  const remotePeriod = tab === "leaderboard" ? boardPeriod : "week";
+  const remoteCohort = tab === "leaderboard" ? cohort : "all";
+  return (
+    <GamiServerFrame
+      cohort={remoteCohort}
+      fallback={gamiLoadingStatus()}
+      icon={defaultGamiIcons.info({ height: 16, width: 16 })}
+      period={remotePeriod}
+      source={gamification}
+    >
+      {body}
+    </GamiServerFrame>
+  );
+}
+
 export interface PulseProgressHandle {
   update(state: PulseGamiState, now: Date): void;
   dispose(): void;
 }
 
 /** Gölge kök içindeki `container`a React kökü kurar; durum değiştikçe `update`. */
-export function mountPulseProgress(container: HTMLElement, actions: PulseProgressActions): PulseProgressHandle {
+export function mountPulseProgress(
+  container: HTMLElement,
+  actions: PulseProgressActions,
+  gamification?: GamiServerSource,
+): PulseProgressHandle {
   const root: Root = createRoot(container);
   return {
     dispose: () => root.unmount(),
-    update: (state, now) => root.render(<PulseProgressPage actions={actions} now={now} state={state} />),
+    update: (state, now) => root.render(
+      <PulseProgressPage
+        actions={actions}
+        now={now}
+        state={state}
+        {...(gamification === undefined ? {} : { gamification })}
+      />,
+    ),
   };
 }

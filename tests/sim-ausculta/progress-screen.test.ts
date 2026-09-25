@@ -1,5 +1,5 @@
 import { createElement, type ReactNode } from "react";
-import { renderToStaticMarkup } from "react-dom/server";
+import { renderToReadableStream, renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import { StoreProvider, createMemoryRuntimeAdapter, initialState } from "../../packages/sim-ausculta/src/index";
 import type { StoragePort, WindowLike } from "../../packages/sim-ausculta/src/index";
@@ -44,6 +44,12 @@ function render(node: ReactNode, state: AppState = initialState): string {
   }));
 }
 
+async function markup(node: ReactNode): Promise<string> {
+  const stream = await renderToReadableStream(node);
+  await stream.allReady;
+  return new Response(stream).text();
+}
+
 describe("Ausculta ilerleme ekranı", () => {
   it("Başarılarım ve Liderlik sekmelerini ve demo bandını çizer", () => {
     const repository = new LocalGamiRepository({ storage: new MemoryGami(), now: () => at });
@@ -54,6 +60,37 @@ describe("Ausculta ilerleme ekranı", () => {
     expect(html).toContain("Başarılarım burada birikecek");
     expect(html).toContain("Kısa dinleme");
     expect(html).not.toContain("eg-ausculta-progress");
+  });
+
+  it("sahte kaynakta demo bandını gizler ve sunucu rozetini kazanıldı gösterir", async () => {
+    const repository = new LocalGamiRepository({ storage: new MemoryGami(), now: () => at });
+    const html = await markup(createElement(StoreProvider, {
+      children: createElement(ProgressScreen, {
+        gamification: {
+          async summary() {
+            return {
+              badges: [{ awardedAt: "2026-09-20T10:15:00.000+03:00", key: "listen-3" }],
+              level: 2,
+              streak: { best: 3, current: 2 },
+              xp: 40,
+            };
+          },
+          async leaderboard() {
+            return { rows: [] };
+          },
+        },
+        repository,
+      }),
+      env: inertWindow,
+      initialState,
+      now: () => NOW,
+      runtime: createMemoryRuntimeAdapter(),
+      storage: memoryStorage(),
+    }));
+    expect(html).not.toContain("Demo verisi");
+    expect(html).toContain("Kısa dinleme");
+    expect(html).toContain("is-earned");
+    expect(html).toContain("kazanıldı");
   });
 
   it("liderlik sekmesinde yerel demo sıralamasını çizer", () => {

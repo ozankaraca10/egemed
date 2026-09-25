@@ -1,5 +1,6 @@
 import { createContext, type JSX, type ReactNode, useCallback, useContext, useMemo, useState } from "react";
 import type { GamiRepository } from "@egemed/gamification-core";
+import type { SimGamificationSource } from "@egemed/sim-host";
 import type { OpacaAttemptRecord } from "./attempt";
 import { formatGamiSyncError } from "./errors";
 import { configureGamiRepository } from "./repo";
@@ -15,6 +16,7 @@ export interface GamiContextValue {
   readonly reportSyncError: (error: unknown, kind?: "read" | "write") => void;
   readonly clearSyncError: () => void;
   readonly reportAttempt?: (attempt: OpacaAttemptRecord) => void;
+  readonly gamification?: SimGamificationSource;
 }
 
 const GamiContext = createContext<GamiContextValue | null>(null);
@@ -23,11 +25,13 @@ export function GamiProvider({
   repository = null,
   now,
   reportAttempt,
+  gamification,
   children,
 }: {
   readonly repository?: GamiRepository<OpacaAttemptRecord> | null;
   readonly now: () => number;
   readonly reportAttempt?: (attempt: OpacaAttemptRecord) => void;
+  readonly gamification?: SimGamificationSource;
   readonly children: ReactNode;
 }): JSX.Element {
   const [syncError, setSyncError] = useState<GamiSyncError | null>(null);
@@ -47,8 +51,12 @@ export function GamiProvider({
       reportSyncError,
       clearSyncError,
     };
-    return reportAttempt === undefined ? base : { ...base, reportAttempt };
-  }, [clearSyncError, reportAttempt, reportSyncError, repository, syncError]);
+    return {
+      ...base,
+      ...(reportAttempt === undefined ? {} : { reportAttempt }),
+      ...(gamification === undefined ? {} : { gamification }),
+    };
+  }, [clearSyncError, gamification, reportAttempt, reportSyncError, repository, syncError]);
 
   return <GamiContext.Provider value={value}>{children}</GamiContext.Provider>;
 }

@@ -1,4 +1,5 @@
 import type { AttemptRecord } from "@egemed/gamification-core";
+import type { GamiServerSource } from "@egemed/gami-ui";
 import type { GamiPageTab } from "@egemed/gami-ui";
 import type { SimChrome } from "@egemed/sim-host";
 import { useEffect, useRef, useState, type JSX } from "react";
@@ -43,6 +44,7 @@ export interface AppProps {
   readonly resultsEnv?: ResultsScreenEnv;
   readonly scrollToTop?: () => void;
   readonly reportAttempt?: (attempt: AttemptRecord) => void;
+  readonly gamification?: GamiServerSource;
   readonly setChrome?: (chrome: SimChrome | null) => void;
   readonly fullscreenEnv?: FullscreenEnv;
 }
@@ -56,6 +58,7 @@ function Shell({
   resultsEnv,
   scrollToTop,
   reportAttempt,
+  gamification,
   setChrome,
   fullscreenEnv,
 }: AppProps & { embedded: boolean }): JSX.Element {
@@ -144,7 +147,7 @@ function Shell({
             />
           ) : null}
           {screen === "progress" ? (
-            <ProgressScreen embedded={embedded} repository={gami} tab={progressTab} onTab={setProgressTab} {...(modalEnv ? { modalEnv } : {})} />
+            <ProgressScreen embedded={embedded} repository={gami} tab={progressTab} onTab={setProgressTab} {...(modalEnv ? { modalEnv } : {})} {...(gamification === undefined ? {} : { gamification })} />
           ) : null}
           {screen === "sources" ? <SourcesScreen embedded={embedded} /> : null}
         </main>
