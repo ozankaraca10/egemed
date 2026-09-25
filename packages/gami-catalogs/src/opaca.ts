@@ -351,11 +351,11 @@ export interface OpacaSummaryInput {
     readonly qualityCorrect: number;
     readonly interpretationCorrect: number;
     readonly fastPerfect: boolean;
-    /** Bu denemedeki konu başına doğru bulgu sayısı (sim TOPIC_BADGE_MATCH ile hesaplar). */
-    readonly topicCorrect: Partial<Record<OpacaTopic, number>>;
+    /** Bu denemedeki konu başına doğru bulgu sayısı (sim TOPIC_BADGE_MATCH ile hesaplar); kodlanamıyorsa kod yazılmaz. */
+    readonly topicCorrect?: Partial<Record<OpacaTopic, number>>;
   };
-  /** Sim'in deneme anındaki birikimli öğrenme sayaçları (rozet istatistiğinin girdisi). */
-  readonly learn: {
+  /** Sim'in deneme anındaki birikimli öğrenme sayaçları (rozet istatistiğinin girdisi); kabuk raporunda yoksa kodlanmaz. */
+  readonly learn?: {
     /** Birikimli benzersiz öğrenme konusu sayısı. */
     readonly topicsCount: number;
     /** Birikimli tamamlanmış toraks BT yığını sayısı. */
@@ -387,11 +387,13 @@ export function encodeOpacaSummary(input: OpacaSummaryInput): Record<string, num
     "opaca.cases": clampInt(input.caseCount, 0, 100),
     "opaca.hints": clampInt(input.hintsUsed, 0, 1000),
     "opaca.day": clampInt(dayIndexOf(input.finishedAt), 0, 1_000_000),
-    "opaca.learn": clampInt(input.learn.topicsCount, 0, 100_000),
-    "opaca.stacks": clampInt(input.learn.stacksCount, 0, 100_000),
-    "opaca.lib": clampInt(input.learn.libraryTopicsTotal, 0, 100_000),
-    "opaca.cov": clampInt(input.learn.libraryTopicsCovered, 0, 100_000),
   };
+  if (input.learn !== undefined) {
+    summary["opaca.learn"] = clampInt(input.learn.topicsCount, 0, 100_000);
+    summary["opaca.stacks"] = clampInt(input.learn.stacksCount, 0, 100_000);
+    summary["opaca.lib"] = clampInt(input.learn.libraryTopicsTotal, 0, 100_000);
+    summary["opaca.cov"] = clampInt(input.learn.libraryTopicsCovered, 0, 100_000);
+  }
   if (assessment) {
     summary["opaca.loc"] = clampInt(input.extra.localizationHits, 0, 10_000);
     summary["opaca.abcde"] = clampInt(input.extra.abcdeComplete, 0, 1);
@@ -400,7 +402,7 @@ export function encodeOpacaSummary(input: OpacaSummaryInput): Record<string, num
     if (input.extra.fastPerfect) summary["opaca.fast"] = 1;
   }
   for (const topic of OPACA_TOPICS) {
-    const hits = clampInt(input.extra.topicCorrect[topic] ?? 0, 0, 1000);
+    const hits = clampInt(input.extra.topicCorrect?.[topic] ?? 0, 0, 1000);
     if (hits > 0) summary[`opaca.t.${topic}`] = hits;
   }
   return summary;

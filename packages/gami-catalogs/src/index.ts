@@ -1,4 +1,14 @@
 export {
+  AUSCULTA_BADGES,
+  AUSCULTA_BADGE_RULES,
+  AUSCULTA_HEART_TOPICS,
+  AUSCULTA_LUNG_TOPICS,
+  AUSCULTA_SUMMARY_VERSION,
+  encodeAuscultaSummary,
+  auscultaStatsFromSummaries,
+} from "./ausculta";
+export type { AuscultaStats, HeartTopic, LungTopic } from "./ausculta";
+export {
   OPACA_BADGES,
   OPACA_BADGE_RULES,
   OPACA_SUMMARY_VERSION,

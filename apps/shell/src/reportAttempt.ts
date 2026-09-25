@@ -6,7 +6,17 @@
  */
 
 import { createApiClient, createApiGamiRepository, type ApiClient } from "@egemed/api-client";
-import { PULSE_MODES, encodePulseSummary, type PulseSummaryInput } from "@egemed/gami-catalogs";
+import {
+  AUSCULTA_HEART_TOPICS,
+  AUSCULTA_LUNG_TOPICS,
+  PULSE_MODES,
+  encodeAuscultaSummary,
+  encodeOpacaSummary,
+  encodePulseSummary,
+  type AuscultaStats,
+  type OpacaSummaryInput,
+  type PulseSummaryInput,
+} from "@egemed/gami-catalogs";
 import type { SimId } from "@egemed/contracts";
 import { browserApiWindow, csrfTokenFromCookie } from "./apiAuth";
 
@@ -78,13 +88,76 @@ function isPulseExtra(extra: unknown): extra is PulseSummaryInput["extra"] {
   );
 }
 
+function isOpacaExtra(extra: unknown): extra is OpacaSummaryInput["extra"] {
+  if (typeof extra !== "object" || extra === null) return false;
+  const value = extra as Record<string, unknown>;
+  return (
+    Array.isArray(value["findings"]) &&
+    typeof value["localizationHits"] === "number" &&
+    typeof value["abcdeComplete"] === "number" &&
+    typeof value["qualityCorrect"] === "number" &&
+    typeof value["interpretationCorrect"] === "number" &&
+    typeof value["fastPerfect"] === "boolean"
+  );
+}
+
+const isFiniteCount = (value: unknown): value is number => typeof value === "number" && Number.isFinite(value);
+
+function isAuscultaStats(extra: unknown): extra is AuscultaStats {
+  if (typeof extra !== "object" || extra === null) return false;
+  const value = extra as Record<string, unknown>;
+  const heart = value["heartCorrect"];
+  const lung = value["lungCorrect"];
+  if (typeof heart !== "object" || heart === null || typeof lung !== "object" || lung === null) return false;
+  const heartCounts = heart as Record<string, unknown>;
+  const lungCounts = lung as Record<string, unknown>;
+  return (
+    isFiniteCount(value["listenDisciplineCases"]) &&
+    isFiniteCount(value["systematicExams"]) &&
+    isFiniteCount(value["cardiacFociExams"]) &&
+    isFiniteCount(value["posteriorLungExams"]) &&
+    isFiniteCount(value["pediatricCorrect"]) &&
+    isFiniteCount(value["mixedCorrect"]) &&
+    isFiniteCount(value["headChoiceCorrect"]) &&
+    (value["correctDiagnosisCount"] === undefined || isFiniteCount(value["correctDiagnosisCount"])) &&
+    AUSCULTA_HEART_TOPICS.every((topic) => isFiniteCount(heartCounts[topic])) &&
+    AUSCULTA_LUNG_TOPICS.every((topic) => isFiniteCount(lungCounts[topic]))
+  );
+}
+
 /**
  * ADR-008: sunucu rozetleri sime özgü kodlu özetten değerlendirir. Kodlayıcısı
- * olmayan sim yalnız genel özeti gönderir (rozeti S2 ile gelir).
+ * olmayan sim yalnız genel özeti gönderir. Opaca özetinde öğrenme sayaçları
+ * ve konu kodları sim verisi gerektirdiğinden kodlanmaz; rozetlerin bu bölümü
+ * yerel değerlendirmede kalır.
  */
-export function simSummaryCodes(simId: SimId, attempt: Pick<ReportedAttempt, "score" | "extra">): Record<string, number> {
+export function simSummaryCodes(
+  simId: SimId,
+  attempt: Pick<ReportedAttempt, "score" | "extra"> &
+    Partial<Pick<ReportedAttempt, "mode" | "finishedAt" | "caseCount" | "hintsUsed">>,
+): Record<string, number> {
   if (simId === "pulse" && isPulseExtra(attempt.extra)) {
     return encodePulseSummary({ extra: attempt.extra, score: attempt.score });
+  }
+  if (
+    simId === "opaca" &&
+    isOpacaExtra(attempt.extra) &&
+    attempt.mode !== undefined &&
+    attempt.finishedAt !== undefined &&
+    attempt.caseCount !== undefined &&
+    attempt.hintsUsed !== undefined
+  ) {
+    return encodeOpacaSummary({
+      mode: attempt.mode,
+      finishedAt: attempt.finishedAt,
+      score: attempt.score,
+      caseCount: attempt.caseCount,
+      hintsUsed: attempt.hintsUsed,
+      extra: attempt.extra,
+    });
+  }
+  if (simId === "ausculta" && isAuscultaStats(attempt.extra)) {
+    return encodeAuscultaSummary(attempt.extra);
   }
   return {};
 }
