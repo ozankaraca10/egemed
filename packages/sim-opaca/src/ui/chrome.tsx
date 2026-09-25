@@ -213,7 +213,7 @@ export function Header({ embedded = false, env = NOOP_CHROME_ENV, modals, gamiEn
     actions.push({
       id: 'progress',
       icon: 'progress',
-      label: 'Başarılarım',
+      label: 'İlerlemem',
       onSelect: () => dispatch({ type: 'goto', screen: 'achievements' }),
     })
   }

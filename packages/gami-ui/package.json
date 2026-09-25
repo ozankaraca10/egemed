@@ -1,14 +1,14 @@
 {
-  "name": "@egemed/sim-opaca",
+  "name": "@egemed/gami-ui",
   "version": "0.0.0",
   "private": true,
   "type": "module",
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./styles.css": "./src/styles.css",
+    "./styles": "./src/styles-inline.ts"
   },
   "scripts": {
-    "check:assets": "node tools/check-assets.mjs",
-    "sync:xray": "node tools/sync-xray.mjs",
     "typecheck": "tsc --noEmit"
   },
   "peerDependencies": {
@@ -16,11 +16,7 @@
     "react-dom": "^19"
   },
   "dependencies": {
-    "@egemed/gami-catalogs": "workspace:*",
-    "@egemed/gami-ui": "workspace:*",
-    "@egemed/gamification-core": "workspace:*",
-    "@egemed/sim-host": "workspace:*",
-    "@egemed/tokens": "workspace:*"
+    "@egemed/gamification-core": "workspace:*"
   },
   "devDependencies": {
     "@types/react": "19.3.0",

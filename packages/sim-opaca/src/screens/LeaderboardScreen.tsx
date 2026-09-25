@@ -7,12 +7,7 @@ import { sampleSession, SESSION_SIZE } from '../core/session'
 import { sessionSeedFromNow } from './simulation-core'
 import { Footer } from '../ui/chrome'
 import { ScreenHeading } from '../ui/ScreenHeading'
-import { GamiDemoBanner } from '../ui/gami/GamiDemoBanner'
-import { GamiPageTabs } from '../ui/gami/GamiPageTabs'
-import { GamiSeg } from '../ui/gami/GamiSeg'
-import {
-  GamiLeaderboardTable, GamiPodium, GamiPrivacyCard, GamiRewardBanner, GamiRewardHistory, GamiRewardTerms,
-} from '../ui/gami/GamiLeaderboard'
+import { GamiLeaderboardView, GamiProgressPage, type GamiModalEnv } from '@egemed/gami-ui'
 import { useGami, useLeaderboard } from '../gamification/useGami'
 import { useGamiContext } from '../gamification/GamiContext'
 import { gamiDemoFrom } from '../gamification/flag'
@@ -20,10 +15,14 @@ import { countdownText, meRewardStatus, periodLabel, previousPeriodNow, tableIte
 import { rewardStandings } from '@egemed/gamification-core'
 import { monthKeyTr } from '@egemed/gamification-core'
 import type { CohortFilter, MonthlyReward, Period, RewardWinner } from '@egemed/gamification-core'
-import { IconArrowRight } from '../ui/icons'
+import { opacaAvatarOf, opacaGamiIcons } from '../ui/opacaGami'
 
 const PERIODS: { id: Period; label: string }[] = [
   { id: 'today', label: 'Bugün' }, { id: 'week', label: 'Bu hafta' }, { id: 'month', label: 'Bu ay' }, { id: 'academic_year', label: 'Akademik yıl' },
+]
+const COHORTS: { id: CohortFilter; label: string }[] = [
+  { id: 'all', label: 'Tüm dönemler' },
+  ...([1, 2, 3, 4, 5, 6] as const).map((c) => ({ id: c, label: `Dönem ${c}` })),
 ]
 
 /** Liderlik Tahtası + Ayın Ödülü (tasarım promptu §5, §5.1). Yalnız oyunlaştırma bayrağı açıkken erişilir. */
@@ -40,7 +39,6 @@ export function LeaderboardScreen({ embedded = false, devBuild = false, modalEnv
   const [reward, setReward] = useState<MonthlyReward | null>(null)
   const [winners, setWinners] = useState<RewardWinner[]>([])
 
-  // geri sayım dakikada bir (aria-live kapalı)
   useEffect(() => {
     setClock(view.now)
     const w = windowLike()
@@ -90,64 +88,46 @@ export function LeaderboardScreen({ embedded = false, devBuild = false, modalEnv
   return (
     <>
       <div className="screen">
-        <div className="results-wrap-v2 gami-page">
-          <GamiDemoBanner />
-          <GamiPageTabs active="leaderboard" />
-          <div className="results-title-row">
-            <div>
-              <ScreenHeading className="results-title-v2">Liderlik Tahtası</ScreenHeading>
-              <p className="results-sub-v2">Değerlendirme modundaki en iyi 3 denemenin ortalamasıyla sıralanır (en az 2 deneme).</p>
-            </div>
-          </div>
-          {reward && (
-            <GamiRewardBanner
-              reward={reward}
-              compact={period !== 'month'}
-              countdown={countdownText(clock)}
-              status={status}
-              onTerms={(el) => setTerms(el)}
-              onMonthly={() => setPeriod('month')}
-              onStatusAction={statusAction}
-            />
-          )}
-          <div className="gami-period-row">
-            <GamiSeg options={PERIODS} value={period} onChange={setPeriod} label="Dönem" variant="tabs" purple />
-            <select className="gami-select" aria-label="Kohort" value={String(cohort)} onChange={(e) => setCohort((e.target as { value: string }).value === 'all' ? 'all' : (Number((e.target as { value: string }).value) as CohortFilter))}>
-              <option value="all">Tüm dönemler</option>
-              {[1, 2, 3, 4, 5, 6].map((c) => <option key={c} value={c}>Dönem {c}</option>)}
-            </select>
-            <span className="gami-range">{periodLabel(period, view.now)}</span>
-          </div>
-          {board && ranked.length === 0 && <div className="card"><p className="gami-note" style={{ margin: 0 }}>Bu dönemde henüz sıralamaya giren yok.</p></div>}
-          {withPodium && <GamiPodium rows={[...rows]} candidates={candidates} />}
-          {items.length > 0 && (
-            <div className="card">
-              <GamiLeaderboardTable items={items} candidates={candidates} meDelta={meDelta} />
-              <p className="gami-note">Puan: dönemdeki en iyi 3 değerlendirmenin ortalaması · sıralamaya girmek için en az 2 deneme.</p>
-            </div>
-          )}
-          {me && me.rank === null && (
-            <div className="gami-qualify">
-              <span className="badge gray">Sıralamaya girmek için bu dönem {Math.max(1, 2 - me.attemptsCount)} değerlendirme daha tamamla</span>
-              <button className="btn purple small" type="button" onClick={startAssessment}>Değerlendirmeye gir <IconArrowRight width={14} height={14} /></button>
-            </div>
-          )}
-          <GamiPrivacyCard
-            id="gami-privacy"
-            name={profile.displayName ?? (me?.isPublic ? me.displayName : null)}
-            isPublic={profile.public}
-            cohort={profile.cohort}
-            onChange={(patch) => {
-              void view.repo
-                .updateMe(patch)
-                .then(() => setVersion((v) => v + 1))
-                .catch((error: unknown) => reportSyncError(error, 'write'))
+        <GamiProgressPage active="leaderboard" onTab={(id) => dispatch({ type: 'goto', screen: id })} icons={opacaGamiIcons}>
+          <GamiLeaderboardView
+            title={<ScreenHeading className="results-title-v2">Liderlik Tahtası</ScreenHeading>}
+            subtitle="Değerlendirme modundaki en iyi 3 denemenin ortalamasıyla sıralanır (en az 2 deneme)."
+            reward={reward}
+            period={period}
+            periods={PERIODS}
+            onPeriod={setPeriod}
+            cohort={cohort}
+            cohorts={COHORTS}
+            onCohort={setCohort}
+            periodLabel={periodLabel(period, view.now)}
+            countdown={countdownText(clock)}
+            status={status}
+            onTerms={(el) => setTerms(el)}
+            onStatusAction={statusAction}
+            rankedEmpty={Boolean(board) && ranked.length === 0}
+            rows={rows}
+            candidates={candidates}
+            items={items}
+            meDelta={meDelta}
+            qualify={me && me.rank === null ? { left: Math.max(1, 2 - me.attemptsCount) } : null}
+            onQualify={startAssessment}
+            privacy={{
+              name: profile.displayName ?? (me?.isPublic ? me.displayName : null),
+              isPublic: profile.public,
+              cohort: profile.cohort,
             }}
+            onPrivacy={(patch) => {
+              void view.repo.updateMe(patch).then(() => setVersion((v) => v + 1)).catch((error: unknown) => reportSyncError(error, 'write'))
+            }}
+            winners={winners}
+            terms={terms}
+            onCloseTerms={() => setTerms(false)}
+            {...(modalEnv ? { modalEnv: modalEnv as GamiModalEnv } : {})}
+            avatarOf={opacaAvatarOf}
+            icons={opacaGamiIcons}
           />
-          <GamiRewardHistory winners={winners} />
-        </div>
+        </GamiProgressPage>
       </div>
-      {terms !== false && reward && <GamiRewardTerms reward={reward} returnTo={terms} onClose={() => setTerms(false)} {...(modalEnv ? { env: modalEnv } : {})} />}
       <Footer embedded={embedded} />
     </>
   )
