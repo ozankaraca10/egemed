@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { MODES, PULSE_MODE_CONTENT } from "../../packages/sim-pulse/src/index";
 
@@ -20,5 +21,19 @@ describe("Pulse mod içerikleri", () => {
     expect(PULSE_MODE_CONTENT.vf.note).toContain("resüsitasyon ve defibrilasyon");
     expect(PULSE_MODE_CONTENT.stemi.note).toContain("tek başına MI tanısı koydurmaz");
     expect(PULSE_MODE_CONTENT.normal.cards[0]?.[0]).toBe("EKG özellikleri");
+  });
+});
+
+describe("Pulse vendor çıktısı (T138)", () => {
+  it("sınav mod kartında kullanıcıya görünen SCORM ifadesi yok", () => {
+    const appVendor = readFileSync("packages/sim-pulse/src/runtime/vendor/app.js", "utf8");
+    expect(appVendor).not.toContain("SCORM");
+    expect(appVendor).toContain("Puan kaydedilir");
+
+    const manifest = JSON.parse(readFileSync("packages/sim-pulse/src/runtime/vendor/manifest.json", "utf8")) as {
+      patches: { file: string; id: string; matches: number }[];
+    };
+    const patch = manifest.patches.find((entry) => entry.id === "PULSE-ADR006-SCORM-TEXT");
+    expect(patch).toMatchObject({ file: "app.js", id: "PULSE-ADR006-SCORM-TEXT", matches: 1 });
   });
 });
