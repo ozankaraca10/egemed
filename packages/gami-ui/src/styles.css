@@ -21,12 +21,12 @@
 .eg-gami-sync-error svg{ width: 16px; height: 16px; flex-shrink: 0; }
 .eg-gami-sync-error .btn{ margin-left: auto; }
 .eg-gami-pagetabs{ display: inline-flex; gap: 4px; padding: 4px; background: var(--card); border: 1px solid var(--border); border-radius: var(--r-pill); box-shadow: var(--shadow-card); align-self: flex-start; }
-.eg-gami-pagetabs [role="tab"]{ border: 0; background: transparent; color: var(--ink-700); font-weight: 700; font-size: var(--fs-md); padding: var(--sp-2) var(--sp-4); border-radius: var(--r-pill); display: inline-flex; align-items: center; gap: var(--sp-2); }
+.eg-gami-pagetabs [role="tab"]{ border: 0; background: transparent; color: var(--ink-700); font-weight: 700; font-size: var(--fs-md); padding: var(--sp-2) var(--sp-4); border-radius: var(--r-pill); display: inline-flex; align-items: center; gap: var(--sp-2); min-height: 44px; }
 .eg-gami-pagetabs [role="tab"] svg{ width: 16px; height: 16px; }
 .eg-gami-pagetabs [role="tab"]:hover{ background: var(--blue-50); }
 .eg-gami-pagetabs [role="tab"][aria-selected="true"]{ background: var(--navy-800); color: var(--card); }
 .eg-gami-seg{ display: inline-flex; flex-wrap: wrap; gap: 2px; padding: 3px; background: var(--blue-50); border: 1px solid var(--border); border-radius: var(--r-md); }
-.eg-gami-seg button{ border: 0; background: transparent; color: var(--ink-600); font-weight: 700; font-size: var(--fs-sm); padding: 6px var(--sp-3); border-radius: var(--r-sm); }
+.eg-gami-seg button{ border: 0; background: transparent; color: var(--ink-600); font-weight: 700; font-size: var(--fs-sm); padding: 6px var(--sp-3); border-radius: var(--r-sm); min-height: 44px; min-width: 44px; }
 .eg-gami-seg button:hover{ color: var(--ink-900); }
 .eg-gami-seg button[aria-pressed="true"],
 .eg-gami-seg button[aria-selected="true"]{ background: var(--card); color: var(--ink-900); box-shadow: 0 1px 3px color-mix(in srgb, var(--navy-800) 12%, transparent); }
@@ -99,7 +99,7 @@
 .eg-gami-badge.eg-gami-cat-topic.is-earned{ background: linear-gradient(180deg, var(--blue-50), var(--card) 58%); border-color: color-mix(in srgb, var(--blue-600) 22%, var(--border)); }
 .eg-gami-badge.eg-gami-cat-topic.is-earned:hover{ transform: translateY(-2px); border-color: color-mix(in srgb, var(--blue-600) 45%, var(--border)); }
 .eg-gami-badge.eg-gami-cat-topic .cat{ color: var(--blue-600); }
-.eg-gami-badge.eg-gami-cat-topic.is-earned .ft{ color: var(--blue-600); }
+.eg-gami-badge.eg-gami-cat-topic.is-earned .ft{ color: var(--blue-700); }
 .eg-gami-badge.eg-gami-cat-topic .ft .domain-bar{ background: color-mix(in srgb, var(--blue-600) 14%, var(--card)); }
 .eg-gami-badge.eg-gami-cat-topic .ft .domain-bar > i{ background: var(--blue-600); }
 .eg-gami-cat-legend .eg-gami-cat-topic i{ background: linear-gradient(145deg, var(--blue-500), var(--blue-700)); }
@@ -144,7 +144,7 @@
 .eg-gami-badge.eg-gami-cat-learn.is-earned{ background: linear-gradient(180deg, var(--green-50), var(--card) 58%); border-color: color-mix(in srgb, var(--green-600) 22%, var(--border)); }
 .eg-gami-badge.eg-gami-cat-learn.is-earned:hover{ transform: translateY(-2px); border-color: color-mix(in srgb, var(--green-600) 45%, var(--border)); }
 .eg-gami-badge.eg-gami-cat-learn .cat{ color: var(--green-600); }
-.eg-gami-badge.eg-gami-cat-learn.is-earned .ft{ color: var(--green-600); }
+.eg-gami-badge.eg-gami-cat-learn.is-earned .ft{ color: color-mix(in srgb, var(--green-600) 70%, var(--ink-900)); }
 .eg-gami-badge.eg-gami-cat-learn .ft .domain-bar{ background: color-mix(in srgb, var(--green-600) 14%, var(--card)); }
 .eg-gami-badge.eg-gami-cat-learn .ft .domain-bar > i{ background: var(--green-600); }
 .eg-gami-cat-legend .eg-gami-cat-learn i{ background: linear-gradient(145deg, var(--green-500), var(--green-600)); }
@@ -176,7 +176,7 @@
 .eg-gami-badge .eg-gami-badge-ic{ margin-bottom: 4px; }
 .eg-gami-badge .nm{ font-size: var(--fs-md); font-weight: 700; color: var(--ink-900); line-height: 1.25; }
 .eg-gami-badge .ds{ font-size: var(--fs-xs); color: var(--ink-600); line-height: 1.35; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; min-height: 2.7em; }
-.eg-gami-badge .ft{ margin-top: auto; width: 100%; font-size: var(--fs-xs); color: var(--ink-500); font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 6px; font-variant-numeric: tabular-nums; }
+.eg-gami-badge .ft{ margin-top: auto; width: 100%; font-size: var(--fs-xs); color: var(--ink-600); font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 6px; font-variant-numeric: tabular-nums; }
 .eg-gami-badge .ft svg{ width: 13px; height: 13px; }
 /* WCAG AA: kilitli rozet metni ≥4.5:1 (ink-400 beyazda ≈3.2:1 idi); kilit simgesi ve çerçeve durumu işaretler. */
 .eg-gami-badge.is-locked .nm,
