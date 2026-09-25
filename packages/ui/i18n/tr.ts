@@ -57,6 +57,11 @@ export const tr = {
   "shell.session.student": "Sahte test öğrencisi",
   "shell.session.logout": "Çıkış yap",
   "shell.session.banner": "Geliştirme oturumu: gerçek kimlik doğrulama yok, veri kaydedilmez.",
+  "shell.session.devChip": "Geliştirme oturumu",
+  "shell.sim.crumbs": "Konum",
+  "shell.sim.steps": "Adımlar",
+  "shell.sim.actions": "Simülatör eylemleri",
+  "shell.sim.back": "Simülatörlere dön",
   "admin.title": "Yönetici paneli",
   "admin.intro":
     "Kullanıcıları, simülatör erişimini ve denetim kayıtlarını buradan yöneteceksiniz. Bölümler kullanıcı yönetimi altyapısıyla birlikte açılacak.",

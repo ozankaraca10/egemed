@@ -20,6 +20,7 @@ import { adminGuardHref, entryHref, isAdminProtected, type ResolvedRoute } from 
 import { sessionAllowsSim, shellSessionFromDev, type ShellSession } from "./session";
 import { ShellLayout } from "./ShellLayout";
 import { SimRoute } from "./SimRoute";
+import type { SimChrome } from "@egemed/sim-host";
 import { useHashRoute } from "./useHashRoute";
 
 /**
@@ -40,7 +41,12 @@ function titleKeyFor(route: ResolvedRoute): TrKey {
 }
 
 /** Rota içeriğini seçer; üst bar (`ShellLayout`) tüm iç sayfalarda ortaktır. */
-function contentFor(route: ResolvedRoute, session: ShellSession | null, apiBaseUrl: string | null): ReactNode {
+function contentFor(
+  route: ResolvedRoute,
+  session: ShellSession | null,
+  apiBaseUrl: string | null,
+  onChrome?: (chrome: SimChrome | null) => void,
+): ReactNode {
   if (route.kind === "page") return pageFor(route.route.id, session);
   if (route.kind === "admin") return <AdminPage />;
   if (route.kind === "adminUsers") return <UsersPage />;
@@ -55,6 +61,7 @@ function contentFor(route: ResolvedRoute, session: ShellSession | null, apiBaseU
         actorId={session?.actorId}
         allowed={sessionAllowsSim(session, route.simId)}
         apiBaseUrl={apiBaseUrl}
+        onChrome={onChrome}
         simId={route.simId}
       />
     );
@@ -70,6 +77,8 @@ function contentFor(route: ResolvedRoute, session: ShellSession | null, apiBaseU
  */
 export function App(): JSX.Element | null {
   const route = useHashRoute();
+  // Birleşik bar: simin adım/çip/eylemleri (yalnız sim rotasında çizilir).
+  const [simChrome, setSimChrome] = useState<SimChrome | null>(null);
   // `apiSessionBaseUrl` üretimde (DEV false) daima null döner; aşağıdaki
   // `import.meta.env.DEV` kapıları sayesinde dinamik içe aktarmalar dâhil API
   // oturum kodu üretim paketine girmez.
@@ -214,8 +223,8 @@ export function App(): JSX.Element | null {
   if (apiEnabled && (sources === null || !apiReady)) return null;
   if (isAdminProtected(route) && (apiPending || guardHref !== null)) return null;
   return frame(
-    <ShellLayout onLogout={logout} route={route} session={session}>
-      {contentFor(route, session, apiEnabled && session !== null ? apiBaseUrl : null)}
+    <ShellLayout onLogout={logout} route={route} session={session} simChrome={route.kind === "sim" ? simChrome : null}>
+      {contentFor(route, session, apiEnabled && session !== null ? apiBaseUrl : null, setSimChrome)}
     </ShellLayout>,
   );
 }

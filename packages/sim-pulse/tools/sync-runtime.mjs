@@ -101,6 +101,12 @@ const PATCHES = {
 /** index.html işaretleme yamaları (kaynak erişilebilirlik kusurları, PULSE-10). */
 const MARKUP_PATCHES = [
   {
+    id: "PULSE-A11Y-EXPLAIN-TABS-ROLE",
+    why: "Açıklama sekmeleri role=tablist taşıyor ama çocukları role=tab değil (axe aria-required-children); düğmeler aç/kapa grubu olarak işaretlenir.",
+    find: '<div class="explain-tabs" role="tablist">',
+    replace: '<div class="explain-tabs" role="group" aria-label="Açıklama görünümü">',
+  },
+  {
     id: "PULSE-A11Y-LANDING-HELP-NAME",
     why: "Mobilde etiket gizlenince düğmenin erişilebilir adı kalmıyor (axe button-name).",
     find: '<button class="eg-navbtn" id="landingHelp" type="button">',

@@ -3,6 +3,7 @@ import type { SimDispose, SimModule, SimMountContext, SimMountTarget } from "@eg
 import type { PulseAttemptRecord } from "../gamification/attempt";
 import { createStorageGamiRepo } from "../gamification/repo";
 import type { PulseGamiRepo } from "../gamification/repo";
+import { attachPulseChrome } from "./chrome";
 import { attachPulseGamification } from "./gami";
 import { mountPulseRuntime } from "./host";
 import type { PulseRuntimeBridge } from "./host";
@@ -69,6 +70,7 @@ export function createPulseRuntimeModule(deps: PulseRuntimeModuleDeps = {}): Sim
         // Kaynak ilk girişte kalıcı (modal) tam ekran önerisi açar; platformda
         // gezinme kabuğundadır ve modal onu kilitler. Tam ekran düğmesi kalır.
         defaultPreferences: { "pulse.fsPromptDone": "1" },
+        unifiedChrome: context.setChrome !== undefined,
         ...(deps.bridge === undefined ? {} : { bridge: deps.bridge }),
       });
       let detachGami: (() => void) | null = null;
@@ -87,7 +89,15 @@ export function createPulseRuntimeModule(deps: PulseRuntimeModuleDeps = {}): Sim
           detachGami = null;
         }
       }
+      let detachChrome: (() => void) | null = null;
+      if (context.setChrome !== undefined) {
+        // Birleşik barda kaynağın açılış sayfası atlanır (kullanıcı kararı):
+        // Pulse, Opaca/Ausculta gibi doğrudan mod seçimiyle açılır.
+        (handle.global("CardAILanding") as { enter?: () => void } | undefined)?.enter?.();
+        detachChrome = attachPulseChrome(handle, context.setChrome);
+      }
       return () => {
+        detachChrome?.();
         detachGami?.();
         handle.dispose();
       };

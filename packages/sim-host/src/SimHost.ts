@@ -35,6 +35,36 @@ export interface SimMountTarget {
   appendChild(node: unknown): unknown;
 }
 
+/** Birleşik barda simin eylem düğmesi simgesi (kabuk çizer). */
+export type SimChromeIcon = "help" | "progress" | "fullscreen" | "swap" | "info" | "sound";
+
+/** Birleşik barda simin eylemi (ör. Yardım, İlerlemem, Tam ekran). */
+export interface SimChromeAction {
+  readonly id: string;
+  readonly label: string;
+  readonly icon: SimChromeIcon;
+  /** Aç/kapa durumundaki düğmeler için (ör. ses, tam ekran). */
+  readonly pressed?: boolean;
+  onSelect(): void;
+}
+
+/** Birleşik barda bilgi çipi (ör. çalışma modu, süre, ilerleme). */
+export interface SimChromeChip {
+  readonly id: string;
+  readonly label: string;
+  readonly tone?: "learn" | "practice" | "assessment" | "neutral";
+}
+
+/**
+ * UX kararı (25 Eylül 2026): sim rotasında tek bar vardır. Sim kendi üst barını
+ * çizmez; adım göstergesini, çiplerini ve eylemlerini bu yapıyla kabuğa verir.
+ */
+export interface SimChrome {
+  readonly steps?: { readonly labels: readonly string[]; readonly current: number };
+  readonly chips?: readonly SimChromeChip[];
+  readonly actions?: readonly SimChromeAction[];
+}
+
 /** Modüle taşınan oturum bağlamı; sim başına ayrıktır (veri izolasyonu). */
 export interface SimMountContext {
   readonly simId: SimulatorId;
@@ -50,6 +80,11 @@ export interface SimMountContext {
    * başarıyla bitince sim bunu çağırır; yoksa alan hiç yoktur.
    */
   readonly reportAttempt?: (attempt: AttemptRecord) => void;
+  /**
+   * Birleşik bar kanalı: verilmişse sim kendi üst barını çizmez, `SimChrome`
+   * gönderir (durum değiştikçe yeniden çağrılır; `null` barı temizler).
+   */
+  readonly setChrome?: (chrome: SimChrome | null) => void;
 }
 
 /** Modül `mount` dönüşünde zorunlu cleanup verir; idempotent olmalıdır. */
@@ -83,6 +118,7 @@ export interface SimHostOptions {
 export interface SimMountOptions {
   readonly actorId?: string;
   readonly reportAttempt?: (attempt: AttemptRecord) => void;
+  readonly setChrome?: (chrome: SimChrome | null) => void;
 }
 
 /** Bir `mount` çağrısının kimliği; yalnız o çağrının oturumunu bırakmak için. */
@@ -116,11 +152,13 @@ interface PendingLoad {
 function mountContext(simId: SimulatorId, now: () => number, mountOptions: SimMountOptions | undefined): SimMountContext {
   const actorId = mountOptions?.actorId;
   const reportAttempt = mountOptions?.reportAttempt;
+  const setChrome = mountOptions?.setChrome;
   return {
     now,
     simId,
     ...(actorId === undefined ? {} : { actorId }),
     ...(reportAttempt === undefined ? {} : { reportAttempt }),
+    ...(setChrome === undefined ? {} : { setChrome }),
   };
 }
 
