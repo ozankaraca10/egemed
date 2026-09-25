@@ -1,6 +1,8 @@
 # ADR-008 — Rozetler sunucuda değerlendirilir
 
-- Durum: Öneri — depo sahibi yönlendirmesi (24 Eylül 2026): "rozet olayını sunucuya taşıyacağız". `Kabul` satırını insan yazar.
+- Durum: Kabul
+- Kabul eden: depo sahibi (canlı oturum), 2026-09-25 ("hepsi kabul"). Yönlendirme 24 Eylül 2026: "rozet olayını sunucuya taşıyacağız".
+- Uygulama: S1–S4 tamam (T101, T103, T104, T109, T114, T124, T140).
 - Astra ikinci görüşü: Bekleniyor.
 - İlgili: ADR-006 (tek platform), ADR-007 (kullanıcı verisi EGEMED DB'de), Astra denetimi API-05
 
