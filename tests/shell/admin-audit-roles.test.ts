@@ -322,6 +322,7 @@ function baseAuditViewProps(overrides: Partial<AuditViewProps>): AuditViewProps 
     query: { page: 1, pageSize: 20 },
     result: null,
     status: "loading",
+    today: "2026-05-10",
     ...overrides,
   };
 }

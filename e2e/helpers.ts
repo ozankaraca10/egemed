@@ -100,10 +100,14 @@ function adminFilterScope(page: Page, opened: boolean): Page | Locator {
   return opened ? page.getByRole("dialog") : page;
 }
 
-/** Metin/tarih filtre alanını doldurur (ör. "Ara", "Aktör", "Bitiş"). */
+/** Metin/tarih filtre alanını doldurur (ör. "Ara", "Aktör", "Bitiş"). Tarih alanları
+ *  (`DateField`, T161) doğrulamayı blur'da yaptığı için `fill()` sonrası açıkça
+ *  blur tetiklenir — diyalog kapatan `Escape` bu garantiyi masaüstünde vermez. */
 export async function fillAdminFilter(page: Page, label: string, value: string): Promise<void> {
   const opened = await openAdminFilters(page);
-  await adminFilterScope(page, opened).getByLabel(label).fill(value);
+  const field = adminFilterScope(page, opened).getByLabel(label);
+  await field.fill(value);
+  await field.blur();
   await closeAdminFilters(page, opened);
 }
 
