@@ -4,6 +4,18 @@
 .eg-sim-ausculta .screen-body.no-scroll { overflow: hidden; }
 .eg-sim-ausculta .container { max-width: 1520px; width: 100%; margin: 0 auto; padding: 0 var(--sp-5); }
 .eg-sim-ausculta .container.tall { display: flex; flex-direction: column; min-height: 0; flex: 1; }
+/* T166: mod seçimi ekranı — kabuk sim kökü `.app-shell{height:100dvh}` üzerinden
+   görünümün tüm yüksekliğini varsayıyor (apps/shell dışına taşınamaz). İçerik bu
+   yüksekliği doldurmayınca (1440'ta ~840px'e karşı ~600px içerik) kartlar üstte
+   sabit kalıp altta ~130px boş alan bırakıyordu. Sadece mode-cards içeren ekranı
+   hedefler ve içeriği düşey ortalar; taşma olursa (dar ekranlarda) `safe center`
+   üstten kırpma yapmadan başa döner — diğer ekranların `flex:1`/`tall` davranışı
+   değişmez. */
+.eg-sim-ausculta .screen-body:has(> .mode-cards) {
+  display: flex;
+  flex-direction: column;
+  justify-content: safe center;
+}
 .eg-sim-ausculta .eg-header { position: relative; z-index: 30; height: var(--head-h); flex-shrink: 0; padding-top: env(safe-area-inset-top, 0px); background: linear-gradient(90deg, var(--navy-900) 0%, var(--navy-700) 100%); color: var(--card); display: flex; align-items: center; padding: 0 var(--sp-4); gap: 14px; box-shadow: 0 2px 10px rgba(6,30,68,.35); }
 .eg-sim-ausculta .eg-brand { display: flex; align-items: center; gap: 10px; color: var(--card); background: none; border: 0; padding: 4px 4px 4px 0; }
 .eg-sim-ausculta .brand-mark { display: block; }
