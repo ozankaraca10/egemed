@@ -26,7 +26,8 @@ export interface GamiIcons {
   clock: GamiIcon;
   arrowUp: GamiIcon;
   book: GamiIcon;
-  badge: (name: string, size: number) => JSX.Element | null;
+  /** Bilinmeyen `name` için de kategoriye göre yedek ikon döner — asla `null` değildir. */
+  badge: (name: string, size: number, category: BadgeCategory) => JSX.Element;
 }
 
 export type GamiAvatarTone = "t-blue" | "t-purple" | "t-green" | "t-amber" | "t-anon";

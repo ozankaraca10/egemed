@@ -13,7 +13,7 @@ export function GamiBadgeIc({ v, icons, size = "md" }: { v: GamiBadgeModel; icon
   const px = size === "lg" ? 40 : size === "sm" ? 22 : 28;
   return (
     <span className={`eg-gami-badge-ic eg-gami-cat-${v.category}${tier}${v.state === "progress" ? " progress" : ""}${v.state === "locked" ? " locked" : ""}${size === "sm" ? " sm" : ""}`} aria-hidden="true">
-      {icons.badge(v.iconName, px)}
+      {icons.badge(v.iconName, px, v.category)}
       {v.state === "locked" && <span className="lock">{icons.lock({ width: 12, height: 12 })}</span>}
     </span>
   );

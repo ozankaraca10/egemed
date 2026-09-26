@@ -1,5 +1,6 @@
 /** Oyunlaştırma ikon seti. Çizimler Opaca `icons.tsx` ile aynıdır; simler `defaultGamiIcons` kullanır. */
 import type { ReactElement, SVGProps } from "react";
+import type { BadgeCategory } from "@egemed/gamification-core";
 import type { GamiIcons } from "./types";
 
 type P = SVGProps<SVGSVGElement>;
@@ -63,6 +64,9 @@ const IconAward = (p: P) => <svg {...base(p)}><circle cx="12" cy="9" r="6" /><pa
 const IconStar = (p: P) => <svg {...base(p)}><path d="m12 3 2.8 5.8 6.2.9-4.5 4.4 1 6.2L12 17.4 6.5 20.3l1-6.2L3 9.7l6.2-.9z" /></svg>;
 const IconGift = (p: P) => <svg {...base(p)}><rect x="3" y="8" width="18" height="4" rx="1" /><path d="M5 12v8a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-8" /><path d="M12 8v13" /><path d="M12 8c-1.5-3-5-3.5-5-1.2C7 8 9 8 12 8zM12 8c1.5-3 5-3.5 5-1.2C17 8 15 8 12 8z" /></svg>;
 const IconArrowUp = (p: P) => <svg {...base(p)}><path d="M12 19V5" /><path d="m6 11 6-6 6 6" /></svg>;
+const IconRuler = (p: P) => (
+  <svg {...base(p)}><path d="M3 16.5 16.5 3l4.5 4.5L7.5 21z" /><path d="m14 5 2 2M11 8l2 2M8 11l2 2M5 14l2 2" /></svg>
+);
 
 const BADGE_ICONS: Record<string, (p: P) => ReactElement> = {
   Activity: IconActivity,
@@ -88,6 +92,7 @@ const BADGE_ICONS: Record<string, (p: P) => ReactElement> = {
   Lock: IconLock,
   Lungs: IconLungs,
   Medal: IconMedal,
+  Ruler: IconRuler,
   Scan: IconScan,
   Star: IconStar,
   Stethoscope: IconStethoscope,
@@ -95,6 +100,15 @@ const BADGE_ICONS: Record<string, (p: P) => ReactElement> = {
   Trophy: IconTrophy,
   User: IconUser,
   Wave: IconWave,
+};
+
+/** Bilinmeyen `iconName` için kategoriye göre anlamlı yedek — rozet ikonu asla boş kalmaz. */
+const BADGE_ICON_FALLBACK: Record<BadgeCategory, (p: P) => ReactElement> = {
+  topic: IconBook,
+  skill: IconTarget,
+  streak: IconFlame,
+  learn: IconLightbulb,
+  milestone: IconTrophy,
 };
 
 const icon = (C: (p: P) => ReactElement) => (p: { width?: number; height?: number }) => <C {...p} />;
@@ -116,8 +130,8 @@ export const defaultGamiIcons: GamiIcons = {
   clock: icon(IconClock),
   arrowUp: icon(IconArrowUp),
   book: icon(IconBook),
-  badge: (name, size) => {
-    const C = BADGE_ICONS[name];
-    return C ? <C width={size} height={size} /> : null;
+  badge: (name, size, category) => {
+    const C = BADGE_ICONS[name] ?? BADGE_ICON_FALLBACK[category];
+    return <C width={size} height={size} />;
   },
 };

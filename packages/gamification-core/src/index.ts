@@ -8,7 +8,7 @@ export type {
   BadgeProgressFn,
   BadgeTier,
 } from "./badges";
-export { BADGE_CATEGORY_LABEL, BADGE_TIER_LABEL, badgeViews, sortBadgeViews } from "./badgeView";
+export { BADGE_CATEGORY_LABEL, BADGE_TIER_LABEL, badgeViews, sortBadgeViews, sortBadgesByDifficulty } from "./badgeView";
 export type { BadgeState, BadgeView } from "./badgeView";
 export { buildChartSeries, labelEvery, niceMax } from "./chart";
 export type { ChartPoint } from "./chart";
