@@ -1,6 +1,7 @@
 import type { Context, Hono, MiddlewareHandler } from "hono";
 import { getCookie } from "hono/cookie";
 import {
+  isGamificationEligible,
   SIM_IDS,
   attemptWriteRequestSchema,
   gamiLeaderboardQuerySchema,
@@ -423,7 +424,8 @@ export function createPgGamificationRepo(db: GamiDb): GamificationRepo {
          left join units unit on unit.id = u.unit_id and unit.deleted_at is null
          left join gami_attempts a on a.user_id = p.user_id and a.sim_id = p.sim_id
          where u.institution_id = $1 and p.sim_id = $2 and u.status = 'active' and u.deleted_at is null
-           and (u.leaderboard_visible or u.id = $3)`,
+           and (u.leaderboard_visible or u.id = $3)
+           and not exists (select 1 from user_roles r where r.user_id = u.id and r.role = 'ogretim_uyesi')`,
         [query.institutionId, query.simId, query.userId],
       );
       return assembleLeaderboardRecord(query, rows.rows as readonly PgLeaderboardSourceRow[]);
@@ -1028,7 +1030,12 @@ export function registerMeGamificationRoutes(
       await sessions.revoke(getCookie(c, SESSION_COOKIE));
       return jsonError(c, "unauthorized");
     }
-    c.set("meActor", { userId: context.id, institutionId: context.institution.id, simAccess: context.simAccess });
+    c.set("meActor", {
+      userId: context.id,
+      institutionId: context.institution.id,
+      simAccess: context.simAccess,
+      gamified: isGamificationEligible(context.roles),
+    });
     return next();
   };
 
@@ -1111,6 +1118,8 @@ export function registerMeGamificationRoutes(
     const parsedSim = gamiSimIdParamSchema.safeParse(c.req.param("simId"));
     if (!parsedSim.success) return jsonError(c, "not_found");
     if (!canUseSim(c, parsedSim.data)) return jsonError(c, "forbidden");
+    // Öğretim üyesi deneme yazamaz: XP, rozet ve liderlik yalnız öğrencileri kapsar.
+    if (!c.get("meActor").gamified) return jsonError(c, "role_not_permitted");
     const parsed = attemptWriteRequestSchema.safeParse(await readJson(c));
     if (!parsed.success) {
       return isScoreIssue(parsed.error)

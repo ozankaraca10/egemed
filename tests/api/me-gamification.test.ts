@@ -144,6 +144,17 @@ async function postAttempt(
 }
 
 describe("yetki ve kendi verisi (E3 §d)", () => {
+  it("öğretim üyesi deneme yazamaz (403 role_not_permitted); özetini okuyabilir (26 Eyl 2026)", async () => {
+    const users = DEFAULT_USERS.map((entry) => (entry.id === ALI_ID ? { ...entry, roles: ["ogretim_uyesi" as const] } : entry));
+    const testHarness = createAdminHarness({ gamification: GAMIFICATION_SEED, users });
+    const ali = await login(testHarness, "ali.veli");
+    const write = await postAttempt(testHarness, ali.headers, attemptBody());
+    expect(write.status).toBe(403);
+    expect(await write.json()).toMatchObject({ error: { code: "role_not_permitted" } });
+    const read = await testHarness.app.request("/me/gamification/pulse", { headers: ali.headers });
+    expect(read.status).toBe(200);
+  });
+
   it("oturumsuz istek 401 unauthorized döner", async () => {
     const response = await harness().app.request("/me/gamification");
     expect(response.status).toBe(401);

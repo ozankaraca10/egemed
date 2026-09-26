@@ -261,10 +261,13 @@ describe("tablolar ve kolonlar", () => {
 });
 
 describe("kısıtlar", () => {
-  it("rol CHECK'i yalnız admin ve kullanici içerir", () => {
+  it("rol CHECK'i admin, kullanici ve (007) ogretim_uyesi içerir", () => {
     const roleChecks = [...allUp.matchAll(/check \(\s*role\s+in \(([^)]*)\)/g)];
-    expect(roleChecks).toHaveLength(1);
+    expect(roleChecks).toHaveLength(2);
     expect(checkValues("constraint user_roles_role_check")).toEqual(["admin", "kullanici"]);
+    // 007 kısıtı yeniden kurar; son geçerli küme üç roldür.
+    const latest = [...(roleChecks[1]?.[1] ?? "").matchAll(/'([^']+)'/g)].map((value) => value[1] ?? "").sort();
+    expect(latest).toEqual(["admin", "kullanici", "ogretim_uyesi"]);
     expect(allUp).not.toMatch(/platform_admin|kurum_admin|egitmen|denetci/i);
   });
 
@@ -362,7 +365,7 @@ describe("down migration'ları", () => {
       const down = stripComments(migration.down);
       const addedColumns = [...up.matchAll(/add column ([a-z_][a-z0-9_]*)/g)].map((match) => match[1] ?? "");
       const addedConstraints = [...up.matchAll(/add constraint ([a-z_][a-z0-9_]*)/g)].map((match) => match[1] ?? "");
-      expect(created.length + addedColumns.length, "migration nesne ya da kolon eklemeli").toBeGreaterThan(0);
+      expect(created.length + addedColumns.length + addedConstraints.length, "migration nesne, kolon ya da kısıt eklemeli").toBeGreaterThan(0);
       expect([...dropped].reverse()).toEqual(created);
       // API-05 (005): `alter table` ekleri tersine düşürülmeli.
       for (const column of addedColumns) expect(down, column).toContain(`drop column if exists ${column}`);
@@ -370,6 +373,9 @@ describe("down migration'ları", () => {
       expect(
         down
           .replace(/drop [^\n]*\n?/g, "")
+          // 007: kısıt genişletme geri alınırken eski CHECK yeniden kurulur ve yeni değerler silinir.
+          .replace(/add constraint [a-z_]+ check \([^\n]*\n?/g, "")
+          .replace(/delete from [a-z_]+ where [^\n]*\n?/g, "")
           .replace(/alter table [a-z_][a-z0-9_]*\s*/g, "")
           .trim(),
       ).toBe("");
