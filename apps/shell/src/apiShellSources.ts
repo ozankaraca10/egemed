@@ -11,7 +11,7 @@ import {
   type ApiClient,
   type ApiImportRow,
 } from "@egemed/api-client";
-import type { BulkRequest } from "@egemed/contracts";
+import type { BulkRequest, RewardUpsertRequest } from "@egemed/contracts";
 import { browserApiWindow, csrfTokenFromCookie } from "./apiAuth";
 import {
   AUDIT_ACTIONS,
@@ -34,6 +34,7 @@ import {
   type ImportsDataSource,
   type TemplateColumn,
 } from "./admin/importsDataSource";
+import type { AdminReward, RewardsDataSource } from "./admin/rewardsDataSource";
 import {
   primaryRoleFor,
   type AdminUserDetail,
@@ -453,8 +454,54 @@ export function createApiShellDataSources(client: ApiClient): ShellDataSources {
       return session === null ? null : apiShowcase;
     },
     imports,
+    rewards: createApiRewardsSource(client),
     users,
   };
+}
+
+/** `ApiAdminReward` = `RewardBody & { winners }` — `AdminReward`ile birebir aynı şekil, dönüştürme gerekmez. */
+function createApiRewardsSource(client: ApiClient): RewardsDataSource {
+  return {
+    async finalize(simId, month): Promise<AdminReward> {
+      try {
+        const result = await client.rewards.finalizeAdminReward(simId, month);
+        if (result === null) throw new Error("not_found");
+        return result;
+      } catch (error) {
+        if (error instanceof ApiError && error.code === "conflict") throw new Error("already_finalized");
+        if (error instanceof ApiError && error.code === "validation_failed" && hasIssueCode(error.details, "month_not_closed")) {
+          throw new Error("month_not_closed");
+        }
+        throw error;
+      }
+    },
+    async list(simId): Promise<readonly AdminReward[]> {
+      const response = await client.rewards.listAdminRewards(simId);
+      return response.data;
+    },
+    async remove(simId, month): Promise<void> {
+      try {
+        await client.rewards.deleteAdminReward(simId, month);
+      } catch (error) {
+        if (error instanceof ApiError && error.code === "conflict") throw new Error("reward_finalized");
+        throw error;
+      }
+    },
+    async upsert(simId, month, body: RewardUpsertRequest): Promise<AdminReward> {
+      try {
+        return await client.rewards.upsertAdminReward(simId, month, body);
+      } catch (error) {
+        if (error instanceof ApiError && error.code === "conflict") throw new Error("reward_finalized");
+        throw error;
+      }
+    },
+  };
+}
+
+/** `validation_failed` ayrıntısı `{ issues: [{ code, path }] }` (apps/api `http.ts` `validationDetails`). */
+function hasIssueCode(details: unknown, code: string): boolean {
+  const issues = (details as { issues?: unknown } | null)?.issues;
+  return Array.isArray(issues) && issues.some((issue) => (issue as { code?: unknown } | null)?.code === code);
 }
 
 async function runBulk(client: ApiClient, input: BulkEditInput, dryRun: boolean): Promise<BulkEditResult> {
@@ -497,6 +544,7 @@ export function createBrowserShellDataSources(baseUrl: string): ShellDataSources
       leaderboardPreferences: () => null,
       showcase: () => null,
       imports: { apply: fail, template: fail, upload: fail, validate: fail },
+      rewards: { finalize: fail, list: fail, remove: fail, upsert: fail },
       users,
     };
   }

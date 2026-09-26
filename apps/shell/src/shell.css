@@ -915,11 +915,11 @@ body { font-family: var(--font); }
 /* T150: admin kendi hesabında yıkıcı eylemlerin yerine gösterilen bilgi notu. */
 .eg-shell-userform__note { margin: 0; padding: 10px 12px; border: 1px solid var(--border); border-radius: var(--r-md); background: var(--card-soft); color: var(--ink-700); font-size: var(--fs-sm); }
 
-/* T152 — yönetim alanı çerçevesi: dar ekranda beş sütunlu sekme şeridi (yatay kaydırma yok),
-   ≥1024 px sol kenar menüsü (yapışkan). */
+/* T152 — yönetim alanı çerçevesi: dar ekranda altı sütunlu sekme şeridi (T186 "Ödüller"
+   eklendi; yatay kaydırma yok), ≥1024 px sol kenar menüsü (yapışkan). */
 .eg-shell-adminframe { display: grid; gap: var(--sp-4); }
 .eg-shell-adminframe__list {
-  display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: var(--sp-1);
+  display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: var(--sp-1);
   margin: 0; padding: var(--sp-1); list-style: none;
   background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-lg); box-shadow: var(--elev-1);
 }
@@ -951,3 +951,7 @@ body { font-family: var(--font); }
   .eg-shell-hero--compact .eg-shell-hero__lead { grid-column: 1; }
   .eg-shell-hero--compact .eg-shell-hero__actions { grid-column: 2; grid-row: 1 / span 3; flex-direction: column; align-items: stretch; }
 }
+
+/* T186 — Aylık ödüller (admin): sim seçici, satır eylemleri, form diyaloğu genişliği. */
+.eg-shell-rewards__simSelect { max-width: 20rem; }
+.eg-shell-rewards__rowActions { display: flex; flex-wrap: wrap; gap: var(--sp-2); }

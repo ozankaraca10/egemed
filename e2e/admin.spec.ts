@@ -18,6 +18,7 @@ const USER_CREATE = "#/admin/kullanicilar/yeni";
 const IMPORT = "#/admin/ice-aktar";
 const ROLES = "#/admin/roller";
 const AUDIT = "#/admin/denetim";
+const REWARDS = "#/admin/oduller";
 const userDetail = (id: string): string => `#/admin/kullanicilar/${id}`;
 
 /** Öğrenci oturumunun reddedilmesi gereken tüm korumalı rotalar (routes.ts). */
@@ -28,6 +29,7 @@ const ADMIN_ROUTES = [
   userDetail("user-001"),
   IMPORT,
   ROLES,
+  REWARDS,
   AUDIT,
 ] as const;
 
@@ -464,6 +466,57 @@ test.describe("denetim günlüğü (E3 §e.7)", () => {
   });
 });
 
+test.describe("aylık ödüller (T186)", () => {
+  test("Opaca örnek verisi + oluştur → listede görünür → düzenle → sil", async ({ page }) => {
+    await signInAsAdmin(page);
+    await openAdmin(page, REWARDS);
+    await expect(page.getByRole("heading", { name: "Ödüller" })).toBeVisible();
+
+    // Opaca: tohumlu örnek — bu ay geçerli (Eylül) + kesinleşmiş geçmiş ay (Ağustos, kazananlarla).
+    await selectRadixOption(page.locator("body"), "Simülatör", "Opaca");
+    await expect(listRows(page).filter({ hasText: "Eylül 2026" })).toContainText("Bu ay geçerli");
+    const augustRow = listRows(page).filter({ hasText: "Ağustos 2026" });
+    await expect(augustRow).toContainText("Kesinleşti");
+    await expect(augustRow).toContainText("1. Mert Tunç, 2. Deniz Kaya, 3. Burak Demir");
+    await expect(augustRow.getByRole("button", { name: "Sil" })).toHaveCount(0);
+
+    // Pulse: henüz ödül tanımlı değil → boş durum.
+    await selectRadixOption(page.locator("body"), "Simülatör", "Pulse");
+    await expect(page.getByText("Bu simülatör için ödül tanımlı değil.")).toBeVisible();
+
+    await page.getByRole("button", { name: "Yeni ödül" }).click();
+    const createDialog = page.getByRole("dialog");
+    await expect(createDialog.getByRole("heading", { name: "Yeni ödül" })).toBeVisible();
+    await createDialog.getByLabel("Ay", { exact: true }).fill("2026-08");
+    await createDialog.getByLabel("Başlık").fill("T75 test ödülü");
+    await createDialog.getByLabel("Açıklama").fill("Test açıklaması.");
+    await createDialog.getByLabel("Sponsor").fill("Test Sponsor");
+    await createDialog.getByRole("button", { name: "Kaydet" }).click();
+    await expect(page.getByRole("dialog")).toHaveCount(0);
+    const createdRow = listRows(page).filter({ hasText: "T75 test ödülü" });
+    await expect(createdRow).toContainText("Ağustos 2026");
+
+    await createdRow.getByRole("button", { name: "Düzenle" }).click();
+    const editDialog = page.getByRole("dialog");
+    await expect(editDialog.getByRole("heading", { name: "Ödülü düzenle" })).toBeVisible();
+    await editDialog.getByLabel("Başlık").fill("T75 güncellendi");
+    await editDialog.getByRole("button", { name: "Kaydet" }).click();
+    await expect(page.getByRole("dialog")).toHaveCount(0);
+    const updatedRow = listRows(page).filter({ hasText: "T75 güncellendi" });
+    await expect(updatedRow).toBeVisible();
+    // Ay kapandı ve ödül kesinleşmedi → "Kazananları kesinleştir" eylemi görünür.
+    await expect(updatedRow.getByRole("button", { name: "Kazananları kesinleştir" })).toBeVisible();
+
+    await updatedRow.getByRole("button", { name: "Sil" }).click();
+    const deleteDialog = page.getByRole("dialog");
+    await expect(deleteDialog.getByRole("heading", { name: "Ödülü sil" })).toBeVisible();
+    await deleteDialog.getByRole("button", { name: "Sil" }).click();
+    await expect(page.getByRole("dialog")).toHaveCount(0);
+    await expect(listRows(page).filter({ hasText: "T75 güncellendi" })).toHaveCount(0);
+    await expect(page.getByText("Bu simülatör için ödül tanımlı değil.")).toBeVisible();
+  });
+});
+
 test.describe("admin rota koruması", () => {
   test("öğrenci oturumu tüm /admin rotalarında reddedilir", async ({ page }) => {
     await signInAsStudent(page);
@@ -575,6 +628,32 @@ test.describe("admin ekranları: axe 0, yatay taşma yok, artefaktlar", () => {
       setup: async (page) => {
         await openAdmin(page, ROLES);
         await expect(page.getByRole("heading", { name: "Roller ve erişim" })).toBeVisible();
+      },
+    },
+    {
+      key: REWARDS,
+      setup: async (page) => {
+        await openAdmin(page, REWARDS);
+        await selectRadixOption(page.locator("body"), "Simülatör", "Opaca");
+        await expect(listRows(page).filter({ hasText: "Ağustos 2026" })).toContainText("Kesinleşti");
+      },
+    },
+    {
+      key: `${REWARDS}#yeni-odul`,
+      setup: async (page) => {
+        await openAdmin(page, REWARDS);
+        await page.getByRole("button", { name: "Yeni ödül" }).click();
+        await expect(page.getByRole("dialog").getByRole("heading", { name: "Yeni ödül" })).toBeVisible();
+      },
+    },
+    {
+      key: `${REWARDS}#silme-onayi`,
+      setup: async (page) => {
+        await openAdmin(page, REWARDS);
+        await selectRadixOption(page.locator("body"), "Simülatör", "Opaca");
+        const row = listRows(page).filter({ hasText: "Eylül 2026" });
+        await row.getByRole("button", { name: "Sil" }).click();
+        await expect(page.getByRole("dialog").getByRole("heading", { name: "Ödülü sil" })).toBeVisible();
       },
     },
     {

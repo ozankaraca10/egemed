@@ -1,9 +1,9 @@
 import type { JSX, ReactNode } from "react";
 import { icons } from "@egemed/ui";
 import { t, type TrKey } from "@egemed/ui/i18n";
-import { ADMIN_PATH, adminAuditHref, adminImportHref, adminRolesHref, adminUsersHref } from "../routes";
+import { ADMIN_PATH, adminAuditHref, adminImportHref, adminRewardsHref, adminRolesHref, adminUsersHref } from "../routes";
 
-export type AdminSection = "overview" | "users" | "import" | "roles" | "audit";
+export type AdminSection = "overview" | "users" | "import" | "roles" | "audit" | "rewards";
 
 interface AdminLink {
   readonly id: AdminSection;
@@ -17,6 +17,7 @@ const LINKS: readonly AdminLink[] = [
   { id: "users", href: adminUsersHref(), labelKey: "admin.nav.users", icon: <icons.Users /> },
   { id: "import", href: adminImportHref(), labelKey: "admin.nav.import", icon: <icons.Upload /> },
   { id: "roles", href: adminRolesHref(), labelKey: "admin.nav.roles", icon: <icons.ShieldCheck /> },
+  { id: "rewards", href: adminRewardsHref(), labelKey: "admin.nav.rewards", icon: <icons.Trophy /> },
   { id: "audit", href: adminAuditHref(), labelKey: "admin.nav.audit", icon: <icons.ScrollText /> },
 ];
 

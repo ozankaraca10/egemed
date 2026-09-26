@@ -5,6 +5,7 @@ import { t, type TrKey } from "@egemed/ui/i18n";
 import { AdminPage } from "./AdminPage";
 import { AuditPage } from "./admin/AuditPage";
 import { ImportWizardPage } from "./admin/ImportWizardPage";
+import { RewardsPage } from "./admin/RewardsPage";
 import { RolesPage } from "./admin/RolesPage";
 import { UserDetailPage } from "./admin/UserDetailPage";
 import { UserFormPage } from "./admin/UserFormPage";
@@ -72,6 +73,7 @@ function contentFor(
   }
   if (route.kind === "adminImport") return <AdminFrame active="import"><ImportWizardPage /></AdminFrame>;
   if (route.kind === "adminRoles") return <AdminFrame active="roles"><RolesPage /></AdminFrame>;
+  if (route.kind === "adminRewards") return <AdminFrame active="rewards"><RewardsPage /></AdminFrame>;
   if (route.kind === "adminAudit") return <AdminFrame active="audit"><AuditPage /></AdminFrame>;
   if (route.kind === "sim") {
     return (
