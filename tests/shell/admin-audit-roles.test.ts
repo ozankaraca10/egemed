@@ -311,9 +311,11 @@ describe("RolesPage kabı (T73)", () => {
 function baseAuditViewProps(overrides: Partial<AuditViewProps>): AuditViewProps {
   return {
     detailEntry: null,
+    filtersOpen: false,
     onClearFilters: noop,
     onCloseDetail: noop,
     onFilterChange: noop,
+    onFiltersOpenChange: noop,
     onOpenDetail: noop,
     onPageChange: noop,
     onRetry: noop,
@@ -391,6 +393,7 @@ describe("Toplu düzenleme diyaloğu (UsersListView içinde, E3 §e.5, T73)", ()
       bulkPreview: null,
       bulkPreviewStatus: "idle",
       bulkValue: "active",
+      filtersOpen: false,
       onBulkApply: noop,
       onBulkOperationChange: noop,
       onBulkValueChange: noop,
@@ -398,6 +401,7 @@ describe("Toplu düzenleme diyaloğu (UsersListView içinde, E3 §e.5, T73)", ()
       onClearSelection: noop,
       onCloseBulk: noop,
       onFilterChange: noop,
+      onFiltersOpenChange: noop,
       onOpenBulk: noop,
       onPageChange: noop,
       onRetry: noop,

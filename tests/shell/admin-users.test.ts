@@ -1,5 +1,6 @@
 import { createElement, type ReactElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
+import { DataTable } from "../../packages/ui/src/primitives/DataTable";
 import {
   ADMIN_USERS_PATH,
   adminGuardHref,
@@ -29,10 +30,8 @@ import {
 import {
   parseSortChoice,
   sortChoiceFor,
-  UsersCards,
   UsersListView,
   UsersPage,
-  UsersTable,
   type UsersListViewProps,
 } from "../../apps/shell/src/admin/UsersPage";
 import { t } from "../../packages/ui/i18n/tr";
@@ -88,9 +87,18 @@ function collectElements(
   return results;
 }
 
-function findAllCheckboxProps(tree: ReactElement): { onChange: () => void }[] {
-  const inputs = collectElements(tree, (element) => (element.props as { type?: string }).type === "checkbox");
-  return inputs.map((element) => element.props as { onChange: () => void });
+interface TestColumn { readonly key: string; readonly cell: (user: AdminUser) => unknown }
+
+/** `UsersListView`'in çizdiği `DataTable` öğesini bulur ve "select" sütununu döner (T156):
+ *  statik ağaç iç içe fonksiyon bileşenlerini genişletmediği için `DataTable`'ın `columns`
+ *  prop'undaki `cell` işlevi doğrudan çağrılıp test edilir. */
+function findSelectColumn(tree: ReactElement): TestColumn {
+  const [dataTableElement] = collectElements(tree, (element) => element.type === DataTable);
+  if (dataTableElement === undefined) throw new Error("DataTable öğesi bulunamadı");
+  const columns = (dataTableElement.props as { columns: readonly TestColumn[] }).columns;
+  const selectColumn = columns.find((column) => column.key === "select");
+  if (selectColumn === undefined) throw new Error("select sütunu bulunamadı");
+  return selectColumn;
 }
 
 function baseViewProps(overrides: Partial<UsersListViewProps>): UsersListViewProps {
@@ -102,6 +110,7 @@ function baseViewProps(overrides: Partial<UsersListViewProps>): UsersListViewPro
     bulkPreview: null,
     bulkPreviewStatus: "idle",
     bulkValue: "active",
+    filtersOpen: false,
     onBulkApply: noop,
     onBulkOperationChange: noop,
     onBulkValueChange: noop,
@@ -109,6 +118,7 @@ function baseViewProps(overrides: Partial<UsersListViewProps>): UsersListViewPro
     onClearSelection: noop,
     onCloseBulk: noop,
     onFilterChange: noop,
+    onFiltersOpenChange: noop,
     onOpenBulk: noop,
     onPageChange: noop,
     onRetry: noop,
@@ -303,7 +313,7 @@ describe("#/admin/kullanicilar rotası ve koruması", () => {
 describe("UsersListView işaretlemesi", () => {
   const READY_META = { page: 1, pageSize: 20, total: SAMPLE_USERS.length };
 
-  it("tablo başlıklarını, kart liste sınıflarını ve durum rozetlerini metinle çizer", () => {
+  it("tablo başlıklarını (@egemed/ui DataTable, T156) ve durum rozetlerini metinle çizer", () => {
     const html = renderToStaticMarkup(
       createElement(UsersListView, baseViewProps({ result: { data: SAMPLE_USERS, meta: READY_META }, status: "ready" })),
     );
@@ -314,10 +324,10 @@ describe("UsersListView işaretlemesi", () => {
       "admin.users.table.unit",
       "admin.users.table.status",
     ] as const) {
-      expect(html, key).toContain(`<th role="columnheader" scope="col">${t(key)}</th>`);
+      expect(html, key).toContain(t(key));
     }
-    expect(html).toContain('class="eg-shell-users__table"');
-    expect(count(html, 'class="eg-shell-users__card"')).toBe(SAMPLE_USERS.length);
+    expect(html).toContain('class="eg-dtable eg-dtable--stack"');
+    expect(count(html, "eg-check__control")).toBe(SAMPLE_USERS.length);
     expect(html).toContain(t("admin.users.status.active"));
     expect(html).toContain(t("admin.users.status.invited"));
     expect(html).toContain(`href="${adminUserDetailHref("user-001")}"`);
@@ -354,10 +364,10 @@ describe("UsersListView işaretlemesi", () => {
     expect(html).not.toContain(t("table.empty"));
   });
 
-  it("yükleniyor durumunda iskelet, hata durumunda kod + 'Yeniden dene' gösterir", () => {
+  it("yükleniyor durumunda DataTable'ın kendi iskeleti (aria-busy) çizilir, hata durumunda kod + 'Yeniden dene' gösterir", () => {
     const loading = renderToStaticMarkup(createElement(UsersListView, baseViewProps({ status: "loading" })));
-    expect(loading).toContain("eg-shell-users__skeleton");
-    expect(loading).not.toContain("eg-shell-users__table");
+    expect(loading).toContain('aria-busy="true"');
+    expect(loading).not.toContain("eg-shell-users__error");
 
     const error = renderToStaticMarkup(createElement(UsersListView, baseViewProps({ status: "error" })));
     expect(error).toMatch(/role="alert"/);
@@ -409,50 +419,48 @@ describe("UsersListView işaretlemesi", () => {
     expect(cleared).toBe(1);
   });
 
-  it("tablo ve kart satırlarındaki onay kutuları onToggleSelect'i doğru kimlikle çağırır (Space sözleşmesi)", () => {
-    for (const Rows of [UsersTable, UsersCards]) {
-      const calls: string[] = [];
-      const tree = Rows({
+  it("seçim sütunu hücreleri onToggleSelect'i doğru kimlikle çağırır (DataTable columns, T156)", () => {
+    const calls: string[] = [];
+    const tree = UsersListView(
+      baseViewProps({
         onToggleSelect: (id) => calls.push(id),
-        selected: new Set(),
-        units: ADMIN_UNITS,
-        users: SAMPLE_USERS,
-      });
-      const html = renderToStaticMarkup(tree);
-      expect(html).toContain(`href="${adminUserDetailHref("user-001")}"`);
-      expect(html).toContain(`href="${adminUserDetailHref("user-002")}"`);
-      // Statik işaretleme olay taşımaz; onay kutusunun geri çağrısını doğrudan çağırıp doğrularız.
-      const checkboxProps = findAllCheckboxProps(tree);
-      expect(checkboxProps).toHaveLength(SAMPLE_USERS.length);
-      checkboxProps[0]?.onChange();
-      checkboxProps[1]?.onChange();
-      expect(calls).toEqual(["user-001", "user-002"]);
-    }
+        result: { data: SAMPLE_USERS, meta: READY_META },
+        status: "ready",
+      }),
+    ) as ReactElement;
+    const html = renderToStaticMarkup(tree);
+    expect(html).toContain(`href="${adminUserDetailHref("user-001")}"`);
+    expect(html).toContain(`href="${adminUserDetailHref("user-002")}"`);
+    const selectColumn = findSelectColumn(tree);
+    // Statik işaretleme olay taşımaz; sütunun `cell` işlevini doğrudan çağırıp
+    // döndürdüğü `Checkbox` öğesinin geri çağrısını tetikleriz.
+    const checkboxA = selectColumn.cell(USER_A) as ReactElement;
+    const checkboxB = selectColumn.cell(USER_B) as ReactElement;
+    (checkboxA.props as { onCheckedChange: (checked: boolean) => void }).onCheckedChange(true);
+    (checkboxB.props as { onCheckedChange: (checked: boolean) => void }).onCheckedChange(true);
+    expect(calls).toEqual(["user-001", "user-002"]);
   });
 
-  it("T150: oturumdaki adminin kendi satırında toplu seçim kutusu devre dışıdır ve not içerir; diğer satır etkin kalır", () => {
-    for (const Rows of [UsersTable, UsersCards]) {
-      const html = renderToStaticMarkup(
-        Rows({
-          currentUserId: "user-001",
-          onToggleSelect: () => {
-            // yalnız zorunlu prop; bu testte çağrılmaz
-          },
-          selected: new Set(),
-          units: ADMIN_UNITS,
-          users: SAMPLE_USERS,
-        }),
-      );
-      // `aria-label` içinde de görünen ad geçtiği için sınır olarak benzersiz
-      // profil bağlantısı kullanılır (ad metninin kendisi değil).
-      const firstLinkAt = html.indexOf(`href="${adminUserDetailHref("user-001")}"`);
-      const secondLinkAt = html.indexOf(`href="${adminUserDetailHref("user-002")}"`);
-      const checkboxHtml = html.slice(0, firstLinkAt);
-      expect(checkboxHtml).toContain("disabled");
-      expect(checkboxHtml).toContain(t("admin.users.detail.selfNote"));
-      const secondCheckboxHtml = html.slice(firstLinkAt, secondLinkAt);
-      expect(secondCheckboxHtml).not.toContain("disabled");
-    }
+  it("T150: oturumdaki adminin kendi satırında seçim kutusu devre dışıdır ve not içerir; diğer satır etkin kalır", () => {
+    const tree = UsersListView(
+      baseViewProps({
+        currentUserId: "user-001",
+        onToggleSelect: () => {
+          // yalnız zorunlu prop; bu testte çağrılmaz
+        },
+        result: { data: SAMPLE_USERS, meta: READY_META },
+        status: "ready",
+      }),
+    ) as ReactElement;
+    const selectColumn = findSelectColumn(tree);
+    const selfCheckbox = selectColumn.cell(USER_A) as ReactElement;
+    const otherCheckbox = selectColumn.cell(USER_B) as ReactElement;
+    const selfProps = selfCheckbox.props as { disabled?: boolean; label: string };
+    const otherProps = otherCheckbox.props as { disabled?: boolean; label: string };
+    expect(selfProps.disabled).toBe(true);
+    expect(selfProps.label).toContain(t("admin.users.detail.selfNote"));
+    expect(otherProps.disabled).toBe(false);
+    expect(otherProps.label).not.toContain(t("admin.users.detail.selfNote"));
   });
 });
 
@@ -460,13 +468,13 @@ describe("UsersPage kabı", () => {
   it("varsayılan (dataSource'suz) çağrıldığında ilk render'da iskelet gösterir", () => {
     const html = renderToStaticMarkup(createElement(UsersPage));
     expect(html).toContain(t("admin.users.title"));
-    expect(html).toContain("eg-shell-users__skeleton");
+    expect(html).toContain('aria-busy="true"');
   });
 
   it("enjekte edilen kaynakla da ilk render iskelet gösterir; efekt SSR'da çalışmaz", async () => {
     const source = createMockUsersSource(7, 5);
     const html = renderToStaticMarkup(createElement(UsersPage, { dataSource: source }));
-    expect(html).toContain("eg-shell-users__skeleton");
+    expect(html).toContain('aria-busy="true"');
     // Kaynağın kendisi bağımsız olarak çalışır (determinizm doğrulaması burada değil, üstteki grupta).
     const list = await source.list({});
     expect(list.meta.total).toBe(5);

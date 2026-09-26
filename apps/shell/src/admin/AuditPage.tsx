@@ -1,5 +1,5 @@
 import { useEffect, useState, type JSX } from "react";
-import { Modal } from "@egemed/ui";
+import { Badge, Button, DataTable, Dialog, EmptyState, Field, Modal, Pagination, Select, TextInput, icons, type DataTableColumn } from "@egemed/ui";
 import { t, type TrKey } from "@egemed/ui/i18n";
 import { useShellSource } from "../dataSources";
 import { formatTrDateTime } from "./trFormat";
@@ -35,150 +35,78 @@ const ACTION_KEYS: Record<AuditAction, TrKey> = {
 
 const DEFAULT_QUERY: AuditListQuery = { page: 1, pageSize: 20 };
 
-interface RowsProps {
-  readonly entries: readonly AuditEntry[];
-  readonly onOpenDetail: (entry: AuditEntry) => void;
+/** Yalnız aktör/eylem/hedef/tarih filtrelerinden etkin olanları sayar (mobil "Filtreler" rozeti). */
+function countActiveAuditFilters(query: AuditListQuery): number {
+  let count = 0;
+  if ((query.actor?.trim().length ?? 0) > 0) count += 1;
+  if (query.action !== undefined) count += 1;
+  if ((query.target?.trim().length ?? 0) > 0) count += 1;
+  if (query.from !== undefined) count += 1;
+  if (query.to !== undefined) count += 1;
+  return count;
 }
 
-/** ≥768 px tablo görünümü (E3 §e.7); 360 px'te CSS ile gizlenir. */
-function AuditTable({ entries, onOpenDetail }: RowsProps): JSX.Element {
-  return (
-    <table className="eg-shell-users__table" role="table">
-      <caption className="eg-shell-users__caption">{t("admin.audit.table.caption")}</caption>
-      <thead>
-        <tr role="row">
-          <th role="columnheader" scope="col">{t("admin.audit.table.occurredAt")}</th>
-          <th role="columnheader" scope="col">{t("admin.audit.table.actor")}</th>
-          <th role="columnheader" scope="col">{t("admin.audit.table.action")}</th>
-          <th role="columnheader" scope="col">{t("admin.audit.table.target")}</th>
-          <th role="columnheader" scope="col">
-            <span className="eg-visually-hidden">{t("admin.audit.table.detail")}</span>
-          </th>
-        </tr>
-      </thead>
-      <tbody>
-        {entries.map((entry) => (
-          <tr key={entry.id} role="row">
-            <td role="cell">{formatTrDateTime(entry.occurredAt)}</td>
-            <td role="cell">{entry.actorName}</td>
-            <td role="cell">{t(ACTION_KEYS[entry.action])}</td>
-            <td role="cell">{entry.targetName ?? t("admin.audit.noTarget")}</td>
-            <td role="cell">
-              <button className="eg-shell-audit__detail" onClick={() => onOpenDetail(entry)} type="button">
-                {t("admin.audit.table.detail")}
-              </button>
-            </td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
-  );
+function buildAuditColumns(onOpenDetail: (entry: AuditEntry) => void): readonly DataTableColumn<AuditEntry>[] {
+  return [
+    { cell: (entry) => formatTrDateTime(entry.occurredAt), header: t("admin.audit.table.occurredAt"), key: "occurredAt" },
+    { cell: (entry) => entry.actorName, header: t("admin.audit.table.actor"), key: "actor" },
+    { cell: (entry) => t(ACTION_KEYS[entry.action]), header: t("admin.audit.table.action"), key: "action" },
+    { cell: (entry) => entry.targetName ?? t("admin.audit.noTarget"), header: t("admin.audit.table.target"), key: "target" },
+    {
+      cell: (entry) => (
+        <Button onClick={() => onOpenDetail(entry)} variant="secondary">{t("admin.audit.table.detail")}</Button>
+      ),
+      header: t("admin.audit.table.detail"),
+      key: "detail",
+    },
+  ];
 }
 
-/** 360 px kart listesi (E3 §e.7); ≥768 px'te CSS ile gizlenir. */
-function AuditCards({ entries, onOpenDetail }: RowsProps): JSX.Element {
-  return (
-    <ul aria-label={t("admin.audit.cards.label")} className="eg-shell-users__cards">
-      {entries.map((entry) => (
-        <li className="eg-shell-users__card" key={entry.id}>
-          <div className="eg-shell-users__card-body">
-            <p className="eg-shell-users__card-name">{formatTrDateTime(entry.occurredAt)}</p>
-            <p className="eg-shell-users__card-meta">{entry.actorName} · {t(ACTION_KEYS[entry.action])}</p>
-            <p className="eg-shell-users__card-meta">{entry.targetName ?? t("admin.audit.noTarget")}</p>
-            <button className="eg-shell-audit__detail" onClick={() => onOpenDetail(entry)} type="button">
-              {t("admin.audit.table.detail")}
-            </button>
-          </div>
-        </li>
-      ))}
-    </ul>
-  );
-}
-
-interface FiltersProps {
+interface FilterFieldsProps {
   readonly query: AuditListQuery;
   readonly onFilterChange: (patch: Partial<AuditListQuery>) => void;
-  readonly onClearFilters: () => void;
 }
 
-/** 360/768'te katlanır panel, 1440'ta tek satır; kırılım yalnız CSS'tedir (UsersFilters deseniyle aynı). */
-function AuditFilters({ query, onFilterChange, onClearFilters }: FiltersProps): JSX.Element {
+/** Filtre alanları: masaüstünde yatay çubukta, 360/768'te "Filtreler" diyaloğu içinde aynı
+ *  bileşen iki kez çizilir (kırılım yalnız CSS'te, T156). Tarih alanları şimdilik yerel
+ *  `input[type=date]` kalır (T157 ayrı görev). */
+function AuditFilterFields({ query, onFilterChange }: FilterFieldsProps): JSX.Element {
   return (
-    <div className="eg-shell-users__filters">
-      <label className="eg-shell-users__field">
-        <span className="eg-shell-users__field-label">{t("admin.audit.filter.actor")}</span>
-        <input
-          onChange={(event: ChangeLike) => onFilterChange({ actor: changeValue(event) || undefined })}
-          type="search"
-          value={query.actor ?? ""}
-        />
-      </label>
-      <label className="eg-shell-users__field">
-        <span className="eg-shell-users__field-label">{t("admin.audit.filter.action")}</span>
-        <select
-          onChange={(event: ChangeLike) => {
-            const value = changeValue(event);
-            onFilterChange({ action: value === "" ? undefined : (value as AuditAction) });
-          }}
-          value={query.action ?? ""}
-        >
-          <option value="">{t("admin.audit.filter.action.all")}</option>
-          {AUDIT_ACTIONS.map((action) => <option key={action} value={action}>{t(ACTION_KEYS[action])}</option>)}
-        </select>
-      </label>
-      <label className="eg-shell-users__field">
-        <span className="eg-shell-users__field-label">{t("admin.audit.filter.target")}</span>
-        <input
-          onChange={(event: ChangeLike) => onFilterChange({ target: changeValue(event) || undefined })}
-          type="search"
-          value={query.target ?? ""}
-        />
-      </label>
-      <label className="eg-shell-users__field">
-        <span className="eg-shell-users__field-label">{t("admin.audit.filter.from")}</span>
-        <input
-          onChange={(event: ChangeLike) => onFilterChange({ from: changeValue(event) || undefined })}
-          type="date"
-          value={query.from ?? ""}
-        />
-      </label>
-      <label className="eg-shell-users__field">
-        <span className="eg-shell-users__field-label">{t("admin.audit.filter.to")}</span>
-        <input
-          onChange={(event: ChangeLike) => onFilterChange({ to: changeValue(event) || undefined })}
-          type="date"
-          value={query.to ?? ""}
-        />
-      </label>
-      <button className="eg-shell-users__clear" onClick={onClearFilters} type="button">
-        {t("admin.audit.filter.clear")}
-      </button>
-    </div>
-  );
-}
-
-function AuditPagination({
-  result,
-  onPageChange,
-}: {
-  readonly result: AuditListResult;
-  readonly onPageChange: (page: number) => void;
-}): JSX.Element {
-  const { meta } = result;
-  const totalPages = Math.max(1, Math.ceil(meta.total / meta.pageSize));
-  const from = meta.total === 0 ? 0 : (meta.page - 1) * meta.pageSize + 1;
-  const to = Math.min(meta.total, meta.page * meta.pageSize);
-  return (
-    <div className="eg-shell-users__pagination">
-      <button disabled={meta.page <= 1} onClick={() => onPageChange(meta.page - 1)} type="button">
-        {t("admin.audit.pagination.prev")}
-      </button>
-      <span>{`${t("admin.audit.pagination.page")} ${meta.page}/${totalPages}`}</span>
-      <button disabled={meta.page >= totalPages} onClick={() => onPageChange(meta.page + 1)} type="button">
-        {t("admin.audit.pagination.next")}
-      </button>
-      <span>{`${from}-${to}/${meta.total} ${t("admin.audit.pagination.records")}`}</span>
-    </div>
+    <>
+      <Field label={t("admin.audit.filter.actor")}>
+        {(control) => (
+          <TextInput {...control} onChange={(event: ChangeLike) => onFilterChange({ actor: changeValue(event) || undefined })} type="search" value={query.actor ?? ""} />
+        )}
+      </Field>
+      <Field label={t("admin.audit.filter.action")}>
+        {(control) => (
+          <Select
+            {...control}
+            onValueChange={(value) => onFilterChange({ action: value === "" ? undefined : (value as AuditAction) })}
+            options={[
+              { label: t("admin.audit.filter.action.all"), value: "" },
+              ...AUDIT_ACTIONS.map((action) => ({ label: t(ACTION_KEYS[action]), value: action })),
+            ]}
+            value={query.action ?? ""}
+          />
+        )}
+      </Field>
+      <Field label={t("admin.audit.filter.target")}>
+        {(control) => (
+          <TextInput {...control} onChange={(event: ChangeLike) => onFilterChange({ target: changeValue(event) || undefined })} type="search" value={query.target ?? ""} />
+        )}
+      </Field>
+      <Field label={t("admin.audit.filter.from")}>
+        {(control) => (
+          <TextInput {...control} onChange={(event: ChangeLike) => onFilterChange({ from: changeValue(event) || undefined })} type="date" value={query.from ?? ""} />
+        )}
+      </Field>
+      <Field label={t("admin.audit.filter.to")}>
+        {(control) => (
+          <TextInput {...control} onChange={(event: ChangeLike) => onFilterChange({ to: changeValue(event) || undefined })} type="date" value={query.to ?? ""} />
+        )}
+      </Field>
+    </>
   );
 }
 
@@ -193,6 +121,10 @@ export interface AuditViewProps {
   readonly onOpenDetail: (entry: AuditEntry) => void;
   readonly onCloseDetail: () => void;
   readonly onRetry: () => void;
+  /** <768 px "Filtreler" diyaloğunun açık/kapalı durumu; salt görsel olduğu için
+   *  `AuditPage` üzerinde tutulur (view saf props'tan beslenir, T156). */
+  readonly filtersOpen: boolean;
+  readonly onFiltersOpenChange: (open: boolean) => void;
 }
 
 /**
@@ -210,37 +142,75 @@ export function AuditView({
   onOpenDetail,
   onCloseDetail,
   onRetry,
+  filtersOpen,
+  onFiltersOpenChange,
 }: AuditViewProps): JSX.Element {
   const filtered = hasActiveAuditFilters(query);
+  const activeCount = countActiveAuditFilters(query);
+  const columns = buildAuditColumns(onOpenDetail);
+
+  const emptyState = filtered ? (
+    <EmptyState
+      action={<Button onClick={onClearFilters} variant="secondary">{t("admin.audit.filter.clear")}</Button>}
+      icon={<icons.ScrollText />}
+      title={t("admin.audit.filtered.empty")}
+    />
+  ) : (
+    <EmptyState icon={<icons.ScrollText />} title={t("table.empty")} />
+  );
+
   return (
     <section className="eg-shell-page eg-shell-users">
-      <h1 className="eg-shell-page__title">{t("admin.audit.title")}</h1>
-      <AuditFilters onClearFilters={onClearFilters} onFilterChange={onFilterChange} query={query} />
-      {status === "loading" && (
-        <div aria-hidden="true" className="eg-shell-users__skeleton">
-          <span className="eg-shell-users__skeleton-row" />
-          <span className="eg-shell-users__skeleton-row" />
-          <span className="eg-shell-users__skeleton-row" />
+      <div className="eg-shell-users__head">
+        <h1 className="eg-shell-page__title">{t("admin.audit.title")}</h1>
+        <div className="eg-shell-adminlist__actions">
+          <Button onClick={onClearFilters} variant="ghost">{t("admin.audit.filter.clear")}</Button>
         </div>
-      )}
-      {status === "error" && (
+      </div>
+      <div className="eg-shell-adminlist__filterbar">
+        <AuditFilterFields onFilterChange={onFilterChange} query={query} />
+      </div>
+      <div className="eg-shell-adminlist__filtertrigger">
+        <Button icon={<icons.Filter />} onClick={() => onFiltersOpenChange(true)} variant="secondary">
+          {t("admin.audit.filter.open")}
+          {activeCount > 0 ? <Badge tone="info">{String(activeCount)}</Badge> : null}
+        </Button>
+      </div>
+      <Dialog
+        footer={<Button onClick={onClearFilters} variant="ghost">{t("admin.audit.filter.clear")}</Button>}
+        onOpenChange={onFiltersOpenChange}
+        open={filtersOpen}
+        title={t("admin.audit.filter.open")}
+      >
+        <div className="eg-shell-adminlist__filterfields">
+          <AuditFilterFields onFilterChange={onFilterChange} query={query} />
+        </div>
+      </Dialog>
+      {status === "error" ? (
         <div className="eg-shell-users__error" role="alert">
           <p className="eg-shell-users__error-title">{t("admin.audit.error.title")}</p>
           <p className="eg-shell-users__error-body">{t("admin.audit.error.body")}</p>
-          <button onClick={onRetry} type="button">{t("admin.audit.error.retry")}</button>
+          <Button onClick={onRetry} variant="secondary">{t("admin.audit.error.retry")}</Button>
         </div>
-      )}
-      {status === "ready" && result !== null && result.meta.total === 0 && (
-        <div className="eg-shell-users__empty">
-          <p>{filtered ? t("admin.audit.filtered.empty") : t("table.empty")}</p>
-          {filtered && <button onClick={onClearFilters} type="button">{t("admin.audit.filter.clear")}</button>}
-        </div>
-      )}
-      {status === "ready" && result !== null && result.meta.total > 0 && (
+      ) : (
         <>
-          <AuditTable entries={result.data} onOpenDetail={onOpenDetail} />
-          <AuditCards entries={result.data} onOpenDetail={onOpenDetail} />
-          <AuditPagination onPageChange={onPageChange} result={result} />
+          <DataTable<AuditEntry>
+            caption={t("admin.audit.table.caption")}
+            columns={columns}
+            empty={emptyState}
+            loading={status === "loading"}
+            rowKey={(entry) => entry.id}
+            rows={status === "ready" && result !== null ? result.data : []}
+          />
+          {status === "ready" && result !== null && result.meta.total > 0 && (
+            <Pagination
+              onPageChange={onPageChange}
+              page={result.meta.page}
+              pageCount={Math.max(1, Math.ceil(result.meta.total / result.meta.pageSize))}
+              pageSize={result.meta.pageSize}
+              total={result.meta.total}
+            />
+          )}
         </>
       )}
       <Modal onClose={onCloseDetail} open={detailEntry !== null} title={t("admin.audit.detail.title")}>
@@ -276,6 +246,7 @@ export function AuditPage({ dataSource }: AuditPageProps): JSX.Element {
   const [result, setResult] = useState<AuditListResult | null>(null);
   const [detailEntry, setDetailEntry] = useState<AuditEntry | null>(null);
   const [attempt, setAttempt] = useState(0);
+  const [filtersOpen, setFiltersOpen] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -302,6 +273,8 @@ export function AuditPage({ dataSource }: AuditPageProps): JSX.Element {
   return (
     <AuditView
       detailEntry={detailEntry}
+      filtersOpen={filtersOpen}
+      onFiltersOpenChange={setFiltersOpen}
       onClearFilters={() => setQuery(DEFAULT_QUERY)}
       onCloseDetail={() => setDetailEntry(null)}
       onFilterChange={(patch) => updateQuery(patch)}

@@ -1,7 +1,7 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Locator, type Page } from "@playwright/test";
 import { captureRouteScreenshot, writeAxeArtifact } from "./artifacts";
-import { trackErrors } from "./helpers";
+import { clickAdminFilterButton, fillAdminFilter, selectAdminFilterOption, trackErrors } from "./helpers";
 
 /**
  * T75 — Kabuk admin ekranlarının uçtan uca akışları (E3 §e.1-§e.7).
@@ -78,11 +78,9 @@ function visible(locator: Locator): Locator {
   return locator.filter({ visible: true });
 }
 
-/** Liste kayıtları: ≥768 px tablo satırı, <768 px kart; ikisi aynı DOM'dadır. */
+/** Liste kayıtları: `@egemed/ui` `DataTable` gövdesindeki satırlar (T156, 360↔768'te aynı DOM, CSS ile yığılır). */
 function listRows(page: Page): Locator {
-  return page.locator(".eg-shell-users__table tbody tr, .eg-shell-users__cards > li").filter({
-    visible: true,
-  });
+  return page.locator(".eg-dtable tbody tr");
 }
 
 function currentStep(page: Page): Locator {
@@ -132,42 +130,39 @@ test.describe("admin kullanıcı listesi (E3 §e.1)", () => {
     await signInAsAdmin(page);
     await openAdmin(page, USERS);
     await expect(page.getByRole("heading", { name: "Kullanıcılar" })).toBeVisible();
-    await expect(page.getByText("1-20/240 kayıt")).toBeVisible();
-    await expect(page.getByText("Sayfa 1/12")).toBeVisible();
+    await expect(page.getByText("1–20 / 240 kayıt")).toBeVisible();
     await expect(visible(page.getByRole("button", { name: "Önceki" }))).toBeDisabled();
 
-    await page.getByLabel("Ara").fill("ornek.kullanici.137");
-    await expect(page.getByText("1-1/1 kayıt")).toBeVisible();
+    await fillAdminFilter(page, "Ara", "ornek.kullanici.137");
+    await expect(page.getByText("1–1 / 1 kayıt")).toBeVisible();
     await expect(visible(page.getByRole("link", { name: "Örnek Kullanıcı 137" }))).toBeVisible();
 
-    await page.getByLabel("Ara").fill("t75-eslesmeyen-arama");
+    await fillAdminFilter(page, "Ara", "t75-eslesmeyen-arama");
     await expect(page.getByText("Bu filtrelerle sonuç bulunamadı.")).toBeVisible();
-    await visible(page.getByRole("button", { name: "Filtreleri temizle" })).first().click();
-    await expect(page.getByText("1-20/240 kayıt")).toBeVisible();
+    await clickAdminFilterButton(page, "Filtreleri temizle");
+    await expect(page.getByText("1–20 / 240 kayıt")).toBeVisible();
 
-    await page.getByLabel("Rol").selectOption("admin");
-    await expect(page.getByText("1-6/6 kayıt")).toBeVisible();
+    await selectAdminFilterOption(page, "Rol", "Yönetici");
+    await expect(page.getByText("1–6 / 6 kayıt")).toBeVisible();
     await expect(visible(page.getByRole("link", { name: "Örnek Kullanıcı 036" }))).toBeVisible();
     await expect(page.getByText("Örnek Kullanıcı 002")).toHaveCount(0);
-    await page.getByLabel("Durum").selectOption("invited");
-    await expect(page.getByText("1-2/2 kayıt")).toBeVisible();
+    await selectAdminFilterOption(page, "Durum", "Davetli");
+    await expect(page.getByText("1–2 / 2 kayıt")).toBeVisible();
     await expect(visible(page.getByRole("link", { name: "Örnek Kullanıcı 217" }))).toBeVisible();
-    await visible(page.getByRole("button", { name: "Filtreleri temizle" })).first().click();
-    await expect(page.getByText("1-20/240 kayıt")).toBeVisible();
+    await clickAdminFilterButton(page, "Filtreleri temizle");
+    await expect(page.getByText("1–20 / 240 kayıt")).toBeVisible();
 
-    await page.getByLabel("Sıralama").selectOption("displayName-desc");
+    await selectAdminFilterOption(page, "Sıralama", "Ada göre (Z-A)");
     await expect(visible(page.getByRole("link", { name: "Örnek Kullanıcı 240" }))).toBeVisible();
     await visible(page.getByRole("button", { name: "Sonraki" })).click();
-    await expect(page.getByText("Sayfa 2/12")).toBeVisible();
-    await expect(page.getByText("21-40/240 kayıt")).toBeVisible();
+    await expect(page.getByText("21–40 / 240 kayıt")).toBeVisible();
     await visible(page.getByRole("button", { name: "Önceki" })).click();
-    await expect(page.getByText("Sayfa 1/12")).toBeVisible();
   });
 
   test("çoklu seçim aria-live duyurusu, Escape temizliği ve rol kaldırma koruması", async ({ page }) => {
     await signInAsAdmin(page);
     await openAdmin(page, USERS);
-    await expect(page.getByText("1-20/240 kayıt")).toBeVisible();
+    await expect(page.getByText("1–20 / 240 kayıt")).toBeVisible();
 
     // E3 §e.1: seçim sayısı aria-live ile duyurulur; Escape seçimi temizler.
     const live = page.locator('p[aria-live="polite"]');
@@ -402,25 +397,24 @@ test.describe("denetim günlüğü (E3 §e.7)", () => {
     await signInAsAdmin(page);
     await openAdmin(page, AUDIT);
     await expect(page.getByRole("heading", { name: "Denetim günlüğü" })).toBeVisible();
-    await expect(page.getByText("1-20/140 kayıt")).toBeVisible();
-    await expect(page.getByText("Sayfa 1/7")).toBeVisible();
+    await expect(page.getByText("1–20 / 140 kayıt")).toBeVisible();
 
-    await page.getByLabel("Eylem").selectOption("purge.run");
-    await expect(page.getByText("1-20/23 kayıt")).toBeVisible();
+    await selectAdminFilterOption(page, "Eylem", "İmha işi çalıştı");
+    await expect(page.getByText("1–20 / 23 kayıt")).toBeVisible();
     await expect(listRows(page).first()).toContainText("İmha işi çalıştı");
     await expect(listRows(page).first()).toContainText("Sistem");
     await expect(listRows(page).first()).toContainText("—");
 
-    await visible(page.getByRole("button", { name: "Filtreleri temizle" })).first().click();
-    await page.getByLabel("Aktör").fill("Örnek Yönetici 001");
-    await expect(page.getByText("1-20/22 kayıt")).toBeVisible();
+    await clickAdminFilterButton(page, "Filtreleri temizle");
+    await fillAdminFilter(page, "Aktör", "Örnek Yönetici 001");
+    await expect(page.getByText("1–20 / 22 kayıt")).toBeVisible();
     await expect(listRows(page).first()).toContainText("Örnek Yönetici 001");
 
-    await visible(page.getByRole("button", { name: "Filtreleri temizle" })).first().click();
-    await page.getByLabel("Bitiş").fill("2026-01-01");
+    await clickAdminFilterButton(page, "Filtreleri temizle");
+    await fillAdminFilter(page, "Bitiş", "2026-01-01");
     await expect(page.getByText("Bu filtrelerle sonuç bulunamadı.")).toBeVisible();
-    await visible(page.getByRole("button", { name: "Filtreleri temizle" })).first().click();
-    await expect(page.getByText("1-20/140 kayıt")).toBeVisible();
+    await clickAdminFilterButton(page, "Filtreleri temizle");
+    await expect(page.getByText("1–20 / 140 kayıt")).toBeVisible();
 
     await visible(page.getByRole("button", { name: "Ayrıntı" })).first().click();
     const dialog = page.getByRole("dialog");
@@ -453,14 +447,14 @@ test.describe("admin ekranları: axe 0, yatay taşma yok, artefaktlar", () => {
       key: USERS,
       setup: async (page) => {
         await openAdmin(page, USERS);
-        await expect(page.getByText("1-20/240 kayıt")).toBeVisible();
+        await expect(page.getByText("1–20 / 240 kayıt")).toBeVisible();
       },
     },
     {
       key: `${USERS}#secim-toplu-islem`,
       setup: async (page) => {
         await openAdmin(page, USERS);
-        await expect(page.getByText("1-20/240 kayıt")).toBeVisible();
+        await expect(page.getByText("1–20 / 240 kayıt")).toBeVisible();
         await visible(page.getByRole("checkbox")).first().check();
         await visible(page.getByRole("button", { name: "Toplu işlem" })).click();
         await expect(page.getByRole("dialog")).toBeVisible();
@@ -547,14 +541,14 @@ test.describe("admin ekranları: axe 0, yatay taşma yok, artefaktlar", () => {
       key: AUDIT,
       setup: async (page) => {
         await openAdmin(page, AUDIT);
-        await expect(page.getByText("1-20/140 kayıt")).toBeVisible();
+        await expect(page.getByText("1–20 / 140 kayıt")).toBeVisible();
       },
     },
     {
       key: `${AUDIT}#kayit-ayrintisi`,
       setup: async (page) => {
         await openAdmin(page, AUDIT);
-        await expect(page.getByText("1-20/140 kayıt")).toBeVisible();
+        await expect(page.getByText("1–20 / 140 kayıt")).toBeVisible();
         await visible(page.getByRole("button", { name: "Ayrıntı" })).first().click();
         await expect(page.getByRole("dialog")).toBeVisible();
       },

@@ -1,5 +1,5 @@
 import { expect, test, type Locator, type Page } from "@playwright/test";
-import { openRoute, trackErrors } from "./helpers";
+import { fillAdminFilter, openRoute, trackErrors } from "./helpers";
 import { completeTopicPractice, giveAnswer, startTopicPractice, submitAnswer } from "./sim-flows";
 
 /**
@@ -253,7 +253,7 @@ test.describe("T155 UAT yolculukları", () => {
     await signInAdmin(page);
     await page.getByRole("link", { name: "Kullanıcı listesini aç" }).click();
     await expect(page).toHaveURL(/#\/admin\/kullanicilar$/);
-    await expect(page.getByText("1-20/240 kayıt")).toBeVisible();
+    await expect(page.getByText("1–20 / 240 kayıt")).toBeVisible();
     await assertNoHorizontalScroll(page);
 
     expect(appErrors(errors), "konsol/sayfa hatası").toEqual([]);
@@ -316,8 +316,8 @@ test.describe("T155 UAT yolculukları", () => {
     await expect(page).toHaveURL(/#\/admin\/kullanicilar$/);
     await expect(page.getByRole("heading", { name: "Kullanıcılar" })).toBeVisible();
 
-    await page.getByLabel("Ara").fill("ornek.kullanici.002");
-    await expect(page.getByText("1-1/1 kayıt")).toBeVisible();
+    await fillAdminFilter(page, "Ara", "ornek.kullanici.002");
+    await expect(page.getByText("1–1 / 1 kayıt")).toBeVisible();
     await page.getByRole("link", { name: "Örnek Kullanıcı 002" }).click();
     await expect(page).toHaveURL(/#\/admin\/kullanicilar\/user-002$/);
     await expect(page.getByRole("heading", { name: "Örnek Kullanıcı 002" })).toBeVisible();
