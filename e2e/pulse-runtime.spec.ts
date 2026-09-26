@@ -170,6 +170,51 @@ test.describe("Pulse kaynak runtime", () => {
     await expect(root.locator("#quizForm input:checked"), "öğrencide seçili yanıt yok").toHaveCount(0);
   });
 
+  test("birleşik bar adımına tıklama mod seçimine döner; değerlendirmede kaynağın süre kaybı uyarısı çıkar (T181)", async ({ page }) => {
+    const errors = trackErrors(page);
+    const root = await openPulse(page);
+    const stepButton = (label: string) => page.locator(".eg-shell-simbar__stepButton", { hasText: label });
+
+    // Uygulama modu: yanıtlar otomatik kaydedildiğinden onay istenmeden döner.
+    await openMode(root, "case");
+    await expect(stepButton("Mod seçimi")).toBeVisible();
+    await stepButton("Mod seçimi").click();
+    await expect(root.locator("#modeCards")).toBeVisible();
+
+    // Değerlendirme modu: kaynağın kendi süre kaybı uyarısı (quizExitDialog) devreye girer.
+    await openMode(root, "quiz");
+    await expect(stepButton("Mod seçimi")).toBeVisible();
+    await stepButton("Mod seçimi").click();
+    const exitDialog = root.locator("#quizExitDialog");
+    await expect(exitDialog).toBeVisible();
+    // Vazgeç: değerlendirmede kalınır, mod ekranına geçilmez.
+    await root.locator("#cancelQuizExit").click();
+    await expect(exitDialog).toBeHidden();
+    await expect(root.locator("#quizView")).toBeVisible();
+    // Evet, çık: onay sonrası mod seçimine döner.
+    await stepButton("Mod seçimi").click();
+    await expect(exitDialog).toBeVisible();
+    await root.locator("#confirmQuizExit").click();
+    await expect(root.locator("#modeCards")).toBeVisible();
+
+    // "Tamamla" adımından geri (index 1) desteklenmez; yalnız 0 (Mod seçimi) çalışır.
+    await openMode(root, "quiz");
+    for (let i = 0; i < 10; i += 1) {
+      const id = /Q\d{3}/.exec(await root.locator("#quizForm").innerText())?.[0] ?? "";
+      await root.locator(`#quizForm input[value="${correctOf(id)}"]`).check();
+      await root.locator("#quizSubmit").click();
+      if (i < 9) await root.locator("#quizItemNext").click();
+    }
+    await expect(root.locator("#resultsView")).toBeVisible();
+    // Tamamlanan her adım kabukta düğme olur, ama sim yalnız 0'ı (Mod seçimi)
+    // destekler; "Çalışma" (1) tıklanınca sonuç ekranından ayrılmaz.
+    const workStep = stepButton("Çalışma");
+    await expect(workStep).toBeVisible();
+    await workStep.click();
+    await expect(root.locator("#resultsView")).toBeVisible();
+    expect(errors).toEqual([]);
+  });
+
   test("sim rotası doğrudan değiştirildiğinde her sim tek kökle açılır (PLATFORM-01)", async ({ page }) => {
     const errors = trackErrors(page);
     await page.goto("/#/sims/pulse");

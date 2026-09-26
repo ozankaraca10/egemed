@@ -68,7 +68,17 @@ export function attachPulseChrome(
       const progress = byId("progressText")?.textContent?.trim() ?? "";
       if (progress.length > 0) chips.push({ id: "progress", label: progress, tone: "neutral" });
     }
-    const chrome: SimChrome = { actions, chips, steps: { current: step, labels: STEP_LABELS } };
+    // Adımlara tıklama (26 Eyl 2026 kararı, T181): yalnız 0 (Mod seçimi)
+    // desteklenir — "Çalışma" (1) sonuç ekranından (2) geri dönülecek anlamlı
+    // bir ekran değildir, bu yüzden yok sayılır. Mod seçimine dönüş kaynağın
+    // kendi `modeSwitch` düğmesini tıklar; değerlendirme (quiz) sürüyorsa
+    // kaynağın süre kaybı uyarısı (`quizExitDialog`) devreye girer, uygulama
+    // (case) modunda yanıtlar otomatik kaydedildiğinden onay gerekmez.
+    const stepsOnSelect = (index: number): void => {
+      if (index !== 0) return;
+      click("modeSwitch")();
+    };
+    const chrome: SimChrome = { actions, chips, steps: { current: step, labels: STEP_LABELS, onSelect: stepsOnSelect } };
     // Aynı durumu tekrar göndermez (MutationObserver sık tetiklenir).
     const key = JSON.stringify({ a: actions.map((a) => a.id), c: chips, s: step });
     if (key === lastKey) return;
