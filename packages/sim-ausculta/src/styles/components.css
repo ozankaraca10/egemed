@@ -168,6 +168,10 @@
 .eg-sim-ausculta .mode-card.practice li .ck { background: var(--blue-100); color: var(--blue-600); }
 .eg-sim-ausculta .mode-card.assessment li .ck { background: var(--purple-100); color: var(--purple-600); }
 .eg-sim-ausculta .mode-card .btn { margin-top: auto; width: 100%; }
+.eg-sim-ausculta .mode-card.visitor-locked { opacity: .7; }
+.eg-sim-ausculta .visitor-strip { margin-bottom: var(--sp-3); }
+.eg-sim-ausculta .visitor-strip .visitor-signin { display: inline-flex; padding: 0 2px; }
+.eg-sim-ausculta .faculty-note { color: var(--ink-600); font-style: italic; }
 .eg-sim-ausculta .mode-rules { margin: 2px 0 0; font-size: var(--fs-xs); color: var(--ink-600); text-align: center; }
 .eg-sim-ausculta .mode-best-score { margin: 6px 0 0; font-size: var(--fs-xs); color: var(--ink-500, var(--ink-600)); text-align: center; }
 .eg-sim-ausculta .mode-best-score b { color: var(--blue-700); font-variant-numeric: tabular-nums; }
@@ -343,6 +347,11 @@
 .eg-sim-ausculta .lib-item b { font-size: var(--fs-sm); color: var(--ink-900); display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .eg-sim-ausculta .lib-item .lib-main > span { font-size: var(--fs-xs); color: var(--ink-600); display: block; margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .eg-sim-ausculta .lib-item .chev { color: var(--ink-300); font-weight: 700; font-size: var(--fs-lg); }
+.eg-sim-ausculta .lib-item.locked { opacity: .55; }
+.eg-sim-ausculta .lib-item.locked .ic { color: var(--ink-400); background: var(--border); }
+.eg-sim-ausculta .lib-item .lib-right svg { color: var(--ink-400); width: 14px; height: 14px; }
+.eg-sim-ausculta .lib-lock-notice { display: flex; align-items: center; gap: 7px; color: var(--ink-600); font-size: var(--fs-xs); margin: 0 0 8px; }
+.eg-sim-ausculta .lib-lock-notice svg { color: var(--ink-400); flex-shrink: 0; }
 .eg-sim-ausculta .tabbar { display: flex; gap: 4px; background: var(--card-soft); border: 1px solid var(--border); border-radius: var(--r-md); padding: 4px; margin-bottom: 11px; }
 .eg-sim-ausculta .tabbar button { flex: 1; border: 0; background: transparent; border-radius: var(--r-md); padding: 8px 6px; min-height: 44px; font-size: var(--fs-sm); font-weight: 600; color: var(--ink-600); display: flex; align-items: center; justify-content: center; gap: 7px; white-space: nowrap; }
 .eg-sim-ausculta .tabbar button.active { background: var(--blue-600); color: var(--card); box-shadow: 0 2px 8px rgba(22,115,230,.3); }

@@ -1,7 +1,7 @@
 import type { AttemptRecord } from "@egemed/gamification-core";
 import type { GamiServerSource } from "@egemed/gami-ui";
 import type { GamiPageTab } from "@egemed/gami-ui";
-import type { SimChrome } from "@egemed/sim-host";
+import type { SimAudience, SimChrome } from "@egemed/sim-host";
 import { useEffect, useRef, useState, type JSX } from "react";
 import { useStore } from "./core/StoreProvider";
 import { gamiStoragePort } from "./core/storage";
@@ -47,6 +47,10 @@ export interface AppProps {
   readonly gamification?: GamiServerSource;
   readonly setChrome?: (chrome: SimChrome | null) => void;
   readonly fullscreenEnv?: FullscreenEnv;
+  /** Kitle (26 Eyl 2026 sözleşmesi); verilmezse `student`. */
+  readonly audience?: SimAudience;
+  /** Ziyaretçi kilidindeki "Öğrenci girişi" eylemi. */
+  readonly requestSignIn?: () => void;
 }
 
 function Shell({
@@ -61,6 +65,8 @@ function Shell({
   gamification,
   setChrome,
   fullscreenEnv,
+  audience = "student",
+  requestSignIn,
 }: AppProps & { embedded: boolean }): JSX.Element {
   const { state, dispatch, bus, now, storage } = useStore();
   const gamiRef = useRef<LocalGamiRepository | null>(null);
@@ -80,6 +86,9 @@ function Shell({
   }, [audio, state.screen]);
 
   useEffect(() => bus.subscribe((event) => {
+    // Oyunlaştırma yalnız öğrenci kitlesi içindir (26 Eyl 2026 sözleşmesi):
+    // öğretim üyesi/ziyaretçi için yerel kayıt ve `reportAttempt` hiç çağrılmaz.
+    if (audience !== "student") return;
     const write = (payload: Parameters<LocalGamiRepository["recordEvent"]>[0]): void => {
       const seen = gami.snapshot().seenEvents.includes(payload.id);
       gami.recordEvent(payload);
@@ -100,7 +109,7 @@ function Shell({
     } else if (event.type === "correct_diagnosis") {
       gami.recordEvent({ type: "correct_diagnosis", id: `${event.caseId}:${event.qid}:${event.at}`, finishedAt: new Date(event.at).toISOString() });
     }
-  }), [bus, gami, reportAttempt]);
+  }), [audience, bus, gami, reportAttempt]);
 
   useEffect(() => {
     scrollToTop?.();
@@ -115,7 +124,12 @@ function Shell({
 
   const doc = DOC_SCREENS.has(screen);
   return (
-    <EmbeddedProvider embedded={embedded} {...(setChrome === undefined ? {} : { setChrome })}>
+    <EmbeddedProvider
+      embedded={embedded}
+      audience={audience}
+      {...(setChrome === undefined ? {} : { setChrome })}
+      {...(requestSignIn === undefined ? {} : { requestSignIn })}
+    >
       <div className={`eg-sim-ausculta app-shell${doc ? " app-shell--doc" : ""}`}>
         <UnifiedChrome
           audio={audio}

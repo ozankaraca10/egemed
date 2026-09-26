@@ -226,4 +226,32 @@ describe("createAuscultaModule (SimHost adaptörü)", () => {
     dispose();
     expect(sent.at(-1)).toBeNull();
   });
+
+  it("öğretim üyesi kitlesinde birleşik bardan İlerlemem eylemi çıkarılır", async () => {
+    const { deps } = createTestDeps();
+    const target = fakeTarget();
+    const sent: Array<SimChrome | null> = [];
+    createAuscultaModule(deps).mount(target, {
+      ...CONTEXT,
+      audience: "faculty",
+      setChrome: (chrome) => {
+        sent.push(chrome);
+      },
+    });
+    renderToStaticMarkup(target.children[0]?.tree as ReactNode);
+    await Promise.resolve();
+    expect(sent.at(-1)?.actions?.map((action) => action.id)).toEqual(["fullscreen", "sound", "help"]);
+  });
+
+  it("ziyaretçi kitlesinde mod seçiminde kilit şeridi ve kilitli kart CTA'ları görünür", async () => {
+    const { deps } = createTestDeps();
+    const target = fakeTarget();
+    createAuscultaModule(deps).mount(target, { ...CONTEXT, audience: "visitor" });
+    await Promise.resolve();
+    const html = renderToStaticMarkup(target.children[0]?.tree as ReactNode);
+    expect(html).toContain("Ziyaretçi modu");
+    expect(html).toContain("Öğrenci girişi");
+    expect(html).toContain("data-visitor-locked=\"true\"");
+    expect(html).toContain("Bu mod yalnızca Ege Üniversitesi Tıp Fakültesi öğrencilerine açıktır.");
+  });
 });

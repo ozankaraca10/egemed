@@ -2,6 +2,7 @@ import { createElement, type ReactNode } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import {
+  EmbeddedProvider,
   LearnScreen,
   StoreProvider,
   createMemoryRuntimeAdapter,
@@ -90,5 +91,14 @@ describe("LearnScreen", () => {
     expect(() => audio.stop()).not.toThrow();
     const html = renderInStore(createElement(LearnScreen, { env, audio }));
     expect(html).toContain("learn-grid");
+  });
+
+  it("ziyaretçi kitlesinde açık olmayan öğeler kilit ikonuyla işaretlenir (T174)", () => {
+    const html = renderInStore(
+      createElement(EmbeddedProvider, { embedded: true, audience: "visitor", children: createElement(LearnScreen) }),
+    );
+    // heart.s4 kataloğun açık öğelerinden değildir; kilitli görünmeli (kilit ikonu + soluk stil).
+    expect(html).toContain("lib-item locked");
+    expect(html).toContain(esc("Tüm içerik yalnızca Ege Üniversitesi Tıp Fakültesi öğrencilerine açıktır."));
   });
 });

@@ -223,6 +223,8 @@ export function createAuscultaModule(deps?: AuscultaModuleDeps): SimModule {
         ...(resolved.resultsEnv ? { resultsEnv: resolved.resultsEnv } : {}),
         ...(context.reportAttempt === undefined ? {} : { reportAttempt: context.reportAttempt }),
         ...(context.gamification === undefined ? {} : { gamification: context.gamification }),
+        ...(context.audience === undefined ? {} : { audience: context.audience }),
+        ...(context.requestSignIn === undefined ? {} : { requestSignIn: context.requestSignIn }),
       };
 
       root.render(

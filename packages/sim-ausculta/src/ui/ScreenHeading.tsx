@@ -1,24 +1,35 @@
 import { createContext, useContext, type JSX, type ReactNode } from "react";
-import type { SimChrome } from "@egemed/sim-host";
+import type { SimAudience, SimChrome } from "@egemed/sim-host";
 
-/** Platform kabuğu: gömülü mod ve, verilmişse, birleşik bar kanalı. */
+/** Platform kabuğu: gömülü mod, verilmişse birleşik bar kanalı, kitle ve giriş isteği. */
 interface EmbeddedValue {
   readonly embedded: boolean;
   readonly setChrome?: (chrome: SimChrome | null) => void;
+  readonly audience: SimAudience;
+  readonly requestSignIn?: () => void;
 }
 
-const EmbeddedContext = createContext<EmbeddedValue>({ embedded: false });
+const EmbeddedContext = createContext<EmbeddedValue>({ embedded: false, audience: "student" });
 
 export function EmbeddedProvider({
   embedded,
   setChrome,
+  audience = "student",
+  requestSignIn,
   children,
 }: {
   readonly embedded: boolean;
   readonly setChrome?: (chrome: SimChrome | null) => void;
+  readonly audience?: SimAudience;
+  readonly requestSignIn?: () => void;
   readonly children: ReactNode;
 }): JSX.Element {
-  const value: EmbeddedValue = setChrome === undefined ? { embedded } : { embedded, setChrome };
+  const value: EmbeddedValue = {
+    embedded,
+    audience,
+    ...(setChrome === undefined ? {} : { setChrome }),
+    ...(requestSignIn === undefined ? {} : { requestSignIn }),
+  };
   return <EmbeddedContext.Provider value={value}>{children}</EmbeddedContext.Provider>;
 }
 
@@ -29,6 +40,16 @@ export function useEmbedded(): boolean {
 /** Birleşik bar kanalı. Yoksa ekran içi adım göstergesi kalır. */
 export function useSetChrome(): ((chrome: SimChrome | null) => void) | undefined {
   return useContext(EmbeddedContext).setChrome;
+}
+
+/** Kitle (26 Eyl 2026 sözleşmesi); bağlam yoksa `student`. */
+export function useAudience(): SimAudience {
+  return useContext(EmbeddedContext).audience;
+}
+
+/** Ziyaretçi kilidindeki "Öğrenci girişi" eylemi; kabukça verilmezse yoktur. */
+export function useRequestSignIn(): (() => void) | undefined {
+  return useContext(EmbeddedContext).requestSignIn;
 }
 
 export interface ScreenHeadingProps {

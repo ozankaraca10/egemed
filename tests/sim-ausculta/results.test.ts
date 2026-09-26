@@ -3,6 +3,8 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
 import {
   BEST_SCORE_KEY,
+  EmbeddedProvider,
+  LocalGamiRepository,
   MASTERY_THRESHOLD,
   ResultsScreen,
   StoreProvider,
@@ -11,10 +13,12 @@ import {
   createNoopResultsScreenEnv,
   createSimRuntime,
   exitResults,
+  gamiStoragePort,
   initialState,
   poolFor,
   sessionSeed,
 } from "../../packages/sim-ausculta/src/index";
+import type { SimAudience } from "../../packages/sim-host/src/index";
 import type { AppState, CaseResult, ScoringWeights, StoragePort, WindowLike } from "../../packages/sim-ausculta/src/index";
 
 /** Sonuç ekranı — statik işaretleme ve terminate seam. DOM kütüphanesi yok. */
@@ -147,6 +151,35 @@ describe("ResultsScreen", () => {
     expect(html).not.toContain("<footer");
     expect(html).not.toContain('class="app-bg"');
     expect(html).toContain("Vaka Raporu");
+  });
+
+  it("kazanım kartı yalnız öğrenci kitlesinde çizilir (T174)", () => {
+    const renderWithAudience = (audience: SimAudience): string => {
+      const repository = new LocalGamiRepository({ storage: gamiStoragePort(trackingStorage()), now: () => new Date(NOW) });
+      return renderToStaticMarkup(
+        createElement(StoreProvider, {
+          children: createElement(EmbeddedProvider, {
+            embedded: true,
+            audience,
+            children: createElement(ResultsScreen, { embedded: true, repository }),
+          }) as ReactNode,
+          env: inertWindow,
+          initialState: {
+            ...initialState,
+            screen: "results",
+            mode: "assessment",
+            caseResults: [resultFor("assessment", true)],
+            assessmentTimer: 90_000,
+          },
+          now: () => NOW,
+          runtime: createMemoryRuntimeAdapter(),
+          storage: trackingStorage(),
+        }),
+      );
+    };
+    expect(renderWithAudience("student")).toContain("eg-gami-gains");
+    expect(renderWithAudience("faculty")).not.toContain("eg-gami-gains");
+    expect(renderWithAudience("visitor")).not.toContain("eg-gami-gains");
   });
 
   it("çıkış no-op seam'i fırlatmaz ve işaretlemede öğrenci adı yoktur", () => {
