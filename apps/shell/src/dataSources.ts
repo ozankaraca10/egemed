@@ -14,6 +14,7 @@ import {
   type GamificationSource,
 } from "./home/gamificationSource";
 import type { ShellSession } from "./session";
+import { createSyntheticShowcaseSource, type ShowcaseSource } from "./home/showcaseSource";
 
 export interface LeaderboardPreferencesSource {
   getVisible(): Promise<boolean>;
@@ -28,6 +29,8 @@ export interface ShellDataSources {
   gamification(session: ShellSession | null): GamificationSource;
   /** Sahte oturumda `null`; API oturumunda liderlik görünürlüğü. */
   leaderboardPreferences(session: ShellSession | null): LeaderboardPreferencesSource | null;
+  /** Ana sayfa liderlik vitrini (26 Eyl 2026); oturumsuz (ziyaretçi) iken null. */
+  showcase(session: ShellSession | null): ShowcaseSource | null;
 }
 
 const ShellDataSourcesContext = createContext<ShellDataSources | null>(null);
@@ -65,6 +68,7 @@ export function createMockShellDataSources(): ShellDataSources {
   const users = createMockUsersSource();
   const imports = createMockImportsSource();
   const audit = createMockAuditSource();
+  const syntheticShowcase = createSyntheticShowcaseSource();
   return {
     audit,
     gamification(session) {
@@ -72,6 +76,9 @@ export function createMockShellDataSources(): ShellDataSources {
     },
     leaderboardPreferences() {
       return null;
+    },
+    showcase(session) {
+      return session === null ? null : syntheticShowcase;
     },
     imports,
     users,

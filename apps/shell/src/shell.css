@@ -793,6 +793,98 @@ button.eg-shell-simbar__chip:hover { background: var(--navy-600); }
 .eg-shell-simabout__dev { color: var(--ink-600); font-size: var(--fs-sm); }
 .eg-shell-simabout__note { padding: var(--sp-2) var(--sp-3); background: var(--blue-50); border-radius: var(--r-md); color: var(--ink-700); font-size: var(--fs-sm); }
 
+/* 26 Eyl 2026 — ana sayfa liderlik vitrini: "reklam gibi" çekici blok. Her sim ayrı sütun
+   (ADR-006); ilk 3 kürsü 2-1-3 dizilir (DOM sırası 1-2-3 kalır, `order` ile). */
+.eg-shell-showcase {
+  --eg-shell-medal-1: var(--orange-500);
+  --eg-shell-medal-2: var(--ink-300);
+  --eg-shell-medal-3: var(--amber-700);
+  display: grid; gap: var(--sp-5); margin-block: var(--sp-5); padding: var(--sp-5) var(--sp-4);
+  background: linear-gradient(150deg, var(--navy-900), var(--navy-700) 60%, var(--blue-700));
+  border-radius: var(--r-xl); box-shadow: var(--elev-3); color: var(--card);
+}
+.eg-shell-visually-hidden { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+.eg-shell-showcase__intro { display: grid; gap: var(--sp-2); max-width: 46rem; }
+.eg-shell-showcase__eyebrow { display: inline-flex; align-items: center; gap: var(--sp-2); margin: 0; color: var(--eg-shell-medal-1); font-size: var(--fs-xs); font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+.eg-shell-showcase__eyebrowIcon { width: 1rem; height: 1rem; }
+.eg-shell-showcase__title { margin: 0; color: var(--card); font-size: var(--fs-2xl); font-weight: 800; line-height: 1.15; }
+.eg-shell-showcase__lead { margin: 0; color: var(--blue-100); font-size: var(--fs-md); line-height: 1.55; }
+.eg-shell-showcase__grid { display: grid; gap: var(--sp-4); grid-template-columns: minmax(0, 1fr); }
+.eg-shell-showcase__col {
+  display: flex; flex-direction: column; gap: var(--sp-3); padding: var(--sp-4);
+  background: var(--card); border-radius: var(--r-lg); box-shadow: var(--elev-2); color: var(--ink-800);
+}
+.eg-shell-showcase__colHead { display: grid; grid-template-columns: auto 1fr; align-items: center; column-gap: var(--sp-2); padding: var(--sp-2) var(--sp-3); margin: calc(var(--sp-4) * -1) calc(var(--sp-4) * -1) 0; background: var(--navy-800); border-radius: var(--r-lg) var(--r-lg) 0 0; color: var(--card); }
+.eg-shell-showcase__logo { grid-row: span 2; width: 28px; height: 28px; object-fit: contain; }
+.eg-shell-showcase__simName { margin: 0; font-size: var(--fs-lg); font-weight: 800; }
+.eg-shell-showcase__tagline { color: var(--blue-100); font-size: var(--fs-xs); }
+.eg-shell-showcase__reward {
+  display: flex; gap: var(--sp-2); align-items: flex-start; margin: 0; padding: var(--sp-2) var(--sp-3);
+  background: var(--orange-100); border: 1px solid var(--orange-500); border-radius: var(--r-md); color: var(--ink-800);
+}
+.eg-shell-showcase__rewardIcon { flex: none; width: 1.25rem; height: 1.25rem; margin-top: 2px; color: var(--amber-700); }
+.eg-shell-showcase__rewardLabel { display: block; color: var(--amber-700); font-size: var(--fs-xs); font-weight: 800; letter-spacing: .02em; }
+.eg-shell-showcase__rewardTitle { display: block; font-size: var(--fs-sm); font-weight: 700; line-height: 1.4; }
+.eg-shell-showcase__rewardSponsor { display: block; color: var(--ink-600); font-size: var(--fs-xs); }
+.eg-shell-podium { display: flex; align-items: flex-end; justify-content: center; gap: var(--sp-2); margin: var(--sp-2) 0 0; padding: 0; list-style: none; }
+.eg-shell-podium__place { display: flex; flex: 1 1 0; flex-direction: column; align-items: center; gap: 4px; min-width: 0; text-align: center; }
+.eg-shell-podium__place--1 { order: 2; }
+.eg-shell-podium__place--2 { order: 1; }
+.eg-shell-podium__place--3 { order: 3; }
+.eg-shell-podium__avatar {
+  display: inline-grid; place-items: center; width: 44px; height: 44px; border-radius: var(--r-pill);
+  background: var(--navy-800); box-shadow: 0 0 0 3px var(--eg-shell-medal-2); color: var(--card); font-size: var(--fs-sm); font-weight: 800;
+}
+.eg-shell-podium__place--1 .eg-shell-podium__avatar { width: 56px; height: 56px; box-shadow: 0 0 0 3px var(--eg-shell-medal-1); }
+.eg-shell-podium__place--3 .eg-shell-podium__avatar { box-shadow: 0 0 0 3px var(--eg-shell-medal-3); }
+.eg-shell-podium__name { max-width: 100%; overflow: hidden; color: var(--ink-900); font-size: var(--fs-sm); font-weight: 700; text-overflow: ellipsis; white-space: nowrap; }
+.eg-shell-podium__me { color: var(--blue-600); font-weight: 800; }
+.eg-shell-podium__score { color: var(--ink-600); font-size: var(--fs-xs); font-variant-numeric: tabular-nums; }
+.eg-shell-podium__step {
+  display: grid; place-items: center; width: 100%; height: 44px; margin-top: 4px;
+  background: linear-gradient(180deg, var(--blue-100), var(--blue-50)); border-radius: var(--r-sm) var(--r-sm) 0 0;
+}
+.eg-shell-podium__place--1 .eg-shell-podium__step { height: 64px; background: linear-gradient(180deg, var(--orange-100), var(--blue-50)); }
+.eg-shell-podium__place--3 .eg-shell-podium__step { height: 32px; }
+.eg-shell-podium__rank { color: var(--navy-800); font-size: var(--fs-lg); font-weight: 800; }
+.eg-shell-showcase__more { border-top: 1px solid var(--blue-100); padding-top: var(--sp-2); }
+.eg-shell-showcase__moreSummary { display: flex; align-items: center; min-height: 44px; color: var(--blue-700); font-size: var(--fs-sm); font-weight: 700; cursor: pointer; }
+.eg-shell-showcase__moreSummary:focus-visible { outline: 2px solid var(--focus-color); outline-offset: 2px; }
+.eg-shell-showcase__list { display: grid; gap: 2px; margin: 0; padding-left: 1.75rem; color: var(--ink-700); font-size: var(--fs-sm); }
+.eg-shell-showcase__row::marker { color: var(--ink-500); font-weight: 700; }
+.eg-shell-showcase__row { padding: 4px 0; }
+.eg-shell-showcase__row--me { color: var(--blue-700); font-weight: 700; }
+.eg-shell-showcase__rowName { display: inline-block; min-width: 60%; }
+.eg-shell-showcase__rowScore { float: right; font-variant-numeric: tabular-nums; }
+.eg-shell-showcase__empty { display: grid; gap: var(--sp-2); justify-items: start; color: var(--ink-600); font-size: var(--fs-sm); }
+.eg-shell-showcase__empty p { margin: 0; }
+.eg-shell-showcase__cta {
+  display: inline-flex; align-items: center; gap: var(--sp-1); align-self: flex-start; min-height: 44px; margin-top: auto;
+  color: var(--blue-700); font-size: var(--fs-sm); font-weight: 800; text-decoration: none;
+}
+.eg-shell-showcase__cta:hover { text-decoration: underline; }
+.eg-shell-showcase__cta:focus-visible { outline: 2px solid var(--focus-color); outline-offset: 2px; border-radius: var(--r-sm); }
+.eg-shell-hall { display: grid; gap: var(--sp-3); padding-top: var(--sp-4); border-top: 1px solid var(--navy-600); }
+.eg-shell-hall__title { margin: 0; color: var(--card); font-size: var(--fs-lg); font-weight: 800; }
+.eg-shell-hall__grid { display: grid; gap: var(--sp-3); grid-template-columns: minmax(0, 1fr); margin: 0; padding: 0; list-style: none; }
+.eg-shell-hall__card { padding: var(--sp-3); background: var(--navy-800); border: 1px solid var(--navy-600); border-radius: var(--r-md); }
+.eg-shell-hall__sim { margin: 0 0 var(--sp-2); color: var(--blue-100); font-size: var(--fs-xs); font-weight: 800; letter-spacing: .06em; text-transform: uppercase; }
+.eg-shell-hall__list { display: grid; gap: var(--sp-1); margin: 0; padding: 0; list-style: none; }
+.eg-shell-hall__winner { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: var(--sp-2); color: var(--card); font-size: var(--fs-sm); }
+.eg-shell-hall__medal { display: inline-grid; place-items: center; width: 24px; height: 24px; border-radius: var(--r-pill); background: var(--eg-shell-medal-2); color: var(--navy-900); font-size: var(--fs-xs); font-weight: 800; }
+.eg-shell-hall__winner--1 .eg-shell-hall__medal { background: var(--eg-shell-medal-1); }
+.eg-shell-hall__winner--3 .eg-shell-hall__medal { background: var(--eg-shell-medal-3); color: var(--card); }
+.eg-shell-hall__name { overflow: hidden; font-weight: 700; text-overflow: ellipsis; white-space: nowrap; }
+.eg-shell-hall__score { color: var(--blue-100); font-variant-numeric: tabular-nums; }
+@media (min-width: 768px) {
+  .eg-shell-showcase { padding: var(--sp-6) var(--sp-5); }
+  .eg-shell-hall__grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+@media (min-width: 1024px) {
+  .eg-shell-showcase__grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .eg-shell-showcase__title { font-size: var(--fs-3xl); }
+}
+
 /* T151 — geliştirme vitrini (#/_vitrin); üretimde çizilmez. */
 .eg-shell-vitrin { max-inline-size: 1100px; margin: 0 auto; padding: var(--sp-5) var(--sp-4) var(--sp-6); display: grid; gap: var(--sp-6); }
 .eg-shell-vitrin h1 { margin: 0; font-size: var(--fs-2xl); color: var(--ink-900); }

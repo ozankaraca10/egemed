@@ -1,7 +1,10 @@
-import type { JSX, ReactNode } from "react";
+import { useMemo, type JSX, type ReactNode } from "react";
 import { icons } from "@egemed/ui";
 import { t, type TrKey } from "@egemed/ui/i18n";
 import { ProgressSection } from "./home/ProgressSection";
+import { ShowcaseSection } from "./home/ShowcaseSection";
+import { useShellDataSources } from "./dataSources";
+import { shellNow } from "./now";
 import { routeHref, simHref, type RouteId } from "./routes";
 import { sessionAllowsSim, type ShellSession } from "./session";
 import { SIM_IDS, SimCard } from "./SimCard";
@@ -43,6 +46,26 @@ export interface HomePageProps {
 }
 
 /** Ana sayfa: hero + "Nasıl çalışır?" adımları + üç sim kartı + ilerleme sekmeleri + güven kanıtları. */
+/** İstanbul saatine göre ay anahtarı ('YYYY-MM') ve bir önceki ay. */
+function istanbulMonths(now: number): { readonly month: string; readonly previous: string } {
+  const parts = new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Istanbul", year: "numeric", month: "2-digit" }).formatToParts(new Date(now));
+  const year = Number(parts.find((part) => part.type === "year")?.value ?? "1970");
+  const monthNo = Number(parts.find((part) => part.type === "month")?.value ?? "1");
+  const pad = (value: number) => String(value).padStart(2, "0");
+  return {
+    month: `${year}-${pad(monthNo)}`,
+    previous: monthNo === 1 ? `${year - 1}-12` : `${year}-${pad(monthNo - 1)}`,
+  };
+}
+
+/** 26 Eyl 2026: liderlik vitrini — kaynak kabuk veri bağlamından (oturumsuzken çizilmez). */
+function HomeShowcase({ session }: { readonly session: ShellSession | null }): JSX.Element | null {
+  const sources = useShellDataSources();
+  const source = useMemo(() => (sources === null ? null : sources.showcase(session)), [sources, session]);
+  const { month, previous } = istanbulMonths(shellNow());
+  return <ShowcaseSection month={month} previousMonth={previous} source={source} />;
+}
+
 export function HomePage({ session = null }: HomePageProps): JSX.Element {
   const roleLabel =
     session === null
@@ -85,6 +108,7 @@ export function HomePage({ session = null }: HomePageProps): JSX.Element {
           ))}
         </ul>
       </section>
+      <HomeShowcase session={session} />
       <ProgressSection session={session} />
       <section
         aria-labelledby="eg-home-how"

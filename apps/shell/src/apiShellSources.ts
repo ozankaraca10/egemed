@@ -51,6 +51,7 @@ import type {
 } from "./admin/usersDataSource";
 import { createApiGamificationSource, createSyntheticGamificationSource } from "./home/gamificationSource";
 import type { ShellDataSources } from "./dataSources";
+import { createApiShowcaseSource } from "./home/showcaseSource";
 import type { ShellSession } from "./session";
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -247,6 +248,7 @@ function istanbulBound(day: string, end: boolean): string | undefined {
 export function createApiShellDataSources(client: ApiClient): ShellDataSources {
   const emptyProgress = createSyntheticGamificationSource(false);
   const apiProgress = createApiGamificationSource(client);
+  const apiShowcase = createApiShowcaseSource(client);
   const uploaded = new Map<string, { readonly headers: readonly string[]; readonly dataRows: readonly (readonly string[])[] }>();
 
   const users: UsersDataSource = {
@@ -441,6 +443,9 @@ export function createApiShellDataSources(client: ApiClient): ShellDataSources {
       if (session === null || session.simAccess === null) return null;
       return apiPreferences;
     },
+    showcase(session: ShellSession | null) {
+      return session === null ? null : apiShowcase;
+    },
     imports,
     users,
   };
@@ -484,6 +489,7 @@ export function createBrowserShellDataSources(baseUrl: string): ShellDataSources
       audit: { list: fail },
       gamification: () => empty,
       leaderboardPreferences: () => null,
+      showcase: () => null,
       imports: { apply: fail, template: fail, upload: fail, validate: fail },
       users,
     };
