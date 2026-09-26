@@ -236,7 +236,8 @@ export {
   IconWave,
   IconXCircle,
 } from "./ui/icons";
-export { EcgDeco, Footer } from "./ui/chrome";
+export { EcgDeco, Footer, needsExitConfirm, resolveStepSelect } from "./ui/chrome";
+export type { StepSelectOutcome } from "./ui/chrome";
 export { EntryScreens } from "./screens/EntryScreens";
 export type { EntryScreensProps } from "./screens/EntryScreens";
 export { modePickTarget, modeRecommendLocked, resolveEntryScreen, sessionSeed } from "./screens/entry";
