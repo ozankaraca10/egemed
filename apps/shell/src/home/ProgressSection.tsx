@@ -9,7 +9,7 @@ import {
   type GamiAvatarOf,
   type GamiBadgeModel,
 } from "@egemed/gami-ui";
-import { Tabs, type TabItem } from "@egemed/ui";
+import { Tabs, icons, type TabItem } from "@egemed/ui";
 import { t } from "@egemed/ui/i18n";
 import { useShellDataSources, type LeaderboardPreferencesSource } from "../dataSources";
 import type { ShellSession } from "../session";
@@ -76,8 +76,9 @@ function weeklyXpGoal(summary: GamiSimSummary): WeeklyGoal {
 
 function SimOpenLink({ simId }: { readonly simId: SimId }): JSX.Element {
   return (
-    <a className="eg-shell-progress__tabEmptyLink" href={simHref(simId)}>
+    <a className="eg-shell-progress__openSim" href={simHref(simId)}>
       {t("home.progress.openInSim")}
+      <icons.ArrowRight aria-hidden="true" className="eg-shell-sim__linkIcon" />
     </a>
   );
 }

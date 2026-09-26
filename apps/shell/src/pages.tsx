@@ -1,4 +1,5 @@
 import type { JSX, ReactNode } from "react";
+import { icons } from "@egemed/ui";
 import { t, type TrKey } from "@egemed/ui/i18n";
 import { ProgressSection } from "./home/ProgressSection";
 import { routeHref, simHref, type RouteId } from "./routes";
@@ -49,7 +50,8 @@ export function HomePage({ session = null }: HomePageProps): JSX.Element {
       : t(session.role === "admin" ? "entry.role.admin" : "entry.role.student");
   return (
     <div className="eg-shell-home">
-      <section className="eg-shell-hero">
+      {/* T162: oturum açmış öğrenci için kompakt karşılama; en çok kullanılan içerik (simler, ilerleme) önce. */}
+      <section className="eg-shell-hero eg-shell-hero--compact">
         {roleLabel !== null && (
           <p className="eg-shell-hero__greeting">
             {t("home.greeting")} · <span className="eg-shell-hero__role">{roleLabel}</span>
@@ -60,6 +62,7 @@ export function HomePage({ session = null }: HomePageProps): JSX.Element {
         <p className="eg-shell-hero__actions">
           <a className="eg-shell-cta" href={routeHref("simulators")}>
             {t("home.hero.cta")}
+            <icons.ArrowRight aria-hidden="true" className="eg-shell-cta__icon" />
           </a>
           <a
             className="eg-shell-hero__secondary"
@@ -70,6 +73,19 @@ export function HomePage({ session = null }: HomePageProps): JSX.Element {
           </a>
         </p>
       </section>
+      <section aria-labelledby="eg-home-sims" className="eg-shell-home__section">
+        <h2 className="eg-shell-section__title" id="eg-home-sims">
+          {t("shell.simulators.title")}
+        </h2>
+        <ul className="eg-shell-cards">
+          {SIM_IDS.map((id) => (
+            <li key={id}>
+              <SimCard denied={!sessionAllowsSim(session, id)} href={simHref(id)} id={id} />
+            </li>
+          ))}
+        </ul>
+      </section>
+      <ProgressSection session={session} />
       <section
         aria-labelledby="eg-home-how"
         className="eg-shell-home__section"
@@ -88,19 +104,6 @@ export function HomePage({ session = null }: HomePageProps): JSX.Element {
           ))}
         </ol>
       </section>
-      <section aria-labelledby="eg-home-sims" className="eg-shell-home__section">
-        <h2 className="eg-shell-section__title" id="eg-home-sims">
-          {t("shell.simulators.title")}
-        </h2>
-        <ul className="eg-shell-cards">
-          {SIM_IDS.map((id) => (
-            <li key={id}>
-              <SimCard denied={!sessionAllowsSim(session, id)} href={simHref(id)} id={id} />
-            </li>
-          ))}
-        </ul>
-      </section>
-      <ProgressSection session={session} />
       <section
         aria-labelledby="eg-home-trust"
         className="eg-shell-home__section"

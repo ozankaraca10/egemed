@@ -1,5 +1,5 @@
 import type { JSX } from "react";
-import { Card } from "@egemed/ui";
+import { Card, icons } from "@egemed/ui";
 import { t } from "@egemed/ui/i18n";
 import { prefetchSimModule } from "./sims/loaders";
 
@@ -69,13 +69,16 @@ export function SimCard({
         <div className="eg-shell-sim__head">
           <Heading className="eg-visually-hidden">{t(`sims.${id}.name`)}</Heading>
         </div>
-        <img
-          alt=""
-          className="eg-shell-sim__logo"
-          height={logo.height}
-          src={logo.src}
-          width={logo.width}
-        />
+        {/* T162: logolar farklı en-boy oranlarında; sabit çerçeve kartları hizalar. */}
+        <div className="eg-shell-sim__logoFrame">
+          <img
+            alt=""
+            className="eg-shell-sim__logo"
+            height={logo.height}
+            src={logo.src}
+            width={logo.width}
+          />
+        </div>
         <p className="eg-shell-sim__tagline">{t(`sims.${id}.tagline`)}</p>
         <p className="eg-shell-sim__body">{t(`sims.${id}.body`)}</p>
         {denied ? <p className="eg-shell-sim__noaccess">{t("sims.access.none")}</p> : null}
@@ -88,6 +91,7 @@ export function SimCard({
             onTouchStart={() => prefetchSimModule(id)}
           >
             {t("sims.open")}
+            <icons.ArrowRight aria-hidden="true" className="eg-shell-sim__linkIcon" />
           </a>
         )}
       </div>
