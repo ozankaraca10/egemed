@@ -34,10 +34,10 @@ describe("kimlik birlikleri", () => {
   it("kimlik korumaları birlik dışı değerleri reddeder", () => {
     for (const value of ["pulse", "ausculta", "opaca"]) expect(isSimId(value)).toBe(true);
     for (const value of ["kalp", "", null, 42, { id: "pulse" }]) expect(isSimId(value)).toBe(false);
-    expect(ROLES).toEqual(["admin", "kullanici"]);
+    expect(ROLES).toEqual(["admin", "kullanici", "ogretim_uyesi"]);
     expect(isRole("admin")).toBe(true);
     expect(isRole("egitmen")).toBe(false);
-    expect(ASSIGNABLE_ROLES).toEqual(["kullanici"]);
+    expect(ASSIGNABLE_ROLES).toEqual(["kullanici", "ogretim_uyesi"]);
     expect(isAssignableRole("kullanici")).toBe(true);
     expect(isAssignableRole("admin")).toBe(false);
     expect(AUTH_METHODS).toEqual(["sso", "dev"]);

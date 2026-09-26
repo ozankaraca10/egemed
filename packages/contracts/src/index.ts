@@ -6,6 +6,7 @@ export {
   USER_STATUSES,
   isAssignableRole,
   isAuthMethod,
+  isGamificationEligible,
   isRole,
   isSimId,
   isUserStatus,

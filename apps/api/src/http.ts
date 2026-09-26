@@ -26,6 +26,8 @@ export interface MeActor {
   readonly institutionId: string;
   /** Oturumdaki kullanıcının erişebildiği simler; her istekte DB'den (API-03). */
   readonly simAccess: readonly SimId[];
+  /** Oyunlaştırmaya katılım (öğretim üyesi katılmaz, 26 Eyl 2026). */
+  readonly gamified: boolean;
 }
 
 /** İstek bağlamı: ara katman üretilen/doğrulanan `request_id`yi ve aktör kimliğini buraya yazar. */

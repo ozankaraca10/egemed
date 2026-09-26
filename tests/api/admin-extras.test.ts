@@ -254,7 +254,7 @@ describe("GET /admin/overview (E2 admin Özet)", () => {
       users: {
         total: 6,
         byStatus: { invited: 1, active: 4, suspended: 1 },
-        byRole: { admin: 2, kullanici: 4 },
+        byRole: { admin: 2, kullanici: 4, ogretim_uyesi: 0 },
       },
       // ADMIN ve EGE pencere içinde, ALI tam sınırda; MERT/BORA dışında, CEREN hiç girmemiş.
       loginsLast7Days: 3,

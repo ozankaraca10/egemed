@@ -1038,7 +1038,7 @@ function parsePositiveInt(value: unknown, context: string): number {
 }
 
 // apps/shell UsersDataSource uyumlu adaptör (bağlama bir sonraki görevde).
-export type UsersSourceRole = "admin" | "kullanici";
+export type UsersSourceRole = Role;
 export type UsersSourceStatus = UserStatus;
 export type UsersSourceAuthMethod = AuthMethod;
 export type UsersSourceSort = "displayName" | "createdAt" | "lastLoginAt";
@@ -1212,7 +1212,8 @@ function normalizeUnitId(value: string | undefined): string | null | undefined {
 }
 
 function primaryRole(roles: readonly Role[]): UsersSourceRole {
-  return roles.includes("admin") ? "admin" : "kullanici";
+  if (roles.includes("admin")) return "admin";
+  return roles.includes("ogretim_uyesi") ? "ogretim_uyesi" : "kullanici";
 }
 
 function toUsersSourceUser(item: ApiAdminUserListItem): UsersSourceUser {
