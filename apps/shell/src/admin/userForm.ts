@@ -6,17 +6,18 @@
  * Kurallar E3 §c/§f'ten alınır: kullanıcı adı `^[a-z0-9][a-z0-9._-]{2,63}$`
  * (3–64 karakter), e-posta biçimi + küçük harfe normalize, görünen ad 2–120
  * karakter, birim zorunlu (bu mock katmanında `unitId` her zaman doludur).
- * `role` bu ekrandan yalnız `kullanici`dır (§b) — form bunu seçenek olarak
- * sunmaz, sabit değerdir.
+ * `role` bu ekrandan `admin` HARİÇ atanabilir (§b, T184): "Kullanıcı (öğrenci)"
+ * veya "Öğretim üyesi"; varsayılan `kullanici`.
  */
 
-import type { MappingKeyType, SimId, UserAuthMethod } from "./usersDataSource";
+import type { AssignableRole, MappingKeyType, SimId, UserAuthMethod } from "./usersDataSource";
 
 export interface CreateUserFormValues {
   readonly mappingKeyType: MappingKeyType;
   readonly mappingKeyValue: string;
   readonly displayName: string;
   readonly authMethod: UserAuthMethod;
+  readonly role: AssignableRole;
   readonly unitId: string;
   readonly simAccess: readonly SimId[];
 }
@@ -26,6 +27,7 @@ export const INITIAL_CREATE_USER_VALUES: CreateUserFormValues = {
   displayName: "",
   mappingKeyType: "username",
   mappingKeyValue: "",
+  role: "kullanici",
   simAccess: [],
   unitId: "",
 };
@@ -86,6 +88,7 @@ export function isFormDirty(values: CreateUserFormValues): boolean {
     values.mappingKeyValue !== INITIAL_CREATE_USER_VALUES.mappingKeyValue ||
     values.displayName !== INITIAL_CREATE_USER_VALUES.displayName ||
     values.authMethod !== INITIAL_CREATE_USER_VALUES.authMethod ||
+    values.role !== INITIAL_CREATE_USER_VALUES.role ||
     values.unitId !== INITIAL_CREATE_USER_VALUES.unitId ||
     values.simAccess.length > 0
   );

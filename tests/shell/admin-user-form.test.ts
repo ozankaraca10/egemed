@@ -19,6 +19,8 @@ import {
   buildCreatedUserDetail,
   createMockUsersSource,
   generateSyntheticUsers,
+  primaryRoleFor,
+  swapBaseRole,
   type AdminUserDetail,
   type CreateUserInput,
 } from "../../apps/shell/src/admin/usersDataSource";
@@ -32,6 +34,7 @@ const BASE_VALUES: CreateUserFormValues = {
   displayName: "Örnek Öğrenci",
   mappingKeyType: "username",
   mappingKeyValue: "ornek.ogrenci",
+  role: "kullanici",
   simAccess: ["pulse"],
   unitId: "unit-3",
 };
@@ -96,6 +99,7 @@ function baseFormViewProps(overrides: Partial<UserFormViewProps>): UserFormViewP
     onMappingTypeChange: noop,
     onMappingValueChange: noop,
     onRequestClose: noop,
+    onRoleChange: noop,
     onSimAccessToggle: noop,
     onSubmitRequest: noop,
     onUnitChange: noop,
@@ -223,6 +227,7 @@ describe("usersDataSource.ts T70 genişletmesi: ayrıntı üretimi", () => {
       displayName: "  Örnek Öğrenci  ",
       mappingKeyType: "username",
       mappingKeyValue: "ornek.ogrenci",
+      role: "kullanici",
       simAccess: ["pulse", "opaca"],
       unitId: "unit-2",
     };
@@ -251,6 +256,7 @@ describe("usersDataSource.ts T70 genişletmesi: ayrıntı üretimi", () => {
       displayName: "Örnek Öğrenci 2",
       mappingKeyType: "email",
       mappingKeyValue: "  Ornek.Ogrenci2@Example.INVALID ",
+      role: "kullanici",
       simAccess: [],
       unitId: "unit-1",
     };
@@ -277,6 +283,20 @@ describe("usersDataSource.ts T70 genişletmesi: ayrıntı üretimi", () => {
     expect(patched.displayName).toBe("Yeni Ad");
     expect(patched.unitId).toBe("unit-4");
   });
+
+  it("primaryRoleFor: admin > ogretim_uyesi > kullanici öncelik sırasıyla tekil rolü türetir (T184)", () => {
+    expect(primaryRoleFor(["kullanici"])).toBe("kullanici");
+    expect(primaryRoleFor(["ogretim_uyesi"])).toBe("ogretim_uyesi");
+    expect(primaryRoleFor(["admin"])).toBe("admin");
+    expect(primaryRoleFor(["ogretim_uyesi", "admin"])).toBe("admin");
+    expect(primaryRoleFor([])).toBe("kullanici");
+  });
+
+  it("swapBaseRole: temel rolü değiştirir, admin bitini korur (T184)", () => {
+    expect(swapBaseRole(["kullanici"], "ogretim_uyesi")).toEqual(["ogretim_uyesi"]);
+    expect(swapBaseRole(["ogretim_uyesi"], "kullanici")).toEqual(["kullanici"]);
+    expect(swapBaseRole(["admin", "kullanici"], "ogretim_uyesi")).toEqual(["admin", "ogretim_uyesi"]);
+  });
 });
 
 describe("createMockUsersSource: get/create/update (T70)", () => {
@@ -297,6 +317,7 @@ describe("createMockUsersSource: get/create/update (T70)", () => {
       displayName: "Yeni Kullanıcı",
       mappingKeyType: "username",
       mappingKeyValue: "yeni.kullanici",
+      role: "kullanici",
       simAccess: [],
       unitId: "unit-1",
     });
@@ -310,6 +331,7 @@ describe("createMockUsersSource: get/create/update (T70)", () => {
         displayName: "Tekrar",
         mappingKeyType: "username",
         mappingKeyValue: "ornek.kullanici.001",
+        role: "kullanici",
         simAccess: [],
         unitId: "unit-1",
       }),
@@ -334,6 +356,7 @@ describe("createMockUsersSource: get/create/update (T70)", () => {
       displayName: "X",
       mappingKeyType: "username",
       mappingKeyValue: "gecici.kullanici",
+      role: "kullanici",
       simAccess: [],
       unitId: "unit-1",
     });
@@ -388,16 +411,37 @@ describe("UserFormView işaretlemesi (E3 §e.2)", () => {
     expect(footer).toContain(t("admin.users.form.action.save"));
   });
 
-  it("rol seçeneklerinde admin YOKTUR; yalnız Kullanıcı seçeneği sunulur (E3 §b, Select devre dışı)", () => {
+  it("rol seçeneklerinde admin YOKTUR; Kullanıcı ve Öğretim üyesi seçilebilir (E3 §b, T184)", () => {
     const tree = UserFormView(baseFormViewProps({})) as ReactElement;
     const dialog = dialogPropsOf(tree);
     const [roleSelect] = collectElements(
       dialog.children,
-      (element) => element.type === Select && (element.props as { disabled?: boolean }).disabled === true,
+      (element) =>
+        element.type === Select &&
+        (element.props as { options?: readonly { value: string }[] }).options?.some((option) => option.value === "kullanici") === true,
     );
     expect(roleSelect).toBeDefined();
+    expect((roleSelect?.props as { disabled?: boolean }).disabled).not.toBe(true);
     const options = (roleSelect?.props as { options: readonly { value: string; label: string }[] }).options;
-    expect(options).toEqual([{ label: t("admin.users.role.kullanici"), value: "kullanici" }]);
+    expect(options).toEqual([
+      { label: t("admin.users.role.kullanici"), value: "kullanici" },
+      { label: t("admin.users.role.ogretim_uyesi"), value: "ogretim_uyesi" },
+    ]);
+    expect(options.some((option) => option.value === "admin")).toBe(false);
+  });
+
+  it("onRoleChange rol değiştiğinde çağrılır", () => {
+    let changed: string | null = null;
+    const tree = UserFormView(baseFormViewProps({ onRoleChange: (value) => { changed = value; } })) as ReactElement;
+    const dialog = dialogPropsOf(tree);
+    const [roleSelect] = collectElements(
+      dialog.children,
+      (element) =>
+        element.type === Select &&
+        (element.props as { options?: readonly { value: string }[] }).options?.some((option) => option.value === "ogretim_uyesi") === true,
+    );
+    (roleSelect?.props as { onValueChange: (value: string) => void }).onValueChange("ogretim_uyesi");
+    expect(changed).toBe("ogretim_uyesi");
   });
 
   it("her doğrulama hatası kendi alanında role=alert ile görünür", () => {
@@ -431,6 +475,13 @@ describe("UserFormView işaretlemesi (E3 §e.2)", () => {
     const footer = footerHtml(props);
     expect(footer).toContain(t("admin.users.form.action.confirm"));
     expect(footer).toContain(t("admin.users.form.action.back"));
+  });
+
+  it("onay diyaloğu: rol 'ogretim_uyesi' seçilmişse özet Öğretim üyesi gösterir (T184)", () => {
+    const props = { step: "confirm" as const, values: { ...BASE_VALUES, role: "ogretim_uyesi" as const } };
+    const html = bodyHtml(props);
+    expect(html).toContain(t("admin.users.role.ogretim_uyesi"));
+    expect(html).not.toContain(t("admin.users.role.admin"));
   });
 
   it("onay adımında sim erişimi seçilmemişse 'Erişim yok' gösterir", () => {
