@@ -160,3 +160,16 @@ export type {
   GamiSummaryResponse,
   MePreferences,
 } from "./schemas/gamification";
+export {
+  REWARD_COHORTS,
+  REWARD_MONTH_PATTERN,
+  adminRewardListResponseSchema,
+  meRewardResponseSchema,
+  meRewardsOverviewResponseSchema,
+  rewardEligibilitySchema,
+  rewardMonthSchema,
+  rewardSchema,
+  rewardUpsertRequestSchema,
+  rewardWinnerSchema,
+} from "./schemas/rewards";
+export type { RewardBody, RewardUpsertRequest, RewardWinnerBody } from "./schemas/rewards";
