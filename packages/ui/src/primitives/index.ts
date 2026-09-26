@@ -1,5 +1,6 @@
 export { Button, IconButton, type ButtonProps, type ButtonSize, type ButtonVariant, type IconButtonProps } from "./Button";
 export { Field, TextArea, TextInput, type FieldControlProps, type FieldProps } from "./Field";
+export { DateField, parseTrDate, formatTrDate, monthMatrix, type DateFieldDayCell, type DateFieldProps } from "./DateField";
 export { Select, type SelectOption, type SelectProps } from "./Select";
 export { Checkbox, RadioGroup, Switch, type CheckboxProps, type RadioGroupProps, type RadioOption, type SwitchProps } from "./Choice";
 export { Dialog, type DialogProps } from "./Dialog";
