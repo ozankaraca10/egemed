@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, type JSX, type ReactNode } from "react";
 import type { SimChrome, SimChromeAction, SimChromeChip } from "@egemed/sim-host";
 import { useStore } from "../core/StoreProvider";
 import type { Mode, Screen } from "../core/types";
-import { useSetChrome } from "./ScreenHeading";
+import { useAudience, useSetChrome } from "./ScreenHeading";
 import { HelpModal } from "./HelpModal";
 import { ConfirmModal } from "./ConfirmModal";
 import type { ModalEnv } from "./modal-env";
@@ -137,6 +137,7 @@ export function UnifiedChrome({
   readonly modalEnv?: ModalEnv;
 }): JSX.Element | null {
   const setChrome = useSetChrome();
+  const audience = useAudience();
   const { state, dispatch } = useStore();
   const [fs, setFs] = useState(false);
   const [muted, setMuted] = useState(false);
@@ -176,7 +177,10 @@ export function UnifiedChrome({
   const actions: SimChromeAction[] = [];
   if (setChrome && inWork) actions.push({ id: "modes", icon: "swap", label: "Mod değiştir", onSelect: goModes });
   if (setChrome) {
-    actions.push({ id: "progress", icon: "progress", label: "İlerlemem", onSelect: () => dispatch({ type: "goto", screen: "progress" }) });
+    // Oyunlaştırma yüzeyi yalnız öğrenciye çizilir (26 Eyl 2026 sözleşmesi).
+    if (audience === "student") {
+      actions.push({ id: "progress", icon: "progress", label: "İlerlemem", onSelect: () => dispatch({ type: "goto", screen: "progress" }) });
+    }
     actions.push({
       id: "fullscreen",
       icon: "fullscreen",

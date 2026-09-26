@@ -10,7 +10,7 @@ import { useStore } from "../core/StoreProvider";
 import type { ScoringWeights } from "../core/types";
 import libraryData from "../data/library.json";
 import { EcgDeco, Footer, touchTarget } from "../ui/chrome";
-import { ScreenHeading } from "../ui/ScreenHeading";
+import { ScreenHeading, useAudience } from "../ui/ScreenHeading";
 import {
   IconCheckCircle,
   IconChevronRight,
@@ -78,6 +78,7 @@ export interface ResultsScreenProps {
 
 export function ResultsScreen({ embedded = false, env = NOOP_RESULTS_ENV, repository, onAchievements, onLeaderboard, serverData = false }: ResultsScreenProps): JSX.Element {
   const { state, dispatch, runtime, now } = useStore();
+  const audience = useAudience();
   const isAssessment = state.mode === "assessment";
   const agg = aggregateResults(state.caseResults);
   const last = state.caseResults[state.caseResults.length - 1];
@@ -131,7 +132,9 @@ export function ResultsScreen({ embedded = false, env = NOOP_RESULTS_ENV, reposi
   const weakKeys = weakDomainKeys(domains, 60);
   const at = new Date(now());
   const gains = useMemo(() => {
-    if (!repository || state.mode === "learn" || state.caseResults.length === 0) return null;
+    // Oyunlaştırma yalnız öğrenci kitlesi içindir (26 Eyl 2026 sözleşmesi):
+    // öğretim üyesi/ziyaretçi için XP/rozet kazanımı ve rozet bildirimi gösterilmez.
+    if (audience !== "student" || !repository || state.mode === "learn" || state.caseResults.length === 0) return null;
     const daysLeft = Math.ceil((endOfMonthTr(at).getTime() + 1 - at.getTime()) / 86_400_000);
     const period = daysLeft < 7 ? "month" : "week";
     const ranked = state.mode === "assessment"
@@ -149,7 +152,7 @@ export function ResultsScreen({ embedded = false, env = NOOP_RESULTS_ENV, reposi
       durationMs: state.assessmentTimer,
       rank: ranked ? { period, rank: me?.rank ?? null, of: ranked.filter((row) => row.rank !== null).length } : null,
     });
-  }, [at, passed, repository, state.assessmentTimer, state.caseResults, state.mode, total]);
+  }, [at, audience, passed, repository, state.assessmentTimer, state.caseResults, state.mode, total]);
 
   const fmtTime = (ms: number) => {
     const seconds = Math.floor(ms / 1000);

@@ -1,8 +1,10 @@
 import { createContext, useContext, useEffect, useMemo, useRef, useState, type JSX, type ReactNode } from "react";
+import { VISITOR_LOCK_TEXT } from "@egemed/sim-host";
 import { countUnlistenedInOtherView, otherViewHintText } from "../core/flow";
 import { resolveLibrarySound, resolveLibrarySoundEx, type LibrarySoundResult } from "../core/resolver";
 import { useStore } from "../core/StoreProvider";
 import type { AuscultationPoint, SoundRecord } from "../core/types";
+import { isVisitorUnlocked } from "../core/visitorAccess";
 import pointsData from "../data/auscultation-points.json";
 import libraryData from "../data/library.json";
 import { ALL_CASES, poolFor } from "../data/pool";
@@ -10,6 +12,7 @@ import { libraryShortTitle, librarySub, libraryTitle } from "../data/terminology
 import { PatientStage, StageAudioProvider, type StageAudio, type StageHandle } from "../ui/PatientStage";
 import { PediatricRefModal } from "../ui/PediatricRefModal";
 import { RegionChipList } from "../ui/RegionChips";
+import { useAudience } from "../ui/ScreenHeading";
 import { Toolbar, ToolbarAudioProvider, type ToolbarAudio } from "../ui/Toolbar";
 import { EcgDeco, Footer } from "../ui/chrome";
 import {
@@ -18,6 +21,7 @@ import {
   IconDoc,
   IconHeart,
   IconInfo,
+  IconLock,
   IconLungs,
   IconStethoscope,
   IconWave,
@@ -157,11 +161,18 @@ export function LearnScreen({
   const { state, dispatch, now } = useStore();
   const contextual = useContext(LearnAudioContext);
   const engine = audio ?? contextual ?? NOOP_LEARN_AUDIO;
-  const [selectedKey, setSelectedKey] = useState<string>(() => state.learnFocusKey ?? FIRST_LIBRARY_ITEM.key);
+  const audience = useAudience();
+  const isVisitor = audience === "visitor";
+  const [selectedKey, setSelectedKey] = useState<string>(() => {
+    const wanted = state.learnFocusKey ?? FIRST_LIBRARY_ITEM.key;
+    if (isVisitor && !isVisitorUnlocked(wanted)) return FIRST_LIBRARY_ITEM.key;
+    return wanted;
+  });
   const [tab, setTab] = useState<"desc" | "wave" | "clin">("desc");
   const stageRef = useRef<StageHandle>(null);
   const [activePoint, setActivePoint] = useState<string | null>(null);
   const [pedModalOpen, setPedModalOpen] = useState(false);
+  const [lockNotice, setLockNotice] = useState(false);
   const initialFocus = useRef(state.learnFocusKey);
 
   useEffect(() => {
@@ -237,6 +248,11 @@ export function LearnScreen({
               <div className="lib-col">
                 <h2>{isMixed ? "Kombine Sesler" : isHeart ? "Kalp Sesleri" : "Akciğer Sesleri"}</h2>
                 <p className="lib-sub">Dinle, tanı, öğren.</p>
+                {isVisitor && lockNotice ? (
+                  <p className="lib-lock-notice" role="status">
+                    <IconLock width={14} height={14} aria-hidden="true" /> {VISITOR_LOCK_TEXT.itemLocked}
+                  </p>
+                ) : null}
                 {LIBRARY_GROUPS.map((group) => (
                   <div className="lib-group" key={group.id}>
                     <div className="g-title">
@@ -244,26 +260,44 @@ export function LearnScreen({
                       {group.title}
                     </div>
                     <div className="lib-items">
-                      {group.items.map((entry) => (
-                        <button
-                          key={entry.key}
-                          type="button"
-                          className={`lib-item ${entry.key === selectedKey ? "active" : ""}`}
-                          onClick={() => setSelectedKey(entry.key)}
-                          title={libraryTitle(entry.key)}
-                        >
-                          <span className="ic">
-                            <GroupIcon group={group.id} />
-                          </span>
-                          <span className="lib-main">
-                            <b>{libraryShortTitle(entry.key)}</b>
-                            <span>{librarySub(entry.key)}</span>
-                          </span>
-                          <span className="lib-right">
-                            <span className="chev">›</span>
-                          </span>
-                        </button>
-                      ))}
+                      {group.items.map((entry) => {
+                        const locked = isVisitor && !isVisitorUnlocked(entry.key);
+                        return (
+                          <button
+                            key={entry.key}
+                            type="button"
+                            className={["lib-item", entry.key === selectedKey ? "active" : "", locked ? "locked" : ""]
+                              .filter(Boolean)
+                              .join(" ")}
+                            aria-disabled={locked}
+                            aria-label={locked ? `${libraryTitle(entry.key)} — ${VISITOR_LOCK_TEXT.itemLocked}` : undefined}
+                            onClick={() => {
+                              if (locked) {
+                                setLockNotice(true);
+                                return;
+                              }
+                              setLockNotice(false);
+                              setSelectedKey(entry.key);
+                            }}
+                            title={locked ? VISITOR_LOCK_TEXT.itemLocked : libraryTitle(entry.key)}
+                          >
+                            <span className="ic">
+                              <GroupIcon group={group.id} />
+                            </span>
+                            <span className="lib-main">
+                              <b>{libraryShortTitle(entry.key)}</b>
+                              <span>{librarySub(entry.key)}</span>
+                            </span>
+                            <span className="lib-right">
+                              {locked ? (
+                                <IconLock width={14} height={14} aria-hidden="true" />
+                              ) : (
+                                <span className="chev">›</span>
+                              )}
+                            </span>
+                          </button>
+                        );
+                      })}
                     </div>
                   </div>
                 ))}
