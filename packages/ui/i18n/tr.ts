@@ -25,6 +25,8 @@ export const tr = {
   "entry.role.student": "Test öğrencisi",
   "entry.field.username": "Kullanıcı adı",
   "entry.field.password": "Parola",
+  "entry.field.password.show": "Parolayı göster",
+  "entry.field.password.hide": "Parolayı gizle",
   "entry.error.required": "Bu alan zorunludur.",
   "entry.error.invalid": "Kullanıcı adı veya parola hatalı.",
   "entry.action.login": "Giriş yap",
