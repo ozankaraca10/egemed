@@ -1,5 +1,5 @@
-import { useId, useState, type JSX } from "react";
-import { Modal } from "@egemed/ui";
+import { Fragment, useState, type JSX } from "react";
+import { Button, Checkbox, Dialog, Field, RadioGroup, Select, TextInput, useToast } from "@egemed/ui";
 import { t, type TrKey } from "@egemed/ui/i18n";
 import { useShellSource } from "../dataSources";
 import { adminUsersHref } from "../routes";
@@ -24,12 +24,6 @@ import {
   type UserAuthMethod,
   type UsersDataSource,
 } from "./usersDataSource";
-
-/** Kök tsconfig DOM lib'i taşımadığı için değişim olayı en dar arayüzle okunur (UsersPage.tsx deseni). */
-interface ChangeLike { target: unknown }
-function changeValue(event: ChangeLike): string {
-  return (event.target as unknown as { value: string }).value;
-}
 
 export type UserFormStep = "form" | "confirm";
 
@@ -68,7 +62,7 @@ export interface UserFormViewProps {
 
 /**
  * "Kullanıcı ekle" ekranının durumsuz (props'tan beslenen) görünümü (E3 §e.2).
- * `Modal` tüm adım boyunca açık kalır; `step` "form" → "confirm" arasında
+ * `Dialog` tüm adım boyunca açık kalır; `step` "form" → "confirm" arasında
  * geçiş yapar (kaydetmeden önce özet diyaloğu). `UserFormPage` veri getirmeyi
  * ve durumu sarar; bu bileşen DOM'suz testlerde doğrudan render edilir.
  */
@@ -90,136 +84,134 @@ export function UserFormView({
   onBackToForm,
   onRequestClose,
 }: UserFormViewProps): JSX.Element {
-  const mappingId = useId();
-  const nameId = useId();
-  const unitId = useId();
+  const formId = "eg-shell-userform-body";
   const title = t(step === "form" ? "admin.users.form.title" : "admin.users.form.confirm.title");
+  const mappingLabel = t(values.mappingKeyType === "email" ? "admin.users.form.mappingKey.email" : "admin.users.form.mappingKey.username");
+
+  // Adım geçişinde iki ayrı `Button` çifti aynı ağaç konumunu paylaşır; anahtarsız
+  // olsa React DOM düğümünü yeniden kullanır ve `type="submit"`e geçen düğme, önceki
+  // tıklamanın odağını üstlenip formu ikinci kez gönderebilir (T163). `key={step}`
+  // adım değişince tam yeniden kurulumu garantiler.
+  const formFooter = (
+    <Fragment key="form">
+      <Button onClick={onRequestClose} variant="secondary">{t("admin.users.form.action.cancel")}</Button>
+      <Button form={formId} type="submit" variant="primary">{t("admin.users.form.action.save")}</Button>
+    </Fragment>
+  );
+  const confirmFooter = (
+    <Fragment key="confirm">
+      <Button disabled={submitting} onClick={onBackToForm} variant="secondary">{t("admin.users.form.action.back")}</Button>
+      <Button loading={submitting} onClick={onConfirm} variant="primary">{t("admin.users.form.action.confirm")}</Button>
+    </Fragment>
+  );
 
   return (
-    <Modal className="eg-shell-userform" onClose={onRequestClose} open title={title}>
+    <Dialog
+      className="eg-shell-userform"
+      footer={step === "form" ? formFooter : confirmFooter}
+      onOpenChange={(open) => {
+        if (!open) onRequestClose();
+      }}
+      open
+      title={title}
+    >
       {step === "form" ? (
         <form
           className="eg-shell-userform__form"
+          id={formId}
           onSubmit={(event) => {
             event.preventDefault();
             onSubmitRequest();
           }}
         >
-          <fieldset className="eg-shell-userform__field">
-            <legend className="eg-shell-userform__label">{t("admin.users.form.mappingKey.label")}</legend>
-            <label className="eg-shell-userform__radio">
-              <input
-                checked={values.mappingKeyType === "username"}
-                name="mappingKeyType"
-                onChange={() => onMappingTypeChange("username")}
-                type="radio"
-                value="username"
+          <RadioGroup
+            legend={t("admin.users.form.mappingKey.label")}
+            onValueChange={(value) => onMappingTypeChange(value as MappingKeyType)}
+            options={[
+              { label: t("admin.users.form.mappingKey.username"), value: "username" },
+              { label: t("admin.users.form.mappingKey.email"), value: "email" },
+            ]}
+            orientation="horizontal"
+            value={values.mappingKeyType}
+          />
+          <Field
+            error={errors.mappingKeyValue === undefined ? undefined : t(FIELD_ERROR_KEYS[errors.mappingKeyValue])}
+            label={mappingLabel}
+          >
+            {(control) => (
+              <TextInput
+                {...control}
+                onChange={(event) => onMappingValueChange(event.target.value)}
+                type="text"
+                value={values.mappingKeyValue}
               />
-              {t("admin.users.form.mappingKey.username")}
-            </label>
-            <label className="eg-shell-userform__radio">
-              <input
-                checked={values.mappingKeyType === "email"}
-                name="mappingKeyType"
-                onChange={() => onMappingTypeChange("email")}
-                type="radio"
-                value="email"
+            )}
+          </Field>
+          <Field
+            error={errors.displayName === undefined ? undefined : t(FIELD_ERROR_KEYS[errors.displayName])}
+            label={t("admin.users.form.field.displayName")}
+          >
+            {(control) => (
+              <TextInput
+                {...control}
+                onChange={(event) => onDisplayNameChange(event.target.value)}
+                type="text"
+                value={values.displayName}
               />
-              {t("admin.users.form.mappingKey.email")}
-            </label>
-          </fieldset>
-          <label className="eg-shell-userform__field" htmlFor={mappingId}>
-            <span className="eg-shell-userform__label">
-              {t(values.mappingKeyType === "email" ? "admin.users.form.mappingKey.email" : "admin.users.form.mappingKey.username")}
-            </span>
-            <input
-              aria-describedby={errors.mappingKeyValue === undefined ? undefined : `${mappingId}-error`}
-              aria-invalid={errors.mappingKeyValue !== undefined}
-              id={mappingId}
-              onChange={(event: ChangeLike) => onMappingValueChange(changeValue(event))}
-              type="text"
-              value={values.mappingKeyValue}
-            />
-          </label>
-          {errors.mappingKeyValue !== undefined && (
-            <p className="eg-shell-userform__error" id={`${mappingId}-error`} role="alert">
-              {t(FIELD_ERROR_KEYS[errors.mappingKeyValue])}
-            </p>
-          )}
-          <label className="eg-shell-userform__field" htmlFor={nameId}>
-            <span className="eg-shell-userform__label">{t("admin.users.form.field.displayName")}</span>
-            <input
-              aria-describedby={errors.displayName === undefined ? undefined : `${nameId}-error`}
-              aria-invalid={errors.displayName !== undefined}
-              id={nameId}
-              onChange={(event: ChangeLike) => onDisplayNameChange(changeValue(event))}
-              type="text"
-              value={values.displayName}
-            />
-          </label>
-          {errors.displayName !== undefined && (
-            <p className="eg-shell-userform__error" id={`${nameId}-error`} role="alert">
-              {t(FIELD_ERROR_KEYS[errors.displayName])}
-            </p>
-          )}
-          <label className="eg-shell-userform__field">
-            <span className="eg-shell-userform__label">
-              {t("admin.users.form.field.authMethod")} <small>({t("admin.users.form.field.authMethod.hint")})</small>
-            </span>
-            <select
-              onChange={(event: ChangeLike) => onAuthMethodChange(changeValue(event) as UserAuthMethod)}
-              value={values.authMethod}
-            >
-              <option value="sso">{t("admin.users.authMethod.sso")}</option>
-              <option value="dev">{t("admin.users.authMethod.dev")}</option>
-            </select>
-          </label>
-          <label className="eg-shell-userform__field">
-            <span className="eg-shell-userform__label">
-              {t("admin.users.form.field.role")} <small>({t("admin.users.form.field.role.hint")})</small>
-            </span>
-            <select disabled value="kullanici">
-              <option value="kullanici">{t("admin.users.role.kullanici")}</option>
-            </select>
-          </label>
-          <label className="eg-shell-userform__field" htmlFor={unitId}>
-            <span className="eg-shell-userform__label">{t("admin.users.form.field.unit")}</span>
-            <select
-              aria-describedby={errors.unitId === undefined ? undefined : `${unitId}-error`}
-              aria-invalid={errors.unitId !== undefined}
-              id={unitId}
-              onChange={(event: ChangeLike) => onUnitChange(changeValue(event))}
-              value={values.unitId}
-            >
-              <option value="">{t("admin.users.form.field.unit.placeholder")}</option>
-              {ADMIN_UNITS.map((unit) => (
-                <option key={unit.id} value={unit.id}>{unit.name}</option>
-              ))}
-            </select>
-          </label>
-          {errors.unitId !== undefined && (
-            <p className="eg-shell-userform__error" id={`${unitId}-error`} role="alert">
-              {t(FIELD_ERROR_KEYS[errors.unitId])}
-            </p>
-          )}
+            )}
+          </Field>
+          <Field hint={t("admin.users.form.field.authMethod.hint")} label={t("admin.users.form.field.authMethod")}>
+            {(control) => (
+              <Select
+                {...control}
+                onValueChange={(value) => onAuthMethodChange(value as UserAuthMethod)}
+                options={[
+                  { label: t("admin.users.authMethod.sso"), value: "sso" },
+                  { label: t("admin.users.authMethod.dev"), value: "dev" },
+                ]}
+                value={values.authMethod}
+              />
+            )}
+          </Field>
+          <Field hint={t("admin.users.form.field.role.hint")} label={t("admin.users.form.field.role")}>
+            {(control) => (
+              <Select
+                {...control}
+                disabled
+                onValueChange={() => undefined}
+                options={[{ label: t("admin.users.role.kullanici"), value: "kullanici" }]}
+                value="kullanici"
+              />
+            )}
+          </Field>
+          <Field
+            error={errors.unitId === undefined ? undefined : t(FIELD_ERROR_KEYS[errors.unitId])}
+            label={t("admin.users.form.field.unit")}
+          >
+            {(control) => (
+              <Select
+                {...control}
+                onValueChange={onUnitChange}
+                options={[
+                  { label: t("admin.users.form.field.unit.placeholder"), value: "" },
+                  ...ADMIN_UNITS.map((unit) => ({ label: unit.name, value: unit.id })),
+                ]}
+                value={values.unitId}
+              />
+            )}
+          </Field>
           <fieldset className="eg-shell-userform__field">
-            <legend className="eg-shell-userform__label">{t("admin.users.form.field.simAccess")}</legend>
+            <legend className="eg-field__label">{t("admin.users.form.field.simAccess")}</legend>
             {SIM_IDS.map((simId) => (
-              <label className="eg-shell-userform__checkbox" key={simId}>
-                <input
-                  checked={values.simAccess.includes(simId)}
-                  onChange={() => onSimAccessToggle(simId)}
-                  type="checkbox"
-                />
-                {t(`sims.${simId}.name`)}
-              </label>
+              <Checkbox
+                checked={values.simAccess.includes(simId)}
+                key={simId}
+                label={t(`sims.${simId}.name`)}
+                onCheckedChange={() => onSimAccessToggle(simId)}
+              />
             ))}
           </fieldset>
           <p className="eg-shell-userform__notice" role="note">{t("admin.users.form.notice.sso")}</p>
-          <div className="eg-shell-userform__actions">
-            <button onClick={onRequestClose} type="button">{t("admin.users.form.action.cancel")}</button>
-            <button type="submit">{t("admin.users.form.action.save")}</button>
-          </div>
           {confirmDiscard && <p className="eg-shell-userform__discard" role="alert">{t("admin.users.form.discard.confirm")}</p>}
         </form>
       ) : (
@@ -238,13 +230,9 @@ export function UserFormView({
             </dd>
           </dl>
           {submitError && <p className="eg-shell-userform__error" role="alert">{t("admin.users.form.error.submit")}</p>}
-          <div className="eg-shell-userform__actions">
-            <button disabled={submitting} onClick={onBackToForm} type="button">{t("admin.users.form.action.back")}</button>
-            <button disabled={submitting} onClick={onConfirm} type="button">{t("admin.users.form.action.confirm")}</button>
-          </div>
         </div>
       )}
-    </Modal>
+    </Dialog>
   );
 }
 
@@ -276,6 +264,7 @@ function navigateToUsersList(): void {
  */
 export function UserFormPage({ dataSource }: UserFormPageProps): JSX.Element {
   const source = useShellSource(dataSource, (sources) => sources.users, () => createMockUsersSource(DEFAULT_MOCK_SEED));
+  const toast = useToast();
 
   const [values, setValues] = useState<CreateUserFormValues>(INITIAL_CREATE_USER_VALUES);
   const [step, setStep] = useState<UserFormStep>("form");
@@ -308,7 +297,10 @@ export function UserFormPage({ dataSource }: UserFormPageProps): JSX.Element {
     setSubmitting(true);
     setSubmitError(false);
     source.create(toCreateUserInput(values)).then(
-      () => navigateToUsersList(),
+      () => {
+        toast({ title: t("admin.users.form.toast.success"), tone: "success" });
+        navigateToUsersList();
+      },
       (error: unknown) => {
         setSubmitting(false);
         if (error instanceof Error && error.message === "duplicate_mapping_key") {

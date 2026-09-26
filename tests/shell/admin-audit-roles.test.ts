@@ -1,6 +1,7 @@
-import { createElement } from "react";
+import { createElement, type ReactElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
+import { Dialog } from "../../packages/ui/src/primitives/Dialog";
 import {
   ADMIN_AUDIT_PATH,
   ADMIN_ROLES_PATH,
@@ -33,7 +34,7 @@ import {
 import { AuditPage, AuditView, type AuditViewProps } from "../../apps/shell/src/admin/AuditPage";
 import { RolesPage, RolesView, type RolesViewProps } from "../../apps/shell/src/admin/RolesPage";
 import { UserDetailPage, UserDetailView, type UserDetailViewProps } from "../../apps/shell/src/admin/UserDetailPage";
-import { UsersListView, type UsersListViewProps } from "../../apps/shell/src/admin/UsersPage";
+import { BulkEditDialog, UsersListView, type UsersListViewProps } from "../../apps/shell/src/admin/UsersPage";
 import { t } from "../../packages/ui/i18n/tr";
 
 function render(element: ReturnType<typeof createElement>): string {
@@ -42,6 +43,54 @@ function render(element: ReturnType<typeof createElement>): string {
 
 function noop(): void {
   // yalnız zorunlu prop'u doldurur; ilgisiz durumlarda çağrılmaz
+}
+
+/** React eleman ağacını DOM'suz gezer (UsersPage.tsx test deseni, T156). `Dialog`
+ *  (Radix Portal) DOM'suz ortamda (`renderToStaticMarkup`) boş çizilir; bu yüzden
+ *  ilgili `Dialog` öğesinin prop'ları doğrudan ağaçtan okunup ayrıca çizilir (T163). */
+function collectElements(
+  node: unknown,
+  predicate: (element: ReactElement) => boolean,
+  results: ReactElement[] = [],
+): ReactElement[] {
+  if (node === null || node === undefined || typeof node !== "object") return results;
+  if (Array.isArray(node)) {
+    for (const child of node) collectElements(child, predicate, results);
+    return results;
+  }
+  const element = node as ReactElement;
+  if (element.type === undefined) return results;
+  if (predicate(element)) results.push(element);
+  const children = (element.props as { children?: unknown } | undefined)?.children;
+  if (typeof children === "function") {
+    collectElements((children as (control: unknown) => unknown)({}), predicate, results);
+  } else if (children !== undefined) {
+    collectElements(children, predicate, results);
+  }
+  return results;
+}
+
+interface DialogLikeProps {
+  readonly title: unknown;
+  readonly open: boolean;
+  readonly footer?: unknown;
+  readonly children?: unknown;
+}
+
+/** `UsersListView`in çizdiği `BulkEditDialog` öğesini bulur (kendisi `Dialog`
+ *  (Radix Portal) döndürür); statik ağaç iç içe fonksiyon bileşenleri genişletmediği
+ *  için `BulkEditDialog` doğrudan çağrılıp `Dialog` prop'ları okunur (T163). */
+function bulkDialogPropsOf(tree: ReactElement): DialogLikeProps {
+  const [bulkElement] = collectElements(tree, (element) => element.type === BulkEditDialog);
+  if (bulkElement === undefined) throw new Error("BulkEditDialog öğesi bulunamadı");
+  const bulkTree = BulkEditDialog(bulkElement.props as Parameters<typeof BulkEditDialog>[0]) as ReactElement;
+  return dialogPropsOf(bulkTree);
+}
+
+function dialogPropsOf(tree: ReactElement): DialogLikeProps {
+  const [dialogElement] = collectElements(tree, (element) => element.type === Dialog);
+  if (dialogElement === undefined) throw new Error("Dialog öğesi bulunamadı");
+  return dialogElement.props as DialogLikeProps;
 }
 
 const BASE_DETAIL: AdminUserDetail = {
@@ -424,44 +473,40 @@ describe("Toplu düzenleme diyaloğu (UsersListView içinde, E3 §e.5, T73)", ()
     expect(html).not.toContain(t("admin.bulk.notice"));
   });
 
+  // Toplu düzenleme diyaloğu `Dialog` (Radix Portal) ile çizilir; DOM'suz test
+  // ortamında Portal içeriği boş döner (T163). `UsersListView` durumsuzdur (hook'suz),
+  // doğrudan çağrılıp `Dialog` prop'ları ağaçtan okunur, gövde/altbilgi ayrıca çizilir.
+  function bulkBodyHtml(props: Partial<UsersListViewProps>): string {
+    const tree = UsersListView(baseListProps(props)) as ReactElement;
+    return render(bulkDialogPropsOf(tree).children as ReturnType<typeof createElement>);
+  }
+
   it("diyalog açıkken altı işlemi ve dryRun etki önizlemesini gösterir; admin değeri hiç sunulmaz", () => {
-    const html = render(
-      createElement(
-        UsersListView,
-        baseListProps({
-          bulkOpen: true,
-          bulkPreview: { skipped: [{ reason: "no_change", userId: "user-002" }], updated: 3 },
-        }),
-      ),
-    );
-    for (const operation of BULK_OPERATIONS) expect(html).toContain(t(`admin.bulk.operation.${operation}` as const));
+    const html = bulkBodyHtml({
+      bulkOpen: true,
+      bulkPreview: { skipped: [{ reason: "no_change", userId: "user-002" }], updated: 3 },
+    });
     expect(html).toContain(t("admin.bulk.notice"));
     expect(html).toContain(t("admin.bulk.effect.label"));
+    expect(html).not.toContain(t("admin.users.role.admin"));
   });
 
   it("assign_role işleminde değer seçeneklerinde ASLA 'admin' sunulmaz (E3 §b)", () => {
-    const html = render(createElement(UsersListView, baseListProps({ bulkOpen: true, bulkOperation: "assign_role" })));
-    const dialogStart = html.indexOf('class="eg-modal__body"');
-    expect(html.slice(dialogStart)).not.toContain('value="admin"');
+    const html = bulkBodyHtml({ bulkOpen: true, bulkOperation: "assign_role" });
+    expect(html).not.toContain('value="admin"');
+    expect(html).not.toContain(t("admin.users.role.admin"));
   });
 
   it("assign_role/revoke_role işleminde değer alanı sabittir; admin seçilemez", () => {
-    const html = render(
-      createElement(UsersListView, baseListProps({ bulkOpen: true, bulkOperation: "assign_role", bulkValue: "kullanici" })),
-    );
+    const html = bulkBodyHtml({ bulkOpen: true, bulkOperation: "assign_role", bulkValue: "kullanici" });
     expect(html).toContain(t("admin.bulk.value.roleForbidden"));
   });
 
   it("uygulama sonucu gösterildiğinde güncellenen/atlanan sayıları render eder", () => {
-    const html = render(
-      createElement(
-        UsersListView,
-        baseListProps({
-          bulkApplyResult: { skipped: [{ reason: "would_orphan_roles", userId: "user-003" }], updated: 4 },
-          bulkOpen: true,
-        }),
-      ),
-    );
+    const html = bulkBodyHtml({
+      bulkApplyResult: { skipped: [{ reason: "would_orphan_roles", userId: "user-003" }], updated: 4 },
+      bulkOpen: true,
+    });
     expect(html).toContain(t("admin.bulk.result.title"));
     expect(html).toContain(t("admin.bulk.result.skip.would_orphan_roles"));
   });
@@ -496,7 +541,8 @@ describe("Roller ve erişim sekmesi — admin rolü ver/kaldır (UserDetailPage,
     );
     expect(html).toContain(t("admin.users.detail.roles.revoke"));
     expect(html).toContain(t("admin.users.detail.roles.selfGuard"));
-    expect(html).toMatch(/<button[^>]*disabled[^>]*>\s*Admin rolünü kaldır/);
+    // `Button` etiketi bir `<span class="eg-btn__label">` içine sarılır (T163).
+    expect(html).toMatch(new RegExp(`<button[^>]*disabled[^>]*>[\\s\\S]{0,200}?${t("admin.users.detail.roles.revoke")}`));
   });
 
   it("admin kullanıcıda ama oturum sahibi BAŞKASIYSA 'kaldır' düğmesi etkindir, uyarı yoktur", () => {

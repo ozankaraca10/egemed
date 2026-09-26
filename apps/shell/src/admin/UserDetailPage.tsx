@@ -1,5 +1,5 @@
 import { useEffect, useState, type JSX } from "react";
-import { Badge, Modal, Tabs, type BadgeTone, type TabItem } from "@egemed/ui";
+import { Badge, Button, Dialog, Field, Tabs, TextInput, useToast, type BadgeTone, type TabItem } from "@egemed/ui";
 import { t, type TrKey } from "@egemed/ui/i18n";
 import { useShellSource } from "../dataSources";
 import { adminUsersHref } from "../routes";
@@ -19,12 +19,6 @@ import {
 /** Rolü ekler/çıkarır; kümeyi değiştirmeden yeni bir dizi döndürür (E3 §b: aynı kullanıcıda birden çok rol olabilir). */
 function toggleRole(roles: readonly UserRole[], role: UserRole): UserRole[] {
   return roles.includes(role) ? roles.filter((candidate) => candidate !== role) : [...roles, role];
-}
-
-/** Kök tsconfig DOM lib'i taşımadığı için değişim olayı en dar arayüzle okunur (UsersPage.tsx deseni). */
-interface ChangeLike { target: unknown }
-function changeValue(event: ChangeLike): string {
-  return (event.target as unknown as { value: string }).value;
 }
 
 export type UserDetailLoadStatus = "loading" | "ready" | "notFound" | "error";
@@ -72,6 +66,13 @@ const CONFIRM_APPLY_ACTION_KEYS: Record<UserDetailAction, TrKey> = {
   revokeAdmin: "admin.users.detail.action.revokeAdmin",
   suspend: "admin.users.detail.action.suspend",
 };
+const CONFIRM_TOAST_KEYS: Record<UserDetailAction, TrKey> = {
+  activate: "admin.users.detail.toast.activate",
+  delete: "admin.users.detail.toast.delete",
+  grantAdmin: "admin.users.detail.toast.grantAdmin",
+  revokeAdmin: "admin.users.detail.toast.revokeAdmin",
+  suspend: "admin.users.detail.toast.suspend",
+};
 
 function GeneralPanel({ detail }: { readonly detail: AdminUserDetail }): JSX.Element {
   return (
@@ -115,13 +116,9 @@ function RolesPanel({
       <ul className="eg-shell-userdetail__badgeList">
         {detail.roles.map((role) => <li key={role}><Badge>{t(ROLE_KEYS[role])}</Badge></li>)}
       </ul>
-      <button
-        disabled={isAdmin && isSelfAdmin}
-        onClick={() => onRequestAction(isAdmin ? "revokeAdmin" : "grantAdmin")}
-        type="button"
-      >
+      <Button disabled={isAdmin && isSelfAdmin} onClick={() => onRequestAction(isAdmin ? "revokeAdmin" : "grantAdmin")} variant="secondary">
         {t(isAdmin ? "admin.users.detail.roles.revoke" : "admin.users.detail.roles.grant")}
-      </button>
+      </Button>
       {isAdmin && isSelfAdmin && <p role="alert">{t("admin.users.detail.roles.selfGuard")}</p>}
       <p className="eg-shell-userdetail__rolesTitle">{t("admin.users.detail.roles.access")}</p>
       {detail.simAccess.length === 0 ? (
@@ -180,8 +177,8 @@ export interface UserDetailViewProps {
 
 /**
  * Kullanıcı ayrıntı/düzenle ekranının durumsuz görünümü (E3 §e.3). Sekmeler
- * `@egemed/ui` `Tabs` ile; askıya alma/etkinleştirme/silme `Modal` onayı ister
- * (silme kullanıcı adını yazarak doğrulanır — "tehlikeli" akış).
+ * `@egemed/ui` `Tabs` ile; askıya alma/etkinleştirme/silme `Dialog` onayı ister
+ * (silme kullanıcı adını yazarak doğrulanır — "tehlikeli" akış, danger düğme).
  */
 export function UserDetailView({
   status,
@@ -215,7 +212,7 @@ export function UserDetailView({
         <div className="eg-shell-userdetail__error" role="alert">
           <p className="eg-shell-userdetail__errorTitle">{t("admin.users.detail.error.title")}</p>
           <p>{t("admin.users.detail.error.body")}</p>
-          <button onClick={onRetry} type="button">{t("admin.users.error.retry")}</button>
+          <Button onClick={onRetry} variant="secondary">{t("admin.users.error.retry")}</Button>
         </div>
       )}
       {status === "ready" && detail !== null && (
@@ -225,19 +222,19 @@ export function UserDetailView({
             {detail.status !== "deleted" && (
               <div className="eg-shell-userdetail__actions">
                 {detail.status === "suspended" && (
-                  <button onClick={() => onRequestAction("activate")} type="button">
+                  <Button onClick={() => onRequestAction("activate")} variant="secondary">
                     {t("admin.users.detail.action.activate")}
-                  </button>
+                  </Button>
                 )}
                 {detail.status !== "suspended" && detail.id !== currentUserId && (
-                  <button onClick={() => onRequestAction("suspend")} type="button">
+                  <Button onClick={() => onRequestAction("suspend")} variant="secondary">
                     {t("admin.users.detail.action.suspend")}
-                  </button>
+                  </Button>
                 )}
                 {detail.id !== currentUserId && (
-                  <button className="eg-shell-userdetail__delete" onClick={() => onRequestAction("delete")} type="button">
+                  <Button className="eg-shell-userdetail__delete" onClick={() => onRequestAction("delete")} variant="danger">
                     {t("admin.users.detail.action.delete")}
-                  </button>
+                  </Button>
                 )}
               </div>
             )}
@@ -260,37 +257,49 @@ export function UserDetailView({
             ] satisfies readonly TabItem[]}
             label={t("admin.users.detail.tabs.label")}
           />
-          <Modal onClose={onCancelAction} open={pendingAction !== null} title={pendingAction === null ? "" : t(CONFIRM_TITLE_KEYS[pendingAction])}>
+          <Dialog
+            footer={
+              pendingAction === null ? null : (
+                <>
+                  <Button onClick={onCancelAction} variant="secondary">{t("admin.users.detail.action.cancel")}</Button>
+                  <Button
+                    disabled={pendingAction === "delete" && deleteConfirmText !== detail.username}
+                    onClick={onConfirmAction}
+                    variant={pendingAction === "delete" ? "danger" : "primary"}
+                  >
+                    {t(CONFIRM_APPLY_ACTION_KEYS[pendingAction])}
+                  </Button>
+                </>
+              )
+            }
+            onOpenChange={(open) => {
+              if (!open) onCancelAction();
+            }}
+            open={pendingAction !== null}
+            title={pendingAction === null ? "" : t(CONFIRM_TITLE_KEYS[pendingAction])}
+          >
             {pendingAction !== null && (
               <div className="eg-shell-userdetail__confirm">
                 <p>{t(CONFIRM_BODY_KEYS[pendingAction])}</p>
                 {pendingAction === "delete" && (
-                  <label className="eg-shell-userdetail__confirmField">
-                    <span>{t("admin.users.detail.confirm.delete.inputLabel")}</span>
-                    <input
-                      onChange={(event: ChangeLike) => onDeleteConfirmTextChange(changeValue(event))}
-                      type="text"
-                      value={deleteConfirmText}
-                    />
-                    {deleteConfirmText.length > 0 && deleteConfirmText !== detail.username && (
-                      <p role="alert">{t("admin.users.detail.confirm.delete.mismatch")}</p>
+                  <Field label={t("admin.users.detail.confirm.delete.inputLabel")}>
+                    {(control) => (
+                      <TextInput
+                        {...control}
+                        onChange={(event) => onDeleteConfirmTextChange(event.target.value)}
+                        type="text"
+                        value={deleteConfirmText}
+                      />
                     )}
-                  </label>
+                  </Field>
+                )}
+                {pendingAction === "delete" && deleteConfirmText.length > 0 && deleteConfirmText !== detail.username && (
+                  <p role="alert">{t("admin.users.detail.confirm.delete.mismatch")}</p>
                 )}
                 {actionError && <p role="alert">{t("admin.users.detail.actionError")}</p>}
-                <div className="eg-shell-userdetail__actions">
-                  <button onClick={onCancelAction} type="button">{t("admin.users.detail.action.cancel")}</button>
-                  <button
-                    disabled={pendingAction === "delete" && deleteConfirmText !== detail.username}
-                    onClick={onConfirmAction}
-                    type="button"
-                  >
-                    {t(CONFIRM_APPLY_ACTION_KEYS[pendingAction])}
-                  </button>
-                </div>
               </div>
             )}
-          </Modal>
+          </Dialog>
         </>
       )}
     </section>
@@ -318,6 +327,7 @@ const ACTION_TO_STATUS: Partial<Record<UserDetailAction, UserStatus>> = {
  */
 export function UserDetailPage({ userId, currentUserId = null, dataSource }: UserDetailPageProps): JSX.Element {
   const source = useShellSource(dataSource, (sources) => sources.users, () => createMockUsersSource(DEFAULT_MOCK_SEED));
+  const toast = useToast();
 
   const [status, setStatus] = useState<UserDetailLoadStatus>("loading");
   const [detail, setDetail] = useState<AdminUserDetail | null>(null);
@@ -356,11 +366,13 @@ export function UserDetailPage({ userId, currentUserId = null, dataSource }: Use
 
   function confirmAction(): void {
     if (pendingAction === null || detail === null) return;
+    const action = pendingAction;
     setActionError(false);
     function onSuccess(updated: AdminUserDetail): void {
       setDetail(updated);
       setPendingAction(null);
       setDeleteConfirmText("");
+      toast({ title: t(CONFIRM_TOAST_KEYS[action]), tone: "success" });
     }
     function onError(): void {
       setActionError(true);

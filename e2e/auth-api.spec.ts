@@ -1,7 +1,7 @@
 import { expect, test, type Page } from "@playwright/test";
 import { curriculum } from "../packages/sim-pulse/src/data/curriculum";
 import { captureRouteScreenshot } from "./artifacts";
-import { trackErrors } from "./helpers";
+import { selectRadixOption, trackErrors } from "./helpers";
 import { completeTopicPractice, startTopicPractice } from "./sim-flows";
 
 /**
@@ -122,7 +122,7 @@ test.describe("API oturumu (dev sağlayıcı)", () => {
     const textInputs = dialog.locator('input[type="text"]');
     await textInputs.nth(0).fill(username);
     await textInputs.nth(1).fill(displayName);
-    await dialog.getByLabel("Birim").selectOption("unit-3");
+    await selectRadixOption(dialog, "Birim", "3. Sınıf");
     const created = page.waitForResponse(
       (response) => response.url().includes("/admin/users") && response.request().method() === "POST" && response.ok(),
     );
