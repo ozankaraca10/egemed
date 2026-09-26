@@ -8,6 +8,7 @@
 import { createContext, createElement, useContext, useRef, type ReactNode } from "react";
 import { createMockAuditSource, type AuditDataSource } from "./admin/auditDataSource";
 import { createMockImportsSource, type ImportsDataSource } from "./admin/importsDataSource";
+import { createMockRewardsSource, type RewardsDataSource } from "./admin/rewardsDataSource";
 import { createMockUsersSource, type UsersDataSource } from "./admin/usersDataSource";
 import {
   createSyntheticGamificationSource,
@@ -25,6 +26,8 @@ export interface ShellDataSources {
   readonly users: UsersDataSource;
   readonly imports: ImportsDataSource;
   readonly audit: AuditDataSource;
+  /** Aylık ödüller (T186); sim başına CRUD + kesinleştirme, admin oturumunda kullanılır. */
+  readonly rewards: RewardsDataSource;
   /** API oturumunda `session === null` iken boş döner; `1450` XP üretmez. */
   gamification(session: ShellSession | null): GamificationSource;
   /** Sahte oturumda `null`; API oturumunda liderlik görünürlüğü. */
@@ -68,9 +71,11 @@ export function createMockShellDataSources(): ShellDataSources {
   const users = createMockUsersSource();
   const imports = createMockImportsSource();
   const audit = createMockAuditSource();
+  const rewards = createMockRewardsSource();
   const syntheticShowcase = createSyntheticShowcaseSource();
   return {
     audit,
+    rewards,
     gamification(session) {
       return createSyntheticGamificationSource(session !== null);
     },

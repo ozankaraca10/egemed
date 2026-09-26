@@ -24,6 +24,7 @@ export type ResolvedRoute =
   | { kind: "adminImport"; titleKey: TrKey }
   | { kind: "adminRoles"; titleKey: TrKey }
   | { kind: "adminAudit"; titleKey: TrKey }
+  | { kind: "adminRewards"; titleKey: TrKey }
   | { kind: "sim"; simId: SimulatorId; titleKey: TrKey }
   | { kind: "notFound"; path: string };
 
@@ -49,6 +50,9 @@ export const ADMIN_ROLES_PATH = "/admin/roller" as const;
 
 /** Denetim günlüğü yolu (T73, E3 §e.7); salt okunur, filtre + sayfalama. */
 export const ADMIN_AUDIT_PATH = "/admin/denetim" as const;
+
+/** Aylık ödüller yolu (T186, 26 Eyl 2026 depo sahibi kararı); sim başına CRUD + kesinleştirme. */
+export const ADMIN_REWARDS_PATH = "/admin/oduller" as const;
 
 export const ROUTES: readonly RouteDef[] = [
   { id: "home", path: "/", labelKey: "shell.nav.home", titleKey: "shell.home.title" },
@@ -107,6 +111,7 @@ export function resolveRoute(hash: string): ResolvedRoute {
   if (path === ADMIN_IMPORT_PATH) return { kind: "adminImport", titleKey: "admin.import.title" };
   if (path === ADMIN_ROLES_PATH) return { kind: "adminRoles", titleKey: "admin.roles.title" };
   if (path === ADMIN_AUDIT_PATH) return { kind: "adminAudit", titleKey: "admin.audit.title" };
+  if (path === ADMIN_REWARDS_PATH) return { kind: "adminRewards", titleKey: "admin.rewards.title" };
   if (path === ADMIN_PATH) return { kind: "admin", titleKey: "admin.title" };
   if (path === ENTRY_PATHS.admin) return { kind: "entry", role: "admin", titleKey: "entry.admin.title" };
   if (path === ENTRY_PATHS.student) return { kind: "entry", role: "student", titleKey: "entry.student.title" };
@@ -171,6 +176,11 @@ export function adminAuditHref(): `#${string}` {
   return `#${ADMIN_AUDIT_PATH}`;
 }
 
+/** Aylık ödüller bağlantısı (T186); `AdminFrame` "Ödüller" menü öğesi buraya gider. */
+export function adminRewardsHref(): `#${string}` {
+  return `#${ADMIN_REWARDS_PATH}`;
+}
+
 /** Admin oturumu koruması yalnız yönetici rotalarında (panel + kullanıcılar + ekle/ayrıntı + içe aktarma + roller + denetim) uygulanır. */
 export function isAdminProtected(route: ResolvedRoute): boolean {
   return (
@@ -180,7 +190,8 @@ export function isAdminProtected(route: ResolvedRoute): boolean {
     route.kind === "adminUserDetail" ||
     route.kind === "adminImport" ||
     route.kind === "adminRoles" ||
-    route.kind === "adminAudit"
+    route.kind === "adminAudit" ||
+    route.kind === "adminRewards"
   );
 }
 
