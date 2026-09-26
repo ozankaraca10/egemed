@@ -1,4 +1,5 @@
 import { createApp } from "../../apps/api/src/app";
+import { createMemoryRewardsRepo } from "../../apps/api/src/rewards";
 import { createMemoryAdminBulkRepo, type AdminBulkRepo } from "../../apps/api/src/admin/bulk";
 import { createMemoryAdminOverviewRepo } from "../../apps/api/src/admin/extras";
 import {
@@ -213,12 +214,14 @@ export function createAdminHarness(
     sessionAbsoluteMs: DEFAULT_SESSION_ABSOLUTE_MS,
   };
   const importStore: MemoryAdminImportStore = createMemoryAdminImportRepo(adminStore, newId);
+  const rewards = createMemoryRewardsRepo();
   const app = createApp({
     db: options.db ?? fakeDb(),
     now: () => clock,
     auth,
     gamification: gamificationStore.repo,
     overview: createMemoryAdminOverviewRepo(adminStore, importStore),
+    rewards,
     admin: {
       auth,
       users: adminStore.users,
@@ -234,6 +237,7 @@ export function createAdminHarness(
     adminStore,
     importStore,
     gamificationStore,
+    rewards,
     advance(ms: number) {
       clock += ms;
     },

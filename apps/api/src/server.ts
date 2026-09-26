@@ -2,6 +2,7 @@ import { serve } from "@hono/node-server";
 import { randomUUID } from "node:crypto";
 import process from "node:process";
 import { createApp } from "./app.ts";
+import { createPgRewardsRepo } from "./rewards.ts";
 import { createPgAdminBulkRepo } from "./admin/bulk.ts";
 import { createPgAdminOverviewRepo } from "./admin/extras.ts";
 import { createPgAdminImportRepo } from "./admin/imports.ts";
@@ -52,6 +53,7 @@ const app = createApp({
   auth,
   gamification: createPgGamificationRepo(db),
   overview: createPgAdminOverviewRepo(db),
+  rewards: createPgRewardsRepo(db),
   admin: {
     auth,
     users: createPgAdminUsersRepo(db),

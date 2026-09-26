@@ -9,6 +9,7 @@ import { registerAdminExtrasRoutes, type AdminOverviewRepo } from "./admin/extra
 import { registerAdminImportRoutes } from "./admin/imports";
 import { registerAdminRoleRoutes } from "./admin/roles";
 import { registerAdminUserRoutes, type AdminDeps } from "./admin/users";
+import { createMemoryRewardsRepo, registerAdminRewardRoutes, registerMeRewardRoutes, type RewardsRepo } from "./rewards";
 import { registerAuthRoutes, type AuthDeps } from "./auth/routes";
 import { registerSsoRoutes } from "./auth/sso/routes";
 import { errorBody, jsonError, validationDetails, type AppEnv } from "./http";
@@ -41,6 +42,8 @@ export interface AppDeps {
   readonly gamification: GamificationRepo;
   /** T58 — `/admin/overview` sayımları; kurum kapsamlı, bireysel veri yok. */
   readonly overview: AdminOverviewRepo;
+  /** Aylık ödüller (26 Eyl 2026); verilmezse bellek deposu (yalnız test/DB'siz geliştirme). */
+  readonly rewards?: RewardsRepo;
 }
 
 /** Gelen `x-request-id` biçimi: başlık güvenli ASCII, 8–128 karakter. */
@@ -162,7 +165,11 @@ export function createApp(deps: AppDeps): Hono<AppEnv> {
     },
     deps.now,
   );
+  const rewards = deps.rewards ?? createMemoryRewardsRepo();
+  registerAdminRewardRoutes(app, { admin: deps.admin, gamification: deps.gamification, rewards }, deps.now);
   registerMeGamificationRoutes(app, { auth: deps.auth, gamification: deps.gamification }, deps.now);
+  // `/me/*` ara katmanı `registerMeGamificationRoutes` içinde bağlanır; ödül okumaları ondan sonra.
+  registerMeRewardRoutes(app, { rewards }, deps.now);
 
   app.notFound((c) => c.json(errorBody("not_found"), statusForErrorCode("not_found")));
 

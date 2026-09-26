@@ -67,6 +67,11 @@ function checkValues(constraint: string): string[] {
 }
 
 const expectedColumns: Record<string, readonly string[]> = {
+  monthly_rewards: [
+    "id", "institution_id", "sim_id", "month", "title", "description", "sponsor", "winners_count", "cohorts",
+    "min_assessments", "require_public_name", "terms", "finalized_at", "created_at", "updated_at", "updated_by",
+  ],
+  reward_winners: ["id", "reward_id", "rank", "display_name", "score"],
   institutions: ["id", "code", "name", "status", "created_at", "updated_at", "deleted_at"],
   units: ["id", "institution_id", "parent_id", "code", "name", "created_at", "updated_at", "deleted_at"],
   users: [
@@ -273,7 +278,7 @@ describe("kısıtlar", () => {
 
   it("her sim_id CHECK'i tam olarak üç simi içerir", () => {
     const simChecks = [...allUp.matchAll(/check \(\s*sim_id\s+in \(([^)]*)\)/g)];
-    expect(simChecks).toHaveLength(3);
+    expect(simChecks).toHaveLength(4);
     for (const check of simChecks) {
       const values = [...(check[1] ?? "").matchAll(/'([^']+)'/g)].map((value) => value[1] ?? "").sort();
       expect(values).toEqual(["ausculta", "opaca", "pulse"]);
