@@ -12,6 +12,8 @@ export interface ShellSession {
   readonly actorId: string;
   readonly displayName: string | null;
   readonly simAccess: readonly SimId[] | null;
+  /** Öğretim üyesi rolü (T171): simleri tam kullanır, oyunlaştırmaya katılmaz. Sahte oturumda yok. */
+  readonly faculty?: boolean;
 }
 
 /** Sahte depodan okunan oturumun en dar yüzeyi (`devAuth.DevSession` yapısal olarak uyar). */
@@ -59,5 +61,6 @@ export function shellSessionFromMe(me: {
     displayName: me.displayName,
     role: shellRoleFromApiRoles(me.roles),
     simAccess: [...me.simAccess],
+    faculty: me.roles.some((entry) => entry.role === "ogretim_uyesi"),
   };
 }
