@@ -81,6 +81,44 @@ export interface SimGamificationSource {
   leaderboard(period: Period, cohort: CohortFilter): Promise<{ readonly rows: readonly GamiLeaderboardRow[] }>;
 }
 
+/**
+ * Kitle (depo sahibi kararı, 26 Eylül 2026):
+ * - `student`: tam içerik + oyunlaştırma (rozet, XP, liderlik, Meydan Okuma).
+ * - `faculty` (öğretim üyesi): tam içerik; oyunlaştırma yüzeyleri (İlerlemem,
+ *   liderlik, aylık ödül, Meydan Okuma) gizlenir, deneme raporlanmaz.
+ * - `visitor` (ziyaretçi, hesapsız): yalnız öğrenme modu ve sime özgü sınırlı
+ *   içerik; kilitli öğeler `VISITOR_LOCK_TEXT` ile işaretlenir.
+ */
+export type SimAudience = "student" | "faculty" | "visitor";
+export const SIM_AUDIENCES: readonly SimAudience[] = ["student", "faculty", "visitor"];
+
+/** Bağlamda kitle yoksa öğrenci varsayılır (geriye uyum). */
+export function audienceOf(context: Pick<SimMountContext, "audience">): SimAudience {
+  return context.audience ?? "student";
+}
+
+/** Oyunlaştırma yüzeyleri yalnız öğrenciye çizilir. */
+export function audienceShowsGamification(audience: SimAudience): boolean {
+  return audience === "student";
+}
+
+/** Ziyaretçi yalnız öğrenme modunu açabilir; uygulama ve değerlendirme kilitlidir. */
+export function audienceCanUseMode(audience: SimAudience, mode: "learn" | "practice" | "assessment"): boolean {
+  return audience !== "visitor" || mode === "learn";
+}
+
+/**
+ * Ziyaretçi kilidi metinleri: üç sim aynı ifadeyi kullanır (tek kaynak).
+ * Sim paketleri `@egemed/ui` i18n'e bağlı olmadığından metin sözleşmededir.
+ */
+export const VISITOR_LOCK_TEXT = {
+  badge: "Ziyaretçi modu",
+  locked: "Yalnızca Ege Üniversitesi Tıp Fakültesi öğrencileri yararlanabilir.",
+  modeLocked: "Bu mod yalnızca Ege Üniversitesi Tıp Fakültesi öğrencilerine açıktır.",
+  itemLocked: "Tüm içerik yalnızca Ege Üniversitesi Tıp Fakültesi öğrencilerine açıktır.",
+  cta: "Öğrenci girişi",
+} as const;
+
 /** Modüle taşınan oturum bağlamı; sim başına ayrıktır (veri izolasyonu). */
 export interface SimMountContext {
   readonly simId: SimulatorId;
@@ -106,6 +144,10 @@ export interface SimMountContext {
    * gönderir (durum değiştikçe yeniden çağrılır; `null` barı temizler).
    */
   readonly setChrome?: (chrome: SimChrome | null) => void;
+  /** Kitle (26 Eyl 2026); yoksa `student`. Bkz. `SimAudience`. */
+  readonly audience?: SimAudience;
+  /** Ziyaretçi kilidindeki "Öğrenci girişi" eylemi; kabuk giriş ekranına götürür. */
+  readonly requestSignIn?: () => void;
 }
 
 /** Modül `mount` dönüşünde zorunlu cleanup verir; idempotent olmalıdır. */
