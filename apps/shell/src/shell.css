@@ -117,60 +117,26 @@ html, body { margin: 0; }
   color: var(--blue-700); font-weight: 600; text-decoration: none;
 }
 
-/* --- Kullanıcılar listesi (T69a, E3 §e.1): framework mode-card/topbar/
-   results-summary bileşenlerinden türetilir; tablo framework'te yoktur,
-   aile token'larından kurulur (E3 §e "Türetildiği framework bileşeni"). --- */
+/* --- Kullanıcılar/denetim listeleri (T69a/T73 → T156, E3 §e.1/§e.7): tablo ve
+   sayfalama artık `@egemed/ui` `DataTable`/`Pagination` (kendi stil dosyası
+   vardır); burada yalnız kabuğun kendi düzeni kalır. Filtre alanları
+   masaüstünde bu çubukta, <768 px'te aynı bileşen bir `Dialog` içinde ikinci
+   kez çizilir (kırılım yalnız CSS'te; ikisi asla aynı anda erişilebilir
+   değildir: biri `display: none`, diğeri diyalog kapalıyken DOM'da yoktur). */
 .eg-shell-users__head {
   display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--sp-3);
 }
-.eg-shell-users__add {
-  box-sizing: border-box; display: inline-flex; align-items: center; justify-content: center;
-  min-height: var(--eg-shell-touch-min); padding: 0 var(--sp-4);
-  background: var(--blue-700); border: 0; border-radius: var(--r-md);
-  color: var(--card); font: inherit; font-weight: 700; text-decoration: none;
+.eg-shell-adminlist__actions { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-2); }
+.eg-shell-adminlist__filterbar {
+  display: none; gap: var(--sp-3); margin: var(--sp-4) 0; padding: var(--sp-3);
+  background: var(--card); border: 1px solid var(--border); border-radius: var(--r-lg); box-shadow: var(--shadow-card);
 }
-.eg-shell-users__filters {
-  display: grid; gap: var(--sp-3); grid-template-columns: repeat(2, minmax(0, 1fr));
-  margin: var(--sp-4) 0; padding: var(--sp-3); background: var(--card); border: 1px solid var(--border);
-  border-radius: var(--r-lg); box-shadow: var(--shadow-card);
-}
-.eg-shell-users__field { display: grid; gap: var(--sp-1); min-width: 0; }
+.eg-shell-adminlist__filtertrigger { margin: var(--sp-4) 0; }
+.eg-shell-adminlist__filterfields { display: grid; gap: var(--sp-3); }
+/* Kullanıcı ekle bağlantısı düğme diliyle çizilir (`eg-btn`); import sihirbazı
+   alan etiketi hâlâ bu sınıfı kullanır, o yüzden ayrı tutulur. */
 .eg-shell-users__field-label { color: var(--muted); font-size: var(--fs-sm); font-weight: 600; }
-.eg-shell-users__field input, .eg-shell-users__field select {
-  box-sizing: border-box; min-height: var(--eg-shell-touch-min); padding: 0 var(--sp-3);
-  border: 1px solid var(--border-strong); border-radius: var(--r-sm); background: var(--card);
-  color: var(--text); font: inherit;
-}
-.eg-shell-users__clear {
-  box-sizing: border-box; grid-column: 1 / -1; justify-self: start;
-  display: inline-flex; align-items: center; min-height: var(--eg-shell-touch-min); padding: 0 var(--sp-3);
-  background: none; border: 0; color: var(--blue-700); font: inherit; font-weight: 600; cursor: pointer;
-}
-/* Masaüstü tablo: 768 px altında kart listesine yer açmak için gizlenir. */
-.eg-shell-users__table {
-  display: none; width: 100%; border-collapse: collapse; color: var(--text); font-family: var(--font);
-}
-.eg-shell-users__table th, .eg-shell-users__table td {
-  padding: var(--sp-2) var(--sp-3); border-bottom: 1px solid var(--border); text-align: left;
-}
 .eg-shell-users__name-link { color: var(--blue-700); font-weight: 600; text-decoration: none; }
-/* Mobil kart listesi: 768 px'te tabloya yer açmak için gizlenir. */
-.eg-shell-users__cards { display: grid; gap: var(--sp-3); margin: 0; padding: 0; list-style: none; }
-.eg-shell-users__card {
-  box-sizing: border-box; display: flex; gap: var(--sp-3); align-items: flex-start;
-  padding: var(--sp-4); background: var(--card); border: 1px solid var(--border);
-  border-radius: var(--r-lg); box-shadow: var(--shadow-card);
-}
-.eg-shell-users__card-select { flex: 0 0 auto; width: var(--eg-shell-touch-min); height: var(--eg-shell-touch-min); }
-.eg-shell-users__card-body { display: grid; gap: var(--sp-1); min-width: 0; }
-.eg-shell-users__card-name { color: var(--blue-700); font-weight: 700; text-decoration: none; }
-.eg-shell-users__card-meta { margin: 0; color: var(--muted); font-size: var(--fs-sm); }
-.eg-shell-users__card-badges { display: flex; flex-wrap: wrap; gap: var(--sp-2); }
-.eg-shell-users__skeleton { display: grid; gap: var(--sp-2); }
-.eg-shell-users__skeleton-row {
-  display: block; height: 2.75rem; background: var(--card-soft);
-  border: 1px dashed var(--border-strong); border-radius: var(--r-md);
-}
 .eg-shell-users__error, .eg-shell-users__empty {
   box-sizing: border-box; display: grid; gap: var(--sp-3); justify-items: start;
   padding: var(--sp-4); background: var(--card); border: 1px solid var(--border); border-radius: var(--r-lg);
@@ -178,16 +144,6 @@ html, body { margin: 0; }
 .eg-shell-users__error { background: var(--red-100); border-color: var(--red-500); }
 .eg-shell-users__error-title { margin: 0; color: var(--red-600); font-weight: 700; }
 .eg-shell-users__error-body { margin: 0; color: var(--text); }
-.eg-shell-users__pagination {
-  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--sp-2);
-  margin-top: var(--sp-4);
-}
-.eg-shell-users__pagination button {
-  box-sizing: border-box; min-height: var(--eg-shell-touch-min); padding: 0 var(--sp-3);
-  background: var(--card); border: 1px solid var(--border-strong); border-radius: var(--r-md);
-  color: var(--text); font: inherit; cursor: pointer;
-}
-.eg-shell-users__pagination button:disabled { color: var(--muted); cursor: not-allowed; }
 /* Toplu işlem çubuğu: seçim varken yapışkan, aria-live duyurusu ayrı gizli metindedir. */
 .eg-shell-users__bulkbar {
   position: sticky; bottom: 0; z-index: 5; display: flex; flex-wrap: wrap; align-items: center;
@@ -200,16 +156,13 @@ html, body { margin: 0; }
   font: inherit; font-weight: 600; cursor: pointer;
 }
 .eg-shell-users__bulkbar button:disabled { background: var(--card-soft); color: var(--muted); cursor: not-allowed; }
-@media (max-width: 767.98px) {
-  .eg-shell-users__filters { grid-template-columns: 1fr; }
-}
 @media (min-width: 768px) {
-  .eg-shell-users__table { display: table; }
-  .eg-shell-users__cards { display: none; }
-  .eg-shell-users__filters { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  /* ≥768 px: filtreler yatay çubukta; mobil düğme+diyalog gizlenir. */
+  .eg-shell-adminlist__filterbar { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); align-items: end; }
+  .eg-shell-adminlist__filtertrigger { display: none; }
 }
 @media (min-width: 1440px) {
-  .eg-shell-users__filters { grid-template-columns: repeat(6, minmax(0, 1fr)) auto; align-items: end; }
+  .eg-shell-adminlist__filterbar { grid-template-columns: repeat(6, minmax(0, 1fr)); }
 }
 
 /* --- Kullanıcı ekle (T70, E3 §e.2): framework dialog/feedback bileşenlerinden
@@ -332,14 +285,10 @@ html, body { margin: 0; }
   display: grid; gap: var(--sp-1); margin: 0; padding: 0; list-style: none; color: var(--text);
 }
 
-/* --- Denetim günlüğü (T73, E3 §e.7): `eg-shell-users__*` tablo/kart/filtre/
-   sayfalama sınıflarını yeniden kullanır (salt okunur ekran); yalnız "Ayrıntı"
-   düğmesi kendi sınıfını ister (44 px dokunma hedefi). --- */
-.eg-shell-audit__detail {
-  box-sizing: border-box; min-height: var(--eg-shell-touch-min); padding: 0 var(--sp-3);
-  background: var(--card); border: 1px solid var(--border-strong); border-radius: var(--r-md);
-  color: var(--blue-700); font: inherit; font-weight: 600; cursor: pointer;
-}
+/* --- Denetim günlüğü (T73 → T156, E3 §e.7): `eg-shell-users__*`/`eg-shell-adminlist__*`
+   sınıflarını yeniden kullanır (salt okunur ekran); tablo/sayfalama/"Ayrıntı"
+   düğmesi artık `@egemed/ui` `DataTable`/`Pagination`/`Button`'dandır, kendi
+   sınıfı kalmaz. --- */
 
 .eg-shell-link {
   display: inline-flex; align-items: center; justify-content: center;

@@ -1,5 +1,21 @@
-import { useEffect, useState, type JSX, type KeyboardEvent } from "react";
-import { Badge, Modal, type BadgeTone } from "@egemed/ui";
+import { useEffect, useState, type JSX, type KeyboardEvent, type ReactNode } from "react";
+import {
+  Badge,
+  Button,
+  Checkbox,
+  DataTable,
+  Dialog,
+  EmptyState,
+  Field,
+  Modal,
+  Pagination,
+  Select,
+  TextInput,
+  icons,
+  type BadgeTone,
+  type DataTableColumn,
+  type DataTableSort,
+} from "@egemed/ui";
 import { t, type TrKey } from "@egemed/ui/i18n";
 import { useShellSource } from "../dataSources";
 import { adminUserCreateHref, adminUserDetailHref } from "../routes";
@@ -31,7 +47,6 @@ import {
   type UserAuthMethod,
   type UserRole,
   type UsersDataSource,
-  type UsersListMeta,
   type UsersListQuery,
   type UsersListResult,
   type UserSort,
@@ -102,7 +117,7 @@ const AUTH_KEYS: Record<UserAuthMethod, TrKey> = {
   sso: "admin.users.authMethod.sso",
 };
 
-/** Sıralama alanı + yönü birleşik seçim değeri (tek `<select>`). */
+/** Sıralama alanı + yönü birleşik seçim değeri (tek seçim denetimi). */
 type SortChoice = `${UserSort}-${SortOrder}`;
 
 const SORT_CHOICES: readonly { readonly value: SortChoice; readonly labelKey: TrKey }[] = [
@@ -130,6 +145,17 @@ const DEFAULT_QUERY: UsersListQuery = {
   sort: DEFAULT_SORT,
 };
 
+/** Yalnız arama/rol/birim/durum/giriş filtrelerinden etkin olanları sayar (mobil "Filtreler" rozeti). */
+function countActiveFilters(query: UsersListQuery): number {
+  let count = 0;
+  if ((query.q?.trim().length ?? 0) > 0) count += 1;
+  if (query.role !== undefined) count += 1;
+  if (query.unitId !== undefined) count += 1;
+  if (query.status !== undefined) count += 1;
+  if (query.authMethod !== undefined) count += 1;
+  return count;
+}
+
 /** Seçim satırı erişilebilir adı: "{ad} — Seç"; kendi hesabında not eklenir (T150). */
 function selectLabel(displayName: string, isSelf: boolean): string {
   const base = `${displayName} — ${t("admin.users.table.select")}`;
@@ -140,229 +166,141 @@ function UserStatusBadge({ status }: { readonly status: UserStatus }): JSX.Eleme
   return <Badge tone={STATUS_TONE[status]}>{t(STATUS_KEYS[status])}</Badge>;
 }
 
-interface RowsProps {
-  readonly users: readonly AdminUser[];
-  readonly units: readonly AdminUnit[];
-  readonly selected: ReadonlySet<string>;
-  readonly onToggleSelect: (id: string) => void;
-  /** Oturumdaki adminin kendi satırında toplu seçim kutusu devre dışıdır (T150: kilitlenme koruması). */
-  readonly currentUserId?: string | null;
-}
-
-/** ≥768 px tablo görünümü (E3 §e.1); 360 px'te CSS ile gizlenir. */
-export function UsersTable({ users, units, selected, onToggleSelect, currentUserId = null }: RowsProps): JSX.Element {
+/** Kullanıcı ekle bağlantısı: gezinme gerektiği için `Button`ın (yalnız `<button>`) yerine
+ *  onun görsel diliyle çizilen bir `<a>` kullanılır (T156). */
+function AddUserLink({ variant = "primary", className }: { readonly variant?: "primary" | "secondary"; readonly className?: string }): JSX.Element {
   return (
-    <table className="eg-shell-users__table" role="table">
-      <caption className="eg-shell-users__caption">{t("admin.users.table.caption")}</caption>
-      <thead>
-        <tr role="row">
-          <th role="columnheader" scope="col">
-            <span className="eg-visually-hidden">{t("admin.users.table.select")}</span>
-          </th>
-          <th role="columnheader" scope="col">{t("admin.users.table.name")}</th>
-          <th role="columnheader" scope="col">{t("admin.users.table.username")}</th>
-          <th role="columnheader" scope="col">{t("admin.users.table.role")}</th>
-          <th role="columnheader" scope="col">{t("admin.users.table.unit")}</th>
-          <th role="columnheader" scope="col">{t("admin.users.table.status")}</th>
-        </tr>
-      </thead>
-      <tbody>
-        {users.map((user) => {
-          const isSelf = user.id === currentUserId;
-          return (
-            <tr key={user.id} role="row">
-              <td role="cell">
-                <input
-                  aria-label={selectLabel(user.displayName, isSelf)}
-                  checked={selected.has(user.id)}
-                  disabled={isSelf}
-                  onChange={() => onToggleSelect(user.id)}
-                  title={isSelf ? t("admin.users.detail.selfNote") : undefined}
-                  type="checkbox"
-                />
-              </td>
-              <td role="cell">
-                <a className="eg-shell-users__name-link" href={adminUserDetailHref(user.id)}>
-                  {user.displayName}
-                </a>
-              </td>
-              <td role="cell">{user.username}</td>
-              <td role="cell">{t(ROLE_KEYS[user.role])}</td>
-              <td role="cell">{unitNameFor(user.unitId, units)}</td>
-              <td role="cell">
-                <UserStatusBadge status={user.status} />
-              </td>
-            </tr>
-          );
-        })}
-      </tbody>
-    </table>
+    <a className={["eg-btn", `eg-btn--${variant}`, "eg-btn--md", className].filter(Boolean).join(" ")} href={adminUserCreateHref()}>
+      <span className="eg-btn__icon" aria-hidden="true"><icons.Plus /></span>
+      <span className="eg-btn__label">{t("admin.users.action.add")}</span>
+    </a>
   );
 }
 
-/** 360 px kart listesi (E3 §e.1); ≥768 px'te CSS ile gizlenir. */
-export function UsersCards({ users, units, selected, onToggleSelect, currentUserId = null }: RowsProps): JSX.Element {
-  return (
-    <ul aria-label={t("admin.users.cards.label")} className="eg-shell-users__cards">
-      {users.map((user) => {
+/** Tablo seçim sütunu, DataTable'ın kendi `selection` API'sinin yerine geçer: T150 kuralı
+ *  (oturumdaki adminin kendi satırı seçilemez + not) yalnız bu satırda uygulanır. */
+function buildUserColumns(
+  units: readonly AdminUnit[],
+  selected: ReadonlySet<string>,
+  onToggleSelect: (id: string) => void,
+  currentUserId: string | null,
+): readonly DataTableColumn<AdminUser>[] {
+  return [
+    {
+      cell: (user) => {
         const isSelf = user.id === currentUserId;
         return (
-          <li className="eg-shell-users__card" key={user.id}>
-            <input
-              aria-label={selectLabel(user.displayName, isSelf)}
-              checked={selected.has(user.id)}
-              className="eg-shell-users__card-select"
-              disabled={isSelf}
-              onChange={() => onToggleSelect(user.id)}
-              title={isSelf ? t("admin.users.detail.selfNote") : undefined}
-              type="checkbox"
-            />
-            <div className="eg-shell-users__card-body">
-              <a className="eg-shell-users__card-name" href={adminUserDetailHref(user.id)}>
-                {user.displayName}
-              </a>
-              <p className="eg-shell-users__card-meta">
-                {t(ROLE_KEYS[user.role])} · {unitNameFor(user.unitId, units)}
-              </p>
-              <div className="eg-shell-users__card-badges">
-                <UserStatusBadge status={user.status} />
-                <Badge>{t(AUTH_KEYS[user.authMethod])}</Badge>
-              </div>
-            </div>
-          </li>
+          <Checkbox
+            checked={selected.has(user.id)}
+            disabled={isSelf}
+            hideLabel
+            label={selectLabel(user.displayName, isSelf)}
+            onCheckedChange={() => onToggleSelect(user.id)}
+          />
         );
-      })}
-    </ul>
-  );
+      },
+      header: t("admin.users.table.select"),
+      key: "select",
+      width: "3rem",
+    },
+    {
+      cell: (user) => (
+        <a className="eg-shell-users__name-link" href={adminUserDetailHref(user.id)}>
+          {user.displayName}
+        </a>
+      ),
+      header: t("admin.users.table.name"),
+      key: "displayName",
+      sortable: true,
+    },
+    { cell: (user) => user.username, header: t("admin.users.table.username"), key: "username" },
+    { cell: (user) => t(ROLE_KEYS[user.role]), header: t("admin.users.table.role"), key: "role" },
+    { cell: (user) => unitNameFor(user.unitId, units), header: t("admin.users.table.unit"), key: "unit" },
+    { cell: (user) => <UserStatusBadge status={user.status} />, header: t("admin.users.table.status"), key: "status" },
+  ];
 }
 
-interface FiltersProps {
+interface FilterFieldsProps {
   readonly query: UsersListQuery;
   readonly units: readonly AdminUnit[];
   readonly onSearchChange: (value: string) => void;
   readonly onFilterChange: (patch: Partial<UsersListQuery>) => void;
   readonly onSortChange: (choice: SortChoice) => void;
-  readonly onClearFilters: () => void;
 }
 
-/** 360/768'te katlanır panel, 1440'ta tek satır; kırılım yalnız CSS'tedir (E3 §e.1). */
-function UsersFilters({
-  query,
-  units,
-  onSearchChange,
-  onFilterChange,
-  onSortChange,
-  onClearFilters,
-}: FiltersProps): JSX.Element {
+/** Filtre alanları: masaüstünde yatay çubukta, 360/768'te "Filtreler" diyaloğu içinde aynı
+ *  bileşen iki kez çizilir (kırılım yalnız CSS'te, T156). */
+function UsersFilterFields({ query, units, onSearchChange, onFilterChange, onSortChange }: FilterFieldsProps): JSX.Element {
   return (
-    <div className="eg-shell-users__filters">
-      <label className="eg-shell-users__field">
-        <span className="eg-shell-users__field-label">{t("admin.users.filter.search")}</span>
-        <input
-          onChange={(event: ChangeLike) => onSearchChange(changeValue(event))}
-          type="search"
-          value={query.q ?? ""}
-        />
-      </label>
-      <label className="eg-shell-users__field">
-        <span className="eg-shell-users__field-label">{t("admin.users.filter.role")}</span>
-        <select
-          onChange={(event: ChangeLike) => {
-            const value = changeValue(event);
-            onFilterChange({ role: value === "" ? undefined : (value as UserRole) });
-          }}
-          value={query.role ?? ""}
-        >
-          <option value="">{t("admin.users.filter.role.all")}</option>
-          {USER_ROLES.map((role) => (
-            <option key={role} value={role}>{t(ROLE_KEYS[role])}</option>
-          ))}
-        </select>
-      </label>
-      <label className="eg-shell-users__field">
-        <span className="eg-shell-users__field-label">{t("admin.users.filter.unit")}</span>
-        <select
-          onChange={(event: ChangeLike) => {
-            const value = changeValue(event);
-            onFilterChange({ unitId: value === "" ? undefined : value });
-          }}
-          value={query.unitId ?? ""}
-        >
-          <option value="">{t("admin.users.filter.unit.all")}</option>
-          {units.map((unit) => (
-            <option key={unit.id} value={unit.id}>{unit.name}</option>
-          ))}
-        </select>
-      </label>
-      <label className="eg-shell-users__field">
-        <span className="eg-shell-users__field-label">{t("admin.users.filter.status")}</span>
-        <select
-          onChange={(event: ChangeLike) => {
-            const value = changeValue(event);
-            onFilterChange({ status: value === "" ? undefined : (value as UserStatus) });
-          }}
-          value={query.status ?? ""}
-        >
-          <option value="">{t("admin.users.filter.status.all")}</option>
-          {USER_STATUSES.map((status) => (
-            <option key={status} value={status}>{t(STATUS_KEYS[status])}</option>
-          ))}
-        </select>
-      </label>
-      <label className="eg-shell-users__field">
-        <span className="eg-shell-users__field-label">{t("admin.users.filter.authMethod")}</span>
-        <select
-          onChange={(event: ChangeLike) => {
-            const value = changeValue(event);
-            onFilterChange({ authMethod: value === "" ? undefined : (value as UserAuthMethod) });
-          }}
-          value={query.authMethod ?? ""}
-        >
-          <option value="">{t("admin.users.filter.authMethod.all")}</option>
-          {USER_AUTH_METHODS.map((method) => (
-            <option key={method} value={method}>{t(AUTH_KEYS[method])}</option>
-          ))}
-        </select>
-      </label>
-      <label className="eg-shell-users__field">
-        <span className="eg-shell-users__field-label">{t("admin.users.sort.label")}</span>
-        <select
-          onChange={(event: ChangeLike) => onSortChange(changeValue(event) as SortChoice)}
-          value={sortChoiceFor(query.sort, query.order)}
-        >
-          {SORT_CHOICES.map((choice) => (
-            <option key={choice.value} value={choice.value}>{t(choice.labelKey)}</option>
-          ))}
-        </select>
-      </label>
-      <button className="eg-shell-users__clear" onClick={onClearFilters} type="button">
-        {t("admin.users.filter.clear")}
-      </button>
-    </div>
-  );
-}
-
-function UsersPagination({
-  meta,
-  onPageChange,
-}: {
-  readonly meta: UsersListMeta;
-  readonly onPageChange: (page: number) => void;
-}): JSX.Element {
-  const totalPages = Math.max(1, Math.ceil(meta.total / meta.pageSize));
-  const from = meta.total === 0 ? 0 : (meta.page - 1) * meta.pageSize + 1;
-  const to = Math.min(meta.total, meta.page * meta.pageSize);
-  return (
-    <div className="eg-shell-users__pagination">
-      <button disabled={meta.page <= 1} onClick={() => onPageChange(meta.page - 1)} type="button">
-        {t("admin.users.pagination.prev")}
-      </button>
-      <span>{`${t("admin.users.pagination.page")} ${meta.page}/${totalPages}`}</span>
-      <button disabled={meta.page >= totalPages} onClick={() => onPageChange(meta.page + 1)} type="button">
-        {t("admin.users.pagination.next")}
-      </button>
-      <span>{`${from}-${to}/${meta.total} ${t("admin.users.pagination.records")}`}</span>
-    </div>
+    <>
+      <Field label={t("admin.users.filter.search")}>
+        {(control) => (
+          <TextInput {...control} onChange={(event: ChangeLike) => onSearchChange(changeValue(event))} type="search" value={query.q ?? ""} />
+        )}
+      </Field>
+      <Field label={t("admin.users.filter.role")}>
+        {(control) => (
+          <Select
+            {...control}
+            onValueChange={(value) => onFilterChange({ role: value === "" ? undefined : (value as UserRole) })}
+            options={[
+              { label: t("admin.users.filter.role.all"), value: "" },
+              ...USER_ROLES.map((role) => ({ label: t(ROLE_KEYS[role]), value: role })),
+            ]}
+            value={query.role ?? ""}
+          />
+        )}
+      </Field>
+      <Field label={t("admin.users.filter.unit")}>
+        {(control) => (
+          <Select
+            {...control}
+            onValueChange={(value) => onFilterChange({ unitId: value === "" ? undefined : value })}
+            options={[
+              { label: t("admin.users.filter.unit.all"), value: "" },
+              ...units.map((unit) => ({ label: unit.name, value: unit.id })),
+            ]}
+            value={query.unitId ?? ""}
+          />
+        )}
+      </Field>
+      <Field label={t("admin.users.filter.status")}>
+        {(control) => (
+          <Select
+            {...control}
+            onValueChange={(value) => onFilterChange({ status: value === "" ? undefined : (value as UserStatus) })}
+            options={[
+              { label: t("admin.users.filter.status.all"), value: "" },
+              ...USER_STATUSES.map((status) => ({ label: t(STATUS_KEYS[status]), value: status })),
+            ]}
+            value={query.status ?? ""}
+          />
+        )}
+      </Field>
+      <Field label={t("admin.users.filter.authMethod")}>
+        {(control) => (
+          <Select
+            {...control}
+            onValueChange={(value) => onFilterChange({ authMethod: value === "" ? undefined : (value as UserAuthMethod) })}
+            options={[
+              { label: t("admin.users.filter.authMethod.all"), value: "" },
+              ...USER_AUTH_METHODS.map((method) => ({ label: t(AUTH_KEYS[method]), value: method })),
+            ]}
+            value={query.authMethod ?? ""}
+          />
+        )}
+      </Field>
+      <Field label={t("admin.users.sort.label")}>
+        {(control) => (
+          <Select
+            {...control}
+            onValueChange={(value) => onSortChange(value as SortChoice)}
+            options={SORT_CHOICES.map((choice) => ({ label: t(choice.labelKey), value: choice.value }))}
+            value={sortChoiceFor(query.sort, query.order)}
+          />
+        )}
+      </Field>
+    </>
   );
 }
 
@@ -386,6 +324,7 @@ interface BulkEditDialogProps {
  * Toplu düzenleme diyaloğu (E3 §e.5): işlem + değer seçilir, `dryRun`
  * önizlemesi ("Etki: N kullanıcı · M atlanacak") gösterilir, onay üzerine
  * atomik uygulanır. `admin` rolü değer seçeneklerinde hiç sunulmaz (§b).
+ * (Bu diyalog T156 kapsamı dışıdır; `Modal` ile çizilir.)
  */
 function BulkEditDialog({
   open,
@@ -500,12 +439,18 @@ export interface UsersListViewProps {
   readonly onBulkOperationChange: (operation: BulkOperation) => void;
   readonly onBulkValueChange: (value: string) => void;
   readonly onBulkApply: () => void;
+  /** <768 px "Filtreler" diyaloğunun açık/kapalı durumu; salt görsel olduğu için
+   *  `UsersPage` üzerinde tutulur (view saf props'tan beslenir, T156). */
+  readonly filtersOpen: boolean;
+  readonly onFiltersOpenChange: (open: boolean) => void;
 }
 
 /**
  * Kullanıcılar listesinin durumsuz (props'tan beslenen) görünümü. `UsersPage`
  * veri getirmeyi sarar; bu bileşen DOM'suz testlerde doğrudan render edilir
  * (SSR efekt çalıştırmaz, bu yüzden durum burada açıkça props'tan gelir).
+ * Mobil filtre diyaloğunun açık/kapalı durumu salt görsel olduğundan yerel
+ * `useState` ile tutulur (T156).
  */
 export function UsersListView({
   status,
@@ -534,77 +479,89 @@ export function UsersListView({
   onBulkOperationChange,
   onBulkValueChange,
   onBulkApply,
+  filtersOpen,
+  onFiltersOpenChange,
 }: UsersListViewProps): JSX.Element {
   function onKeyDown(event: KeyboardEvent<HTMLDivElement>): void {
     if (event.key === "Escape") onClearSelection();
   }
   const filtered = hasActiveFilters(query);
+  const activeCount = countActiveFilters(query);
   const selectionText = selected.size > 0 ? `${selected.size} ${t("admin.users.selection.suffix")}` : "";
+  const columns = buildUserColumns(units, selected, onToggleSelect, currentUserId);
+  const sort: DataTableSort | undefined =
+    query.sort === "displayName" ? { direction: query.order ?? DEFAULT_ORDER, key: "displayName" } : undefined;
+
+  function onTableSortChange(next: DataTableSort | undefined): void {
+    onSortChange(next === undefined ? sortChoiceFor(DEFAULT_SORT, DEFAULT_ORDER) : sortChoiceFor("displayName", next.direction));
+  }
+
+  const emptyState: ReactNode = filtered ? (
+    <EmptyState
+      action={<Button onClick={onClearFilters} variant="secondary">{t("admin.users.filter.clear")}</Button>}
+      icon={<icons.Users />}
+      title={t("admin.users.filtered.empty")}
+    />
+  ) : (
+    <EmptyState action={<AddUserLink variant="secondary" />} icon={<icons.Users />} title={t("table.empty")} />
+  );
 
   return (
     <section className="eg-shell-page eg-shell-users">
       <div className="eg-shell-users__head">
         <h1 className="eg-shell-page__title">{t("admin.users.title")}</h1>
-        <a className="eg-shell-users__add" href={adminUserCreateHref()}>
-          {t("admin.users.action.add")}
-        </a>
+        <div className="eg-shell-adminlist__actions">
+          <Button onClick={onClearFilters} variant="ghost">{t("admin.users.filter.clear")}</Button>
+          <AddUserLink />
+        </div>
       </div>
-      <UsersFilters
-        onClearFilters={onClearFilters}
-        onFilterChange={onFilterChange}
-        onSearchChange={onSearchChange}
-        onSortChange={onSortChange}
-        query={query}
-        units={units}
-      />
+      <div className="eg-shell-adminlist__filterbar">
+        <UsersFilterFields onFilterChange={onFilterChange} onSearchChange={onSearchChange} onSortChange={onSortChange} query={query} units={units} />
+      </div>
+      <div className="eg-shell-adminlist__filtertrigger">
+        <Button icon={<icons.Filter />} onClick={() => onFiltersOpenChange(true)} variant="secondary">
+          {t("admin.users.filter.open")}
+          {activeCount > 0 ? <Badge tone="info">{String(activeCount)}</Badge> : null}
+        </Button>
+      </div>
+      <Dialog
+        footer={<Button onClick={onClearFilters} variant="ghost">{t("admin.users.filter.clear")}</Button>}
+        onOpenChange={onFiltersOpenChange}
+        open={filtersOpen}
+        title={t("admin.users.filter.open")}
+      >
+        <div className="eg-shell-adminlist__filterfields">
+          <UsersFilterFields onFilterChange={onFilterChange} onSearchChange={onSearchChange} onSortChange={onSortChange} query={query} units={units} />
+        </div>
+      </Dialog>
       <div className="eg-shell-users__body" onKeyDown={onKeyDown}>
-        {status === "loading" && (
-          <div aria-hidden="true" className="eg-shell-users__skeleton">
-            <span className="eg-shell-users__skeleton-row" />
-            <span className="eg-shell-users__skeleton-row" />
-            <span className="eg-shell-users__skeleton-row" />
-          </div>
-        )}
-        {status === "error" && (
+        {status === "error" ? (
           <div className="eg-shell-users__error" role="alert">
             <p className="eg-shell-users__error-title">{t("admin.users.error.title")}</p>
             <p className="eg-shell-users__error-body">{t("admin.users.error.body")}</p>
-            <button className="eg-shell-users__retry" onClick={onRetry} type="button">
-              {t("admin.users.error.retry")}
-            </button>
+            <Button onClick={onRetry} variant="secondary">{t("admin.users.error.retry")}</Button>
           </div>
-        )}
-        {status === "ready" && result !== null && result.meta.total === 0 && !filtered && (
-          <div className="eg-shell-users__empty">
-            <p>{t("table.empty")}</p>
-            <a href={adminUserCreateHref()}>{t("admin.users.action.add")}</a>
-          </div>
-        )}
-        {status === "ready" && result !== null && result.meta.total === 0 && filtered && (
-          <div className="eg-shell-users__empty">
-            <p>{t("admin.users.filtered.empty")}</p>
-            <button onClick={onClearFilters} type="button">
-              {t("admin.users.filter.clear")}
-            </button>
-          </div>
-        )}
-        {status === "ready" && result !== null && result.meta.total > 0 && (
+        ) : (
           <>
-            <UsersTable
-              currentUserId={currentUserId}
-              onToggleSelect={onToggleSelect}
-              selected={selected}
-              units={units}
-              users={result.data}
+            <DataTable<AdminUser>
+              caption={t("admin.users.table.caption")}
+              columns={columns}
+              empty={emptyState}
+              loading={status === "loading"}
+              onSortChange={onTableSortChange}
+              rowKey={(user) => user.id}
+              rows={status === "ready" && result !== null ? result.data : []}
+              {...(sort !== undefined ? { sort } : {})}
             />
-            <UsersCards
-              currentUserId={currentUserId}
-              onToggleSelect={onToggleSelect}
-              selected={selected}
-              units={units}
-              users={result.data}
-            />
-            <UsersPagination meta={result.meta} onPageChange={onPageChange} />
+            {status === "ready" && result !== null && result.meta.total > 0 && (
+              <Pagination
+                onPageChange={onPageChange}
+                page={result.meta.page}
+                pageCount={Math.max(1, Math.ceil(result.meta.total / result.meta.pageSize))}
+                pageSize={result.meta.pageSize}
+                total={result.meta.total}
+              />
+            )}
           </>
         )}
       </div>
@@ -663,6 +620,7 @@ export function UsersPage({ dataSource, currentUserId = null }: UsersPageProps):
   const [bulkPreviewStatus, setBulkPreviewStatus] = useState<"idle" | "loading" | "error">("idle");
   const [bulkApplyStatus, setBulkApplyStatus] = useState<"idle" | "loading" | "error">("idle");
   const [bulkApplyResult, setBulkApplyResult] = useState<BulkEditResult | null>(null);
+  const [filtersOpen, setFiltersOpen] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -739,6 +697,8 @@ export function UsersPage({ dataSource, currentUserId = null }: UsersPageProps):
       bulkPreviewStatus={bulkPreviewStatus}
       bulkValue={bulkValue}
       currentUserId={currentUserId}
+      filtersOpen={filtersOpen}
+      onFiltersOpenChange={setFiltersOpen}
       onBulkApply={applyBulk}
       onBulkOperationChange={(operation) => {
         setBulkOperation(operation);
