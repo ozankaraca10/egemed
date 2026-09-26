@@ -8,6 +8,7 @@
 .eg-dialog,
 .eg-menu,
 .eg-select__content,
+.eg-datefield__panel,
 .eg-tooltip,
 .eg-toast__viewport {
   font-family: var(--font);
@@ -172,6 +173,52 @@
 .eg-select__item[data-disabled] { color: var(--ink-400); cursor: not-allowed; }
 .eg-select__check { position: absolute; inset-inline-end: 12px; display: inline-flex; color: var(--blue-600); }
 .eg-select__scroll { display: grid; place-items: center; block-size: 28px; color: var(--ink-600); cursor: default; }
+
+/* ---------- Tarih alanı ---------- */
+.eg-datefield { display: grid; gap: 6px; min-inline-size: 0; }
+.eg-datefield__row { display: flex; align-items: center; gap: var(--sp-2); }
+.eg-datefield__input { flex: 1 1 auto; min-inline-size: 0; letter-spacing: .02em; }
+.eg-datefield__row .eg-icon-btn { flex: none; }
+.eg-datefield--invalid .eg-datefield__input { border-color: var(--red-600); }
+.eg-datefield__error { display: flex; align-items: flex-start; gap: 6px; margin: 0; font-size: var(--fs-sm); color: var(--red-600); line-height: var(--lh-base); }
+.eg-datefield__error svg { flex: none; margin-block-start: 1px; }
+.eg-datefield__panel {
+  z-index: 1000;
+  inline-size: max-content;
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  background: var(--surface);
+  box-shadow: var(--elev-4);
+  animation: eg-fade-in var(--dur-1) var(--ease-out);
+}
+.eg-datefield__panel-head { display: flex; align-items: center; justify-content: space-between; gap: var(--sp-2); margin-block-end: 8px; }
+.eg-datefield__panel-title { font-size: var(--fs-md); font-weight: var(--fw-semibold); color: var(--ink-900); text-transform: capitalize; white-space: nowrap; }
+.eg-datefield__grid { display: grid; gap: 3px; }
+.eg-datefield__weekdays,
+.eg-datefield__week { display: grid; grid-template-columns: repeat(7, minmax(var(--ctl-h), 1fr)); gap: 3px; }
+.eg-datefield__weekday { display: grid; place-items: center; block-size: 24px; font-size: var(--fs-xs); font-weight: var(--fw-semibold); color: var(--ink-600); }
+.eg-datefield__day {
+  box-sizing: border-box;
+  display: grid;
+  place-items: center;
+  min-inline-size: var(--ctl-h);
+  min-block-size: var(--ctl-h);
+  border: 1px solid transparent;
+  border-radius: var(--r-md);
+  background: transparent;
+  color: var(--ink-800);
+  font: inherit;
+  font-size: var(--fs-sm);
+  cursor: pointer;
+}
+.eg-datefield__day:hover:not([aria-disabled="true"]) { background: var(--hover-tint); }
+.eg-datefield__day:focus-visible { outline: 2px solid var(--focus-color); outline-offset: 1px; box-shadow: var(--focus-halo); }
+.eg-datefield__day--outside { color: var(--ink-600); }
+.eg-datefield__day--today { border-color: var(--blue-300); font-weight: var(--fw-semibold); }
+.eg-datefield__day--selected { background: var(--blue-600); color: var(--card); font-weight: var(--fw-semibold); }
+.eg-datefield__day--selected.eg-datefield__day--today { border-color: var(--card); }
+.eg-datefield__day[aria-disabled="true"] { color: var(--ink-400); cursor: not-allowed; opacity: .5; }
 
 /* ---------- Onay kutusu / radyo ---------- */
 .eg-check { display: flex; align-items: flex-start; gap: 2px; min-block-size: var(--ctl-h); }

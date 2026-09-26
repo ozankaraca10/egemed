@@ -4,6 +4,7 @@ import {
   Button,
   Checkbox,
   DataTable,
+  DateField,
   Dialog,
   EmptyState,
   Field,
@@ -41,6 +42,8 @@ const SHOWCASE_ROWS: readonly ShowcaseRow[] = Array.from({ length: 12 }, (_, ind
 });
 
 const TABLE_PAGE_SIZE = 5;
+// Vitrin sabiti: "bugün" vurgusu göstermek için sabit ISO tarih; Date.now() KULLANILMAZ (AGENTS.md).
+const SHOWCASE_TODAY = "2026-09-26";
 
 /** T151 — premium bileşen vitrini (yalnız geliştirme). e2e: erişilebilirlik, klavye, ekran görüntüsü. */
 function Showcase(): JSX.Element {
@@ -55,6 +58,7 @@ function Showcase(): JSX.Element {
   const [tableSort, setTableSort] = useState<DataTableSort | undefined>(undefined);
   const [selected, setSelected] = useState<ReadonlySet<string>>(new Set());
   const [tablePage, setTablePage] = useState(1);
+  const [birthDate, setBirthDate] = useState("");
   const invalid = name.length > 0 && name.length < 2;
 
   const sortedRows = useMemo(() => {
@@ -113,6 +117,9 @@ function Showcase(): JSX.Element {
             )}
           </Field>
           <Field label="Not">{(control) => <TextArea {...control} rows={3} />}</Field>
+          <Field label="Doğum tarihi" hint="gg.aa.yyyy">
+            {(control) => <DateField {...control} value={birthDate} onValueChange={setBirthDate} today={SHOWCASE_TODAY} />}
+          </Field>
           <RadioGroup
             legend="Eşleme anahtarı"
             value={method}
