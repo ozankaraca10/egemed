@@ -1,4 +1,4 @@
-import type { Mode, ZoneVisit } from "./types";
+import type { Mode, Screen, ZoneVisit } from "./types";
 
 /** Saf akış fonksiyonları — DOM/React'a bağımlı değildir, testlerle doğrulanır. */
 
@@ -92,4 +92,18 @@ export function isTimedOut(elapsedMs: number, limitSec: number | undefined): boo
 export function remainingSec(elapsedMs: number, limitSec: number | undefined): number | null {
   if (!limitSec) return null;
   return Math.max(0, Math.ceil(limitSec - elapsedMs / 1000));
+}
+
+/** Birleşik bar header adım göstergesinin geri navigasyon hedefi (T183): yalnız adım 0
+ *  (mod seçimi) tıklanabilir bir hedeftir. Adım 1 ("Çalışma") tamamlanmış olsa da (sonuç
+ *  ekranındayken kabuk onu düğme yapar) çalışma ekranına geri dönmek anlamlı değildir, bu
+ *  yüzden yok sayılır — yalnız 0 döner, başka her indeks (current dahil) null döner. */
+export function stepBackTarget(index: number): "modes" | null {
+  return index === 0 ? "modes" : null;
+}
+
+/** Etkin bir oturum (uygulama/değerlendirme ekranı) sürerken mod seçimine dönüş onay ister
+ *  (T183); öğrenme ekranında kaydedilmemiş ilerleme riski yoktur, onay istenmez. */
+export function needsExitConfirm(screen: Screen): boolean {
+  return screen === "simulation";
 }
