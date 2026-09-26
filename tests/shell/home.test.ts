@@ -37,7 +37,7 @@ describe("HomePage premium yerleşimi", () => {
       `<a class="eg-shell-hero__secondary" href="#${HOW_SECTION_ID}">${t("home.hero.secondary")}</a>`,
     );
   });
-  it("hero'dan sonra üç adımlı 'Nasıl çalışır?' bölümünü sim kartlarından önce çizer", () => {
+  it("T162 sırası: karşılama → simler → ilerleme → 'Nasıl çalışır?' (üç adım) → güven kanıtları", () => {
     const html = render();
     expect(html).toContain(`id="${HOW_SECTION_ID}"`);
     expect(html).toContain(t("home.how.title"));
@@ -48,7 +48,9 @@ describe("HomePage premium yerleşimi", () => {
       expect(html, step).toContain(t(`home.how.${step}.title`));
       expect(html, step).toContain(t(`home.how.${step}.body`));
     }
-    expect(html.indexOf(`id="${HOW_SECTION_ID}"`)).toBeLessThan(html.indexOf('id="eg-home-sims"'));
+    expect(html.indexOf('id="eg-home-sims"')).toBeLessThan(html.indexOf('id="eg-home-progress"'));
+    expect(html.indexOf('id="eg-home-progress"')).toBeLessThan(html.indexOf(`id="${HOW_SECTION_ID}"`));
+    expect(html.indexOf(`id="${HOW_SECTION_ID}"`)).toBeLessThan(html.indexOf(`id="${TRUST_SECTION_ID}"`));
     expect(html).toContain(`id="${TRUST_SECTION_ID}"`);
   });
   it("üç sim kartını rozet ve simülatörler bağlantısıyla listeler", () => {
