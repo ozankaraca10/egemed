@@ -1,7 +1,7 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Locator, type Page, type TestInfo } from "@playwright/test";
 import { captureRouteScreenshot, writeAxeArtifact } from "./artifacts";
-import { trackErrors } from "./helpers";
+import { clickSimBarAction, trackErrors } from "./helpers";
 import { completeTopicPractice, giveAnswer, startTopicPractice, submitAnswer, type SimId } from "./sim-flows";
 import auscultaAllowlistJson from "./ausculta-a11y-allowlist.json" with { type: "json" };
 import opacaAllowlistJson from "./opaca-a11y-allowlist.json" with { type: "json" };
@@ -48,7 +48,6 @@ const MIN_TARGET_PX = 44;
  * katı) izin listesinde izleniyor.
  */
 const DISABLED_RULES = ["target-size"];
-const SIMBAR = ".eg-shell-simbar";
 
 type ScreenId = "modes" | "learn" | "case" | "assessment" | "results" | "gami" | "help";
 
@@ -141,7 +140,7 @@ async function openSim(page: Page, sim: SimConfig): Promise<Locator> {
 
 /** Birleşik bardaki sim eylemini tıklatır (T108: sim araç çubuğu yoktur). */
 async function openSimBarAction(root: Locator, label: string): Promise<void> {
-  await root.page().locator(SIMBAR).getByRole("button", { name: label }).click();
+  await clickSimBarAction(root.page(), label);
 }
 
 

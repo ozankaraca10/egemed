@@ -148,10 +148,10 @@ test.describe("footer her zaman altta (T159 ek)", () => {
     expect(errors).toEqual([]);
   });
 
-  test("sim modunda footer çizilmez (bozulmadı)", async ({ page }) => {
+  test("sim modunda da tek tip platform footer'ı çizilir (26 Eyl 2026)", async ({ page }) => {
     await signIn(page, "student");
     await page.goto("/#/sims/opaca");
-    await expect(page.locator(".eg-shell-footer")).toHaveCount(0);
+    await expect(page.locator(".eg-shell-footer")).toHaveCount(1);
     await expect(page.locator(".eg-shell-main--sim")).toBeVisible();
   });
 });

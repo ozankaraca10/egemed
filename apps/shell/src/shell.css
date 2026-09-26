@@ -659,21 +659,25 @@ html, body { margin: 0; }
 .eg-shell-header--sim .eg-shell-logo__copy { display: none; }
 .eg-shell-main--sim { max-width: none; margin: 0; padding: 0; }
 .eg-shell-simbar { display: flex; flex: 1 1 auto; align-items: center; gap: var(--sp-2); min-width: 0; }
-.eg-shell-simbar__crumbs { display: flex; flex: 0 0 auto; align-items: center; gap: var(--sp-1); }
-.eg-shell-simbar__back {
-  box-sizing: border-box; display: inline-flex; align-items: center; gap: var(--sp-1);
-  min-width: var(--eg-shell-touch-min); min-height: var(--eg-shell-touch-min); padding: 0 var(--sp-2);
-  border-radius: var(--r-md); color: var(--blue-100); font-size: var(--fs-sm); font-weight: 600; text-decoration: none;
+.eg-shell-simbar__title { flex: 0 1 auto; min-width: 0; margin: 0; font-size: var(--fs-lg); }
+/* 26 Eyl 2026: geri düğmesi yerine sim değiştirici — logo + ad + aşağı ok, tek tıklanabilir öğe. */
+.eg-shell-simbar__switch {
+  box-sizing: border-box; display: inline-flex; align-items: center; gap: var(--sp-2); max-width: 100%;
+  min-height: var(--eg-shell-touch-min); padding: 0 var(--sp-2) 0 var(--sp-1);
+  background: none; border: 0; border-radius: var(--r-md);
+  color: var(--card); font: inherit; font-weight: 800; letter-spacing: .01em; cursor: pointer;
+  transition: background-color var(--dur-2) var(--ease-out), border-color var(--dur-2) var(--ease-out);
 }
-.eg-shell-simbar__back:hover { background: var(--navy-700); color: var(--card); }
-.eg-shell-simbar__back:focus-visible,
+.eg-shell-simbar__switch:hover,
+.eg-shell-simbar__switch[data-state="open"] { background: var(--navy-700); box-shadow: inset 0 0 0 1px var(--navy-600); }
+.eg-shell-simbar__switch:focus-visible,
+.eg-shell-simbar__stepButton:focus-visible,
+.eg-shell-simbar__chip:focus-visible,
 .eg-shell-simbar__action:focus-visible { outline: 2px solid var(--blue-300); outline-offset: 2px; }
-.eg-shell-simbar__backLabel { display: none; }
-.eg-shell-simbar__sep { display: none; color: var(--blue-300); }
-.eg-shell-simbar__title {
-  flex: 0 1 auto; min-width: 0; overflow: hidden; margin: 0; color: var(--card); font-size: var(--fs-lg); font-weight: 800;
-  letter-spacing: .01em; text-overflow: ellipsis; white-space: nowrap;
-}
+.eg-shell-simbar__simLogo { flex: none; width: 1.5rem; height: 1.5rem; object-fit: contain; }
+.eg-shell-simbar__simName { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.eg-shell-simbar__chev { flex: none; width: 1rem; height: 1rem; opacity: .85; }
+.eg-shell-simbar__menuLogo { display: block; width: 20px; height: 20px; padding: 2px; background: var(--navy-800); border-radius: var(--r-sm); object-fit: contain; }
 .eg-shell-simbar__icon { flex: 0 0 auto; width: 1.25rem; height: 1.25rem; }
 .eg-shell-simbar__steps { display: none; align-items: center; gap: var(--sp-1); margin: 0 0 0 var(--sp-3); padding: 0; list-style: none; }
 .eg-shell-simbar__step { display: inline-flex; align-items: center; gap: var(--sp-1); color: var(--blue-200); font-size: var(--fs-xs); font-weight: 600; white-space: nowrap; }
@@ -688,16 +692,27 @@ html, body { margin: 0; }
 .eg-shell-simbar__step--done .eg-shell-simbar__stepNum { background: var(--green-600); border-color: var(--green-600); color: var(--card); }
 .eg-shell-simbar__step--current { color: var(--card); font-weight: 800; }
 .eg-shell-simbar__step--current .eg-shell-simbar__stepNum { background: var(--blue-600); border-color: var(--blue-300); color: var(--card); }
+.eg-shell-simbar__stepButton {
+  display: inline-flex; align-items: center; gap: var(--sp-1); min-height: var(--eg-shell-touch-min); padding: 0 var(--sp-1);
+  background: none; border: 0; border-radius: var(--r-md); color: inherit; font: inherit; cursor: pointer;
+}
+.eg-shell-simbar__stepButton:hover { background: var(--navy-700); color: var(--card); }
 .eg-shell-simbar__spacer { flex: 1 1 auto; }
 .eg-shell-simbar__chip {
   display: none; flex: 0 1 auto; min-width: 0; max-width: 13rem; overflow: hidden; text-overflow: ellipsis; align-items: center; min-height: 1.75rem; padding: 0 var(--sp-2);
   background: var(--navy-700); border: 1px solid var(--navy-600); border-radius: var(--r-pill);
   color: var(--card); font-size: var(--fs-xs); font-weight: 700; white-space: nowrap;
 }
+button.eg-shell-simbar__chip { min-height: var(--eg-shell-touch-min); font-family: inherit; cursor: pointer; }
+button.eg-shell-simbar__chip:hover { background: var(--navy-600); }
+/* Durum (süre, ilerleme) düğme görünümü almaz: düz metin. */
+.eg-shell-simbar__status { display: none; flex: 0 1 auto; min-width: 0; overflow: hidden; color: var(--blue-100); font-size: var(--fs-xs); font-weight: 700; font-variant-numeric: tabular-nums; text-overflow: ellipsis; white-space: nowrap; }
 .eg-shell-simbar__chip--learn { border-color: var(--green-500); }
 .eg-shell-simbar__chip--practice { border-color: var(--blue-400); }
 .eg-shell-simbar__chip--assessment { border-color: var(--purple-600); }
-.eg-shell-simbar__actions { display: flex; flex: 0 0 auto; gap: var(--sp-1); }
+/* Eylemler ≥768 px satır içi, <768 px "⋯" menüsünde (yatay taşma yok). */
+.eg-shell-simbar__actions { display: none; flex: 0 0 auto; gap: var(--sp-1); }
+.eg-shell-simbar__more { display: flex; flex: 0 0 auto; }
 .eg-shell-simbar__action {
   box-sizing: border-box; display: inline-flex; align-items: center; justify-content: center; gap: var(--sp-1);
   min-width: var(--eg-shell-touch-min); min-height: var(--eg-shell-touch-min); padding: 0 var(--sp-2);
@@ -744,17 +759,16 @@ html, body { margin: 0; }
 @media (min-width: 1024px) {
   .eg-shell-header:not(.eg-shell-header--sim) .eg-shell-account__who { display: inline-flex; }
 }
-/* Dar ekranda bar yalnız geri, başlık, eylem simgelerini ve hesap düğmesini
-   taşır (yatay taşma yok); hesap düğmesi baş harf dairesine iner. Genişledikçe
-   marka, adımlar, çipler ve etiketler kademeli açılır. */
+/* Dar ekranda bar logo, sim değiştirici, "⋯" eylem menüsü ve hesap düğmesini taşır (yatay
+   taşma yok); genişledikçe eylemler satır içine, adımlar, etiketler ve çipler kademeli açılır. */
 @media (max-width: 767.98px) {
-  .eg-shell-header--sim .eg-shell-brand { display: none; }
+  /* 26 Eyl 2026: logo dar ekranda da kalır (ana sayfaya tek dokunuş); eylemler "⋯" menüsünde. */
   .eg-shell-account__chev { display: none; }
 }
 @media (min-width: 768px) {
   .eg-shell-simbar__title { flex-shrink: 0; }
-  .eg-shell-simbar__backLabel { display: inline; }
-  .eg-shell-simbar__sep { display: inline; }
+  .eg-shell-simbar__actions { display: flex; }
+  .eg-shell-simbar__more { display: none; }
 }
 @media (min-width: 1024px) {
   .eg-shell-simbar__steps { display: flex; }
@@ -764,11 +778,20 @@ html, body { margin: 0; }
 }
 /* Çipler (mod, ilerleme) en geniş ekranda; bar önceliği: başlık > eylemler > adımlar > çipler. */
 @media (min-width: 1600px) {
-  .eg-shell-simbar__chip { display: inline-flex; }
+  .eg-shell-simbar__chip,
+  .eg-shell-simbar__status { display: inline-flex; }
 }
 @media (prefers-reduced-motion: reduce) {
   .eg-shell-sim-page__host { transition: none; }
 }
+
+/* Kabuğun standart sim "Hakkında" penceresi (sim kendi Hakkında'sını vermezse). */
+.eg-shell-simabout { display: grid; gap: var(--sp-3); color: var(--ink-700); line-height: 1.55; }
+.eg-shell-simabout p { margin: 0; }
+.eg-shell-simabout__logo { width: auto; height: 48px; padding: var(--sp-2) var(--sp-3); background: var(--navy-900); border-radius: var(--r-md); justify-self: start; }
+.eg-shell-simabout__tagline { color: var(--ink-900); font-weight: 700; }
+.eg-shell-simabout__dev { color: var(--ink-600); font-size: var(--fs-sm); }
+.eg-shell-simabout__note { padding: var(--sp-2) var(--sp-3); background: var(--blue-50); border-radius: var(--r-md); color: var(--ink-700); font-size: var(--fs-sm); }
 
 /* T151 — geliştirme vitrini (#/_vitrin); üretimde çizilmez. */
 .eg-shell-vitrin { max-inline-size: 1100px; margin: 0 auto; padding: var(--sp-5) var(--sp-4) var(--sp-6); display: grid; gap: var(--sp-6); }

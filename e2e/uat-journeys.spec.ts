@@ -1,5 +1,5 @@
 import { expect, test, type Locator, type Page } from "@playwright/test";
-import { fillAdminFilter, openRoute, trackErrors } from "./helpers";
+import { chooseFromSimSwitcher, clickSimBarAction, fillAdminFilter, openRoute, trackErrors } from "./helpers";
 import { completeTopicPractice, giveAnswer, startTopicPractice, submitAnswer } from "./sim-flows";
 
 /**
@@ -14,7 +14,6 @@ import { completeTopicPractice, giveAnswer, startTopicPractice, submitAnswer } f
 
 const ADMIN_ENTRY = "/#/giris/admin";
 const STUDENT_ENTRY = "/#/giris/test-ogrenci";
-const SIMBAR = ".eg-shell-simbar";
 
 /** Vite dev sunucusunun HMR soketi her tam sayfa geçişinde/offline sırasında
  *  düşer; bu gürültü uygulama hatası değildir (bkz. admin.spec.ts `openAdmin`). */
@@ -40,7 +39,7 @@ async function signInAdmin(page: Page): Promise<void> {
 
 /** Birleşik bardaki sim eylemini tıklatır (sims-a11y.spec.ts deseni). */
 async function openSimBarAction(page: Page, label: string): Promise<void> {
-  await page.locator(SIMBAR).getByRole("button", { name: label }).click();
+  await clickSimBarAction(page, label);
 }
 
 async function assertNoHorizontalScroll(page: Page): Promise<void> {
@@ -98,7 +97,7 @@ test.describe("T155 UAT yolculukları", () => {
     await openSimBarAction(page, "İlerlemem");
     await expect(page.getByRole("tab", { name: "Başarılarım" })).toBeVisible();
 
-    await page.getByRole("link", { name: "Simülatörlere dön" }).click();
+    await chooseFromSimSwitcher(page, "Tüm simülatörler");
     await expect(page).toHaveURL(/#\/simulatorler$/);
     await expect(page.locator(".eg-sim-opaca")).toHaveCount(0);
 

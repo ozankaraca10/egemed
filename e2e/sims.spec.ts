@@ -1,8 +1,7 @@
 import { expect, test, type Page } from "@playwright/test";
 import { captureRouteScreenshot } from "./artifacts";
-import { openRoute, trackErrors } from "./helpers";
+import { chooseFromSimSwitcher, clickSimBarAction, openRoute, trackErrors } from "./helpers";
 
-const NAV = "nav";
 
 /** Simülatörler sayfasındaki kart bağlantısıyla paketin gerçek modül köküne geçer. */
 /** Pulse kaynak runtime'ı gölge DOM kökünde çalışır (PULSE-00). */
@@ -16,7 +15,8 @@ async function openSimCard(page: Page, simId: "ausculta" | "pulse"): Promise<voi
 }
 
 async function backToSimulators(page: Page): Promise<void> {
-  await page.locator(`${NAV} a[href="#/simulatorler"]`).click();
+  // 26 Eyl 2026: geri bağlantısı yok; başlıktaki sim değiştiriciden "Tüm simülatörler".
+  await chooseFromSimSwitcher(page, "Tüm simülatörler");
   await expect(page).toHaveURL(/#\/simulatorler$/);
   await expect(page.locator(".eg-sim-ausculta")).toHaveCount(0);
   await expect(page.locator(PULSE_ROOT)).toHaveCount(0);
@@ -37,9 +37,8 @@ test.describe("sim rotaları yaşam döngüsü", () => {
     await expect(page.locator(".eg-sim-ausculta.app-shell")).toHaveCount(1);
     await expect(page.locator(PULSE_ROOT)).toHaveCount(0);
 
-    // Birleşik barda ana gezinme yoktur: önce konumdan Simülatörler'e, oradan Ana sayfaya.
-    await page.locator('a[href="#/simulatorler"]').first().click();
-    await page.locator(`${NAV} a[href="#/"]`).click();
+    // Birleşik barda ana gezinme yoktur: logo doğrudan ana sayfaya götürür.
+    await page.locator(".eg-shell-brand").click();
     await expect(page).toHaveURL(/#\/$/);
     await expect(page.locator(".eg-sim-ausculta")).toHaveCount(0);
   });
@@ -95,7 +94,7 @@ test.describe("Opaca sim rotası (gerçek modül)", () => {
     expect(errors, "konsol/sayfa hatası").toEqual([]);
 
     // Simülatörler'e dönünce Opaca kökü temiz biçimde kaldırılır.
-    await page.locator(`${NAV} a[href="#/simulatorler"]`).click();
+    await chooseFromSimSwitcher(page, "Tüm simülatörler");
     await expect(page).toHaveURL(/#\/simulatorler$/);
     await expect(page.locator(".eg-sim-opaca")).toHaveCount(0);
 
@@ -112,7 +111,7 @@ test.describe("birleşik bar (Opaca ve Ausculta)", () => {
       const steps = page.locator(".eg-shell-simbar__steps");
       if (width >= 1024) await expect(steps).toBeVisible();
       await expect(page.locator(".eg-sim-toolbar")).toHaveCount(0);
-      await page.getByRole("button", { name: "Yardım" }).click();
+      await clickSimBarAction(page, "Yardım");
       await expect(page.getByRole("dialog", { name: "Yardım" })).toBeVisible();
       await captureRouteScreenshot(page, testInfo.project.name, `#/sims/${simId} birleşik bar`);
       expect(errors, "konsol/sayfa hatası").toEqual([]);
@@ -124,7 +123,7 @@ test.describe("Ausculta ilerleme sayfası", () => {
   test("İlerlemem Başarılarım ve Liderlik sekmelerini açar", async ({ page }, testInfo) => {
     const errors = trackErrors(page);
     await openRoute(page, "#/sims/ausculta");
-    await page.locator(".eg-shell-simbar").getByRole("button", { name: "İlerlemem" }).click();
+    await clickSimBarAction(page, "İlerlemem");
     await expect(page.getByRole("tab", { name: "Başarılarım" })).toBeVisible();
     await expect(page.getByRole("tab", { name: "Liderlik Tahtası" })).toBeVisible();
     await expect(page.getByRole("heading", { name: "Başarılarım", exact: true })).toBeVisible();
@@ -141,7 +140,7 @@ test.describe("Opaca ilerleme sayfası", () => {
   test("İlerlemem Başarılarım ve Liderlik sekmelerini açar", async ({ page }, testInfo) => {
     const errors = trackErrors(page);
     await openRoute(page, "#/sims/opaca");
-    await page.locator(".eg-shell-simbar").getByRole("button", { name: "İlerlemem" }).click();
+    await clickSimBarAction(page, "İlerlemem");
     await expect(page.getByRole("tab", { name: "Başarılarım" })).toBeVisible();
     await expect(page.getByRole("heading", { name: "Başarılarım", exact: true })).toBeVisible();
     await captureRouteScreenshot(page, testInfo.project.name, "#/sims/opaca basarilarim");
@@ -182,7 +181,7 @@ test.describe("kompakt hesap menüsü (T120)", () => {
     expect(overflow, "yatay kaydırma").toBe(false);
 
     // Dışarı tıklama kapatır; Esc kapatıp odağı düğmeye döndürür.
-    await page.locator(".eg-shell-simbar__title").click();
+    await page.locator(".eg-shell-footer").click();
     await expect(page.getByRole("menu")).toBeHidden();
     await account.press("Enter");
     await expect(page.getByRole("menu")).toBeVisible();

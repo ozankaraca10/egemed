@@ -12,7 +12,8 @@ test.describe("tam ekran önerisi yok (T139)", () => {
     await expect(page.locator(".eg-sim-opaca").first()).toBeVisible({ timeout: 20_000 });
     await page.waitForTimeout(1_500);
     await expect(page.getByRole("dialog", { name: "Tam ekran önerilir" })).toHaveCount(0);
-    await expect(page.getByRole("button", { name: "Tam ekran" }).first()).toBeVisible();
+    // Tam ekran kabuğun birleşik barındadır (dar ekranda "⋯" menüsünde).
+    await expect(page.locator('.eg-shell-simbar__actions button[aria-label="Tam ekran"]')).toHaveCount(1);
   });
 
   test("Pulse açılışta tam ekran penceresi açmaz", async ({ page }) => {
@@ -21,7 +22,8 @@ test.describe("tam ekran önerisi yok (T139)", () => {
     await expect(root.locator("#appRoot")).toBeVisible({ timeout: 20_000 });
     await page.waitForTimeout(1_500);
     await expect(root.locator("dialog#fullscreenPrompt[open]")).toHaveCount(0);
-    await expect(page.getByRole("button", { name: "Tam ekran" }).first()).toBeVisible();
+    // Tam ekran kabuğun birleşik barındadır (dar ekranda "⋯" menüsünde).
+    await expect(page.locator('.eg-shell-simbar__actions button[aria-label="Tam ekran"]')).toHaveCount(1);
   });
 });
 
@@ -30,5 +32,5 @@ test("Pulse oynatma çubuğunda ikinci tam ekran düğmesi yok (T139)", async ({
   const root = page.locator(".egemed-pulse-runtime");
   await expect(root.locator("#appRoot")).toBeVisible({ timeout: 20_000 });
   await expect(root.locator("#transportFullscreen")).toBeHidden();
-  await expect(page.getByRole("button", { name: "Tam ekran" })).toHaveCount(1);
+  await expect(page.locator('.eg-shell-simbar__actions button[aria-label="Tam ekran"]')).toHaveCount(1);
 });

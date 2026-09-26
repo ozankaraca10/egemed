@@ -125,25 +125,47 @@ describe("SimRoute yükleniyor durumu", () => {
     expect(html).toContain("eg-shell-sim-page__stage");
   });
 
-  it("sim rotasında birleşik bar tek h1, konum bağlantısı ve simin eylemlerini çizer; ana gezinme ve footer yok", () => {
+  it("sim rotasında birleşik bar: tek h1 içinde sim değiştirici, sabit eylem sırası, footer (26 Eyl 2026)", () => {
     for (const simId of SIMULATOR_IDS) {
+      const selected: number[] = [];
       const html = renderToStaticMarkup(
         createElement(ShellLayout, {
           children: null,
           route: resolveRoute(simHref(simId)),
           simChrome: {
-            actions: [{ icon: "help", id: "help", label: "Yardım", onSelect: () => undefined }],
-            steps: { current: 1, labels: ["Mod seçimi", "Çalışma", "Tamamla"] },
+            actions: [
+              { icon: "help", id: "help", label: "Yardım", onSelect: () => undefined },
+              { icon: "fullscreen", id: "fs", label: "Simin tam ekranı", onSelect: () => undefined },
+              { icon: "progress", id: "progress", label: "İlerlemem", onSelect: () => undefined },
+            ],
+            steps: { current: 1, labels: ["Mod seçimi", "Çalışma", "Tamamla"], onSelect: (index) => selected.push(index) },
+            chips: [
+              { id: "mode", label: "Değerlendirme", tone: "assessment" },
+              { id: "timer", label: "04:59", tone: "neutral" },
+            ],
           },
         }),
       );
       expect((html.match(/<h1\b/g) ?? []).length, simId).toBe(1);
-      expect(html, simId).toContain(`<h1 class="eg-shell-simbar__title">${t(`sims.${simId}.name`)}</h1>`);
-      expect(html, simId).toContain(`href="${routeHref("simulators")}"`);
+      // Geri bağlantısı yok; başlık sim değiştirici düğmesidir.
+      expect(html, simId).toMatch(new RegExp(`<h1 class="eg-shell-simbar__title"><button[^>]*class="eg-shell-simbar__switch"`));
+      expect(html, simId).toContain(`<span class="eg-shell-simbar__simName">${t(`sims.${simId}.name`)}</span>`);
+      expect(html, simId).not.toContain("eg-shell-simbar__back");
+      // Logo ana sayfaya gider.
+      expect(html, simId).toContain(`class="eg-shell-brand" href="${routeHref("home")}"`);
+      // Tamamlanan adım düğmedir; güncel adım aria-current taşır.
       expect(html, simId).toContain('aria-current="step"');
-      expect(html, simId).toContain('aria-label="Yardım"');
+      expect(html, simId).toContain('class="eg-shell-simbar__stepButton"');
+      // Mod çipi düğme (mod seçimine döner), süre düz durum metni.
+      expect(html, simId).toMatch(/<button class="eg-shell-simbar__chip eg-shell-simbar__chip--assessment"/);
+      expect(html, simId).toContain('<span class="eg-shell-simbar__status">04:59</span>');
+      // Sabit sıra: İlerlemem · Tam ekran (kabuğun) · Yardım · Hakkında (kabuğun); simin tam ekranı yok sayılır.
+      const group = html.slice(html.indexOf('class="eg-shell-simbar__actions"'), html.indexOf('class="eg-shell-simbar__more"'));
+      const labels = [...group.matchAll(/aria-label="([^"]+)"/g)].map((match) => match[1]);
+      expect(labels, simId).toEqual(["İlerlemem", t("shell.sim.action.fullscreen"), "Yardım", t("shell.sim.action.about")]);
+      expect(html, simId).not.toContain("Simin tam ekranı");
       expect(html, simId).not.toContain('class="eg-shell-nav"');
-      expect(html, simId).not.toContain("eg-shell-footer");
+      expect(html, simId).toContain("eg-shell-footer");
     }
   });
 });
