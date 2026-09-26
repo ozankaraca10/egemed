@@ -55,6 +55,13 @@ flex: 1; display: flex; flex-direction: column; min-height: 0;
 .eg-sim-opaca .screen-body {
 flex: 1; min-height: 0; overflow: auto;
 }
+/* T167: mod seçim ekranı kısa içerikte kabuğun tüm yüksekliğini varsaymamalı —
+   kartlar altında büyüyen boş alan bırakmak yerine dikeyde ortalanır. Yalnız
+   `.mode-cards` içeren gövdeyi hedefler; çalışma ekranlarının (öğrenme/film/
+   değerlendirme) doldur+kaydır davranışı `.screen-body` temel kuralıyla değişmez. */
+.eg-sim-opaca .screen-body:has(.mode-cards) {
+display: flex; flex-direction: column; justify-content: center;
+}
 .eg-sim-opaca .screen-body.no-scroll {
 overflow: hidden;
 }
@@ -561,6 +568,18 @@ background: var(--purple-100); color: var(--purple-600);
 }
 .eg-sim-opaca .mode-card .btn {
 margin-top: auto; width: 100%;
+}
+/* T167: kilit≠öneri ipucu — kart genelinde tek CSS kuralı yoktu, tarayıcı
+   varsayılan <p> boşluğu (1em üst/alt) kartı gereksiz uzatıp grid satırının
+   diğer kartları eşitlemek için gerdiği boşluğu büyütüyordu (dikey uzama). */
+.eg-sim-opaca .mode-lock-hint {
+display: flex; align-items: center; justify-content: center; gap: 6px;
+  margin: 0 0 6px; padding: 5px 10px;
+  font-size: var(--fs-xs); color: var(--blue-700); background: var(--blue-50);
+  border-radius: var(--r-pill); line-height: 1.3;
+}
+.eg-sim-opaca .mode-lock-hint svg {
+flex-shrink: 0; color: var(--blue-600);
 }
 .eg-sim-opaca .mode-rules {
 margin: 2px 0 0; font-size: var(--fs-xs); color: var(--ink-600); text-align: center;
