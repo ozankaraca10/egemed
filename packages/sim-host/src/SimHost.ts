@@ -193,6 +193,8 @@ export interface SimMountOptions {
   readonly reportAttempt?: (attempt: AttemptRecord) => void;
   readonly gamification?: SimGamificationSource;
   readonly setChrome?: (chrome: SimChrome | null) => void;
+  readonly audience?: SimAudience;
+  readonly requestSignIn?: () => void;
 }
 
 /** Bir `mount` çağrısının kimliği; yalnız o çağrının oturumunu bırakmak için. */
@@ -228,6 +230,8 @@ function mountContext(simId: SimulatorId, now: () => number, mountOptions: SimMo
   const reportAttempt = mountOptions?.reportAttempt;
   const gamification = mountOptions?.gamification;
   const setChrome = mountOptions?.setChrome;
+  const audience = mountOptions?.audience;
+  const requestSignIn = mountOptions?.requestSignIn;
   return {
     now,
     simId,
@@ -235,6 +239,9 @@ function mountContext(simId: SimulatorId, now: () => number, mountOptions: SimMo
     ...(reportAttempt === undefined ? {} : { reportAttempt }),
     ...(gamification === undefined ? {} : { gamification }),
     ...(setChrome === undefined ? {} : { setChrome }),
+    // T180: kitle ve ziyaretçi "Öğrenci girişi" kanalı sime aktarılır (T172'de eksik kalmıştı).
+    ...(audience === undefined ? {} : { audience }),
+    ...(requestSignIn === undefined ? {} : { requestSignIn }),
   };
 }
 

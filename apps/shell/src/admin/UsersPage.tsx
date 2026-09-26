@@ -99,6 +99,7 @@ function changeValue(event: ChangeLike): string {
 const ROLE_KEYS: Record<UserRole, TrKey> = {
   admin: "admin.users.role.admin",
   kullanici: "admin.users.role.kullanici",
+  ogretim_uyesi: "admin.users.role.ogretim_uyesi",
 };
 const STATUS_KEYS: Record<UserStatus, TrKey> = {
   active: "admin.users.status.active",

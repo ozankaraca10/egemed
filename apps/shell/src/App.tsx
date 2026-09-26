@@ -18,12 +18,23 @@ import {
 import { createSessionStore, sessionWhenEnabled } from "./devAuth";
 import { EntryPage } from "./EntryPage";
 import { NotFoundPage, pageFor } from "./pages";
-import { adminGuardHref, entryHref, isAdminProtected, type ResolvedRoute } from "./routes";
+import { adminGuardHref, entryHref, isAdminProtected, routeHref, type ResolvedRoute } from "./routes";
 import { sessionAllowsSim, shellSessionFromDev, type ShellSession } from "./session";
 import { ShellLayout } from "./ShellLayout";
 import { SimRoute } from "./SimRoute";
 import type { SimChrome } from "@egemed/sim-host";
 import { useHashRoute } from "./useHashRoute";
+import { audienceFor, endVisitor, readVisitor, startVisitor, type VisitorStorage } from "./visitor";
+import type { SimAudience } from "@egemed/sim-host";
+
+/** Sekme deposu (ziyaretçi işareti); erişim engelliyse null. */
+function tabStorage(): VisitorStorage | null {
+  try {
+    return window.sessionStorage;
+  } catch {
+    return null;
+  }
+}
 
 /**
  * Sahte oturumu tarayıcı `sessionStorage`'ından okur; `devAuth` DOM'suz kalır.
@@ -48,6 +59,8 @@ function contentFor(
   session: ShellSession | null,
   apiBaseUrl: string | null,
   onChrome?: (chrome: SimChrome | null) => void,
+  audience: SimAudience = "student",
+  onRequestSignIn?: () => void,
 ): ReactNode {
   if (route.kind === "page") return pageFor(route.route.id, session);
   // T152: yönetim sayfaları ortak çerçevede (sol menü / dar ekranda sekme şeridi).
@@ -66,7 +79,9 @@ function contentFor(
         actorId={session?.actorId}
         allowed={sessionAllowsSim(session, route.simId)}
         apiBaseUrl={apiBaseUrl}
+        audience={audience}
         onChrome={onChrome}
+        onRequestSignIn={onRequestSignIn}
         simId={route.simId}
       />
     );
@@ -103,6 +118,9 @@ export function App(): JSX.Element | null {
       ? readDevSession()
       : null;
   const apiPending = apiEnabled && !apiReady;
+  // Ziyaretçi (26 Eyl 2026): oturum yoksa ve işaret varsa (ya da üretimde) simler sınırlı açılır.
+  const visitor = session === null && readVisitor(tabStorage());
+  const audience = audienceFor({ session, visitor, dev: import.meta.env.DEV });
   const apiSessionRef = useRef(apiSession);
   apiSessionRef.current = apiSession;
   const routeKey = route.kind === "sim" ? `sim:${route.simId}` : route.kind === "page" ? route.route.id : route.kind;
@@ -178,6 +196,23 @@ export function App(): JSX.Element | null {
     if (guardHref !== null) window.location.hash = guardHref;
   }, [guardHref]);
 
+  useEffect(() => {
+    // Giriş yapıldığında ziyaretçi işareti temizlenir.
+    if (session !== null) endVisitor(tabStorage());
+  }, [session]);
+
+  /** Ziyaretçi "Öğrenci girişi"ne basınca: işaret kalkar, öğrenci giriş ekranı açılır. */
+  function requestSignIn(): void {
+    endVisitor(tabStorage());
+    window.location.hash = entryHref("student");
+  }
+
+  /** Giriş ekranındaki "Ziyaretçi olarak göz at". */
+  function browseAsVisitor(): void {
+    startVisitor(tabStorage());
+    window.location.hash = routeHref("simulators");
+  }
+
   function signedIn(next: ShellSession): void {
     loginApplied.current = true;
     setApiSession(next);
@@ -225,6 +260,7 @@ export function App(): JSX.Element | null {
         devEnabled={import.meta.env.DEV}
         key={route.role}
         onApiSignedIn={signedIn}
+        onBrowseAsVisitor={browseAsVisitor}
         role={route.role}
       />
     );
@@ -233,8 +269,15 @@ export function App(): JSX.Element | null {
   if (apiEnabled && (sources === null || !apiReady)) return null;
   if (isAdminProtected(route) && (apiPending || guardHref !== null)) return null;
   return frame(
-    <ShellLayout onLogout={logout} route={route} session={session} simChrome={route.kind === "sim" ? simChrome : null}>
-      {contentFor(route, session, apiEnabled && session !== null ? apiBaseUrl : null, setSimChrome)}
+    <ShellLayout
+      onLogout={logout}
+      onSignIn={requestSignIn}
+      route={route}
+      session={session}
+      simChrome={route.kind === "sim" ? simChrome : null}
+      visitor={audience === "visitor"}
+    >
+      {contentFor(route, session, apiEnabled && session !== null ? apiBaseUrl : null, setSimChrome, audience, requestSignIn)}
     </ShellLayout>,
   );
 }

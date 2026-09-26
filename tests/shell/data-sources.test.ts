@@ -77,6 +77,7 @@ describe("createApiShellDataSources", () => {
       displayName: "T89 Kalici Kullanici",
       mappingKeyType: "username",
       mappingKeyValue: "t89.kalici",
+      role: "kullanici",
       simAccess: ["pulse"],
       unitId: "unit-3",
     });
@@ -97,6 +98,7 @@ describe("createApiShellDataSources", () => {
         displayName: "T89 Kalici Kullanici",
         mappingKeyType: "username",
         mappingKeyValue: "t89.kalici",
+        role: "kullanici",
         simAccess: [],
         unitId: "unit-3",
       }),

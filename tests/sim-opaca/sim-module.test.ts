@@ -215,7 +215,13 @@ describe("createOpacaModule (SimHost adaptörü)", () => {
     expect(html).not.toContain("eg-sim-toolbar");
     expect(html).not.toContain('class="stepper"');
     const chrome = sent.at(-1);
-    expect(chrome?.steps).toEqual({ current: 0, labels: ["Mod seçimi", "Çalışma", "Tamamla"] });
+    expect(chrome?.steps?.current).toBe(0);
+    expect(chrome?.steps?.labels).toEqual(["Mod seçimi", "Çalışma", "Tamamla"]);
+    // T183: kabuk yalnız tamamlanan adımlar için çağırır; sim, adım 0 dışındaki indeksleri
+    // (ileri adım/geçersiz) sessizce yok sayar — burada çağrıldığında hata fırlatmaz.
+    expect(typeof chrome?.steps?.onSelect).toBe("function");
+    expect(() => chrome?.steps?.onSelect?.(1)).not.toThrow();
+    expect(() => chrome?.steps?.onSelect?.(0)).not.toThrow();
     expect(chrome?.actions?.map((action) => action.id)).toEqual(["progress", "fullscreen", "help"]);
     dispose();
     expect(sent.at(-1)).toBeNull();

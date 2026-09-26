@@ -12,18 +12,22 @@ interface MatrixRow {
   readonly labelKey: TrKey;
   readonly admin: boolean;
   readonly kullanici: boolean;
+  /** Öğretim üyesi sütunu (T184): simleri tam kullanır, oyunlaştırmaya katılmaz. */
+  readonly ogretimUyesi: boolean;
 }
 
-/** E3 §b yetki matrisinin salt okunur özeti; atama bu ekrandan yapılmaz (tek yol ilkesi). */
+/** E3 §b/T184 yetki matrisinin salt okunur özeti; atama bu ekrandan yapılmaz (tek yol ilkesi). */
 const MATRIX_ROWS: readonly MatrixRow[] = [
-  { admin: true, key: "userList", kullanici: false, labelKey: "admin.roles.matrix.userList" },
-  { admin: true, key: "userManage", kullanici: false, labelKey: "admin.roles.matrix.userManage" },
-  { admin: true, key: "roleAssign", kullanici: false, labelKey: "admin.roles.matrix.roleAssign" },
-  { admin: true, key: "simAccess", kullanici: false, labelKey: "admin.roles.matrix.simAccess" },
-  { admin: true, key: "import", kullanici: false, labelKey: "admin.roles.matrix.import" },
-  { admin: true, key: "bulk", kullanici: false, labelKey: "admin.roles.matrix.bulk" },
-  { admin: true, key: "audit", kullanici: false, labelKey: "admin.roles.matrix.audit" },
-  { admin: false, key: "ownSummary", kullanici: true, labelKey: "admin.roles.matrix.ownSummary" },
+  { admin: true, key: "userList", kullanici: false, labelKey: "admin.roles.matrix.userList", ogretimUyesi: false },
+  { admin: true, key: "userManage", kullanici: false, labelKey: "admin.roles.matrix.userManage", ogretimUyesi: false },
+  { admin: true, key: "roleAssign", kullanici: false, labelKey: "admin.roles.matrix.roleAssign", ogretimUyesi: false },
+  { admin: true, key: "simAccess", kullanici: false, labelKey: "admin.roles.matrix.simAccess", ogretimUyesi: false },
+  { admin: true, key: "import", kullanici: false, labelKey: "admin.roles.matrix.import", ogretimUyesi: false },
+  { admin: true, key: "bulk", kullanici: false, labelKey: "admin.roles.matrix.bulk", ogretimUyesi: false },
+  { admin: true, key: "audit", kullanici: false, labelKey: "admin.roles.matrix.audit", ogretimUyesi: false },
+  { admin: false, key: "simUsage", kullanici: true, labelKey: "admin.roles.matrix.simUsage", ogretimUyesi: true },
+  { admin: false, key: "ownSummary", kullanici: true, labelKey: "admin.roles.matrix.ownSummary", ogretimUyesi: true },
+  { admin: false, key: "gamification", kullanici: true, labelKey: "admin.roles.matrix.gamification", ogretimUyesi: false },
 ];
 
 function matrixCell(value: boolean): string {
@@ -70,6 +74,11 @@ export function RolesView({ status, summary }: RolesViewProps): JSX.Element {
                 {summary.roleCounts.kullanici} {t("admin.roles.card.suffix")}
               </p>
             </Card>
+            <Card title={t("admin.roles.card.ogretim_uyesi")}>
+              <p className="eg-shell-roles__count">
+                {summary.roleCounts.ogretim_uyesi} {t("admin.roles.card.suffix")}
+              </p>
+            </Card>
           </div>
           <h2 className="eg-shell-roles__sectionTitle">{t("admin.roles.matrix.title")}</h2>
           <Table
@@ -78,6 +87,11 @@ export function RolesView({ status, summary }: RolesViewProps): JSX.Element {
               { cell: (row) => t(row.labelKey), header: t("admin.roles.matrix.capability"), key: "capability" },
               { cell: (row) => matrixCell(row.admin), header: t("admin.roles.matrix.admin"), key: "admin" },
               { cell: (row) => matrixCell(row.kullanici), header: t("admin.roles.matrix.kullanici"), key: "kullanici" },
+              {
+                cell: (row) => matrixCell(row.ogretimUyesi),
+                header: t("admin.roles.matrix.ogretim_uyesi"),
+                key: "ogretimUyesi",
+              },
             ]}
             rowKey={(row) => row.key}
             rows={MATRIX_ROWS}

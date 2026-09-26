@@ -16,6 +16,7 @@ import { shellNow } from "../now";
 import { EMAIL_PATTERN, USERNAME_PATTERN } from "./userForm";
 import {
   ADMIN_UNITS,
+  ASSIGNABLE_ROLES,
   DEFAULT_MOCK_SEED,
   DEFAULT_MOCK_SIZE,
   generateSyntheticUsers,
@@ -255,8 +256,10 @@ export function validateImportRow(
   if (displayName.length < 2 || displayName.length > 120) {
     errors.push({ code: "display_name_invalid", column: "ad_soyad", message: "Ad soyad 2-120 karakter olmalıdır." });
   }
+  // T184: `rol` sütunu `kullanici` veya `ogretim_uyesi` kabul eder; `admin` (ve
+  // tanınmayan değerler) CSV ile atanamaz (E3 §b, `ASSIGNABLE_ROLES`ten türer).
   const role = roleRaw.length === 0 ? "kullanici" : roleRaw;
-  if (role !== "kullanici") {
+  if (!(ASSIGNABLE_ROLES as readonly string[]).includes(role)) {
     errors.push({ code: "role_forbidden", column: "rol", message: "admin rolü CSV ile atanamaz." });
   }
   if (unitCode.length > 0 && !ADMIN_UNITS.some((unit) => unit.code === unitCode)) {
