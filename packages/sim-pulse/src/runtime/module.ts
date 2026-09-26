@@ -1,8 +1,10 @@
 /// <reference lib="dom" />
+import { audienceOf, audienceShowsGamification } from "@egemed/sim-host";
 import type { SimDispose, SimModule, SimMountContext, SimMountTarget } from "@egemed/sim-host";
 import type { PulseAttemptRecord } from "../gamification/attempt";
 import { createStorageGamiRepo } from "../gamification/repo";
 import type { PulseGamiRepo } from "../gamification/repo";
+import { attachPulseAudience } from "./audience";
 import { attachPulseChrome } from "./chrome";
 import { attachPulseGamification } from "./gami";
 import { mountPulseRuntime } from "./host";
@@ -73,8 +75,13 @@ export function createPulseRuntimeModule(deps: PulseRuntimeModuleDeps = {}): Sim
         unifiedChrome: context.setChrome !== undefined,
         ...(deps.bridge === undefined ? {} : { bridge: deps.bridge }),
       });
+      // Kitle (T173, sim-host T172 sözleşmesi): oyunlaştırma yalnız öğrenciye
+      // çizilir (öğretim üyesi/ziyaretçi rozet, liderlik, İlerlemem görmez;
+      // `reportAttempt` bağlamda olsa bile bu köprü hiç kurulmadığı için
+      // çağrılmaz).
+      const audience = audienceOf(context);
       let detachGami: (() => void) | null = null;
-      if (deps.gamiEnabled !== false) {
+      if (deps.gamiEnabled !== false && audienceShowsGamification(audience)) {
         try {
           const reportAttempt = context.reportAttempt;
           const gamification = context.gamification;
@@ -98,7 +105,9 @@ export function createPulseRuntimeModule(deps: PulseRuntimeModuleDeps = {}): Sim
         (handle.global("CardAILanding") as { enter?: () => void } | undefined)?.enter?.();
         detachChrome = attachPulseChrome(handle, context.setChrome);
       }
+      const detachAudience = attachPulseAudience(handle, context);
       return () => {
+        detachAudience();
         detachChrome?.();
         detachGami?.();
         handle.dispose();
