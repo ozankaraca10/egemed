@@ -22,7 +22,7 @@ Sonraki epiklerin güvenle üzerine kurulabileceği bir temel hazırlamak: çal�
 ## Kapsam dışı
 - Simülatör içerikleri, Opaca subtree taşıma (T10), oyunlaştırma çekirdeği (T11).
 - Gerçek LRS/kimlik entegrasyonu, üretim altyapısı, dağıtım.
-- Moodle ders, ödev ve not defteri işlevleri. Bunlar Moodle'da kalır.
+- Ders, ödev ve not defteri işlevleri. Bunlar platform kapsamı dışındadır.
 - Gerçek öğrenci verisi. Yalnız deterministik tohumlu mock veri kullanılır.
 - Simülatör verilerini birleştiren herhangi bir yüzey.
 

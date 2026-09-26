@@ -176,7 +176,7 @@ export function leaderboardMarkup(view: PulseLeaderboardTableView): string {
     `<div class="table-scroll mt-12"><table class="report-table report-table-v2" aria-label="Liderlik tablosu">` +
     `<thead><tr><th>#</th><th>Kullanıcı</th><th>Dönem puanı</th><th>Deneme</th><th>Seviye</th><th>Toplam XP</th></tr></thead>` +
     `<tbody>${body}</tbody></table></div>` +
-    `<p class="mt-8">Tablodaki diğer öğrenciler demo verisidir; gerçek sıralama LMS verisiyle doldurulacaktır.</p>`;
+    `<p class="mt-8">Tablodaki diğer öğrenciler demo verisidir; gerçek sıralama kurum verisiyle doldurulacaktır.</p>`;
 }
 
 export interface PulseGainsView {

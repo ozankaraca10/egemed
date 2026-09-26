@@ -158,7 +158,7 @@ export function GamiPrivacyCard({ name, isPublic, cohort, onChange, id, lockIcon
       {lockIcon}
       <div className="txt">
         <b>{isPublic ? "Sıralamada adınla görünüyorsun." : "Sıralamada \"Anonim öğrenci\" olarak görünüyorsun."}</b>
-        <span>Adın Moodle kaydından alınır{name ? ` (${name})` : ""}. İstersen anonim görünebilirsin; ayın ödülüne aday olmak için adınla görünmelisin.</span>
+        <span>Adın kurum kaydından alınır{name ? ` (${name})` : ""}. İstersen anonim görünebilirsin; ayın ödülüne aday olmak için adınla görünmelisin.</span>
       </div>
       <div className="form">
         <label>Dönemin

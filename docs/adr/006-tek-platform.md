@@ -24,7 +24,7 @@ Vite+TS; Ausculta Vite+TS; Pulse düz JS, ~30 bin satır toplam).
 - Veri izolasyonu değişmez: simülatör durumu sim başına ayrık; her xAPI ifadesi
   tek SimulatorId taşır (T06 profili), öğrenci verisi kurum altyapısında kalır
   (ADR-004/005 geçerliliğini korur).
-- SCORM paketleme platform dağıtımından çıkar; kurum Moodle entegrasyonu LTI 1.3
+- SCORM paketleme platform dağıtımından çıkar; kurum entegrasyonu LTI 1.3
   ya da bağlantı yoluyla olur (ADR-005'in kimlik kaynağı LTI'ye yaslanır; sabitleme
   ayrı insan kararıdır).
 
@@ -45,7 +45,7 @@ Vite+TS; Ausculta Vite+TS; Pulse düz JS, ~30 bin satır toplam).
 ## Açık sorular
 - Sim başına "motor" (korunur) / "arayüz" (React'e taşınır) sınırı: port planlarında
   dosya bazında çizilir.
-- Moodle/LTI entegrasyonu ayrı karar görevidir.
+- LTI entegrasyonu ayrı karar görevidir.
 
 ## Astra ikinci görüşü
 

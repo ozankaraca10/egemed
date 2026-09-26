@@ -39,8 +39,8 @@ maddelerinin kaldığı aşağıda açıkça listelenir.
 
 | ADR-005 maddesi | Durum | Gerekçe |
 |---|---|---|
-| "EGEMED hesap, oturum kaydı ve not tutmaz." | **Kısmen kalktı** | Hesap ve sunucu tarafı oturum kaydı EGEMED'e geldi (bu ADR). "Not tutmaz" korunur: ders, ödev, not defteri ve notlar Moodle'da kalır. |
-| "Tanımlayıcı, Moodle başlatma bağlamından gelen opak kurum kimliğidir." | **xAPI için korundu** | İfade aktörü opak kalır. EGEMED hesabının eşleme anahtarı (kurum kullanıcı adı veya e-posta) ifadeye girmez; ilk SSO girişinde `sso_subject` bağlanır. |
+| "EGEMED hesap, oturum kaydı ve not tutmaz." | **Kısmen kalktı** | Hesap ve sunucu tarafı oturum kaydı EGEMED'e geldi (bu ADR). "Not tutmaz" korunur: ders, ödev, not defteri ve notlar platform kapsamı dışındadır. |
+| "Tanımlayıcı, kurum başlatma bağlamından gelen opak kurum kimliğidir." | **xAPI için korundu** | İfade aktörü opak kalır. EGEMED hesabının eşleme anahtarı (kurum kullanıcı adı veya e-posta) ifadeye girmez; ilk SSO girişinde `sso_subject` bağlanır. |
 | "E-posta, ad ve öğrenci numarası ifadeye girmez." | **Korundu** | `packages/xapi-profile` v0 aktör kuralı aynen sürer. |
 | "Kaynak (LTI 1.3 veya SCORM `cmi.learner_id`) açık soru olarak kalır." | **Kapsam dışı kaldı** | ADR-006 ile SCORM gömme yolu kapandı. EGEMED hesabının kaynağı kurum SSO'sudur; SSO protokolü açık insan kararıdır. xAPI aktörünün üretimi ve yaşam döngüsü açık soru olarak sürer. |
 | "Eşleme yalnız kurum tarafında çözülebilir biçimde tasarlanır." | **Korundu** | EGEMED kurum altyapısında çalışır; eşleme kurum kapsamındadır, kurumlar arası birleştirme yoktur. |
@@ -116,7 +116,7 @@ almaz:
   denetim akışı zayıflar. Depo sahibi kararı bunu dışlar.
 - **Yerel parola:** EGEMED parola özeti saklar. Parola yönetimi, sıfırlama, MFA ve
   ihlal riski EGEMED'e geçer; "EGEMED parola saklamaz" kararıyla çelişir. Reddedildi.
-- **LTI-only:** kimlik yalnız Moodle/LTI başlatmasından gelir. Öğrenci akışı
+- **LTI-only:** kimlik yalnız LTI başlatmasından gelir. Öğrenci akışı
   için yeterli olabilir; admin girişi, platform yönetimi ve sim başına erişim
   için bağımsız oturum gerekir. Admin akışı için yetersiz; LTI bir entegrasyon
   yolu olarak insan kararına açık kalır.
@@ -131,7 +131,7 @@ almaz:
   güvenliği (CSRF, `Secure`, `SameSite`) uygulama gereksinimidir.
 - Denetim günlüğü, yumuşak silme ve imha işi zorunlu hale gelir.
 - Sim erişimi ve oyunlaştırma sim başına ayrık kalır; ADR-006 izolasyonu korunur.
-- Moodle ders/ödev/not akışı değişmez; EGEMED not tutmaz.
+- Ders/ödev/not akışı platform kapsamı dışında kalır; EGEMED not tutmaz.
 
 ## KVKK
 

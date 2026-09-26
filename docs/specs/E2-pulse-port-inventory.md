@@ -51,7 +51,7 @@ biçimlendirilmiş satır tahminleriyle yapılır. Yükleme sırası (`index.htm
   `curriculum.js` verisi ve `seededPermutation`, `scorm.js`'teki 4096 bayt/bozuk kayıt politikası
   (kalıcılık arayüzü olarak).
 - **Taşınır (DOM/yan etki):** `app.js`, `features.js`, `landing.js`, `index.html`, `styles.css`.
-- **Platformda yer almaz:** `scorm.js`'in LMS/API çağrıları ve SCORM paketleme (ADR-006); xAPI
+- **Platformda yer almaz:** `scorm.js`'in SCORM API çağrıları ve SCORM paketleme (ADR-006); xAPI
   eşlemesi K2/K3 sonrası T22/T23'ün işidir. Geçici kalıcılık `PersistencePort` ile localStorage.
 - **Ekran sahipliği:** landing, mod çerçevesi ve ortak bileşenler T20'nin; Pulse yalnız sim
   içeriğini (kalp/EKG/açıklama/vaka/soru/sonuç) SimHost içinde çalıştırır.
@@ -202,7 +202,7 @@ Ham satır sayıları yoğun stil nedeniyle kullanılmaz; 400'ü aşan dilimler 
 | Kapı | Bağlı dilimler | Etki |
 |---|---|---|
 | **K-P1** paket yerleşimi | **S0a** (zorunlu) | **Karar (23 Eyl 2026): `packages/sim-pulse`**; `sims/*` arşiv/boş kalır. Workspace/eslint/turbo/tsconfig sözleşmesi bu yola göre kurulur |
-| **K-P2** SCORM | S5a, S7a, S12b, S15a | ADR-006: LMS/API çağrıları ve paketleme kaldırılır; 4096 bayt/bozuk kayıt politikası `PersistencePort`'ta korunur; `finish`/etkileşim raporu seam mi, kaldırma mı |
+| **K-P2** SCORM | S5a, S7a, S12b, S15a | ADR-006: SCORM API çağrıları ve paketleme kaldırılır; 4096 bayt/bozuk kayıt politikası `PersistencePort`'ta korunur; `finish`/etkileşim raporu seam mi, kaldırma mı |
 | **K-P3** yerel depolama | S5a, S5b, S13b | `egemed-pulse-6.0` + legacy anahtarlar, ses tercihi ve tam ekran istemi kabukta mı simde mi; öğrenci verisi ADR-005 |
 | **K-P4** varlık sunumu | S13b, S15b | 4 görsel + `sources.json` kökü (`context.assetBase`); mutlak `/assets` varsayımı yasak |
 | **K-P5** i18n kapsamı | S10a, S10b, S11b, S12a, S12b, S13a, S13b | Chrome metinleri `packages/ui/i18n/tr.ts` (`sim.pulse.*`); authored içerik veri kalır |
