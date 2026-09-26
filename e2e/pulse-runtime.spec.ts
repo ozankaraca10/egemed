@@ -170,7 +170,9 @@ test.describe("Pulse kaynak runtime", () => {
     await expect(root.locator("#quizForm input:checked"), "öğrencide seçili yanıt yok").toHaveCount(0);
   });
 
-  test("birleşik bar adımına tıklama mod seçimine döner; değerlendirmede kaynağın süre kaybı uyarısı çıkar (T181)", async ({ page }) => {
+  test("birleşik bar adımına tıklama mod seçimine döner; değerlendirmede kaynağın süre kaybı uyarısı çıkar (T181)", async ({ page }, testInfo) => {
+    // Adım göstergesi birleşik barda ≥1024 px'te görünür (shell.css); dar ekranda adımlar çizilmez.
+    test.skip((testInfo.project.use.viewport?.width ?? 0) < 1024, "adımlar yalnız ≥1024 px");
     const errors = trackErrors(page);
     const root = await openPulse(page);
     const stepButton = (label: string) => page.locator(".eg-shell-simbar__stepButton", { hasText: label });
