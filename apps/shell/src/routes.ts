@@ -2,7 +2,7 @@ import { isSimulatorId, type SimulatorId } from "@egemed/sim-host";
 import type { TrKey } from "@egemed/ui/i18n";
 
 /** Kabukta tanımlı sayfa kimlikleri. */
-export type RouteId = "home" | "simulators" | "tasks" | "notebook";
+export type RouteId = "home" | "simulators";
 export type EntryRole = "admin" | "student";
 
 /** Tek sayfa rotası: hash yolu, gezinme etiketi ve sayfa başlığı anahtarı. */
@@ -53,8 +53,6 @@ export const ADMIN_AUDIT_PATH = "/admin/denetim" as const;
 export const ROUTES: readonly RouteDef[] = [
   { id: "home", path: "/", labelKey: "shell.nav.home", titleKey: "shell.home.title" },
   { id: "simulators", path: "/simulatorler", labelKey: "shell.nav.simulators", titleKey: "shell.simulators.title" },
-  { id: "tasks", path: "/gorevler", labelKey: "shell.nav.tasks", titleKey: "shell.tasks.title" },
-  { id: "notebook", path: "/not-defteri", labelKey: "shell.nav.notebook", titleKey: "shell.notebook.title" },
 ];
 
 /**

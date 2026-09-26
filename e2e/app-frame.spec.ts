@@ -27,6 +27,45 @@ async function axe(page: Page): Promise<string[]> {
   return result.violations.map((violation) => `${violation.id}: ${violation.nodes.map((node) => node.target.join(" ")).join(", ")}`);
 }
 
+/**
+ * T159 (ek): footer her sayfada ekranın dibine yapışır. `bottom + scrollY`
+ * belge yüksekliğine (±1 px) eşitse footer son öğedir; `scrollHeight >=
+ * innerHeight - 1` ise sayfa gerçekten dolduruyor (kısa sayfada ortada
+ * asılı kalmıyor). Ayrıca footer metni, mobildeki sabit alt sekme çubuğunun
+ * (varsa) üst kenarının üstünde kalır — nav'ın arkasında gizlenmez.
+ */
+async function assertFooterAtBottom(page: Page): Promise<void> {
+  const footer = page.locator(".eg-shell-footer");
+  await expect(footer).toBeVisible();
+  await footer.scrollIntoViewIfNeeded();
+  const measurements = await page.evaluate(() => {
+    const footerEl = document.querySelector(".eg-shell-footer");
+    const navEl = document.querySelector(".eg-shell-nav");
+    if (footerEl === null) throw new Error("footer bulunamadı");
+    const footerRect = footerEl.getBoundingClientRect();
+    const navRect = navEl === null ? null : navEl.getBoundingClientRect();
+    const navFixed = navRect !== null && getComputedStyle(navEl as Element).position === "fixed";
+    return {
+      footerBottom: footerRect.bottom + window.scrollY,
+      // Görünür footer metni (amblem hariç); sabit alt çubuğa göre viewport-bağıl.
+      footerTextTop: (document.querySelector(".eg-shell-footer__text") as Element | null)?.getBoundingClientRect().top ?? footerRect.top,
+      scrollHeight: document.documentElement.scrollHeight,
+      innerHeight: window.innerHeight,
+      navTop: navFixed ? (navRect as DOMRect).top : null,
+    };
+  });
+  expect(
+    Math.abs(measurements.footerBottom - measurements.scrollHeight),
+    "footer belgenin son öğesi değil",
+  ).toBeLessThanOrEqual(1);
+  expect(measurements.scrollHeight, "sayfa ekranı doldurmuyor").toBeGreaterThanOrEqual(measurements.innerHeight - 1);
+  if (measurements.navTop !== null) {
+    expect(measurements.footerTextTop, "footer metni sabit alt çubuğun arkasında").toBeLessThanOrEqual(
+      measurements.navTop + 1,
+    );
+  }
+}
+
 test.describe("uygulama çerçevesi (T152)", () => {
   test("öğrenci: hesap menüsü klavyeyle açılır, çıkış menüden yapılır; rol çipi yoktur", async ({ page }, testInfo) => {
     const errors = trackErrors(page);
@@ -73,5 +112,46 @@ test.describe("uygulama çerçevesi (T152)", () => {
     await page.getByRole("menuitem", { name: "Yönetim paneli" }).click();
     await expect(page).toHaveURL(/#\/admin$/);
     expect(errors).toEqual([]);
+  });
+});
+
+/**
+ * T159 (ek, 26 Eylül 2026): footer kısa sayfalarda ekranın ortasında asılı
+ * kalıyordu; artık her sayfada dibe yapışır. Kısa öğrenci sayfaları, kısa
+ * admin sayfası ve uzun ana sayfa; üç genişlikte de koşar (playwright.config.ts
+ * projeleri: mobile-360, tablet-768, desktop-1440).
+ */
+test.describe("footer her zaman altta (T159 ek)", () => {
+  test("öğrenci: kısa sayfalarda footer dibe yapışır (#/simulatorler, #/bilinmeyen-sayfa)", async ({ page }) => {
+    const errors = trackErrors(page);
+    await signIn(page, "student");
+    await page.goto("/#/simulatorler");
+    await assertFooterAtBottom(page);
+    await page.goto("/#/bilinmeyen-sayfa");
+    await assertFooterAtBottom(page);
+    expect(errors).toEqual([]);
+  });
+
+  test("admin: kısa sayfada (#/admin/ice-aktar) footer dibe yapışır", async ({ page }) => {
+    const errors = trackErrors(page);
+    await signIn(page, "admin");
+    await page.goto("/#/admin/ice-aktar");
+    await assertFooterAtBottom(page);
+    expect(errors).toEqual([]);
+  });
+
+  test("uzun ana sayfada footer yine son öğedir", async ({ page }) => {
+    const errors = trackErrors(page);
+    await signIn(page, "student");
+    await page.goto("/#/");
+    await assertFooterAtBottom(page);
+    expect(errors).toEqual([]);
+  });
+
+  test("sim modunda footer çizilmez (bozulmadı)", async ({ page }) => {
+    await signIn(page, "student");
+    await page.goto("/#/sims/opaca");
+    await expect(page.locator(".eg-shell-footer")).toHaveCount(0);
+    await expect(page.locator(".eg-shell-main--sim")).toBeVisible();
   });
 });
