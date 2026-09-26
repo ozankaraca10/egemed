@@ -41,12 +41,14 @@ describe("giriş rotaları", () => {
     const warningIndex = html.indexOf(t("entry.auth.pending"));
     expect(warningIndex).toBeGreaterThan(-1);
     expect(warningIndex).toBeLessThan(html.indexOf('class="eg-shell-entry__form"'));
-    expect(html).not.toContain('autoComplete="username"');
-    expect(html).not.toContain("current-password");
-    expect(html).toMatch(/<input[^>]*autoComplete="off"[^>]*id="entry-username"[^>]*required/);
+    expect(html).toContain('autoComplete="username"');
+    expect(html).toContain('autoComplete="current-password"');
+    expect(html).toMatch(/<input[^>]*id="entry-username"[^>]*required[^>]*autoComplete="username"/);
     expect(html).toContain('for="entry-username"');
-    expect(html).toMatch(/<input[^>]*autoComplete="off"[^>]*id="entry-password"[^>]*required/);
+    expect(html).toMatch(/<input[^>]*id="entry-password"[^>]*required[^>]*autoComplete="current-password"/);
     expect(html).toContain('for="entry-password"');
+    expect(html).toContain(`aria-label="${t("entry.field.password.show")}"`);
+    expect(html).toContain('aria-pressed="false"');
     expect(html).toContain('type="submit"');
     expect(html).not.toContain('role="alert"');
   });

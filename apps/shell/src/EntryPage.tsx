@@ -1,5 +1,6 @@
 /// <reference types="vite/client" />
 import { useState, type FormEvent, type JSX } from "react";
+import { Button, Field, IconButton, TextInput, icons } from "@egemed/ui";
 import { t } from "@egemed/ui/i18n";
 import { checkDevCredentials, createSessionStore, type DevSession, type DevSessionStorage } from "./devAuth";
 import { focusMain } from "./ShellLayout";
@@ -73,10 +74,13 @@ export function submitDevEntry(
 export function EntryPage({ role, devEnabled = false, apiBaseUrl = null, onApiSignedIn }: EntryPageProps): JSX.Element {
   const [submitted, setSubmitted] = useState(false);
   const [invalid, setInvalid] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const isAdmin = role === "admin";
   const title = t(isAdmin ? "entry.admin.title" : "entry.student.title");
 
   function onSubmit(event: FormEvent<HTMLFormElement>): void {
+    setLoading(true);
     // Dev dalı doğrudan `import.meta.env.DEV` ile korunur: üretim build'inde
     // tümüyle elenir; `devAuth` ve `apiAuth` pakete girmez, önizleme yolu birebir kalır.
     if (import.meta.env.DEV && devEnabled) {
@@ -95,6 +99,7 @@ export function EntryPage({ role, devEnabled = false, apiBaseUrl = null, onApiSi
               onInvalid: () => {
                 setSubmitted(false);
                 setInvalid(true);
+                setLoading(false);
               },
               onSignedIn: (session) => {
                 onApiSignedIn?.(session);
@@ -107,6 +112,7 @@ export function EntryPage({ role, devEnabled = false, apiBaseUrl = null, onApiSi
           )
           .catch(() => {
             setInvalid(true);
+            setLoading(false);
           });
         return;
       }
@@ -114,6 +120,7 @@ export function EntryPage({ role, devEnabled = false, apiBaseUrl = null, onApiSi
         onInvalid: () => {
           setSubmitted(false);
           setInvalid(true);
+          setLoading(false);
         },
         onSignedIn: (session) => {
           // DOM'suz ortamda (SSR/test) oturum yazımı ve yönlendirme sessizce atlanır.
@@ -125,7 +132,10 @@ export function EntryPage({ role, devEnabled = false, apiBaseUrl = null, onApiSi
       });
       return;
     }
-    submitEntryPreview(event, () => setSubmitted(true));
+    submitEntryPreview(event, () => {
+      setSubmitted(true);
+      setLoading(false);
+    });
   }
 
   return (
@@ -177,31 +187,41 @@ export function EntryPage({ role, devEnabled = false, apiBaseUrl = null, onApiSi
             <p className="eg-shell-entry__status">{t("entry.auth.pending")}</p>
           )}
           <form autoComplete="off" className="eg-shell-entry__form" onSubmit={onSubmit}>
-            <label className="eg-shell-entry__label" htmlFor="entry-username">{t("entry.field.username")}</label>
-            <input
-              autoComplete="off"
-              className="eg-shell-entry__input"
-              id="entry-username"
-              name="username"
-              required
-              type="text"
-            />
-            <label className="eg-shell-entry__label" htmlFor="entry-password">{t("entry.field.password")}</label>
-            <input
-              autoComplete="off"
-              className="eg-shell-entry__input"
+            <Field id="entry-username" label={t("entry.field.username")} required>
+              {(control) => (
+                <TextInput {...control} autoComplete="username" name="username" type="text" />
+              )}
+            </Field>
+            <Field
+              error={invalid ? <span role="alert">{t("entry.error.invalid")}</span> : undefined}
               id="entry-password"
-              name="password"
+              label={t("entry.field.password")}
               required
-              type="password"
-            />
-            <button className="eg-shell-entry__submit" type="submit">{t("entry.action.login")}</button>
+            >
+              {(control) => (
+                <div className="eg-shell-entry__password">
+                  <TextInput
+                    {...control}
+                    autoComplete="current-password"
+                    className="eg-shell-entry__password-input"
+                    name="password"
+                    type={showPassword ? "text" : "password"}
+                  />
+                  <IconButton
+                    aria-pressed={showPassword}
+                    className="eg-shell-entry__password-toggle"
+                    icon={showPassword ? <icons.EyeOff /> : <icons.Eye />}
+                    label={t(showPassword ? "entry.field.password.hide" : "entry.field.password.show")}
+                    onClick={() => setShowPassword((prev) => !prev)}
+                    variant="ghost"
+                  />
+                </div>
+              )}
+            </Field>
+            <Button fullWidth loading={loading} type="submit">{t("entry.action.login")}</Button>
           </form>
           {!devEnabled && submitted && (
             <p className="eg-shell-entry__status" role="alert">{t("entry.auth.pending")}</p>
-          )}
-          {devEnabled && invalid && (
-            <p className="eg-shell-entry__status" role="alert">{t("entry.error.invalid")}</p>
           )}
           <a className="eg-shell-entry__back" href="#/">{t("entry.back")}</a>
         </div>
