@@ -85,8 +85,9 @@ describe("gami-ui model sözleşmesi", () => {
     }));
     expect(model.goals).toHaveLength(3);
     expect(model.weekLabel).toContain("–");
-    expect(defaultGamiIcons.badge("Star", 16)).not.toBeNull();
-    expect(defaultGamiIcons.badge("Yok", 16)).toBeNull();
+    expect(defaultGamiIcons.badge("Star", 16, "skill")).not.toBeNull();
+    // bilinmeyen iconName için de asla boş kalmaz — kategoriye göre yedek ikon döner
+    expect(defaultGamiIcons.badge("Yok", 16, "skill")).not.toBeNull();
   });
 
   it("liderlik dönem etiketini, boş sıralamayı ve kalan denemeyi üretir", () => {

@@ -4,6 +4,7 @@ import {
   BADGE_TIER_LABEL,
   badgeViews,
   sortBadgeViews,
+  sortBadgesByDifficulty,
 } from "../../packages/gamification-core/src/badgeView";
 import type { BadgeContext, BadgeDef } from "../../packages/gamification-core/src/badges";
 
@@ -64,5 +65,55 @@ describe("rozet görünüm modeli", () => {
     ];
     const sorted = sortBadgeViews(badgeViews(CATALOG, { hits: 8, done: true }, earned, ctx));
     expect(sorted.map((v) => v.def.id)).toEqual(["d", "b", "a", "c", "e"]);
+  });
+});
+
+describe("sortBadgesByDifficulty — kolaydan zora rozet sıralaması", () => {
+  const fixed = (max: number): ((s: TestState) => { value: number; max: number }) => () => ({ value: 0, max });
+
+  const bronze1 = badge("bronze1", { tier: "bronze", progress: fixed(100) });
+  const silver1 = badge("silver1", { tier: "silver", progress: fixed(5) });
+  const gold1 = badge("gold1", { tier: "gold", progress: fixed(1) });
+  const untieredEasy = badge("untiered-easy", { progress: fixed(2) });
+  const untieredHard = badge("untiered-hard", { progress: fixed(50) });
+  const untieredTieA = badge("untiered-tie-a", { progress: fixed(10) });
+  const untieredTieB = badge("untiered-tie-b", { progress: fixed(10) });
+
+  const DIFFICULTY_CATALOG: BadgeDef<TestState, TestCtx>[] = [
+    bronze1, silver1, gold1, untieredEasy, untieredHard, untieredTieA, untieredTieB,
+  ];
+
+  it("önce kademe (bronz<gümüş<altın; kademesizler bronz sayılır), sonra eşik artan", () => {
+    const sorted = sortBadgesByDifficulty(badgeViews(DIFFICULTY_CATALOG, { hits: 0, done: false }, [], ctx));
+    expect(sorted.map((v) => v.def.id)).toEqual([
+      "untiered-easy", // kademe 0 (kademesiz), eşik 2
+      "untiered-tie-a", // kademe 0, eşik 10 — katalog sırası
+      "untiered-tie-b",
+      "untiered-hard", // kademe 0, eşik 50
+      "bronze1", // kademe 0, eşik 100
+      "silver1", // kademe 1
+      "gold1", // kademe 2
+    ]);
+  });
+
+  it("eşitlikte katalog sırası korunur (kararlı sıralama)", () => {
+    const sorted = sortBadgesByDifficulty(badgeViews(DIFFICULTY_CATALOG, { hits: 0, done: false }, [], ctx));
+    const tieIds = sorted.filter((v) => v.def.id.startsWith("untiered-tie")).map((v) => v.def.id);
+    expect(tieIds).toEqual(["untiered-tie-a", "untiered-tie-b"]);
+  });
+
+  it("durumdan (kazanılmış/ilerleyen/kilitli) bağımsızdır", () => {
+    const noneEarned = sortBadgesByDifficulty(badgeViews(DIFFICULTY_CATALOG, { hits: 0, done: false }, [], ctx));
+    const someEarned = sortBadgesByDifficulty(
+      badgeViews(DIFFICULTY_CATALOG, { hits: 0, done: false }, [{ id: "untiered-hard", at: ctx.now.toISOString() }], ctx),
+    );
+    expect(someEarned.map((v) => v.def.id)).toEqual(noneEarned.map((v) => v.def.id));
+  });
+
+  it("saf fonksiyondur: girdi dizisini değiştirmez", () => {
+    const views = badgeViews(DIFFICULTY_CATALOG, { hits: 0, done: false }, [], ctx);
+    const original = views.map((v) => v.def.id);
+    sortBadgesByDifficulty(views);
+    expect(views.map((v) => v.def.id)).toEqual(original);
   });
 });

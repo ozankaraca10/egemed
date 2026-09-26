@@ -9,7 +9,7 @@ import {
   endOfMonthTr,
   periodRangeTr,
   rewardStandings,
-  sortBadgeViews,
+  sortBadgesByDifficulty,
   startOfWeekTr,
   trDate,
   trShortDate,
@@ -188,7 +188,7 @@ export function buildAchievementsModel<TStats, TContext extends BadgeContext, TD
     const pct = Math.round(vals.reduce((s, v) => s + v, 0) / vals.length);
     domains.push({ key: d.key, label: d.label, icon: d.icon, pct, weak: pct < weakPct });
   }
-  const badges = sortBadgeViews(badgeViews(input.catalog, input.stats, input.earned, input.badgeContext)).map((v): GamiBadgeModel => ({
+  const badges = sortBadgesByDifficulty(badgeViews(input.catalog, input.stats, input.earned, input.badgeContext)).map((v): GamiBadgeModel => ({
     id: v.def.id,
     name: v.def.name,
     tier: v.def.tier ?? null,

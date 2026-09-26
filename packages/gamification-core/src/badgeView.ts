@@ -72,3 +72,16 @@ export function sortBadgeViews<TState, TContext extends BadgeContext>(
       (a.state === "progress" ? ratio(b) - ratio(a) : 0),
   );
 }
+
+const BADGE_TIER_RANK: Record<BadgeTier, number> = { bronze: 0, silver: 1, gold: 2 };
+
+/** Kolaydan zora: önce kademe (bronz < gümüş < altın; kademesiz rozetler bronz sayılır),
+ *  sonra eşik değeri (max) artan; eşitlikte
+ *  katalog sırası (stabil sıralama — girdi zaten katalog sırasındadır). Durumdan (kazanılmış/
+ *  ilerleyen/kilitli) bağımsızdır; rozet koleksiyonu ızgarasının sabit sıralaması içindir. */
+export function sortBadgesByDifficulty<TState, TContext extends BadgeContext>(
+  views: readonly BadgeView<TState, TContext>[],
+): BadgeView<TState, TContext>[] {
+  const stage = (v: BadgeView<TState, TContext>): number => (v.def.tier ? BADGE_TIER_RANK[v.def.tier] : 0);
+  return [...views].sort((a, b) => stage(a) - stage(b) || a.max - b.max);
+}
