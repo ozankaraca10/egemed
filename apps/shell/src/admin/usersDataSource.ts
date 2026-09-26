@@ -15,8 +15,19 @@
 
 import { shellNow } from "../now";
 
-export type UserRole = "admin" | "kullanici";
-export const USER_ROLES: readonly UserRole[] = ["admin", "kullanici"];
+/**
+ * `ogretim_uyesi` (öğretim üyesi) 26 Eyl 2026 depo sahibi kararıyla eklendi
+ * (`@egemed/contracts` `Role`/`ROLES` ile aynı birlik — T171, T184). Öğretim
+ * üyesi simleri tam kullanır ama oyunlaştırmaya (rozet, XP, liderlik, Meydan
+ * Okuma) katılmaz; bu ekran hâlâ `@egemed/contracts`'a bağımlı değildir
+ * (AGENTS.md), bu yüzden değer kümesi burada yerel bir kopya olarak tutulur.
+ */
+export type UserRole = "admin" | "kullanici" | "ogretim_uyesi";
+export const USER_ROLES: readonly UserRole[] = ["admin", "kullanici", "ogretim_uyesi"];
+
+/** Kullanıcı ekle formundan ve CSV içe aktarmadan atanabilir roller (§b): `admin` hariç. */
+export type AssignableRole = "kullanici" | "ogretim_uyesi";
+export const ASSIGNABLE_ROLES: readonly AssignableRole[] = ["kullanici", "ogretim_uyesi"];
 
 export type UserStatus = "invited" | "active" | "suspended" | "deleted";
 export const USER_STATUSES: readonly UserStatus[] = ["invited", "active", "suspended", "deleted"];
@@ -108,7 +119,9 @@ export type UserHistoryAction =
   | "user.activate"
   | "user.delete"
   | "role.grant"
-  | "role.revoke";
+  | "role.revoke"
+  | "role.faculty.grant"
+  | "role.faculty.revoke";
 
 export interface AdminUserHistoryEntry {
   readonly id: string;
@@ -133,12 +146,13 @@ export interface AdminUserDetail extends AdminUser {
 /** Kullanıcı ekle ekranındaki eşleme anahtarı seçimi (E3 §e.2: kullanıcı adı VEYA e-posta). */
 export type MappingKeyType = "username" | "email";
 
-/** `POST /admin/users` sözleşmesi (E3 §d): `role` bu uçtan yalnız `kullanici` olabilir. */
+/** `POST /admin/users` sözleşmesi (E3 §d, T184): `role` bu uçtan `admin` hariç atanabilir (§b). */
 export interface CreateUserInput {
   readonly mappingKeyType: MappingKeyType;
   readonly mappingKeyValue: string;
   readonly displayName: string;
   readonly authMethod: UserAuthMethod;
+  readonly role: AssignableRole;
   readonly unitId: string;
   readonly simAccess: readonly SimId[];
 }
@@ -216,14 +230,14 @@ export function bulkOutcomeForUser(
   if (input.operation === "assign_role") {
     if (user.roles.includes(input.value)) return { next: user, reason: "no_change" };
     const roles = [...user.roles, input.value];
-    return { next: { ...user, role: roles.includes("admin") ? "admin" : "kullanici", roles } };
+    return { next: { ...user, role: primaryRoleFor(roles), roles } };
   }
   if (input.operation === "revoke_role") {
     if (!user.roles.includes(input.value)) return { next: user, reason: "no_change" };
     const roles = user.roles.filter((role) => role !== input.value);
     // Kullanıcıyı tüm rollerden arındırmak (tam erişimsiz bırakmak) toplu işlemle yapılmaz.
     if (roles.length === 0) return { next: user, reason: "would_orphan_roles" };
-    return { next: { ...user, role: roles.includes("admin") ? "admin" : "kullanici", roles } };
+    return { next: { ...user, role: primaryRoleFor(roles), roles } };
   }
   if (input.operation === "set_unit") {
     if (user.unitId === input.value) return { next: user, reason: "no_change" };
@@ -272,6 +286,26 @@ export function planBulkEdit(
   return { result: { skipped, updated: updatedUsers.length }, updatedUsers };
 }
 
+/**
+ * `AdminUser.role` (tekil, liste/tablo sütunu) rol kümesinden türetilir: `admin`
+ * en yüksek önceliktedir, ardından `ogretim_uyesi`, sonra `kullanici` (T184).
+ */
+export function primaryRoleFor(roles: readonly UserRole[]): UserRole {
+  if (roles.includes("admin")) return "admin";
+  if (roles.includes("ogretim_uyesi")) return "ogretim_uyesi";
+  return "kullanici";
+}
+
+/**
+ * Temel rolü (kullanici ↔ ogretim_uyesi) değiştirir; `admin` biti korunur
+ * (T184, E3 §e.6: öğretim üyesi ↔ kullanıcı geçişi `PUT /admin/users/:id/roles`
+ * ile tam küme olarak yapılır).
+ */
+export function swapBaseRole(roles: readonly UserRole[], target: AssignableRole): UserRole[] {
+  const withoutBase = roles.filter((role) => role !== "kullanici" && role !== "ogretim_uyesi");
+  return [...withoutBase, target];
+}
+
 /** Kendi admin rolünü kaldırma girişimini engeller (E3 §e.6 uyarısı: "kendi admin rolünü kaldıramaz"). */
 export type RoleChangeError = "self_admin_removal";
 
@@ -292,7 +326,7 @@ export interface UsersSummary {
 
 /** Roller ve erişim ekranı (E3 §e.6) için rol/sim sayıları; saf, tam listeden hesaplanır. */
 export function computeUsersSummary(users: readonly AdminUserDetail[]): UsersSummary {
-  const roleCounts: Record<UserRole, number> = { admin: 0, kullanici: 0 };
+  const roleCounts: Record<UserRole, number> = { admin: 0, kullanici: 0, ogretim_uyesi: 0 };
   const simCounts: Record<SimId, number> = { ausculta: 0, opaca: 0, pulse: 0 };
   for (const user of users) {
     roleCounts[user.role] += 1;
@@ -516,8 +550,8 @@ export function buildCreatedUserDetail(input: CreateUserInput, nowMs: number, id
     history: [historyEntry(id, 1, createdAt, "user.create")],
     id,
     lastLoginAt: null,
-    role: "kullanici",
-    roles: ["kullanici"],
+    role: input.role,
+    roles: [input.role],
     simAccess: input.simAccess,
     status: "invited",
     unitId: input.unitId,
@@ -613,10 +647,20 @@ export function createMockUsersSource(
       if (guard !== null) return Promise.reject(new Error(guard));
       const grantedAdmin = roles.includes("admin") && !current.roles.includes("admin");
       const revokedAdmin = !roles.includes("admin") && current.roles.includes("admin");
-      const action: UserHistoryAction | null = grantedAdmin ? "role.grant" : revokedAdmin ? "role.revoke" : null;
+      const grantedFaculty = roles.includes("ogretim_uyesi") && !current.roles.includes("ogretim_uyesi");
+      const revokedFaculty = !roles.includes("ogretim_uyesi") && current.roles.includes("ogretim_uyesi");
+      const action: UserHistoryAction | null = grantedAdmin
+        ? "role.grant"
+        : revokedAdmin
+          ? "role.revoke"
+          : grantedFaculty
+            ? "role.faculty.grant"
+            : revokedFaculty
+              ? "role.faculty.revoke"
+              : null;
       const history =
         action === null ? current.history : [...current.history, historyEntry(id, current.history.length + 1, toIso(now()), action)];
-      const updated: AdminUserDetail = { ...current, history, role: roles.includes("admin") ? "admin" : "kullanici", roles };
+      const updated: AdminUserDetail = { ...current, history, role: primaryRoleFor(roles), roles };
       users[index] = updated;
       return Promise.resolve(updated);
     },

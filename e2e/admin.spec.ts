@@ -92,11 +92,12 @@ async function expectStep(page: Page, label: string): Promise<void> {
   await expect(currentStep(page)).toContainText(label);
 }
 
-/** Ekle formunu geçerli değerlerle doldurur (rol alanı kilitli `kullanici` kalır). */
-async function fillCreateUserForm(dialog: Locator, username: string): Promise<void> {
+/** Ekle formunu geçerli değerlerle doldurur; rol seçilmezse varsayılan `kullanici` kalır (T184). */
+async function fillCreateUserForm(dialog: Locator, username: string, role?: "Kullanıcı" | "Öğretim üyesi"): Promise<void> {
   const textInputs = dialog.locator('input[type="text"]');
   await textInputs.nth(0).fill(username);
   await textInputs.nth(1).fill("Örnek Kullanıcı T75");
+  if (role !== undefined) await selectRadixOption(dialog, "Rol", role);
   await selectRadixOption(dialog, "Birim", "3. Sınıf");
   await dialog.getByLabel("Pulse").check();
 }
@@ -203,9 +204,9 @@ test.describe("kullanıcı ekle (E3 §e.2)", () => {
     const dialog = page.getByRole("dialog");
     await expect(dialog.getByRole("heading", { name: "Yeni kullanıcı" })).toBeVisible();
 
-    // §e.2: rol alanında yalnız `kullanici` vardır ve alan kilitlidir (@egemed/ui `Select`, T163).
+    // T184: rol alanında admin YOKTUR; Kullanıcı (varsayılan) ve Öğretim üyesi seçilebilir.
     const roleSelect = dialog.getByLabel("Rol");
-    await expect(roleSelect).toBeDisabled();
+    await expect(roleSelect).toBeEnabled();
     await expect(roleSelect).toContainText("Kullanıcı");
 
     await dialog.getByRole("button", { name: "Kaydet" }).click();
@@ -242,6 +243,19 @@ test.describe("kullanıcı ekle (E3 §e.2)", () => {
     await duplicate.getByRole("button", { name: "Vazgeç" }).click();
     await expect(duplicate.getByText("Kaydedilmemiş değişiklikler silinecek. Çıkmak için tekrar tıklayın.")).toBeVisible();
     await duplicate.getByRole("button", { name: "Vazgeç" }).click();
+    await expect(page).toHaveURL(/#\/admin\/kullanicilar$/);
+  });
+
+  test("öğretim üyesi rolüyle kullanıcı oluşturma (T184)", async ({ page }) => {
+    await signInAsAdmin(page);
+    await openAdmin(page, USER_CREATE);
+    const dialog = page.getByRole("dialog");
+    await fillCreateUserForm(dialog, "yeni.ogretim.uyesi.t184", "Öğretim üyesi");
+    await dialog.getByRole("button", { name: "Kaydet" }).click();
+    await expect(dialog.getByRole("heading", { name: "Kullanıcıyı oluştur" })).toBeVisible();
+    // Onay adımı özetinde seçilen rol "Öğretim üyesi" olarak görünür.
+    await expect(dialog.getByText("Öğretim üyesi")).toBeVisible();
+    await dialog.getByRole("button", { name: "Onayla" }).click();
     await expect(page).toHaveURL(/#\/admin\/kullanicilar$/);
   });
 });
@@ -295,6 +309,8 @@ test.describe("roller ve erişim (E3 §e.6)", () => {
     ).toBeVisible();
     await expect(page.getByText("6 kullanıcı")).toBeVisible();
     await expect(page.getByText("234 kullanıcı")).toBeVisible();
+    // T184: üçüncü rol kartı (öğretim üyesi); mock veride henüz kimse bu rolde değildir.
+    await expect(page.getByText("0 kullanıcı")).toBeVisible();
     await expect(page.getByText("Pulse: 172 kullanıcı")).toBeVisible();
     await expect(page.getByText("Ausculta: 154 kullanıcı")).toBeVisible();
     await expect(page.getByText("Opaca: 171 kullanıcı")).toBeVisible();
@@ -302,6 +318,8 @@ test.describe("roller ve erişim (E3 §e.6)", () => {
     await expect(page.getByText("4. Sınıf")).toBeVisible();
     const roleAssignRow = page.getByRole("row").filter({ hasText: "Rol ata/geri al" });
     await expect(roleAssignRow).toContainText("Evet");
+    const gamificationRow = page.getByRole("row").filter({ hasText: "Rozet, liderlik ve Meydan Okuma" });
+    await expect(gamificationRow).toBeVisible();
     await expect(page.getByRole("link", { name: "Kullanıcılar listesinde gör" })).toHaveAttribute(
       "href",
       "#/admin/kullanicilar",
@@ -334,6 +352,25 @@ test.describe("roller ve erişim (E3 §e.6)", () => {
     await grant.getByRole("button", { name: "Admin rolü ver" }).click();
     await expect(panel.getByRole("button", { name: "Admin rolünü kaldır" })).toBeEnabled();
     await expect(panel.getByText("Yönetici")).toBeVisible();
+
+    // T184: öğretim üyesi ↔ kullanıcı (temel rol) geçişi; admin biti korunur.
+    // Rol rozetleri butonlarla aynı metni ("Öğretim üyesi yap") paylaşabildiği için
+    // yalnız rozet listesi (`.eg-shell-userdetail__badgeList`) içinde aranır.
+    const roleBadges = panel.locator(".eg-shell-userdetail__badgeList").first();
+    await panel.getByRole("button", { name: "Öğretim üyesi yap" }).click();
+    const grantFaculty = page.getByRole("dialog");
+    await expect(grantFaculty.getByRole("heading", { name: "Öğretim üyesi yap" })).toBeVisible();
+    await grantFaculty.getByRole("button", { name: "Öğretim üyesi yap" }).click();
+    await expect(roleBadges.getByText("Öğretim üyesi")).toBeVisible();
+    await expect(roleBadges.getByText("Yönetici")).toBeVisible();
+    await expect(panel.getByRole("button", { name: "Kullanıcı yap" })).toBeVisible();
+
+    await panel.getByRole("button", { name: "Kullanıcı yap" }).click();
+    const revokeFaculty = page.getByRole("dialog");
+    await expect(revokeFaculty.getByRole("heading", { name: "Kullanıcı yap" })).toBeVisible();
+    await revokeFaculty.getByRole("button", { name: "Kullanıcı yap" }).click();
+    await expect(roleBadges.getByText("Öğretim üyesi")).toHaveCount(0);
+    await expect(panel.getByRole("button", { name: "Öğretim üyesi yap" })).toBeVisible();
   });
 });
 

@@ -202,6 +202,16 @@ describe("validateImportRow (E3 §f satır kuralları)", () => {
     expect(row.errors.map((e) => e.code)).toContain("role_forbidden");
   });
 
+  it("rol 'ogretim_uyesi' hatasızdır (T184: kullanici veya ogretim_uyesi kabul edilir)", () => {
+    const row = validateImportRow(
+      { ...emptyRaw(), ad_soyad: "Ad Soyad", kullanici_adi: "gecerli.ogretim.uyesi", rol: "ogretim_uyesi" },
+      1,
+      context(),
+    );
+    expect(row.errors.map((e) => e.code)).not.toContain("role_forbidden");
+    expect(row.status).toBe("valid");
+  });
+
   it("bilinmeyen birim kodu unknown_unit döner; bilinen kod hatasızdır", () => {
     const unknown = validateImportRow(
       { ...emptyRaw(), ad_soyad: "Ad Soyad", birim_kodu: "yok-boyle-birim", kullanici_adi: "gecerli.kullanici" },

@@ -326,13 +326,23 @@ describe("RolesView işaretlemesi (E3 §e.6, T73)", () => {
         RolesView,
         baseRolesViewProps({
           status: "ready",
-          summary: { roleCounts: { admin: 2, kullanici: 48 }, simCounts: { ausculta: 10, opaca: 5, pulse: 20 } },
+          summary: {
+            roleCounts: { admin: 2, kullanici: 48, ogretim_uyesi: 3 },
+            simCounts: { ausculta: 10, opaca: 5, pulse: 20 },
+          },
         }),
       ),
     );
     expect(html).toContain(t("admin.roles.matrix.title"));
     expect(html).toContain(t("admin.roles.matrix.roleAssign"));
     expect(html).toContain(t("admin.roles.usersLink"));
+    // T184: üçüncü rol kartı ve matris sütunu (öğretim üyesi).
+    expect(html).toContain(t("admin.roles.card.ogretim_uyesi"));
+    expect(html).toContain("3 " + t("admin.roles.card.suffix"));
+    expect(html).toContain(t("admin.roles.matrix.ogretim_uyesi"));
+    expect(html).toContain(t("admin.roles.matrix.simUsage"));
+    // Apostrof `renderToStaticMarkup` çıktısında `&#x27;` olarak kaçışlanır; alt dizi apostrofsuz aranır.
+    expect(html).toContain("Rozet, liderlik ve Meydan Okuma");
     // Rol ataması bu ekrandan yapılmaz: mutasyon düğmesi/formu yoktur (tek yol ilkesi).
     expect(html).not.toContain("<button");
     expect(html).not.toContain("<select");
@@ -566,6 +576,21 @@ describe("Roller ve erişim sekmesi — admin rolü ver/kaldır (UserDetailPage,
   });
 });
 
+describe("Roller ve erişim sekmesi — öğretim üyesi ↔ kullanıcı geçişi (UserDetailPage, T184)", () => {
+  it("kullanıcı (öğrenci) kaydında 'Öğretim üyesi yap' düğmesi görünür", () => {
+    const html = render(createElement(UserDetailView, baseDetailViewProps({})));
+    expect(html).toContain(t("admin.users.detail.roles.grantFaculty"));
+    expect(html).not.toContain(t("admin.users.detail.roles.revokeFaculty"));
+  });
+
+  it("öğretim üyesi kaydında 'Kullanıcı yap' düğmesi görünür", () => {
+    const faculty: AdminUserDetail = { ...BASE_DETAIL, role: "ogretim_uyesi", roles: ["ogretim_uyesi"] };
+    const html = render(createElement(UserDetailView, baseDetailViewProps({ detail: faculty })));
+    expect(html).toContain(t("admin.users.detail.roles.revokeFaculty"));
+    expect(html).toContain(t("admin.users.role.ogretim_uyesi"));
+  });
+});
+
 describe("UserDetailPage kabı: setRoles akışı ve self-guard (T73)", () => {
   it("grantAdmin/revokeAdmin akışında setRoles kullanılır; kendi admin rolünü kaldırma guardSelfAdminRemoval ile reddedilir", async () => {
     const source = createMockUsersSource(69, 5);
@@ -579,5 +604,18 @@ describe("UserDetailPage kabı: setRoles akışı ve self-guard (T73)", () => {
   it("varsayılan (dataSource'suz) çağrıldığında başlangıçta yüklenme iskeletini render eder", () => {
     const html = render(createElement(UserDetailPage, { userId: "user-001" }));
     expect(html).toContain(t("admin.users.detail.back"));
+  });
+
+  it("swapBaseRole ile üretilen tam küme setRoles'e verildiğinde öğretim üyesi ↔ kullanıcı geçişi yapılır (T184)", async () => {
+    const source = createMockUsersSource(69, 5);
+    const first = generateSyntheticUsers(69, 5)[0];
+    if (first === undefined) throw new Error("Test verisi boş.");
+    expect(first.roles).toEqual(["kullanici"]);
+    const madeFaculty = await source.setRoles(first.id, ["ogretim_uyesi"], null);
+    expect(madeFaculty.roles).toEqual(["ogretim_uyesi"]);
+    expect(madeFaculty.role).toBe("ogretim_uyesi");
+    const madeStudent = await source.setRoles(first.id, ["kullanici"], null);
+    expect(madeStudent.roles).toEqual(["kullanici"]);
+    expect(madeStudent.role).toBe("kullanici");
   });
 });

@@ -34,20 +34,21 @@ import {
   type ImportsDataSource,
   type TemplateColumn,
 } from "./admin/importsDataSource";
-import type {
-  AdminUserDetail,
-  AdminUserHistoryEntry,
-  BulkEditInput,
-  BulkEditResult,
-  BulkSkipReason,
-  CreateUserInput,
-  SimId,
-  UpdateUserInput,
-  UserHistoryAction,
-  UserRole,
-  UsersDataSource,
-  UsersListQuery,
-  UsersSummary,
+import {
+  primaryRoleFor,
+  type AdminUserDetail,
+  type AdminUserHistoryEntry,
+  type BulkEditInput,
+  type BulkEditResult,
+  type BulkSkipReason,
+  type CreateUserInput,
+  type SimId,
+  type UpdateUserInput,
+  type UserHistoryAction,
+  type UserRole,
+  type UsersDataSource,
+  type UsersListQuery,
+  type UsersSummary,
 } from "./admin/usersDataSource";
 import { createApiGamificationSource, createSyntheticGamificationSource } from "./home/gamificationSource";
 import type { ShellDataSources } from "./dataSources";
@@ -80,12 +81,16 @@ function uuidOrUndefined(value: string | undefined): string | undefined {
   return UUID_RE.test(trimmed) ? trimmed : undefined;
 }
 
-function asRole(roles: readonly string[]): UserRole {
-  return roles.includes("admin") ? "admin" : "kullanici";
+/** T184: `UserRole` üçüncü değeri (`ogretim_uyesi`) aldı; API'den gelen roller
+ *  bu kümeye göre süzülür/öncelenir (`primaryRoleFor` ile aynı sıra: admin >
+ *  ogretim_uyesi > kullanici) — aksi hâlde gerçek API'den dönen öğretim üyesi
+ *  rolü sessizce düşerdi. */
+function asRoles(roles: readonly string[]): UserRole[] {
+  return roles.filter((role): role is UserRole => role === "admin" || role === "kullanici" || role === "ogretim_uyesi");
 }
 
-function asRoles(roles: readonly string[]): UserRole[] {
-  return roles.filter((role): role is UserRole => role === "admin" || role === "kullanici");
+function asRole(roles: readonly string[]): UserRole {
+  return primaryRoleFor(asRoles(roles));
 }
 
 function asSims(ids: readonly string[]): SimId[] {
@@ -263,7 +268,8 @@ export function createApiShellDataSources(client: ApiClient): ShellDataSources {
         const created = await client.admin.createUser({
           authMethod: input.authMethod,
           displayName: input.displayName,
-          role: "kullanici",
+          // T184: `CreateUserInput.role` artık `kullanici` HARİCİNDE `ogretim_uyesi`yi de taşıyabilir (§b).
+          role: input.role,
           simAccess: [...input.simAccess],
           ...(input.mappingKeyType === "email" ? { email: value } : { username: value }),
           ...(unitId === undefined ? {} : { unitId }),
@@ -318,7 +324,7 @@ export function createApiShellDataSources(client: ApiClient): ShellDataSources {
       }
     },
     async summary(): Promise<UsersSummary> {
-      const roleCounts: Record<UserRole, number> = { admin: 0, kullanici: 0 };
+      const roleCounts: Record<UserRole, number> = { admin: 0, kullanici: 0, ogretim_uyesi: 0 };
       const simCounts: Record<SimId, number> = { ausculta: 0, opaca: 0, pulse: 0 };
       let page = 1;
       let total = 0;

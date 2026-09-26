@@ -8,6 +8,7 @@ import {
   ADMIN_UNITS,
   createMockUsersSource,
   DEFAULT_MOCK_SEED,
+  swapBaseRole,
   unitNameFor,
   type AdminUserDetail,
   type UserAuthMethod,
@@ -22,12 +23,18 @@ function toggleRole(roles: readonly UserRole[], role: UserRole): UserRole[] {
 }
 
 export type UserDetailLoadStatus = "loading" | "ready" | "notFound" | "error";
-/** `grantAdmin`/`revokeAdmin` (T73, E3 §b/§e.6): admin rolünü elle ver/kaldır; kendi rolünü kaldırma engellenir. */
-export type UserDetailAction = "suspend" | "activate" | "delete" | "grantAdmin" | "revokeAdmin";
+/**
+ * `grantAdmin`/`revokeAdmin` (T73, E3 §b/§e.6): admin rolünü elle ver/kaldır;
+ * kendi rolünü kaldırma engellenir. `grantFaculty`/`revokeFaculty` (T184):
+ * öğretim üyesi ↔ kullanıcı (temel rol) geçişi; aynı `PUT .../roles` ucuyla,
+ * tam rol kümesi gönderilerek yapılır (`swapBaseRole`).
+ */
+export type UserDetailAction = "suspend" | "activate" | "delete" | "grantAdmin" | "revokeAdmin" | "grantFaculty" | "revokeFaculty";
 
 const ROLE_KEYS: Record<UserRole, TrKey> = {
   admin: "admin.users.role.admin",
   kullanici: "admin.users.role.kullanici",
+  ogretim_uyesi: "admin.users.role.ogretim_uyesi",
 };
 const STATUS_KEYS: Record<UserStatus, TrKey> = {
   active: "admin.users.status.active",
@@ -49,28 +56,36 @@ const CONFIRM_TITLE_KEYS: Record<UserDetailAction, TrKey> = {
   activate: "admin.users.detail.confirm.activate.title",
   delete: "admin.users.detail.confirm.delete.title",
   grantAdmin: "admin.users.detail.confirm.grantAdmin.title",
+  grantFaculty: "admin.users.detail.confirm.grantFaculty.title",
   revokeAdmin: "admin.users.detail.confirm.revokeAdmin.title",
+  revokeFaculty: "admin.users.detail.confirm.revokeFaculty.title",
   suspend: "admin.users.detail.confirm.suspend.title",
 };
 const CONFIRM_BODY_KEYS: Record<UserDetailAction, TrKey> = {
   activate: "admin.users.detail.confirm.activate.body",
   delete: "admin.users.detail.confirm.delete.body",
   grantAdmin: "admin.users.detail.confirm.grantAdmin.body",
+  grantFaculty: "admin.users.detail.confirm.grantFaculty.body",
   revokeAdmin: "admin.users.detail.confirm.revokeAdmin.body",
+  revokeFaculty: "admin.users.detail.confirm.revokeFaculty.body",
   suspend: "admin.users.detail.confirm.suspend.body",
 };
 const CONFIRM_APPLY_ACTION_KEYS: Record<UserDetailAction, TrKey> = {
   activate: "admin.users.detail.action.activate",
   delete: "admin.users.detail.action.delete",
   grantAdmin: "admin.users.detail.action.grantAdmin",
+  grantFaculty: "admin.users.detail.action.grantFaculty",
   revokeAdmin: "admin.users.detail.action.revokeAdmin",
+  revokeFaculty: "admin.users.detail.action.revokeFaculty",
   suspend: "admin.users.detail.action.suspend",
 };
 const CONFIRM_TOAST_KEYS: Record<UserDetailAction, TrKey> = {
   activate: "admin.users.detail.toast.activate",
   delete: "admin.users.detail.toast.delete",
   grantAdmin: "admin.users.detail.toast.grantAdmin",
+  grantFaculty: "admin.users.detail.toast.grantFaculty",
   revokeAdmin: "admin.users.detail.toast.revokeAdmin",
+  revokeFaculty: "admin.users.detail.toast.revokeFaculty",
   suspend: "admin.users.detail.toast.suspend",
 };
 
@@ -110,6 +125,7 @@ function RolesPanel({
   readonly onRequestAction: (action: UserDetailAction) => void;
 }): JSX.Element {
   const isAdmin = detail.roles.includes("admin");
+  const isFaculty = detail.roles.includes("ogretim_uyesi");
   return (
     <div className="eg-shell-userdetail__roles">
       <p className="eg-shell-userdetail__rolesTitle">{t("admin.users.detail.roles.title")}</p>
@@ -120,6 +136,10 @@ function RolesPanel({
         {t(isAdmin ? "admin.users.detail.roles.revoke" : "admin.users.detail.roles.grant")}
       </Button>
       {isAdmin && isSelfAdmin && <p role="alert">{t("admin.users.detail.roles.selfGuard")}</p>}
+      {/* T184: temel rol (kullanıcı ↔ öğretim üyesi) geçişi; admin biti bu düğmeden etkilenmez. */}
+      <Button onClick={() => onRequestAction(isFaculty ? "revokeFaculty" : "grantFaculty")} variant="secondary">
+        {t(isFaculty ? "admin.users.detail.roles.revokeFaculty" : "admin.users.detail.roles.grantFaculty")}
+      </Button>
       <p className="eg-shell-userdetail__rolesTitle">{t("admin.users.detail.roles.access")}</p>
       {detail.simAccess.length === 0 ? (
         <p>{t("admin.users.detail.roles.access.empty")}</p>
@@ -379,6 +399,11 @@ export function UserDetailPage({ userId, currentUserId = null, dataSource }: Use
     }
     if (pendingAction === "grantAdmin" || pendingAction === "revokeAdmin") {
       source.setRoles(detail.id, toggleRole(detail.roles, "admin"), currentUserId).then(onSuccess, onError);
+      return;
+    }
+    if (pendingAction === "grantFaculty" || pendingAction === "revokeFaculty") {
+      const target = pendingAction === "grantFaculty" ? "ogretim_uyesi" : "kullanici";
+      source.setRoles(detail.id, swapBaseRole(detail.roles, target), currentUserId).then(onSuccess, onError);
       return;
     }
     const status = ACTION_TO_STATUS[pendingAction];

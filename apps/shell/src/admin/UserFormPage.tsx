@@ -18,6 +18,7 @@ import {
   createMockUsersSource,
   DEFAULT_MOCK_SEED,
   SIM_IDS,
+  type AssignableRole,
   type CreateUserInput,
   type MappingKeyType,
   type SimId,
@@ -41,6 +42,12 @@ const AUTH_METHOD_KEYS: Record<UserAuthMethod, TrKey> = {
   sso: "admin.users.authMethod.sso",
 };
 
+/** Form/onay adımında sunulan roller (§b: `admin` hariç, T184). */
+const ASSIGNABLE_ROLE_KEYS: Record<AssignableRole, TrKey> = {
+  kullanici: "admin.users.role.kullanici",
+  ogretim_uyesi: "admin.users.role.ogretim_uyesi",
+};
+
 export interface UserFormViewProps {
   readonly step: UserFormStep;
   readonly values: CreateUserFormValues;
@@ -52,6 +59,7 @@ export interface UserFormViewProps {
   readonly onMappingValueChange: (value: string) => void;
   readonly onDisplayNameChange: (value: string) => void;
   readonly onAuthMethodChange: (value: UserAuthMethod) => void;
+  readonly onRoleChange: (value: AssignableRole) => void;
   readonly onUnitChange: (value: string) => void;
   readonly onSimAccessToggle: (simId: SimId) => void;
   readonly onSubmitRequest: () => void;
@@ -77,6 +85,7 @@ export function UserFormView({
   onMappingValueChange,
   onDisplayNameChange,
   onAuthMethodChange,
+  onRoleChange,
   onUnitChange,
   onSimAccessToggle,
   onSubmitRequest,
@@ -177,10 +186,12 @@ export function UserFormView({
             {(control) => (
               <Select
                 {...control}
-                disabled
-                onValueChange={() => undefined}
-                options={[{ label: t("admin.users.role.kullanici"), value: "kullanici" }]}
-                value="kullanici"
+                onValueChange={(value) => onRoleChange(value as AssignableRole)}
+                options={[
+                  { label: t("admin.users.role.kullanici"), value: "kullanici" },
+                  { label: t("admin.users.role.ogretim_uyesi"), value: "ogretim_uyesi" },
+                ]}
+                value={values.role}
               />
             )}
           </Field>
@@ -221,7 +232,7 @@ export function UserFormView({
             <dt>{t("admin.users.form.confirm.authMethod")}</dt>
             <dd>{t(AUTH_METHOD_KEYS[values.authMethod])}</dd>
             <dt>{t("admin.users.form.confirm.role")}</dt>
-            <dd>{t("admin.users.role.kullanici")}</dd>
+            <dd>{t(ASSIGNABLE_ROLE_KEYS[values.role])}</dd>
             <dt>{t("admin.users.form.confirm.simAccess")}</dt>
             <dd>
               {values.simAccess.length === 0
@@ -247,6 +258,7 @@ function toCreateUserInput(values: CreateUserFormValues): CreateUserInput {
     displayName: values.displayName,
     mappingKeyType: values.mappingKeyType,
     mappingKeyValue: values.mappingKeyValue,
+    role: values.role,
     simAccess: values.simAccess,
     unitId: values.unitId,
   };
@@ -324,6 +336,7 @@ export function UserFormPage({ dataSource }: UserFormPageProps): JSX.Element {
       onMappingTypeChange={(mappingKeyType) => updateValues({ mappingKeyType, mappingKeyValue: "" })}
       onMappingValueChange={(mappingKeyValue) => updateValues({ mappingKeyValue })}
       onRequestClose={requestClose}
+      onRoleChange={(role) => updateValues({ role })}
       onSimAccessToggle={(simId) => updateValues({ simAccess: toggleSimAccess(values.simAccess, simId) })}
       onSubmitRequest={onSubmitRequest}
       onUnitChange={(unitId) => updateValues({ unitId })}
