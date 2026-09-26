@@ -255,6 +255,7 @@ export {
 export { SUSPEND_LIMIT_12, SUSPEND_LIMIT_2004, deserializeSuspend, serializeSuspend } from "./core/suspend";
 export { filterAssessmentPool, validateCase } from "./core/validation";
 export type { ValidationIssue } from "./core/validation";
+export { VISITOR_UNLOCKED_ITEM_KEYS, isVisitorUnlocked } from "./core/visitorAccess";
 export { DEFAULT_WEIGHTS, EXPERT_SOURCES } from "./core/types";
 export type {
   AbcdeStep,

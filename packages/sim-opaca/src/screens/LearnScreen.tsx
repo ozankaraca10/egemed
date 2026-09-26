@@ -1,9 +1,12 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type JSX } from 'react'
+import type { SimAudience } from '@egemed/sim-host'
+import { VISITOR_LOCK_TEXT } from '@egemed/sim-host'
 import { useStore } from '../core/StoreProvider'
 import { examplesFor, isExpertSource } from '../core/images'
 import type { ImageRecord } from '../core/types'
 import { ZONES } from '../data/zones'
 import { ALL_CASES, poolFor } from '../data/pool'
+import { isVisitorUnlocked } from '../core/visitorAccess'
 import { LIBRARY_GROUPS, LIBRARY_ITEMS, LABEL_SOURCE_TEXT, findingShort, type LibraryItem } from '../data/terminology'
 import { FilmViewer, createNoopFilmEnv, type FilmViewerHandle } from '../ui/FilmViewer'
 import { FilmInfoPanel } from '../ui/FilmInfoPanel'
@@ -24,6 +27,7 @@ import {
   IconUser,
   IconWave,
   IconShieldCheck,
+  IconLock,
 } from '../ui/icons'
 
 /** Öğrenme modu: kütüphane + film görüntüleyici. Skor ve süre yok.
@@ -64,6 +68,8 @@ export interface LearnScreenProps {
   readonly gamiEnabled?: boolean
   /** Oyunlaştırma kayıt seam'i; `gamiEnabled` açıkken konu ve BT yığını tamamlama kaydı. */
   readonly gami?: LearnGamiPort
+  /** Kitle (T175); yoksa `student` (geriye uyum). Ziyaretçide kütüphane kısmen kilitli. */
+  readonly audience?: SimAudience
 }
 
 export function LearnScreen({
@@ -71,9 +77,12 @@ export function LearnScreen({
   env = NOOP_LEARN_ENV,
   gamiEnabled = false,
   gami,
+  audience = 'student',
 }: LearnScreenProps): JSX.Element {
   const { state, dispatch, now } = useStore()
+  const isVisitor = audience === 'visitor'
   const [selectedKey, setSelectedKey] = useState<string>(() => state.learnFocusKey ?? FIRST_LIBRARY_ITEM.key)
+  const [visitorNotice, setVisitorNotice] = useState<string | null>(null)
   const [tab, setTab] = useState<'desc' | 'film' | 'clin'>('desc')
   const [exampleIdx, setExampleIdx] = useState(() => state.learnFocusIdx ?? 0)
   const lastKey = useRef(selectedKey)
@@ -138,6 +147,18 @@ export function LearnScreen({
     })
   }
 
+  const selectLibraryItem = useCallback(
+    (key: string) => {
+      if (isVisitor && !isVisitorUnlocked(key)) {
+        setVisitorNotice(VISITOR_LOCK_TEXT.itemLocked)
+        return
+      }
+      setVisitorNotice(null)
+      setSelectedKey(key)
+    },
+    [isVisitor],
+  )
+
   const onZoneEnter = useCallback((ids: string[]) => dispatch({ type: 'zoneEnter', zoneIds: ids }), [dispatch])
   const onZoneDwell = useCallback((ids: string[], ms: number) => dispatch({ type: 'zoneDwell', zoneIds: ids, dwellMs: ms }), [dispatch])
   const ctExpertFinding = image?.modality === 'CT' ? image.annotations.find((a) => isExpertSource(a.source))?.finding ?? null : null
@@ -160,29 +181,42 @@ export function LearnScreen({
             <nav className="lib-col" aria-label="Öğrenme kütüphanesi">
               <h2>Kütüphane</h2>
               <p className="lib-sub">Konu seçin, filmi okuyun.</p>
+              {isVisitor && visitorNotice && (
+                <p className="mode-lock-hint" role="status">
+                  <IconLock width={14} height={14} aria-hidden="true" /> {visitorNotice}
+                </p>
+              )}
               {LIBRARY_GROUPS.map((g) => (
                 <div className="lib-group" key={g.id}>
                   <div className="g-title"><GroupIcon group={g.id} />{g.title}</div>
                   <div className="lib-items">
-                    {g.items.map((it) => (
-                      <button
-                        key={it.key}
-                        type="button"
-                        className={`lib-item ${it.key === selectedKey ? 'active' : ''}`}
-                        onClick={() => setSelectedKey(it.key)}
-                        aria-current={it.key === selectedKey ? 'true' : undefined}
-                        title={it.title}
-                      >
-                        <span className="ic"><GroupIcon group={g.id} /></span>
-                        <span className="lib-main">
-                          <b>{it.short}</b>
-                          <span>{it.sub}</span>
-                        </span>
-                        <span className="lib-right">
-                          <span className="lib-count" title="Örnek film sayısı">{countFor(it)}</span>
-                        </span>
-                      </button>
-                    ))}
+                    {g.items.map((it) => {
+                      const locked = isVisitor && !isVisitorUnlocked(it.key)
+                      return (
+                        <button
+                          key={it.key}
+                          type="button"
+                          className={`lib-item ${it.key === selectedKey ? 'active' : ''}${locked ? ' locked' : ''}`}
+                          onClick={() => selectLibraryItem(it.key)}
+                          aria-current={it.key === selectedKey ? 'true' : undefined}
+                          aria-disabled={locked ? 'true' : undefined}
+                          title={locked ? VISITOR_LOCK_TEXT.itemLocked : it.title}
+                        >
+                          <span className="ic"><GroupIcon group={g.id} /></span>
+                          <span className="lib-main">
+                            <b>{it.short}</b>
+                            <span>{it.sub}</span>
+                          </span>
+                          <span className="lib-right">
+                            {locked ? (
+                              <span className="lib-lock-badge" aria-hidden="true"><IconLock width={12} height={12} /></span>
+                            ) : (
+                              <span className="lib-count" title="Örnek film sayısı">{countFor(it)}</span>
+                            )}
+                          </span>
+                        </button>
+                      )
+                    })}
                   </div>
                 </div>
               ))}

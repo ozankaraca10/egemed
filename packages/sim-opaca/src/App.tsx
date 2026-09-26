@@ -1,6 +1,7 @@
 import { type JSX } from "react";
 import { EmbeddedProvider } from "./EmbeddedContext";
-import type { SimChrome } from "@egemed/sim-host";
+import type { SimAudience, SimChrome } from "@egemed/sim-host";
+import { audienceShowsGamification } from "@egemed/sim-host";
 import { useStore } from "./core/StoreProvider";
 import type { Screen } from "./core/types";
 import { DevPanel } from "./DevPanel";
@@ -47,6 +48,10 @@ export interface AppProps {
   readonly devBuild?: boolean;
   /** Birleşik bar kanalı. Verilirse sim araç çubuğu çizilmez. */
   readonly setChrome?: (chrome: SimChrome | null) => void;
+  /** Kitle (T175); yoksa `student` (geriye uyum). */
+  readonly audience?: SimAudience;
+  /** Ziyaretçi kilidindeki "Öğrenci girişi" eylemi. */
+  readonly requestSignIn?: () => void;
 }
 
 function PendingScreen({ screen, embedded }: { screen: Screen; embedded: boolean }): JSX.Element {
@@ -76,6 +81,8 @@ function ScreenBody({
   timing,
   gamiEnabled,
   devBuild,
+  audience,
+  requestSignIn,
 }: {
   embedded: boolean;
   startEnv: StartScreenEnv;
@@ -86,6 +93,8 @@ function ScreenBody({
   timing?: WindowLike;
   gamiEnabled: boolean;
   devBuild: boolean;
+  audience: SimAudience;
+  requestSignIn?: () => void;
 }): JSX.Element | null {
   const { state } = useStore();
   const learnGamiPort = useLearnGamiPort();
@@ -95,7 +104,14 @@ function ScreenBody({
   switch (state.screen) {
     case "start":
       if (embedded) {
-        return <ModeSelectScreen embedded={embedded} gamiEnabled={gamiEnabled} />;
+        return (
+          <ModeSelectScreen
+            embedded={embedded}
+            gamiEnabled={gamiEnabled}
+            audience={audience}
+            {...(requestSignIn ? { requestSignIn } : {})}
+          />
+        );
       }
       return timing ? (
         <StartScreen embedded={embedded} env={startEnv} modalEnv={modalEnv} timing={timing} />
@@ -103,7 +119,14 @@ function ScreenBody({
         <StartScreen embedded={embedded} env={startEnv} modalEnv={modalEnv} />
       );
     case "modes":
-      return <ModeSelectScreen embedded={embedded} gamiEnabled={gamiEnabled} />;
+      return (
+        <ModeSelectScreen
+          embedded={embedded}
+          gamiEnabled={gamiEnabled}
+          audience={audience}
+          {...(requestSignIn ? { requestSignIn } : {})}
+        />
+      );
     case "tutorial":
       return <TutorialScreen embedded={embedded} />;
     case "learn":
@@ -112,6 +135,7 @@ function ScreenBody({
           embedded={embedded}
           env={learnEnv}
           gamiEnabled={gamiEnabled}
+          audience={audience}
           {...(learnGami ? { gami: learnGami } : {})}
         />
       );
@@ -161,13 +185,19 @@ export function App({
   showDevPanel = false,
   devBuild = false,
   setChrome,
+  audience = "student",
+  requestSignIn,
 }: AppProps): JSX.Element {
   const { syncError, clearSyncError } = useGamiContext();
+  // T175: kitle sözleşmesi — oyunlaştırma yüzeyleri (rozet/XP/liderlik/aylık ödül) yalnız
+  // öğrenciye çizilir; çağıran `gamiEnabled=true` verse bile öğretim üyesi/ziyaretçide gizlenir
+  // (depo sahibi kararı, plan.md). Tek kaynak burada: alt bileşenler yalnız bunu sorgular.
+  const effectiveGami = gamiEnabled && audienceShowsGamification(audience);
   return (
     <EmbeddedProvider embedded={embedded} {...(setChrome === undefined ? {} : { setChrome })}>
       <div className="eg-sim-opaca app-shell">
-        <Header embedded={embedded} env={chromeEnv} modals={{ help: HelpModal, confirm: ConfirmModal }} gamiEnabled={gamiEnabled} />
-        {gamiEnabled && syncError ? <GamiSyncErrorBanner message={syncError.message} onDismiss={clearSyncError} icon={<IconInfo width={16} height={16} />} /> : null}
+        <Header embedded={embedded} env={chromeEnv} modals={{ help: HelpModal, confirm: ConfirmModal }} gamiEnabled={effectiveGami} />
+        {effectiveGami && syncError ? <GamiSyncErrorBanner message={syncError.message} onDismiss={clearSyncError} icon={<IconInfo width={16} height={16} />} /> : null}
         <main className="app-content">
           {timing ? (
             <ScreenBody
@@ -178,8 +208,10 @@ export function App({
               resultsEnv={resultsEnv}
               modalEnv={modalEnv}
               timing={timing}
-              gamiEnabled={gamiEnabled}
+              gamiEnabled={effectiveGami}
               devBuild={devBuild}
+              audience={audience}
+              {...(requestSignIn ? { requestSignIn } : {})}
             />
           ) : (
             <ScreenBody
@@ -189,8 +221,10 @@ export function App({
               popoverEnv={popoverEnv}
               resultsEnv={resultsEnv}
               modalEnv={modalEnv}
-              gamiEnabled={gamiEnabled}
+              gamiEnabled={effectiveGami}
               devBuild={devBuild}
+              audience={audience}
+              {...(requestSignIn ? { requestSignIn } : {})}
             />
           )}
         </main>
