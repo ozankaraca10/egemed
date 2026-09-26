@@ -10,7 +10,7 @@ platform), ADR-007 (kimlik ve kullanıcı verisi), E2 K1/K4,
 `packages/xapi-profile`, `infra/docker-compose.dev.yml` (PostgreSQL 18.4).
 
 Kapsam notu: Simülatör verileri birleştirilmez; her oyunlaştırma kaydı tek
-`sim_id` taşır. Ders, ödev ve not Moodle'da kalır. xAPI ifadeleri kurum
+`sim_id` taşır. Ders, ödev ve not platform kapsamı dışındadır. xAPI ifadeleri kurum
 LRS'sine gider; EGEMED ifade saklamaz (ADR-004).
 
 ## a. Kimlik akışı

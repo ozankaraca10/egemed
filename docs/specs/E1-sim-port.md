@@ -43,4 +43,4 @@ başlamadan önce küçük bir düzeltme görevi).
 ## Açık sorular (insan kararı)
 - Paket yerleşimi: `packages/sim-<id>` mü, `apps/shell` içi bölüm mü (port
   planlarında kararlaştırılır; öneri: sim başına paket).
-- Moodle/LTI entegrasyonu ayrı epik.
+- LTI entegrasyonu ayrı epik.

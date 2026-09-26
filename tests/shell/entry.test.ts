@@ -7,7 +7,7 @@ import { t } from "../../packages/ui/i18n/tr";
 import { describe, expect, it } from "vitest";
 
 describe("giriş rotaları", () => {
-  it("yönetici ve test öğrencisi yollarını mevcut dört kabuk rotasından ayrı çözer", () => {
+  it("yönetici ve test öğrencisi yollarını mevcut kabuk rotalarından ayrı çözer", () => {
     expect(resolveRoute(entryHref("admin"))).toEqual({
       kind: "entry",
       role: "admin",
@@ -19,7 +19,7 @@ describe("giriş rotaları", () => {
       titleKey: "entry.student.title",
     });
     expect(ENTRY_PATHS).toEqual({ admin: "/giris/admin", student: "/giris/test-ogrenci" });
-    expect(ROUTES).toHaveLength(4);
+    expect(ROUTES).toHaveLength(2);
   });
 
   it.each(["admin", "student"] as const)("%s ekranı erişilebilir form işaretlemesi üretir", (role) => {

@@ -15,19 +15,23 @@ describe("resolveRoute", () => {
   });
   it("her ROUTES yolu kendi kimliğine çözülür; sondaki '/' ve sorgu yok sayılır", () => {
     for (const route of ROUTES) expect(pageId(`#${route.path}`), route.path).toBe(route.id);
-    for (const hash of ["#/gorevler/", "#/gorevler//", "#/gorevler?x=1", "#/gorevler/?x=1"]) {
-      expect(pageId(hash), hash).toBe("tasks");
+    for (const hash of ["#/simulatorler/", "#/simulatorler//", "#/simulatorler?x=1", "#/simulatorler/?x=1"]) {
+      expect(pageId(hash), hash).toBe("simulators");
     }
   });
   it("bilinmeyen yol notFound'a çözülür", () => {
     expect(resolveRoute("#/yok")).toEqual({ kind: "notFound", path: "/yok" });
-    expect(resolveRoute("#/gorevler/fazla").kind).toBe("notFound");
+    expect(resolveRoute("#/simulatorler/fazla").kind).toBe("notFound");
+  });
+  it("kaldırılan Görevler/Not Defteri yolları artık notFound'a çözülür (T159)", () => {
+    expect(resolveRoute("#/gorevler").kind).toBe("notFound");
+    expect(resolveRoute("#/not-defteri").kind).toBe("notFound");
   });
   it("gidiş-dönüş, benzersizlik ve sözlük anahtarları korunur", () => {
     const keys = new Set(Object.keys(tr));
-    expect(ROUTES.length).toBe(4);
-    expect(new Set(ROUTES.map((route) => route.id)).size).toBe(4);
-    expect(new Set(ROUTES.map((route) => route.path)).size).toBe(4);
+    expect(ROUTES.length).toBe(2);
+    expect(new Set(ROUTES.map((route) => route.id)).size).toBe(2);
+    expect(new Set(ROUTES.map((route) => route.path)).size).toBe(2);
     for (const route of ROUTES) {
       expect(routeHref(route.id), route.id).toBe(`#${route.path}`);
       expect(pageId(routeHref(route.id)), route.id).toBe(route.id);

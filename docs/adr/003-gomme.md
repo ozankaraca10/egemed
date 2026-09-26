@@ -22,8 +22,8 @@ Kabuk, kullanıcıya tek seferde tek simülatör sunar.
   SCORM/HTML dağıtımı ve tek başına çalışma yeteneği kaybolur.
 - **Birleşik oynatıcı:** üç simülatörü tek yüzeyde birleştiren oynatıcı; veri
   birleştirme yasağıyla çelişir.
-- **Yalnız Moodle:** gömme yalnız Moodle üzerinden yapılır; kurumsal bağımsız
-  dağıtım esnekliği kaybolur.
+- **Yalnız harici sistem üzerinden gömme:** gömme yalnız harici bir sistem üzerinden
+  yapılır; kurumsal bağımsız dağıtım esnekliği kaybolur.
 
 ## Sonuçlar
 - Simülatörler kendi sürüm çizgisinde ilerler; biri diğerini etkilemez.

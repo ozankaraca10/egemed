@@ -90,6 +90,12 @@ const PATCHES = {
       find: "SCORM puanı",
       replace: "Puan kaydedilir",
     },
+    {
+      id: "PULSE-NO-LMS-QUIZ-TEXT",
+      why: "Kullanıcı kararı (26 Eylül 2026): Moodle/LMS ile bağ yok; platformda SCORM algılanmaz. Sınav açıklamasındaki 'en iyi puan LMS'ye yazılır' ifadesi öğrenciyi var olmayan bir LMS kaydına yönlendirmesin diye nötr bir ifadeyle değiştirilir. (S.detected/S.isLMS'e bağlı saveStatus metinleri bu dalda çalışmadığından kasıtlı olarak dokunulmadı; bkz. T160 summary.)",
+      find: "en iyi puan LMS’ye yazılır",
+      replace: "en iyi puan kaydedilir",
+    },
   ],
   features: [
     {

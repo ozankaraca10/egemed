@@ -102,11 +102,11 @@ kalır (Karar 23 Eyl 2026).
 |---|---|---|---|
 | `tests/core.test.ts` | 66 | geometri · yanıt doğruluğu · skor · vaka doğrulama · akış · oturum örnekleme · suspend · SCORM çalışma zamanı · reducer · reducer — konu uygulaması dönüşü · en iyi puan (bestScore) · paketlenen veri | Taşınır (S1–S7) |
 | `tests/gamification/*.test.ts` (13 dosya) | 87 | zaman/TR takvimi 16 · ranking 12 · repo 11 · xp 10 · badges 8 · streak-goals 7 · leaderboardView 7 · attempt 4 · badgeView 4 · chart 4 · flag 2 · ui-meta 2 | Taşınır, bayrak kapalı (G1–G5) |
-| `tests/scripts.test.ts` | 45 | CSV · DICOM · ortak yardımcılar · vaka seçimi (V1/V10) · soru imzası · güvenli çeldirici · bilgi sorusu tavanı · içe aktarıcılar | **Taşınmaz — kaynak depoda arşiv (veri üretimi + LMS paketleme), Karar 23 Eyl 2026** |
-| `tests/remote-zip.test.ts` | 11 | remote-zip Range okuma · Commons lisans filtresi · pediatrik oran | **Taşınmaz — kaynak depoda arşiv (veri üretimi + LMS paketleme), Karar 23 Eyl 2026** |
+| `tests/scripts.test.ts` | 45 | CSV · DICOM · ortak yardımcılar · vaka seçimi (V1/V10) · soru imzası · güvenli çeldirici · bilgi sorusu tavanı · içe aktarıcılar | **Taşınmaz — kaynak depoda arşiv (veri üretimi + SCORM paketleme), Karar 23 Eyl 2026** |
+| `tests/remote-zip.test.ts` | 11 | remote-zip Range okuma · Commons lisans filtresi · pediatrik oran | **Taşınmaz — kaynak depoda arşiv (veri üretimi + SCORM paketleme), Karar 23 Eyl 2026** |
 
 - **Platform regresyon ağı: 153 test** (66 core + 87 gamification) — Karar (23 Eyl 2026): yalnız çalışma
-  zamanı testleri taşınır; `scripts/` hattı (veri üretimi + LMS paketleme) ve 56 betik testi kaynak depoda
+  zamanı testleri taşınır; `scripts/` hattı (veri üretimi + SCORM paketleme) ve 56 betik testi kaynak depoda
   arşiv kalır. `jszip`/`sharp` eklenmez; vaka seti yeniden üretilecekse kaynak depoda üretilip çıktı kopyalanır.
 - E1/E2'deki "119 test" hedefi bu ölçümle güncellenir; kabul kapısı 153 test üzerinden sayar.
 - Platform test deseni: DOM yok → `renderToStaticMarkup`, saf fonksiyon, dosya okuma `ts.sys.readFile`
@@ -117,7 +117,7 @@ kalır (Karar 23 Eyl 2026).
 ## 7. Riskler (kanıtlı)
 
 ### 7.1 SCORM / kimlik (KVKK)
-- `core/scorm.ts:32-45` `detectScorm` `window.parent`/`opener` zincirini tarar — iframe/LMS varsayımı;
+- `core/scorm.ts:32-45` `detectScorm` `window.parent`/`opener` zincirini tarar — iframe varsayımı;
   platform SPA'da anlamsızdır. `ScormRuntime` `core/store.tsx:258-371` içinde gömülüdür ve
   `init/saveInteractions/saveProgress/reportScore/attachAutoFlush/terminate` API'si vardır.
 - `screens/ResultsScreen.tsx:46` `runtime.terminate()` çağırır; `ResultsScreen.tsx:154`
@@ -308,7 +308,7 @@ T09 mobil e2e (Playwright, 360/768/1440) çalışan rota sonrası T09'a aittir; 
 ## 10. Açık kararlar (insan)
 
 1. **Test hedefi — Karar (23 Eyl 2026):** Platform hedefi **153 çalışma zamanı testi** (66 core + 87 gamification).
-   `scripts/` hattı (veri üretimi + LMS paketleme) ve 56 betik testi taşınmaz, kaynak depoda arşiv kalır;
+   `scripts/` hattı (veri üretimi + SCORM paketleme) ve 56 betik testi taşınmaz, kaynak depoda arşiv kalır;
    `jszip`/`sharp` eklenmez. Vaka seti yeniden üretilecekse kaynak depoda üretilip çıktı kopyalanır.
 2. **Asset politikası — Karar (23 Eyl 2026):** `public/assets/xray/runtime` (20 MB, git-dışı) yerel kopyadan
    kopyalanır; import betikleriyle yeniden üretim yolu kullanılmaz. Modül varlıklarının sunum kökü

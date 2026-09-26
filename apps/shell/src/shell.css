@@ -10,7 +10,8 @@ html, body { margin: 0; }
 .eg-shell {
   /* Aile token'ında 44 px dokunma hedefi yok; yerelde --eg- önekiyle tutulur. */
   --eg-shell-touch-min: 44px;
-  position: relative; box-sizing: border-box; min-height: 100vh;
+  position: relative; box-sizing: border-box; min-height: 100dvh;
+  display: flex; flex-direction: column;
   background: var(--bg-grad-b); color: var(--text);
   font-family: var(--font); font-size: var(--fs-md); line-height: 1.5;
 }
@@ -82,13 +83,14 @@ html, body { margin: 0; }
 .eg-shell-nav__link[aria-current="page"] {
   color: var(--blue-700); font-weight: 600; box-shadow: inset 0 -3px 0 var(--blue-600);
 }
-.eg-shell-main { box-sizing: border-box; padding: var(--sp-4); }
+.eg-shell-main { flex: 1 0 auto; width: 100%; box-sizing: border-box; padding: var(--sp-4); }
 /* Mobilde alt sekme çubuğu sabittir; boşluğu sayfa sonundaki footer'ın alt
    dolgusu verir (aşağıda `.eg-shell .eg-shell-footer`), böylece footer çubuğun
    altında kalmaz ve içerik ile footer arasında çift boşluk oluşmaz. */
 .eg-shell-footer {
   box-sizing: border-box; display: flex; flex-wrap: wrap; align-items: center;
   justify-content: center; gap: var(--sp-2) var(--sp-3); padding: var(--sp-4);
+  flex-shrink: 0;
   background: var(--card); border-top: 1px solid var(--border);
   color: var(--muted); font-size: var(--fs-sm); text-align: center;
 }
@@ -591,8 +593,8 @@ html, body { margin: 0; }
   .eg-shell-entry__panel { padding: var(--sp-4); }
 }
 @media (max-width: 380px) {
-  /* 360 px'te "Simülatörler"/"Not Defteri" etiketleri kırılmadan sığsın:
-     kısaltma yok, yalnız iç boşluk ve harf aralığı daraltılır. */
+  /* 360 px'te "Simülatörler" etiketi kırılmadan sığsın: kısaltma yok, yalnız
+     iç boşluk ve harf aralığı daraltılır. */
   .eg-shell-nav__link { padding: 0; letter-spacing: -.02em; }
   .eg-shell-entry__brand { min-height: 11rem; }
   .eg-shell-entry__roles { gap: var(--sp-1); }

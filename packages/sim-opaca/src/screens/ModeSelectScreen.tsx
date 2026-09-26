@@ -89,7 +89,7 @@ export function ModeSelectScreen({ embedded = false, gamiEnabled = false }: Mode
               title="Değerlendirme Modu"
               text={assessmentCount ? `${assessmentCount} radyolog etiketli vakalık havuzdan rastgele ${Math.min(SESSION_SIZE, assessmentCount)} vaka.` : 'Değerlendirme havuzu boş: radyolog etiketli veri seti içe aktarılmalı.'}
               items={['Okuma bölgesi ve uzman katmanı yok', 'Vaka başına süre sınırı', embedded ? 'Puan kaydedilir' : 'SCORM puanı']}
-              rules={embedded ? 'İpucu yok · geri bildirim yalnız sonunda · puan kaydedilir' : "İpucu yok · geri bildirim yalnız sonunda · puan LMS'e yazılır"}
+              rules="İpucu yok · geri bildirim yalnız sonunda · puan kaydedilir"
               cta={recommendLearn && assessmentCount ? 'Öğrenmeye git' : 'Değerlendirmeye gir'}
               disabled={!assessmentCount}
               recommendLocked={recommendLearn && !!assessmentCount}

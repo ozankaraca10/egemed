@@ -608,7 +608,7 @@ export const PatientStage = forwardRef<StageHandle, PatientStageProps>(function 
           {audioStatus?.status === "loading" && <div className="dwell-hint">Ses hazırlanıyor…</div>}
           {audioStatus?.status === "error" && (
             <div className="dwell-hint dwell-error" role="alert">
-              Ses yüklenemedi. Bağlantınızı/LMS oturumunu kontrol edip bölgeyi yeniden dinleyin.
+              Ses yüklenemedi. Bağlantınızı kontrol edip bölgeyi yeniden dinleyin.
             </div>
           )}
         </div>

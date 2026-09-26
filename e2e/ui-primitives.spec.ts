@@ -111,6 +111,37 @@ test.describe("premium bileşen temeli (T151)", () => {
     await expect(page.getByRole("region", { name: /Bildirimler/ }).getByText("Kaydedildi")).toBeVisible();
   });
 
+  test("tarih alanı: yazarak giriş yapılır, takvimden klavyeyle seçilir, axe 0, 360'da taşma yok", async ({ page }) => {
+    await openShowcase(page);
+    const dateInput = page.getByLabel("Doğum tarihi");
+    await dateInput.click();
+    await dateInput.pressSequentially("15042026");
+    await expect(dateInput).toHaveValue("15.04.2026");
+    await page.keyboard.press("Tab");
+    await expect(page.locator(".eg-datefield__error")).toHaveCount(0);
+
+    const openCalendar = page.getByRole("button", { name: "Takvimi aç" });
+    await openCalendar.click();
+    const grid = page.getByRole("grid");
+    await expect(grid).toBeVisible();
+    expect(await axeViolations(page)).toEqual([]);
+    expect(await smallTargets(page)).toEqual([]);
+
+    const selectedCell = page.locator('[data-iso="2026-04-15"]');
+    await expect(selectedCell).toBeFocused();
+    await page.keyboard.press("ArrowRight");
+    await expect(page.locator('[data-iso="2026-04-16"]')).toBeFocused();
+    await page.keyboard.press("Enter");
+    await expect(grid).toBeHidden();
+    await expect(openCalendar).toBeFocused();
+    await expect(dateInput).toHaveValue("16.04.2026");
+
+    await page.setViewportSize({ width: 360, height: 800 });
+    const overflow = await page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth);
+    expect(overflow).toBe(false);
+    await page.setViewportSize({ width: 1280, height: 800 });
+  });
+
   test("tablo: aria-sort klavyeyle sıralanır, seçim çalışır, 360 px'te yatay taşma yok, tüm hedefler ≥ 44 px", async ({ page }) => {
     const errors = trackErrors(page);
     await openShowcase(page);

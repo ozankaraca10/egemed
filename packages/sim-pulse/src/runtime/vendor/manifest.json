@@ -87,6 +87,12 @@
       "why": "ADR-006 ile SCORM/iframe LMS modeli kalktı; platform kendi API'siyle ilerlemeyi kaydeder. Sınav mod kartındaki kullanıcıya görünen 'SCORM puanı' ifadesi öğrenciyi artık var olmayan bir SCORM kaydına yönlendirmesin diye nötr bir ifadeyle değiştirilir."
     },
     {
+      "file": "app.js",
+      "id": "PULSE-NO-LMS-QUIZ-TEXT",
+      "matches": 1,
+      "why": "Kullanıcı kararı (26 Eylül 2026): Moodle/LMS ile bağ yok; platformda SCORM algılanmaz. Sınav açıklamasındaki 'en iyi puan LMS'ye yazılır' ifadesi öğrenciyi var olmayan bir LMS kaydına yönlendirmesin diye nötr bir ifadeyle değiştirilir. (S.detected/S.isLMS'e bağlı saveStatus metinleri bu dalda çalışmadığından kasıtlı olarak dokunulmadı; bkz. T160 summary.)"
+    },
+    {
       "file": "features.js",
       "id": "PULSE-ASSET-BASE",
       "matches": 1,
