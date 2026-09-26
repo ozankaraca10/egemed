@@ -122,18 +122,6 @@ export function HomePage({ session = null }: HomePageProps): JSX.Element {
   );
 }
 
-export function TasksPage(): JSX.Element {
-  return <EmptyPage bodyKey="shell.tasks.body" titleKey="shell.tasks.title" />;
-}
-
-export function NotebookPage(): JSX.Element {
-  return (
-    <EmptyPage bodyKey="shell.notebook.body" titleKey="shell.notebook.title">
-      <p className="eg-shell-page__body">{t("shell.notebook.pending")}</p>
-    </EmptyPage>
-  );
-}
-
 export function NotFoundPage(): JSX.Element {
   return (
     <EmptyPage bodyKey="shell.notFound.body" titleKey="shell.notFound.title">
@@ -159,14 +147,7 @@ export function SimulatorsPage({ session = null }: { readonly session?: ShellSes
   );
 }
 
-/** Ana sayfa dışındaki sayfalar; eksik sayfa derleme zamanında yakalanır. */
-const PAGES: Record<Exclude<RouteId, "home" | "simulators">, () => JSX.Element> = {
-  notebook: NotebookPage,
-  tasks: TasksPage,
-};
-
 export function pageFor(id: RouteId, session: ShellSession | null = null): JSX.Element {
   if (id === "home") return <HomePage session={session} />;
-  if (id === "simulators") return <SimulatorsPage session={session} />;
-  return PAGES[id]();
+  return <SimulatorsPage session={session} />;
 }
