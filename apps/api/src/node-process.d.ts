@@ -11,6 +11,8 @@ declare module "node:process" {
     readonly stderr: { write(text: string): void };
     /** Tohum CLI'ı hata durumunda 1 yazar. */
     exitCode: number;
+    /** T170 — önizleme betiği çıktı klasörünü çalışma dizinine göre çözer. */
+    cwd(): string;
   };
   export default process;
 }
