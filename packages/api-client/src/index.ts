@@ -1,5 +1,6 @@
 import {
   ROLES,
+  adminRewardListResponseSchema,
   attemptWriteRequestSchema,
   authMeResponseSchema,
   authMethodSchema,
@@ -14,9 +15,15 @@ import {
   gamiSimIdParamSchema,
   gamiSummaryResponseSchema,
   isoDateTimeSchema,
+  meRewardResponseSchema,
+  meRewardsOverviewResponseSchema,
   mePreferencesResponseSchema,
   mePreferencesSchema,
   pageMetaSchema,
+  rewardMonthSchema,
+  rewardSchema,
+  rewardUpsertRequestSchema,
+  rewardWinnerSchema,
   roleSchema,
   simIdSchema,
   updateUserRequestSchema,
@@ -35,6 +42,9 @@ import {
   type GamiLeaderboardResponse,
   type GamiSummaryResponse,
   type MePreferences,
+  type RewardBody,
+  type RewardUpsertRequest,
+  type RewardWinnerBody,
   type Role,
   type SimId,
   type UpdateUserRequest,
@@ -250,6 +260,31 @@ export interface ApiAuditListResponse {
   readonly meta: PageMeta | null;
 }
 
+export type ApiAdminReward = RewardBody & { readonly winners: readonly RewardWinnerBody[] };
+
+export interface ApiAdminRewardListResponse {
+  readonly data: readonly ApiAdminReward[];
+}
+
+export interface ApiMeRewardResponse {
+  readonly data: {
+    readonly current: RewardBody | null;
+    readonly winners: readonly RewardWinnerBody[];
+  };
+}
+
+export interface ApiMeRewardsOverviewSim {
+  readonly simId: SimId;
+  readonly current: RewardBody | null;
+  readonly lastMonthWinners: readonly RewardWinnerBody[];
+}
+
+export interface ApiMeRewardsOverviewResponse {
+  readonly data: {
+    readonly sims: readonly ApiMeRewardsOverviewSim[];
+  };
+}
+
 export interface ApiClient {
   readonly auth: {
     me(): Promise<AuthMeResponse>;
@@ -279,6 +314,14 @@ export interface ApiClient {
       apply(id: string): Promise<ApiImportApplyResponse>;
     };
     listAudit(query?: QueryMap): Promise<ApiAuditListResponse>;
+  };
+  readonly rewards: {
+    listAdminRewards(simId?: SimId): Promise<ApiAdminRewardListResponse>;
+    upsertAdminReward(simId: SimId, month: string, body: RewardUpsertRequest): Promise<ApiAdminReward>;
+    deleteAdminReward(simId: SimId, month: string): Promise<void>;
+    finalizeAdminReward(simId: SimId, month: string): Promise<ApiAdminReward | null>;
+    getMyRewards(): Promise<ApiMeRewardsOverviewResponse>;
+    getMySimReward(simId: SimId): Promise<ApiMeRewardResponse>;
   };
   readonly gamification: {
     getAll(): Promise<GamiAllResponse>;
@@ -609,6 +652,61 @@ export function createApiClient(options: CreateApiClientOptions): ApiClient {
         });
       },
     },
+    rewards: {
+      async listAdminRewards(simId?: SimId): Promise<ApiAdminRewardListResponse> {
+        const parsedSimId = simId === undefined ? undefined : parseSchema(simIdSchema, simId, "GET /admin/rewards query.simId");
+        return requestJson({
+          method: "GET",
+          path: "/admin/rewards",
+          query: { simId: parsedSimId },
+          parse: (value, context) => parseSchema(adminRewardListResponseSchema, value, `${context} response`),
+        });
+      },
+      async upsertAdminReward(simId: SimId, month: string, body: RewardUpsertRequest): Promise<ApiAdminReward> {
+        const parsedSimId = parseSchema(simIdSchema, simId, "PUT /admin/rewards/:simId/:month path.simId");
+        const parsedMonth = parseSchema(rewardMonthSchema, month, "PUT /admin/rewards/:simId/:month path.month");
+        const parsedBody = parseSchema(rewardUpsertRequestSchema, body, "PUT /admin/rewards/:simId/:month request");
+        return requestJson({
+          method: "PUT",
+          path: `/admin/rewards/${parsedSimId}/${parsedMonth}`,
+          contentType: "application/json",
+          body: JSON.stringify(parsedBody),
+          parse: parseAdminRewardEnvelope,
+        });
+      },
+      async deleteAdminReward(simId: SimId, month: string): Promise<void> {
+        const parsedSimId = parseSchema(simIdSchema, simId, "DELETE /admin/rewards/:simId/:month path.simId");
+        const parsedMonth = parseSchema(rewardMonthSchema, month, "DELETE /admin/rewards/:simId/:month path.month");
+        await requestNoContent({
+          method: "DELETE",
+          path: `/admin/rewards/${parsedSimId}/${parsedMonth}`,
+        });
+      },
+      async finalizeAdminReward(simId: SimId, month: string): Promise<ApiAdminReward | null> {
+        const parsedSimId = parseSchema(simIdSchema, simId, "POST /admin/rewards/:simId/:month/finalize path.simId");
+        const parsedMonth = parseSchema(rewardMonthSchema, month, "POST /admin/rewards/:simId/:month/finalize path.month");
+        return requestJson({
+          method: "POST",
+          path: `/admin/rewards/${parsedSimId}/${parsedMonth}/finalize`,
+          parse: parseAdminRewardEnvelopeNullable,
+        });
+      },
+      async getMyRewards(): Promise<ApiMeRewardsOverviewResponse> {
+        return requestJson({
+          method: "GET",
+          path: "/me/rewards",
+          parse: (value, context) => parseSchema(meRewardsOverviewResponseSchema, value, `${context} response`),
+        });
+      },
+      async getMySimReward(simId: SimId): Promise<ApiMeRewardResponse> {
+        const parsedSimId = parseSchema(gamiSimIdParamSchema, simId, "GET /me/rewards/:simId path");
+        return requestJson({
+          method: "GET",
+          path: `/me/rewards/${parsedSimId}`,
+          parse: (value, context) => parseSchema(meRewardResponseSchema, value, `${context} response`),
+        });
+      },
+    },
     gamification: {
       async getAll(): Promise<GamiAllResponse> {
         return requestJson({
@@ -878,6 +976,26 @@ function parseRoleSetResponse(value: unknown, context: string): ApiRoleSetRespon
       status: parseSchema(userStatusSchema, data.status, `${context}.data.status`),
     },
   };
+}
+
+function parseAdminReward(value: unknown, context: string): ApiAdminReward {
+  const object = asObject(value, context);
+  const { winners, ...rewardFields } = object;
+  const reward = parseSchema(rewardSchema, rewardFields, context);
+  const parsedWinners = asArray(winners, `${context}.winners`).map((winner, index) =>
+    parseSchema(rewardWinnerSchema, winner, `${context}.winners[${index}]`),
+  );
+  return { ...reward, winners: parsedWinners };
+}
+
+function parseAdminRewardEnvelope(value: unknown, context: string): ApiAdminReward {
+  const object = asObject(value, context);
+  return parseAdminReward(object.data, `${context}.data`);
+}
+
+function parseAdminRewardEnvelopeNullable(value: unknown, context: string): ApiAdminReward | null {
+  const object = asObject(value, context);
+  return parseNullable(object.data, `${context}.data`, parseAdminReward);
 }
 
 function parseImportMode(value: unknown, context: string): ImportMode {
