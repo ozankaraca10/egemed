@@ -1,5 +1,5 @@
-import { useId, useState, type JSX } from "react";
-import { Modal } from "@egemed/ui";
+import { useState, type JSX } from "react";
+import { Button, Dialog, Field, Select, TextArea, TextInput, useToast } from "@egemed/ui";
 import { useShellSource } from "../dataSources";
 import { t, type TrKey } from "@egemed/ui/i18n";
 import {
@@ -15,12 +15,6 @@ import {
   type ImportsDataSource,
   type TemplateColumn,
 } from "./importsDataSource";
-
-/** Kök tsconfig DOM lib'i taşımadığı için değişim olayı en dar arayüzle okunur (UsersPage.tsx deseni). */
-interface ChangeLike { target: unknown }
-function changeValue(event: ChangeLike): string {
-  return (event.target as unknown as { value: string }).value;
-}
 
 /** DOM'suz ortamda (SSR/test) sessizce atlanan CSV indirme; yapısal tipler DOM lib gerektirmez (Modal.tsx deseni). */
 interface DownloadAnchor { href: string; download: string; click(): void }
@@ -127,8 +121,6 @@ export interface ImportWizardViewProps {
  */
 export function ImportWizardView(props: ImportWizardViewProps): JSX.Element {
   const { step } = props;
-  const fileNameId = useId();
-  const csvId = useId();
   const validRows = props.rows.filter((row) => row.status === "valid");
   const errorRows = props.rows.filter((row) => row.status === "error");
 
@@ -141,9 +133,9 @@ export function ImportWizardView(props: ImportWizardViewProps): JSX.Element {
         <div className="eg-shell-import__panel">
           <h2 className="eg-shell-import__panelTitle">{t("admin.import.template.title")}</h2>
           <p>{t("admin.import.template.body")}</p>
-          <button onClick={props.onDownloadTemplate} type="button">{t("admin.import.template.download")}</button>
+          <Button onClick={props.onDownloadTemplate} variant="secondary">{t("admin.import.template.download")}</Button>
           <div className="eg-shell-userform__actions">
-            <button onClick={props.onNext} type="button">{t("admin.import.action.next")}</button>
+            <Button onClick={props.onNext} variant="primary">{t("admin.import.action.next")}</Button>
           </div>
         </div>
       )}
@@ -152,31 +144,39 @@ export function ImportWizardView(props: ImportWizardViewProps): JSX.Element {
         <div className="eg-shell-import__panel">
           <h2 className="eg-shell-import__panelTitle">{t("admin.import.upload.title")}</h2>
           <p className="eg-shell-users__field-label">{t("admin.import.upload.hint")}</p>
-          <label className="eg-shell-userform__field">
-            <span className="eg-shell-userform__label">{t("admin.import.upload.mode.label")}</span>
-            <select onChange={(event: ChangeLike) => props.onModeChange(changeValue(event) as ImportMode)} value={props.mode}>
-              <option value="ekle">{t("admin.import.upload.mode.ekle")}</option>
-              <option value="guncelle">{t("admin.import.upload.mode.guncelle")}</option>
-            </select>
-          </label>
-          <label className="eg-shell-userform__field" htmlFor={fileNameId}>
-            <span className="eg-shell-userform__label">{t("admin.import.upload.fileName")}</span>
-            <input
-              id={fileNameId}
-              onChange={(event: ChangeLike) => props.onFileNameChange(changeValue(event))}
-              type="text"
-              value={props.fileNameInput}
-            />
-          </label>
-          <label className="eg-shell-userform__field" htmlFor={csvId}>
-            <span className="eg-shell-userform__label">{t("admin.import.upload.content")}</span>
-            <textarea
-              id={csvId}
-              onChange={(event: ChangeLike) => props.onCsvTextChange(changeValue(event))}
-              rows={8}
-              value={props.csvText}
-            />
-          </label>
+          <Field label={t("admin.import.upload.mode.label")}>
+            {(control) => (
+              <Select
+                {...control}
+                onValueChange={(value) => props.onModeChange(value as ImportMode)}
+                options={[
+                  { label: t("admin.import.upload.mode.ekle"), value: "ekle" },
+                  { label: t("admin.import.upload.mode.guncelle"), value: "guncelle" },
+                ]}
+                value={props.mode}
+              />
+            )}
+          </Field>
+          <Field label={t("admin.import.upload.fileName")}>
+            {(control) => (
+              <TextInput
+                {...control}
+                onChange={(event) => props.onFileNameChange(event.target.value)}
+                type="text"
+                value={props.fileNameInput}
+              />
+            )}
+          </Field>
+          <Field label={t("admin.import.upload.content")}>
+            {(control) => (
+              <TextArea
+                {...control}
+                onChange={(event) => props.onCsvTextChange(event.target.value)}
+                rows={8}
+                value={props.csvText}
+              />
+            )}
+          </Field>
           {props.uploadStatus === "error" && (
             <p className="eg-shell-userform__error" role="alert">{t(uploadErrorKey(props.uploadErrorCode))}</p>
           )}
@@ -184,13 +184,13 @@ export function ImportWizardView(props: ImportWizardViewProps): JSX.Element {
             <p>{props.batch?.rowCount ?? 0} {t("admin.import.upload.rowCount")}</p>
           )}
           <div className="eg-shell-userform__actions">
-            <button onClick={props.onBack} type="button">{t("admin.import.action.back")}</button>
-            <button disabled={props.uploadStatus === "loading"} onClick={props.onUploadRequest} type="button">
+            <Button onClick={props.onBack} variant="secondary">{t("admin.import.action.back")}</Button>
+            <Button loading={props.uploadStatus === "loading"} onClick={props.onUploadRequest} variant="secondary">
               {t("admin.import.upload.action")}
-            </button>
-            <button disabled={props.headers.length === 0} onClick={props.onNext} type="button">
+            </Button>
+            <Button disabled={props.headers.length === 0} onClick={props.onNext} variant="primary">
               {t("admin.import.action.next")}
-            </button>
+            </Button>
           </div>
         </div>
       )}
@@ -212,24 +212,23 @@ export function ImportWizardView(props: ImportWizardViewProps): JSX.Element {
                 <tr key={column} role="row">
                   <td role="cell">{t(FIELD_LABEL_KEYS[column])}</td>
                   <td role="cell">
-                    <label>
-                      <span className="eg-visually-hidden">{t(FIELD_LABEL_KEYS[column])}</span>
-                      <select
-                        onChange={(event: ChangeLike) => props.onMappingChange(column, changeValue(event))}
-                        value={props.mapping[column] ?? ""}
-                      >
-                        <option value="">{t("admin.import.map.column.placeholder")}</option>
-                        {props.headers.map((header) => <option key={header} value={header}>{header}</option>)}
-                      </select>
-                    </label>
+                    <Select
+                      aria-label={t(FIELD_LABEL_KEYS[column])}
+                      onValueChange={(header) => props.onMappingChange(column, header)}
+                      options={[
+                        { label: t("admin.import.map.column.placeholder"), value: "" },
+                        ...props.headers.map((header) => ({ label: header, value: header })),
+                      ]}
+                      value={props.mapping[column] ?? ""}
+                    />
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
           <div className="eg-shell-userform__actions">
-            <button onClick={props.onBack} type="button">{t("admin.import.action.back")}</button>
-            <button onClick={props.onNext} type="button">{t("admin.import.action.next")}</button>
+            <Button onClick={props.onBack} variant="secondary">{t("admin.import.action.back")}</Button>
+            <Button onClick={props.onNext} variant="primary">{t("admin.import.action.next")}</Button>
           </div>
         </div>
       )}
@@ -247,7 +246,7 @@ export function ImportWizardView(props: ImportWizardViewProps): JSX.Element {
             <div className="eg-shell-users__error" role="alert">
               <p className="eg-shell-users__error-title">{t("admin.import.validate.error.title")}</p>
               <p className="eg-shell-users__error-body">{t("admin.import.validate.error.body")}</p>
-              <button onClick={props.onValidateRetry} type="button">{t("admin.users.error.retry")}</button>
+              <Button onClick={props.onValidateRetry} variant="secondary">{t("admin.users.error.retry")}</Button>
             </div>
           )}
           {props.validateStatus === "idle" && props.batch !== null && (
@@ -269,16 +268,16 @@ export function ImportWizardView(props: ImportWizardViewProps): JSX.Element {
                       )),
                     )}
                   </ul>
-                  <button onClick={props.onDownloadErrors} type="button">{t("admin.import.validate.download")}</button>
+                  <Button onClick={props.onDownloadErrors} variant="secondary">{t("admin.import.validate.download")}</Button>
                 </>
               )}
             </>
           )}
           <div className="eg-shell-userform__actions">
-            <button onClick={props.onBack} type="button">{t("admin.import.action.back")}</button>
-            <button disabled={props.batch === null || props.batch.validCount === 0} onClick={props.onNext} type="button">
+            <Button onClick={props.onBack} variant="secondary">{t("admin.import.action.back")}</Button>
+            <Button disabled={props.batch === null || props.batch.validCount === 0} onClick={props.onNext} variant="primary">
               {t("admin.import.action.next")}
-            </button>
+            </Button>
           </div>
         </div>
       )}
@@ -297,8 +296,8 @@ export function ImportWizardView(props: ImportWizardViewProps): JSX.Element {
             </ul>
           )}
           <div className="eg-shell-userform__actions">
-            <button onClick={props.onBack} type="button">{t("admin.import.action.back")}</button>
-            <button disabled={validRows.length === 0} onClick={props.onNext} type="button">{t("admin.import.action.next")}</button>
+            <Button onClick={props.onBack} variant="secondary">{t("admin.import.action.back")}</Button>
+            <Button disabled={validRows.length === 0} onClick={props.onNext} variant="primary">{t("admin.import.action.next")}</Button>
           </div>
         </div>
       )}
@@ -313,25 +312,33 @@ export function ImportWizardView(props: ImportWizardViewProps): JSX.Element {
             <p className="eg-shell-userform__error" role="alert">{t("admin.import.apply.error")}</p>
           )}
           <div className="eg-shell-userform__actions">
-            <button onClick={props.onBack} type="button">{t("admin.import.action.back")}</button>
-            <button disabled={(props.batch?.validCount ?? 0) === 0} onClick={props.onRequestApply} type="button">
+            <Button onClick={props.onBack} variant="secondary">{t("admin.import.action.back")}</Button>
+            <Button disabled={(props.batch?.validCount ?? 0) === 0} onClick={props.onRequestApply} variant="primary">
               {t("admin.import.apply.action")}
-            </button>
+            </Button>
           </div>
-          <Modal onClose={props.onCancelApply} open={props.applyConfirmOpen} title={t("admin.import.apply.confirm.title")}>
+          <Dialog
+            footer={
+              <>
+                <Button disabled={props.applyStatus === "loading"} onClick={props.onCancelApply} variant="secondary">
+                  {t("admin.users.detail.action.cancel")}
+                </Button>
+                <Button loading={props.applyStatus === "loading"} onClick={props.onConfirmApply} variant="primary">
+                  {t("admin.import.apply.action")}
+                </Button>
+              </>
+            }
+            onOpenChange={(open) => {
+              if (!open) props.onCancelApply();
+            }}
+            open={props.applyConfirmOpen}
+            title={t("admin.import.apply.confirm.title")}
+          >
             <p>
               {props.batch?.validCount ?? 0}{" "}
               {t(props.mode === "ekle" ? "admin.import.apply.confirm.body.ekle" : "admin.import.apply.confirm.body.guncelle")}
             </p>
-            <div className="eg-shell-userform__actions">
-              <button disabled={props.applyStatus === "loading"} onClick={props.onCancelApply} type="button">
-                {t("admin.users.detail.action.cancel")}
-              </button>
-              <button disabled={props.applyStatus === "loading"} onClick={props.onConfirmApply} type="button">
-                {t("admin.import.apply.action")}
-              </button>
-            </div>
-          </Modal>
+          </Dialog>
         </div>
       )}
 
@@ -346,12 +353,12 @@ export function ImportWizardView(props: ImportWizardViewProps): JSX.Element {
                 {t("admin.import.validate.invalid")}
               </p>
               {props.applyResult.errorCount > 0 && (
-                <button onClick={props.onDownloadErrors} type="button">{t("admin.import.validate.download")}</button>
+                <Button onClick={props.onDownloadErrors} variant="secondary">{t("admin.import.validate.download")}</Button>
               )}
             </>
           )}
           <div className="eg-shell-userform__actions">
-            <button onClick={props.onRestart} type="button">{t("admin.import.result.restart")}</button>
+            <Button onClick={props.onRestart} variant="primary">{t("admin.import.result.restart")}</Button>
           </div>
         </div>
       )}
@@ -373,6 +380,7 @@ const INITIAL_FILE_NAME = "kullanicilar.csv";
  */
 export function ImportWizardPage({ dataSource }: ImportWizardPageProps): JSX.Element {
   const source = useShellSource(dataSource, (sources) => sources.imports, () => createMockImportsSource());
+  const toast = useToast();
 
   const [step, setStep] = useState<ImportWizardStep>("template");
   const [mode, setMode] = useState<ImportMode>("ekle");
@@ -441,6 +449,7 @@ export function ImportWizardPage({ dataSource }: ImportWizardPageProps): JSX.Ele
         setApplyStatus("idle");
         setApplyConfirmOpen(false);
         setStep("result");
+        toast({ title: t("admin.import.toast.success"), tone: "success" });
       },
       () => setApplyStatus("error"),
     );

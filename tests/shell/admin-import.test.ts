@@ -1,6 +1,8 @@
-import { createElement } from "react";
+import { createElement, type ReactElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
+import { Dialog } from "../../packages/ui/src/primitives/Dialog";
+import { Select } from "../../packages/ui/src/primitives/Select";
 import { ADMIN_IMPORT_PATH, adminImportHref, isAdminProtected, resolveRoute } from "../../apps/shell/src/routes";
 import {
   autoMapHeaders,
@@ -26,6 +28,45 @@ import { t } from "../../packages/ui/i18n/tr";
 
 function render(element: ReturnType<typeof createElement>): string {
   return renderToStaticMarkup(element);
+}
+
+/** React eleman ağacını DOM'suz gezer (UsersPage.tsx test deseni, T156). `Field`
+ *  çocuğunu render-prop olarak alır; sahte bir `control` ile çağrılıp içine girilir.
+ *  `Dialog` (Radix Portal) ve `Select`in açılır listesi (Portal) DOM'suz ortamda
+ *  boş çizildiğinden ilgili öğelerin prop'ları doğrudan ağaçtan okunur (T163). */
+function collectElements(
+  node: unknown,
+  predicate: (element: ReactElement) => boolean,
+  results: ReactElement[] = [],
+): ReactElement[] {
+  if (node === null || node === undefined || typeof node !== "object") return results;
+  if (Array.isArray(node)) {
+    for (const child of node) collectElements(child, predicate, results);
+    return results;
+  }
+  const element = node as ReactElement;
+  if (element.type === undefined) return results;
+  if (predicate(element)) results.push(element);
+  const children = (element.props as { children?: unknown } | undefined)?.children;
+  if (typeof children === "function") {
+    collectElements((children as (control: unknown) => unknown)({}), predicate, results);
+  } else if (children !== undefined) {
+    collectElements(children, predicate, results);
+  }
+  return results;
+}
+
+interface DialogLikeProps {
+  readonly title: unknown;
+  readonly open: boolean;
+  readonly footer?: unknown;
+  readonly children?: unknown;
+}
+
+function dialogPropsOf(tree: ReactElement): DialogLikeProps {
+  const [dialogElement] = collectElements(tree, (element) => element.type === Dialog);
+  if (dialogElement === undefined) throw new Error("Dialog öğesi bulunamadı");
+  return dialogElement.props as DialogLikeProps;
 }
 
 function noop(): void {
@@ -392,22 +433,24 @@ describe("ImportWizardView işaretlemesi (E3 §e.4)", () => {
   });
 
   it("yükle adımında mod seçimi, dosya adı ve CSV alanını gösterir; hata kodunu Türkçeye çevirir", () => {
-    const html = render(
-      createElement(ImportWizardView, baseViewProps({ step: "upload", uploadErrorCode: "too_many_rows", uploadStatus: "error" })),
-    );
-    expect(html).toContain(t("admin.import.upload.mode.ekle"));
-    expect(html).toContain(t("admin.import.upload.mode.guncelle"));
+    const props = baseViewProps({ step: "upload", uploadErrorCode: "too_many_rows", uploadStatus: "error" });
+    const html = render(createElement(ImportWizardView, props));
     expect(html).toContain(t("admin.import.upload.error.too_many_rows"));
     expect(html).toMatch(/role="alert"/);
+    // Mod seçimi bir `Select`tir (Radix); açılır liste Portal ile çizilir ve
+    // DOM'suz test ortamında boş döner (T163) — seçenekler ağaçtan doğrudan okunur.
+    const tree = ImportWizardView(props) as ReactElement;
+    const [modeSelect] = collectElements(tree, (element) => element.type === Select);
+    const options = (modeSelect?.props as { options: readonly { label: string; value: string }[] }).options;
+    expect(options).toEqual([
+      { label: t("admin.import.upload.mode.ekle"), value: "ekle" },
+      { label: t("admin.import.upload.mode.guncelle"), value: "guncelle" },
+    ]);
   });
 
   it("eşle adımında yedi hedef alanı ve algılanan başlıkları seçenek olarak gösterir", () => {
-    const html = render(
-      createElement(
-        ImportWizardView,
-        baseViewProps({ headers: ["kullanici_adi", "ad_soyad"], mapping: { kullanici_adi: "kullanici_adi" }, step: "map" }),
-      ),
-    );
+    const props = baseViewProps({ headers: ["kullanici_adi", "ad_soyad"], mapping: { kullanici_adi: "kullanici_adi" }, step: "map" });
+    const html = render(createElement(ImportWizardView, props));
     for (const key of [
       "admin.import.field.kullanici_adi",
       "admin.import.field.eposta",
@@ -419,7 +462,18 @@ describe("ImportWizardView işaretlemesi (E3 §e.4)", () => {
     ] as const) {
       expect(html).toContain(t(key));
     }
-    expect(html).toContain('<option value="kullanici_adi">kullanici_adi</option>');
+    // Eşleme seçimleri `Select` (Radix, Portal) ile çizilir; algılanan başlıklar
+    // seçeneklerde ağaçtan doğrudan doğrulanır (T163).
+    const tree = ImportWizardView(props) as ReactElement;
+    const selects = collectElements(tree, (element) => element.type === Select);
+    expect(selects).toHaveLength(7);
+    const usernameSelect = selects.find((select) => (select.props as { "aria-label"?: string })["aria-label"] === t("admin.import.field.kullanici_adi"));
+    const options = (usernameSelect?.props as { options: readonly { label: string; value: string }[] }).options;
+    expect(options).toEqual([
+      { label: t("admin.import.map.column.placeholder"), value: "" },
+      { label: "kullanici_adi", value: "kullanici_adi" },
+      { label: "ad_soyad", value: "ad_soyad" },
+    ]);
   });
 
   it("doğrulama adımında sayıları ve satır hatalarını gösterir; hata yoksa 'Hata yok.' gösterir", () => {
@@ -455,19 +509,21 @@ describe("ImportWizardView işaretlemesi (E3 §e.4)", () => {
   });
 
   it("uygula adımı onay diyaloğunu açık/kapalı gösterir; onaylama düğmesi mevcuttur", () => {
-    const html = render(
-      createElement(
-        ImportWizardView,
-        baseViewProps({
-          applyConfirmOpen: true,
-          batch: { appliedCount: 0, errorCount: 0, fileName: "x.csv", id: "import-3", mode: "ekle", rowCount: 3, status: "validated", templateVersion: "2026-09", validCount: 3 },
-          step: "apply",
-        }),
-      ),
-    );
-    expect(html).toContain('role="dialog"');
-    expect(html).toContain(t("admin.import.apply.confirm.title"));
-    expect(html).toContain(t("admin.import.apply.confirm.body.ekle"));
+    // `Dialog` (Radix Portal) DOM'suz ortamda boş çizilir (T163); `ImportWizardView`
+    // durumsuzdur (hook'suz), doğrudan çağrılıp `Dialog` prop'ları ağaçtan okunur.
+    const props = baseViewProps({
+      applyConfirmOpen: true,
+      batch: { appliedCount: 0, errorCount: 0, fileName: "x.csv", id: "import-3", mode: "ekle", rowCount: 3, status: "validated", templateVersion: "2026-09", validCount: 3 },
+      step: "apply",
+    });
+    const tree = ImportWizardView(props) as ReactElement;
+    const dialog = dialogPropsOf(tree);
+    expect(dialog.open).toBe(true);
+    expect(dialog.title).toBe(t("admin.import.apply.confirm.title"));
+    const bodyHtml = render(dialog.children as ReturnType<typeof createElement>);
+    expect(bodyHtml).toContain(t("admin.import.apply.confirm.body.ekle"));
+    const footerHtml = render(dialog.footer as ReturnType<typeof createElement>);
+    expect(footerHtml).toContain(t("admin.import.apply.action"));
   });
 
   it("sonuç adımı uygulanan/hatalı sayılarını ve yeniden başlatma eylemini gösterir", () => {

@@ -7,10 +7,10 @@ import {
   Dialog,
   EmptyState,
   Field,
-  Modal,
   Pagination,
   Select,
   TextInput,
+  useToast,
   icons,
   type BadgeTone,
   type DataTableColumn,
@@ -304,7 +304,9 @@ function UsersFilterFields({ query, units, onSearchChange, onFilterChange, onSor
   );
 }
 
-interface BulkEditDialogProps {
+/** Test'lerde `Dialog` (Radix Portal) DOM'suz ortamda boş çizildiği için doğrudan
+ *  içe aktarılıp çağrılabilsin diye dışa açılır (T163). */
+export interface BulkEditDialogProps {
   readonly open: boolean;
   readonly count: number;
   readonly units: readonly AdminUnit[];
@@ -324,9 +326,9 @@ interface BulkEditDialogProps {
  * Toplu düzenleme diyaloğu (E3 §e.5): işlem + değer seçilir, `dryRun`
  * önizlemesi ("Etki: N kullanıcı · M atlanacak") gösterilir, onay üzerine
  * atomik uygulanır. `admin` rolü değer seçeneklerinde hiç sunulmaz (§b).
- * (Bu diyalog T156 kapsamı dışıdır; `Modal` ile çizilir.)
+ * (Bu diyalog T156 kapsamı dışıdır; `Dialog` ile çizilir, T163.)
  */
-function BulkEditDialog({
+export function BulkEditDialog({
   open,
   count,
   units,
@@ -341,8 +343,27 @@ function BulkEditDialog({
   onValueChange,
   onApply,
 }: BulkEditDialogProps): JSX.Element {
+  const title = `${t("admin.bulk.title")} — ${count} ${t("admin.users.selection.suffix")}`;
   return (
-    <Modal onClose={onClose} open={open} title={`${t("admin.bulk.title")} — ${count} ${t("admin.users.selection.suffix")}`}>
+    <Dialog
+      footer={
+        applyResult !== null ? (
+          <Button onClick={onClose} variant="secondary">{t("admin.bulk.result.close")}</Button>
+        ) : (
+          <>
+            <Button onClick={onClose} variant="secondary">{t("admin.bulk.action.cancel")}</Button>
+            <Button disabled={applyStatus === "loading" || preview === null} loading={applyStatus === "loading"} onClick={onApply}>
+              {t("admin.bulk.action.apply")}
+            </Button>
+          </>
+        )
+      }
+      onOpenChange={(next) => {
+        if (!next) onClose();
+      }}
+      open={open}
+      title={title}
+    >
       {applyResult !== null ? (
         <div className="eg-shell-userform__confirm">
           <p className="eg-shell-userform__label">{t("admin.bulk.result.title")}</p>
@@ -354,40 +375,54 @@ function BulkEditDialog({
               ))}
             </ul>
           )}
-          <div className="eg-shell-userform__actions">
-            <button onClick={onClose} type="button">{t("admin.bulk.result.close")}</button>
-          </div>
         </div>
       ) : (
         <div className="eg-shell-userform__form">
-          <label className="eg-shell-userform__field">
-            <span className="eg-shell-userform__label">{t("admin.bulk.operation.label")}</span>
-            <select
-              onChange={(event: ChangeLike) => onOperationChange(changeValue(event) as BulkOperation)}
-              value={operation}
-            >
-              {BULK_OPERATIONS.map((candidate) => <option key={candidate} value={candidate}>{t(BULK_OPERATION_KEYS[candidate])}</option>)}
-            </select>
-          </label>
-          <label className="eg-shell-userform__field">
-            <span className="eg-shell-userform__label">{t("admin.bulk.value.label")}</span>
-            {(operation === "assign_role" || operation === "revoke_role") && <p>{t("admin.bulk.value.roleForbidden")}</p>}
-            {operation === "set_unit" && (
-              <select onChange={(event: ChangeLike) => onValueChange(changeValue(event))} value={value}>
-                {units.map((unit) => <option key={unit.id} value={unit.id}>{unit.name}</option>)}
-              </select>
+          <Field label={t("admin.bulk.operation.label")}>
+            {(control) => (
+              <Select
+                {...control}
+                onValueChange={(next) => onOperationChange(next as BulkOperation)}
+                options={BULK_OPERATIONS.map((candidate) => ({ label: t(BULK_OPERATION_KEYS[candidate]), value: candidate }))}
+                value={operation}
+              />
             )}
-            {operation === "set_status" && (
-              <select onChange={(event: ChangeLike) => onValueChange(changeValue(event))} value={value}>
-                {BULK_STATUSES.map((status) => <option key={status} value={status}>{t(BULK_STATUS_KEYS[status])}</option>)}
-              </select>
-            )}
-            {(operation === "grant_sim" || operation === "revoke_sim") && (
-              <select onChange={(event: ChangeLike) => onValueChange(changeValue(event))} value={value}>
-                {SIM_IDS.map((simId) => <option key={simId} value={simId}>{t(`sims.${simId}.name`)}</option>)}
-              </select>
-            )}
-          </label>
+          </Field>
+          <Field label={t("admin.bulk.value.label")}>
+            {(control) => {
+              if (operation === "assign_role" || operation === "revoke_role") {
+                return <p>{t("admin.bulk.value.roleForbidden")}</p>;
+              }
+              if (operation === "set_unit") {
+                return (
+                  <Select
+                    {...control}
+                    onValueChange={onValueChange}
+                    options={units.map((unit) => ({ label: unit.name, value: unit.id }))}
+                    value={value}
+                  />
+                );
+              }
+              if (operation === "set_status") {
+                return (
+                  <Select
+                    {...control}
+                    onValueChange={onValueChange}
+                    options={BULK_STATUSES.map((status) => ({ label: t(BULK_STATUS_KEYS[status]), value: status }))}
+                    value={value}
+                  />
+                );
+              }
+              return (
+                <Select
+                  {...control}
+                  onValueChange={onValueChange}
+                  options={SIM_IDS.map((simId) => ({ label: t(`sims.${simId}.name`), value: simId }))}
+                  value={value}
+                />
+              );
+            }}
+          </Field>
           {previewStatus === "error" && <p className="eg-shell-userform__error" role="alert">{t("admin.bulk.error.generic")}</p>}
           {previewStatus === "idle" && preview !== null && (
             <p>
@@ -398,15 +433,9 @@ function BulkEditDialog({
           )}
           <p className="eg-shell-userform__notice">{t("admin.bulk.notice")}</p>
           {applyStatus === "error" && <p className="eg-shell-userform__error" role="alert">{t("admin.bulk.error.generic")}</p>}
-          <div className="eg-shell-userform__actions">
-            <button onClick={onClose} type="button">{t("admin.bulk.action.cancel")}</button>
-            <button disabled={applyStatus === "loading" || preview === null} onClick={onApply} type="button">
-              {t("admin.bulk.action.apply")}
-            </button>
-          </div>
         </div>
       )}
-    </Modal>
+    </Dialog>
   );
 }
 
@@ -569,8 +598,8 @@ export function UsersListView({
       {selected.size > 0 && (
         <div className="eg-shell-users__bulkbar">
           <span aria-hidden="true">{selectionText}</span>
-          <button onClick={onOpenBulk} type="button">{t("admin.users.bulk.open")}</button>
-          <button onClick={onClearSelection} type="button">{t("admin.users.selection.clear")}</button>
+          <Button onClick={onOpenBulk} variant="primary">{t("admin.users.bulk.open")}</Button>
+          <Button onClick={onClearSelection} variant="ghost">{t("admin.users.selection.clear")}</Button>
         </div>
       )}
       <BulkEditDialog
@@ -607,6 +636,7 @@ export interface UsersPageProps {
  */
 export function UsersPage({ dataSource, currentUserId = null }: UsersPageProps): JSX.Element {
   const source = useShellSource(dataSource, (sources) => sources.users, () => createMockUsersSource(DEFAULT_MOCK_SEED));
+  const toast = useToast();
 
   const [query, setQuery] = useState<UsersListQuery>(DEFAULT_QUERY);
   const [status, setStatus] = useState<UsersLoadStatus>("loading");
@@ -682,6 +712,7 @@ export function UsersPage({ dataSource, currentUserId = null }: UsersPageProps):
         setBulkApplyStatus("idle");
         setSelected(new Set());
         setAttempt((value) => value + 1);
+        toast({ title: t("admin.bulk.toast.success"), tone: "success" });
       },
       () => setBulkApplyStatus("error"),
     );

@@ -124,6 +124,16 @@ export async function selectAdminFilterOption(
   await closeAdminFilters(page, opened);
 }
 
+/** `@egemed/ui` `Select` (Radix) alanını, verilen kapsam (diyalog/sayfa) içinde
+ *  etiketiyle bulup seçenek adıyla ayarlar; native `<select>`in `selectOption`i
+ *  yerine geçer (filtre dışı formlar — kullanıcı ekle, toplu düzenleme, içe aktarma
+ *  eşleme tablosu — artık bu bileşeni kullanır, T163). Açılır liste Portal ile
+ *  belgeye eklendiği için seçenek `scope.page()` üzerinden aranır. */
+export async function selectRadixOption(scope: Locator, label: string, optionName: string | RegExp): Promise<void> {
+  await scope.getByLabel(label).click();
+  await scope.page().getByRole("option", { name: optionName }).click();
+}
+
 /** Filtre panelindeki bir düğmeyi (ör. "Filtreleri temizle") tıklar. */
 export async function clickAdminFilterButton(page: Page, name: string): Promise<void> {
   const opened = await openAdminFilters(page);

@@ -1,7 +1,7 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Locator, type Page } from "@playwright/test";
 import { captureRouteScreenshot, writeAxeArtifact } from "./artifacts";
-import { clickAdminFilterButton, fillAdminFilter, selectAdminFilterOption, trackErrors } from "./helpers";
+import { clickAdminFilterButton, fillAdminFilter, selectAdminFilterOption, selectRadixOption, trackErrors } from "./helpers";
 
 /**
  * T75 — Kabuk admin ekranlarının uçtan uca akışları (E3 §e.1-§e.7).
@@ -97,7 +97,7 @@ async function fillCreateUserForm(dialog: Locator, username: string): Promise<vo
   const textInputs = dialog.locator('input[type="text"]');
   await textInputs.nth(0).fill(username);
   await textInputs.nth(1).fill("Örnek Kullanıcı T75");
-  await dialog.getByLabel("Birim").selectOption("unit-3");
+  await selectRadixOption(dialog, "Birim", "3. Sınıf");
   await dialog.getByLabel("Pulse").check();
 }
 
@@ -184,7 +184,7 @@ test.describe("admin kullanıcı listesi (E3 §e.1)", () => {
     await visible(page.getByRole("button", { name: "Toplu işlem" })).click();
     const dialog = page.getByRole("dialog");
     await expect(dialog.getByRole("heading", { name: /Toplu işlem — 2 kullanıcı seçildi/ })).toBeVisible();
-    await dialog.getByLabel("İşlem").selectOption("revoke_role");
+    await selectRadixOption(dialog, "İşlem", "Rol kaldır (Kullanıcı)");
     await expect(dialog.getByText("Kullanıcı (admin yasak)")).toBeVisible();
     await expect(dialog.getByText("Etki: 2 kullanıcı · 2 atlanacak")).toBeVisible();
     await dialog.getByRole("button", { name: "Uygula" }).click();
@@ -203,14 +203,15 @@ test.describe("kullanıcı ekle (E3 §e.2)", () => {
     const dialog = page.getByRole("dialog");
     await expect(dialog.getByRole("heading", { name: "Yeni kullanıcı" })).toBeVisible();
 
-    // §e.2: rol alanında yalnız `kullanici` vardır ve alan kilitlidir.
-    const roleSelect = dialog.locator("select:disabled");
-    await expect(roleSelect).toHaveCount(1);
-    await expect(roleSelect).toHaveValue("kullanici");
-    await expect(roleSelect.locator("option")).toHaveText(["Kullanıcı"]);
+    // §e.2: rol alanında yalnız `kullanici` vardır ve alan kilitlidir (@egemed/ui `Select`, T163).
+    const roleSelect = dialog.getByLabel("Rol");
+    await expect(roleSelect).toBeDisabled();
+    await expect(roleSelect).toContainText("Kullanıcı");
 
     await dialog.getByRole("button", { name: "Kaydet" }).click();
-    await expect(dialog.getByRole("alert")).toHaveCount(3);
+    // `Field` hata iletisini `aria-describedby` + `aria-invalid` ile denetime bağlar
+    // (role="alert" değil, Field.tsx, T163); üç alan da geçersiz işaretlenir.
+    await expect(dialog.locator('[aria-invalid="true"]')).toHaveCount(3);
     await expect(dialog.getByText("Kullanıcı adı veya e-posta girin.")).toBeVisible();
     await expect(dialog.getByText("Görünen ad 2-120 karakter olmalıdır.")).toBeVisible();
     await expect(dialog.getByText("Birim seçin.")).toBeVisible();
@@ -355,10 +356,12 @@ test.describe("toplu içe aktarma sihirbazı (E3 §e.4/§f)", () => {
     await page.getByRole("button", { name: "İleri" }).click();
 
     await expectStep(page, "Eşle");
-    const mapping = page.locator(".eg-shell-import__mapTable select");
+    // Eşleme seçimleri `@egemed/ui` `Select` (Radix, T163); değer native `<select>`
+    // değil, seçilen seçeneğin görünür metnidir.
+    const mapping = page.locator('.eg-shell-import__mapTable [role="combobox"]');
     await expect(mapping).toHaveCount(7);
-    await expect(mapping.nth(0)).toHaveValue("kullanici_adi");
-    await expect(mapping.nth(6)).toHaveValue("giris_tipi");
+    await expect(mapping.nth(0)).toHaveText("kullanici_adi");
+    await expect(mapping.nth(6)).toHaveText("giris_tipi");
     await page.getByRole("button", { name: "İleri" }).click();
 
     await expectStep(page, "Doğrula");
@@ -466,7 +469,7 @@ test.describe("admin ekranları: axe 0, yatay taşma yok, artefaktlar", () => {
         await openAdmin(page, USER_CREATE);
         const dialog = page.getByRole("dialog");
         await dialog.getByRole("button", { name: "Kaydet" }).click();
-        await expect(dialog.getByRole("alert")).toHaveCount(3);
+        await expect(dialog.locator('[aria-invalid="true"]')).toHaveCount(3);
       },
     },
     {
