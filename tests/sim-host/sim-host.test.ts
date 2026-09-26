@@ -295,3 +295,17 @@ describe("SimHost release ve aktör bağlamı", () => {
     expect(pulse.contexts[1] !== undefined && "gamification" in pulse.contexts[1]).toBe(false);
   });
 });
+
+describe("kitle sözleşmesi (26 Eyl 2026)", () => {
+  it("varsayılan öğrencidir; oyunlaştırma yalnız öğrenciye, ziyaretçi yalnız öğrenme modunu açar", async () => {
+    const host = await import("../../packages/sim-host/src/index");
+    expect(host.audienceOf({})).toBe("student");
+    expect(host.audienceOf({ audience: "faculty" })).toBe("faculty");
+    expect(host.SIM_AUDIENCES.map((a) => host.audienceShowsGamification(a))).toEqual([true, false, false]);
+    expect(host.audienceCanUseMode("visitor", "learn")).toBe(true);
+    expect(host.audienceCanUseMode("visitor", "practice")).toBe(false);
+    expect(host.audienceCanUseMode("visitor", "assessment")).toBe(false);
+    expect(host.audienceCanUseMode("faculty", "assessment")).toBe(true);
+    expect(host.VISITOR_LOCK_TEXT.locked).toContain("Ege Üniversitesi Tıp Fakültesi");
+  });
+});

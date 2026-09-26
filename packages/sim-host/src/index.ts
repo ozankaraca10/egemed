@@ -1,5 +1,11 @@
 export {
+  audienceCanUseMode,
+  audienceOf,
+  audienceShowsGamification,
   createSimHost,
+  SIM_AUDIENCES,
+  VISITOR_LOCK_TEXT,
+  type SimAudience,
   isSimulatorId,
   SIMULATOR_IDS,
   type SimChrome,
