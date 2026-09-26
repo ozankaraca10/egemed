@@ -511,6 +511,10 @@
 
 /* T130: kontrast — ink-500 → ink-700 (card-soft üstünde AA) */
 .eg-sim-opaca .lib-count{ font-size: var(--fs-xs); font-weight: 700; color: var(--ink-700); background: var(--card-soft); border: 1px solid var(--border-strong); border-radius: var(--r-pill); padding: 1px 7px; font-variant-numeric: tabular-nums; }
+/* T175: ziyaretçi kilidi — renk dışında ikon+soluklukla işaretli, buton odaklanabilir kalır. */
+.eg-sim-opaca .lib-item.locked{ opacity: .6; }
+.eg-sim-opaca .lib-item.locked .ic{ background: var(--card-soft); color: var(--ink-500); }
+.eg-sim-opaca .lib-lock-badge{ display: inline-flex; align-items: center; justify-content: center; color: var(--ink-500); }
 .eg-sim-opaca .film-meta{ display: grid; grid-template-columns: max-content 1fr; gap: 6px 14px; margin: 0; font-size: var(--fs-md); }
 .eg-sim-opaca .film-meta dt{ color: var(--ink-500); font-weight: 600; }
 .eg-sim-opaca .film-meta dd{ margin: 0; overflow-wrap: anywhere; }

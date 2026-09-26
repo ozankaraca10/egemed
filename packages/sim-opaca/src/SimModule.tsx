@@ -1,6 +1,7 @@
 import { createElement, type ReactNode } from "react";
 import { createRoot as reactCreateRoot } from "react-dom/client";
 import type { SimChrome, SimDispose, SimModule, SimMountContext, SimMountTarget } from "@egemed/sim-host";
+import { audienceOf } from "@egemed/sim-host";
 import { App } from "./App";
 import { StoreProvider } from "./core/StoreProvider";
 import { DEFAULT_ASSET_BASE, resetAssetBase, setAssetBase } from "./core/images";
@@ -128,12 +129,19 @@ export function createOpacaModule(deps?: OpacaModuleDeps): SimModule {
             if (chromeOpen) hostChrome(chrome);
           }
         : undefined;
+      // T175: kitle (öğrenci/öğretim üyesi/ziyaretçi) sözleşmesi — oyunlaştırma yüzeyleri
+      // App içinde audience'a göre indirgenir (tek kaynak); burada yalnız deneme raporlama
+      // öğrenci dışına kapatılır (depo sahibi kararı, plan.md).
+      const audience = audienceOf(context);
+      const forwardReportAttempt = audience === "student" ? context.reportAttempt : undefined;
       const appProps = {
         embedded: true as const,
         gamiEnabled: resolved.gamiEnabled ?? true,
+        audience,
         showDevPanel,
         devBuild: Boolean(resolved.devBuild),
         ...(setChrome === undefined ? {} : { setChrome }),
+        ...(context.requestSignIn === undefined ? {} : { requestSignIn: context.requestSignIn }),
         ...(resolved.chromeEnv ? { chromeEnv: resolved.chromeEnv } : {}),
         ...(resolved.modalEnv ? { modalEnv: resolved.modalEnv } : {}),
         ...(resolved.startEnv ? { startEnv: resolved.startEnv } : {}),
@@ -146,9 +154,9 @@ export function createOpacaModule(deps?: OpacaModuleDeps): SimModule {
         createElement(GamiProvider, {
           repository: resolved.gamiRepository ?? null,
           now: context.now,
-          ...(context.reportAttempt === undefined
+          ...(forwardReportAttempt === undefined
             ? {}
-            : { reportAttempt: (attempt: OpacaAttemptRecord) => context.reportAttempt?.(attempt) }),
+            : { reportAttempt: (attempt: OpacaAttemptRecord) => forwardReportAttempt?.(attempt) }),
           ...(context.gamification === undefined ? {} : { gamification: context.gamification }),
           children: createElement(StoreProvider, {
             now: context.now,
