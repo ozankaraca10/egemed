@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type ComponentType, type JSX, type ReactNode } from 'react'
 import type { SimChrome, SimChromeAction, SimChromeChip } from '@egemed/sim-host'
 import { useStore } from '../core/StoreProvider'
+import { needsExitConfirm, stepBackTarget } from '../core/flow'
 import type { Mode, Screen } from '../core/types'
 import { assetUrl } from '../core/images'
 import { useSetChrome } from '../EmbeddedContext'
@@ -165,6 +166,8 @@ export function Header({ embedded = false, env = NOOP_CHROME_ENV, modals, gamiEn
   const modeLabel = `${modeShort} Modu`
   const inAssessment = state.mode === 'assessment' && state.screen === 'simulation'
   const inWorkScreen = state.screen === 'simulation' || state.screen === 'learn'
+  // T183: uygulama VE değerlendirme sırasında (öğrenmede değil) mod seçimine dönüş onay ister.
+  const activeSession = needsExitConfirm(state.screen)
 
   useEffect(() => {
     const onFs = () => setFs(env.fullscreenElement !== null)
@@ -193,10 +196,15 @@ export function Header({ embedded = false, env = NOOP_CHROME_ENV, modals, gamiEn
   }, [env])
 
   const goStart = () => (inAssessment && modals?.confirm ? setExitTarget('start') : dispatch({ type: 'goto', screen: 'start' }))
-  const goModes = () => (inAssessment && modals?.confirm ? setExitTarget('modes') : dispatch({ type: 'goto', screen: 'modes' }))
+  const goModes = () => (activeSession && modals?.confirm ? setExitTarget('modes') : dispatch({ type: 'goto', screen: 'modes' }))
   const confirmExit = () => {
     if (exitTarget) dispatch({ type: 'goto', screen: exitTarget })
     setExitTarget(null)
+  }
+  // T183: header adım göstergesi — kabuk yalnız tamamlanan adımlar (index < current) için
+  // çağırır; anlamlı tek geri hedef adım 0'dır (mod seçimi), diğerleri yok sayılır (belgeli).
+  const onStepSelect = (index: number) => {
+    if (stepBackTarget(index) === 'modes') goModes()
   }
 
   const setChrome = useSetChrome()
@@ -227,16 +235,24 @@ export function Header({ embedded = false, env = NOOP_CHROME_ENV, modals, gamiEn
     })
     actions.push({ id: 'help', icon: 'help', label: 'Yardım', onSelect: () => setHelpOpen(true) })
   }
-  usePublishChrome(unified ? { actions, chips, steps: { current: step, labels: STEP_LABELS } } : null)
+  usePublishChrome(
+    unified ? { actions, chips, steps: { current: step, labels: STEP_LABELS, onSelect: onStepSelect } } : null
+  )
 
   const HelpModal = modals?.help
   const ConfirmModal = modals?.confirm
   const helpModal = HelpModal ? <HelpModal open={helpOpen} onClose={() => setHelpOpen(false)} /> : null
+  // T183: değerlendirmede süre kaybı uyarısı; uygulamada ilerlemenin kaydedilmediği uyarısı.
+  const confirmTitle = state.mode === 'assessment' ? 'Değerlendirmeden çıkılsın mı?' : 'Çalışmadan çıkılsın mı?'
+  const confirmMessage =
+    state.mode === 'assessment'
+      ? 'İlerlemeniz kaydedilir, oturum devam ettirilebilir. Süre işlemeye devam eder; kaybedilen süre geri gelmez.'
+      : 'İlerleme kaydedilmez.'
   const confirmModal = ConfirmModal ? (
     <ConfirmModal
       open={exitTarget !== null}
-      title="Değerlendirmeden çıkılsın mı?"
-      message="İlerlemeniz kaydedilir, oturum devam ettirilebilir."
+      title={confirmTitle}
+      message={confirmMessage}
       confirmLabel="Çık"
       cancelLabel="Vazgeç"
       onConfirm={confirmExit}
