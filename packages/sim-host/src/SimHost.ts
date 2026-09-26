@@ -53,6 +53,12 @@ export interface SimChromeChip {
   readonly id: string;
   readonly label: string;
   readonly tone?: "learn" | "practice" | "assessment" | "neutral";
+  /**
+   * Header'daki her öğe tıklanabilir (26 Eyl 2026): mod çipi için kabuk,
+   * verilmişse `steps.onSelect(0)` (mod seçimine dön) çağırır; süre/ilerleme
+   * gibi durum çipleri düğme görünümü almaz, düz durum metni olarak çizilir.
+   */
+  readonly onSelect?: () => void;
 }
 
 /**
@@ -60,7 +66,11 @@ export interface SimChromeChip {
  * çizmez; adım göstergesini, çiplerini ve eylemlerini bu yapıyla kabuğa verir.
  */
 export interface SimChrome {
-  readonly steps?: { readonly labels: readonly string[]; readonly current: number };
+  /**
+   * `onSelect` verilirse tamamlanan adımlar (index < current) düğme olur; sim
+   * geri dönüşü kendi yönetir (etkin oturumdan çıkışta onay sorar).
+   */
+  readonly steps?: { readonly labels: readonly string[]; readonly current: number; readonly onSelect?: (index: number) => void };
   readonly chips?: readonly SimChromeChip[];
   readonly actions?: readonly SimChromeAction[];
 }

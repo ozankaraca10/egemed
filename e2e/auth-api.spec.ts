@@ -1,7 +1,7 @@
 import { expect, test, type Page } from "@playwright/test";
 import { curriculum } from "../packages/sim-pulse/src/data/curriculum";
 import { captureRouteScreenshot } from "./artifacts";
-import { selectRadixOption, trackErrors } from "./helpers";
+import { clickSimBarAction, selectRadixOption, trackErrors } from "./helpers";
 import { completeTopicPractice, startTopicPractice } from "./sim-flows";
 
 /**
@@ -393,7 +393,7 @@ test.describe("API oturumu (dev sağlayıcı)", () => {
       if (i < 9) await root.locator("#quizItemNext").click();
     }
     await posted;
-    await page.locator(".eg-shell-simbar").getByRole("button", { name: "İlerlemem" }).click();
+    await clickSimBarAction(page, "İlerlemem");
     await expect(page.getByRole("button", { name: /Ritim izleyicisi.*kazanıldı/i }).first()).toBeVisible();
     await expect(page.getByText("Demo verisi")).toHaveCount(0);
   });

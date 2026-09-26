@@ -140,3 +140,24 @@ export async function clickAdminFilterButton(page: Page, name: string): Promise<
   await adminFilterScope(page, opened).getByRole("button", { name }).first().click();
   await closeAdminFilters(page, opened);
 }
+
+/**
+ * Birleşik bardaki eylemi tıklatır (26 Eyl 2026 header'ı): ≥768 px'te eylemler satır
+ * içidir; <768 px'te "Diğer eylemler" (⋯) menüsündedir ve menü öğesi seçilir.
+ */
+export async function clickSimBarAction(page: Page, label: string): Promise<void> {
+  const bar = page.locator(".eg-shell-simbar");
+  const inline = bar.locator(".eg-shell-simbar__actions").getByRole("button", { name: label, exact: true });
+  if (await inline.isVisible()) {
+    await inline.click();
+    return;
+  }
+  await bar.getByRole("button", { name: "Diğer eylemler" }).click();
+  await page.getByRole("menuitem", { name: label, exact: true }).click();
+}
+
+/** Sim değiştiriciden (başlıktaki "Sim ▾" menüsü) hedefe gider: diğer sim ya da "Tüm simülatörler". */
+export async function chooseFromSimSwitcher(page: Page, label: string): Promise<void> {
+  await page.locator(".eg-shell-simbar__switch").click();
+  await page.getByRole("menuitem", { name: label, exact: true }).click();
+}

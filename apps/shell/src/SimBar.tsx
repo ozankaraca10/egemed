@@ -1,13 +1,23 @@
-import type { JSX } from "react";
-import type { SimChrome, SimChromeIcon } from "@egemed/sim-host";
+import { useEffect, useState, type JSX } from "react";
+import { Button, Dialog, Menu, icons, type MenuEntry } from "@egemed/ui";
+import { SIMULATOR_IDS, type SimChrome, type SimChromeAction, type SimChromeIcon, type SimulatorId } from "@egemed/sim-host";
 import { t } from "@egemed/ui/i18n";
-import { routeHref } from "./routes";
+import { routeHref, simHref } from "./routes";
 
 /**
- * Birleşik bar (UX kararı, 25 Eylül 2026): sim rotasında kabuğun üst barı
- * simin barına dönüşür. Konum (Simülatörler › Sim), tek h1, adım göstergesi,
- * bilgi çipleri ve simin eylemleri burada çizilir; simler kendi üst barını
- * çizmez (`SimMountContext.setChrome`).
+ * Birleşik bar (UX kararı 25 Eyl, yeniden tasarım 26 Eyl 2026): sim rotasında
+ * kabuğun üst barı simin barına dönüşür ve ÜÇ SİMDE AYNI yapıyı taşır:
+ *
+ *   [logo → ana sayfa] [Sim ▾ değiştirici] [① ② ③ adımlar] … [eylemler] [hesap]
+ *
+ * - Geri düğmesi yoktur; "Sim ▾" menüsü diğer simleri ve "Tüm simülatörler"i verir.
+ * - Her öğe tıklanabilir: tamamlanan adımlar (sim destekliyorsa), mod çipi
+ *   (mod seçimine döner). Süre/ilerleme gibi durumlar düğme görünümü almaz.
+ * - Sabit eylem sırası: [sime özgü] · İlerlemem · Tam ekran · Yardım · Hakkında.
+ *   Tam ekranı kabuk yönetir (belge düzeyinde; bar tam ekranda da kalır) ve
+ *   simin kendi tam ekran eylemi yok sayılır. Sim "Hakkında" vermezse kabuk
+ *   standart Hakkında penceresini açar.
+ * - <768 px'te eylemler "⋯" menüsünde toplanır (yatay taşma yok).
  */
 const ICON_PATHS: Record<SimChromeIcon, readonly string[]> = {
   fullscreen: ["M8 3H5a2 2 0 0 0-2 2v3", "M16 3h3a2 2 0 0 1 2 2v3", "M8 21H5a2 2 0 0 1-2-2v-3", "M16 21h3a2 2 0 0 0 2-2v-3"],
@@ -28,69 +38,232 @@ function ChromeIcon({ icon }: { readonly icon: SimChromeIcon }): JSX.Element {
   );
 }
 
+/** Kabuğun bara koyduğu eylem (simden gelen ya da kabuğun kendi eylemi). */
+interface BarAction {
+  readonly id: string;
+  readonly label: string;
+  readonly icon: SimChromeIcon;
+  readonly pressed?: boolean | undefined;
+  readonly onSelect: () => void;
+}
+
+/** Sabit sıra yuvası: sime özgü eylemler önce, ardından ortak dört eylem. */
+function slotOf(action: SimChromeAction): number {
+  switch (action.icon) {
+    case "progress":
+      return 1;
+    case "help":
+      return 3;
+    case "info":
+      return 4;
+    default:
+      return 0;
+  }
+}
+
+/** Sim eylemlerini sabit sıraya dizer; tam ekranı kabuk verir, Hakkında yoksa kabuğunkini ekler. */
+export function orderBarActions(
+  simActions: readonly SimChromeAction[],
+  shell: { readonly fullscreen: boolean; readonly toggleFullscreen: () => void; readonly openAbout: () => void },
+): BarAction[] {
+  const own = simActions.filter((action) => action.icon !== "fullscreen");
+  const sorted = own
+    .map((action, index) => ({ action, index }))
+    .sort((a, b) => slotOf(a.action) - slotOf(b.action) || a.index - b.index)
+    .map(({ action }): BarAction => ({
+      id: action.id,
+      label: action.label,
+      icon: action.icon,
+      pressed: action.pressed,
+      onSelect: () => action.onSelect(),
+    }));
+  const fullscreen: BarAction = {
+    id: "fullscreen",
+    label: t(shell.fullscreen ? "shell.sim.action.fullscreenExit" : "shell.sim.action.fullscreen"),
+    icon: "fullscreen",
+    pressed: shell.fullscreen,
+    onSelect: shell.toggleFullscreen,
+  };
+  // Tam ekran İlerlemem'den sonra, Yardım'dan önce (yuva 2).
+  const helpAt = sorted.findIndex((action) => action.icon === "help" || action.icon === "info");
+  const result = helpAt === -1 ? [...sorted, fullscreen] : [...sorted.slice(0, helpAt), fullscreen, ...sorted.slice(helpAt)];
+  if (!own.some((action) => action.icon === "info")) {
+    result.push({ id: "about", label: t("shell.sim.action.about"), icon: "info", onSelect: shell.openAbout });
+  }
+  return result;
+}
+
+/** Belge düzeyinde tam ekran (26 Eyl 2026 kararı); DOM yoksa (SSR/test) sessizce hiçbir şey yapmaz. */
+function useDocumentFullscreen(): { readonly fullscreen: boolean; readonly toggle: () => void } {
+  const [fullscreen, setFullscreen] = useState(false);
+  useEffect(() => {
+    const sync = () => setFullscreen(document.fullscreenElement !== null);
+    sync();
+    document.addEventListener("fullscreenchange", sync);
+    return () => document.removeEventListener("fullscreenchange", sync);
+  }, []);
+  const toggle = () => {
+    if (document.fullscreenElement !== null) void document.exitFullscreen().catch(() => undefined);
+    else void document.documentElement.requestFullscreen?.().catch(() => undefined);
+  };
+  return { fullscreen, toggle };
+}
+
+function navigate(href: `#${string}`): void {
+  const scope = globalThis as { location?: { hash: string } };
+  if (scope.location !== undefined) scope.location.hash = href;
+}
+
 export interface SimBarProps {
+  readonly simId: SimulatorId;
   readonly title: string;
   readonly chrome: SimChrome | null;
 }
 
-export function SimBar({ title, chrome }: SimBarProps): JSX.Element {
+export function SimBar({ simId, title, chrome }: SimBarProps): JSX.Element {
   const steps = chrome?.steps;
+  const { fullscreen, toggle } = useDocumentFullscreen();
+  const [aboutOpen, setAboutOpen] = useState(false);
+  const actions = orderBarActions(chrome?.actions ?? [], {
+    fullscreen,
+    toggleFullscreen: toggle,
+    openAbout: () => setAboutOpen(true),
+  });
+
+  const switchItems: MenuEntry[] = [
+    ...SIMULATOR_IDS.filter((id) => id !== simId).map((id): MenuEntry => ({
+      key: id,
+      label: t(`sims.${id}.name`),
+      icon: <img alt="" className="eg-shell-simbar__menuLogo" height={20} src={`/brand/sims/${id}-icon-white.png`} width={20} />,
+      onSelect: () => navigate(simHref(id)),
+    })),
+    { kind: "separator", key: "sep" },
+    { key: "all", label: t("shell.sim.all"), icon: <icons.LayoutDashboard />, onSelect: () => navigate(routeHref("simulators")) },
+  ];
+
+  const selectStep = steps?.onSelect;
+  const modeChip = (chrome?.chips ?? []).find((chip) => chip.id === "mode");
+  const modeSelect = modeChip?.onSelect ?? (selectStep === undefined ? undefined : () => selectStep(0));
+
   return (
     <div className="eg-shell-simbar">
-      <nav aria-label={t("shell.sim.crumbs")} className="eg-shell-simbar__crumbs">
-        <a aria-label={t("shell.sim.back")} className="eg-shell-simbar__back" href={routeHref("simulators")}>
-          <svg aria-hidden="true" className="eg-shell-simbar__icon" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24">
-            <path d="M15 18l-6-6 6-6" />
-          </svg>
-          <span className="eg-shell-simbar__backLabel">{t("shell.nav.simulators")}</span>
-        </a>
-        <span aria-hidden="true" className="eg-shell-simbar__sep">›</span>
-      </nav>
-      <h1 className="eg-shell-simbar__title">{title}</h1>
+      <h1 className="eg-shell-simbar__title">
+        <Menu
+          align="start"
+          className="eg-shell-simbar__switchMenu"
+          items={switchItems}
+          trigger={
+            <button className="eg-shell-simbar__switch" title={t("shell.sim.switch")} type="button">
+              <img alt="" className="eg-shell-simbar__simLogo" height={24} src={`/brand/sims/${simId}-icon-white.png`} width={24} />
+              <span className="eg-shell-simbar__simName">{title}</span>
+              <icons.ChevronDown aria-hidden="true" className="eg-shell-simbar__chev" />
+            </button>
+          }
+        />
+      </h1>
       {steps !== undefined && steps.labels.length > 0 && (
         <ol aria-label={t("shell.sim.steps")} className="eg-shell-simbar__steps">
-          {steps.labels.map((label, index) => (
-            <li
-              aria-current={index === steps.current ? "step" : undefined}
-              className={
-                index < steps.current
-                  ? "eg-shell-simbar__step eg-shell-simbar__step--done"
-                  : index === steps.current
-                    ? "eg-shell-simbar__step eg-shell-simbar__step--current"
-                    : "eg-shell-simbar__step"
-              }
-              key={label}
-            >
-              <span aria-hidden="true" className="eg-shell-simbar__stepNum">{index + 1}</span>
-              <span className="eg-shell-simbar__stepLabel">{label}</span>
-            </li>
-          ))}
+          {steps.labels.map((label, index) => {
+            const done = index < steps.current;
+            const current = index === steps.current;
+            const className = done
+              ? "eg-shell-simbar__step eg-shell-simbar__step--done"
+              : current
+                ? "eg-shell-simbar__step eg-shell-simbar__step--current"
+                : "eg-shell-simbar__step";
+            const body = (
+              <>
+                <span aria-hidden="true" className="eg-shell-simbar__stepNum">{index + 1}</span>
+                <span className="eg-shell-simbar__stepLabel">{label}</span>
+              </>
+            );
+            return (
+              <li aria-current={current ? "step" : undefined} className={className} key={label}>
+                {done && selectStep !== undefined ? (
+                  <button
+                    className="eg-shell-simbar__stepButton"
+                    onClick={() => selectStep(index)}
+                    title={`${label} ${t("shell.sim.stepBack")}`}
+                    type="button"
+                  >
+                    {body}
+                  </button>
+                ) : (
+                  body
+                )}
+              </li>
+            );
+          })}
         </ol>
       )}
       <div className="eg-shell-simbar__spacer" />
-      {(chrome?.chips ?? []).map((chip) => (
-        <span className={`eg-shell-simbar__chip eg-shell-simbar__chip--${chip.tone ?? "neutral"}`} key={chip.id}>
-          {chip.label}
-        </span>
-      ))}
-      {(chrome?.actions ?? []).length > 0 && (
-        <div aria-label={t("shell.sim.actions")} className="eg-shell-simbar__actions" role="group">
-          {(chrome?.actions ?? []).map((action) => (
-            <button
-              aria-label={action.label}
-              aria-pressed={action.pressed}
-              className="eg-shell-simbar__action"
-              key={action.id}
-              onClick={() => action.onSelect()}
-              title={action.label}
-              type="button"
-            >
-              <ChromeIcon icon={action.icon} />
-              <span className="eg-shell-simbar__actionLabel">{action.label}</span>
-            </button>
-          ))}
-        </div>
+      {(chrome?.chips ?? []).map((chip) =>
+        chip.id === "mode" && modeSelect !== undefined ? (
+          <button
+            className={`eg-shell-simbar__chip eg-shell-simbar__chip--${chip.tone ?? "neutral"}`}
+            key={chip.id}
+            onClick={modeSelect}
+            title={t("shell.sim.modeChange")}
+            type="button"
+          >
+            {chip.label}
+          </button>
+        ) : (
+          <span className="eg-shell-simbar__status" key={chip.id}>
+            {chip.label}
+          </span>
+        ),
       )}
+      <div aria-label={t("shell.sim.actions")} className="eg-shell-simbar__actions" role="group">
+        {actions.map((action) => (
+          <button
+            aria-label={action.label}
+            aria-pressed={action.pressed}
+            className="eg-shell-simbar__action"
+            key={action.id}
+            onClick={action.onSelect}
+            title={action.label}
+            type="button"
+          >
+            <ChromeIcon icon={action.icon} />
+            <span className="eg-shell-simbar__actionLabel">{action.label}</span>
+          </button>
+        ))}
+      </div>
+      <div className="eg-shell-simbar__more">
+        <Menu
+          items={actions.map((action): MenuEntry => ({
+            key: action.id,
+            label: action.label,
+            icon: <ChromeIcon icon={action.icon} />,
+            onSelect: action.onSelect,
+          }))}
+          trigger={
+            <button aria-label={t("shell.sim.more")} className="eg-shell-simbar__action" type="button">
+              <icons.MoreHorizontal aria-hidden="true" className="eg-shell-simbar__icon" />
+            </button>
+          }
+        />
+      </div>
+      <Dialog
+        closeLabel={t("shell.sim.about.close")}
+        footer={
+          <Button onClick={() => setAboutOpen(false)} variant="secondary">
+            {t("shell.sim.about.close")}
+          </Button>
+        }
+        onOpenChange={setAboutOpen}
+        open={aboutOpen}
+        title={`${title} · ${t("shell.sim.action.about")}`}
+      >
+        <div className="eg-shell-simabout">
+          <img alt="" className="eg-shell-simabout__logo" height={48} src={`/brand/sims/${simId}-horizontal.png`} />
+          <p className="eg-shell-simabout__tagline">{t(`sims.${simId}.tagline`)}</p>
+          <p>{t(`sims.${simId}.body`)}</p>
+          <p className="eg-shell-simabout__dev">{t("shell.sim.about.dev")}</p>
+          <p className="eg-shell-simabout__note">{t("shell.sim.about.note")}</p>
+        </div>
+      </Dialog>
     </div>
   );
 }

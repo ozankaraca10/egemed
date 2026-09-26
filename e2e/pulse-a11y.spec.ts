@@ -2,7 +2,7 @@ import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Locator, type Page, type TestInfo } from "@playwright/test";
 import { curriculum } from "../packages/sim-pulse/src/data/curriculum";
 import { captureRouteScreenshot, writeAxeArtifact } from "./artifacts";
-import { trackErrors } from "./helpers";
+import { clickSimBarAction, trackErrors } from "./helpers";
 import allowlist from "./pulse-a11y-allowlist.json" with { type: "json" };
 
 /**
@@ -173,7 +173,7 @@ const SCREENS: readonly PulseScreen[] = [
     route: "#/sims/pulse/hakkinda",
     async open(root) {
       // Birleşik bar (T107): kaynak üst çubuğu gizli; eylem kabuk barındadır.
-      await root.page().locator(".eg-shell-simbar").getByRole("button", { name: "Hakkında" }).click();
+      await clickSimBarAction(root.page(), "Hakkında");
       await expect(root.locator("#aboutView")).toBeVisible();
       await expect(root.locator("#aboutContent")).toBeVisible();
     },
@@ -183,7 +183,7 @@ const SCREENS: readonly PulseScreen[] = [
     label: "İlerlemem diyaloğu",
     route: "#/sims/pulse/ilerlemem",
     async open(root) {
-      await root.page().locator(".eg-shell-simbar").getByRole("button", { name: "İlerlemem" }).click();
+      await clickSimBarAction(root.page(), "İlerlemem");
       await expect(root.locator("#egemedGamiProgress")).toBeVisible();
       await expect(root.locator("#egemedGamiProgress").getByRole("tab", { name: "Başarılarım" })).toBeVisible();
     },

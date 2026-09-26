@@ -71,7 +71,7 @@ const NAV_ICONS: Record<RouteId, ReactNode> = {
 export function ShellLayout({ route, session, onLogout, simChrome = null, children }: ShellLayoutProps): JSX.Element {
   const activeId = route.kind === "page" ? route.route.id : undefined;
   // UX kararı (25 Eylül 2026): sim rotasında tek birleşik bar ve tam alan;
-  // ana gezinme, sayfa başlığı, kart ve footer çizilmez.
+  // ana gezinme, sayfa başlığı ve kart çizilmez (footer 26 Eyl'den beri her sayfada).
   const simMode = route.kind === "sim";
   // API oturumunda görünen ad sunucudan gelir; sahte oturumda rol etiketi çizilir.
   const roleLabel = session === undefined || session === null
@@ -101,7 +101,7 @@ export function ShellLayout({ route, session, onLogout, simChrome = null, childr
         <a aria-label={simMode ? t("shell.brand") : undefined} className="eg-shell-brand" href={routeHref("home")}>
           <EgemedLogo compact={simMode} variant="on-dark" />
         </a>
-        {route.kind === "sim" && <SimBar chrome={simChrome} title={t(route.titleKey)} />}
+        {route.kind === "sim" && <SimBar chrome={simChrome} simId={route.simId} title={t(route.titleKey)} />}
         {simMode ? (
           // T120: sim rotasında tek hesap düğmesi; menüde ad, not ve çıkış.
           account
@@ -127,7 +127,8 @@ export function ShellLayout({ route, session, onLogout, simChrome = null, childr
         {synthetic && !simMode && <p className="eg-shell-session-banner">{t("shell.session.banner")}</p>}
         {children}
       </main>
-      {!simMode && <ShellFooter />}
+      {/* 26 Eyl 2026: footer tek tiptir; sim sayfalarında da aynı platform footer'ı çizilir. */}
+      <ShellFooter />
     </div>
   );
 }
