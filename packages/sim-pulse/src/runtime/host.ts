@@ -142,6 +142,10 @@ export function mountPulseRuntime(target: HTMLElement, options: PulseRuntimeOpti
   bodyEl.className = "pulse-body";
   bodyEl.innerHTML = markup.split("__PULSE_ASSET_BASE__").join(options.assetBase);
   htmlEl.append(bodyEl);
+  // Tam ekran daima belge düzeyinde (26 Eyl 2026 kararı): kaynağın
+  // `document.documentElement.requestFullscreen()` çağrısı sim kökünü değil
+  // sayfayı büyütür; böylece platformun birleşik üst barı tam ekranda da kalır.
+  htmlEl.requestFullscreen = (fsOptions?: FullscreenOptions) => realDocument.documentElement.requestFullscreen(fsOptions);
   shadow.append(style, htmlEl);
   target.appendChild(host);
   const top = host.getBoundingClientRect().top + realWindow.scrollY;
@@ -282,7 +286,7 @@ export function mountPulseRuntime(target: HTMLElement, options: PulseRuntimeOpti
           return shadow.activeElement;
         case "fullscreenElement":
         case "webkitFullscreenElement":
-          return shadow.fullscreenElement;
+          return realDoc.fullscreenElement === null ? null : htmlEl;
         case "addEventListener":
           return (type: string, fn: Listener | null, opts?: boolean | AddEventListenerOptions) =>
             addTracked(realDoc, doc, type, fn, opts);
@@ -373,7 +377,7 @@ export function mountPulseRuntime(target: HTMLElement, options: PulseRuntimeOpti
       for (const observer of observers) observer.disconnect();
       for (const context of audioContexts) void context.close().catch(() => undefined);
       for (const entry of listeners.splice(0)) entry.target.removeEventListener(entry.type, entry.wrapper, entry.capture);
-      if (shadow.fullscreenElement !== null) void realDocument.exitFullscreen().catch(() => undefined);
+      if (realDocument.fullscreenElement !== null) void realDocument.exitFullscreen().catch(() => undefined);
       shadow.querySelectorAll("dialog[open]").forEach((dialog) => (dialog as HTMLDialogElement).close());
       timeouts.clear();
       intervals.clear();
@@ -414,9 +418,7 @@ const EMBED_CSS = `
 :host{display:block;position:relative;min-height:var(--pulse-vh,100dvh)}
 .pulse-html,.pulse-body{min-height:var(--pulse-vh,100dvh)}
 .landing{position:absolute;min-height:var(--pulse-vh,100dvh)}
-.pulse-html:fullscreen{--pulse-vh:100dvh;overflow:auto;background:var(--bg-grad-a,#fff)}
 .transport,.case-toolbar{bottom:calc(8px + var(--pulse-bottom-inset,0px))}
-.pulse-html:fullscreen .transport,.pulse-html:fullscreen .case-toolbar{bottom:8px}
 .landing{overflow-y:auto}
 /* PULSE-10: kaynak yeşili (#16a34a) açık zeminde ve beyaz metinle WCAG AA altında
    (≈3.1–3.3:1); token koyulaştırılır (#15803d ≈ 4.8–5:1). */
