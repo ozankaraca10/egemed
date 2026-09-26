@@ -95,6 +95,21 @@ function fmtTimer(ms: number): string {
   return `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}`;
 }
 
+/** Adım düğmesi tıklamasının sonucu (T182): yalnız adım 0 (mod seçimi) anlamlıdır;
+ *  "Çalışma" adımı (index 1) tamamlanmış olsa bile o ekrana geri dönüş tanımsızdır ve yok sayılır. */
+export type StepSelectOutcome = "navigate" | "confirm" | "ignore";
+
+/** Etkin oturum: uygulama veya değerlendirme sürüyor, kaydedilmemiş ilerleme kaybedilebilir. */
+export function needsExitConfirm(screen: Screen): boolean {
+  return screen === "simulation";
+}
+
+/** `SimChrome.steps.onSelect` sözleşmesinin saf kararı: bkz. `StepSelectOutcome`. */
+export function resolveStepSelect(index: number, screen: Screen): StepSelectOutcome {
+  if (index !== 0) return "ignore";
+  return needsExitConfirm(screen) ? "confirm" : "navigate";
+}
+
 function chromeKey(chrome: SimChrome): string {
   return JSON.stringify({
     steps: chrome.steps,
@@ -162,8 +177,14 @@ export function UnifiedChrome({
     else fullscreen.exitFullscreen();
   };
   const goModes = () => {
-    if (inAssessment) setExitAsk(true);
+    if (needsExitConfirm(state.screen)) setExitAsk(true);
     else dispatch({ type: "goto", screen: "modes" });
+  };
+  /** Kabuğun tamamlanan adım düğmeleri için (T182): kararı `resolveStepSelect` verir; yalnız
+   *  adım 0 aksiyon üretir, diğerleri (örn. "Çalışma") yok sayılır. */
+  const onStepSelect = (index: number) => {
+    if (resolveStepSelect(index, state.screen) === "ignore") return;
+    goModes();
   };
   const toggleMute = () => {
     const next = !muted;
@@ -199,15 +220,19 @@ export function UnifiedChrome({
     }
     actions.push({ id: "help", icon: "help", label: "Yardım", onSelect: () => setHelpOpen(true) });
   }
-  usePublishChrome(setChrome ? { actions, chips, steps: { current: step, labels: STEP_LABELS } } : null);
+  usePublishChrome(setChrome ? { actions, chips, steps: { current: step, labels: STEP_LABELS, onSelect: onStepSelect } } : null);
   if (!setChrome) return null;
+  const exitTitle = inAssessment ? "Değerlendirmeden çıkılsın mı?" : "Çalışmadan çıkılsın mı?";
+  const exitMessage = inAssessment
+    ? "İlerlemeniz kaydedilmez ve geçen süre kaybedilir."
+    : "İlerleme kaydedilmez.";
   return (
     <>
       <HelpModal open={helpOpen} onClose={() => setHelpOpen(false)} {...(modalEnv ? { env: modalEnv } : {})} />
       <ConfirmModal
         open={exitAsk}
-        title="Değerlendirmeden çıkılsın mı?"
-        message="İlerlemeniz kaydedilir, oturum devam ettirilebilir."
+        title={exitTitle}
+        message={exitMessage}
         confirmLabel="Çık"
         cancelLabel="Vazgeç"
         onConfirm={() => {
