@@ -235,7 +235,7 @@ Kurallar:
 | Kapı | Bağlı dilimler | Etki |
 |---|---|---|
 | **K-P1** paket yerleşimi | **S0a** (zorunlu) | **Karar (23 Eyl 2026): `packages/sim-ausculta`**; `sims/*` arşiv/boş kalır. Workspace/tsconfig sözleşmesi ve hedef yollar bu karara göre kurulur |
-| **K-P2** SCORM | S8b, S8d, S15c, S16a, S19a | **Karar (port, ADR-006):** LMS/CMI adaptörü yok; bellek seam. S19a sayımı: 13 SCORM testinden 7 uyarlandı, 6 emekli (§13) |
+| **K-P2** SCORM | S8b, S8d, S15c, S16a, S19a | **Karar (port, ADR-006):** CMI adaptörü yok; bellek seam. S19a sayımı: 13 SCORM testinden 7 uyarlandı, 6 emekli (§13) |
 | **K-P3** localStorage | S8c | `bestScore` kaldırma/oturum-içi; `landingSound`/`fsPromptDone` kabuk ya da çıkarma |
 | **K-P4** varlık sunumu | S3b, S18b | 31 MB / 249 wav kökü |
 | **K-P5** i18n kapsamı | S13a, S13b, S14, S15b, S16a, S16b | Gömülü metinlerin `packages/ui/i18n/tr.ts`'e taşınması |
@@ -407,7 +407,7 @@ dosya sayısı ve boyutu; `sims/*` yer tutucuları; family-tokens'ta Ausculta pa
 
 1. **K-P1 Paket yerleşimi — Karar (23 Eyl 2026):** `packages/sim-ausculta`; `sims/*` arşiv/boş kalır.
    Karar S0a'yı ve `tests/config/tsconfig.test.ts` genişletmesini belirler; S0a bu karara göre başlar.
-2. **K-P2 SCORM — Karar (port, ADR-006; sayım T17b-S19):** LMS/CMI adaptörü kalkar; suspend ve
+2. **K-P2 SCORM — Karar (port, ADR-006; sayım T17b-S19):** CMI adaptörü kalkar; suspend ve
    oturum seam'i `RuntimeAdapter` üzerindedir. 31-85 ve 581-719: 7 uyarlama, 6 emekli (§13).
 3. **K-P3 localStorage:** `bestScore` kaldırılsın mı, oturum-içi mi tutulsun? `landingSound`/
    `fsPromptDone` kabuğa mı taşınsın, simden mi çıkarılsın? Karar S8c'yi açar.
@@ -432,7 +432,7 @@ Uyarlananlar `tests/sim-ausculta/runtime-flush.test.ts` içindedir.
 | Kaynak `it` | Grup | Sonuç |
 |---|---|---|
 | mock adapter temel CRUD | 31-85 | uyarlama — bellek adaptörü yazım/flush |
-| LMS yoksa standalone fallback (`detectScorm`) | 31-85 | emekli — `parent`/`opener` taraması yok |
+| SCORM ortamı yoksa standalone fallback (`detectScorm`) | 31-85 | emekli — `parent`/`opener` taraması yok |
 | 2004 Initialize/SetValue/GetValue sırası | 31-85 | emekli — CMI API yok |
 | 1.2 `success_status` → `lesson_status` | 31-85 | emekli — sürüm eşlemesi yok |
 | 2004 `"incorrect"` + `PT4S` | 581-719 | uyarlama — `correct: false`, `latencySec: 4` |

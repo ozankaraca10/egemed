@@ -6,7 +6,7 @@ Durum: Uygulama planı. ADR-006 ve ADR-007 kabul edildi; K2 (xAPI profili) ve K3
 
 - Tek React kabuğu; Pulse, Ausculta ve Opaca ayrı rotalar, ayrı durum ve ayrı lazy modüllerdir. Motorları davranışları korunarak taşınır. Simler kendi başlarına başlatılıp sonlandırılabilir; bir simin durumu diğerine aktarılmaz.
 - Kabuk, sim ekranları ve admin ekranları `@egemed/ui` ile `@egemed/tokens` ailesini kullanır. Simülatörün klinik etkileşimleri kendine özgü kalabilir; tipografi, navigasyon, kart, diyalog, odak ve erişilebilirlik kuralları ortaktır. Referans: `egemed-sim-ui-ux-framework`.
-- Öğrenci deneyimi kurum Moodle/LTI bağlamında çalışır. Not, ödev ve ders yönetimi Moodle'da kalır. xAPI ifadesi tek `SimulatorId` taşır ve kurum LRS'sine gider; EGEMED ifade depolamaz.
+- Öğrenci deneyimi bağımsız platform olarak çalışır; not, ödev ve ders yönetimi platform kapsamı dışındadır. xAPI ifadesi tek `SimulatorId` taşır ve kurum LRS'sine gider; EGEMED ifade depolamaz.
 - Admin alanı öğrenci simlerinden ayrıdır. Yetki sunucuda doğrulanır; arayüzde menü gizleme güvenlik sınırı sayılmaz. Kurum kimliği ve rol kaynağı ADR-007 (Önerildi) ile yeniden tanımlanır; ayrıntı `docs/specs/E3-kullanici-yonetimi.md`.
 
 ## Karar kapıları
@@ -26,7 +26,7 @@ port envanterleri) işlendi.
 - **Opaca varlıkları:** `public/assets/xray/runtime` (621 dosya / ~20 MB, kaynakta git-dışı) yerel
   kopyadan kopyalanır; import betikleriyle yeniden üretim yolu kullanılmaz.
 - **Opaca test hedefi:** Platform hedefi **153 çalışma zamanı testi** (66 core + 87 gamification); `scripts/`
-  hattı (veri üretimi + LMS paketleme) ve 56 betik testi taşınmaz, kaynak depoda arşiv kalır; `jszip`/`sharp`
+  hattı (veri üretimi + SCORM paketleme) ve 56 betik testi taşınmaz, kaynak depoda arşiv kalır; `jszip`/`sharp`
   eklenmez. Vaka seti yeniden üretilecekse kaynak depoda üretilip çıktı kopyalanır.
 - **Oyunlaştırma:** Üç simde de (Opaca, Pulse, Ausculta) zorunlu dilimler halinde aktarılır — koşullu değil;
   ortak mantık (XP, seviye, seri, hedef, zaman, sıralama, ödül, grafik) `packages/gamification-core`'a, sim
@@ -112,7 +112,7 @@ Opaca kaynağı zaten React+TS'tir. T15 ekranları yeniden React'e yazmaz; mevcu
 - **Kullanıcılar:** EGEMED kullanıcı kaydında arama/filtreleme, rol görüntüleme, davet/etkinleştirme, toplu içe aktarma; ayrıntı E3 §e.
 - **Roller ve erişim:** iki rollü matris (`admin`, `kullanici`), kişi bazlı sim erişimi, birim sınıflandırması (dönem/grup), yetki değişikliği onayı.
 - **Simülatörler ve içerik:** modül durumu, sürüm, görünürlük, içerik ataması.
-- **Entegrasyonlar:** Moodle/LTI ve LRS bağlantı sağlığı, anahtarların yalnız durumu; sır değeri ekranda gösterilmez.
+- **Entegrasyonlar:** LTI ve LRS bağlantı sağlığı, anahtarların yalnız durumu; sır değeri ekranda gösterilmez.
 - **Denetim ve ayarlar:** yönetici eylemleri, kurum ayarları, saklama ve erişim politikası.
 - **Giriş:** admin ve test öğrencisi için aynı marka ailesinde ayrı giriş yolları. Geniş ekranda sol yarı kurum logosu/EGEMED markası/slogan, sağ yarı form; mobilde dikey akış. Test öğrenci oturumu yalnız geliştirme ortamında sunulur. Kimlik doğrulama ADR-007/K1 ve E3 §a'ya bağlıdır.
 

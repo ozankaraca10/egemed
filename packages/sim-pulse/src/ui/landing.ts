@@ -101,7 +101,7 @@ export function createPulseLandingContent(options: CreatePulseLandingContentOpti
       },
       {
         title: "SCORM 1.2",
-        description: "Puan ve durum LMS’e raporlanır.",
+        description: "Puan ve durum kaydedilir.",
       },
     ],
   };
