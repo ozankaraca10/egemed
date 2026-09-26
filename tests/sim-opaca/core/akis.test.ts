@@ -2,8 +2,10 @@ import { describe, expect, it } from "vitest";
 import {
   firstWeakLibraryKey,
   isTimedOut,
+  needsExitConfirm,
   nextActionForSubmit,
   remainingSec,
+  stepBackTarget,
   stepProgress,
   tutorialProgress,
   weakDomainKeys,
@@ -70,5 +72,20 @@ describe("akış (kaynak davranışı)", () => {
     ];
     expect(firstWeakLibraryKey(res, (id) => (id === "y" ? "finding.pneumothorax" : null))).toBe("finding.pneumothorax");
     expect(firstWeakLibraryKey(res, () => null)).toBeNull();
+  });
+
+  it("T183: header adım geri navigasyonu yalnız adım 0'ı (mod seçimi) hedef alır", () => {
+    expect(stepBackTarget(0)).toBe("modes");
+    expect(stepBackTarget(1)).toBeNull();
+    expect(stepBackTarget(2)).toBeNull();
+    expect(stepBackTarget(-1)).toBeNull();
+  });
+
+  it("T183: yalnız etkin oturum (simulation ekranı) mod seçimine dönüşte onay ister", () => {
+    expect(needsExitConfirm("simulation")).toBe(true);
+    expect(needsExitConfirm("learn")).toBe(false);
+    expect(needsExitConfirm("modes")).toBe(false);
+    expect(needsExitConfirm("results")).toBe(false);
+    expect(needsExitConfirm("start")).toBe(false);
   });
 });

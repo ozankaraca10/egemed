@@ -221,7 +221,11 @@ describe("createAuscultaModule (SimHost adaptörü)", () => {
     expect(html).not.toContain("eg-sim-toolbar");
     expect(html).not.toContain('class="stepper"');
     const chrome = sent.at(-1);
-    expect(chrome?.steps).toEqual({ current: 0, labels: ["Mod seçimi", "Çalışma", "Tamamla"] });
+    expect(chrome?.steps).toEqual({
+      current: 0,
+      labels: ["Mod seçimi", "Çalışma", "Tamamla"],
+      onSelect: expect.any(Function),
+    });
     expect(chrome?.actions?.map((action) => action.id)).toEqual(["progress", "fullscreen", "sound", "help"]);
     dispose();
     expect(sent.at(-1)).toBeNull();

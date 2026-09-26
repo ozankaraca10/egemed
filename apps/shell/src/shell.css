@@ -785,6 +785,25 @@ button.eg-shell-simbar__chip:hover { background: var(--navy-600); }
   .eg-shell-sim-page__host { transition: none; }
 }
 
+/* Ziyaretçi (26 Eyl 2026): hesap menüsü yerine rozet + öğrenci girişi. */
+.eg-shell-visitor { display: flex; flex: 0 0 auto; align-items: center; gap: var(--sp-2); }
+.eg-shell-visitor__badge {
+  display: none; align-items: center; min-height: 1.75rem; padding: 0 var(--sp-2);
+  background: var(--navy-700); border: 1px solid var(--blue-400); border-radius: var(--r-pill);
+  color: var(--blue-100); font-size: var(--fs-xs); font-weight: 700;
+}
+.eg-shell-visitor__signin {
+  box-sizing: border-box; min-height: var(--eg-shell-touch-min); padding: 0 var(--sp-3);
+  background: var(--card); border: 0; border-radius: var(--r-pill);
+  color: var(--navy-900); font: inherit; font-size: var(--fs-sm); font-weight: 700; cursor: pointer; white-space: nowrap;
+}
+.eg-shell-visitor__signin:hover { background: var(--blue-50); }
+.eg-shell-visitor__signin:focus-visible { outline: 2px solid var(--blue-300); outline-offset: 2px; }
+@media (min-width: 768px) { .eg-shell-visitor__badge { display: inline-flex; } }
+.eg-shell-entry__visitor { display: grid; gap: var(--sp-2); margin-top: var(--sp-4); }
+.eg-shell-entry__or { color: var(--ink-600); font-size: var(--fs-sm); text-align: center; }
+.eg-shell-entry__visitorNote { margin: 0; color: var(--ink-600); font-size: var(--fs-xs); line-height: 1.5; text-align: center; }
+
 /* Kabuğun standart sim "Hakkında" penceresi (sim kendi Hakkında'sını vermezse). */
 .eg-shell-simabout { display: grid; gap: var(--sp-3); color: var(--ink-700); line-height: 1.55; }
 .eg-shell-simabout p { margin: 0; }

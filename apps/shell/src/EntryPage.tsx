@@ -28,6 +28,8 @@ export interface EntryPageProps {
   apiBaseUrl?: string | null;
   /** T57 — API oturumu kurulduğunda kabuk durumunu günceller (`App` geçirir). */
   onApiSignedIn?: (session: ShellSession) => void;
+  /** 26 Eyl 2026 — "Ziyaretçi olarak göz at" (yalnız öğrenci girişinde; sınırlı öğrenme modu). */
+  onBrowseAsVisitor?: () => void;
 }
 
 export interface EntryFormValues {
@@ -71,7 +73,7 @@ export function submitDevEntry(
 }
 
 /** Giriş ekranı: dev kapalıyken yalnız önizleme, açıkken sahte ya da API oturumu. */
-export function EntryPage({ role, devEnabled = false, apiBaseUrl = null, onApiSignedIn }: EntryPageProps): JSX.Element {
+export function EntryPage({ role, devEnabled = false, apiBaseUrl = null, onApiSignedIn, onBrowseAsVisitor }: EntryPageProps): JSX.Element {
   const [submitted, setSubmitted] = useState(false);
   const [invalid, setInvalid] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -222,6 +224,13 @@ export function EntryPage({ role, devEnabled = false, apiBaseUrl = null, onApiSi
           </form>
           {!devEnabled && submitted && (
             <p className="eg-shell-entry__status" role="alert">{t("entry.auth.pending")}</p>
+          )}
+          {!isAdmin && onBrowseAsVisitor !== undefined && (
+            <div className="eg-shell-entry__visitor">
+              <span aria-hidden="true" className="eg-shell-entry__or">{t("entry.visitor.or")}</span>
+              <Button fullWidth onClick={onBrowseAsVisitor} variant="secondary">{t("entry.visitor.action")}</Button>
+              <p className="eg-shell-entry__visitorNote">{t("entry.visitor.note")}</p>
+            </div>
           )}
           <a className="eg-shell-entry__back" href="#/">{t("entry.back")}</a>
         </div>

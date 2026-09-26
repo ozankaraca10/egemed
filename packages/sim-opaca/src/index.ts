@@ -45,8 +45,10 @@ export type { EventBus, SimEventDraft } from "./core/events";
 export {
   firstWeakLibraryKey,
   isTimedOut,
+  needsExitConfirm,
   nextActionForSubmit,
   remainingSec,
+  stepBackTarget,
   stepProgress,
   tutorialProgress,
   weakDomainKeys,
