@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type JSX } from "react";
-import { createSimHost, type SimChrome, type SimHost, type SimulatorId } from "@egemed/sim-host";
+import { audienceShowsGamification, createSimHost, type SimAudience, type SimChrome, type SimHost, type SimulatorId } from "@egemed/sim-host";
 import { t } from "@egemed/ui/i18n";
 import { shellNow } from "./now";
 import { routeHref, simTitleKey } from "./routes";
@@ -27,6 +27,10 @@ export interface SimRouteProps {
   readonly allowed?: boolean;
   /** Birleşik bar kanalı: simin adım/çip/eylemleri kabuğun üst barına gider. */
   readonly onChrome?: ((chrome: SimChrome | null) => void) | undefined;
+  /** Kitle (26 Eyl 2026): öğrenci / öğretim üyesi / ziyaretçi; yoksa öğrenci. */
+  readonly audience?: SimAudience | undefined;
+  /** Ziyaretçi kilidindeki "Öğrenci girişi" eylemi. */
+  readonly onRequestSignIn?: (() => void) | undefined;
 }
 
 /** Duyuru kartı simgesi: erişim reddi (kilit) ve hata (uyarı). Dekoratiftir. */
@@ -124,15 +128,26 @@ export function SimErrorNotice({ onRetry }: SimErrorNoticeProps): JSX.Element {
  * kutusu host'un kardeşidir; yükleniyor/hata sırasında host gizlenmez, boş
  * kalır ve aşama ızgarasında aynı hücreyi paylaşır.
  */
-export function SimRoute({ actorId, allowed = true, apiBaseUrl = null, onChrome, simId }: SimRouteProps): JSX.Element {
+export function SimRoute({ actorId, allowed = true, apiBaseUrl = null, audience, onChrome, onRequestSignIn, simId }: SimRouteProps): JSX.Element {
   if (!allowed) return <SimAccessDenied />;
-  return <SimRouteHost actorId={actorId} apiBaseUrl={apiBaseUrl} onChrome={onChrome} simId={simId} />;
+  return (
+    <SimRouteHost
+      actorId={actorId}
+      apiBaseUrl={apiBaseUrl}
+      audience={audience}
+      onChrome={onChrome}
+      onRequestSignIn={onRequestSignIn}
+      simId={simId}
+    />
+  );
 }
 
-function SimRouteHost({ actorId, apiBaseUrl = null, onChrome, simId }: Omit<SimRouteProps, "allowed">): JSX.Element {
+function SimRouteHost({ actorId, apiBaseUrl = null, audience = "student", onChrome, onRequestSignIn, simId }: Omit<SimRouteProps, "allowed">): JSX.Element {
   // Kanal ref'te tutulur: üst bileşen yeniden çizilince sim yeniden mount edilmez.
   const chromeRef = useRef(onChrome);
   chromeRef.current = onChrome;
+  const signInRef = useRef(onRequestSignIn);
+  signInRef.current = onRequestSignIn;
   const containerRef = useRef<SimContainer | null>(null);
   const hostRef = useRef<SimHost | null>(null);
   const [status, setStatus] = useState<SimRouteStatus>("loading");
@@ -158,19 +173,23 @@ function SimRouteHost({ actorId, apiBaseUrl = null, onChrome, simId }: Omit<SimR
     // kapanışı React render'ı sırasında değil, ondan sonra olur. Sıra korunur:
     // önceki cleanup'ın `release`ı bu mount'tan önce kuyruğa girer.
     const mounted = Promise.resolve().then(() => {
-      const reporter = apiBaseUrl === null ? null : createBrowserAttemptReporter(apiBaseUrl);
+      // Oyunlaştırma hattı (deneme raporu, sunucu özeti) yalnız öğrenciye kurulur (T171/T172).
+      const gamified = audienceShowsGamification(audience);
+      const reporter = apiBaseUrl === null || !gamified ? null : createBrowserAttemptReporter(apiBaseUrl);
       const reportAttempt =
         reporter === null
           ? undefined
           : (attempt: ReportedAttempt) => {
               void reporter(simId, attempt).catch(() => undefined);
             };
-      const gamification = apiBaseUrl === null ? null : createBrowserGamification(apiBaseUrl, simId);
+      const gamification = apiBaseUrl === null || !gamified ? null : createBrowserGamification(apiBaseUrl, simId);
       const options = {
         ...(actorId === undefined ? {} : { actorId }),
         ...(reportAttempt === undefined ? {} : { reportAttempt }),
         ...(gamification === null ? {} : { gamification }),
         setChrome: (chrome: SimChrome | null) => chromeRef.current?.(chrome),
+        audience,
+        requestSignIn: () => signInRef.current?.(),
       };
       return host.mount(container, simId, options);
     });
@@ -188,7 +207,7 @@ function SimRouteHost({ actorId, apiBaseUrl = null, onChrome, simId }: Omit<SimR
       void mounted.then((token) => host.release(token));
       chromeRef.current?.(null);
     };
-  }, [simId, actorId, apiBaseUrl, attempt]);
+  }, [simId, actorId, apiBaseUrl, audience, attempt]);
 
   // Başlık (h1) ve konum birleşik bardadır; sim tam alanı çerçevesiz kaplar.
   return (

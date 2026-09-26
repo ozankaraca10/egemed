@@ -17,6 +17,9 @@ export interface ShellLayoutProps {
   onLogout?: () => void;
   /** Sim rotasında simin birleşik bara verdiği adım/çip/eylemler. */
   simChrome?: SimChrome | null;
+  /** 26 Eyl 2026: hesapsız ziyaretçi; hesap menüsü yerine rozet + "Öğrenci girişi". */
+  visitor?: boolean;
+  onSignIn?: () => void;
   children: ReactNode;
 }
 
@@ -68,7 +71,7 @@ const NAV_ICONS: Record<RouteId, ReactNode> = {
  * `main#icerik`. Render DOM'a dokunmaz; yalnız atlama bağlantısının olay
  * işleyicisi dokunur. Tek `nav` CSS ile <768 px alt sekme, >=768 px üst bar olur.
  */
-export function ShellLayout({ route, session, onLogout, simChrome = null, children }: ShellLayoutProps): JSX.Element {
+export function ShellLayout({ route, session, onLogout, simChrome = null, visitor = false, onSignIn, children }: ShellLayoutProps): JSX.Element {
   const activeId = route.kind === "page" ? route.route.id : undefined;
   // UX kararı (25 Eylül 2026): sim rotasında tek birleşik bar ve tam alan;
   // ana gezinme, sayfa başlığı ve kart çizilmez (footer 26 Eyl'den beri her sayfada).
@@ -82,10 +85,18 @@ export function ShellLayout({ route, session, onLogout, simChrome = null, childr
   const synthetic = session !== undefined && session !== null && session.displayName === null;
   // T152: API oturumunda ad altında rol; sahte oturumda ad zaten rol etiketidir.
   const accountRole = session !== undefined && session !== null && !synthetic
-    ? t(session.role === "admin" ? "shell.account.role.admin" : "shell.account.role.student")
+    ? t(session.role === "admin" ? "shell.account.role.admin" : session.faculty === true ? "shell.account.role.faculty" : "shell.account.role.student")
     : undefined;
   const adminHref = session?.role === "admin" ? (`#${ADMIN_PATH}` as const) : null;
-  const account = roleLabel !== null && (
+  const visitorBox = roleLabel === null && visitor && (
+    <div className="eg-shell-visitor">
+      <span className="eg-shell-visitor__badge">{t("shell.visitor.badge")}</span>
+      <button className="eg-shell-visitor__signin" onClick={() => onSignIn?.()} type="button">
+        {t("shell.visitor.signIn")}
+      </button>
+    </div>
+  );
+  const account = roleLabel !== null ? (
     <AccountMenu
       adminHref={adminHref}
       displayName={roleLabel}
@@ -93,7 +104,7 @@ export function ShellLayout({ route, session, onLogout, simChrome = null, childr
       roleLabel={accountRole}
       synthetic={synthetic}
     />
-  );
+  ) : visitorBox;
   return (
     <div className="eg-shell">
       <a className="eg-shell-skip" href="#icerik" onClick={focusMain}>{t("shell.skip")}</a>

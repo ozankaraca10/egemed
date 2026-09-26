@@ -248,6 +248,21 @@ describe("SimHost release ve aktör bağlamı", () => {
     expect(pulse.contexts[1] !== undefined && "actorId" in pulse.contexts[1]).toBe(false);
   });
 
+  it("kitle ve requestSignIn bağlama taşınır; verilmezse alanlar yoktur (T180)", async () => {
+    const pulse = fake("pulse");
+    let signIns = 0;
+    const { host, target } = harness(() => Promise.resolve(pulse.module));
+    host.mount(target, "pulse", { audience: "visitor", requestSignIn: () => (signIns += 1) });
+    await flush();
+    host.mount(target, "pulse");
+    await flush();
+    expect(pulse.contexts[0]?.audience).toBe("visitor");
+    pulse.contexts[0]?.requestSignIn?.();
+    expect(signIns).toBe(1);
+    expect(pulse.contexts[1] !== undefined && "audience" in pulse.contexts[1]).toBe(false);
+    expect(pulse.contexts[1] !== undefined && "requestSignIn" in pulse.contexts[1]).toBe(false);
+  });
+
   it("reportAttempt bağlama taşınır; verilmezse alan hiç yoktur", async () => {
     const pulse = fake("pulse");
     const seen: string[] = [];
