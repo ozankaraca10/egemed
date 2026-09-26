@@ -801,7 +801,7 @@ button.eg-shell-simbar__chip:hover { background: var(--navy-600); }
 .eg-shell-visitor__signin:focus-visible { outline: 2px solid var(--blue-300); outline-offset: 2px; }
 @media (min-width: 768px) { .eg-shell-visitor__badge { display: inline-flex; } }
 .eg-shell-entry__visitor { display: grid; gap: var(--sp-2); margin-top: var(--sp-4); }
-.eg-shell-entry__or { color: var(--ink-500); font-size: var(--fs-sm); text-align: center; }
+.eg-shell-entry__or { color: var(--ink-600); font-size: var(--fs-sm); text-align: center; }
 .eg-shell-entry__visitorNote { margin: 0; color: var(--ink-600); font-size: var(--fs-xs); line-height: 1.5; text-align: center; }
 
 /* Kabuğun standart sim "Hakkında" penceresi (sim kendi Hakkında'sını vermezse). */
