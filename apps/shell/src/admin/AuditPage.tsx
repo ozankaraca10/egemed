@@ -1,8 +1,23 @@
 import { useEffect, useState, type JSX } from "react";
-import { Badge, Button, DataTable, Dialog, EmptyState, Field, Modal, Pagination, Select, TextInput, icons, type DataTableColumn } from "@egemed/ui";
+import { Badge, Button, DataTable, DateField, Dialog, EmptyState, Field, Modal, Pagination, Select, TextInput, icons, type DataTableColumn } from "@egemed/ui";
 import { t, type TrKey } from "@egemed/ui/i18n";
 import { useShellSource } from "../dataSources";
+import { shellNow } from "../now";
 import { formatTrDateTime } from "./trFormat";
+
+/**
+ * `shellNow()`'ı (AGENTS.md: `Date.now()` YOK) Europe/Istanbul duvar tarihine (ISO
+ * "YYYY-MM-DD") çevirir; yalnız `DateField`in "bugün" vurgusu için kullanılır
+ * (sabit UTC+3 — `trFormat.ts` ile aynı varsayım, DST yok).
+ */
+const TR_OFFSET_MS = 3 * 60 * 60 * 1000;
+function nowIsoDate(nowMs: number): string {
+  const wall = new Date(nowMs + TR_OFFSET_MS);
+  const year = wall.getUTCFullYear();
+  const month = String(wall.getUTCMonth() + 1).padStart(2, "0");
+  const day = String(wall.getUTCDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
 import {
   AUDIT_ACTIONS,
   createMockAuditSource,
@@ -65,12 +80,13 @@ function buildAuditColumns(onOpenDetail: (entry: AuditEntry) => void): readonly 
 interface FilterFieldsProps {
   readonly query: AuditListQuery;
   readonly onFilterChange: (patch: Partial<AuditListQuery>) => void;
+  readonly today: string;
 }
 
 /** Filtre alanları: masaüstünde yatay çubukta, 360/768'te "Filtreler" diyaloğu içinde aynı
- *  bileşen iki kez çizilir (kırılım yalnız CSS'te, T156). Tarih alanları şimdilik yerel
- *  `input[type=date]` kalır (T157 ayrı görev). */
-function AuditFilterFields({ query, onFilterChange }: FilterFieldsProps): JSX.Element {
+ *  bileşen iki kez çizilir (kırılım yalnız CSS'te, T156). Tarih alanları @egemed/ui
+ *  `DateField` (T157/T161); değer biçimi ISO "YYYY-MM-DD" olarak kalır. */
+function AuditFilterFields({ query, onFilterChange, today }: FilterFieldsProps): JSX.Element {
   return (
     <>
       <Field label={t("admin.audit.filter.actor")}>
@@ -98,12 +114,22 @@ function AuditFilterFields({ query, onFilterChange }: FilterFieldsProps): JSX.El
       </Field>
       <Field label={t("admin.audit.filter.from")}>
         {(control) => (
-          <TextInput {...control} onChange={(event: ChangeLike) => onFilterChange({ from: changeValue(event) || undefined })} type="date" value={query.from ?? ""} />
+          <DateField
+            {...control}
+            onValueChange={(value) => onFilterChange({ from: value === "" ? undefined : value })}
+            today={today}
+            value={query.from ?? ""}
+          />
         )}
       </Field>
       <Field label={t("admin.audit.filter.to")}>
         {(control) => (
-          <TextInput {...control} onChange={(event: ChangeLike) => onFilterChange({ to: changeValue(event) || undefined })} type="date" value={query.to ?? ""} />
+          <DateField
+            {...control}
+            onValueChange={(value) => onFilterChange({ to: value === "" ? undefined : value })}
+            today={today}
+            value={query.to ?? ""}
+          />
         )}
       </Field>
     </>
@@ -125,6 +151,9 @@ export interface AuditViewProps {
    *  `AuditPage` üzerinde tutulur (view saf props'tan beslenir, T156). */
   readonly filtersOpen: boolean;
   readonly onFiltersOpenChange: (open: boolean) => void;
+  /** `DateField`in "bugün" vurgusu için ISO tarih (Date.now() KULLANILMAZ, AGENTS.md);
+   *  `AuditPage` enjekte edilen `shellNow`'dan üretir. */
+  readonly today: string;
 }
 
 /**
@@ -144,6 +173,7 @@ export function AuditView({
   onRetry,
   filtersOpen,
   onFiltersOpenChange,
+  today,
 }: AuditViewProps): JSX.Element {
   const filtered = hasActiveAuditFilters(query);
   const activeCount = countActiveAuditFilters(query);
@@ -168,7 +198,7 @@ export function AuditView({
         </div>
       </div>
       <div className="eg-shell-adminlist__filterbar">
-        <AuditFilterFields onFilterChange={onFilterChange} query={query} />
+        <AuditFilterFields onFilterChange={onFilterChange} query={query} today={today} />
       </div>
       <div className="eg-shell-adminlist__filtertrigger">
         <Button icon={<icons.Filter />} onClick={() => onFiltersOpenChange(true)} variant="secondary">
@@ -183,7 +213,7 @@ export function AuditView({
         title={t("admin.audit.filter.open")}
       >
         <div className="eg-shell-adminlist__filterfields">
-          <AuditFilterFields onFilterChange={onFilterChange} query={query} />
+          <AuditFilterFields onFilterChange={onFilterChange} query={query} today={today} />
         </div>
       </Dialog>
       {status === "error" ? (
@@ -247,6 +277,7 @@ export function AuditPage({ dataSource }: AuditPageProps): JSX.Element {
   const [detailEntry, setDetailEntry] = useState<AuditEntry | null>(null);
   const [attempt, setAttempt] = useState(0);
   const [filtersOpen, setFiltersOpen] = useState(false);
+  const [today] = useState(() => nowIsoDate(shellNow()));
 
   useEffect(() => {
     let active = true;
@@ -284,6 +315,7 @@ export function AuditPage({ dataSource }: AuditPageProps): JSX.Element {
       query={query}
       result={result}
       status={status}
+      today={today}
     />
   );
 }

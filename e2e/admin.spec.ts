@@ -411,7 +411,7 @@ test.describe("denetim günlüğü (E3 §e.7)", () => {
     await expect(listRows(page).first()).toContainText("Örnek Yönetici 001");
 
     await clickAdminFilterButton(page, "Filtreleri temizle");
-    await fillAdminFilter(page, "Bitiş", "2026-01-01");
+    await fillAdminFilter(page, "Bitiş", "01.01.2026");
     await expect(page.getByText("Bu filtrelerle sonuç bulunamadı.")).toBeVisible();
     await clickAdminFilterButton(page, "Filtreleri temizle");
     await expect(page.getByText("1–20 / 140 kayıt")).toBeVisible();
