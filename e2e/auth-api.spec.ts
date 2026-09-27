@@ -54,10 +54,21 @@ async function openPulseQuiz(page: Page): Promise<Locator> {
     v: Array.from({ length: 23 }, () => 16_000),
     u: 4,
     c: {
-      i: "egemed-seed-session-0001",
+      // Oturum kimliği her koşuda benzersiz olmalı; sunucu aynı kimlikli denemeyi 409 ile reddeder.
+      i: `egemed-seed-case-${randomUUID().slice(0, 8)}`,
       n: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
       a: Array.from({ length: 10 }, () => 0),
       s: 1023,
+      l: Array.from({ length: 10 }, () => [0, 0, 0]),
+      x: Array.from({ length: 10 }, () => -1),
+    },
+    // T210: runtime havuzu 500 maddeye büyüdü; doğru yanıt indeksleri TS veri
+    // aynasından (ilk 400 madde) okunduğu için değerlendirme oturumu Q001–Q010'a sabitlenir.
+    q: {
+      i: `egemed-seed-quiz-${randomUUID().slice(0, 8)}`,
+      n: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+      a: Array.from({ length: 10 }, () => -1),
+      s: 0,
       l: Array.from({ length: 10 }, () => [0, 0, 0]),
       x: Array.from({ length: 10 }, () => -1),
     },
@@ -440,6 +451,8 @@ test.describe("API oturumu (dev sağlayıcı)", () => {
     await page.goto(STUDENT_ENTRY);
     await signIn(page, "ogrenci");
     await expect(page).toHaveURL(/#\/$/);
+    // T209: öğrenme kilidi — uygulama akışından önce öğrenme kaydı sunucuya yazılır.
+    await completeLearn(page, "ausculta");
     const caseBodies: string[] = [];
     const clientAttempts: string[] = [];
     page.on("response", async (response) => {

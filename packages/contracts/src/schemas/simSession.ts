@@ -223,6 +223,10 @@ export const caseResultSchema = z.strictObject({
   domains: z.record(z.string(), z.strictObject({ earned: z.number().min(0), max: z.number().min(0) })),
   hintsUsed: z.number().int().min(0),
   questions: z.array(questionFeedbackSchema),
+  /** T214: vaka BİTTİKTEN sonra öğrenme kütüphanesi odak anahtarı (ör. "heart.normal").
+   *  Yalnız sonuç yanıtında (answer/finish) döner; vaka açılışında (PublicCase) ASLA yoktur.
+   *  Opaca sonucu bu alanı taşımayabilir (geriye uyumlu: isteğe bağlı, null olabilir). */
+  libraryKey: z.string().regex(/^[a-z0-9_.-]{1,40}$/).nullable().optional(),
 });
 
 export const simSessionCheckResponseSchema = z.strictObject({ data: questionFeedbackSchema });

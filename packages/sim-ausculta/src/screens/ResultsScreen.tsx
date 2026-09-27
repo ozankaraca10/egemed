@@ -2,7 +2,8 @@ import { useChallenge } from "../ui/ScreenHeading";
 import { endOfMonthTr } from "@egemed/gamification-core";
 import { defaultGamiIcons, GamiGainsView } from "@egemed/gami-ui";
 import { Fragment, useMemo, useState, type JSX, type ReactNode } from "react";
-import { firstWeakLibraryKey, weakDomainKeys } from "../core/flow";
+import { firstWeakLibraryKeyFromServer, weakDomainKeys } from "../core/flow";
+import { useStartMode } from "../core/LearnGate";
 import { aggregateResults } from "../core/scoring";
 import type { SimRuntime } from "../core/runtime";
 import { useStore } from "../core/StoreProvider";
@@ -66,6 +67,22 @@ export function exitResults(ports: ResultsExitPorts): void {
   ports.dispatch({ type: "goto", screen: "start" });
 }
 
+export interface StudyLearnPorts {
+  /** Sunucu sonucundan çözülen zayıf konu kütüphane anahtarı (yoksa null). */
+  readonly weakLearnKey: string | null;
+  /** T209 öğrenme kilidi: `useStartMode` aynen geçirilir. */
+  readonly startMode: (mode: "learn") => boolean;
+  dispatch(action: { type: "setLearnFocus"; key: string } | { type: "goto"; screen: "learn" }): void;
+}
+
+/** "Öğrenme modunda çalış" (T214): zayıf konu varsa odağı kurup öğrenme ekranına geçer
+ *  (T209 kilidi `startMode` içinde korunur). */
+export function studyLearnFromResults(ports: StudyLearnPorts): void {
+  if (ports.weakLearnKey !== null) ports.dispatch({ type: "setLearnFocus", key: ports.weakLearnKey });
+  ports.startMode("learn");
+  ports.dispatch({ type: "goto", screen: "learn" });
+}
+
 export interface ResultsScreenProps {
   readonly embedded?: boolean;
   readonly env?: ResultsScreenEnv;
@@ -79,6 +96,7 @@ export interface ResultsScreenProps {
 export function ResultsScreen({ embedded = false, env = NOOP_RESULTS_ENV, repository, onAchievements, onLeaderboard, serverData = false }: ResultsScreenProps): JSX.Element {
   const { state, dispatch, runtime, now } = useStore();
   const audience = useAudience();
+  const startMode = useStartMode();
   const isAssessment = state.mode === "assessment";
   const agg = aggregateResults(state.caseResults);
   const last = state.caseResults[state.caseResults.length - 1];
@@ -119,17 +137,14 @@ export function ResultsScreen({ embedded = false, env = NOOP_RESULTS_ENV, reposi
 
   const retry = () => {
     // Yeni oturumu sunucu sürücüsü başlatır (istemcide örneklem yok).
-    dispatch({ type: "startMode", mode: state.mode });
+    // T209: öğrenme kilidi burada da geçerli (koruma tek noktada).
+    startMode(state.mode);
   };
 
-  // Sunucu sonucu bulgu/kütüphane anahtarı taşımaz; zayıf konu odağı şimdilik yok.
-  const weakLearnKey = firstWeakLibraryKey(state.caseResults, () => null);
+  // T214: sunucu sonucu vaka bittikten sonra öğrenme kütüphanesi anahtarını taşır.
+  const weakLearnKey = firstWeakLibraryKeyFromServer(state.caseResults, server?.metas ?? {});
 
-  const studyLearn = () => {
-    if (weakLearnKey) dispatch({ type: "setLearnFocus", key: weakLearnKey });
-    dispatch({ type: "startMode", mode: "learn" });
-    dispatch({ type: "goto", screen: "learn" });
-  };
+  const studyLearn = () => studyLearnFromResults({ weakLearnKey, startMode, dispatch });
 
   const weakLabels: Record<string, string> = {
     technique: "Oskültasyon tekniği",

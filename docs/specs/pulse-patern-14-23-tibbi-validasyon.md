@@ -138,3 +138,99 @@
 - Perikarditte yaygın ST, aVR karşılığı, PR çökmesi ve bölgesel karşılığın olmaması.
 - Hiperkalemide T/P/PR/QRS ve derivasyon farklılığı; sinüs dalgası olmaması.
 - 12 derivasyonun senkronu, Einthoven/Goldberger türetmesi ve animasyon olaylarının yalnız ilgili paternde görülmesi.
+
+## Soru havuzu 14–18 (T210)
+
+- Kapsam: Patern 14–18 için 50 uygulama + 50 değerlendirme maddesi. Havuz 200+200'den **250+250'ye (500 madde)** büyüdü; yeni maddeler mevcut kimliklerin arkasına eklenir, eski kimlikler değişmez.
+- Kimlik aralığı: uygulama `C201–C250`, değerlendirme `Q201–Q250`. Her patern 10 + 10 madde alır.
+- Bankalar: `p14_…`–`p18_…` önekli 50 bank; her bank bir uygulama ve bir değerlendirme maddesinde (toplam en fazla 2 satır, farklı kök ve soru) kullanılır. İlk satır doğru seçenektir; `seededPermutation` ile karıştırılır.
+- Motor tutarlılığı: kök ve ölçüm soruları motor parametreleriyle uyumludur — sinüs bradikardisi ≈48/dk, PR 160 ms; 1. derece AV blok ≈63/dk, PR 260 ms sabit; Mobitz I P–P 750 ms, 4:3, PR 160→220→260 ms, duraklama 1400 ms; Mobitz II P–P 800 ms, PR 180 ms sabit, QRS 120 ms; tam AV blok atriyum ≈83/dk, ventrikül ≈38/dk, kaçış QRS 140 ms, PR ölçülemez.
+- `itemMeta` (PulseCurriculum.meta): her bank için `bloom`, `difficulty`, `objective` ve `refs` (`BRADY2018`, `ECG2007`, `ESCPACE2021`; ESCPACE2021 = Glikson 2021, DOI 10.1093/eurheartj/ehab364, `sources.json`'a eklendi).
+- Zorunlu ayrımlar içerikte kapsanır: sinüs bradikardisi vs AV blok; 1. derece AV blok vs normal PR; Mobitz I vs Mobitz II; Mobitz II vs 2:1 iletim; Mobitz II vs tam AV blok; tam AV blokta AV dissosiyasyon; P:QRS ilişkisi, PR davranışı ve düşen atım mekanizması. 2:1 iletim yalnız çeldirici/ayırıcı olarak geçer ve "yalnız 2:1 iletimde tip ayrımı yüzey EKG'sinden kesin yapılamaz" biçiminde doğru tanımlanır.
+- 12 derivasyon senkronu, düşen atımın başka derivasyonda görünmemesi ve türetme ilişkileri T204 kayıtlarındaki gibidir; motor ve kartlar bu görevde değişmedi.
+
+### Patern başına madde sayıları
+
+| # | Patern | Mode | Uygulama | Değerlendirme | Banka |
+|---|---|---|---|---|---|
+| 14 | Sinüs bradikardisi | `sinbrady` | 10 (C201–C210) | 10 (Q201–Q210) | `p14_*` (10) |
+| 15 | 1. derece AV blok | `avb1` | 10 (C211–C220) | 10 (Q211–Q220) | `p15_*` (10) |
+| 16 | Mobitz Tip I | `mobitz1` | 10 (C221–C230) | 10 (Q221–Q230) | `p16_*` (10) |
+| 17 | Mobitz Tip II | `mobitz2` | 10 (C231–C240) | 10 (Q231–Q240) | `p17_*` (10) |
+| 18 | Tam AV blok | `chb` | 10 (C241–C250) | 10 (Q241–Q250) | `p18_*` (10) |
+
+### Bloom dağılımı (yeni 100 madde)
+
+| Bloom | sinbrady | avb1 | mobitz1 | mobitz2 | chb | Toplam | Hedef |
+|---|---|---|---|---|---|---|---|
+| Bilgi/anlama | 4 | 4 | 4 | 4 | 4 | 20 | ≈%20 |
+| Uygulama | 10 | 10 | 10 | 10 | 10 | 50 | ≈%50 |
+| Analiz/ayırt etme | 6 | 6 | 6 | 6 | 6 | 30 | ≈%30 |
+
+Her bank iki maddede (bir uygulama + bir değerlendirme) kullanıldığı için Bloom sayıları patern başına 2'şer banka karşılık gelir.
+
+### Otomatik QC sonuçları (T210)
+
+`tests/sim-pulse/questions-14-18.test.ts`: 12/12 test geçti. Kapsanan kontroller:
+
+- Patern başına 10 uygulama + 10 değerlendirme; toplam 100 yeni madde.
+- Mevcut 400 madde kimliği değişmez; yeni kimlikler C201–C250 / Q201–Q250.
+- Her maddede 5 benzersiz seçenek ve gerekçe; doğru indeks bankın ilk satırını gösterir.
+- Bankalar `p14_`–`p18_` önekli, benzersiz ve en fazla iki satırda kullanılır.
+- Kök+soru tam kopyası yok; aynı patern içinde kök kelime Jaccard < 0,8.
+- Yasaklı ifadelerin hiçbiri madde metinlerinde geçmez; "hepsi/hiçbiri" seçeneği yok; kökte tanı kelimesi yok.
+- Doğru seçeneğin en uzun olduğu madde oranı patern başına ≤ %40 (ölçülen: sinbrady/avb1/mobitz1/mobitz2 %0, chb %10).
+- `itemMeta` her yeni bank için dolu; `refs` kayıtları `sources.json`'da; Bloom dağılımı hedefin ±10 puanında.
+- Eski oturumlar (C001–C200 / Q001–Q200) `state.js` doğrulamasından aynen geçer; sınır kimlikleri (C200/C250) kabul edilir, sınır dışı numara yeniden örneklemeye düşer.
+- Sınırlılık metni madde sayısını dinamik taşır ("500 sentetik madde … 23 EKG sonucu").
+
+> Not: Yeni maddelerin motorla tutarlılığı ve ayırıcı tanı örüntüleri Kardiyoloji ABD onayı bekleyen T204 kaydının kapsamındadır.
+
+## Soru havuzu 19–23 (T211)
+
+- Kapsam: Patern 19–23 için 50 uygulama + 50 değerlendirme maddesi. Havuz 250+250'den **300+300'e (600 madde)** büyüdü; yeni maddeler mevcut kimliklerin arkasına eklenir, eski kimlikler değişmez.
+- Kimlik aralığı: uygulama `C251–C300`, değerlendirme `Q251–Q300`. Her patern 10 + 10 madde alır.
+- Bankalar: `p19_…`–`p23_…` önekli 50 bank; her bank bir uygulama ve bir değerlendirme maddesinde (toplam en fazla 2 satır, farklı kök ve soru) kullanılır. İlk satır doğru seçenektir; `seededPermutation` ile karıştırılır.
+- Motor tutarlılığı: kök ve ölçüm soruları motor parametreleriyle uyumludur — PAC temel sinüs ≈72/dk (R–R 833 ms), bağlaşım ≈560 ms (540–580), erken atım PR 150 ms ve QRS 80 ms, sonraki duraklama 900–970 ms ve tam kompansatuvar değil; kavşak kaçış ≈47/dk (R–R 1280 ms), QRS 80 ms, retrograd P QRS sonundan ≈75 ms sonra (D2/D3/aVF negatif, aVR pozitif); WPW ≈72/dk (R–R 830 ms), PR 100 ms, QRS 140 ms, QRS başlangıcı eğimli; perikardit sinüs ≈88/dk (R–R 680 ms), yaygın konkav ST yükselmesi, PR segment çökmesi, QRS 80 ms, PR 160 ms; hiperkalemi ≈63/dk, PR 240 ms, QRS 120 ms, sivri dar tabanlı T (V2–V4 belirgin), basık P.
+- 22 ve 23 **ritim değildir**; soru ve gerekçelerde ritim bozukluğu/aritmi olarak tanımlanmaz. QC bunu metin düzeyinde doğrular.
+- `itemMeta` (PulseCurriculum.meta): her bank için `bloom`, `difficulty`, `objective` ve `refs`; kullanılan kaynak kimlikleri `BRADY2018`, `ECG2007`, `ESCPACE2021`, `PAC2019`, `WPW2009`, `SVT2019`, `PERI2025`, `MON2017`, `ACS2023`. `WPW2009` (Surawicz 2009, DOI 10.1161/CIRCULATIONAHA.108.191095) `sources.json`'a eklendi.
+- Zorunlu ayrımlar içerikte kapsanır: PAC vs PVC; PAC vs sinüs aritmisi; PAC vs atriyal taşikardi; kavşak kaçış vs sinüs bradikardisi; kavşak kaçış vs tam AV blok; kavşak kaçış vs ventriküler kaçış; kısa PR + delta + geniş QRS bileşimi; WPW paterni vs dal bloğu; WPW paterni vs yalnız kısa PR; WPW paterni vs WPW sendromu terminolojisi; perikardit vs anterior/inferior STEMI; yaygın vs bölgesel ST değişikliği; PR segment değişiklikleri; sivri T vs normal varyant; hiperkalemi vs STEMI; hiperkalemi vs dal bloğu/geniş QRS; EKG'nin potasyum düzeyi için kusursuz şiddet göstergesi olmaması.
+
+### Patern başına madde sayıları
+
+| # | Patern | Mode | Uygulama | Değerlendirme | Banka |
+|---|---|---|---|---|---|
+| 19 | Atriyal erken atım (PAC) | `pac` | 10 (C251–C260) | 10 (Q251–Q260) | `p19_*` (10) |
+| 20 | AV kavşak kaçış ritmi | `junctional` | 10 (C261–C270) | 10 (Q261–Q270) | `p20_*` (10) |
+| 21 | Ventriküler preeksitasyon (WPW paterni) | `wpw` | 10 (C271–C280) | 10 (Q271–Q280) | `p21_*` (10) |
+| 22 | Akut perikardit EKG paterni | `pericarditis` | 10 (C281–C290) | 10 (Q281–Q290) | `p22_*` (10) |
+| 23 | Hiperkalemiye bağlı EKG paterni | `hyperk` | 10 (C291–C300) | 10 (Q291–Q300) | `p23_*` (10) |
+
+### Bloom dağılımı (yeni 100 madde)
+
+| Bloom | pac | junctional | wpw | pericarditis | hyperk | Toplam | Hedef |
+|---|---|---|---|---|---|---|---|
+| Bilgi/anlama | 4 | 4 | 4 | 4 | 4 | 20 | ≈%20 |
+| Uygulama | 10 | 10 | 10 | 10 | 10 | 50 | ≈%50 |
+| Analiz/ayırt etme | 6 | 6 | 6 | 6 | 6 | 30 | ≈%30 |
+
+Her bank iki maddede (bir uygulama + bir değerlendirme) kullanıldığı için Bloom sayıları patern başına 2'şer banka karşılık gelir.
+
+### Otomatik QC sonuçları (T211)
+
+`tests/sim-pulse/questions-19-23.test.ts`: 18/18 test geçti. Kapsanan kontroller:
+
+- Patern başına 10 uygulama + 10 değerlendirme; toplam 100 yeni madde; havuz 300+300.
+- Mevcut maddeler kimliğini korur; yeni kimlikler C251–C300 / Q251–Q300.
+- Her maddede 5 benzersiz seçenek ve gerekçe; doğru indeks bankın ilk satırını gösterir.
+- Bankalar `p19_`–`p23_` önekli, benzersiz ve en fazla iki satırda kullanılır.
+- Kök+soru tam kopyası yok; aynı patern içinde kök kelime Jaccard < 0,8.
+- Yasaklı ifadelerin hiçbiri madde metinlerinde geçmez; "hepsi/hiçbiri" seçeneği yok; kökte tanı kelimesi yok.
+- 22/23 maddeleri ritim bozukluğu/aritmi dili kullanmaz.
+- Doğru seçeneğin en uzun olduğu madde oranı patern başına ≤ %40 (ölçülen: pac %20, junctional/wpw/pericarditis/hyperk %30).
+- `itemMeta` her yeni bank için dolu; `refs` kayıtları `sources.json`'da; Bloom dağılımı hedefin ±10 puanında.
+- Motor tutarlılığı sayısal olarak doğrulanır: PAC bağlaşım/duraklama/PR/QRS, kavşak hız/QRS/retrograd P zamanı, WPW PR/QRS/hız, perikardit hız/PR/QRS, hiperkalemi PR/QRS.
+- Eski oturumlar (C001–C200 / Q001–Q200) `state.js` doğrulamasından aynen geçer; yeni sınırlar (C300/Q300) kabul edilir, sınır dışı numara yeniden örneklemeye düşer.
+- Sınırlılık metni madde sayısını dinamik taşır ("600 sentetik madde … 23 EKG sonucu").
+
+> Not: Yeni maddelerin motorla tutarlılığı ve ayırıcı tanı örüntüleri Kardiyoloji ABD onayı bekleyen T204 kaydının kapsamındadır.

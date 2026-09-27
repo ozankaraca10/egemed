@@ -1,16 +1,18 @@
 import { createElement, type ReactNode } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
+import type { SimLearnPort } from "../../packages/sim-host/src/SimHost";
 import {
   BEST_SCORE_KEY,
   EntryScreens,
+  LearnGateProvider,
   ModeSelectScreen,
   StartScreen,
   StoreProvider,
   createMemoryRuntimeAdapter,
   initialState,
+  modeLearnLocked,
   modePickTarget,
-  modeRecommendLocked,
   playVolumeCheckTone,
   resolveEntryScreen,
   sessionSeed,
@@ -37,12 +39,23 @@ function memoryStorage(seed: Record<string, string> = {}): StoragePort {
   };
 }
 
-function renderInStore(node: ReactNode, storage: StoragePort = memoryStorage(), tutorialSeen = false): string {
+function learnComplete(): SimLearnPort {
+  return { complete: true, async markComplete(): Promise<void> {} };
+}
+
+function renderInStore(
+  node: ReactNode,
+  storage: StoragePort = memoryStorage(),
+  options: { tutorialSeen?: boolean; learn?: SimLearnPort } = {},
+): string {
   return renderToStaticMarkup(
     createElement(StoreProvider, {
-      children: node,
+      children: createElement(LearnGateProvider, {
+        ...(options.learn === undefined ? {} : { learn: options.learn }),
+        children: node,
+      }),
       env: inertWindow,
-      initialState: { ...initialState, tutorialSeen },
+      initialState: { ...initialState, tutorialSeen: options.tutorialSeen ?? false },
       now: () => 1_728_000_000_000,
       runtime: createMemoryRuntimeAdapter(),
       storage,
@@ -62,10 +75,10 @@ describe("giriş çözümü", () => {
     expect(sessionSeed(1_728_000_000_000)).toBe((1_728_000_000_000 % 2147483647) | 0);
   });
 
-  it("öneri kilidi gönderimi kapatmaz; hedef öğrenmedir", () => {
-    expect(modeRecommendLocked(false, true)).toBe(true);
-    expect(modeRecommendLocked(true, true)).toBe(false);
-    expect(modeRecommendLocked(false, false)).toBe(false);
+  it("öğrenme kilidi tamamlanmadan hedefi öğrenmeye çevirir", () => {
+    expect(modeLearnLocked(false, true)).toBe(true);
+    expect(modeLearnLocked(true, true)).toBe(false);
+    expect(modeLearnLocked(false, false)).toBe(false);
     expect(modePickTarget("assessment", false, true)).toBe("learn");
     expect(modePickTarget("practice", true, true)).toBe("practice");
     expect(modePickTarget("learn", false, true)).toBe("learn");
@@ -106,22 +119,24 @@ describe("StartScreen", () => {
 });
 
 describe("ModeSelectScreen", () => {
-  it("üç mod kartını ve öneri kilidini çizer", () => {
+  it("üç mod kartını çizer; öğrenme tamamlanmadan uygulama/değerlendirme kilitlidir (T209)", () => {
     const html = renderInStore(createElement(ModeSelectScreen));
     expect(html).toContain('class="mode-card learn"');
-    expect(html).toContain("mode-card practice recommend-locked");
-    expect(html).toContain("mode-card assessment recommend-locked");
-    expect(html).toContain('data-recommend-locked="true"');
+    expect(html).toContain("mode-card practice learn-locked");
+    expect(html).toContain("mode-card assessment learn-locked");
+    expect(html).toContain('data-learn-locked="true"');
     expect(html).toContain("Öğrenmeye başla");
     expect(html).toContain("Öğrenmeye git");
     expect(html).toContain("mode-lock-hint");
+    expect(html).toContain("Önce öğrenme modunu tamamlayın: 0/20 ses dinlendi.");
     expect(html).toContain("Henüz denenmedi");
-    expect(html).not.toMatch(/disabled=""[^>]*>Öğrenmeye git/);
+    // Kilit gönderimi kapatır: düğme pasiftir.
+    expect(html).toMatch(/disabled=""[^>]*>Öğrenmeye git/);
   });
 
-  it("öğretici görüldüyse kartlar açık kalır", () => {
-    const html = renderInStore(createElement(ModeSelectScreen), memoryStorage(), true);
-    expect(html).toContain('data-recommend-locked="false"');
+  it("öğrenme tamamlanınca kartlar açık kalır", () => {
+    const html = renderInStore(createElement(ModeSelectScreen), memoryStorage(), { learn: learnComplete() });
+    expect(html).toContain('data-learn-locked="false"');
     expect(html).toContain("Vakaları çöz");
     expect(html).toContain("Değerlendirmeye gir");
     expect(html).not.toContain("mode-lock-hint");
@@ -129,7 +144,7 @@ describe("ModeSelectScreen", () => {
 
   it("en iyi puanı StoragePort'tan okur", () => {
     const storage = memoryStorage({ [BEST_SCORE_KEY]: JSON.stringify({ practice: 80, assessment: 0 }) });
-    const html = renderInStore(createElement(ModeSelectScreen), storage, true);
+    const html = renderInStore(createElement(ModeSelectScreen), storage, { tutorialSeen: true, learn: learnComplete() });
     expect(html).toContain("En iyi puan:");
     expect(html).toContain(">80<");
   });

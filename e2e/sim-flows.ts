@@ -1,8 +1,9 @@
-import { expect, type Locator } from "@playwright/test";
+import { expect, type Locator, type Page } from "@playwright/test";
 import opacaCasesCore from "../packages/sim-opaca/src/data/cases.json" with { type: "json" };
 import opacaCasesAuto from "../packages/sim-opaca/src/data/cases-auto.json" with { type: "json" };
 import auscultaCasesCore from "../packages/assessment-bank/data/ausculta/cases.json" with { type: "json" };
 import auscultaCasesAuto from "../packages/assessment-bank/data/ausculta/cases-auto.json" with { type: "json" };
+import auscultaLibrary from "../packages/sim-ausculta/src/data/library.json" with { type: "json" };
 
 /**
  * Opaca/Ausculta ortak sim akışları (T143): öğrenme → konu uygulaması → oturum sonu.
@@ -60,6 +61,26 @@ const AUSCULTA_CORRECT_BY_PROMPT = practiceQuestions(
   auscultaCasesCore as unknown as { cases: unknown[] },
   auscultaCasesAuto as unknown as { cases: unknown[] },
 );
+
+/**
+ * T209 — öğrenme kilidi tohumu: uygulama/değerlendirme akışından önce Ausculta
+ * öğrenmesini tamamlanmış sayar. İki yol birlikte açılır: yerel dinlendi kümesi
+ * tüm kütüphane anahtarlarıyla yazılır ve DEV kabuğun sekme deposu öğrenme kaydı
+ * (`egemed.learn.ausculta`) işaretlenir. `addInitScript` her gezinmeden önce koşar.
+ */
+export async function unlockAuscultaLearn(page: Page): Promise<void> {
+  const listened = JSON.stringify(
+    (auscultaLibrary.groups as { items: { key: string }[] }[]).flatMap((group) => group.items.map((item) => item.key)),
+  );
+  const namespaces = ["egemed:anon:ausculta:", "egemed:u:dev-student-0001:ausculta:", "egemed:u:dev-admin-0001:ausculta:"];
+  await page.addInitScript(
+    (seed: { listened: string; namespaces: string[] }) => {
+      for (const namespace of seed.namespaces) localStorage.setItem(`${namespace}ausculta.learn.listened`, seed.listened);
+      sessionStorage.setItem("egemed.learn.ausculta", "1");
+    },
+    { listened, namespaces },
+  );
+}
 
 /**
  * Öğrenme ekranından konu uygulaması başlatır (kütüphane öğeleri sırayla

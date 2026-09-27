@@ -109,12 +109,28 @@
       "use": "LBBB ve RBBB örneklerinde geniş QRS ve derivasyona özgü morfoloji."
     },
     {
+      "id": "WPW2009",
+      "title": "AHA/ACCF/HRS EKG Standardizasyonu — İntraventriküler İleti ve Preeksitasyon (Surawicz 2009)",
+      "org": "AHA / ACCF / HRS",
+      "year": 2009,
+      "url": "https://doi.org/10.1161/CIRCULATIONAHA.108.191095",
+      "use": "Ventriküler preeksitasyon paterninde kısa PR, delta dalgası ve geniş QRS'in tanımı; geniş QRS ayırıcı tanısı ve patern ile sendrom ayrımı."
+    },
+    {
       "id": "BRADY2018",
       "title": "2018 ACC/AHA/HRS Bradikardi ve Kardiyak İletim Gecikmesi Kılavuzu",
       "org": "ACC / AHA / HRS",
       "year": 2018,
       "url": "https://doi.org/10.1161/CIR.0000000000000628",
       "use": "Sinüs bradikardisi, AV blok dereceleri ve kavşak kaçış ritmi örneklerinin tanımı."
+    },
+    {
+      "id": "ESCPACE2021",
+      "title": "2021 ESC Kardiyak Pacing ve Kardiyak Resenkronizasyon Tedavisi Kılavuzu",
+      "org": "Avrupa Kardiyoloji Derneği (ESC)",
+      "year": 2021,
+      "url": "https://doi.org/10.1093/eurheartj/ehab364",
+      "use": "AV bloklarda ileti hastalığı ve pacing değerlendirmesi; 2:1 iletimde tip ayrımının yüzey EKG'siyle kesinleşmemesi."
     },
     {
       "id": "ECG2007",

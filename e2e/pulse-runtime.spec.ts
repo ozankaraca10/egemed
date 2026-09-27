@@ -1,7 +1,31 @@
+import { readFileSync } from "node:fs";
 import { expect, test, type Locator, type Page } from "@playwright/test";
-import { curriculum } from "../packages/sim-pulse/src/data/curriculum";
 import { captureRouteScreenshot } from "./artifacts";
 import { trackErrors } from "./helpers";
+
+/**
+ * Doğru seçenekler çalışan runtime havuzundan okunur (ADR-011): statik
+ * `data/curriculum` anlık görüntüsü 200 maddede sabittir; oturumlar ise
+ * runtime havuzundan örneklenir. Havuz büyüdükçe (T210/T211 ile C201+/Q201+)
+ * statik `byId` araması "Bilinmeyen madde" hatası verirdi.
+ */
+interface RuntimeCurriculum {
+  readonly version: number;
+  readonly byId: Readonly<Record<string, { readonly correct: number } | undefined>>;
+}
+function loadRuntimeCurriculum(): RuntimeCurriculum {
+  const VENDOR = "packages/sim-pulse/src/runtime/vendor";
+  const win: Record<string, unknown> = {};
+  const load = (path: string): void => {
+    const source = readFileSync(path, "utf8").replace("export default function run", "return function run");
+    (new Function("module", source)(undefined) as (env: Record<string, unknown>) => void)({ window: win });
+  };
+  load(`${VENDOR}/model.js`);
+  win["CardAIScorm"] = { previousStatus: "" };
+  load(`${VENDOR}/curriculum.js`);
+  return win["PulseCurriculum"] as RuntimeCurriculum;
+}
+const curriculum = loadRuntimeCurriculum();
 
 /**
  * Pulse kaynak runtime'ı (EGEMED_PULSE/cardai) platform içinde (PULSE-00).
@@ -36,6 +60,23 @@ interface PulseSeedOptions {
   readonly casesComplete?: boolean;
 }
 
+/**
+ * Deterministik oturum tohumu: T210 ile runtime havuzu büyüdü (500 madde); spec,
+ * doğru yanıt indekslerini TS veri aynasından (ilk 400 madde) okuduğu için
+ * oturumlar C001–C010 / Q001–Q010 maddelerine sabitlenir.
+ */
+function seedSession(role: "case" | "quiz", submitted: boolean): Record<string, unknown> {
+  return {
+    // Oturum kimliği her koşuda benzersiz olmalı; sunucu aynı kimlikli denemeyi 409 ile reddeder.
+    i: `egemed-seed-${role}-${Math.random().toString(36).slice(2, 10)}`,
+    n: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+    a: Array.from({ length: 10 }, () => (submitted ? 0 : -1)),
+    s: submitted ? 1023 : 0,
+    l: Array.from({ length: 10 }, () => [0, 0, 0]),
+    x: Array.from({ length: 10 }, () => -1),
+  };
+}
+
 function pulseSeedRecord(options: PulseSeedOptions = {}): Record<string, unknown> {
   return {
     version: 6,
@@ -46,18 +87,8 @@ function pulseSeedRecord(options: PulseSeedOptions = {}): Record<string, unknown
     f: 0,
     v: Array.from({ length: 23 }, () => 16_000),
     u: 4,
-    ...(options.casesComplete === true
-      ? {
-          c: {
-            i: "egemed-seed-session-0001",
-            n: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
-            a: Array.from({ length: 10 }, () => 0),
-            s: 1023,
-            l: Array.from({ length: 10 }, () => [0, 0, 0]),
-            x: Array.from({ length: 10 }, () => -1),
-          },
-        }
-      : {}),
+    c: seedSession("case", options.casesComplete === true),
+    q: seedSession("quiz", false),
   };
 }
 

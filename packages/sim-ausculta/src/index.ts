@@ -36,6 +36,7 @@ export {
 export {
   countUnlistenedInOtherView,
   firstWeakLibraryKey,
+  firstWeakLibraryKeyFromServer,
   libraryKeyForCase,
   nextActionForSubmit,
   otherViewHintText,
@@ -68,6 +69,33 @@ export { computeMetrics } from "./data/metrics";
 export type { InventoryMetrics } from "./data/metrics";
 export { ASSESSMENT_CASE_COUNT, CASE_INVENTORY } from "./data/inventory";
 export type { CaseInventory } from "./data/inventory";
+export {
+  FIRST_LIBRARY_ITEM,
+  LIBRARY_GROUPS,
+  LIBRARY_ITEM_COUNT,
+  LIBRARY_ITEM_KEYS,
+  findLibraryItem,
+} from "./data/library";
+export type { LibGroup, LibItem } from "./data/library";
+export {
+  AUSCULTA_CONTENT_VERSION,
+  LEARN_LISTENED_KEY,
+  LOCKED_LEARN_SNAPSHOT,
+  canStartMode,
+  challengeLearnLockText,
+  contentVersion,
+  createLearnCompletionNotifier,
+  createLearnTracker,
+  learnLockText,
+  learnProgressText,
+  listenedKeyOnPlay,
+  loadListened,
+  parseListened,
+  saveListened,
+} from "./core/learnLock";
+export type { LearnCompletionNotifier, LearnSnapshot, LearnTracker, LearnTrackerDeps } from "./core/learnLock";
+export { LearnGateProvider, useLearnGate, useStartMode } from "./core/LearnGate";
+export type { LearnGateProviderProps, LearnGateValue, StartModeOptions } from "./core/LearnGate";
 export { mulberry32, sampleSession, SESSION_SIZE, shuffledOptions, stringSeed } from "./core/session";
 export {
   heartFindingText,
@@ -241,7 +269,7 @@ export { EcgDeco, Footer, needsExitConfirm, resolveStepSelect } from "./ui/chrom
 export type { StepSelectOutcome } from "./ui/chrome";
 export { EntryScreens } from "./screens/EntryScreens";
 export type { EntryScreensProps } from "./screens/EntryScreens";
-export { modePickTarget, modeRecommendLocked, resolveEntryScreen, sessionSeed } from "./screens/entry";
+export { modeLearnLocked, modePickTarget, resolveEntryScreen, sessionSeed } from "./screens/entry";
 export { ModeCard, ModeSelectScreen, Stepper } from "./screens/ModeSelectScreen";
 export type { ModeSelectScreenProps } from "./screens/ModeSelectScreen";
 export { StartScreen } from "./screens/StartScreen";
@@ -254,8 +282,8 @@ export { LearnAudioProvider, LearnScreen, createNoopLearnAudio, createNoopLearnS
 export type { LearnAudio, LearnScreenEnv, LearnScreenProps } from "./screens/LearnScreen";
 export { SimulationScreen, createNoopSimulationAudio } from "./screens/SimulationScreen";
 export type { SimulationAudio, SimulationScreenProps } from "./screens/SimulationScreen";
-export { ResultsScreen, createNoopResultsScreenEnv, exitResults } from "./screens/ResultsScreen";
-export type { ResultsExitPorts, ResultsScreenEnv, ResultsScreenProps } from "./screens/ResultsScreen";
+export { ResultsScreen, createNoopResultsScreenEnv, exitResults, studyLearnFromResults } from "./screens/ResultsScreen";
+export type { ResultsExitPorts, ResultsScreenEnv, ResultsScreenProps, StudyLearnPorts } from "./screens/ResultsScreen";
 export { SourcesScreen } from "./screens/SourcesScreen";
 export type { SourcesScreenProps } from "./screens/SourcesScreen";
 export {

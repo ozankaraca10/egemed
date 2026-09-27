@@ -114,6 +114,26 @@ describe("sunucu vaka oturumu (A1.3)", () => {
     expect((await call(h, ali, "GET", `/me/sims/ausculta/sessions/${session.sessionId}/cases/2`)).status).toBe(409);
   });
 
+  it("sonuç yanıtları öğrenme kütüphanesi anahtarını taşır (T214)", async () => {
+    const h = harness();
+    const ali = await login(h, "ali.veli");
+    const response = await call(h, ali, "POST", "/me/sims/ausculta/sessions", { mode: "practice", focusFinding: "s3" });
+    expect(response.status).toBe(201);
+    const session = simSessionStartResponseSchema.parse(await response.json()).data;
+    await openCase(h, ali, session.sessionId, 1);
+    const answer = await call(h, ali, "POST", `/me/sims/ausculta/sessions/${session.sessionId}/cases/1/answer`, {
+      answers: correctAnswers(h, session.sessionId, 1),
+      telemetry: TELEMETRY,
+    });
+    expect(answer.status).toBe(200);
+    const body = simSessionAnswerResponseSchema.parse(await answer.json()).data;
+    if (body.mode !== "practice") throw new Error("uygulama yanıtı bekleniyordu");
+    expect(body.result.libraryKey).toBe("heart.s3");
+    const finish = await call(h, ali, "POST", `/me/sims/ausculta/sessions/${session.sessionId}/finish`);
+    const done = simSessionFinishResponseSchema.parse(await finish.json()).data;
+    expect(done.cases[0]?.libraryKey).toBe("heart.s3");
+  });
+
   it("değerlendirme: yanıtta geri bildirim yok, ipucu yasak, bitişte açılır; açılmayan vakalar sıfır sayılır", async () => {
     const h = harness();
     const ali = await login(h, "ali.veli");
