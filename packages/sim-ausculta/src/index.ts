@@ -259,18 +259,13 @@ export type { ResultsExitPorts, ResultsScreenEnv, ResultsScreenProps } from "./s
 export { SourcesScreen } from "./screens/SourcesScreen";
 export type { SourcesScreenProps } from "./screens/SourcesScreen";
 export {
-  applyPrimaryAction,
   armTimer,
   bindDismissListeners,
   createNoopSimulationScreenEnv,
   rememberQuestionShown,
-  reportSessionCompletion,
-  warmCaseSounds,
 } from "./screens/simulation/runtime";
 export type {
-  SimulationBus,
   SimulationClock,
-  SimulationGamiPort,
   SimulationListenerEnv,
   SimulationPointerEvent,
   SimulationScreenEnv,
@@ -283,25 +278,12 @@ export {
   isAnswerCorrect,
   isLastQuestion,
   planAssessmentAutoAdvance,
-  planK3SessionRegeneration,
   planPrimaryAction,
-  planSessionAction,
-  planSessionCompletion,
   questionCursor,
-  resolveSimulationSession,
   shouldStartCaseTransition,
   showCaseEndCard,
-  simulationPointIds,
 } from "./screens/simulation/derive";
-export type {
-  PrimaryActionPlan,
-  QuestionCursor,
-  ResolvedSimulationSession,
-  SessionActionKind,
-  SessionCompletionPlan,
-  SessionIdPlan,
-  SimulationDispatch,
-} from "./screens/simulation/derive";
+export type { PrimaryActionPlan, QuestionCursor, SimulationDispatch } from "./screens/simulation/derive";
 export { AUDIO_CONFIG } from "./audio/config";
 export { createAudioEngine } from "./audio/engine";
 export type { AudioEngine, AudioEngineDeps, EngineState } from "./audio/engine";

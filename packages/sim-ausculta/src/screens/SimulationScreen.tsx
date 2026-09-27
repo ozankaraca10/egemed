@@ -28,7 +28,6 @@ import {
   bindDismissListeners,
   createNoopSimulationScreenEnv,
   rememberQuestionShown,
-  type SimulationGamiPort,
   type SimulationPointerEvent,
   type SimulationScreenEnv,
 } from "./simulation/runtime";
@@ -78,8 +77,6 @@ export interface SimulationScreenProps {
   readonly env?: SimulationScreenEnv;
   readonly modalEnv?: ModalEnv;
   readonly audio?: SimulationAudio;
-  readonly gamiEnabled?: boolean;
-  readonly gami?: SimulationGamiPort;
 }
 
 function stageBody(caseDef: CaseDef): "erkek" | "pediatrik" {

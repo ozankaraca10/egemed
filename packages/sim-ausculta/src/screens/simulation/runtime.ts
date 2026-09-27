@@ -1,12 +1,5 @@
-/** Simülasyon raporu ve yaşam döngüsü (S15c). React/DOM yok.
- *  Puan ve etkileşimler S8 `SimRuntime` adaptörüne gider.
- *  Dinleyici ve zamanlayıcı dönen işlevle düşer. Oyunlaştırma yalnız bayrak açıkken çağrılır.
- *  Zaman çağıranın `now` değeridir; `Date.now()` kullanılmaz. */
-
-import { resolveCaseSounds } from "../../core/resolver";
-import type { SimRuntime } from "../../core/runtime";
-import type { Question, SimEvent, SoundAssignment } from "../../core/types";
-import type { PrimaryActionPlan, SessionCompletionPlan, SimulationDispatch } from "./derive";
+/** Simülasyon dinleyici ve zamanlayıcı yardımcıları (S15c). React/DOM yok.
+ *  Dinleyici ve zamanlayıcı dönen işlevle düşer. */
 
 export interface SimulationPointerEvent {
   readonly key?: string;
@@ -27,14 +20,6 @@ export interface SimulationClock {
 }
 
 export interface SimulationScreenEnv extends SimulationClock, SimulationListenerEnv {}
-
-export interface SimulationGamiPort {
-  recordAssessmentComplete(payload: { total: number; passed: boolean }, at: number): void | Promise<void>;
-}
-
-export interface SimulationBus {
-  emit(event: Omit<Extract<SimEvent, { type: "assessment_completed" }>, "at">): void;
-}
 
 export function createNoopSimulationScreenEnv(): SimulationScreenEnv {
   return {
@@ -91,40 +76,4 @@ export function rememberQuestionShown(
 ): Record<string, number> {
   if (shownAt[questionId]) return { ...shownAt };
   return { ...shownAt, [questionId]: nowMs };
-}
-
-/** Kaynak vaka açılışında ses haritasını ısıtır. Ağ çağrısı yoktur. */
-export function warmCaseSounds(assignments: readonly SoundAssignment[]): void {
-  resolveCaseSounds([...assignments]);
-}
-
-/** Değerlendirme oturumu bitince skoru adaptöre yazar. Bayrak kapalıyken oyunlaştırma çağrılmaz. */
-export function reportSessionCompletion(params: {
-  plan: SessionCompletionPlan;
-  runtime: Pick<SimRuntime, "reportScore">;
-  bus: SimulationBus;
-  gamiEnabled: boolean;
-  gami?: SimulationGamiPort | undefined;
-}): void {
-  if (!params.plan.reportScore || params.plan.completedAt == null) return;
-  const { total, mastery } = params.plan.aggregate;
-  params.runtime.reportScore(total, mastery, true);
-  params.bus.emit({ type: "assessment_completed", total });
-  if (params.gamiEnabled && params.gami) {
-    void params.gami.recordAssessmentComplete({ total, passed: mastery }, params.plan.completedAt);
-  }
-}
-
-/** Birincil eylem: reducer adımları, son soruda etkileşim kaydı. */
-export function applyPrimaryAction(params: {
-  plan: PrimaryActionPlan;
-  dispatch: (action: SimulationDispatch) => void;
-  runtime: Pick<SimRuntime, "saveInteractions">;
-  caseId: string;
-  questions: Question[];
-  answers: Record<string, string[]>;
-}): void {
-  for (const action of params.plan.dispatches) params.dispatch(action);
-  if (!params.plan.saveInteractions || !params.plan.latency) return;
-  params.runtime.saveInteractions(params.caseId, params.questions, params.answers, params.plan.latency);
 }
