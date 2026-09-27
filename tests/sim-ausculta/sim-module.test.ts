@@ -194,6 +194,25 @@ describe("createAuscultaModule (SimHost adaptörü)", () => {
     expect(target.children).toHaveLength(0);
   });
 
+  it("learn kanalı App'e taşınır: host complete ise mod kartları açılır (T209)", async () => {
+    const { deps } = createTestDeps();
+    const target = fakeTarget();
+    createAuscultaModule(deps).mount(target, {
+      ...CONTEXT,
+      learn: { complete: true, async markComplete(): Promise<void> {} },
+    });
+    await Promise.resolve();
+    const html = renderToStaticMarkup(target.children[0]?.tree as ReactNode);
+    expect(html).toContain('data-learn-locked="false"');
+    expect(html).toContain("Vakaları çöz");
+
+    const locked = fakeTarget();
+    createAuscultaModule(createTestDeps().deps).mount(locked, CONTEXT);
+    await Promise.resolve();
+    const lockedHtml = renderToStaticMarkup(locked.children[0]?.tree as ReactNode);
+    expect(lockedHtml).toContain('data-learn-locked="true"');
+  });
+
   it("ScreenHeading bağımsız modda h1 çizer", () => {
     const html = renderToStaticMarkup(createElement(ScreenHeading, { className: "mode-title", children: "Başlık" }));
     expect(html).toBe('<h1 class="mode-title">Başlık</h1>');

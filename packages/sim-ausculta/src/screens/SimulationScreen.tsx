@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState, type JSX } from "react";
 import { countUnlistenedInOtherView, otherViewHintText } from "../core/flow";
+import { useStartMode } from "../core/LearnGate";
 import { useStore } from "../core/StoreProvider";
 import type { AuscultationPoint, CaseDef, CaseResult, ScoringWeights, SoundRecord } from "../core/types";
 import pointsData from "../data/auscultation-points.json";
@@ -98,6 +99,7 @@ export function SimulationScreen({
 }: SimulationScreenProps): JSX.Element {
   const { state, dispatch } = useStore();
   const sessions = useSessions();
+  const startMode = useStartMode();
   const serverMode = sessions !== undefined && state.mode !== "learn";
   const server = state.server;
   const startingRef = useRef(false);
@@ -151,7 +153,7 @@ export function SimulationScreen({
                 <>
                   <h2>Vaka yüklenemedi</h2>
                   <p>{server.error}</p>
-                  <button type="button" className="btn primary" style={HIT} onClick={() => dispatch({ type: "startMode", mode: state.mode })}>
+                  <button type="button" className="btn primary" style={HIT} onClick={() => startMode(state.mode)}>
                     Yeniden dene
                   </button>
                 </>
@@ -219,6 +221,7 @@ function CaseView({
   binding: ServerBinding;
 }): JSX.Element {
   const { state, dispatch, bus, now } = useStore();
+  const startMode = useStartMode();
   const isAssessment = state.mode === "assessment";
   const stageRef = useRef<StageHandle>(null);
   const shownAtRef = useRef<Record<string, number>>({});
@@ -431,7 +434,7 @@ function CaseView({
                       </button>
                     ) : null}
                     {state.mode === "practice" ? (
-                      <button type="button" className="btn outline small" style={HIT} onClick={() => (progress ? setSessionAction(true) : dispatch({ type: "startMode", mode: "practice" }))}>
+                      <button type="button" className="btn outline small" style={HIT} onClick={() => (progress ? setSessionAction(true) : startMode("practice"))}>
                         Yeni oturum
                       </button>
                     ) : null}
@@ -510,7 +513,7 @@ function CaseView({
         cancelLabel="Vazgeç"
         onConfirm={() => {
           setSessionAction(false);
-          dispatch({ type: "startMode", mode: "practice" });
+          startMode("practice");
         }}
         onCancel={() => setSessionAction(false)}
         env={modalEnv}

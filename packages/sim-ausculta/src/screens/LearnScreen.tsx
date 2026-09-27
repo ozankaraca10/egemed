@@ -1,19 +1,20 @@
-import { useSessions } from "../ui/ScreenHeading";
+import { useAudience, useChallenge, useRequestSignIn, useSessions } from "../ui/ScreenHeading";
 import { createContext, useContext, useEffect, useMemo, useRef, useState, type JSX, type ReactNode } from "react";
 import { VISITOR_LOCK_TEXT } from "@egemed/sim-host";
 import { countUnlistenedInOtherView, otherViewHintText } from "../core/flow";
+import { useLearnGate, useStartMode } from "../core/LearnGate";
+import { challengeLearnLockText, listenedKeyOnPlay } from "../core/learnLock";
 import { resolveLibrarySound, resolveLibrarySoundEx, type LibrarySoundResult } from "../core/resolver";
 import { useStore } from "../core/StoreProvider";
 import type { AuscultationPoint, SoundRecord } from "../core/types";
 import { isVisitorUnlocked } from "../core/visitorAccess";
 import pointsData from "../data/auscultation-points.json";
-import libraryData from "../data/library.json";
 import { CASE_INVENTORY } from "../data/inventory";
+import { FIRST_LIBRARY_ITEM, LIBRARY_GROUPS, findLibraryItem } from "../data/library";
 import { libraryShortTitle, librarySub, libraryTitle } from "../data/terminology";
 import { PatientStage, StageAudioProvider, type StageAudio, type StageHandle } from "../ui/PatientStage";
 import { PediatricRefModal } from "../ui/PediatricRefModal";
 import { RegionChipList } from "../ui/RegionChips";
-import { useAudience } from "../ui/ScreenHeading";
 import { Toolbar, ToolbarAudioProvider, type ToolbarAudio } from "../ui/Toolbar";
 import { EcgDeco, Footer } from "../ui/chrome";
 import {
@@ -32,84 +33,7 @@ import {
  *  Port (E2 §9 S14): `document`/`Date.now` yok; kaydırma `LearnScreenEnv`, tohum `now`,
  *  ses motoru bağlamdan gelir. DevPanel bu rotada yoktur. */
 
-interface LibItem {
-  key: string;
-  category: string;
-  acousticFinding: string;
-  description: string;
-  metaphor?: string;
-  s1?: string;
-  s2?: string;
-  phase?: string;
-  clinical: string;
-  bestPoints: string[];
-  group: string;
-}
-
-interface LibGroup {
-  id: string;
-  title: string;
-  items: LibItem[];
-}
-
-interface RawItem {
-  key: string;
-  category: string;
-  acousticFinding: string;
-  description: string;
-  metaphor?: string;
-  s1?: string;
-  s2?: string;
-  phase?: string;
-  clinical: string;
-  bestPoints: string[];
-}
-
-interface RawGroup {
-  id: string;
-  title: string;
-  items: RawItem[];
-}
-
-function toItem(groupId: string, raw: RawItem): LibItem {
-  const item: LibItem = {
-    key: raw.key,
-    category: raw.category,
-    acousticFinding: raw.acousticFinding,
-    description: raw.description,
-    clinical: raw.clinical,
-    bestPoints: raw.bestPoints,
-    group: groupId,
-  };
-  if (raw.metaphor !== undefined) item.metaphor = raw.metaphor;
-  if (raw.s1 !== undefined) item.s1 = raw.s1;
-  if (raw.s2 !== undefined) item.s2 = raw.s2;
-  if (raw.phase !== undefined) item.phase = raw.phase;
-  return item;
-}
-
-const LIBRARY_GROUPS: LibGroup[] = (libraryData.groups as RawGroup[]).map((group) => ({
-  id: group.id,
-  title: group.title,
-  items: group.items.map((item) => toItem(group.id, item)),
-}));
-
-/** Kaynakta `heart.normal`; strict indeks için modül yüklenirken doğrulanan ilk öğe. */
-const FIRST_LIBRARY_ITEM: LibItem = (() => {
-  const first = LIBRARY_GROUPS[0]?.items[0];
-  if (!first) throw new Error("Kütüphane boş olamaz");
-  return first;
-})();
-
 const POINTS = pointsData.points as AuscultationPoint[];
-
-function findLibraryItem(key: string): LibItem {
-  for (const group of LIBRARY_GROUPS) {
-    const found = group.items.find((item) => item.key === key);
-    if (found) return found;
-  }
-  return FIRST_LIBRARY_ITEM;
-}
 
 /** Aktif kütüphane öğesini görünür alana kaydırma (kaynak: `document.querySelector('.lib-item.active')`). */
 export interface LearnScreenEnv {
@@ -164,6 +88,10 @@ export function LearnScreen({
   const engine = audio ?? contextual ?? NOOP_LEARN_AUDIO;
   const audience = useAudience();
   const isVisitor = audience === "visitor";
+  const gate = useLearnGate();
+  const startMode = useStartMode();
+  const challenge = useChallenge();
+  const requestSignIn = useRequestSignIn();
   const [selectedKey, setSelectedKey] = useState<string>(() => {
     const wanted = state.learnFocusKey ?? FIRST_LIBRARY_ITEM.key;
     if (isVisitor && !isVisitorUnlocked(wanted)) return FIRST_LIBRARY_ITEM.key;
@@ -189,9 +117,16 @@ export function LearnScreen({
 
   const startPracticeForFinding = () => {
     // T196: odaklı uygulama oturumu (bulgu başına ≤5 vaka) yalnız sunucudan açılır.
+    // T209: öğrenme tamamlanmadan odaklı uygulama da kilitlidir; koruma tek noktada.
     if (sessions === undefined || cov.p === 0) return;
-    dispatch({ type: "startMode", mode: "practice", focusFinding: item.acousticFinding });
+    startMode("practice", { focusFinding: item.acousticFinding });
   };
+
+  // T209: kilit metni ziyaretçide ziyaretçi kilidini korur (öncelik ziyaretçide).
+  const practiceLocked = !isVisitor && !gate.complete;
+  const practiceDisabled = isVisitor ? requestSignIn === undefined : practiceLocked;
+  const practiceLockText = isVisitor ? VISITOR_LOCK_TEXT.modeLocked : gate.lockText;
+  const challengeLocked = challenge.challengeId !== undefined && !gate.complete;
 
   useEffect(() => {
     engine.stop();
@@ -226,6 +161,16 @@ export function LearnScreen({
         <EcgDeco embedded={embedded} />
         <div className="screen" style={{ position: "relative", zIndex: 1 }}>
           <div className="container tall screen-body no-scroll learn-body">
+            {/* T209: öğrenme tamamlanma göstergesi (kilidin ilerleme metni). */}
+            <p className="learn-progress" role="status">
+              {gate.progressText}
+            </p>
+            {challengeLocked ? (
+              <p className="lib-lock-notice challenge-lock-notice" role="status">
+                <IconLock width={14} height={14} aria-hidden="true" />{" "}
+                {challengeLearnLockText(gate.listenedCount, gate.total)}
+              </p>
+            ) : null}
             <div className="learn-grid">
               <div className="lib-col">
                 <h2>{isMixed ? "Kombine Sesler" : isHeart ? "Kalp Sesleri" : "Akciğer Sesleri"}</h2>
@@ -240,15 +185,19 @@ export function LearnScreen({
                     <div className="g-title">
                       <GroupIcon group={group.id} />
                       {group.title}
+                      <span className="g-count">
+                        {group.items.filter((entry) => gate.listened.has(entry.key)).length}/{group.items.length}
+                      </span>
                     </div>
                     <div className="lib-items">
                       {group.items.map((entry) => {
                         const locked = isVisitor && !isVisitorUnlocked(entry.key);
+                        const listened = gate.listened.has(entry.key);
                         return (
                           <button
                             key={entry.key}
                             type="button"
-                            className={["lib-item", entry.key === selectedKey ? "active" : "", locked ? "locked" : ""]
+                            className={["lib-item", entry.key === selectedKey ? "active" : "", locked ? "locked" : "", listened ? "listened" : ""]
                               .filter(Boolean)
                               .join(" ")}
                             aria-disabled={locked}
@@ -271,6 +220,11 @@ export function LearnScreen({
                               <span>{librarySub(entry.key)}</span>
                             </span>
                             <span className="lib-right">
+                              {listened ? (
+                                <span className="lib-done" aria-label="dinlendi" title="dinlendi">
+                                  ✓
+                                </span>
+                              ) : null}
                               {locked ? (
                                 <IconLock width={14} height={14} aria-hidden="true" />
                               ) : (
@@ -304,7 +258,12 @@ export function LearnScreen({
                     onVisit={(pointId) => dispatch({ type: "visit", pointId })}
                     onDwell={(pointId, dwellMs) => dispatch({ type: "dwell", pointId, dwellMs })}
                     onListen={(pointId, listenMs) => dispatch({ type: "listen", pointId, listenMs })}
-                    onPlayingChange={(_playing, pointId) => setActivePoint(pointId)}
+                    onPlayingChange={(playing, pointId) => {
+                      setActivePoint(pointId);
+                      // T209: ses gerçekten oynatılınca öğe "dinlendi" sayılır; yalnız seçmek yetmez.
+                      const listenedKey = listenedKeyOnPlay(playing, pointId, item.key, item.bestPoints);
+                      if (listenedKey !== null) gate.markListened(listenedKey);
+                    }}
                   />
                   <RegionChipList
                     points={POINTS}
@@ -404,9 +363,21 @@ export function LearnScreen({
                         {cov.a > 0 ? `, ${cov.a} değerlendirme vakası` : ""}
                       </p>
                       {cov.p > 0 && (
-                        <button type="button" className="btn outline small mb-12" onClick={startPracticeForFinding}>
-                          Bu sesle uygulama yap <IconArrowRight width={14} height={14} />
-                        </button>
+                        <>
+                          <button
+                            type="button"
+                            className="btn outline small mb-12"
+                            onClick={() => (isVisitor ? requestSignIn?.() : startPracticeForFinding())}
+                            disabled={practiceDisabled}
+                          >
+                            Bu sesle uygulama yap <IconArrowRight width={14} height={14} />
+                          </button>
+                          {isVisitor || practiceLocked ? (
+                            <p className="lib-lock-notice" role="status">
+                              <IconLock width={14} height={14} aria-hidden="true" /> {practiceLockText}
+                            </p>
+                          ) : null}
+                        </>
                       )}
                       <div className="klin-strip mt-12">
                         <IconStethoscope />
