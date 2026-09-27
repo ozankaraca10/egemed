@@ -28,6 +28,8 @@ const envSchema = z.object({
   ATTEMPT_RATE_MAX: z.coerce.number().int().min(1).max(10000).default(60),
   /** A1.3: Ausculta çalışma zamanı ses kökü (vaka sesleri yalnız API vekiliyle, oturuma bağlı). */
   AUSCULTA_AUDIO_DIR: z.string().trim().min(1).default("../../packages/sim-ausculta/public"),
+  /** A2.2: Opaca çalışma zamanı görüntü kökü (vaka görüntüleri yalnız API vekiliyle, oturuma bağlı). */
+  OPACA_IMAGE_DIR: z.string().trim().min(1).default("../../packages/sim-opaca/public"),
   SESSION_ABSOLUTE_HOURS: z.coerce.number().int().min(1).max(168).default(12),
   // T64 — SSO adaptörü: protokol (§i) seçilene dek `none` kalır ve uçlar 404
   // döner. Seçim yapıldığında bu değer adaptörü belirler.
@@ -60,6 +62,7 @@ export function loadEnv(source: Record<string, string | undefined>): Env {
     AUTH_LOGIN_RATE_MAX: emptyAsUndefined(source.AUTH_LOGIN_RATE_MAX),
     ATTEMPT_RATE_MAX: emptyAsUndefined(source.ATTEMPT_RATE_MAX),
     AUSCULTA_AUDIO_DIR: emptyAsUndefined(source.AUSCULTA_AUDIO_DIR),
+    OPACA_IMAGE_DIR: emptyAsUndefined(source.OPACA_IMAGE_DIR),
     SESSION_ABSOLUTE_HOURS: emptyAsUndefined(source.SESSION_ABSOLUTE_HOURS),
     SSO_PROVIDER: emptyAsUndefined(source.SSO_PROVIDER),
     SSO_STATE_SECRET: emptyAsUndefined(source.SSO_STATE_SECRET),

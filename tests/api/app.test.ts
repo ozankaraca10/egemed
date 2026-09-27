@@ -189,6 +189,7 @@ describe("ortam doğrulaması", () => {
       AUTH_LOGIN_RATE_MAX: 8,
       ATTEMPT_RATE_MAX: 60,
       AUSCULTA_AUDIO_DIR: "../../packages/sim-ausculta/public",
+      OPACA_IMAGE_DIR: "../../packages/sim-opaca/public",
       SESSION_ABSOLUTE_HOURS: 12,
       SSO_PROVIDER: "none",
     });

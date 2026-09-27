@@ -8,12 +8,13 @@ import {
   isTimedSessionMode,
   uuidSchema,
   type AuscultaPublicCase,
+  type OpacaPublicCase,
   type SimCaseResult,
   type SimId,
   type SimSessionMode,
   type SimTelemetry,
 } from "@egemed/contracts";
-import { ausculta } from "@egemed/assessment-bank";
+import { ausculta, opaca } from "@egemed/assessment-bank";
 import { encodeAuscultaSummary } from "@egemed/gami-catalogs";
 import { jsonError, validationDetails, type AppEnv } from "../http";
 import { createLoginRateLimiter } from "../auth/rate-limit";
@@ -56,13 +57,99 @@ export function seededRandom(seed: number): () => number {
   };
 }
 const SESSION_START_WINDOW_MS = 60 * 60 * 1000;
-/** Şimdilik yalnız Ausculta sunucu oturumunda (A2 Opaca, A3 Pulse). */
-const SERVER_SESSION_SIMS: readonly SimId[] = ["ausculta"];
+/** A2.2: sunucu oturumu destekleyen simler (A3 Pulse ile genişler). */
+const SERVER_SESSION_SIMS: readonly SimId[] = ["ausculta", "opaca"];
+
+/** İki bankanın anahtar tiplerinin birleşimi; jsonb biçimi sim başına değişmez (geriye uyumlu). */
+type SimCaseKeys = ausculta.AuscultaCaseKeys | opaca.OpacaCaseKeys;
+/** İki bankanın anahtarsız vaka tiplerinin birleşimi. */
+type SimPublicCase = AuscultaPublicCase | OpacaPublicCase;
+
+function isAuscultaKeys(keys: SimCaseKeys): keys is ausculta.AuscultaCaseKeys {
+  return "audio" in keys;
+}
+
+function isOpacaKeys(keys: SimCaseKeys): keys is opaca.OpacaCaseKeys {
+  return "images" in keys;
+}
+
+interface QuestionFeedback {
+  readonly questionId: string;
+  readonly correct: boolean;
+  readonly correctOptionIds: string[];
+  readonly feedback: string;
+}
+
+/**
+ * A2.2: vaka bankası yüzeyi — rotalar `bankFor(simId)` ile seçer, `CaseDef`
+ * rotalara sızmaz. Anahtarlı işlemler anahtar tipi bankanın kendi tipiyle
+ * eşleşmiyorsa null döner (bozuk kayıt sessizce 404 olur).
+ */
+interface SimBank {
+  readonly MASTERY_THRESHOLD: number;
+  readonly FOCUS_CASE_COUNT: number;
+  selectCaseIds(mode: SimSessionMode, random: () => number, count?: number, focusFinding?: string): string[];
+  buildPublicCase(caseId: string, input: ausculta.BuildCaseInput): { readonly publicCase: SimPublicCase; readonly keys: SimCaseKeys } | null;
+  gradeCase(caseId: string, keys: SimCaseKeys, input: ausculta.GradeInput): SimCaseResult | null;
+  checkQuestion(caseId: string, keys: SimCaseKeys, questionId: string, answer: readonly string[]): QuestionFeedback | null;
+  hintFor(caseId: string, questionId: string): string | null;
+}
+
+const AUSCULTA_BANK: SimBank = {
+  MASTERY_THRESHOLD: ausculta.MASTERY_THRESHOLD,
+  FOCUS_CASE_COUNT: ausculta.FOCUS_CASE_COUNT,
+  selectCaseIds: ausculta.selectCaseIds,
+  buildPublicCase(caseId, input) {
+    const caseDef = ausculta.caseById(caseId);
+    return caseDef === undefined ? null : ausculta.buildPublicCase(caseDef, input);
+  },
+  gradeCase(caseId, keys, input) {
+    const caseDef = ausculta.caseById(caseId);
+    return caseDef === undefined || !isAuscultaKeys(keys) ? null : ausculta.gradeCase(caseDef, keys, input);
+  },
+  checkQuestion(caseId, keys, questionId, answer) {
+    const caseDef = ausculta.caseById(caseId);
+    return caseDef === undefined || !isAuscultaKeys(keys) ? null : ausculta.checkQuestion(caseDef, keys, questionId, answer);
+  },
+  hintFor(caseId, questionId) {
+    const caseDef = ausculta.caseById(caseId);
+    return caseDef === undefined ? null : ausculta.hintFor(caseDef, questionId);
+  },
+};
+
+const OPACA_BANK: SimBank = {
+  MASTERY_THRESHOLD: opaca.MASTERY_THRESHOLD,
+  FOCUS_CASE_COUNT: opaca.FOCUS_CASE_COUNT,
+  selectCaseIds: opaca.selectCaseIds,
+  buildPublicCase(caseId, input) {
+    const caseDef = opaca.caseById(caseId);
+    return caseDef === undefined ? null : opaca.buildPublicCase(caseDef, input);
+  },
+  gradeCase(caseId, keys, input) {
+    const caseDef = opaca.caseById(caseId);
+    return caseDef === undefined || !isOpacaKeys(keys) ? null : opaca.gradeCase(caseDef, keys, input);
+  },
+  checkQuestion(caseId, keys, questionId, answer) {
+    const caseDef = opaca.caseById(caseId);
+    return caseDef === undefined || !isOpacaKeys(keys) ? null : opaca.checkQuestion(caseDef, keys, questionId, answer);
+  },
+  hintFor(caseId, questionId) {
+    const caseDef = opaca.caseById(caseId);
+    return caseDef === undefined ? null : opaca.hintFor(caseDef, questionId);
+  },
+};
+
+/** Sunucu oturumunda desteklenmeyen sim (ör. pulse) null döner. */
+function bankFor(simId: SimId): SimBank | null {
+  if (simId === "ausculta") return AUSCULTA_BANK;
+  if (simId === "opaca") return OPACA_BANK;
+  return null;
+}
 
 export interface SimCaseState {
   readonly caseId: string;
-  publicCase: AuscultaPublicCase | null;
-  keys: ausculta.AuscultaCaseKeys | null;
+  publicCase: SimPublicCase | null;
+  keys: SimCaseKeys | null;
   openedAt: number | null;
   answeredAt: number | null;
   answers: Record<string, string[]> | null;
@@ -106,6 +193,8 @@ export interface SimSessionDeps {
   readonly sessions: SimSessionRepo;
   /** Çalışma zamanı ses yolunu (örn. `assets/audio/runtime/heart/x.wav`) bayt olarak okur; yoksa null. */
   readonly readAudio: (runtimeUrl: string) => Promise<Uint8Array | null>;
+  /** A2.2: Opaca çalışma zamanı görüntü yolunu (örn. `assets/xray/runtime/x.webp`) bayt olarak okur; yoksa null. */
+  readonly readImage: (runtimeUrl: string) => Promise<Uint8Array | null>;
   /** Kriptografik rastgele opak jeton (base64url). */
   readonly newToken: () => string;
   /** Kriptografik kaynaklı [0,1). */
@@ -184,20 +273,57 @@ function crossCheckTelemetry(telemetry: SimTelemetry, heardPoints: ReadonlySet<s
 }
 
 function heardPointsOf(item: SimCaseState): Set<string> {
-  const audio = item.keys?.audio ?? {};
+  if (item.keys === null || !isAuscultaKeys(item.keys)) return new Set();
+  const audio = item.keys.audio;
   return new Set(item.heardTokens.flatMap((token) => (audio[token] === undefined ? [] : [audio[token].pointId])));
 }
 
+/** Dinleme telemetrisi çapraz denetimi YALNIZ Ausculta'da (ses jetonu kayıtları) uygulanır. */
+function telemetryForGrade(row: SimSessionRow, item: SimCaseState, telemetry: SimTelemetry): SimTelemetry {
+  return row.simId === "ausculta" ? crossCheckTelemetry(telemetry, heardPointsOf(item)) : telemetry;
+}
+
 function gradeItem(row: SimSessionRow, index: number, item: SimCaseState, answers: Record<string, string[]>, telemetry: SimTelemetry): SimCaseResult | null {
-  const caseDef = ausculta.caseById(item.caseId);
-  if (caseDef === undefined || item.keys === null) return null;
-  return ausculta.gradeCase(caseDef, item.keys, {
+  const bank = bankFor(row.simId);
+  if (bank === null || item.keys === null) return null;
+  return bank.gradeCase(item.caseId, item.keys, {
     index,
     mode: row.mode,
     answers,
-    telemetry: crossCheckTelemetry(telemetry, heardPointsOf(item)),
+    telemetry: telemetryForGrade(row, item, telemetry),
     hintsUsed: item.hintedQuestions.length,
   });
+}
+
+/** Ausculta rozet istatistiği (ADR-008); yalnız Ausculta denemelerinin özetine kodlanır. */
+function auscultaSummaryOf(counted: readonly { readonly item: SimCaseState; readonly result: SimCaseResult }[]): Record<string, number> {
+  return encodeAuscultaSummary(
+    ausculta.auscultaSessionStats(
+      counted.flatMap(({ item, result }) => {
+        const caseDef = ausculta.caseById(item.caseId);
+        return caseDef === undefined ? [] : [{ caseDef, result, telemetry: item.telemetry ?? EMPTY_TELEMETRY, heardPoints: heardPointsOf(item) }];
+      }),
+    ),
+  );
+}
+
+/** A2.2: görüntü vekilinin içerik türü çalışma zamanı yolunun uzantısından belirlenir. */
+function imageContentType(runtimeUrl: string): string {
+  const lower = runtimeUrl.toLowerCase();
+  if (lower.endsWith(".webp")) return "image/webp";
+  if (lower.endsWith(".png")) return "image/png";
+  if (lower.endsWith(".jpg") || lower.endsWith(".jpeg")) return "image/jpeg";
+  return "application/octet-stream";
+}
+
+/** Açılmış bir vakanın görüntü jetonu → çalışma zamanı yolu; jeton yoksa null. */
+function imageRuntimeUrl(row: SimSessionRow, token: string): string | null {
+  for (const item of row.state.cases) {
+    if (item.openedAt === null || item.keys === null || !isOpacaKeys(item.keys)) continue;
+    const runtimeUrl = item.keys.images[token];
+    if (runtimeUrl !== undefined) return runtimeUrl;
+  }
+  return null;
 }
 
 export function registerSimSessionRoutes(app: Hono<AppEnv>, deps: SimSessionDeps, now: () => number): void {
@@ -228,6 +354,8 @@ export function registerSimSessionRoutes(app: Hono<AppEnv>, deps: SimSessionDeps
   app.post("/me/sims/:simId/sessions", async (c) => {
     const sim = gamiSimIdParamSchema.safeParse(c.req.param("simId"));
     if (!sim.success || !SERVER_SESSION_SIMS.includes(sim.data)) return jsonError(c, "not_found");
+    const bank = bankFor(sim.data);
+    if (bank === null) return jsonError(c, "not_found");
     const actor = c.get("meActor");
     if (!actor.simAccess.includes(sim.data)) return jsonError(c, "forbidden");
     const parsed = simSessionStartRequestSchema.safeParse(await readJson(c));
@@ -238,8 +366,8 @@ export function registerSimSessionRoutes(app: Hono<AppEnv>, deps: SimSessionDeps
     const focus = parsed.data.focusFinding;
     const caseIds =
       focus === undefined
-        ? ausculta.selectCaseIds(parsed.data.mode, deps.random)
-        : ausculta.selectCaseIds(parsed.data.mode, deps.random, ausculta.FOCUS_CASE_COUNT, focus);
+        ? bank.selectCaseIds(parsed.data.mode, deps.random)
+        : bank.selectCaseIds(parsed.data.mode, deps.random, bank.FOCUS_CASE_COUNT, focus);
     if (caseIds.length === 0) return jsonError(c, "not_found");
     const row = newSessionRow({
       id: deps.newId(),
@@ -258,6 +386,8 @@ export function registerSimSessionRoutes(app: Hono<AppEnv>, deps: SimSessionDeps
     const loaded = await loadSession(c);
     if ("error" in loaded) return loaded.error;
     const row = loaded.row;
+    const bank = bankFor(row.simId);
+    if (bank === null) return jsonError(c, "not_found");
     const index = parseIndex(c, row);
     if (index === null) return jsonError(c, "not_found");
     const item = row.state.cases[index - 1] as SimCaseState;
@@ -270,9 +400,7 @@ export function registerSimSessionRoutes(app: Hono<AppEnv>, deps: SimSessionDeps
     if (limits.totalMs !== null && at - row.startedAt > limits.totalMs + TIME_GRACE_MS) {
       return jsonError(c, "validation_failed", { issues: [{ code: "session_time_exceeded" }] });
     }
-    const caseDef = ausculta.caseById(item.caseId);
-    if (caseDef === undefined) return jsonError(c, "not_found");
-    const built = ausculta.buildPublicCase(caseDef, {
+    const built = bank.buildPublicCase(item.caseId, {
       index,
       mode: row.mode,
       openedAt: toIstanbulIso(at),
@@ -280,6 +408,7 @@ export function registerSimSessionRoutes(app: Hono<AppEnv>, deps: SimSessionDeps
       // Düelloda iki taraf aynı seçenek sırasını görür (tohum + vaka sırası).
       random: typeof row.state.shuffleSeed === "number" ? seededRandom(row.state.shuffleSeed + index) : deps.random,
     });
+    if (built === null) return jsonError(c, "not_found");
     item.publicCase = built.publicCase;
     item.keys = built.keys;
     item.openedAt = at;
@@ -291,6 +420,8 @@ export function registerSimSessionRoutes(app: Hono<AppEnv>, deps: SimSessionDeps
     const loaded = await loadSession(c);
     if ("error" in loaded) return loaded.error;
     const row = loaded.row;
+    const bank = bankFor(row.simId);
+    if (bank === null) return jsonError(c, "not_found");
     if (row.mode !== "practice") return jsonError(c, "forbidden");
     const index = parseIndex(c, row);
     if (index === null) return jsonError(c, "not_found");
@@ -298,8 +429,7 @@ export function registerSimSessionRoutes(app: Hono<AppEnv>, deps: SimSessionDeps
     if (!parsed.success) return jsonError(c, "invalid_request", validationDetails(parsed.error));
     const item = row.state.cases[index - 1] as SimCaseState;
     if (item.openedAt === null || item.answeredAt !== null) return jsonError(c, "conflict", { issues: [{ code: "case_not_open" }] });
-    const caseDef = ausculta.caseById(item.caseId);
-    const hint = caseDef === undefined ? null : ausculta.hintFor(caseDef, parsed.data.questionId);
+    const hint = bank.hintFor(item.caseId, parsed.data.questionId);
     if (hint === null || hint.length === 0) return jsonError(c, "not_found");
     if (!item.hintedQuestions.includes(parsed.data.questionId)) item.hintedQuestions.push(parsed.data.questionId);
     await deps.sessions.save(row);
@@ -311,6 +441,8 @@ export function registerSimSessionRoutes(app: Hono<AppEnv>, deps: SimSessionDeps
     const loaded = await loadSession(c);
     if ("error" in loaded) return loaded.error;
     const row = loaded.row;
+    const bank = bankFor(row.simId);
+    if (bank === null) return jsonError(c, "not_found");
     if (row.mode !== "practice") return jsonError(c, "forbidden");
     const index = parseIndex(c, row);
     if (index === null) return jsonError(c, "not_found");
@@ -320,8 +452,7 @@ export function registerSimSessionRoutes(app: Hono<AppEnv>, deps: SimSessionDeps
     if (item.openedAt === null || item.answeredAt !== null || item.keys === null) return jsonError(c, "conflict", { issues: [{ code: "case_not_open" }] });
     const checked = item.checked ?? {};
     if (checked[parsed.data.questionId] !== undefined) return jsonError(c, "conflict", { issues: [{ code: "question_already_checked" }] });
-    const caseDef = ausculta.caseById(item.caseId);
-    const feedback = caseDef === undefined ? null : ausculta.checkQuestion(caseDef, item.keys, parsed.data.questionId, parsed.data.answer);
+    const feedback = bank.checkQuestion(item.caseId, item.keys, parsed.data.questionId, parsed.data.answer);
     if (feedback === null) return jsonError(c, "not_found");
     item.checked = { ...checked, [parsed.data.questionId]: [...parsed.data.answer] };
     await deps.sessions.save(row);
@@ -363,6 +494,8 @@ export function registerSimSessionRoutes(app: Hono<AppEnv>, deps: SimSessionDeps
     const loaded = await loadSession(c);
     if ("error" in loaded) return loaded.error;
     const row = loaded.row;
+    const bank = bankFor(row.simId);
+    if (bank === null) return jsonError(c, "not_found");
     const at = now();
     const actor = c.get("meActor");
     // Değerlendirmede açılmamış/yanıtlanmamış vakalar sıfır sayılır; uygulamada yalnız yanıtlananlar.
@@ -375,9 +508,8 @@ export function registerSimSessionRoutes(app: Hono<AppEnv>, deps: SimSessionDeps
       }
       if (!isTimedSessionMode(row.mode)) return;
       if (item.keys === null) {
-        const caseDef = ausculta.caseById(item.caseId);
-        if (caseDef === undefined) return;
-        const built = ausculta.buildPublicCase(caseDef, { index, mode: row.mode, openedAt: toIstanbulIso(at), newToken: deps.newToken, random: deps.random });
+        const built = bank.buildPublicCase(item.caseId, { index, mode: row.mode, openedAt: toIstanbulIso(at), newToken: deps.newToken, random: deps.random });
+        if (built === null) return;
         item.keys = built.keys;
       }
       const result = gradeItem(row, index, item, {}, EMPTY_TELEMETRY);
@@ -388,18 +520,14 @@ export function registerSimSessionRoutes(app: Hono<AppEnv>, deps: SimSessionDeps
     });
     if (counted.length === 0) return jsonError(c, "validation_failed", { issues: [{ code: "no_answered_cases" }] });
     const total = Math.round(counted.reduce((sum, entry) => sum + entry.result.total, 0) / counted.length);
-    const passed = total >= ausculta.MASTERY_THRESHOLD;
+    const passed = total >= bank.MASTERY_THRESHOLD;
     const hintsUsed = counted.reduce((sum, entry) => sum + entry.result.hintsUsed, 0);
     let attemptId: string | null = null;
     let xpGained = 0;
     // Öğretim üyesi (T171) oyunlaştırmaya katılmaz: deneme yazılmaz.
     if (actor.gamified) {
-      const stats = ausculta.auscultaSessionStats(
-        counted.flatMap(({ item, result }) => {
-          const caseDef = ausculta.caseById(item.caseId);
-          return caseDef === undefined ? [] : [{ caseDef, result, telemetry: item.telemetry ?? EMPTY_TELEMETRY, heardPoints: heardPointsOf(item) }];
-        }),
-      );
+      // Rozet özeti sime özgüdür: Ausculta kodlu, Opaca yalnız genel alanlarla yazılır.
+      const summaryExtra = row.simId === "ausculta" ? auscultaSummaryOf(counted) : {};
       const written = await deps.gamification.writeAttempt({
         id: deps.newId(),
         userId: actor.userId,
@@ -414,7 +542,7 @@ export function registerSimSessionRoutes(app: Hono<AppEnv>, deps: SimSessionDeps
           score: total,
           correct: counted.filter((entry) => entry.result.mastery).length,
           total: counted.length,
-          ...encodeAuscultaSummary(stats),
+          ...summaryExtra,
         },
         createdAt: at,
         institutionId: actor.institutionId,
@@ -450,9 +578,10 @@ export function registerSimSessionRoutes(app: Hono<AppEnv>, deps: SimSessionDeps
     if ("error" in loaded) return loaded.error;
     const row = loaded.row;
     const token = c.req.param("token");
-    const item = row.state.cases.find((entry) => entry.openedAt !== null && entry.keys?.audio[token] !== undefined);
-    const audio = item?.keys?.audio[token];
-    if (item === undefined || audio === undefined) return jsonError(c, "not_found");
+    const item = row.state.cases.find((entry) => entry.openedAt !== null && entry.keys !== null && isAuscultaKeys(entry.keys) && entry.keys.audio[token] !== undefined);
+    if (item === undefined || item.keys === null || !isAuscultaKeys(item.keys)) return jsonError(c, "not_found");
+    const audio = item.keys.audio[token];
+    if (audio === undefined) return jsonError(c, "not_found");
     if (!item.heardTokens.includes(token)) {
       item.heardTokens.push(token);
       await deps.sessions.save(row);
@@ -463,6 +592,24 @@ export function registerSimSessionRoutes(app: Hono<AppEnv>, deps: SimSessionDeps
     return c.body(varied as unknown as ArrayBuffer, 200, {
       "content-type": "audio/wav",
       "cache-control": "private, no-store",
+    });
+  });
+
+  /** A2.2: Opaca görüntü vekili — jeton yalnız AÇILMIŞ bir vakanın `keys.images` kaydında geçerlidir. */
+  app.get("/me/sims/:simId/sessions/:sessionId/image/:token", async (c) => {
+    const loaded = await loadSession(c);
+    if ("error" in loaded) return loaded.error;
+    const row = loaded.row;
+    if (row.simId !== "opaca") return jsonError(c, "not_found");
+    const runtimeUrl = imageRuntimeUrl(row, c.req.param("token"));
+    if (runtimeUrl === null) return jsonError(c, "not_found");
+    const bytes = await deps.readImage(runtimeUrl);
+    if (bytes === null) return jsonError(c, "not_found");
+    // Piksel değişikliği yok: banka görüntüsü bayt olarak aynen döner.
+    return c.body(bytes as unknown as ArrayBuffer, 200, {
+      "content-type": imageContentType(runtimeUrl),
+      "cache-control": "no-store",
+      "x-content-type-options": "nosniff",
     });
   });
 }
