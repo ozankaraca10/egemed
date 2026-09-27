@@ -7,7 +7,8 @@ export const SESSION_CASE_COUNT = 10;
 
 /** Mod havuzu (sim `poolFor` ile aynı kural): değerlendirme yalnız doğrulanmış eşlemeli vakalar. */
 export function poolFor(mode: SimSessionMode): readonly CaseDef[] {
-  if (mode === "assessment") return ALL_CASES.filter((c) => c.modes.includes("assessment") && c.mappingValidation === "validated");
+  // Düello (challenge) değerlendirme havuzunu kullanır (doğrulanmış eşleme).
+  if (mode !== "practice") return ALL_CASES.filter((c) => c.modes.includes("assessment") && c.mappingValidation === "validated");
   return ALL_CASES.filter((c) => c.modes.includes("practice"));
 }
 

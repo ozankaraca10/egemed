@@ -60,7 +60,8 @@ export function trDate(at: number): string {
   return new Date(at + TR_OFFSET_MS).toISOString().slice(0, 10);
 }
 
-export type GamiAttemptMode = "practice" | "assessment";
+/** `challenge` (ADR-010): düello denemesi — yarım değerlendirme XP'si, liderliğe girmez. */
+export type GamiAttemptMode = "practice" | "assessment" | "challenge";
 
 /**
  * API-05: deneme XP'si sunucuda, üç simde ortak `DEFAULT_RULES.xp` ile
@@ -78,6 +79,7 @@ export function serverAttemptXp(input: {
     input.score !== null && input.maxScore !== null && input.maxScore > 0
       ? Math.round((input.score * 100) / input.maxScore)
       : 0;
+  if (input.mode === "challenge") return Math.floor(assessmentXp({ caseCount: input.caseCount, score: percent }, DEFAULT_RULES) / 2);
   return input.mode === "assessment"
     ? assessmentXp({ caseCount: input.caseCount, score: percent }, DEFAULT_RULES)
     : practiceXp({ caseCount: input.caseCount, hintsUsed: input.hintsUsed, mastery: input.passed === true }, DEFAULT_RULES);
@@ -432,7 +434,7 @@ export function createPgGamificationRepo(db: GamiDb): GamificationRepo {
          from gami_profiles p
          join users u on u.id = p.user_id
          left join units unit on unit.id = u.unit_id and unit.deleted_at is null
-         left join gami_attempts a on a.user_id = p.user_id and a.sim_id = p.sim_id
+         left join gami_attempts a on a.user_id = p.user_id and a.sim_id = p.sim_id and a.mode = 'assessment'
          where u.institution_id = $1 and p.sim_id = $2 and u.status = 'active' and u.deleted_at is null
            and (u.leaderboard_visible or u.id = $3)
            and not exists (select 1 from user_roles r where r.user_id = u.id and r.role = 'ogretim_uyesi')`,
@@ -647,6 +649,8 @@ export interface MemoryGamiAttemptState {
   readonly summary: Readonly<Record<string, number>>;
   /** Sunucu XP'si (API-05); tohum denemelerinde 0. */
   readonly xp: number;
+  /** Deneme modu; tohumlarda yoksa değerlendirme sayılır. Liderlik yalnız değerlendirmeyi sayar. */
+  readonly mode?: GamiAttemptMode;
 }
 
 /** Testlerin durum okuduğu bellek deposu (DB gerekmez). */
@@ -820,6 +824,7 @@ export function createMemoryGamificationRepo(
         passed: input.passed,
         summary: { ...input.summary },
         xp,
+        mode: input.mode,
       });
       // PG ifadesiyle aynı kural: profil XP/düzey/seri deneme ile birlikte güncellenir.
       const key = profileKey(input.userId, input.simId);
@@ -888,8 +893,9 @@ export function createMemoryGamificationRepo(
           return [peer.userId, { xp: profile?.xp ?? 0, level: profile?.level ?? 1 }];
         }),
       );
+      // Liderlik yalnız değerlendirme denemelerini sayar (uygulama/düello puanı sıralamayı etkilemez).
       const attemptSeeds: LeaderboardAttemptSeed[] = [...attempts.values()]
-        .filter((attempt) => attempt.simId === query.simId)
+        .filter((attempt) => attempt.simId === query.simId && (attempt.mode ?? "assessment") === "assessment")
         .map((attempt) => ({
           userId: attempt.userId,
           simId: attempt.simId,

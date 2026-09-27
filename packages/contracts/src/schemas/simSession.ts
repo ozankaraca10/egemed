@@ -8,15 +8,21 @@ import { isoDateTimeSchema, uuidSchema } from "./common";
  * seçeneği, tanıyı, bulgu adını ya da ses dosyası adını taşıyamaz (katı şemalar).
  */
 
-export const SIM_SESSION_MODES = ["practice", "assessment"] as const;
+/** `challenge` (ADR-010): Meydan Okuma oturumu — değerlendirme gibi davranır (ipucu yok, geri bildirim sonda). */
+export const SIM_SESSION_MODES = ["practice", "assessment", "challenge"] as const;
 export const simSessionModeSchema = z.enum(SIM_SESSION_MODES);
 export type SimSessionMode = z.infer<typeof simSessionModeSchema>;
+/** Değerlendirme benzeri (süreli, ipucusuz, geri bildirim sonda) modlar. */
+export function isTimedSessionMode(mode: SimSessionMode): boolean {
+  return mode !== "practice";
+}
 
 /** Oturuma bağlı opak jeton (ses, seçenek kimliği): tahmin edilemez, anlam taşımaz. */
 export const OPAQUE_TOKEN_PATTERN = /^[A-Za-z0-9_-]{8,64}$/;
 export const opaqueTokenSchema = z.string().regex(OPAQUE_TOKEN_PATTERN);
 
-export const simSessionStartRequestSchema = z.strictObject({ mode: simSessionModeSchema });
+/** Doğrudan başlatma yalnız uygulama/değerlendirme; düello oturumu `/me/challenges/:id/session` ile açılır. */
+export const simSessionStartRequestSchema = z.strictObject({ mode: z.enum(["practice", "assessment"]) });
 
 export const simSessionSchema = z.strictObject({
   sessionId: uuidSchema,
@@ -131,7 +137,7 @@ export const caseResultSchema = z.strictObject({
 export const simSessionAnswerResponseSchema = z.strictObject({
   data: z.union([
     z.strictObject({ mode: z.literal("practice"), result: caseResultSchema }),
-    z.strictObject({ mode: z.literal("assessment"), accepted: z.literal(true) }),
+    z.strictObject({ mode: z.enum(["assessment", "challenge"]), accepted: z.literal(true) }),
   ]),
 });
 
@@ -153,3 +159,41 @@ export type SimSession = z.infer<typeof simSessionSchema>;
 export type SimSessionAnswerRequest = z.infer<typeof simSessionAnswerRequestSchema>;
 export type SimCaseResult = z.infer<typeof caseResultSchema>;
 export type SimTelemetry = z.infer<typeof simTelemetrySchema>;
+
+// --- Meydan Okuma (ADR-010) ------------------------------------------------------
+
+export const CHALLENGE_CODE_PATTERN = /^[0-9]{6}$/;
+export const challengeCreateRequestSchema = z.strictObject({ simId: z.enum(["pulse", "ausculta", "opaca"]) });
+export const challengeJoinRequestSchema = z.strictObject({ code: z.string().regex(CHALLENGE_CODE_PATTERN) });
+export const CHALLENGE_STATUSES = ["open", "accepted", "finished", "expired"] as const;
+
+export const challengeParticipantSchema = z.strictObject({
+  role: z.enum(["inviter", "opponent"]),
+  /** Görünen ad yalnız düellonun iki tarafına döner (arama/liste yok, KVKK). */
+  displayName: z.string().max(120),
+  isMe: z.boolean(),
+  finished: z.boolean(),
+  /** İki taraf da bitirene dek null (sonuç erken sızmaz). */
+  score: z.number().min(0).max(100).nullable(),
+  durationMs: z.number().int().min(0).nullable(),
+});
+
+export const challengeSchema = z.strictObject({
+  challengeId: uuidSchema,
+  simId: z.enum(["pulse", "ausculta", "opaca"]),
+  status: z.enum(CHALLENGE_STATUSES),
+  /** Yalnız davet edene ve yalnız açıkken döner. */
+  code: z.string().regex(CHALLENGE_CODE_PATTERN).nullable(),
+  caseCount: z.number().int().min(1).max(20),
+  perCaseLimitMs: z.number().int().positive(),
+  totalLimitMs: z.number().int().positive(),
+  expiresAt: isoDateTimeSchema,
+  participants: z.array(challengeParticipantSchema).max(2),
+  /** İki taraf bitirince: önce doğru (puan), eşitlikte kısa süre; berabere null. */
+  winner: z.enum(["inviter", "opponent", "draw"]).nullable(),
+  /** Bu kullanıcının bu düellodaki oturumu (varsa). */
+  mySessionId: uuidSchema.nullable(),
+});
+export const challengeResponseSchema = z.strictObject({ data: challengeSchema });
+export const challengeListResponseSchema = z.strictObject({ data: z.array(challengeSchema) });
+export type ChallengeBody = z.infer<typeof challengeSchema>;

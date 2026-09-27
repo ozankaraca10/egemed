@@ -5,6 +5,7 @@ import { createApp } from "./app.ts";
 import { createPgRewardsRepo } from "./rewards.ts";
 import { cryptoRandom, cryptoToken, cryptoUuid } from "./app.ts";
 import { createPgSimSessionRepo } from "./me/simSessions.ts";
+import { createPgChallengeRepo } from "./me/challenges.ts";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { createPgAdminBulkRepo } from "./admin/bulk.ts";
@@ -58,6 +59,7 @@ const app = createApp({
   gamification: createPgGamificationRepo(db),
   overview: createPgAdminOverviewRepo(db),
   rewards: createPgRewardsRepo(db),
+  challenges: createPgChallengeRepo(db),
   simSessions: {
     sessions: createPgSimSessionRepo(db),
     // Yol bankadaki güvenilir veriden gelir; yine de kök dışına çıkış reddedilir.

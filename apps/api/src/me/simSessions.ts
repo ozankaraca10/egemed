@@ -4,6 +4,7 @@ import {
   simSessionAnswerRequestSchema,
   simSessionHintRequestSchema,
   simSessionStartRequestSchema,
+  isTimedSessionMode,
   uuidSchema,
   type AuscultaPublicCase,
   type SimCaseResult,
@@ -32,6 +33,27 @@ export const ASSESSMENT_PER_CASE_MS = 10 * 60 * 1000;
 export const ASSESSMENT_TOTAL_MS = 60 * 60 * 1000;
 export const TIME_GRACE_MS = 5_000;
 export const SESSION_START_RATE_MAX = 30;
+/** ADR-010: düello — vaka başı 2 dk, toplam 8 dk. */
+export const CHALLENGE_PER_CASE_MS = 2 * 60 * 1000;
+export const CHALLENGE_TOTAL_MS = 8 * 60 * 1000;
+
+export function limitsFor(mode: SimSessionMode): { readonly perCaseMs: number | null; readonly totalMs: number | null } {
+  if (mode === "challenge") return { perCaseMs: CHALLENGE_PER_CASE_MS, totalMs: CHALLENGE_TOTAL_MS };
+  if (mode === "assessment") return { perCaseMs: ASSESSMENT_PER_CASE_MS, totalMs: ASSESSMENT_TOTAL_MS };
+  return { perCaseMs: null, totalMs: null };
+}
+
+/** Tohumlu [0,1) (yalnız seçenek SIRASI için; jetonlar kriptografik kalır). */
+export function seededRandom(seed: number): () => number {
+  let state = seed >>> 0 || 1;
+  return () => {
+    state = (state + 0x6d2b79f5) >>> 0;
+    let t = state;
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
 const SESSION_START_WINDOW_MS = 60 * 60 * 1000;
 /** Şimdilik yalnız Ausculta sunucu oturumunda (A2 Opaca, A3 Pulse). */
 const SERVER_SESSION_SIMS: readonly SimId[] = ["ausculta"];
@@ -60,7 +82,10 @@ export interface SimSessionRow {
   readonly startedAt: number;
   readonly expiresAt: number;
   finishedAt: number | null;
-  readonly state: { readonly cases: SimCaseState[] };
+  /** ADR-010: düelloya ait oturum. */
+  readonly challengeId: string | null;
+  /** Düelloda iki tarafa aynı seçenek sırası için tohum; diğer modlarda null. */
+  readonly state: { readonly cases: SimCaseState[]; readonly shuffleSeed?: number | null; total?: number | null };
 }
 
 export interface SimSessionRepo {
@@ -69,6 +94,8 @@ export interface SimSessionRepo {
   save(row: SimSessionRow): Promise<void>;
   /** Aynı kullanıcı×sim×mod için açık oturumları kapatır (değerlendirmede tek açık oturum). */
   expireOpen(userId: string, simId: SimId, mode: SimSessionMode): Promise<void>;
+  /** ADR-010: bir düelloya ait oturumlar. */
+  listByChallenge(challengeId: string): Promise<readonly SimSessionRow[]>;
 }
 
 export interface SimSessionDeps {
@@ -81,6 +108,8 @@ export interface SimSessionDeps {
   /** Kriptografik kaynaklı [0,1). */
   readonly random: () => number;
   readonly newId: () => string;
+  /** ADR-010: düello oturumu bitince düello kaydı güncellenir (verilmezse yok sayılır). */
+  readonly onFinished?: (row: SimSessionRow, total: number) => Promise<void>;
 }
 
 const EMPTY_TELEMETRY: SimTelemetry = { visits: {}, order: [], headChanges: 0, headUse: { bell: 0, diaphragm: 0 }, replayCount: 0 };
@@ -89,15 +118,57 @@ function readJson(c: Context<AppEnv>): Promise<unknown> {
   return c.req.json().catch(() => null);
 }
 
-function sessionBody(row: SimSessionRow) {
-  const assessment = row.mode === "assessment";
+export function sessionBody(row: SimSessionRow) {
+  const limits = limitsFor(row.mode);
   return {
     sessionId: row.id,
     mode: row.mode,
     caseCount: row.state.cases.length,
-    perCaseLimitMs: assessment ? ASSESSMENT_PER_CASE_MS : null,
-    totalLimitMs: assessment ? ASSESSMENT_TOTAL_MS : null,
+    perCaseLimitMs: limits.perCaseMs,
+    totalLimitMs: limits.totalMs,
     startedAt: toIstanbulIso(row.startedAt),
+  };
+}
+
+/** Yeni oturum satırı (doğrudan başlatma ve düello ortak yolu). */
+export function newSessionRow(input: {
+  readonly id: string;
+  readonly userId: string;
+  readonly institutionId: string;
+  readonly simId: SimId;
+  readonly mode: SimSessionMode;
+  readonly caseIds: readonly string[];
+  readonly at: number;
+  readonly challengeId?: string | null;
+  readonly shuffleSeed?: number | null;
+}): SimSessionRow {
+  return {
+    id: input.id,
+    userId: input.userId,
+    institutionId: input.institutionId,
+    simId: input.simId,
+    mode: input.mode,
+    status: "open",
+    startedAt: input.at,
+    expiresAt: input.at + SIM_SESSION_TTL_MS,
+    finishedAt: null,
+    challengeId: input.challengeId ?? null,
+    state: {
+      shuffleSeed: input.shuffleSeed ?? null,
+      cases: input.caseIds.map((caseId) => ({
+        caseId,
+        publicCase: null,
+        keys: null,
+        openedAt: null,
+        answeredAt: null,
+        answers: null,
+        telemetry: null,
+        hintedQuestions: [],
+        heardTokens: [],
+        timedOut: false,
+        result: null,
+      })),
+    },
   };
 }
 
@@ -162,32 +233,15 @@ export function registerSimSessionRoutes(app: Hono<AppEnv>, deps: SimSessionDeps
     if (!startRate.consume(`sim-session:${actor.userId}`, at)) return jsonError(c, "rate_limited");
     if (parsed.data.mode === "assessment") await deps.sessions.expireOpen(actor.userId, sim.data, "assessment");
     const caseIds = ausculta.selectCaseIds(parsed.data.mode, deps.random);
-    const row: SimSessionRow = {
+    const row = newSessionRow({
       id: deps.newId(),
       userId: actor.userId,
       institutionId: actor.institutionId,
       simId: sim.data,
       mode: parsed.data.mode,
-      status: "open",
-      startedAt: at,
-      expiresAt: at + SIM_SESSION_TTL_MS,
-      finishedAt: null,
-      state: {
-        cases: caseIds.map((caseId) => ({
-          caseId,
-          publicCase: null,
-          keys: null,
-          openedAt: null,
-          answeredAt: null,
-          answers: null,
-          telemetry: null,
-          hintedQuestions: [],
-          heardTokens: [],
-          timedOut: false,
-          result: null,
-        })),
-      },
-    };
+      caseIds,
+      at,
+    });
     await deps.sessions.create(row);
     return c.json({ data: sessionBody(row) }, 201);
   });
@@ -204,7 +258,8 @@ export function registerSimSessionRoutes(app: Hono<AppEnv>, deps: SimSessionDeps
     const previous = index > 1 ? row.state.cases[index - 2] : undefined;
     if (previous !== undefined && previous.answeredAt === null) return jsonError(c, "conflict", { issues: [{ code: "case_out_of_order" }] });
     const at = now();
-    if (row.mode === "assessment" && at - row.startedAt > ASSESSMENT_TOTAL_MS + TIME_GRACE_MS) {
+    const limits = limitsFor(row.mode);
+    if (limits.totalMs !== null && at - row.startedAt > limits.totalMs + TIME_GRACE_MS) {
       return jsonError(c, "validation_failed", { issues: [{ code: "session_time_exceeded" }] });
     }
     const caseDef = ausculta.caseById(item.caseId);
@@ -214,7 +269,8 @@ export function registerSimSessionRoutes(app: Hono<AppEnv>, deps: SimSessionDeps
       mode: row.mode,
       openedAt: toIstanbulIso(at),
       newToken: deps.newToken,
-      random: deps.random,
+      // Düelloda iki taraf aynı seçenek sırasını görür (tohum + vaka sırası).
+      random: typeof row.state.shuffleSeed === "number" ? seededRandom(row.state.shuffleSeed + index) : deps.random,
     });
     item.publicCase = built.publicCase;
     item.keys = built.keys;
@@ -254,7 +310,8 @@ export function registerSimSessionRoutes(app: Hono<AppEnv>, deps: SimSessionDeps
     if (item.openedAt === null) return jsonError(c, "conflict", { issues: [{ code: "case_not_open" }] });
     if (item.answeredAt !== null) return jsonError(c, "conflict", { issues: [{ code: "case_already_answered" }] });
     const at = now();
-    const late = row.mode === "assessment" && at - item.openedAt > ASSESSMENT_PER_CASE_MS + TIME_GRACE_MS;
+    const perCase = limitsFor(row.mode).perCaseMs;
+    const late = perCase !== null && at - item.openedAt > perCase + TIME_GRACE_MS;
     // Süre aşımında yanıt yok sayılır (boş yanıtla puanlanır); oturum sonraki vakayla sürer.
     const answers = late ? {} : parsed.data.answers;
     const telemetry = late ? EMPTY_TELEMETRY : parsed.data.telemetry;
@@ -268,7 +325,7 @@ export function registerSimSessionRoutes(app: Hono<AppEnv>, deps: SimSessionDeps
     await deps.sessions.save(row);
     if (late) return jsonError(c, "validation_failed", { issues: [{ code: "case_time_exceeded" }] });
     if (row.mode === "practice") return c.json({ data: { mode: "practice" as const, result } });
-    return c.json({ data: { mode: "assessment" as const, accepted: true as const } });
+    return c.json({ data: { mode: row.mode, accepted: true as const } });
   });
 
   app.post("/me/sims/:simId/sessions/:sessionId/finish", async (c) => {
@@ -285,7 +342,7 @@ export function registerSimSessionRoutes(app: Hono<AppEnv>, deps: SimSessionDeps
         counted.push({ item, result: item.result });
         return;
       }
-      if (row.mode !== "assessment") return;
+      if (!isTimedSessionMode(row.mode)) return;
       if (item.keys === null) {
         const caseDef = ausculta.caseById(item.caseId);
         if (caseDef === undefined) return;
@@ -341,7 +398,9 @@ export function registerSimSessionRoutes(app: Hono<AppEnv>, deps: SimSessionDeps
     }
     row.status = "finished";
     row.finishedAt = at;
+    row.state.total = total;
     await deps.sessions.save(row);
+    if (row.challengeId !== null && deps.onFinished !== undefined) await deps.onFinished(row, total);
     return c.json({
       data: {
         mode: row.mode,
@@ -394,20 +453,32 @@ interface PgSimSessionRow {
   readonly started_at: Date;
   readonly expires_at: Date;
   readonly finished_at: Date | null;
+  readonly challenge_id: string | null;
 }
 
 export function createPgSimSessionRepo(db: SimSessionDb): SimSessionRepo {
   return {
     async create(row) {
       await db.query(
-        `insert into sim_sessions (id, user_id, institution_id, sim_id, mode, status, state, started_at, expires_at)
-         values ($1, $2, $3, $4, $5, $6, $7::jsonb, $8, $9)`,
-        [row.id, row.userId, row.institutionId, row.simId, row.mode, row.status, JSON.stringify(row.state), new Date(row.startedAt), new Date(row.expiresAt)],
+        `insert into sim_sessions (id, user_id, institution_id, sim_id, mode, status, state, started_at, expires_at, challenge_id)
+         values ($1, $2, $3, $4, $5, $6, $7::jsonb, $8, $9, $10)`,
+        [
+          row.id,
+          row.userId,
+          row.institutionId,
+          row.simId,
+          row.mode,
+          row.status,
+          JSON.stringify(row.state),
+          new Date(row.startedAt),
+          new Date(row.expiresAt),
+          row.challengeId,
+        ],
       );
     },
     async get(id) {
       const result = await db.query(
-        "select id, user_id, institution_id, sim_id, mode, status, state, started_at, expires_at, finished_at from sim_sessions where id = $1",
+        "select id, user_id, institution_id, sim_id, mode, status, state, started_at, expires_at, finished_at, challenge_id from sim_sessions where id = $1",
         [id],
       );
       const row = result.rows[0] as PgSimSessionRow | undefined;
@@ -423,6 +494,7 @@ export function createPgSimSessionRepo(db: SimSessionDb): SimSessionRepo {
         startedAt: row.started_at.getTime(),
         expiresAt: row.expires_at.getTime(),
         finishedAt: row.finished_at === null ? null : row.finished_at.getTime(),
+        challengeId: row.challenge_id,
       };
     },
     async save(row) {
@@ -432,6 +504,11 @@ export function createPgSimSessionRepo(db: SimSessionDb): SimSessionRepo {
         JSON.stringify(row.state),
         row.finishedAt === null ? null : new Date(row.finishedAt),
       ]);
+    },
+    async listByChallenge(challengeId) {
+      const result = await db.query("select id from sim_sessions where challenge_id = $1", [challengeId]);
+      const rows = await Promise.all((result.rows as readonly { readonly id: string }[]).map((row) => this.get(row.id)));
+      return rows.filter((row): row is SimSessionRow => row !== null);
     },
     async expireOpen(userId, simId, mode) {
       await db.query("update sim_sessions set status = 'expired' where user_id = $1 and sim_id = $2 and mode = $3 and status = 'open'", [
@@ -458,6 +535,9 @@ export function createMemorySimSessionRepo(): SimSessionRepo & { readonly rows: 
     },
     async save(row) {
       rows.set(row.id, clone(row));
+    },
+    async listByChallenge(challengeId) {
+      return [...rows.values()].filter((row) => row.challengeId === challengeId).map(clone);
     },
     async expireOpen(userId, simId, mode) {
       for (const row of rows.values()) {
