@@ -137,7 +137,8 @@ describe("uyarlayıcılar", () => {
     expect(result).toMatchObject({ caseId: "srv-1", total: 90, mastery: true });
     expect(result.domains.recognition).toEqual({ earned: 25, max: 25 });
     expect(result.domains.diagnosis).toEqual({ earned: 0, max: 0 });
-    expect(meta).toEqual({ title: "Normal Kardiyak Oskültasyon", diagnosis: null, summary: "Özet" });
+    expect(meta).toMatchObject({ title: "Normal Kardiyak Oskültasyon", diagnosis: null, summary: "Özet" });
+    expect(meta.questions?.q1).toEqual({ correctOptionIds: ["tok_optionaaaa"], feedback: "Doğru." });
   });
 });
 
@@ -163,6 +164,16 @@ describe("sürücü + reducer", () => {
     expect(run.state.caseResults).toHaveLength(1);
     expect(run.emitted).not.toContain("case_completed");
     expect(calls).toEqual(["start:practice:s3", "case:1", "check:q1:tok_optionbbbb", "hint:q1", "answer:1", "finish"]);
+  });
+
+  it("çok sorulu sunucu vakasında advance sonraki soruya geçer", async () => {
+    const twoQuestions = { ...PUBLIC_CASE, questions: [...PUBLIC_CASE.questions, { ...PUBLIC_CASE.questions[0]!, id: "q2" }] };
+    const { source } = fakeSessions("practice", { getCase: async () => twoQuestions });
+    const run = runner(reducer(initialState, { type: "startMode", mode: "practice" }));
+    await startServerSession(source, run.dispatch, "practice", null);
+    expect(run.state.step).toBe(0);
+    run.dispatch({ type: "advance" });
+    expect(run.state.step).toBe(1);
   });
 
   it("değerlendirme: gönderimde sonuç yer tutucudur; geri bildirim bitişte gelir", async () => {

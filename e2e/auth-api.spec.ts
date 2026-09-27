@@ -368,6 +368,39 @@ test.describe("API oturumu (dev sağlayıcı)", () => {
     expect((await request.response())?.ok(), "deneme yazımı").toBe(true);
   });
 
+  test("Ausculta uygulaması sunucu oturumundan gelir: anahtarsız vaka, sunucu puanı ve denemesi (A1.4, ADR-009)", async ({ page }) => {
+    // 5 vaka × (vaka, kontrol, yanıt) sunucu gidiş-dönüşü: seri koşuda varsayılan 30 sn yetmez.
+    test.setTimeout(90_000);
+    await page.goto(STUDENT_ENTRY);
+    await signIn(page, "ogrenci");
+    await expect(page).toHaveURL(/#\/$/);
+    const caseBodies: string[] = [];
+    const clientAttempts: string[] = [];
+    page.on("response", async (response) => {
+      const url = response.url();
+      if (/\/me\/sims\/ausculta\/sessions\/[^/]+\/cases\/\d+$/.test(url) && response.request().method() === "GET") {
+        caseBodies.push(await response.text().catch(() => ""));
+      }
+    });
+    page.on("request", (request) => {
+      if (request.url().includes("/me/gamification/ausculta/attempts")) clientAttempts.push(request.url());
+    });
+    const before = await page.request.get("/api/me/gamification/ausculta");
+    const xpBefore = ((await before.json()) as { data: { xp: number } }).data.xp;
+    const finished = page.waitForResponse((response) => /\/me\/sims\/ausculta\/sessions\/[^/]+\/finish$/.test(response.url()));
+    await page.goto("/#/sims/ausculta");
+    const root = page.locator(".eg-sim-ausculta").first();
+    await expect(page.getByRole("heading", { name: "Çalışma Modunu Seçin" })).toBeVisible({ timeout: 20_000 });
+    await startTopicPractice(root);
+    await completeTopicPractice(root, "ausculta");
+    expect((await finished).ok(), "sunucu oturumu kapanışı").toBe(true);
+    expect(caseBodies.length, "sunucudan gelen vaka").toBeGreaterThan(0);
+    for (const body of caseBodies) expect(body).not.toMatch(/"correct"|feedbackCorrect|\.wav|acousticFinding/);
+    expect(clientAttempts, "istemci deneme yazmaz (sunucu yazar)").toEqual([]);
+    const after = await page.request.get("/api/me/gamification/ausculta");
+    expect(((await after.json()) as { data: { xp: number } }).data.xp).toBeGreaterThan(xpBefore);
+  });
+
   test("Pulse sınavı bitince İlerlemem sunucu rozetini gösterir ve demo bandı yoktur", async ({ page }) => {
     await page.goto(STUDENT_ENTRY);
     await signIn(page, "ogrenci");

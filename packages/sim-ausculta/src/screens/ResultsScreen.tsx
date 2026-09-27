@@ -34,6 +34,15 @@ import { AUSCULTA_RULES } from "../gamification/rules";
 const HIT = touchTarget();
 const cases = ALL_CASES;
 
+/** Sonuç satırı için soru görünümü (yerel vaka ya da sunucu anlık görüntüsü). */
+interface ReviewQuestion {
+  readonly id: string;
+  readonly prompt: string;
+  readonly options: readonly { readonly id: string; readonly label: string }[];
+  readonly correct: readonly string[];
+  readonly feedbackIncorrect: string;
+}
+
 const libraryItems = (
   libraryData as {
     groups: { items: { key: string; category: string; acousticFinding: string }[] }[];
@@ -100,7 +109,31 @@ export function ResultsScreen({ embedded = false, env = NOOP_RESULTS_ENV, reposi
     exitResults({ env, runtime, dispatch });
   };
 
+  const server = state.server;
+  const reviewFor = (caseId: string): { readonly title: string; readonly questions: readonly ReviewQuestion[] } | null => {
+    if (server !== null) {
+      const snapshot = server.snapshots[caseId];
+      const meta = server.metas[caseId];
+      if (snapshot === undefined) return meta === undefined ? null : { title: meta.title, questions: [] };
+      return {
+        title: meta?.title ?? snapshot.title,
+        questions: snapshot.questions.map((question) => ({
+          ...question,
+          correct: meta?.questions?.[question.id]?.correctOptionIds ?? [],
+          feedbackIncorrect: meta?.questions?.[question.id]?.feedback ?? "",
+        })),
+      };
+    }
+    const caseDef = cases.find((item) => item.id === caseId);
+    return caseDef === undefined ? null : { title: caseDef.title, questions: caseDef.questions };
+  };
+
   const retry = () => {
+    // A1.4: sunucu modunda yeni oturumu sürücü başlatır (yerel örneklem kullanılmaz).
+    if (server !== null) {
+      dispatch({ type: "startMode", mode: state.mode });
+      return;
+    }
     const seed = sessionSeed(now());
     const practiceIds = sampleSession(poolFor("practice"), seed, SESSION_SIZE);
     const assessmentIds = sampleSession(poolFor("assessment"), seed + 1, SESSION_SIZE);
@@ -109,10 +142,12 @@ export function ResultsScreen({ embedded = false, env = NOOP_RESULTS_ENV, reposi
   };
 
   const weakLearnKey = firstWeakLibraryKey(state.caseResults, (caseId) =>
-    libraryKeyForCase(
-      cases.find((item) => item.id === caseId),
-      libraryItems,
-    ),
+    server !== null
+      ? null
+      : libraryKeyForCase(
+          cases.find((item) => item.id === caseId),
+          libraryItems,
+        ),
   );
 
   const studyLearn = () => {
@@ -271,7 +306,7 @@ export function ResultsScreen({ embedded = false, env = NOOP_RESULTS_ENV, reposi
                 </thead>
                 <tbody>
                   {state.caseResults.map((result) => {
-                    const caseDef = cases.find((item) => item.id === result.caseId);
+                    const caseDef = reviewFor(result.caseId);
                     const isOpen = expanded === result.caseId;
                     return (
                       <Fragment key={result.caseId}>

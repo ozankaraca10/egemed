@@ -1,3 +1,4 @@
+import { useSessions } from "../ui/ScreenHeading";
 import { createContext, useContext, useEffect, useMemo, useRef, useState, type JSX, type ReactNode } from "react";
 import { VISITOR_LOCK_TEXT } from "@egemed/sim-host";
 import { countUnlistenedInOtherView, otherViewHintText } from "../core/flow";
@@ -179,6 +180,7 @@ export function LearnScreen({
     if (initialFocus.current) dispatch({ type: "setLearnFocus", key: null });
   }, [dispatch]);
 
+  const sessions = useSessions();
   const item = findLibraryItem(selectedKey);
   const isHeart = item.group === "heart";
   const isMixed = item.group === "mixed";
@@ -197,6 +199,12 @@ export function LearnScreen({
   const cov = coverage[item.acousticFinding] ?? { p: 0, a: 0 };
 
   const startPracticeForFinding = () => {
+    // A1.4: sunucu modunda odaklı uygulama oturumu (bulgu başına ≤5 vaka) sunucudan açılır.
+    if (sessions !== undefined) {
+      if (cov.p === 0) return;
+      dispatch({ type: "startMode", mode: "practice", focusFinding: item.acousticFinding });
+      return;
+    }
     const ids = poolFor("practice")
       .filter((entry) => entry.primaryAcousticFinding === item.acousticFinding)
       .slice(0, 5)

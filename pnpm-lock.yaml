@@ -80,6 +80,9 @@ importers:
       '@egemed/api-client':
         specifier: workspace:*
         version: link:../../packages/api-client
+      '@egemed/assessment-bank':
+        specifier: workspace:*
+        version: link:../../packages/assessment-bank
       '@egemed/contracts':
         specifier: workspace:*
         version: link:../../packages/contracts

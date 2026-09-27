@@ -2,7 +2,7 @@ import type { CaseDef, CaseResult, Mode, PatientView, Screen, StethHead, Suspend
 import type { SimEventDraft } from "./events";
 import { aggregateResults, practiceAdjusted, scoreCase, MASTERY_THRESHOLD } from "./scoring";
 import { ALL_CASES } from "../data/pool";
-import type { ServerCaseMeta, ServerClientCase, ServerQuestionFeedback, ServerSessionState } from "./serverSession";
+import type { ServerCaseMeta, ServerCaseSnapshot, ServerClientCase, ServerQuestionFeedback, ServerSessionState } from "./serverSession";
 
 /** Ausculta durum iskeleti ve saf reducer (kaynak: `core/store.tsx:106-299`, `buildSuspend`).
  *  React/DOM importu yoktur; `Date.now()` kullanılmaz. Yamalar şu iki sınırla dışarı açılır:
@@ -159,6 +159,7 @@ export type Action =
   | { type: "serverChecked"; qid: string; feedback: ServerQuestionFeedback }
   | { type: "serverHint"; qid: string; hint: string }
   | { type: "serverSubmitting" }
+  | { type: "serverSnapshot"; caseId: string; snapshot: ServerCaseSnapshot }
   | { type: "serverCaseResult"; result: CaseResult; meta: ServerCaseMeta | null }
   | { type: "serverFinished"; results: CaseResult[]; metas: Record<string, ServerCaseMeta> }
   | { type: "serverError"; message: string };
@@ -170,12 +171,18 @@ export interface ReducerSeam {
 
 const noopSeam: ReducerSeam = { emit: () => undefined };
 
-const findCase = (id: string) => ALL_CASES.find((c) => c.id === id);
+const findLocalCase = (id: string) => ALL_CASES.find((c) => c.id === id);
 
 function bodySexFor(def: CaseDef): BodySex {
   const pop = (def as CaseDef & { population?: string }).population;
   if (pop === "pediatrik") return "pediatrik";
   return def.patient.sex === "kadın" ? "kadin" : "erkek";
+}
+
+/** Etkin vaka: sunucu oturumundaysa yüklü sunucu vakası (A1.4), değilse yerel havuz. */
+function findCase(s: AppState, id: string): CaseDef | undefined {
+  if (s.server?.currentCase?.id === id) return s.server.currentCase;
+  return findLocalCase(id);
 }
 
 export function reducer(s: AppState, a: Action, seam: ReducerSeam = noopSeam): AppState {
@@ -265,7 +272,7 @@ export function reducer(s: AppState, a: Action, seam: ReducerSeam = noopSeam): A
       return { ...s, answers: { ...s.answers, [a.qid]: a.values } };
     case "submitAnswer":
       {
-        const question = findCase(s.currentCaseId)?.questions.find((item) => item.id === a.qid);
+        const question = findCase(s, s.currentCaseId)?.questions.find((item) => item.id === a.qid);
         seam.emit({ type: "answer_submitted", qid: a.qid, correct: a.correct });
         if (a.correct && question?.domain === "diagnosis") seam.emit({ type: "correct_diagnosis", caseId: s.currentCaseId, qid: a.qid });
       }
@@ -276,13 +283,13 @@ export function reducer(s: AppState, a: Action, seam: ReducerSeam = noopSeam): A
     case "timer":
       return { ...s, assessmentTimer: s.assessmentTimer + a.deltaMs };
     case "advance": {
-      const def = findCase(s.currentCaseId);
+      const def = findCase(s, s.currentCaseId);
       if (!def) return s;
       if (def.questions[s.step + 1] == null) return s;
       return { ...s, step: s.step + 1, lastFeedback: null };
     }
     case "finishCase": {
-      const def = findCase(s.currentCaseId);
+      const def = findCase(s, s.currentCaseId);
       if (!def) return s;
       let result = scoreCase(def, s.answers, s.telemetry, s.hintsUsed);
       if (s.mode === "practice" && s.hintsUsed > 0) {
@@ -377,6 +384,7 @@ export function reducer(s: AppState, a: Action, seam: ReducerSeam = noopSeam): A
           feedback: {},
           hints: {},
           metas: {},
+          snapshots: {},
           status: "loading",
           error: null,
         },
@@ -394,6 +402,9 @@ export function reducer(s: AppState, a: Action, seam: ReducerSeam = noopSeam): A
     case "serverHint":
       if (!s.server) return s;
       return { ...s, server: { ...s.server, hints: { ...s.server.hints, [a.qid]: a.hint } } };
+    case "serverSnapshot":
+      if (!s.server) return s;
+      return { ...s, server: { ...s.server, snapshots: { ...s.server.snapshots, [a.caseId]: a.snapshot } } };
     case "serverSubmitting":
       if (!s.server) return s;
       return { ...s, server: { ...s.server, status: "submitting" } };
@@ -401,10 +412,12 @@ export function reducer(s: AppState, a: Action, seam: ReducerSeam = noopSeam): A
       // Yerel `finishCase` karşılığı; `case_completed` YAYINLANMAZ (denemeyi sunucu yazar).
       if (!s.server) return s;
       const metas = a.meta === null ? s.server.metas : { ...s.server.metas, [a.result.caseId]: a.meta };
+      const given = s.server.snapshots[a.result.caseId]?.given ?? {};
+      const result = { ...a.result, answers: a.result.answers.map((answer) => ({ ...answer, given: [...(given[answer.qid] ?? [])] })) };
       return {
         ...s,
-        caseResults: [...s.caseResults, a.result],
-        pendingSummary: a.result,
+        caseResults: [...s.caseResults, result],
+        pendingSummary: result,
         lastFeedback: null,
         server: { ...s.server, metas, status: "ready" },
       };
@@ -412,12 +425,17 @@ export function reducer(s: AppState, a: Action, seam: ReducerSeam = noopSeam): A
     case "serverFinished": {
       if (!s.server) return s;
       const modeKey: "practice" | "assessment" = s.mode === "assessment" ? "assessment" : "practice";
-      const agg = aggregateResults(a.results);
+      const snapshots = s.server.snapshots;
+      const results = a.results.map((item) => ({
+        ...item,
+        answers: item.answers.map((answer) => ({ ...answer, given: [...(snapshots[item.caseId]?.given[answer.qid] ?? [])] })),
+      }));
+      const agg = aggregateResults(results);
       const prevBest = s.bestScore[modeKey] ?? 0;
       const bestScore = agg.total > prevBest ? { ...s.bestScore, [modeKey]: agg.total } : s.bestScore;
       return {
         ...s,
-        caseResults: a.results,
+        caseResults: results,
         screen: "results",
         bestScore,
         server: { ...s.server, metas: { ...s.server.metas, ...a.metas }, status: "finished" },

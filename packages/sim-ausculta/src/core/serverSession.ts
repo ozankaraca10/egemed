@@ -19,6 +19,15 @@ export interface ServerCaseMeta {
   readonly title: string;
   readonly diagnosis: string | null;
   readonly summary: string;
+  /** Soru başına doğru seçenek jetonları ve açıklama (yanıttan/bitişten sonra). */
+  readonly questions?: Readonly<Record<string, { readonly correctOptionIds: readonly string[]; readonly feedback: string }>>;
+}
+
+/** Gönderilen vakanın soru metni/seçenekleri ve verilen yanıtlar (sonuç ekranı ayrıntısı için). */
+export interface ServerCaseSnapshot {
+  readonly title: string;
+  readonly questions: readonly { readonly id: string; readonly prompt: string; readonly options: readonly { readonly id: string; readonly label: string }[] }[];
+  readonly given: Readonly<Record<string, readonly string[]>>;
 }
 
 export interface ServerQuestionFeedback {
@@ -37,6 +46,7 @@ export interface ServerSessionState {
   readonly feedback: Readonly<Record<string, ServerQuestionFeedback>>;
   readonly hints: Readonly<Record<string, string>>;
   readonly metas: Readonly<Record<string, ServerCaseMeta>>;
+  readonly snapshots: Readonly<Record<string, ServerCaseSnapshot>>;
   readonly status: "loading" | "ready" | "submitting" | "finished" | "error";
   readonly error: string | null;
 }
@@ -154,7 +164,27 @@ export function fromServerResult(result: SimCaseResult): { readonly result: Case
       answers: result.questions.map((question) => ({ qid: question.questionId, correct: question.correct, given: [] })),
       hintsUsed: result.hintsUsed,
     },
-    meta: { title: result.title, diagnosis: result.diagnosis, summary: result.summary },
+    meta: {
+      title: result.title,
+      diagnosis: result.diagnosis,
+      summary: result.summary,
+      questions: Object.fromEntries(
+        result.questions.map((question) => [question.questionId, { correctOptionIds: [...question.correctOptionIds], feedback: question.feedback }]),
+      ),
+    },
+  };
+}
+
+/** Gönderim anındaki vaka anlık görüntüsü (soru metni, seçenekler, verilen yanıtlar). */
+export function snapshotOf(clientCase: ServerClientCase, given: Readonly<Record<string, readonly string[]>>): ServerCaseSnapshot {
+  return {
+    title: clientCase.title,
+    questions: clientCase.questions.map((question) => ({
+      id: question.id,
+      prompt: question.prompt,
+      options: question.options.map((option) => ({ id: option.id, label: option.label })),
+    })),
+    given: Object.fromEntries(Object.entries(given).map(([qid, values]) => [qid, [...values]])),
   };
 }
 

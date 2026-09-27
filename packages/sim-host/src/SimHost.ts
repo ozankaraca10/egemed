@@ -157,7 +157,7 @@ export interface SimSessionSource {
     sessionId: string,
     index: number,
     body: SimSessionAnswerRequest,
-  ): Promise<{ readonly mode: "practice"; readonly result: SimCaseResult } | { readonly mode: "assessment"; readonly accepted: true }>;
+  ): Promise<{ readonly mode: "practice"; readonly result: SimCaseResult } | { readonly mode: "assessment" | "challenge"; readonly accepted: true }>;
   finish(sessionId: string): Promise<{
     readonly mode: SimSessionMode;
     readonly total: number;
