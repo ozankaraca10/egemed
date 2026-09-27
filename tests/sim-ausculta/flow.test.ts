@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   countUnlistenedInOtherView,
   firstWeakLibraryKey,
+  firstWeakLibraryKeyFromServer,
   libraryKeyForCase,
   nextActionForSubmit,
   otherViewHintText,
@@ -135,6 +136,23 @@ describe("libraryKeyForCase / firstWeakLibraryKey / weakDomainKeys (madde 5, wav
   });
   it("weakDomainKeys: domains null ise boş dizi", () => {
     expect(weakDomainKeys(null)).toEqual([]);
+  });
+});
+
+/* ---------------- T214: sunucu meta verisinden zayıf konu anahtarı ---------------- */
+describe("firstWeakLibraryKeyFromServer (T214)", () => {
+  const results = [
+    { caseId: "srv-1", answers: [{ correct: true }] },
+    { caseId: "srv-2", answers: [{ correct: false }] },
+    { caseId: "srv-3", answers: [{ correct: false }] },
+  ];
+  it("yanlış yanıtlı İLK vakanın sunucu meta anahtarını döndürür", () => {
+    expect(firstWeakLibraryKeyFromServer(results, { "srv-2": { libraryKey: "heart.s3" }, "srv-3": { libraryKey: "lung.wheezing" } })).toBe("heart.s3");
+  });
+  it("meta yoksa/null ise atlar; eşleşme yoksa null", () => {
+    expect(firstWeakLibraryKeyFromServer(results, { "srv-2": { libraryKey: null }, "srv-3": { libraryKey: "lung.wheezing" } })).toBe("lung.wheezing");
+    expect(firstWeakLibraryKeyFromServer(results, { "srv-2": { libraryKey: null } })).toBeNull();
+    expect(firstWeakLibraryKeyFromServer([], {})).toBeNull();
   });
 });
 

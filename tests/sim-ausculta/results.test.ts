@@ -1,7 +1,7 @@
 import { createElement, type ReactNode } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
-import { BEST_SCORE_KEY, EmbeddedProvider, LocalGamiRepository, MASTERY_THRESHOLD, ResultsScreen, StoreProvider, buildSuspend, createMemoryRuntimeAdapter, createNoopResultsScreenEnv, createSimRuntime, exitResults, gamiStoragePort, initialState, sessionSeed } from "../../packages/sim-ausculta/src/index";
+import { BEST_SCORE_KEY, EmbeddedProvider, LocalGamiRepository, MASTERY_THRESHOLD, ResultsScreen, StoreProvider, buildSuspend, createMemoryRuntimeAdapter, createNoopResultsScreenEnv, createSimRuntime, exitResults, firstWeakLibraryKeyFromServer, gamiStoragePort, initialState, sessionSeed, studyLearnFromResults } from "../../packages/sim-ausculta/src/index";
 import { poolFor } from "./bank-cases";
 import type { SimAudience } from "../../packages/sim-host/src/index";
 import type { AppState, CaseResult, ScoringWeights, StoragePort, WindowLike } from "../../packages/sim-ausculta/src/index";
@@ -184,6 +184,29 @@ describe("ResultsScreen", () => {
       expect(value).not.toMatch(/learner_name|learner_id|Öğrenci Adı|displayName/i);
     }
     expect(sessionSeed(NOW)).toBe((NOW % 2147483647) | 0);
+  });
+});
+
+describe("öğrenme odağı (T214)", () => {
+  it("yanlış yanıtlı vakanın sunucu kütüphane anahtarı setLearnFocus ile kurulur", () => {
+    const weak = { ...resultFor("practice", false), caseId: "srv-1" };
+    const weakLearnKey = firstWeakLibraryKeyFromServer([weak], { "srv-1": { libraryKey: "heart.normal" } });
+    expect(weakLearnKey).toBe("heart.normal");
+    const dispatch = vi.fn();
+    const startMode = vi.fn(() => true);
+    studyLearnFromResults({ weakLearnKey, startMode, dispatch });
+    expect(dispatch).toHaveBeenCalledWith({ type: "setLearnFocus", key: "heart.normal" });
+    expect(startMode).toHaveBeenCalledWith("learn");
+    expect(dispatch).toHaveBeenCalledWith({ type: "goto", screen: "learn" });
+  });
+
+  it("zayıf konu yoksa odak kurulmaz, yalnız öğrenmeye geçilir (T209 kilidi korunur)", () => {
+    const dispatch = vi.fn();
+    const startMode = vi.fn(() => true);
+    studyLearnFromResults({ weakLearnKey: null, startMode, dispatch });
+    expect(dispatch).not.toHaveBeenCalledWith(expect.objectContaining({ type: "setLearnFocus" }));
+    expect(startMode).toHaveBeenCalledWith("learn");
+    expect(dispatch).toHaveBeenCalledWith({ type: "goto", screen: "learn" });
   });
 });
 
