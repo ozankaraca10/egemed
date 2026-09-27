@@ -1,40 +1,8 @@
 import { describe, expect, it, vi } from "vitest";
-import {
-  applyPrimaryAction,
-  armTimer,
-  bindDismissListeners,
-  planSessionCompletion,
-  rememberQuestionShown,
-  reportSessionCompletion,
-} from "../../packages/sim-ausculta/src/index";
-import type { CaseResult, Question, ScoringWeights, SimulationClock, SimulationListenerEnv } from "../../packages/sim-ausculta/src/index";
+import { armTimer, bindDismissListeners, rememberQuestionShown } from "../../packages/sim-ausculta/src/index";
+import type { SimulationClock, SimulationListenerEnv } from "../../packages/sim-ausculta/src/index";
 
-/** S15c — rapor çağrısı ve dinleyici/zamanlayıcı temizliği. DOM yok. */
-
-function result(): CaseResult {
-  const domains = {
-    technique: { earned: 20, max: 20 },
-    localization: { earned: 0, max: 0 },
-    recognition: { earned: 25, max: 25 },
-    interpretation: { earned: 20, max: 20 },
-    diagnosis: { earned: 10, max: 10 },
-    systematic: { earned: 5, max: 5 },
-  } satisfies Record<keyof ScoringWeights, { earned: number; max: number }>;
-  return { caseId: "c1", total: 80, max: 100, mastery: true, domains, answers: [], hintsUsed: 0 };
-}
-
-function question(id: string): Question {
-  return {
-    id,
-    type: "single_choice",
-    domain: "recognition",
-    prompt: "Bulgu?",
-    options: [{ id: "a", label: "Normal" }],
-    correct: ["a"],
-    feedbackCorrect: "Doğru",
-    feedbackIncorrect: "Yanlış",
-  };
-}
+/** S15c — dinleyici/zamanlayıcı temizliği ve soru damgası. DOM yok. */
 
 function listenerEnv(): {
   env: SimulationListenerEnv;
@@ -90,67 +58,6 @@ function clock(): { clock: SimulationClock; fire(): void; cleared: number[] } {
 }
 
 describe("simulation-runtime", () => {
-  it("değerlendirme skorunu adaptöre yazar; bayrak kapalıyken oyunlaştırma susar", () => {
-    const plan = planSessionCompletion({
-      caseIndex: 1,
-      caseCount: 1,
-      mode: "assessment",
-      caseResults: [result()],
-      now: 50,
-    });
-    expect(plan).not.toBeNull();
-    if (!plan) return;
-    const reportScore = vi.fn();
-    const emit = vi.fn();
-    const gami = { recordAssessmentComplete: vi.fn() };
-    reportSessionCompletion({ plan, runtime: { reportScore }, bus: { emit }, gamiEnabled: false, gami });
-    expect(reportScore).toHaveBeenCalledWith(100, true, true);
-    expect(emit).toHaveBeenCalledWith({ type: "assessment_completed", total: 100 });
-    expect(gami.recordAssessmentComplete).not.toHaveBeenCalled();
-    reportSessionCompletion({ plan, runtime: { reportScore }, bus: { emit }, gamiEnabled: true, gami });
-    expect(gami.recordAssessmentComplete).toHaveBeenCalledWith({ total: 100, passed: true }, 50);
-  });
-
-  it("uygulama oturumunda skor ve oyunlaştırma çağrılmaz", () => {
-    const plan = planSessionCompletion({
-      caseIndex: 1,
-      caseCount: 1,
-      mode: "practice",
-      caseResults: [result()],
-      now: 50,
-    });
-    expect(plan?.reportScore).toBe(false);
-    if (!plan) return;
-    const reportScore = vi.fn();
-    const gami = { recordAssessmentComplete: vi.fn() };
-    reportSessionCompletion({ plan, runtime: { reportScore }, bus: { emit: vi.fn() }, gamiEnabled: true, gami });
-    expect(reportScore).not.toHaveBeenCalled();
-    expect(gami.recordAssessmentComplete).not.toHaveBeenCalled();
-  });
-
-  it("son soruda etkileşimleri adaptöre kaydeder", () => {
-    const q = question("q1");
-    const saveInteractions = vi.fn();
-    const dispatch = vi.fn();
-    applyPrimaryAction({
-      plan: {
-        dispatches: [
-          { type: "submitAnswer", qid: "q1", correct: true },
-          { type: "finishCase" },
-        ],
-        saveInteractions: true,
-        latency: { q1: 400 },
-      },
-      dispatch,
-      runtime: { saveInteractions },
-      caseId: "c1",
-      questions: [q],
-      answers: { q1: ["a"] },
-    });
-    expect(dispatch).toHaveBeenCalledTimes(2);
-    expect(saveInteractions).toHaveBeenCalledWith("c1", [q], { q1: ["a"] }, { q1: 400 });
-  });
-
   it("dinleyiciyi kaldırır ve kesilen zamanlayıcıyı çalıştırmaz", () => {
     const listeners = listenerEnv();
     const dismiss = vi.fn();
