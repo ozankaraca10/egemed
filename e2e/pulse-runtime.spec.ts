@@ -26,6 +26,59 @@ async function suppressFullscreenPrompt(page: Page, actorIds: readonly (string |
   }, keys);
 }
 
+/**
+ * T208 öğrenme kilidi: uygulama ve değerlendirme, ALL_MODES'daki 23 paternin her
+ * biri 16 sn izlenene kadar (değerlendirme ayrıca 10 vaka gönderilene kadar)
+ * kapalıdır. Testler kayıt tohumuyla bu eşiği açar; `PULSE_STATE_KEY` biçimi
+ * kaynak `scorm.js` ile aynıdır.
+ */
+interface PulseSeedOptions {
+  readonly casesComplete?: boolean;
+}
+
+function pulseSeedRecord(options: PulseSeedOptions = {}): Record<string, unknown> {
+  return {
+    version: 6,
+    cv: curriculum.version,
+    m: 0,
+    t: 2,
+    p: 1,
+    f: 0,
+    v: Array.from({ length: 23 }, () => 16_000),
+    u: 4,
+    ...(options.casesComplete === true
+      ? {
+          c: {
+            i: "egemed-seed-session-0001",
+            n: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+            a: Array.from({ length: 10 }, () => 0),
+            s: 1023,
+            l: Array.from({ length: 10 }, () => [0, 0, 0]),
+            x: Array.from({ length: 10 }, () => -1),
+          },
+        }
+      : {}),
+  };
+}
+
+/** Tüm paternler izlenmiş (isteğe bağlı: 10 vaka gönderilmiş) kayıtla başlatır. */
+async function seedPulseLearning(
+  page: Page,
+  actorIds: readonly (string | null)[],
+  options: PulseSeedOptions = {},
+): Promise<void> {
+  const storageKeys = actorIds.map((id) => `${namespaceOf(id)}${PULSE_STATE_KEY}`);
+  const record = pulseSeedRecord(options);
+  await page.addInitScript((payload: { keys: string[]; value: Record<string, unknown> }) => {
+    for (const key of payload.keys) localStorage.setItem(key, JSON.stringify(payload.value));
+  }, { keys: storageKeys, value: record });
+}
+
+/** Testlerin çoğu sim ekranından başlar; 23 patern izlenmiş sayılır. */
+async function seedViewed(page: Page): Promise<void> {
+  await seedPulseLearning(page, [null, ADMIN.actorId, STUDENT.actorId]);
+}
+
 async function openPulse(page: Page): Promise<Locator> {
   await page.goto("/#/sims/pulse");
   const root = page.locator(ROOT);
@@ -54,6 +107,7 @@ test.describe("Pulse kaynak runtime", () => {
 
   test("gölge kökte açılır; tek h1, inceleme araçları ve EKG tam genişlikte", async ({ page }, testInfo) => {
     const errors = trackErrors(page);
+    await seedViewed(page);
     const root = await openPulse(page);
     await openMode(root, "sim");
     await expect(page.locator("h1")).toHaveCount(1);
@@ -71,6 +125,7 @@ test.describe("Pulse kaynak runtime", () => {
   });
 
   test("kalp SVG'si oynatılırken motorla birlikte değişir (PULSE-03)", async ({ page }) => {
+    await seedViewed(page);
     const root = await openPulse(page);
     await openMode(root, "sim");
     await root.locator("#playBtn").click();
@@ -86,6 +141,7 @@ test.describe("Pulse kaynak runtime", () => {
 
   test("10 vaka oturumu tamamlanma raporuyla biter (PULSE-05)", async ({ page }) => {
     const errors = trackErrors(page);
+    await seedViewed(page);
     const root = await openPulse(page);
     await openMode(root, "case");
     for (let i = 0; i < 10; i += 1) {
@@ -102,6 +158,7 @@ test.describe("Pulse kaynak runtime", () => {
 
   test("10 soru gönderilince sonuç ekranı ve 'Tekrar dene' gelir (PULSE-06)", async ({ page }) => {
     const errors = trackErrors(page);
+    await seedPulseLearning(page, [null, ADMIN.actorId, STUDENT.actorId], { casesComplete: true });
     const root = await openPulse(page);
     await openMode(root, "quiz");
     for (let i = 0; i < 10; i += 1) {
@@ -117,7 +174,9 @@ test.describe("Pulse kaynak runtime", () => {
     // modül tamamlama (inceleme + vakalar) ayrı not olarak gösterilir.
     await expect(root.locator("#resultsView")).toContainText("✓ Başarılı");
     await expect(root.locator("#resultsView")).not.toContainText("Hedefin altında");
-    await expect(root.locator("[data-egemed-module-note]")).toBeVisible();
+    // T208 öğrenme kilidi: sınav yalnız 23 patern izlenip 10 vaka gönderildikten
+    // sonra açıldığından modül tamamlanmıştır; "Modül henüz tamamlanmadı" notu çizilmez.
+    await expect(root.locator("[data-egemed-module-note]")).toHaveCount(0);
 
     // Platform oyunlaştırması: deneme kullanıcı×sim ad alanına tek kez yazılır,
     // sonuç ekranında kazanım kartı ve "İlerlemem" diyaloğu açılır.
@@ -144,6 +203,7 @@ test.describe("Pulse kaynak runtime", () => {
     const asUser = async (session: typeof ADMIN | typeof STUDENT): Promise<void> => {
       await page.evaluate((value) => sessionStorage.setItem("egemed.devSession", JSON.stringify(value)), session);
     };
+    await seedPulseLearning(page, [null, ADMIN.actorId, STUDENT.actorId], { casesComplete: true });
     await page.goto("/#/");
     await asUser(ADMIN);
     let root = await openPulse(page);
@@ -174,6 +234,7 @@ test.describe("Pulse kaynak runtime", () => {
     // Adım göstergesi birleşik barda ≥1024 px'te görünür (shell.css); dar ekranda adımlar çizilmez.
     test.skip((testInfo.project.use.viewport?.width ?? 0) < 1024, "adımlar yalnız ≥1024 px");
     const errors = trackErrors(page);
+    await seedPulseLearning(page, [null, ADMIN.actorId, STUDENT.actorId], { casesComplete: true });
     const root = await openPulse(page);
     const stepButton = (label: string) => page.locator(".eg-shell-simbar__stepButton", { hasText: label });
 
@@ -219,6 +280,7 @@ test.describe("Pulse kaynak runtime", () => {
 
   test("sim rotası doğrudan değiştirildiğinde her sim tek kökle açılır (PLATFORM-01)", async ({ page }) => {
     const errors = trackErrors(page);
+    await seedViewed(page);
     await page.goto("/#/sims/pulse");
     await expect(page.locator(ROOT)).toHaveCount(1);
     for (const [hash, selector] of [
@@ -233,6 +295,59 @@ test.describe("Pulse kaynak runtime", () => {
       await expect(page.locator(".eg-shell-sim-page")).toHaveAttribute("aria-busy", "false");
       await expect(page.locator(selector).first()).toBeVisible();
       await expect(page.locator(".eg-shell-sim-page__host > *")).toHaveCount(1);
+    }
+    expect(errors).toEqual([]);
+  });
+
+  test("öğrenme kilidi: paternler izlenmeden uygulama ve değerlendirme kapalıdır (T208)", async ({ page }) => {
+    const errors = trackErrors(page);
+    // Tohum yok: yeni kayıt; hiçbir patern izlenmemiş.
+    const root = await openPulse(page);
+    await expect(root.locator("#modeCards")).toBeVisible();
+    const practice = root.locator("#modeCards .mode-card.practice");
+    const assessment = root.locator("#modeCards .mode-card.assessment");
+    await expect(practice.locator('button[data-view="case"]')).toBeDisabled();
+    await expect(assessment.locator('button[data-view="quiz"]')).toBeDisabled();
+    await expect(practice).toContainText("Önce öğrenme modunu tamamlayın: 0/23 patern izlendi.");
+    await expect(assessment).toContainText("Önce öğrenme modunu tamamlayın: 0/23 patern izlendi.");
+    // Kilitliyken tıklama görünüm değiştirmez (buton pasif).
+    await practice.locator('button[data-view="case"]').click({ force: true });
+    await expect(root.locator("#caseView")).toBeHidden();
+    await expect(root.locator("#modesView")).toBeVisible();
+    expect(errors).toEqual([]);
+  });
+
+  test("Mobitz I sekmesi seçilip oynatılınca kalpte AV blok işareti belirir (T208)", async ({ page }) => {
+    const errors = trackErrors(page);
+    await seedViewed(page);
+    const root = await openPulse(page);
+    await openMode(root, "sim");
+    await root.locator('.rhythm-tab[data-mode="mobitz1"]').click();
+    await expect(root.locator(".rhythm-tab.selected")).toHaveAttribute("data-mode", "mobitz1");
+    await expect(root.locator("#explanationTitle")).toContainText("Mobitz");
+    await root.locator("#playBtn").click();
+    // Mobitz I'de her 4. P iletilmez; blok işareti döngü boyunca görünür olur.
+    await expect(root.locator("#heartSvg #avBlockMark")).toHaveCSS("opacity", "1", { timeout: 8_000 });
+    // Klavye şerit sırasını izler: ] görünür sıradaki sonraki sekmeye geçer (T208).
+    await page.keyboard.press("]");
+    await expect(root.locator(".rhythm-tab.selected")).toHaveAttribute("data-mode", "mobitz2");
+    expect(errors).toEqual([]);
+  });
+
+  test("ritim şeridi 390/768/1440 px'te yatay sayfa kaydırması yapmaz (T208)", async ({ page }) => {
+    const errors = trackErrors(page);
+    await seedViewed(page);
+    const root = await openPulse(page);
+    await openMode(root, "sim");
+    await expect(root.locator(".rhythm-group")).toHaveCount(6);
+    await expect(root.locator(".rhythm-tab[data-mode]")).toHaveCount(23);
+    for (const width of [390, 768, 1440]) {
+      await page.setViewportSize({ width, height: 900 });
+      await page.waitForTimeout(120);
+      const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
+      expect(overflow, `yatay sayfa taşması ${width}px`).toBeLessThanOrEqual(0);
+      const strip = await root.locator(".rhythm-tabs").evaluate((node) => ({ scrollWidth: node.scrollWidth, clientWidth: node.clientWidth }));
+      expect(strip.scrollWidth, `şerit kendi içinde kaydırılabilir ${width}px`).toBeGreaterThan(strip.clientWidth);
     }
     expect(errors).toEqual([]);
   });

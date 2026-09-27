@@ -6,8 +6,8 @@
  * Betikler bir gölge DOM kökünde çalışır. Platforma uyarlanan yalnız sınırlardır:
  * - DOM: `document.getElementById/querySelector*` gölge köke, `body` /
  *   `documentElement` köke ait sarmalayıcılara yönlenir; CSS gölge kökte kalır.
- * - Olaylar: `cardai:*`, `pagehide`, `pageshow` bağlama özel bir veri yolunda
- *   kalır; gerçek `document`/`window` dinleyicileri izlenir ve `target`
+ * - Olaylar: `cardai:*`, `pulse:*`, `pagehide`, `pageshow` bağlama özel bir veri
+ *   yolunda kalır; gerçek `document`/`window` dinleyicileri izlenir ve `target`
  *   gölge kök içindeki gerçek hedefe döndürülür (retarget).
  * - Kayıt: `localStorage` kullanıcıya özel ad alanıyla önekleniyor (PULSE-08).
  * - Yaşam döngüsü: zamanlayıcı, rAF, ResizeObserver, AudioContext ve
@@ -39,11 +39,11 @@ const SCRIPTS: readonly (readonly [string, (env: PulseScriptEnv) => void])[] = [
 /** Bağlama özel kalan olaylar; diğerleri gerçek window'a izlenerek bağlanır. */
 const LOCAL_WINDOW_EVENTS = new Set(["pagehide", "pageshow"]);
 const isLocalWindowEvent = (type: string): boolean =>
-  type.startsWith("cardai:") || LOCAL_WINDOW_EVENTS.has(type);
+  type.startsWith("cardai:") || type.startsWith("pulse:") || LOCAL_WINDOW_EVENTS.has(type);
 
 /** Kabuğa ve platform kayıt katmanına açılan köprü. */
 export interface PulseRuntimeBridge {
-  /** `cardai:*` olayları (ör. `cardai:session`); oyunlaştırma buradan beslenir. */
+  /** `cardai:*` ve `pulse:*` olayları (ör. `cardai:session`, `pulse:learn-complete`). */
   onEvent?(type: string, detail: unknown): void;
 }
 
@@ -335,7 +335,9 @@ export function mountPulseRuntime(target: HTMLElement, options: PulseRuntimeOpti
           };
         case "dispatchEvent":
           return (event: Event) => {
-            if (event.type.startsWith("cardai:")) {
+            // `pulse:*` (ör. T208 `pulse:learn-complete`) platform köprüsüne
+            // `cardai:*` ile aynı yoldan iletilir; köprü sonraki görevde bağlanır.
+            if (event.type.startsWith("cardai:") || event.type.startsWith("pulse:")) {
               options.bridge?.onEvent?.(event.type, (event as CustomEvent<unknown>).detail);
             }
             return bus.dispatchEvent(event);
