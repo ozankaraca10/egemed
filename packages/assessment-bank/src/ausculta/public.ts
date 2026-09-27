@@ -1,4 +1,5 @@
 import type { AuscultaPublicCase, SimCaseResult, SimSessionMode, SimTelemetry } from "@egemed/contracts";
+import { libraryKeyForCase } from "./library";
 import { assessmentPointFilter, resolveCaseSoundsEx } from "./resolver";
 import { practiceAdjusted, scoreCase } from "./scoring";
 import type { CaseDef, Question } from "./types";
@@ -135,6 +136,8 @@ export function gradeCase(caseDef: CaseDef, keys: AuscultaCaseKeys, input: Grade
     mastery: result.mastery,
     domains: Object.fromEntries(Object.entries(result.domains).map(([key, value]) => [key, { earned: value.earned, max: value.max }])),
     hintsUsed: input.hintsUsed,
+    // T214: zayıf konu odağı için kütüphane anahtarı — yalnız sonuç yanıtında.
+    libraryKey: libraryKeyForCase(caseDef),
     questions: caseDef.questions.map((question) => {
       const answer = result.answers.find((entry) => entry.qid === question.id);
       const correct = answer?.correct === true;

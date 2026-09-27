@@ -19,6 +19,9 @@ export interface ServerCaseMeta {
   readonly title: string;
   readonly diagnosis: string | null;
   readonly summary: string;
+  /** T214: sunucunun vaka bittiğinde döndürdüğü öğrenme kütüphanesi odak anahtarı
+   *  (ör. "heart.normal"); eşleşme yoksa null. Vaka açılışında gelmez. */
+  readonly libraryKey?: string | null;
   /** Soru başına doğru seçenek jetonları ve açıklama (yanıttan/bitişten sonra). */
   readonly questions?: Readonly<Record<string, { readonly correctOptionIds: readonly string[]; readonly feedback: string }>>;
 }
@@ -168,6 +171,7 @@ export function fromServerResult(result: SimCaseResult): { readonly result: Case
       title: result.title,
       diagnosis: result.diagnosis,
       summary: result.summary,
+      libraryKey: result.libraryKey ?? null,
       questions: Object.fromEntries(
         result.questions.map((question) => [question.questionId, { correctOptionIds: [...question.correctOptionIds], feedback: question.feedback }]),
       ),

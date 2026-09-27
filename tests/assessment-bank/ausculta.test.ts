@@ -32,6 +32,8 @@ describe("anahtarsız projeksiyon — tüm vakalar", () => {
         const withoutOptions = JSON.stringify({ ...publicCase, questions: publicCase.questions.map((q) => ({ ...q, options: [] })) });
         expect(withoutOptions, caseDef.id).not.toContain(`"${caseDef.title}"`);
         expect(json, caseDef.id).not.toMatch(/\.wav|runtime\/|acousticFinding|"correct"|feedback|hls-cmds/);
+        // T214: kütüphane anahtarı vaka açılışında gitmez (yalnız sonuç yanıtında).
+        expect(json, caseDef.id).not.toContain("libraryKey");
         for (const objective of caseDef.objectives) expect(withoutOptions, caseDef.id).not.toContain(objective);
         expect(json, caseDef.id).not.toContain(caseDef.feedback.summary);
         for (const q of caseDef.questions) {
@@ -98,6 +100,32 @@ describe("sunucu notlandırması", () => {
     expect(ids).toHaveLength(ausculta.SESSION_CASE_COUNT);
     expect(new Set(ids).size).toBe(ids.length);
     for (const id of ids) expect(ausculta.caseById(id)?.modes).toContain("assessment");
+  });
+});
+
+describe("zayıf konu kütüphane anahtarı (T214)", () => {
+  it("bilinen vaka kategori + akustik bulgu eşleşmesiyle anahtar taşır", () => {
+    const caseDef = ausculta.caseById("case_normal_heart");
+    if (caseDef === undefined) throw new Error("vaka yok");
+    const { keys } = ausculta.buildPublicCase(caseDef, { index: 1, mode: "practice", openedAt: "2026-09-27T10:00:00.000+03:00", newToken, random });
+    const result = ausculta.gradeCase(caseDef, keys, { index: 1, mode: "practice", answers: {}, telemetry: EMPTY_TELEMETRY, hintsUsed: 0 });
+    expect(result.libraryKey).toBe("heart.normal");
+    expect(caseResultSchema.safeParse(result).success).toBe(true);
+  });
+
+  it("kütüphanede eşleşmeyen vaka null döner (odağı kurmaz)", () => {
+    const caseDef = allCases.find((c) => c.primaryAcousticFinding === "normal+rhonchi");
+    if (caseDef === undefined) throw new Error("eşleşmeyen vaka yok");
+    const { keys } = ausculta.buildPublicCase(caseDef, { index: 1, mode: "practice", openedAt: "2026-09-27T10:00:00.000+03:00", newToken, random });
+    const result = ausculta.gradeCase(caseDef, keys, { index: 1, mode: "practice", answers: {}, telemetry: EMPTY_TELEMETRY, hintsUsed: 0 });
+    expect(result.libraryKey).toBeNull();
+    expect(caseResultSchema.safeParse(result).success).toBe(true);
+  });
+
+  it("vakanın kendi libraryKey alanı eşleşmeden önce gelir", () => {
+    const base = allCases[0];
+    if (base === undefined) throw new Error("vaka yok");
+    expect(ausculta.libraryKeyForCase({ ...base, libraryKey: "heart.s3" })).toBe("heart.s3");
   });
 });
 
