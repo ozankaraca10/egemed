@@ -1,7 +1,31 @@
+import { readFileSync } from "node:fs";
 import { expect, test, type Locator, type Page } from "@playwright/test";
-import { curriculum } from "../packages/sim-pulse/src/data/curriculum";
 import { captureRouteScreenshot } from "./artifacts";
 import { trackErrors } from "./helpers";
+
+/**
+ * Doğru seçenekler çalışan runtime havuzundan okunur (ADR-011): statik
+ * `data/curriculum` anlık görüntüsü 200 maddede sabittir; oturumlar ise
+ * runtime havuzundan örneklenir. Havuz büyüdükçe (T210/T211 ile C201+/Q201+)
+ * statik `byId` araması "Bilinmeyen madde" hatası verirdi.
+ */
+interface RuntimeCurriculum {
+  readonly version: number;
+  readonly byId: Readonly<Record<string, { readonly correct: number } | undefined>>;
+}
+function loadRuntimeCurriculum(): RuntimeCurriculum {
+  const VENDOR = "packages/sim-pulse/src/runtime/vendor";
+  const win: Record<string, unknown> = {};
+  const load = (path: string): void => {
+    const source = readFileSync(path, "utf8").replace("export default function run", "return function run");
+    (new Function("module", source)(undefined) as (env: Record<string, unknown>) => void)({ window: win });
+  };
+  load(`${VENDOR}/model.js`);
+  win["CardAIScorm"] = { previousStatus: "" };
+  load(`${VENDOR}/curriculum.js`);
+  return win["PulseCurriculum"] as RuntimeCurriculum;
+}
+const curriculum = loadRuntimeCurriculum();
 
 /**
  * Pulse kaynak runtime'ı (EGEMED_PULSE/cardai) platform içinde (PULSE-00).
