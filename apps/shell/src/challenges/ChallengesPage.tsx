@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState, type JSX } from "react";
-import { Button, EmptyState, Field, Select, TextInput, icons, useToast } from "@egemed/ui";
+import { Button, EmptyState, Field, Select, TextInput, icons, useToast, type SelectOption } from "@egemed/ui";
 import { t, type TrKey } from "@egemed/ui/i18n";
-import type { ChallengeBody, SimId } from "@egemed/contracts";
+import type { ChallengeBody, LearnStatus, SimId } from "@egemed/contracts";
 import { useShellDataSources } from "../dataSources";
 import { challengeHref, challengePlayHref } from "../routes";
 import type { ShellSession } from "../session";
@@ -10,6 +10,8 @@ import { challengeErrorKey, outcomeFor, type ChallengeSource } from "./challenge
 /**
  * Meydan Okuma sayfası (ADR-010): yeni düello (kod), kodla katılma ve düellolarım.
  * Kullanıcı arama/liste yoktur; rakip yalnız kodu paylaşarak davet edilir (KVKK).
+ * Öğrenme kilidi (27 Eyl 2026): öğrenmesi tamamlanmamış sim seçilemez ve düello
+ * oluşturulamaz; sunucu da aynı kuralı uygular (`learn_required`).
  */
 
 const SIM_OPTIONS: readonly { readonly value: SimId; readonly enabled: boolean }[] = [
@@ -17,6 +19,23 @@ const SIM_OPTIONS: readonly { readonly value: SimId; readonly enabled: boolean }
   { value: "opaca", enabled: false },
   { value: "pulse", enabled: false },
 ];
+
+/**
+ * Sim seçici seçenekleri: düello desteklemeyen sim "yakında"; destekleyen simin
+ * öğrenmesi tamamlanmadıysa pasif ve öğrenme ipucu etiketiyle çizilir. Durum
+ * henüz okunmadıysa (`null`) seçenek açık kalır: kapıyı sunucu kesin uygular
+ * (`learn_required`), geçici bir okuma hatası kullanıcıyı kilitlemez.
+ */
+export function challengeSimOptions(learn: LearnStatus | null): readonly SelectOption[] {
+  return SIM_OPTIONS.map((option) => {
+    const name = t(`sims.${option.value}.name`);
+    if (!option.enabled) return { value: option.value, label: `${name} · ${t("challenges.create.soon")}`, disabled: true };
+    if (learn !== null && learn[option.value].complete !== true) {
+      return { value: option.value, label: `${name} · ${t("challenges.create.learnHint")}`, disabled: true };
+    }
+    return { value: option.value, label: name, disabled: false };
+  });
+}
 
 function navigate(href: `#${string}`): void {
   const scope = globalThis as { location?: { hash: string } };
@@ -82,7 +101,14 @@ function CodeCard({ challenge }: { readonly challenge: ChallengeBody }): JSX.Ele
   );
 }
 
-function ChallengeWorkspace({ source }: { readonly source: ChallengeSource }): JSX.Element {
+export function ChallengeWorkspace({
+  source,
+  learn = null,
+}: {
+  readonly source: ChallengeSource;
+  /** Öğrenme tamamlama durumu; null iken durum henüz okunmamıştır (kapı sunucuda). */
+  readonly learn?: LearnStatus | null;
+}): JSX.Element {
   const toast = useToast();
   const [simId, setSimId] = useState<SimId>("ausculta");
   const [created, setCreated] = useState<ChallengeBody | null>(null);
@@ -131,15 +157,10 @@ function ChallengeWorkspace({ source }: { readonly source: ChallengeSource }): J
     }
   };
 
-  const simOptions = useMemo(
-    () =>
-      SIM_OPTIONS.map((option) => ({
-        value: option.value,
-        label: option.enabled ? t(`sims.${option.value}.name`) : `${t(`sims.${option.value}.name`)} · ${t("challenges.create.soon")}`,
-        disabled: !option.enabled,
-      })),
-    [],
-  );
+  const simOptions = useMemo(() => challengeSimOptions(learn), [learn]);
+  // Öğrenme kilidi: seçili simin tamamlanma kaydı yoksa oluşturulamaz; durum
+  // henüz okunmadıysa düğme açık kalır ve kapıyı sunucu uygular.
+  const canCreate = learn === null || learn[simId].complete === true;
 
   return (
     <>
@@ -152,9 +173,14 @@ function ChallengeWorkspace({ source }: { readonly source: ChallengeSource }): J
           <Field label={t("challenges.create.sim")}>
             {(control) => <Select {...control} onValueChange={(value) => setSimId(value as SimId)} options={simOptions} value={simId} />}
           </Field>
-          <Button fullWidth loading={creating} onClick={() => void create()}>
+          <Button disabled={!canCreate} fullWidth loading={creating} onClick={() => void create()}>
             {t("challenges.create.action")}
           </Button>
+          {learn !== null && !canCreate ? (
+            <p className="eg-shell-duel__lockNote" role="note">
+              {t("challenges.create.learnHint")}
+            </p>
+          ) : null}
           {created !== null ? <CodeCard challenge={created} /> : null}
         </section>
         <section aria-labelledby="eg-duel-join" className="eg-shell-duel__card">
@@ -220,6 +246,23 @@ function ChallengeWorkspace({ source }: { readonly source: ChallengeSource }): J
 export function ChallengesPage({ session = null }: { readonly session?: ShellSession | null }): JSX.Element {
   const sources = useShellDataSources();
   const source = useMemo(() => (sources === null ? null : sources.challenges(session)), [sources, session]);
+  const learnSource = useMemo(() => (sources === null ? null : sources.learn(session)), [sources, session]);
+  const [learn, setLearn] = useState<LearnStatus | null>(null);
+
+  useEffect(() => {
+    if (learnSource === null) return undefined;
+    let cancelled = false;
+    void learnSource
+      .status()
+      .then((status) => {
+        if (!cancelled) setLearn(status);
+      })
+      .catch(() => undefined);
+    return () => {
+      cancelled = true;
+    };
+  }, [learnSource]);
+
   return (
     <section className="eg-shell-page eg-shell-duel">
       <header className="eg-shell-duel__hero">
@@ -232,7 +275,7 @@ export function ChallengesPage({ session = null }: { readonly session?: ShellSes
       ) : source === null ? (
         <EmptyState description={t("challenges.unavailable.body")} icon={<icons.Users />} title={t("challenges.unavailable.title")} />
       ) : (
-        <ChallengeWorkspace source={source} />
+        <ChallengeWorkspace learn={learn} source={source} />
       )}
     </section>
   );

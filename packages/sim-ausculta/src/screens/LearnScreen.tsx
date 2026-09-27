@@ -225,7 +225,7 @@ export function LearnScreen({
       <ToolbarAudioProvider engine={engine}>
         <EcgDeco embedded={embedded} />
         <div className="screen" style={{ position: "relative", zIndex: 1 }}>
-          <div className="container tall screen-body no-scroll">
+          <div className="container tall screen-body no-scroll learn-body">
             <div className="learn-grid">
               <div className="lib-col">
                 <h2>{isMixed ? "Kombine Sesler" : isHeart ? "Kalp Sesleri" : "Akciğer Sesleri"}</h2>
@@ -286,7 +286,9 @@ export function LearnScreen({
               </div>
 
               <div className="sim-main">
-                <div className="stage-card">
+                {/* T206: masaüstünde sahne, `data-view` ile seçilen gövde görselinin
+                    en-boy oranında kalır (CSS: .learn-grid .stage-card .stage). */}
+                <div className="stage-card" data-view={state.view}>
                   <PatientStage
                     ref={stageRef}
                     points={POINTS}

@@ -11,6 +11,7 @@ import { registerAdminRoleRoutes } from "./admin/roles";
 import { registerAdminUserRoutes, type AdminDeps } from "./admin/users";
 import { createMemorySimSessionRepo, registerSimSessionRoutes, type SimSessionDeps } from "./me/simSessions";
 import { challengeFinishedHook, createMemoryChallengeRepo, registerChallengeRoutes, type ChallengeRepo } from "./me/challenges";
+import { createMemoryLearnRepo, registerLearnRoutes, type LearnRepo } from "./me/learn";
 import { createMemoryRewardsRepo, registerAdminRewardRoutes, registerMeRewardRoutes, type RewardsRepo } from "./rewards";
 import { registerAuthRoutes, type AuthDeps } from "./auth/routes";
 import { registerSsoRoutes } from "./auth/sso/routes";
@@ -50,6 +51,8 @@ export interface AppDeps {
   readonly simSessions?: Omit<SimSessionDeps, "gamification" | "onFinished">;
   /** ADR-010 Meydan Okuma deposu; verilmezse bellek deposu. */
   readonly challenges?: ChallengeRepo;
+  /** Öğrenme tamamlama kaydı (27 Eyl 2026); verilmezse bellek deposu. */
+  readonly learn?: LearnRepo;
 }
 
 /** WebCrypto (Node 20+ genel `crypto`); kök tsconfig DOM'suz olduğu için yapısal tip. */
@@ -206,6 +209,10 @@ export function createApp(deps: AppDeps): Hono<AppEnv> {
   registerMeGamificationRoutes(app, { auth: deps.auth, gamification: deps.gamification }, deps.now);
   // `/me/*` ara katmanı `registerMeGamificationRoutes` içinde bağlanır; ödül okumaları ondan sonra.
   registerMeRewardRoutes(app, { rewards }, deps.now);
+  // Öğrenme tamamlama kaydı (27 Eyl 2026): `/me/*` ara katmanına bağlı iki uç;
+  // meydan okuma kilidi (ADR-010) aynı depoyu okur.
+  const learn = deps.learn ?? createMemoryLearnRepo();
+  registerLearnRoutes(app, { learn }, deps.now);
   const simSessionDeps = deps.simSessions ?? {
     sessions: createMemorySimSessionRepo(),
     readAudio: () => Promise.resolve(null),
@@ -226,7 +233,7 @@ export function createApp(deps: AppDeps): Hono<AppEnv> {
   );
   registerChallengeRoutes(
     app,
-    { auth: deps.auth, challenges, sessions: simSessionDeps.sessions, random: simSessionDeps.random, newId: simSessionDeps.newId },
+    { auth: deps.auth, challenges, learn, sessions: simSessionDeps.sessions, random: simSessionDeps.random, newId: simSessionDeps.newId },
     deps.now,
   );
 

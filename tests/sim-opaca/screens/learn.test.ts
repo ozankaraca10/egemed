@@ -130,6 +130,27 @@ describe("LearnScreen (statik render)", () => {
     const html = renderInStore(createElement(LearnScreen, { env }));
     expect(html).toContain("learn-grid");
   });
+
+  it("kütüphane başlığı liste kaydırma kabının dışındadır (T207)", () => {
+    const html = renderInStore(createElement(LearnScreen));
+    // Başlık `.lib-head`te sabit kalır; yalnız `.lib-scroll` içindeki liste kayar.
+    expect(html).toContain('class="lib-head"');
+    expect(html).toContain('class="lib-scroll"');
+    const headAt = html.indexOf('class="lib-head"');
+    const scrollAt = html.indexOf('class="lib-scroll"');
+    expect(headAt).toBeGreaterThan(-1);
+    expect(headAt).toBeLessThan(scrollAt);
+    const headMarkup = html.slice(headAt, scrollAt);
+    expect(headMarkup).toContain("<h2");
+    expect(headMarkup).toContain("Kütüphane");
+    // Kütüphane kayıtları liste kabının içinde kalır.
+    expect(html.slice(scrollAt)).toContain("lib-item");
+  });
+
+  it("film sahnesi öğrenme düzeninde görüntünün en-boy oranını taşır (T207)", () => {
+    const html = renderInStore(createElement(LearnScreen));
+    expect(html).toMatch(/class="film-stage"[^>]*style="[^"]*aspect-ratio/);
+  });
 });
 
 describe("sentetik konu/görüntü fixture'ı", () => {
