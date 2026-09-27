@@ -4,6 +4,7 @@
   "private": true,
   "type": "module",
   "dependencies": {
+    "@egemed/contracts": "workspace:*",
     "@egemed/gamification-core": "workspace:*"
   },
   "exports": {

@@ -173,3 +173,33 @@ export {
   rewardWinnerSchema,
 } from "./schemas/rewards";
 export type { RewardBody, RewardUpsertRequest, RewardWinnerBody } from "./schemas/rewards";
+export {
+  OPAQUE_TOKEN_PATTERN,
+  SIM_SESSION_MODES,
+  auscultaPublicCaseSchema,
+  auscultaPublicPointSchema,
+  caseResultSchema,
+  opaqueTokenSchema,
+  publicOptionSchema,
+  publicQuestionSchema,
+  questionFeedbackSchema,
+  simSessionAnswerRequestSchema,
+  simSessionAnswerResponseSchema,
+  simSessionCaseResponseSchema,
+  simSessionFinishResponseSchema,
+  simSessionHintRequestSchema,
+  simSessionHintResponseSchema,
+  simSessionModeSchema,
+  simSessionSchema,
+  simSessionStartRequestSchema,
+  simSessionStartResponseSchema,
+  simTelemetrySchema,
+} from "./schemas/simSession";
+export type {
+  AuscultaPublicCase,
+  SimCaseResult,
+  SimSession,
+  SimSessionAnswerRequest,
+  SimSessionMode,
+  SimTelemetry,
+} from "./schemas/simSession";

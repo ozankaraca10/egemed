@@ -23,5 +23,6 @@ export {
   type SimMountContext,
   type SimMountOptions,
   type SimMountTarget,
+  type SimSessionSource,
   type SimulatorId,
 } from "./SimHost";
