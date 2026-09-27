@@ -76,6 +76,7 @@ describe("tsconfig sözleşmesi", () => {
   it("packages altındaki paket tsconfig'lerini bulur", () => {
     expect(packageConfigs).toEqual([
       "packages/api-client/tsconfig.json",
+      "packages/assessment-bank/tsconfig.json",
       "packages/contracts/tsconfig.json",
       "packages/gami-catalogs/tsconfig.json",
       "packages/gami-ui/tsconfig.json",
