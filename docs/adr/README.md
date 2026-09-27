@@ -13,8 +13,8 @@ insan onayına sunulur; öneri metni karar değildir.
 | [ADR-006](006-tek-platform.md) | Tek platform — simülatörler iç modül (hibrit) | Kabul |
 | [ADR-007](007-kimlik-ve-kullanici-verisi.md) | Kimlik, kullanıcı kaydı ve oyunlaştırma verisi | Kabul |
 | [ADR-008](008-rozetler-sunucuda.md) | Rozetler sunucuda değerlendirilir (sime özgü saf katalog paketi) | Kabul |
-| [ADR-009](009-sunucuda-puanlama.md) | Değerlendirme sunucuda puanlanır; cevap anahtarı istemciye gitmez | Öneri |
-| [ADR-010](010-meydan-okuma.md) | Meydan Okuma: eşzamansız, süreli düello | Öneri |
+| [ADR-009](009-sunucuda-puanlama.md) | Değerlendirme sunucuda puanlanır; cevap anahtarı istemciye gitmez | Kabul |
+| [ADR-010](010-meydan-okuma.md) | Meydan Okuma: eşzamansız, süreli düello | Kabul |
 
 `Durum: Kabul` satırını yalnız insan yazar. ADR-006 (23 Eylül 2026) ADR-003'ün gömme modelini iç modülle değiştirdi; veri izolasyonu kuralı geçerli. Astra ikinci görüşü her ADR'de
 `Bekleniyor.` olarak durur; bulgular gelene kadar karar kaydı tamamlanmış

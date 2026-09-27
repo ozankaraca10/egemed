@@ -1,6 +1,7 @@
 # ADR-009 — Değerlendirme sunucuda puanlanır; cevap anahtarı istemciye gitmez
 
-- Durum: Öneri
+- Durum: Kabul
+- Kabul eden: depo sahibi (canlı oturum), 2026-09-27 ("9-10 onaylıyorum").
 - Yönlendirme: depo sahibi, 2026-09-26. Yapay zekâya karşı önlemlerde ilk adım olarak "Doğru cevap istemciye gitmesin, sunucu puanlasın" seçildi.
 - Astra ikinci görüşü: Bekleniyor.
 - İlgili: ADR-008 (bu ADR onun kalan riskini kapatır), ADR-010 (Meydan Okuma bu yola dayanır)

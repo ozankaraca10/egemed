@@ -1,6 +1,7 @@
 # ADR-010 — Meydan Okuma: eşzamansız, süreli düello
 
-- Durum: Öneri
+- Durum: Kabul
+- Kabul eden: depo sahibi (canlı oturum), 2026-09-27 ("9-10 onaylıyorum").
 - Yönlendirme: depo sahibi, 2026-09-26. Önerilen biçim seçildi: "Eşzamansız düello; kod veya bağlantıyla davet, aynı 10 vaka aynı sırayla, süre sınırı; önce ADR". Öğretim üyesi katılamaz ve seçilemez.
 - Astra ikinci görüşü: Bekleniyor.
 - İlgili: ADR-006 (simler arası birleşik puan yok), ADR-007 (kullanıcı verisi), ADR-009 (sunucuda puanlama)
