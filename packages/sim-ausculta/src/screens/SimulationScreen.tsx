@@ -144,10 +144,10 @@ export function SimulationScreen({
     startingRef.current = true;
     loadingIndexRef.current = 1;
     finishingRef.current = "";
-    void startServerSession(sessions, dispatch, state.mode, state.serverFocus).finally(() => {
+    void startServerSession(sessions, dispatch, state.mode, state.serverFocus, state.serverChallengeId).finally(() => {
       startingRef.current = false;
     });
-  }, [dispatch, server, serverMode, sessions, state.mode, state.serverFocus]);
+  }, [dispatch, server, serverMode, sessions, state.mode, state.serverFocus, state.serverChallengeId]);
 
   // Sıradaki vakayı yükle (sonuç kartı kapanıp `nextCase` sonrası).
   useEffect(() => {
@@ -433,7 +433,11 @@ function CaseView({
             <div className={`sim-main ${endCard ? "is-inert" : ""}`}>
               {isAssessment && (
                 <div className={`strict-banner ${state.caseIndex > 0 ? "compact" : ""}`} role="alert">
-                  {state.caseIndex === 0 ? (
+                  {binding?.server.mode === "challenge" ? (
+                    <span>
+                      <strong>Meydan Okuma.</strong> Rakibinizle aynı vakalar · vaka başı 2 dk, toplam 8 dk · tek dinleme
+                    </span>
+                  ) : state.caseIndex === 0 ? (
                     <>
                       <strong>Manuel muayene modu.</strong>
                       <span className="strict-banner-detail"> Her bölge yalnızca <b>bir kez</b> dinlenebilir; işaretleme, ipucu ve tekrar dinleme yoktur.</span>

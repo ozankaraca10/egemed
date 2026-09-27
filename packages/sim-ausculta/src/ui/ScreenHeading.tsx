@@ -9,6 +9,8 @@ interface EmbeddedValue {
   readonly requestSignIn?: () => void;
   /** A1 (ADR-009): sunucu vaka oturumu kanalı; uygulama/değerlendirme bununla çalışır. */
   readonly sessions?: SimSessionSource;
+  readonly challengeId?: string;
+  readonly onChallengeFinished?: (challengeId: string) => void;
 }
 
 const EmbeddedContext = createContext<EmbeddedValue>({ embedded: false, audience: "student" });
@@ -19,6 +21,8 @@ export function EmbeddedProvider({
   audience = "student",
   requestSignIn,
   sessions,
+  challengeId,
+  onChallengeFinished,
   children,
 }: {
   readonly embedded: boolean;
@@ -26,6 +30,8 @@ export function EmbeddedProvider({
   readonly audience?: SimAudience;
   readonly requestSignIn?: () => void;
   readonly sessions?: SimSessionSource;
+  readonly challengeId?: string;
+  readonly onChallengeFinished?: (challengeId: string) => void;
   readonly children: ReactNode;
 }): JSX.Element {
   const value: EmbeddedValue = {
@@ -34,6 +40,8 @@ export function EmbeddedProvider({
     ...(setChrome === undefined ? {} : { setChrome }),
     ...(requestSignIn === undefined ? {} : { requestSignIn }),
     ...(sessions === undefined ? {} : { sessions }),
+    ...(challengeId === undefined ? {} : { challengeId }),
+    ...(onChallengeFinished === undefined ? {} : { onChallengeFinished }),
   };
   return <EmbeddedContext.Provider value={value}>{children}</EmbeddedContext.Provider>;
 }
@@ -60,6 +68,15 @@ export function useRequestSignIn(): (() => void) | undefined {
 /** A1: sunucu vaka oturumu kanalı; kabuk vermezse yoktur. */
 export function useSessions(): SimSessionSource | undefined {
   return useContext(EmbeddedContext).sessions;
+}
+
+/** ADR-010: düello bağlamı (kabuk `#/sims/ausculta/duello/<id>` ile açınca). */
+export function useChallenge(): { readonly challengeId?: string; readonly onChallengeFinished?: (challengeId: string) => void } {
+  const value = useContext(EmbeddedContext);
+  return {
+    ...(value.challengeId === undefined ? {} : { challengeId: value.challengeId }),
+    ...(value.onChallengeFinished === undefined ? {} : { onChallengeFinished: value.onChallengeFinished }),
+  };
 }
 
 export interface ScreenHeadingProps {

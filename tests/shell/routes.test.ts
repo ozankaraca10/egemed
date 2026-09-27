@@ -27,11 +27,20 @@ describe("resolveRoute", () => {
     expect(resolveRoute("#/gorevler").kind).toBe("notFound");
     expect(resolveRoute("#/not-defteri").kind).toBe("notFound");
   });
+  it("Meydan Okuma rotaları: liste, ayrıntı ve düello modunda sim (ADR-010)", () => {
+    const id = "11111111-1111-4111-8111-111111111111";
+    expect(resolveRoute("#/meydan-okuma")).toMatchObject({ kind: "page", route: { id: "challenges" } });
+    expect(resolveRoute(`#/meydan-okuma/${id}`)).toEqual({ kind: "challengeDetail", challengeId: id, titleKey: "challenges.detail.title" });
+    expect(resolveRoute(`#/sims/ausculta/duello/${id}`)).toMatchObject({ kind: "sim", simId: "ausculta", challengeId: id });
+    expect(resolveRoute("#/meydan-okuma/degil-uuid").kind).toBe("notFound");
+    expect(resolveRoute(`#/sims/kalp/duello/${id}`).kind).toBe("notFound");
+  });
+
   it("gidiş-dönüş, benzersizlik ve sözlük anahtarları korunur", () => {
     const keys = new Set(Object.keys(tr));
-    expect(ROUTES.length).toBe(2);
-    expect(new Set(ROUTES.map((route) => route.id)).size).toBe(2);
-    expect(new Set(ROUTES.map((route) => route.path)).size).toBe(2);
+    expect(ROUTES.length).toBe(3);
+    expect(new Set(ROUTES.map((route) => route.id)).size).toBe(3);
+    expect(new Set(ROUTES.map((route) => route.path)).size).toBe(3);
     for (const route of ROUTES) {
       expect(routeHref(route.id), route.id).toBe(`#${route.path}`);
       expect(pageId(routeHref(route.id)), route.id).toBe(route.id);

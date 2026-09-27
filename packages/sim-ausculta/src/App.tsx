@@ -53,6 +53,8 @@ export interface AppProps {
   readonly requestSignIn?: () => void;
   /** A1: sunucu vaka oturumu kanalı. */
   readonly sessions?: SimSessionSource;
+  readonly challengeId?: string;
+  readonly onChallengeFinished?: (challengeId: string) => void;
 }
 
 function Shell({
@@ -70,6 +72,8 @@ function Shell({
   audience = "student",
   requestSignIn,
   sessions,
+  challengeId,
+  onChallengeFinished,
 }: AppProps & { embedded: boolean }): JSX.Element {
   const { state, dispatch, bus, now, storage } = useStore();
   const gamiRef = useRef<LocalGamiRepository | null>(null);
@@ -87,6 +91,14 @@ function Shell({
   useEffect(() => {
     audio.stop();
   }, [audio, state.screen]);
+
+  // ADR-010: düello bağlamıyla açılınca mod seçimi atlanır; oturumu sürücü düello ucundan açar.
+  const challengeStarted = useRef<string | null>(null);
+  useEffect(() => {
+    if (challengeId === undefined || challengeStarted.current === challengeId) return;
+    challengeStarted.current = challengeId;
+    dispatch({ type: "startMode", mode: "assessment", challengeId });
+  }, [challengeId, dispatch]);
 
   useEffect(() => bus.subscribe((event) => {
     // Oyunlaştırma yalnız öğrenci kitlesi içindir (26 Eyl 2026 sözleşmesi):
@@ -131,6 +143,8 @@ function Shell({
       embedded={embedded}
       audience={audience}
       {...(sessions === undefined ? {} : { sessions })}
+      {...(challengeId === undefined ? {} : { challengeId })}
+      {...(onChallengeFinished === undefined ? {} : { onChallengeFinished })}
       {...(setChrome === undefined ? {} : { setChrome })}
       {...(requestSignIn === undefined ? {} : { requestSignIn })}
     >

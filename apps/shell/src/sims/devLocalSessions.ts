@@ -119,6 +119,10 @@ export function createDevLocalSessionSource(now: () => number): SimSessionSource
       const total = results.length === 0 ? 0 : Math.round(results.reduce((sum, result) => sum + result.total, 0) / results.length);
       return { mode: session.mode, total, max: 100, passed: total >= ausculta.MASTERY_THRESHOLD, cases: results, xpGained: 0 };
     },
+    // Meydan Okuma sunucu ister (iki kullanıcı); DEV yerel kaynakta yoktur.
+    async startChallenge() {
+      throw new Error("not_found");
+    },
     audioUrl(sessionId, audioToken) {
       const session = sessions.get(sessionId);
       const audio = session?.cases.flatMap((entry) => (entry.keys?.audio[audioToken] === undefined ? [] : [entry.keys.audio[audioToken]]))[0];

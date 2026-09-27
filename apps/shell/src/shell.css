@@ -904,6 +904,57 @@ button.eg-shell-simbar__chip:hover { background: var(--navy-600); }
   .eg-shell-showcase__title { font-size: var(--fs-3xl); }
 }
 
+/* ADR-010 — Meydan Okuma sayfaları. */
+.eg-shell-duel { display: grid; gap: var(--sp-5); }
+.eg-shell-duel__hero { display: grid; gap: var(--sp-2); max-width: 46rem; }
+.eg-shell-duel__lead { margin: 0; color: var(--ink-700); font-size: var(--fs-md); line-height: 1.55; }
+.eg-shell-duel__rules { margin: 0; color: var(--ink-600); font-size: var(--fs-sm); }
+.eg-shell-duel__grid { display: grid; gap: var(--sp-4); grid-template-columns: minmax(0, 1fr); }
+.eg-shell-duel__card { display: grid; gap: var(--sp-3); align-content: start; padding: var(--sp-4); background: var(--card); border: 1px solid var(--blue-100); border-radius: var(--r-lg); box-shadow: var(--elev-1); }
+.eg-shell-duel__cardTitle { display: flex; align-items: center; gap: var(--sp-2); margin: 0; color: var(--ink-900); font-size: var(--fs-lg); font-weight: 800; }
+.eg-shell-duel__cardIcon { width: 1.25rem; height: 1.25rem; color: var(--blue-600); }
+.eg-shell-duel__join { display: grid; gap: var(--sp-3); }
+.eg-shell-duel__codeInput { font-size: var(--fs-xl); font-variant-numeric: tabular-nums; letter-spacing: .3em; text-align: center; }
+.eg-shell-duel__code { display: grid; gap: var(--sp-1); justify-items: center; padding: var(--sp-4); background: var(--blue-50); border: 1px dashed var(--blue-300); border-radius: var(--r-md); text-align: center; }
+.eg-shell-duel__codeLabel { margin: 0; color: var(--ink-600); font-size: var(--fs-xs); font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
+.eg-shell-duel__codeValue { margin: 0; color: var(--navy-900); font-size: var(--fs-3xl); font-weight: 800; font-variant-numeric: tabular-nums; letter-spacing: .25em; }
+.eg-shell-duel__codeNote { margin: 0; color: var(--ink-600); font-size: var(--fs-xs); }
+.eg-shell-duel__actions { display: flex; flex-wrap: wrap; gap: var(--sp-2); }
+.eg-shell-duel__listSection { display: grid; gap: var(--sp-3); }
+.eg-shell-duel__list { display: grid; gap: var(--sp-2); margin: 0; padding: 0; list-style: none; }
+.eg-shell-duel__row { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: var(--sp-1) var(--sp-3); padding: var(--sp-3); background: var(--card); border: 1px solid var(--blue-100); border-radius: var(--r-md); }
+.eg-shell-duel__rowSim { color: var(--ink-600); font-size: var(--fs-xs); font-weight: 700; text-transform: uppercase; letter-spacing: .05em; }
+.eg-shell-duel__rowName { grid-column: 1; color: var(--ink-900); font-weight: 700; }
+.eg-shell-duel__rowLink { display: inline-flex; align-items: center; gap: var(--sp-1); min-height: 44px; color: var(--blue-700); font-weight: 700; text-decoration: none; }
+.eg-shell-duel__rowLink:focus-visible, .eg-shell-duel__back:focus-visible { outline: 2px solid var(--focus-color); outline-offset: 2px; border-radius: var(--r-sm); }
+.eg-shell-duel__badge { display: inline-flex; align-items: center; justify-self: start; min-height: 1.75rem; padding: 0 var(--sp-2); border-radius: var(--r-pill); font-size: var(--fs-xs); font-weight: 800; background: var(--blue-50); color: var(--blue-700); border: 1px solid var(--blue-200); }
+.eg-shell-duel__badge--win { background: var(--green-50); color: var(--green-600); border-color: var(--green-500); }
+.eg-shell-duel__badge--lose { background: var(--red-100); color: var(--red-600); border-color: var(--red-500); }
+.eg-shell-duel__badge--expired { background: var(--blue-50); color: var(--ink-600); border-color: var(--ink-300); }
+.eg-shell-duel__back { display: inline-flex; align-items: center; gap: var(--sp-1); justify-self: start; min-height: 44px; color: var(--blue-700); font-weight: 700; text-decoration: none; }
+.eg-shell-duel__detailHead { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-3); }
+.eg-shell-duel__banner { display: flex; align-items: center; gap: var(--sp-2); margin: 0; padding: var(--sp-3) var(--sp-4); border-radius: var(--r-md); font-size: var(--fs-lg); font-weight: 800; background: var(--blue-50); color: var(--navy-900); }
+.eg-shell-duel__banner--win { background: var(--green-50); color: var(--green-600); }
+.eg-shell-duel__banner--lose { background: var(--red-100); color: var(--red-600); }
+.eg-shell-duel__bannerIcon { width: 1.5rem; height: 1.5rem; }
+.eg-shell-duel__waiting { margin: 0; padding: var(--sp-3) var(--sp-4); background: var(--orange-100); border-radius: var(--r-md); color: var(--ink-800); }
+.eg-shell-duel__versus { display: grid; gap: var(--sp-3); grid-template-columns: minmax(0, 1fr); margin: 0; padding: 0; list-style: none; }
+.eg-shell-duel__side { display: grid; gap: var(--sp-1); padding: var(--sp-4); background: var(--card); border: 1px solid var(--blue-100); border-radius: var(--r-lg); box-shadow: var(--elev-1); }
+.eg-shell-duel__side--me { border-color: var(--blue-400); }
+.eg-shell-duel__side--winner { border-color: var(--green-500); box-shadow: 0 0 0 2px var(--green-500); }
+.eg-shell-duel__side--empty { background: var(--blue-50); border-style: dashed; }
+.eg-shell-duel__sideRole { margin: 0; color: var(--ink-600); font-size: var(--fs-xs); font-weight: 700; letter-spacing: .05em; text-transform: uppercase; }
+.eg-shell-duel__sideName { margin: 0; color: var(--ink-900); font-size: var(--fs-lg); font-weight: 800; }
+.eg-shell-duel__sideState { margin: 0; color: var(--ink-600); font-size: var(--fs-sm); }
+.eg-shell-duel__stats { display: flex; gap: var(--sp-4); margin: var(--sp-2) 0 0; }
+.eg-shell-duel__stats dt { color: var(--ink-600); font-size: var(--fs-xs); }
+.eg-shell-duel__stats dd { margin: 0; color: var(--navy-900); font-size: var(--fs-xl); font-weight: 800; font-variant-numeric: tabular-nums; }
+@media (min-width: 768px) {
+  .eg-shell-duel__grid, .eg-shell-duel__versus { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .eg-shell-duel__row { grid-template-columns: 8rem minmax(0, 1fr) auto auto; }
+  .eg-shell-duel__rowName { grid-column: auto; }
+}
+
 /* T151 — geliştirme vitrini (#/_vitrin); üretimde çizilmez. */
 .eg-shell-vitrin { max-inline-size: 1100px; margin: 0 auto; padding: var(--sp-5) var(--sp-4) var(--sp-6); display: grid; gap: var(--sp-6); }
 .eg-shell-vitrin h1 { margin: 0; font-size: var(--fs-2xl); color: var(--ink-900); }
