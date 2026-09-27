@@ -440,6 +440,8 @@ test.describe("API oturumu (dev sağlayıcı)", () => {
     await page.goto(STUDENT_ENTRY);
     await signIn(page, "ogrenci");
     await expect(page).toHaveURL(/#\/$/);
+    // T209: öğrenme kilidi — uygulama akışından önce öğrenme kaydı sunucuya yazılır.
+    await completeLearn(page, "ausculta");
     const caseBodies: string[] = [];
     const clientAttempts: string[] = [];
     page.on("response", async (response) => {
