@@ -61,6 +61,12 @@ export interface PulseRuntimeOptions {
    * footer'ı gizlenir; kontroller kabuğun barına taşınır (`chrome.ts`).
    */
   readonly unifiedChrome?: boolean;
+  /**
+   * T213: host kaydına göre öğrenme başka cihazda tamamlanmış
+   * (`context.learn.complete`). true ise kaynağın `derive()` kapısı vaka/sınav
+   * kilidini açar (`window.__pulseLearnComplete`); yerel izlenme kaydı değişmez.
+   */
+  readonly learnComplete?: boolean;
 }
 
 export interface PulseRuntimeHandle {
@@ -169,7 +175,12 @@ export function mountPulseRuntime(target: HTMLElement, options: PulseRuntimeOpti
   const observers = new Set<ResizeObserver>();
   const audioContexts = new Set<AudioContext>();
   const bus = new EventTarget();
-  const local: Record<PropertyKey, unknown> = { __pulseAssetBase: options.assetBase };
+  const local: Record<PropertyKey, unknown> = {
+    __pulseAssetBase: options.assetBase,
+    // T213: host tamamlaması `derive()` kilit kararında VEYA'lanır; bayrak
+    // yoksa (ziyaretçi/kanalsız) kilit yerel izlenme kaydına göre kalır.
+    __pulseLearnComplete: options.learnComplete === true,
+  };
 
   const addTracked = (
     realTarget: EventTarget,
@@ -336,7 +347,8 @@ export function mountPulseRuntime(target: HTMLElement, options: PulseRuntimeOpti
         case "dispatchEvent":
           return (event: Event) => {
             // `pulse:*` (ör. T208 `pulse:learn-complete`) platform köprüsüne
-            // `cardai:*` ile aynı yoldan iletilir; köprü sonraki görevde bağlanır.
+            // `cardai:*` ile aynı yoldan iletilir; T213 bu olayı
+            // `markComplete`e bağlar (`learn.ts`).
             if (event.type.startsWith("cardai:") || event.type.startsWith("pulse:")) {
               options.bridge?.onEvent?.(event.type, (event as CustomEvent<unknown>).detail);
             }

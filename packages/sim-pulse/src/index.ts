@@ -20,6 +20,14 @@ export { DEFAULT_PULSE_RUNTIME_ASSET_BASE, createPulseRuntimeModule, pulseStorag
 export type { PulseRuntimeModuleDeps } from "./runtime/module";
 export { mountPulseRuntime } from "./runtime/host";
 export type { PulseRuntimeBridge, PulseRuntimeHandle, PulseRuntimeOptions } from "./runtime/host";
+export {
+  PULSE_LEARN_COMPLETE_EVENT,
+  PULSE_LEARN_VERSION_PATTERN,
+  createPulseLearnBridge,
+  pulseContentVersion,
+  pulseLearnPort,
+} from "./runtime/learn";
+export type { PulseLearnBridge, PulseLearnPort } from "./runtime/learn";
 import { createPulseRuntimeModule } from "./runtime/module";
 export const pulseModule = createPulseRuntimeModule();
 export type { PulseMountElement, PulseModuleDeps, PulseModuleEnv } from "./mount";
