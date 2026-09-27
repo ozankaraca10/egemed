@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@egemed/api-client": "workspace:*",
+    "@egemed/assessment-bank": "workspace:*",
     "@egemed/contracts": "workspace:*",
     "@egemed/gami-catalogs": "workspace:*",
     "@egemed/gami-ui": "workspace:*",

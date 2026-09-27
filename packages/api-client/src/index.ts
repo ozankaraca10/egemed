@@ -37,6 +37,8 @@ import {
   simSessionFinishResponseSchema,
   simSessionHintRequestSchema,
   simSessionHintResponseSchema,
+  simSessionCheckRequestSchema,
+  simSessionCheckResponseSchema,
   simSessionStartRequestSchema,
   simSessionStartResponseSchema,
   updateUserRequestSchema,
@@ -389,7 +391,19 @@ export interface ApiClient {
     setPreferences(input: MePreferences): Promise<{ readonly data: MePreferences }>;
   };
   readonly simSessions: {
-    start(simId: SimId, mode: "practice" | "assessment"): Promise<{ readonly data: SimSession }>;
+    start(
+      simId: SimId,
+      mode: "practice" | "assessment",
+      options?: { readonly focusFinding?: string | undefined },
+    ): Promise<{ readonly data: SimSession }>;
+    /** Yalnız uygulama: tek soru kontrolü (anında geri bildirim, yanıt kilitlenir). */
+    check(
+      simId: SimId,
+      sessionId: string,
+      index: number,
+      questionId: string,
+      answer: readonly string[],
+    ): Promise<{ readonly data: { readonly questionId: string; readonly correct: boolean; readonly correctOptionIds: readonly string[]; readonly feedback: string } }>;
     getCase(simId: SimId, sessionId: string, index: number): Promise<{ readonly data: AuscultaPublicCase }>;
     hint(simId: SimId, sessionId: string, index: number, questionId: string): Promise<ApiSimSessionHintResult>;
     answer(
@@ -867,11 +881,15 @@ export function createApiClient(options: CreateApiClientOptions): ApiClient {
       },
     },
     simSessions: {
-      async start(simId: SimId, mode: "practice" | "assessment"): Promise<{ readonly data: SimSession }> {
+      async start(
+        simId: SimId,
+        mode: "practice" | "assessment",
+        options: { readonly focusFinding?: string | undefined } = {},
+      ): Promise<{ readonly data: SimSession }> {
         const parsedSimId = parseSchema(simIdSchema, simId, "POST /me/sims/:simId/sessions path.simId");
         const parsedBody = parseSchema(
           simSessionStartRequestSchema,
-          { mode },
+          options.focusFinding === undefined ? { mode } : { mode, focusFinding: options.focusFinding },
           "POST /me/sims/:simId/sessions request",
         );
         return requestJson({
@@ -924,6 +942,20 @@ export function createApiClient(options: CreateApiClientOptions): ApiClient {
           contentType: "application/json",
           body: JSON.stringify(parsedBody),
           parse: (value, ctx) => parseSchema(simSessionHintResponseSchema, value, `${ctx} response`),
+        });
+      },
+      async check(simId: SimId, sessionId: string, index: number, questionId: string, answer: readonly string[]) {
+        const context = "POST /me/sims/:simId/sessions/:sessionId/cases/:index/check";
+        const parsedSimId = parseSchema(simIdSchema, simId, `${context} path.simId`);
+        const parsedSessionId = parseSchema(uuidSchema, sessionId, `${context} path.sessionId`);
+        const parsedIndex = parseCaseIndex(index, `${context} path.index`);
+        const parsedBody = parseSchema(simSessionCheckRequestSchema, { questionId, answer: [...answer] }, `${context} request`);
+        return requestJson({
+          method: "POST",
+          path: `/me/sims/${parsedSimId}/sessions/${parsedSessionId}/cases/${parsedIndex}/check`,
+          contentType: "application/json",
+          body: JSON.stringify(parsedBody),
+          parse: (value, ctx) => parseSchema(simSessionCheckResponseSchema, value, `${ctx} response`),
         });
       },
       async answer(

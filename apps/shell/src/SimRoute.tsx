@@ -5,6 +5,23 @@ import { shellNow } from "./now";
 import { routeHref, simTitleKey } from "./routes";
 import { createBrowserAttemptReporter, createBrowserGamification, type ReportedAttempt } from "./reportAttempt";
 import { loadSimModule } from "./sims/loaders";
+import { SERVER_SESSION_SIMS, createBrowserSessionSource } from "./sims/sessionSources";
+import type { SimSessionSource } from "@egemed/sim-host";
+
+/**
+ * A1.4 (ADR-009): uygulama/değerlendirme vakaları sunucu oturumundan gelir. Ziyaretçide
+ * kanal yoktur (modlar zaten kilitli). API yoksa YALNIZ geliştirmede tarayıcı içi yerel
+ * kaynak dinamik yüklenir; `import.meta.env.DEV` kapısı üretim paketinden eler.
+ */
+async function sessionSourceFor(simId: SimulatorId, audience: string, apiBaseUrl: string | null): Promise<SimSessionSource | null> {
+  if (audience === "visitor" || !SERVER_SESSION_SIMS.includes(simId)) return null;
+  if (apiBaseUrl !== null) return createBrowserSessionSource(apiBaseUrl, simId);
+  if (import.meta.env.DEV) {
+    const module = await import("./sims/devLocalSessions");
+    return module.createDevLocalSessionSource(shellNow);
+  }
+  return null;
+}
 
 /** Sim host kapsayıcısı; kök tsconfig DOM lib'i taşımadığı için tip yapısaldır. */
 interface SimContainer {
@@ -172,7 +189,7 @@ function SimRouteHost({ actorId, apiBaseUrl = null, audience = "student", onChro
     // Mount da mikro göreve ertelenir: önceki simin (ör. Opaca React kökü)
     // kapanışı React render'ı sırasında değil, ondan sonra olur. Sıra korunur:
     // önceki cleanup'ın `release`ı bu mount'tan önce kuyruğa girer.
-    const mounted = Promise.resolve().then(() => {
+    const mounted = Promise.resolve().then(async () => {
       // Oyunlaştırma hattı (deneme raporu, sunucu özeti) yalnız öğrenciye kurulur (T171/T172).
       const gamified = audienceShowsGamification(audience);
       const reporter = apiBaseUrl === null || !gamified ? null : createBrowserAttemptReporter(apiBaseUrl);
@@ -183,6 +200,7 @@ function SimRouteHost({ actorId, apiBaseUrl = null, audience = "student", onChro
               void reporter(simId, attempt).catch(() => undefined);
             };
       const gamification = apiBaseUrl === null || !gamified ? null : createBrowserGamification(apiBaseUrl, simId);
+      const sessions = await sessionSourceFor(simId, audience, apiBaseUrl);
       const options = {
         ...(actorId === undefined ? {} : { actorId }),
         ...(reportAttempt === undefined ? {} : { reportAttempt }),
@@ -190,6 +208,7 @@ function SimRouteHost({ actorId, apiBaseUrl = null, audience = "student", onChro
         setChrome: (chrome: SimChrome | null) => chromeRef.current?.(chrome),
         audience,
         requestSignIn: () => signInRef.current?.(),
+        ...(sessions === null ? {} : { sessions }),
       };
       return host.mount(container, simId, options);
     });
