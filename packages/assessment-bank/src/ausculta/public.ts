@@ -44,7 +44,7 @@ export function buildPublicCase(caseDef: CaseDef, input: BuildCaseInput): { read
   const { sounds: records } = resolveCaseSoundsEx(caseDef.soundAssignments);
   // Değerlendirmede bildirimsiz yedek (posterior→anterior) sunumu yapılmaz (O7).
   const pointIds =
-    input.mode === "assessment" ? assessmentPointFilter(caseDef.soundAssignments) : caseDef.soundAssignments.map((a) => a.pointId);
+    input.mode !== "practice" ? assessmentPointFilter(caseDef.soundAssignments) : caseDef.soundAssignments.map((a) => a.pointId);
   const audio: Record<string, { runtimeUrl: string; pointId: string }> = {};
   const points = pointIds.flatMap((pointId) => {
     const record = records[pointId];

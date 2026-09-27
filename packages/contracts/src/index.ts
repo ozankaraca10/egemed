@@ -194,6 +194,15 @@ export {
   simSessionStartRequestSchema,
   simSessionStartResponseSchema,
   simTelemetrySchema,
+  isTimedSessionMode,
+  CHALLENGE_CODE_PATTERN,
+  CHALLENGE_STATUSES,
+  challengeCreateRequestSchema,
+  challengeJoinRequestSchema,
+  challengeListResponseSchema,
+  challengeParticipantSchema,
+  challengeResponseSchema,
+  challengeSchema,
 } from "./schemas/simSession";
 export type {
   AuscultaPublicCase,
@@ -202,4 +211,5 @@ export type {
   SimSessionAnswerRequest,
   SimSessionMode,
   SimTelemetry,
+  ChallengeBody,
 } from "./schemas/simSession";

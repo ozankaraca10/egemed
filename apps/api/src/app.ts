@@ -10,6 +10,7 @@ import { registerAdminImportRoutes } from "./admin/imports";
 import { registerAdminRoleRoutes } from "./admin/roles";
 import { registerAdminUserRoutes, type AdminDeps } from "./admin/users";
 import { createMemorySimSessionRepo, registerSimSessionRoutes, type SimSessionDeps } from "./me/simSessions";
+import { challengeFinishedHook, createMemoryChallengeRepo, registerChallengeRoutes, type ChallengeRepo } from "./me/challenges";
 import { createMemoryRewardsRepo, registerAdminRewardRoutes, registerMeRewardRoutes, type RewardsRepo } from "./rewards";
 import { registerAuthRoutes, type AuthDeps } from "./auth/routes";
 import { registerSsoRoutes } from "./auth/sso/routes";
@@ -46,7 +47,9 @@ export interface AppDeps {
   /** Aylık ödüller (26 Eyl 2026); verilmezse bellek deposu (yalnız test/DB'siz geliştirme). */
   readonly rewards?: RewardsRepo;
   /** A1 sunucu vaka oturumu (ADR-009); verilmezse bellek deposu ve ses yok (yalnız test/DB'siz geliştirme). */
-  readonly simSessions?: Omit<SimSessionDeps, "gamification">;
+  readonly simSessions?: Omit<SimSessionDeps, "gamification" | "onFinished">;
+  /** ADR-010 Meydan Okuma deposu; verilmezse bellek deposu. */
+  readonly challenges?: ChallengeRepo;
 }
 
 /** WebCrypto (Node 20+ genel `crypto`); kök tsconfig DOM'suz olduğu için yapısal tip. */
@@ -203,18 +206,26 @@ export function createApp(deps: AppDeps): Hono<AppEnv> {
   registerMeGamificationRoutes(app, { auth: deps.auth, gamification: deps.gamification }, deps.now);
   // `/me/*` ara katmanı `registerMeGamificationRoutes` içinde bağlanır; ödül okumaları ondan sonra.
   registerMeRewardRoutes(app, { rewards }, deps.now);
+  const simSessionDeps = deps.simSessions ?? {
+    sessions: createMemorySimSessionRepo(),
+    readAudio: () => Promise.resolve(null),
+    newToken: cryptoToken,
+    random: cryptoRandom,
+    newId: () => cryptoUuid(),
+  };
+  const challenges = deps.challenges ?? createMemoryChallengeRepo();
   registerSimSessionRoutes(
     app,
     {
       gamification: deps.gamification,
-      ...(deps.simSessions ?? {
-        sessions: createMemorySimSessionRepo(),
-        readAudio: () => Promise.resolve(null),
-        newToken: cryptoToken,
-        random: cryptoRandom,
-        newId: () => cryptoUuid(),
-      }),
+      ...simSessionDeps,
+      onFinished: challengeFinishedHook({ challenges, sessions: simSessionDeps.sessions }),
     },
+    deps.now,
+  );
+  registerChallengeRoutes(
+    app,
+    { auth: deps.auth, challenges, sessions: simSessionDeps.sessions, random: simSessionDeps.random, newId: simSessionDeps.newId },
     deps.now,
   );
 
