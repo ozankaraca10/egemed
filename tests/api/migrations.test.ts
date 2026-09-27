@@ -72,6 +72,7 @@ const expectedColumns: Record<string, readonly string[]> = {
     "status", "created_at", "expires_at", "accepted_at",
   ],
   sim_sessions: ["id", "user_id", "institution_id", "sim_id", "mode", "status", "state", "started_at", "expires_at", "finished_at"],
+  sim_learn_completions: ["user_id", "sim_id", "completed_at", "content_version"],
   monthly_rewards: [
     "id", "institution_id", "sim_id", "month", "title", "description", "sponsor", "winners_count", "cohorts",
     "min_assessments", "require_public_name", "terms", "finalized_at", "created_at", "updated_at", "updated_by",
@@ -210,6 +211,10 @@ const expectedConstraints = [
   "constraint gami_attempts_score_nonnegative_check check (score >= 0)",
   "constraint gami_attempts_max_score_positive_check check (max_score > 0)",
   "constraint gami_attempts_user_sim_attempt_key unique (user_id, sim_id, attempt_no)",
+  "constraint sim_learn_completions_user_id_fkey foreign key (user_id) references users (id) on delete cascade",
+  "constraint sim_learn_completions_sim_id_check check (sim_id in ('pulse', 'ausculta', 'opaca'))",
+  "constraint sim_learn_completions_content_version_check check (content_version ~ '^[a-z0-9._-]{1,40}$')",
+  "constraint sim_learn_completions_pkey primary key (user_id, sim_id)",
 ] as const;
 
 const expectedIndexes = [
@@ -283,7 +288,7 @@ describe("kısıtlar", () => {
 
   it("her sim_id CHECK'i tam olarak üç simi içerir", () => {
     const simChecks = [...allUp.matchAll(/check \(\s*sim_id\s+in \(([^)]*)\)/g)];
-    expect(simChecks).toHaveLength(6);
+    expect(simChecks).toHaveLength(7);
     for (const check of simChecks) {
       const values = [...(check[1] ?? "").matchAll(/'([^']+)'/g)].map((value) => value[1] ?? "").sort();
       expect(values).toEqual(["ausculta", "opaca", "pulse"]);

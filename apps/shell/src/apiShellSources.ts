@@ -55,6 +55,7 @@ import { createApiGamificationSource, createSyntheticGamificationSource } from "
 import type { ShellDataSources } from "./dataSources";
 import { createApiShowcaseSource } from "./home/showcaseSource";
 import { createApiChallengeSource } from "./challenges/challengeSource";
+import { createApiLearnSource } from "./learn/learnSource";
 import type { ShellSession } from "./session";
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -257,6 +258,7 @@ export function createApiShellDataSources(client: ApiClient): ShellDataSources {
   const apiProgress = createApiGamificationSource(client);
   const apiShowcase = createApiShowcaseSource(client);
   const apiChallenges = createApiChallengeSource(client);
+  const apiLearn = createApiLearnSource(client);
   const uploaded = new Map<string, { readonly headers: readonly string[]; readonly dataRows: readonly (readonly string[])[] }>();
 
   const users: UsersDataSource = {
@@ -458,6 +460,9 @@ export function createApiShellDataSources(client: ApiClient): ShellDataSources {
     challenges(session: ShellSession | null) {
       return session === null ? null : apiChallenges;
     },
+    learn(session: ShellSession | null) {
+      return session === null ? null : apiLearn;
+    },
     imports,
     rewards: createApiRewardsSource(client),
     users,
@@ -549,6 +554,7 @@ export function createBrowserShellDataSources(baseUrl: string): ShellDataSources
       leaderboardPreferences: () => null,
       showcase: () => null,
       challenges: () => null,
+      learn: () => null,
       imports: { apply: fail, template: fail, upload: fail, validate: fail },
       rewards: { finalize: fail, list: fail, remove: fail, upsert: fail },
       users,

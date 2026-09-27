@@ -29,6 +29,7 @@ export function challengeErrorKey(error: unknown): TrKey {
   if (issue === "own_challenge") return "challenges.error.own";
   if (issue === "challenge_taken") return "challenges.error.taken";
   if (issue === "too_many_open_challenges") return "challenges.error.tooMany";
+  if (issue === "learn_required") return "challenges.error.learnRequired";
   if (error.code === "rate_limited") return "challenges.error.rate";
   if (error.code === "not_found") return "challenges.error.notFound";
   return "challenges.error.generic";

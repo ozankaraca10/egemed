@@ -2,6 +2,7 @@ import { createApp } from "../../apps/api/src/app";
 import { createMemoryRewardsRepo } from "../../apps/api/src/rewards";
 import { createMemorySimSessionRepo } from "../../apps/api/src/me/simSessions";
 import { createMemoryChallengeRepo } from "../../apps/api/src/me/challenges";
+import { createMemoryLearnRepo } from "../../apps/api/src/me/learn";
 import { createMemoryAdminBulkRepo, type AdminBulkRepo } from "../../apps/api/src/admin/bulk";
 import { createMemoryAdminOverviewRepo } from "../../apps/api/src/admin/extras";
 import {
@@ -223,6 +224,7 @@ export function createAdminHarness(
   const rewards = createMemoryRewardsRepo();
   const simSessions = createMemorySimSessionRepo();
   const challenges = createMemoryChallengeRepo();
+  const learn = createMemoryLearnRepo();
   let tokenCounter = 0;
   let randomSeed = 42;
   let idCounter = 0;
@@ -234,6 +236,7 @@ export function createAdminHarness(
     overview: createMemoryAdminOverviewRepo(adminStore, importStore),
     rewards,
     challenges,
+    learn,
     simSessions: {
       sessions: simSessions,
       readAudio: options.readAudio ?? (() => Promise.resolve(null)),
@@ -263,6 +266,7 @@ export function createAdminHarness(
     rewards,
     simSessions,
     challenges,
+    learn,
     advance(ms: number) {
       clock += ms;
     },

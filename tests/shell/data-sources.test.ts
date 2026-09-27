@@ -25,6 +25,7 @@ const ZERO_SIM = {
 function clientStub(overrides: {
   readonly createUser?: ReturnType<typeof vi.fn>;
   readonly getAll?: ReturnType<typeof vi.fn>;
+  readonly learnStatus?: ReturnType<typeof vi.fn>;
 }): ApiClient {
   return {
     admin: {
@@ -32,6 +33,10 @@ function clientStub(overrides: {
     },
     gamification: {
       getAll: overrides.getAll ?? vi.fn(),
+    },
+    learn: {
+      status: overrides.learnStatus ?? vi.fn(),
+      complete: vi.fn(),
     },
   } as unknown as ApiClient;
 }
@@ -43,6 +48,8 @@ describe("createMockShellDataSources", () => {
     const summaries = await sources.gamification(SESSION).getSummaries();
     expect(summaries.some((summary) => summary.xp === 1450)).toBe(true);
     await expect(sources.gamification(null).getSummaries()).resolves.toEqual([]);
+    // Öğrenme kaydı sunucu ister; sahte oturumda kaynak yoktur.
+    expect(sources.learn(SESSION)).toBeNull();
   });
 });
 
@@ -54,6 +61,19 @@ describe("createApiShellDataSources", () => {
     expect(getAll).not.toHaveBeenCalled();
     await expect(sources.gamification(SESSION).getSummaries()).resolves.toEqual([ZERO_SIM]);
     expect(getAll).toHaveBeenCalledOnce();
+  });
+
+  it("öğrenme kaynağı yalnız API oturumunda döner ve /me/learn okur (27 Eyl 2026)", async () => {
+    const sims = {
+      ausculta: { complete: true, completedAt: "2026-09-27T10:00:00.000+03:00" },
+      opaca: { complete: false, completedAt: null },
+      pulse: { complete: false, completedAt: null },
+    };
+    const learnStatus = vi.fn().mockResolvedValue({ data: { sims } });
+    const sources = createApiShellDataSources(clientStub({ learnStatus }));
+    expect(sources.learn(null)).toBeNull();
+    await expect(sources.learn(SESSION)?.status()).resolves.toEqual(sims);
+    expect(learnStatus).toHaveBeenCalledOnce();
   });
 
   it("mock birim kimliğini create isteğinden düşer ve yinelenen anahtarı kabuk hatasına çevirir", async () => {

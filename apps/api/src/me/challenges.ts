@@ -11,6 +11,7 @@ import { ausculta } from "@egemed/assessment-bank";
 import { jsonError, validationDetails, type AppEnv } from "../http";
 import { toIstanbulIso } from "../admin/users";
 import type { AuthDeps } from "../auth/routes";
+import type { LearnRepo } from "./learn";
 import {
   CHALLENGE_PER_CASE_MS,
   CHALLENGE_TOTAL_MS,
@@ -25,6 +26,8 @@ import {
  * - Davet 6 haneli kodla; kod yalnız sha256 özeti olarak saklanır, 24 saat geçerli, tek rakip.
  * - Kullanıcı arama/liste yok (KVKK); ad yalnız düellonun iki tarafına görünür.
  * - Öğretim üyesi ve ziyaretçi katılamaz; kişi kendi davetine katılamaz; aynı kurum + sim erişimi şart.
+ * - Öğrenme kilidi (27 Eyl 2026): ilgili simin öğrenme modu tamamlanmadan ne oluşturma
+ *   ne katılma; ihlal `forbidden` + `learn_required` (403).
  * - En fazla 3 açık davet; 24 saatte en fazla 10 düello oluşturma.
  * - İki tarafa aynı vakalar aynı sırayla ve aynı seçenek sırasıyla (tohum) verilir; süreyi sunucu ölçer.
  * - Düello denemesi `challenge` modunda yazılır: yarım XP, liderliğe/aylık ödüle girmez.
@@ -69,6 +72,8 @@ export interface ChallengeRepo {
 export interface ChallengeDeps {
   readonly auth: AuthDeps;
   readonly challenges: ChallengeRepo;
+  /** Öğrenme kilidi (27 Eyl 2026): ilgili simin tamamlama kaydı yoksa düello yok. */
+  readonly learn: LearnRepo;
   readonly sessions: SimSessionRepo;
   readonly random: () => number;
   readonly newId: () => string;
@@ -97,6 +102,15 @@ export function registerChallengeRoutes(app: Hono<AppEnv>, deps: ChallengeDeps, 
   async function displayName(userId: string): Promise<string> {
     const context = await deps.auth.users.getMeContext(userId);
     return context?.displayName ?? "Silinmiş kullanıcı";
+  }
+
+  /** Öğrenme kilidi: simin tamamlama kaydı yoksa meydan okuma yok (27 Eyl 2026). */
+  async function learnCompleted(userId: string, simId: SimId): Promise<boolean> {
+    return (await deps.learn.list(userId)).some((record) => record.simId === simId);
+  }
+
+  function learnRequired(c: Context<AppEnv>) {
+    return jsonError(c, "forbidden", { issues: [{ code: "learn_required" }] });
   }
 
   async function body(record: ChallengeRecord, viewerId: string, at: number, code: string | null = null): Promise<ChallengeBody> {
@@ -156,6 +170,8 @@ export function registerChallengeRoutes(app: Hono<AppEnv>, deps: ChallengeDeps, 
     if (!parsed.success) return jsonError(c, "invalid_request", validationDetails(parsed.error));
     if (!CHALLENGE_SIMS.includes(parsed.data.simId)) return jsonError(c, "not_found");
     if (!actor.simAccess.includes(parsed.data.simId)) return jsonError(c, "forbidden");
+    // Öğrenme kilidi: ilgili simin öğrenme modu tamamlanmadan düello oluşturulamaz.
+    if (!(await learnCompleted(actor.userId, parsed.data.simId))) return learnRequired(c);
     const at = now();
     if ((await deps.challenges.countOpenByInviter(actor.userId, at)) >= CHALLENGE_MAX_OPEN) {
       return jsonError(c, "conflict", { issues: [{ code: "too_many_open_challenges" }] });
@@ -199,6 +215,8 @@ export function registerChallengeRoutes(app: Hono<AppEnv>, deps: ChallengeDeps, 
     if (record === null || record.institutionId !== actor.institutionId) return jsonError(c, "not_found");
     if (record.inviterId === actor.userId) return jsonError(c, "conflict", { issues: [{ code: "own_challenge" }] });
     if (!actor.simAccess.includes(record.simId)) return jsonError(c, "forbidden");
+    // Öğrenme kilidi: davetin simi için tamamlama kaydı yoksa katılınamaz.
+    if (!(await learnCompleted(actor.userId, record.simId))) return learnRequired(c);
     if (!(await deps.challenges.accept(record.id, actor.userId, at))) return jsonError(c, "conflict", { issues: [{ code: "challenge_taken" }] });
     const accepted = await deps.challenges.get(record.id);
     return c.json({ data: await body(accepted ?? record, actor.userId, at) });
