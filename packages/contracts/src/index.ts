@@ -229,6 +229,7 @@ export type {
   AuscultaPublicCase,
   OpacaPublicCase,
   SimCaseResult,
+  SimPublicCase,
   SimSession,
   SimSessionAnswerRequest,
   SimSessionMode,

@@ -49,7 +49,6 @@ import {
   usernameSchema,
   uuidSchema,
   type AttemptWriteRequest,
-  type AuscultaPublicCase,
   type AuthMeResponse,
   type AuthMethod,
   type BulkRequest,
@@ -68,6 +67,7 @@ import {
   type Role,
   type SimCaseResult,
   type SimId,
+  type SimPublicCase,
   type SimSession,
   type SimSessionAnswerRequest,
   type SimSessionMode,
@@ -407,7 +407,7 @@ export interface ApiClient {
       questionId: string,
       answer: readonly string[],
     ): Promise<{ readonly data: { readonly questionId: string; readonly correct: boolean; readonly correctOptionIds: readonly string[]; readonly feedback: string } }>;
-    getCase(simId: SimId, sessionId: string, index: number): Promise<{ readonly data: AuscultaPublicCase }>;
+    getCase(simId: SimId, sessionId: string, index: number): Promise<{ readonly data: SimPublicCase }>;
     hint(simId: SimId, sessionId: string, index: number, questionId: string): Promise<ApiSimSessionHintResult>;
     answer(
       simId: SimId,
@@ -418,6 +418,8 @@ export interface ApiClient {
     finish(simId: SimId, sessionId: string): Promise<ApiSimSessionFinishResult>;
     /** İstek yapmaz; `<audio src>` için taban adres + yol (çerez aynı kökenden gider). */
     audioUrl(simId: SimId, sessionId: string, token: string): string;
+    /** İstek yapmaz; `<img src>` için taban adres + yol (A2.2: Opaca görüntü vekili). */
+    imageUrl(simId: SimId, sessionId: string, token: string): string;
   };
   readonly learn: {
     /** Öğrenme tamamlama durumu: üç simin AYRI kaydı (27 Eyl 2026). */
@@ -909,7 +911,7 @@ export function createApiClient(options: CreateApiClientOptions): ApiClient {
           parse: (value, context) => parseSchema(simSessionStartResponseSchema, value, `${context} response`),
         });
       },
-      async getCase(simId: SimId, sessionId: string, index: number): Promise<{ readonly data: AuscultaPublicCase }> {
+      async getCase(simId: SimId, sessionId: string, index: number): Promise<{ readonly data: SimPublicCase }> {
         const parsedSimId = parseSchema(
           simIdSchema,
           simId,
@@ -1002,6 +1004,13 @@ export function createApiClient(options: CreateApiClientOptions): ApiClient {
         const parsedSessionId = parseSchema(uuidSchema, sessionId, `${context} path.sessionId`);
         const parsedToken = parseSchema(opaqueTokenSchema, token, `${context} path.token`);
         return buildUrl(baseUrl, `/me/sims/${parsedSimId}/sessions/${parsedSessionId}/audio/${parsedToken}`, undefined);
+      },
+      imageUrl(simId: SimId, sessionId: string, token: string): string {
+        const context = "GET /me/sims/:simId/sessions/:sessionId/image/:token";
+        const parsedSimId = parseSchema(simIdSchema, simId, `${context} path.simId`);
+        const parsedSessionId = parseSchema(uuidSchema, sessionId, `${context} path.sessionId`);
+        const parsedToken = parseSchema(opaqueTokenSchema, token, `${context} path.token`);
+        return buildUrl(baseUrl, `/me/sims/${parsedSimId}/sessions/${parsedSessionId}/image/${parsedToken}`, undefined);
       },
     },
     learn: {

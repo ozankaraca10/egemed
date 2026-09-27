@@ -62,7 +62,9 @@ async function start(h: AdminHarness, who: Login, mode: "practice" | "assessment
 async function openCase(h: AdminHarness, who: Login, sessionId: string, index: number): Promise<AuscultaPublicCase> {
   const response = await call(h, who, "GET", `/me/sims/ausculta/sessions/${sessionId}/cases/${index}`);
   expect(response.status).toBe(200);
-  return simSessionCaseResponseSchema.parse(await response.json()).data;
+  const parsed = simSessionCaseResponseSchema.parse(await response.json()).data;
+  if (parsed.simId !== "ausculta") throw new Error("Ausculta vakası bekleniyordu");
+  return parsed;
 }
 
 /** Sunucu durumundan doğru jetonları okur (test ayrıcalığı; istemci bunu bilemez). */

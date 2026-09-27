@@ -154,14 +154,15 @@ const simSessionAnyCaseResponseSchema = z.strictObject({
   data: z.discriminatedUnion("simId", [auscultaPublicCaseSchema, opacaPublicCaseSchema]),
 });
 
+/** Sunucunun anahtarsız vaka gövdelerinin birleşimi (A2.2: iki sim). */
+export type SimPublicCase = AuscultaPublicCase | OpacaPublicCase;
+
 /**
- * Sunucunun vaka yanıtı: iki simin de anahtarsız gövdesini doğrular. İstemci
- * tipleri A2.2'ye dek yalnız Ausculta gövdesiyle çalışır (API opaca sunucu
- * oturumu açmaz); bu yüzden dışa vuran tip AuscultaPublicCase olarak kalır ve
- * opaca istemcisiyle birlikte birleşime genişletilir.
+ * Sunucunun vaka yanıtı: iki simin de anahtarsız gövdesini doğrular. Tüketiciler
+ * `data.simId` ayrımıyla daraltır (ör. Ausculta istemcisi `"ausculta"` koruması).
  */
 export const simSessionCaseResponseSchema = simSessionAnyCaseResponseSchema as unknown as z.ZodType<{
-  readonly data: AuscultaPublicCase;
+  readonly data: SimPublicCase;
 }>;
 
 // --- İpucu, yanıt, bitiş --------------------------------------------------------

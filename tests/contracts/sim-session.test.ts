@@ -7,6 +7,7 @@ import {
   simSessionCaseResponseSchema,
   simSessionCheckRequestSchema,
   simSessionFinishResponseSchema,
+  type SimPublicCase,
 } from "../../packages/contracts/src/index";
 
 // A1 (ADR-009): istemciye giden vaka anahtarsızdır; katı şema sızdırıcı alanları reddeder.
@@ -174,6 +175,15 @@ describe("anahtarsız Opaca vakası", () => {
     expect(simSessionCaseResponseSchema.safeParse({ data: OPACA_BASE }).success).toBe(true);
     expect(simSessionCaseResponseSchema.safeParse({ data: { ...OPACA_BASE, simId: "pulse" } }).success).toBe(false);
     expect(simSessionCaseResponseSchema.safeParse({ data: { ...OPACA_BASE, title: "sızıntı" } }).success).toBe(false);
+  });
+
+  it("SimPublicCase birleşimi iki sim gövdesini taşır, üçüncüsünü reddeder (tip testi)", () => {
+    const auscultaCase: SimPublicCase = BASE;
+    const opacaCase: SimPublicCase = OPACA_BASE;
+    expect([auscultaCase.simId, opacaCase.simId]).toEqual(["ausculta", "opaca"]);
+    // @ts-expect-error pulse gövdesi birleşimde yok
+    const pulseCase: SimPublicCase = { ...BASE, simId: "pulse" };
+    expect(pulseCase).toBeDefined();
   });
 });
 

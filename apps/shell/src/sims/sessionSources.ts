@@ -9,8 +9,15 @@ import { browserApiWindow, csrfTokenFromCookie } from "../apiAuth";
  * API hataları sim sürücüsünün tanıdığı kodlu iletiye çevrilir (ör. `case_time_exceeded`).
  */
 
+/**
+ * T212b: Opaca istemcisi sunucu oturumuna hazır olunca `true` yapılır (liste
+ * `"opaca"` ile genişler). T212a yalnız altyapıyı hazırlar; kullanıcı davranışı
+ * değişmez (Opaca kanalı kapalı kalır).
+ */
+const OPACA_SERVER_SESSIONS = false;
+
 /** Sunucu oturumu olan simler (A2 Opaca, A3 Pulse ile genişler). */
-export const SERVER_SESSION_SIMS: readonly SimId[] = ["ausculta"];
+export const SERVER_SESSION_SIMS: readonly SimId[] = OPACA_SERVER_SESSIONS ? ["ausculta", "opaca"] : ["ausculta"];
 
 function rethrow(error: unknown): never {
   if (error instanceof ApiError) {
@@ -38,6 +45,7 @@ export function createApiSessionSource(client: Pick<ApiClient, "simSessions" | "
     answer: (sessionId, index, body) => guarded(async () => (await api.answer(simId, sessionId, index, body)).data),
     finish: (sessionId) => guarded(async () => (await api.finish(simId, sessionId)).data),
     audioUrl: (sessionId, token) => api.audioUrl(simId, sessionId, token),
+    imageUrl: (sessionId, token) => api.imageUrl(simId, sessionId, token),
     startChallenge: (challengeId) => guarded(async () => (await client.challenges.startSession(challengeId)).data),
   };
 }
