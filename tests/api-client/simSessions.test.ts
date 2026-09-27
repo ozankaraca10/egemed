@@ -85,6 +85,7 @@ function publicCaseWireBody(overrides: Partial<Record<string, unknown>> = {}) {
     index: 1,
     label: "Vaka 1",
     patient: { age: 45, sex: "erkek" },
+    population: null,
     chiefComplaint: "Nefes darlığı",
     history: "3 gündür şikayet.",
     vitalSigns: { hr: 88, rr: 18, bp: "120/80", spo2: 97, temp: "36.8" },

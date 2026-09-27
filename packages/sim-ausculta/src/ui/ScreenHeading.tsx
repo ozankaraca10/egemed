@@ -1,5 +1,5 @@
 import { createContext, useContext, type JSX, type ReactNode } from "react";
-import type { SimAudience, SimChrome } from "@egemed/sim-host";
+import type { SimAudience, SimChrome, SimSessionSource } from "@egemed/sim-host";
 
 /** Platform kabuğu: gömülü mod, verilmişse birleşik bar kanalı, kitle ve giriş isteği. */
 interface EmbeddedValue {
@@ -7,6 +7,8 @@ interface EmbeddedValue {
   readonly setChrome?: (chrome: SimChrome | null) => void;
   readonly audience: SimAudience;
   readonly requestSignIn?: () => void;
+  /** A1 (ADR-009): sunucu vaka oturumu kanalı; uygulama/değerlendirme bununla çalışır. */
+  readonly sessions?: SimSessionSource;
 }
 
 const EmbeddedContext = createContext<EmbeddedValue>({ embedded: false, audience: "student" });
@@ -16,12 +18,14 @@ export function EmbeddedProvider({
   setChrome,
   audience = "student",
   requestSignIn,
+  sessions,
   children,
 }: {
   readonly embedded: boolean;
   readonly setChrome?: (chrome: SimChrome | null) => void;
   readonly audience?: SimAudience;
   readonly requestSignIn?: () => void;
+  readonly sessions?: SimSessionSource;
   readonly children: ReactNode;
 }): JSX.Element {
   const value: EmbeddedValue = {
@@ -29,6 +33,7 @@ export function EmbeddedProvider({
     audience,
     ...(setChrome === undefined ? {} : { setChrome }),
     ...(requestSignIn === undefined ? {} : { requestSignIn }),
+    ...(sessions === undefined ? {} : { sessions }),
   };
   return <EmbeddedContext.Provider value={value}>{children}</EmbeddedContext.Provider>;
 }
@@ -50,6 +55,11 @@ export function useAudience(): SimAudience {
 /** Ziyaretçi kilidindeki "Öğrenci girişi" eylemi; kabukça verilmezse yoktur. */
 export function useRequestSignIn(): (() => void) | undefined {
   return useContext(EmbeddedContext).requestSignIn;
+}
+
+/** A1: sunucu vaka oturumu kanalı; kabuk vermezse yoktur. */
+export function useSessions(): SimSessionSource | undefined {
+  return useContext(EmbeddedContext).sessions;
 }
 
 export interface ScreenHeadingProps {

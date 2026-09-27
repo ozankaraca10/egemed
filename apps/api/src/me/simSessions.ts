@@ -235,7 +235,12 @@ export function registerSimSessionRoutes(app: Hono<AppEnv>, deps: SimSessionDeps
     const at = now();
     if (!startRate.consume(`sim-session:${actor.userId}`, at)) return jsonError(c, "rate_limited");
     if (parsed.data.mode === "assessment") await deps.sessions.expireOpen(actor.userId, sim.data, "assessment");
-    const caseIds = ausculta.selectCaseIds(parsed.data.mode, deps.random);
+    const focus = parsed.data.focusFinding;
+    const caseIds =
+      focus === undefined
+        ? ausculta.selectCaseIds(parsed.data.mode, deps.random)
+        : ausculta.selectCaseIds(parsed.data.mode, deps.random, ausculta.FOCUS_CASE_COUNT, focus);
+    if (caseIds.length === 0) return jsonError(c, "not_found");
     const row = newSessionRow({
       id: deps.newId(),
       userId: actor.userId,

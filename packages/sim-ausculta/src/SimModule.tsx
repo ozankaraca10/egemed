@@ -1,3 +1,4 @@
+import { SESSION_AUDIO_PREFIX } from "./core/serverSession";
 import { createElement, type ReactNode } from "react";
 import { createRoot as reactCreateRoot } from "react-dom/client";
 import type { SimChrome, SimDispose, SimModule, SimMountContext, SimMountTarget } from "@egemed/sim-host";
@@ -49,7 +50,10 @@ export interface AuscultaModuleDeps {
   readonly fullscreenEnv?: FullscreenEnv;
 }
 
+/** A1: sunucu oturum ses adresleri bu önekle işaretlenir; varlık tabanına eklenmeden aynen kullanılır. */
+
 export function resolveAuscultaAssetUrl(assetBase: string, path: string): string {
+  if (path.startsWith(SESSION_AUDIO_PREFIX)) return path.slice(SESSION_AUDIO_PREFIX.length);
   if (/^https?:\/\//i.test(path)) return path;
   const base = assetBase.endsWith("/") ? assetBase : `${assetBase}/`;
   const normalized = path.startsWith("/") ? path.slice(1) : path;
@@ -225,6 +229,7 @@ export function createAuscultaModule(deps?: AuscultaModuleDeps): SimModule {
         ...(context.gamification === undefined ? {} : { gamification: context.gamification }),
         ...(context.audience === undefined ? {} : { audience: context.audience }),
         ...(context.requestSignIn === undefined ? {} : { requestSignIn: context.requestSignIn }),
+        ...(context.sessions === undefined ? {} : { sessions: context.sessions }),
       };
 
       root.render(

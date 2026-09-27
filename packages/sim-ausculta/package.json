@@ -16,6 +16,7 @@
     "react-dom": "19.3.0"
   },
   "dependencies": {
+    "@egemed/contracts": "workspace:*",
     "@egemed/gami-catalogs": "workspace:*",
     "@egemed/gami-ui": "workspace:*",
     "@egemed/gamification-core": "workspace:*",

@@ -142,7 +142,8 @@ export const VISITOR_LOCK_TEXT = {
  * (DEV, API yok) tarayıcıda çalışan yerel bankayla kurar; üretimde yerel yol yoktur.
  */
 export interface SimSessionSource {
-  start(mode: SimSessionMode): Promise<SimSession>;
+  /** Doğrudan başlatma (uygulama/değerlendirme); `focusFinding` yalnız uygulamada (öğrenme → "bu bulguda çalış"). */
+  start(mode: "practice" | "assessment", options?: { readonly focusFinding?: string }): Promise<SimSession>;
   getCase(sessionId: string, index: number): Promise<AuscultaPublicCase>;
   hint(sessionId: string, index: number, questionId: string): Promise<{ readonly hint: string; readonly hintsUsed: number }>;
   /** Yalnız uygulama: tek soruyu kontrol eder (anında geri bildirim); soru kilitlenir. */
