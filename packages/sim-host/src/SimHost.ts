@@ -1,4 +1,11 @@
 import type { AttemptRecord, CohortFilter, GamiLeaderboardRow, Period } from "@egemed/gamification-core";
+import type {
+  AuscultaPublicCase,
+  SimCaseResult,
+  SimSession,
+  SimSessionAnswerRequest,
+  SimSessionMode,
+} from "@egemed/contracts";
 
 /**
  * SimHost sözleşmesi (ADR-006): tek React kabuk içindeki sim modülleri için
@@ -129,6 +136,32 @@ export const VISITOR_LOCK_TEXT = {
   cta: "Öğrenci girişi",
 } as const;
 
+/**
+ * A1 (ADR-009): uygulama ve değerlendirme vakaları sunucu oturumundan gelir; sim
+ * cevap anahtarı görmez. Kabuk API oturumunda API istemcisiyle, geliştirmede
+ * (DEV, API yok) tarayıcıda çalışan yerel bankayla kurar; üretimde yerel yol yoktur.
+ */
+export interface SimSessionSource {
+  start(mode: SimSessionMode): Promise<SimSession>;
+  getCase(sessionId: string, index: number): Promise<AuscultaPublicCase>;
+  hint(sessionId: string, index: number, questionId: string): Promise<{ readonly hint: string; readonly hintsUsed: number }>;
+  answer(
+    sessionId: string,
+    index: number,
+    body: SimSessionAnswerRequest,
+  ): Promise<{ readonly mode: "practice"; readonly result: SimCaseResult } | { readonly mode: "assessment"; readonly accepted: true }>;
+  finish(sessionId: string): Promise<{
+    readonly mode: SimSessionMode;
+    readonly total: number;
+    readonly max: number;
+    readonly passed: boolean;
+    readonly cases: readonly SimCaseResult[];
+    readonly xpGained: number;
+  }>;
+  /** Oturuma bağlı ses jetonunun oynatılabilir adresi. */
+  audioUrl(sessionId: string, token: string): string;
+}
+
 /** Modüle taşınan oturum bağlamı; sim başına ayrıktır (veri izolasyonu). */
 export interface SimMountContext {
   readonly simId: SimulatorId;
@@ -158,6 +191,8 @@ export interface SimMountContext {
   readonly audience?: SimAudience;
   /** Ziyaretçi kilidindeki "Öğrenci girişi" eylemi; kabuk giriş ekranına götürür. */
   readonly requestSignIn?: () => void;
+  /** A1: sunucu vaka oturumu kanalı (ADR-009). Yoksa sim uygulama/değerlendirmeyi açmaz. */
+  readonly sessions?: SimSessionSource;
 }
 
 /** Modül `mount` dönüşünde zorunlu cleanup verir; idempotent olmalıdır. */
@@ -195,6 +230,7 @@ export interface SimMountOptions {
   readonly setChrome?: (chrome: SimChrome | null) => void;
   readonly audience?: SimAudience;
   readonly requestSignIn?: () => void;
+  readonly sessions?: SimSessionSource;
 }
 
 /** Bir `mount` çağrısının kimliği; yalnız o çağrının oturumunu bırakmak için. */
@@ -232,6 +268,7 @@ function mountContext(simId: SimulatorId, now: () => number, mountOptions: SimMo
   const setChrome = mountOptions?.setChrome;
   const audience = mountOptions?.audience;
   const requestSignIn = mountOptions?.requestSignIn;
+  const sessions = mountOptions?.sessions;
   return {
     now,
     simId,
@@ -242,6 +279,7 @@ function mountContext(simId: SimulatorId, now: () => number, mountOptions: SimMo
     // T180: kitle ve ziyaretçi "Öğrenci girişi" kanalı sime aktarılır (T172'de eksik kalmıştı).
     ...(audience === undefined ? {} : { audience }),
     ...(requestSignIn === undefined ? {} : { requestSignIn }),
+    ...(sessions === undefined ? {} : { sessions }),
   };
 }
 

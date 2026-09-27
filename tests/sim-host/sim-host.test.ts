@@ -263,6 +263,25 @@ describe("SimHost release ve aktör bağlamı", () => {
     expect(pulse.contexts[1] !== undefined && "requestSignIn" in pulse.contexts[1]).toBe(false);
   });
 
+  it("sessions (A1 sunucu oturumu) kanalı bağlama taşınır; verilmezse alan yoktur", async () => {
+    const pulse = fake("pulse");
+    const { host, target } = harness(() => Promise.resolve(pulse.module));
+    const sessions = {
+      start: () => Promise.reject(new Error("x")),
+      getCase: () => Promise.reject(new Error("x")),
+      hint: () => Promise.reject(new Error("x")),
+      answer: () => Promise.reject(new Error("x")),
+      finish: () => Promise.reject(new Error("x")),
+      audioUrl: (id: string, token: string) => `/api/${id}/${token}`,
+    };
+    host.mount(target, "pulse", { sessions });
+    await flush();
+    host.mount(target, "pulse");
+    await flush();
+    expect(pulse.contexts[0]?.sessions?.audioUrl("s", "t")).toBe("/api/s/t");
+    expect(pulse.contexts[1] !== undefined && "sessions" in pulse.contexts[1]).toBe(false);
+  });
+
   it("reportAttempt bağlama taşınır; verilmezse alan hiç yoktur", async () => {
     const pulse = fake("pulse");
     const seen: string[] = [];
