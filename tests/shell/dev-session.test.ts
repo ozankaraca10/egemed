@@ -2,6 +2,7 @@ import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { AdminPage } from "../../apps/shell/src/AdminPage";
 import {
+  checkApiDevCredentials,
   checkDevCredentials,
   createSessionStore,
   DEV_ACCOUNTS,
@@ -264,5 +265,22 @@ describe("ShellLayout oturum göstergesi", () => {
     expect(admin).toContain('type="button"');
     expect(student).toContain(t("shell.session.student"));
     expect(student).not.toContain(t("shell.session.admin"));
+  });
+});
+
+describe("API geliştirme girişi ön denetimi (T198)", () => {
+  const pass = DEV_ACCOUNTS.student.password;
+  it("öğrenci sekmesi kayıtlı herhangi bir dev öğrenciyi sabit parolayla geçirir", () => {
+    expect(checkApiDevCredentials("student", DEV_ACCOUNTS.student.username, pass)).toBe(true);
+    expect(checkApiDevCredentials("student", "ogrenci2", pass)).toBe(true);
+    expect(checkApiDevCredentials("student", " Ogrenci2 ", pass)).toBe(true);
+  });
+  it("yanlış parola, yönetici kimliği ve geçersiz ad reddedilir", () => {
+    expect(checkApiDevCredentials("student", "ogrenci2", "yanlis")).toBe(false);
+    expect(checkApiDevCredentials("student", DEV_ACCOUNTS.admin.username, DEV_ACCOUNTS.admin.password)).toBe(false);
+    expect(checkApiDevCredentials("student", "a b", pass)).toBe(false);
+    expect(checkApiDevCredentials("admin", "ogrenci2", pass)).toBe(false);
+    expect(checkApiDevCredentials("admin", DEV_ACCOUNTS.student.username, pass)).toBe(false);
+    expect(checkApiDevCredentials("admin", DEV_ACCOUNTS.admin.username, DEV_ACCOUNTS.admin.password)).toBe(true);
   });
 });
