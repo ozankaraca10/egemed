@@ -1,23 +1,8 @@
 import { createElement, type ReactNode } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
-import {
-  BEST_SCORE_KEY,
-  EmbeddedProvider,
-  LocalGamiRepository,
-  MASTERY_THRESHOLD,
-  ResultsScreen,
-  StoreProvider,
-  buildSuspend,
-  createMemoryRuntimeAdapter,
-  createNoopResultsScreenEnv,
-  createSimRuntime,
-  exitResults,
-  gamiStoragePort,
-  initialState,
-  poolFor,
-  sessionSeed,
-} from "../../packages/sim-ausculta/src/index";
+import { BEST_SCORE_KEY, EmbeddedProvider, LocalGamiRepository, MASTERY_THRESHOLD, ResultsScreen, StoreProvider, buildSuspend, createMemoryRuntimeAdapter, createNoopResultsScreenEnv, createSimRuntime, exitResults, gamiStoragePort, initialState, sessionSeed } from "../../packages/sim-ausculta/src/index";
+import { poolFor } from "./bank-cases";
 import type { SimAudience } from "../../packages/sim-host/src/index";
 import type { AppState, CaseResult, ScoringWeights, StoragePort, WindowLike } from "../../packages/sim-ausculta/src/index";
 
@@ -104,8 +89,13 @@ function renderResults(
 describe("ResultsScreen", () => {
   it("uygulama raporunu, zayıf alanı ve en iyi puanı çizer", () => {
     const storage = trackingStorage({ [BEST_SCORE_KEY]: '{"practice":88,"assessment":0}' });
-    const { html } = renderResults({ mode: "practice", caseResults: [resultFor("practice", false)], assessmentTimer: 125_000 }, storage);
     const caseDef = poolFor("practice")[0];
+    // T196: vaka başlığı istemci havuzundan değil, sunucu sonuç meta verisinden gelir.
+    const server = {
+      snapshots: {},
+      metas: { [caseDef?.id ?? ""]: { title: caseDef?.title ?? "", diagnosis: null, summary: "" } },
+    } as unknown as AppState["server"];
+    const { html } = renderResults({ mode: "practice", caseResults: [resultFor("practice", false)], assessmentTimer: 125_000, server }, storage);
     expect(html).toContain("Vaka Raporu");
     expect(html).toContain("Hedefin altında");
     expect(html).toContain("Durum (eşik 80)");

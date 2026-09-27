@@ -66,7 +66,8 @@ export {
 export type { CaseSoundsResolution, LibrarySoundResult } from "./core/resolver";
 export { computeMetrics } from "./data/metrics";
 export type { InventoryMetrics } from "./data/metrics";
-export { ALL_CASES, AUTO_CASES, CORE_CASES, poolFor } from "./data/pool";
+export { ASSESSMENT_CASE_COUNT, CASE_INVENTORY } from "./data/inventory";
+export type { CaseInventory } from "./data/inventory";
 export { mulberry32, sampleSession, SESSION_SIZE, shuffledOptions, stringSeed } from "./core/session";
 export {
   heartFindingText,

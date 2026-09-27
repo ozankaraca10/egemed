@@ -1,7 +1,7 @@
 import libraryData from "./library.json";
 import sourcesData from "./sources.json";
 import pointsData from "./auscultation-points.json";
-import { ALL_CASES, poolFor } from "./pool";
+import { CASE_INVENTORY } from "./inventory";
 import { RECORDS, EXTERNAL_RECORDS } from "../core/resolver";
 
 /** Envanter zenginliği metrikleri — landing sayfasında gösterilir (tamamen veri odaklı). */
@@ -30,8 +30,6 @@ export function computeMetrics(): InventoryMetrics {
       }
     ).inventory ?? [];
   const libraryCount = libraryData.groups.reduce((s, g) => s + g.items.length, 0);
-  const assessmentPool = poolFor("assessment");
-  const practicePool = poolFor("practice");
   const bundled = RECORDS.filter((r) => r.sourceDataset === "hls-cmds-v3").length;
   return {
     datasets: inv.length,
@@ -42,11 +40,11 @@ export function computeMetrics(): InventoryMetrics {
     externalRecordings: EXTERNAL_RECORDS.length,
     soundClasses: libraryCount,
     auscultationPoints: (pointsData.points as unknown[]).length,
-    totalCases: ALL_CASES.length,
-    practicePoolSize: practicePool.length,
-    assessmentPoolSize: assessmentPool.length,
-    assessmentQuestions: assessmentPool.reduce((s, c) => s + c.questions.length, 0),
-    pediatricCases: ALL_CASES.filter((c) => (c as { population?: string }).population === "pediatrik").length,
-    mixedCases: ALL_CASES.filter((c) => c.primaryAcousticFinding.includes("+")).length,
+    totalCases: CASE_INVENTORY.totalCases,
+    practicePoolSize: CASE_INVENTORY.practicePoolSize,
+    assessmentPoolSize: CASE_INVENTORY.assessmentPoolSize,
+    assessmentQuestions: CASE_INVENTORY.assessmentQuestions,
+    pediatricCases: CASE_INVENTORY.pediatricCases,
+    mixedCases: CASE_INVENTORY.mixedCases,
   };
 }

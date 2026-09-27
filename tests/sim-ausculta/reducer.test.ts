@@ -1,14 +1,6 @@
 import { describe, expect, it } from "vitest";
-import {
-  ALL_CASES,
-  buildSuspend,
-  deserializeSuspend,
-  initialState,
-  poolFor,
-  reducer,
-  sampleSession,
-  serializeSuspend,
-} from "../../packages/sim-ausculta/src/index";
+import { buildSuspend, deserializeSuspend, initialState, reducer, sampleSession, serializeSuspend } from "../../packages/sim-ausculta/src/index";
+import { ALL_CASES, poolFor } from "./bank-cases";
 
 /** Kaynak tests/core.test.ts:148-234 (7 test → 7 test). */
 
@@ -16,6 +8,11 @@ function caseNormalHeart() {
   const def = ALL_CASES.find((c) => c.id === "case_normal_heart");
   if (!def) throw new Error("case_normal_heart yok");
   return def;
+}
+
+/** T196: reducer etkin vakayı yalnız sunucu oturumundan okur (istemcide havuz yok). */
+function serverWith(def: ReturnType<typeof caseNormalHeart>) {
+  return { server: { currentCase: def } as unknown as typeof initialState.server };
 }
 
 describe("reducer: yeni oturum ve devam ettirme", () => {
@@ -66,6 +63,7 @@ describe("reducer: yeni oturum ve devam ettirme", () => {
     };
     const baseState = {
       ...initialState,
+      ...serverWith(def),
       currentCaseId: def.id,
       step: def.questions.length - 1,
       answers: allCorrect,
@@ -104,6 +102,7 @@ describe("reducer: yeni oturum ve devam ettirme", () => {
     const baseState = {
       ...initialState,
       mode: "practice" as const,
+      ...serverWith(def),
       currentCaseId: def.id,
       step: def.questions.length - 1,
       answers: allCorrect,

@@ -1,18 +1,11 @@
 import { createElement, type ReactNode } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
-import {
-  SimulationScreen,
-  StoreProvider,
-  createMemoryRuntimeAdapter,
-  createNoopSimulationAudio,
-  createNoopSimulationScreenEnv,
-  initialState,
-  isLastQuestion,
-  planPrimaryAction,
-  poolFor,
-  reducer,
-} from "../../packages/sim-ausculta/src/index";
+import { EmbeddedProvider, SimulationScreen, StoreProvider, createMemoryRuntimeAdapter, createNoopSimulationAudio, createNoopSimulationScreenEnv, initialState, isLastQuestion, planPrimaryAction, reducer } from "../../packages/sim-ausculta/src/index";
+import { toClientCase } from "../../packages/sim-ausculta/src/core/serverSession";
+import { ausculta } from "../../packages/assessment-bank/src/index";
+import type { SimSessionSource } from "../../packages/sim-host/src/index";
+import { poolFor } from "./bank-cases";
 import type { AppState, StoragePort, WindowLike } from "../../packages/sim-ausculta/src/index";
 
 /** Simülasyon ekranı — statik işaretleme ve vaka akışı. DOM kütüphanesi yok. */
@@ -33,15 +26,49 @@ const storage: StoragePort = {
 const esc = (text: string): string =>
   text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#x27;");
 
+/** T196: ekran yalnız sunucu oturumuyla vaka çizer; bankadan anahtarsız vaka kurulur. */
+function serverStateFor(mode: "practice" | "assessment"): AppState["server"] {
+  const caseDef = poolFor(mode)[0];
+  if (!caseDef) throw new Error("havuz boş");
+  let counter = 0;
+  const { publicCase } = ausculta.buildPublicCase(caseDef as never, {
+    index: 1,
+    mode,
+    openedAt: "2026-09-27T10:00:00.000+03:00",
+    newToken: () => `tok_test${String((counter += 1)).padStart(6, "0")}`,
+    random: () => 0.5,
+  });
+  return {
+    sessionId: "00000000-0000-4000-8000-00000000abcd",
+    mode,
+    caseCount: 10,
+    loadedIndex: 1,
+    currentCase: toClientCase(publicCase, mode),
+    feedback: {},
+    hints: {},
+    metas: {},
+    snapshots: {},
+    status: "ready",
+    error: null,
+  };
+}
+
+const fakeSessions = { audioUrl: (_id: string, token: string) => `/audio/${token}` } as unknown as SimSessionSource;
+
 function renderInStore(node: ReactNode, seed: Partial<AppState> = {}): string {
+  const mode = seed.mode === "assessment" ? "assessment" : "practice";
   return renderToStaticMarkup(
-    createElement(StoreProvider, {
-      children: node,
-      env: inertWindow,
-      initialState: { ...initialState, screen: "simulation", ...seed },
-      now: () => 1_728_000_000_000,
-      runtime: createMemoryRuntimeAdapter(),
-      storage,
+    createElement(EmbeddedProvider, {
+      embedded: false,
+      sessions: fakeSessions,
+      children: createElement(StoreProvider, {
+        children: node,
+        env: inertWindow,
+        initialState: { ...initialState, screen: "simulation", mode, server: serverStateFor(mode), ...seed },
+        now: () => 1_728_000_000_000,
+        runtime: createMemoryRuntimeAdapter(),
+        storage,
+      }),
     }),
   );
 }
@@ -63,7 +90,7 @@ describe("SimulationScreen", () => {
     expect(html).toContain(esc(practice.questions[0]?.prompt ?? ""));
     expect(html).toContain("Yanıtla");
     expect(html).toContain("Dinleme noktalarını göster");
-    expect(html).toContain("Oturum");
+    expect(html).toContain("Yeni oturum");
     expect(html).toContain("stage-card");
     expect(html).toContain('role="toolbar"');
     expect(html).toContain("<footer");
@@ -78,6 +105,21 @@ describe("SimulationScreen", () => {
     expect(html).toContain("Sonraki soru");
     expect(html).not.toContain("Dinleme noktalarını göster");
     expect(html).not.toContain(">Oturum<");
+  });
+
+  it("T196: oturum kanalı yoksa vaka çizilmez; sunucu gerektiği söylenir", () => {
+    const html = renderToStaticMarkup(
+      createElement(StoreProvider, {
+        children: createElement(SimulationScreen),
+        env: inertWindow,
+        initialState: { ...initialState, screen: "simulation", mode: "practice" },
+        now: () => 1_728_000_000_000,
+        runtime: createMemoryRuntimeAdapter(),
+        storage,
+      }),
+    );
+    expect(html).toContain("Bu mod için sunucu bağlantısı gerekir");
+    expect(html).not.toContain("sim-grid");
   });
 
   it("gömülü modda footer ve arka plan çizilmez", () => {

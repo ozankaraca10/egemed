@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import { AUTO_CASES, CORE_CASES, RECORDS, poolFor } from "../../packages/sim-ausculta/src/index";
+import { RECORDS } from "../../packages/sim-ausculta/src/index";
+import { AUTO_CASES, CORE_CASES, poolFor } from "./bank-cases";
 import type { CaseDef } from "../../packages/sim-ausculta/src/index";
 
 /** Kaynak tests/core.test.ts:368-415 ve 507-580 (13 test → 13 test). */

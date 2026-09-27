@@ -2,14 +2,11 @@ import { useChallenge } from "../ui/ScreenHeading";
 import { endOfMonthTr } from "@egemed/gamification-core";
 import { defaultGamiIcons, GamiGainsView } from "@egemed/gami-ui";
 import { Fragment, useMemo, useState, type JSX, type ReactNode } from "react";
-import { firstWeakLibraryKey, libraryKeyForCase, weakDomainKeys } from "../core/flow";
-import { ALL_CASES, poolFor } from "../data/pool";
-import { sampleSession, SESSION_SIZE } from "../core/session";
+import { firstWeakLibraryKey, weakDomainKeys } from "../core/flow";
 import { aggregateResults } from "../core/scoring";
 import type { SimRuntime } from "../core/runtime";
 import { useStore } from "../core/StoreProvider";
 import type { ScoringWeights } from "../core/types";
-import libraryData from "../data/library.json";
 import { EcgDeco, Footer, touchTarget } from "../ui/chrome";
 import { ScreenHeading, useAudience } from "../ui/ScreenHeading";
 import {
@@ -22,7 +19,6 @@ import {
   IconStethoscope,
   IconWave,
 } from "../ui/icons";
-import { sessionSeed } from "./entry";
 import { auscultaSessionGains } from "../gamification/gains";
 import { localLeaderboardRows } from "../gamification/leaderboard";
 import type { LocalGamiRepository } from "../gamification/repo";
@@ -33,9 +29,8 @@ import { AUSCULTA_RULES } from "../gamification/rules";
  *  öğrenci adı (`learner_name`) okunmaz ve yazılmaz. */
 
 const HIT = touchTarget();
-const cases = ALL_CASES;
 
-/** Sonuç satırı için soru görünümü (yerel vaka ya da sunucu anlık görüntüsü). */
+/** Sonuç satırı için soru görünümü (sunucu anlık görüntüsü + sonuç meta verisi). */
 interface ReviewQuestion {
   readonly id: string;
   readonly prompt: string;
@@ -44,11 +39,6 @@ interface ReviewQuestion {
   readonly feedbackIncorrect: string;
 }
 
-const libraryItems = (
-  libraryData as {
-    groups: { items: { key: string; category: string; acousticFinding: string }[] }[];
-  }
-).groups.flatMap((group) => group.items);
 
 /** LMS çıkış seam'i (kaynak: `runtime.flags.scormAvailable` + `window.close`). */
 export interface ResultsScreenEnv {
@@ -113,44 +103,27 @@ export function ResultsScreen({ embedded = false, env = NOOP_RESULTS_ENV, reposi
   const challenge = useChallenge();
   const server = state.server;
   const reviewFor = (caseId: string): { readonly title: string; readonly questions: readonly ReviewQuestion[] } | null => {
-    if (server !== null) {
-      const snapshot = server.snapshots[caseId];
-      const meta = server.metas[caseId];
-      if (snapshot === undefined) return meta === undefined ? null : { title: meta.title, questions: [] };
-      return {
-        title: meta?.title ?? snapshot.title,
-        questions: snapshot.questions.map((question) => ({
-          ...question,
-          correct: meta?.questions?.[question.id]?.correctOptionIds ?? [],
-          feedbackIncorrect: meta?.questions?.[question.id]?.feedback ?? "",
-        })),
-      };
-    }
-    const caseDef = cases.find((item) => item.id === caseId);
-    return caseDef === undefined ? null : { title: caseDef.title, questions: caseDef.questions };
+    if (server === null) return null;
+    const snapshot = server.snapshots[caseId];
+    const meta = server.metas[caseId];
+    if (snapshot === undefined) return meta === undefined ? null : { title: meta.title, questions: [] };
+    return {
+      title: meta?.title ?? snapshot.title,
+      questions: snapshot.questions.map((question) => ({
+        ...question,
+        correct: meta?.questions?.[question.id]?.correctOptionIds ?? [],
+        feedbackIncorrect: meta?.questions?.[question.id]?.feedback ?? "",
+      })),
+    };
   };
 
   const retry = () => {
-    // A1.4: sunucu modunda yeni oturumu sürücü başlatır (yerel örneklem kullanılmaz).
-    if (server !== null) {
-      dispatch({ type: "startMode", mode: state.mode });
-      return;
-    }
-    const seed = sessionSeed(now());
-    const practiceIds = sampleSession(poolFor("practice"), seed, SESSION_SIZE);
-    const assessmentIds = sampleSession(poolFor("assessment"), seed + 1, SESSION_SIZE);
-    dispatch({ type: "startSession", practiceIds, assessmentIds, seed });
+    // Yeni oturumu sunucu sürücüsü başlatır (istemcide örneklem yok).
     dispatch({ type: "startMode", mode: state.mode });
   };
 
-  const weakLearnKey = firstWeakLibraryKey(state.caseResults, (caseId) =>
-    server !== null
-      ? null
-      : libraryKeyForCase(
-          cases.find((item) => item.id === caseId),
-          libraryItems,
-        ),
-  );
+  // Sunucu sonucu bulgu/kütüphane anahtarı taşımaz; zayıf konu odağı şimdilik yok.
+  const weakLearnKey = firstWeakLibraryKey(state.caseResults, () => null);
 
   const studyLearn = () => {
     if (weakLearnKey) dispatch({ type: "setLearnFocus", key: weakLearnKey });

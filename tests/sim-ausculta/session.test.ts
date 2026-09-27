@@ -1,16 +1,7 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import {
-  EXTERNAL_RECORDS,
-  RECORDS,
-  SESSION_SIZE,
-  poolFor,
-  resolveAssignment,
-  resolveAssignmentEx,
-  sampleSession,
-  shuffledOptions,
-  validateCase,
-} from "../../packages/sim-ausculta/src/index";
+import { EXTERNAL_RECORDS, RECORDS, SESSION_SIZE, resolveAssignment, resolveAssignmentEx, sampleSession, shuffledOptions, validateCase } from "../../packages/sim-ausculta/src/index";
+import { poolFor } from "./bank-cases";
 
 /** Kaynak tests/core.test.ts:417-506 (12 test → 12 test). */
 

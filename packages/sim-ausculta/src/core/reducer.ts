@@ -1,7 +1,6 @@
 import type { CaseDef, CaseResult, Mode, PatientView, Screen, StethHead, SuspendPayload, Telemetry } from "./types";
 import type { SimEventDraft } from "./events";
 import { aggregateResults, practiceAdjusted, scoreCase, MASTERY_THRESHOLD } from "./scoring";
-import { ALL_CASES } from "../data/pool";
 import type { ServerCaseMeta, ServerCaseSnapshot, ServerClientCase, ServerQuestionFeedback, ServerSessionState } from "./serverSession";
 
 /** Ausculta durum iskeleti ve saf reducer (kaynak: `core/store.tsx:106-299`, `buildSuspend`).
@@ -174,18 +173,15 @@ export interface ReducerSeam {
 
 const noopSeam: ReducerSeam = { emit: () => undefined };
 
-const findLocalCase = (id: string) => ALL_CASES.find((c) => c.id === id);
-
 function bodySexFor(def: CaseDef): BodySex {
   const pop = (def as CaseDef & { population?: string }).population;
   if (pop === "pediatrik") return "pediatrik";
   return def.patient.sex === "kadın" ? "kadin" : "erkek";
 }
 
-/** Etkin vaka: sunucu oturumundaysa yüklü sunucu vakası (A1.4), değilse yerel havuz. */
+/** Etkin vaka: yalnız sunucu oturumunda yüklü vaka (T196; istemcide yerel havuz yok). */
 function findCase(s: AppState, id: string): CaseDef | undefined {
-  if (s.server?.currentCase?.id === id) return s.server.currentCase;
-  return findLocalCase(id);
+  return s.server?.currentCase?.id === id ? s.server.currentCase : undefined;
 }
 
 export function reducer(s: AppState, a: Action, seam: ReducerSeam = noopSeam): AppState {

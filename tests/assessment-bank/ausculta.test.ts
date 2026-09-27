@@ -111,6 +111,15 @@ describe("paket sınırı", () => {
     const offenders = files.filter((f) => !/devLocalSessions/.test(f) && (ts.sys.readFile(f) ?? "").includes("@egemed/assessment-bank"));
     expect(offenders).toEqual([]);
   });
+
+  it("T196: istemci kaynağı anahtarlı vaka dosyalarını içe aktarmaz", () => {
+    const files = [
+      ...ts.sys.readDirectory("packages", [".ts", ".tsx"]).filter((f) => /packages\/sim-ausculta\/src\//.test(f)),
+      ...ts.sys.readDirectory("apps/shell/src", [".ts", ".tsx"]),
+    ].filter((f) => !f.includes("node_modules"));
+    const offenders = files.filter((f) => /cases(-auto)?\.json/.test(ts.sys.readFile(f) ?? ""));
+    expect(offenders).toEqual([]);
+  });
 });
 
 describe("istemci envanteri (A1.4)", () => {

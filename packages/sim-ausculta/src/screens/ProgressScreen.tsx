@@ -3,8 +3,6 @@ import { useMemo, useState } from "react";
 import type { AchievementsPeriod, Cohort, CohortFilter, Period, WeeklyGoal } from "@egemed/gamification-core";
 import { periodRangeTr } from "@egemed/gamification-core";
 import { buildAchievementsModel, buildLeaderboardModel, defaultGamiIcons, earnedFromServer, GamiAchievementsView, GamiLeaderboardView, GamiProgressPage, GamiServerFrame, gamiLoadingStatus, levelFromServer, serverHasActivity, streakFromServer, type GamiModalEnv, type GamiPageTab, type GamiServerSource, type ServerGamiData } from "@egemed/gami-ui";
-import { poolFor } from "../data/pool";
-import { sampleSession, SESSION_SIZE } from "../core/session";
 import { useStore } from "../core/StoreProvider";
 import type { ScoringWeights } from "../core/types";
 import { AUSCULTA_BADGES } from "../gamification/catalog";
@@ -130,13 +128,7 @@ function ProgressBody({
   }), [activeTab, at, boardPeriod, cohort, prevRows, rows, server]);
 
   const startAssessment = () => {
-    const seed = sessionSeed(now());
-    dispatch({
-      type: "startSession",
-      practiceIds: sampleSession(poolFor("practice"), seed, SESSION_SIZE),
-      assessmentIds: sampleSession(poolFor("assessment"), seed + 1, SESSION_SIZE),
-      seed,
-    });
+    dispatch({ type: "startSession", practiceIds: [], assessmentIds: [], seed: sessionSeed(now()) });
     dispatch({ type: "startMode", mode: "assessment" });
   };
 
