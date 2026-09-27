@@ -1,9 +1,9 @@
 /// <reference lib="dom" />
 
 /**
- * Kaynak Pulse betiklerine (`vendor/*.js`) verilen gölge ortam. Adlar
- * `tools/sync-runtime.mjs` içindeki ENV_NAMES ile birebir aynıdır; betikler bu
- * adları global yerine `env`den okur.
+ * Pulse runtime betiklerine (`vendor/*.js`) verilen gölge ortam. Adlar her
+ * vendor betiğinin başındaki `const { ... } = env` çözümlemesiyle birebir
+ * aynıdır; betikler bu adları global yerine `env`den okur (ADR-011).
  */
 export interface PulseScriptEnv {
   readonly window: Window;
