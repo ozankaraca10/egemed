@@ -90,8 +90,79 @@ export const auscultaPublicCaseSchema = z.strictObject({
   /** Vaka süresi başladığında (ilk okuma). */
   openedAt: isoDateTimeSchema,
 });
-export const simSessionCaseResponseSchema = z.strictObject({ data: auscultaPublicCaseSchema });
 export type AuscultaPublicCase = z.infer<typeof auscultaPublicCaseSchema>;
+
+// --- Opaca anahtarsız vaka (A2.1, ADR-009) -------------------------------------
+
+/** Opaca soru tipleri (sim `QuestionType` ile birebir; film_quality yalnız projeksiyonu sorar). */
+export const opacaPublicQuestionSchema = z.strictObject({
+  id: publicQuestionSchema.shape.id,
+  type: z.enum(["single_choice", "multi_choice", "finding_identify", "localization", "film_quality", "interpretation", "diagnosis", "sequence"]),
+  domain: publicQuestionSchema.shape.domain,
+  prompt: publicQuestionSchema.shape.prompt,
+  help: publicQuestionSchema.shape.help,
+  multiple: z.boolean(),
+  hintAvailable: z.boolean(),
+  /** Lokalizasyon sorusunda seçenek YOK; işaret görüntü üzerine konur. */
+  options: z.array(publicOptionSchema).min(0).max(12),
+});
+
+/** Stack karesi: pencere ön ayarı + çalışma zamanı jetonları (kare yolu gitmez). */
+export const opacaPublicStackSchema = z.strictObject({
+  window: z.enum(["lung", "mediastinum"]),
+  label: z.string().max(40).optional(),
+  frames: z.array(opaqueTokenSchema).min(1).max(400),
+});
+
+/** Opaca görüntüsü: kaynak dosya, bulgu, kalite, çözümleme metni ve adres GİTMEZ. */
+export const opacaPublicImageSchema = z.strictObject({
+  token: opaqueTokenSchema,
+  width: z.number().int().min(1).max(10000),
+  height: z.number().int().min(1).max(10000),
+  modality: z.enum(["XR", "CT"]),
+  bodyPart: z.enum(["toraks", "boyun"]),
+  stack: z.array(opacaPublicStackSchema).max(2).optional(),
+});
+
+export const opacaPublicCaseSchema = z.strictObject({
+  simId: z.literal("opaca"),
+  index: z.number().int().min(1).max(20),
+  /** Genel etiket ("Vaka 3"); gerçek başlık tanıyı ele verebildiği için gitmez. */
+  label: z.string().min(1).max(40),
+  patient: z.strictObject({ age: z.number().int().min(0).max(120).nullable(), sex: z.enum(["kadın", "erkek"]).nullable() }),
+  population: z.enum(["pediatrik"]).nullable(),
+  chiefComplaint: z.string().max(400),
+  history: z.string().max(2000),
+  vitalSigns: z.strictObject({
+    hr: z.number().optional(),
+    rr: z.number().optional(),
+    bp: z.string().max(20).optional(),
+    spo2: z.number().optional(),
+    temp: z.string().max(20).optional(),
+  }),
+  /** Vaka `objectives` metinleri tanı içerdiğinden gitmez; yalnız genel yönergeler. */
+  tasks: z.array(z.string().max(300)).max(10),
+  image: opacaPublicImageSchema,
+  questions: z.array(opacaPublicQuestionSchema).min(1).max(12),
+  technique: z.strictObject({ requiredZoneCount: z.number().int().min(0).max(20), systematicOrder: z.boolean() }),
+  /** Vaka süresi başladığında (ilk okuma). */
+  openedAt: isoDateTimeSchema,
+});
+export type OpacaPublicCase = z.infer<typeof opacaPublicCaseSchema>;
+
+const simSessionAnyCaseResponseSchema = z.strictObject({
+  data: z.discriminatedUnion("simId", [auscultaPublicCaseSchema, opacaPublicCaseSchema]),
+});
+
+/**
+ * Sunucunun vaka yanıtı: iki simin de anahtarsız gövdesini doğrular. İstemci
+ * tipleri A2.2'ye dek yalnız Ausculta gövdesiyle çalışır (API opaca sunucu
+ * oturumu açmaz); bu yüzden dışa vuran tip AuscultaPublicCase olarak kalır ve
+ * opaca istemcisiyle birlikte birleşime genişletilir.
+ */
+export const simSessionCaseResponseSchema = simSessionAnyCaseResponseSchema as unknown as z.ZodType<{
+  readonly data: AuscultaPublicCase;
+}>;
 
 // --- İpucu, yanıt, bitiş --------------------------------------------------------
 
@@ -115,14 +186,19 @@ export const simTelemetrySchema = z.strictObject({
   replayCount: z.number().int().min(0).max(1000),
 });
 
+/** Opaca lokalizasyon işareti (`pt:x,y`, normalize 0–1; sim `encodeMark` biçimi). */
+export const MARK_ANSWER_PATTERN = /^pt:(0(\.\d{1,4})?|1(\.0{1,4})?),(0(\.\d{1,4})?|1(\.0{1,4})?)$/;
+/** Yanıt öğesi: opak seçenek/ses jetonu YA DA lokalizasyon işareti. */
+export const simAnswerEntrySchema = z.union([opaqueTokenSchema, z.string().regex(MARK_ANSWER_PATTERN)]);
+
 /** Uygulamada tek soru kontrolü (A1.4): soru kilitlenir, doğru seçenekler açılır. */
 export const simSessionCheckRequestSchema = z.strictObject({
   questionId: publicQuestionSchema.shape.id,
-  answer: z.array(opaqueTokenSchema).min(1).max(12),
+  answer: z.array(simAnswerEntrySchema).min(1).max(12),
 });
 
 export const simSessionAnswerRequestSchema = z.strictObject({
-  answers: z.record(publicQuestionSchema.shape.id, z.array(opaqueTokenSchema).max(12)),
+  answers: z.record(publicQuestionSchema.shape.id, z.array(simAnswerEntrySchema).max(12)),
   telemetry: simTelemetrySchema,
 });
 

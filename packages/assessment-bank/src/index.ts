@@ -5,3 +5,4 @@
  * sim paketleri ve kabuğun üretim yolu içe aktaramaz (sözleşme testi korur).
  */
 export * as ausculta from "./ausculta/index";
+export * as opaca from "./opaca/index";
