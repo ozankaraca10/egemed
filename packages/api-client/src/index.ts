@@ -5,6 +5,10 @@ import {
   authMeResponseSchema,
   authMethodSchema,
   bulkRequestSchema,
+  challengeCreateRequestSchema,
+  challengeJoinRequestSchema,
+  challengeListResponseSchema,
+  challengeResponseSchema,
   createUserRequestSchema,
   displayNameSchema,
   emailSchema,
@@ -19,6 +23,7 @@ import {
   meRewardsOverviewResponseSchema,
   mePreferencesResponseSchema,
   mePreferencesSchema,
+  opaqueTokenSchema,
   pageMetaSchema,
   rewardMonthSchema,
   rewardSchema,
@@ -26,15 +31,25 @@ import {
   rewardWinnerSchema,
   roleSchema,
   simIdSchema,
+  simSessionAnswerRequestSchema,
+  simSessionAnswerResponseSchema,
+  simSessionCaseResponseSchema,
+  simSessionFinishResponseSchema,
+  simSessionHintRequestSchema,
+  simSessionHintResponseSchema,
+  simSessionStartRequestSchema,
+  simSessionStartResponseSchema,
   updateUserRequestSchema,
   userListQuerySchema,
   userStatusSchema,
   usernameSchema,
   uuidSchema,
   type AttemptWriteRequest,
+  type AuscultaPublicCase,
   type AuthMeResponse,
   type AuthMethod,
   type BulkRequest,
+  type ChallengeBody,
   type CreateUserRequest,
   type ErrorCode,
   type GamiAllResponse,
@@ -46,7 +61,11 @@ import {
   type RewardUpsertRequest,
   type RewardWinnerBody,
   type Role,
+  type SimCaseResult,
   type SimId,
+  type SimSession,
+  type SimSessionAnswerRequest,
+  type SimSessionMode,
   type UpdateUserRequest,
   type UserListQuery,
   type UserStatus,
@@ -285,6 +304,42 @@ export interface ApiMeRewardsOverviewResponse {
   };
 }
 
+export interface ApiSimSessionHintResult {
+  readonly data: {
+    readonly hint: string;
+    readonly hintsUsed: number;
+  };
+}
+
+export interface ApiSimSessionAnswerResult {
+  readonly data:
+    | { readonly mode: "practice"; readonly result: SimCaseResult }
+    | { readonly mode: "assessment" | "challenge"; readonly accepted: true };
+}
+
+export interface ApiSimSessionFinishResult {
+  readonly data: {
+    readonly mode: SimSessionMode;
+    readonly total: number;
+    readonly max: number;
+    readonly passed: boolean;
+    readonly cases: readonly SimCaseResult[];
+    readonly attemptId: string | null;
+    readonly xpGained: number;
+  };
+}
+
+/** Sunucu 409/422 gövdesindeki ayrıntı kodu (`details.issues[0].code`) — yoksa undefined. */
+export function apiIssueCode(error: unknown): string | undefined {
+  if (!(error instanceof ApiError)) return undefined;
+  const details = error.details;
+  if (typeof details !== "object" || details === null) return undefined;
+  const issues = (details as { issues?: unknown }).issues;
+  if (!Array.isArray(issues) || issues.length === 0) return undefined;
+  const first = issues[0] as { code?: unknown };
+  return typeof first?.code === "string" ? first.code : undefined;
+}
+
 export interface ApiClient {
   readonly auth: {
     me(): Promise<AuthMeResponse>;
@@ -332,6 +387,27 @@ export interface ApiClient {
   readonly preferences: {
     getPreferences(): Promise<{ readonly data: MePreferences }>;
     setPreferences(input: MePreferences): Promise<{ readonly data: MePreferences }>;
+  };
+  readonly simSessions: {
+    start(simId: SimId, mode: "practice" | "assessment"): Promise<{ readonly data: SimSession }>;
+    getCase(simId: SimId, sessionId: string, index: number): Promise<{ readonly data: AuscultaPublicCase }>;
+    hint(simId: SimId, sessionId: string, index: number, questionId: string): Promise<ApiSimSessionHintResult>;
+    answer(
+      simId: SimId,
+      sessionId: string,
+      index: number,
+      body: SimSessionAnswerRequest,
+    ): Promise<ApiSimSessionAnswerResult>;
+    finish(simId: SimId, sessionId: string): Promise<ApiSimSessionFinishResult>;
+    /** İstek yapmaz; `<audio src>` için taban adres + yol (çerez aynı kökenden gider). */
+    audioUrl(simId: SimId, sessionId: string, token: string): string;
+  };
+  readonly challenges: {
+    create(simId: SimId): Promise<{ readonly data: ChallengeBody }>;
+    join(code: string): Promise<{ readonly data: ChallengeBody }>;
+    list(): Promise<{ readonly data: readonly ChallengeBody[] }>;
+    get(challengeId: string): Promise<{ readonly data: ChallengeBody }>;
+    startSession(challengeId: string): Promise<{ readonly data: SimSession }>;
   };
 }
 
@@ -790,6 +866,148 @@ export function createApiClient(options: CreateApiClientOptions): ApiClient {
         });
       },
     },
+    simSessions: {
+      async start(simId: SimId, mode: "practice" | "assessment"): Promise<{ readonly data: SimSession }> {
+        const parsedSimId = parseSchema(simIdSchema, simId, "POST /me/sims/:simId/sessions path.simId");
+        const parsedBody = parseSchema(
+          simSessionStartRequestSchema,
+          { mode },
+          "POST /me/sims/:simId/sessions request",
+        );
+        return requestJson({
+          method: "POST",
+          path: `/me/sims/${parsedSimId}/sessions`,
+          contentType: "application/json",
+          body: JSON.stringify(parsedBody),
+          parse: (value, context) => parseSchema(simSessionStartResponseSchema, value, `${context} response`),
+        });
+      },
+      async getCase(simId: SimId, sessionId: string, index: number): Promise<{ readonly data: AuscultaPublicCase }> {
+        const parsedSimId = parseSchema(
+          simIdSchema,
+          simId,
+          "GET /me/sims/:simId/sessions/:sessionId/cases/:index path.simId",
+        );
+        const parsedSessionId = parseSchema(
+          uuidSchema,
+          sessionId,
+          "GET /me/sims/:simId/sessions/:sessionId/cases/:index path.sessionId",
+        );
+        const parsedIndex = parseCaseIndex(
+          index,
+          "GET /me/sims/:simId/sessions/:sessionId/cases/:index path.index",
+        );
+        return requestJson({
+          method: "GET",
+          path: `/me/sims/${parsedSimId}/sessions/${parsedSessionId}/cases/${parsedIndex}`,
+          parse: (value, context) => parseSchema(simSessionCaseResponseSchema, value, `${context} response`),
+        });
+      },
+      async hint(
+        simId: SimId,
+        sessionId: string,
+        index: number,
+        questionId: string,
+      ): Promise<ApiSimSessionHintResult> {
+        const context = "POST /me/sims/:simId/sessions/:sessionId/cases/:index/hint";
+        const parsedSimId = parseSchema(simIdSchema, simId, `${context} path.simId`);
+        const parsedSessionId = parseSchema(uuidSchema, sessionId, `${context} path.sessionId`);
+        const parsedIndex = parseCaseIndex(index, `${context} path.index`);
+        const parsedBody = parseSchema(
+          simSessionHintRequestSchema,
+          { questionId },
+          `${context} request`,
+        );
+        return requestJson({
+          method: "POST",
+          path: `/me/sims/${parsedSimId}/sessions/${parsedSessionId}/cases/${parsedIndex}/hint`,
+          contentType: "application/json",
+          body: JSON.stringify(parsedBody),
+          parse: (value, ctx) => parseSchema(simSessionHintResponseSchema, value, `${ctx} response`),
+        });
+      },
+      async answer(
+        simId: SimId,
+        sessionId: string,
+        index: number,
+        body: SimSessionAnswerRequest,
+      ): Promise<ApiSimSessionAnswerResult> {
+        const context = "POST /me/sims/:simId/sessions/:sessionId/cases/:index/answer";
+        const parsedSimId = parseSchema(simIdSchema, simId, `${context} path.simId`);
+        const parsedSessionId = parseSchema(uuidSchema, sessionId, `${context} path.sessionId`);
+        const parsedIndex = parseCaseIndex(index, `${context} path.index`);
+        const parsedBody = parseSchema(simSessionAnswerRequestSchema, body, `${context} request`);
+        return requestJson({
+          method: "POST",
+          path: `/me/sims/${parsedSimId}/sessions/${parsedSessionId}/cases/${parsedIndex}/answer`,
+          contentType: "application/json",
+          body: JSON.stringify(parsedBody),
+          parse: (value, ctx) => parseSchema(simSessionAnswerResponseSchema, value, `${ctx} response`),
+        });
+      },
+      async finish(simId: SimId, sessionId: string): Promise<ApiSimSessionFinishResult> {
+        const context = "POST /me/sims/:simId/sessions/:sessionId/finish";
+        const parsedSimId = parseSchema(simIdSchema, simId, `${context} path.simId`);
+        const parsedSessionId = parseSchema(uuidSchema, sessionId, `${context} path.sessionId`);
+        return requestJson({
+          method: "POST",
+          path: `/me/sims/${parsedSimId}/sessions/${parsedSessionId}/finish`,
+          parse: (value, ctx) => parseSchema(simSessionFinishResponseSchema, value, `${ctx} response`),
+        });
+      },
+      audioUrl(simId: SimId, sessionId: string, token: string): string {
+        const context = "GET /me/sims/:simId/sessions/:sessionId/audio/:token";
+        const parsedSimId = parseSchema(simIdSchema, simId, `${context} path.simId`);
+        const parsedSessionId = parseSchema(uuidSchema, sessionId, `${context} path.sessionId`);
+        const parsedToken = parseSchema(opaqueTokenSchema, token, `${context} path.token`);
+        return buildUrl(baseUrl, `/me/sims/${parsedSimId}/sessions/${parsedSessionId}/audio/${parsedToken}`, undefined);
+      },
+    },
+    challenges: {
+      async create(simId: SimId): Promise<{ readonly data: ChallengeBody }> {
+        const parsedBody = parseSchema(challengeCreateRequestSchema, { simId }, "POST /me/challenges request");
+        return requestJson({
+          method: "POST",
+          path: "/me/challenges",
+          contentType: "application/json",
+          body: JSON.stringify(parsedBody),
+          parse: (value, context) => parseSchema(challengeResponseSchema, value, `${context} response`),
+        });
+      },
+      async join(code: string): Promise<{ readonly data: ChallengeBody }> {
+        const parsedBody = parseSchema(challengeJoinRequestSchema, { code }, "POST /me/challenges/join request");
+        return requestJson({
+          method: "POST",
+          path: "/me/challenges/join",
+          contentType: "application/json",
+          body: JSON.stringify(parsedBody),
+          parse: (value, context) => parseSchema(challengeResponseSchema, value, `${context} response`),
+        });
+      },
+      async list(): Promise<{ readonly data: readonly ChallengeBody[] }> {
+        return requestJson({
+          method: "GET",
+          path: "/me/challenges",
+          parse: (value, context) => parseSchema(challengeListResponseSchema, value, `${context} response`),
+        });
+      },
+      async get(challengeId: string): Promise<{ readonly data: ChallengeBody }> {
+        const parsedId = parseSchema(uuidSchema, challengeId, "GET /me/challenges/:challengeId path");
+        return requestJson({
+          method: "GET",
+          path: `/me/challenges/${parsedId}`,
+          parse: (value, context) => parseSchema(challengeResponseSchema, value, `${context} response`),
+        });
+      },
+      async startSession(challengeId: string): Promise<{ readonly data: SimSession }> {
+        const parsedId = parseSchema(uuidSchema, challengeId, "POST /me/challenges/:challengeId/session path");
+        return requestJson({
+          method: "POST",
+          path: `/me/challenges/${parsedId}/session`,
+          parse: (value, context) => parseSchema(simSessionStartResponseSchema, value, `${context} response`),
+        });
+      },
+    },
   };
 }
 
@@ -1153,6 +1371,11 @@ function parseNonNegativeInt(value: unknown, context: string): number {
 function parsePositiveInt(value: unknown, context: string): number {
   if (typeof value === "number" && Number.isInteger(value) && value >= 1) return value;
   throw new ApiSchemaError(`${context} pozitif tam sayı olmalıdır.`, context, value, []);
+}
+
+function parseCaseIndex(value: number, context: string): number {
+  if (Number.isInteger(value) && value >= 1 && value <= 20) return value;
+  throw new ApiSchemaError(`${context} 1-20 aralığında tam sayı olmalıdır.`, context, value, []);
 }
 
 // apps/shell UsersDataSource uyumlu adaptör (bağlama bir sonraki görevde).
