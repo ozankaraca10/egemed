@@ -107,6 +107,12 @@ export const simTelemetrySchema = z.strictObject({
   replayCount: z.number().int().min(0).max(1000),
 });
 
+/** Uygulamada tek soru kontrolü (A1.4): soru kilitlenir, doğru seçenekler açılır. */
+export const simSessionCheckRequestSchema = z.strictObject({
+  questionId: publicQuestionSchema.shape.id,
+  answer: z.array(opaqueTokenSchema).min(1).max(12),
+});
+
 export const simSessionAnswerRequestSchema = z.strictObject({
   answers: z.record(publicQuestionSchema.shape.id, z.array(opaqueTokenSchema).max(12)),
   telemetry: simTelemetrySchema,
@@ -133,6 +139,8 @@ export const caseResultSchema = z.strictObject({
   hintsUsed: z.number().int().min(0),
   questions: z.array(questionFeedbackSchema),
 });
+
+export const simSessionCheckResponseSchema = z.strictObject({ data: questionFeedbackSchema });
 
 export const simSessionAnswerResponseSchema = z.strictObject({
   data: z.union([

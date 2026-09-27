@@ -201,6 +201,31 @@ describe("sunucu vaka oturumu (A1.3)", () => {
     expect(done.xpGained).toBe(0);
   });
 
+  it("uygulamada soru kontrolü anında geri bildirim verir ve yanıtı kilitler; değerlendirmede yasak", async () => {
+    const h = harness();
+    const ali = await login(h, "ali.veli");
+    const session = await start(h, ali, "practice");
+    const first = await openCase(h, ali, session.sessionId, 1);
+    const question = first.questions[0];
+    if (question === undefined) throw new Error("soru yok");
+    const correct = correctAnswers(h, session.sessionId, 1)[question.id] ?? [];
+    const wrong = [question.options.find((o) => !correct.includes(o.id))?.id ?? ""];
+    const check = await call(h, ali, "POST", `/me/sims/ausculta/sessions/${session.sessionId}/cases/1/check`, { questionId: question.id, answer: wrong });
+    expect(check.status).toBe(200);
+    const feedback = ((await check.json()) as { data: { correct: boolean; correctOptionIds: string[] } }).data;
+    expect(feedback.correct).toBe(false);
+    expect(feedback.correctOptionIds).toEqual(correct);
+    expect((await call(h, ali, "POST", `/me/sims/ausculta/sessions/${session.sessionId}/cases/1/check`, { questionId: question.id, answer: correct })).status).toBe(409);
+    // Kontrolden sonra doğruya çevirmek puanı değiştirmez (kilitli yanıt).
+    const answers = { ...correctAnswers(h, session.sessionId, 1), [question.id]: correct };
+    const answer = await call(h, ali, "POST", `/me/sims/ausculta/sessions/${session.sessionId}/cases/1/answer`, { answers, telemetry: TELEMETRY });
+    const result = ((await answer.json()) as { data: { result: { questions: { questionId: string; correct: boolean }[] } } }).data.result;
+    expect(result.questions.find((q) => q.questionId === question.id)?.correct).toBe(false);
+    const assess = await start(h, ali, "assessment");
+    const aCase = await openCase(h, ali, assess.sessionId, 1);
+    expect((await call(h, ali, "POST", `/me/sims/ausculta/sessions/${assess.sessionId}/cases/1/check`, { questionId: aCase.questions[0]?.id, answer: [aCase.questions[0]?.options[0]?.id] })).status).toBe(403);
+  });
+
   it("sim erişimi yoksa 403; sunucu oturumu olmayan sim 404", async () => {
     const h = createAdminHarness({});
     const ali = await login(h, "ali.veli");

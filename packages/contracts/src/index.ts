@@ -186,6 +186,8 @@ export {
   simSessionAnswerRequestSchema,
   simSessionAnswerResponseSchema,
   simSessionCaseResponseSchema,
+  simSessionCheckRequestSchema,
+  simSessionCheckResponseSchema,
   simSessionFinishResponseSchema,
   simSessionHintRequestSchema,
   simSessionHintResponseSchema,
