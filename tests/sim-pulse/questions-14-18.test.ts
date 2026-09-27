@@ -119,10 +119,10 @@ describe("T210 havuz bütünlüğü", () => {
     expect(newItems).toHaveLength(100);
   });
 
-  it("mevcut 400 madde kimliği değişmez; yeni maddeler C201–C250 / Q201–Q250 olarak arkaya eklenir", () => {
-    expect(curriculum.cases.map(({ id }) => id)).toEqual(Array.from({ length: 250 }, (_, index) => `C${String(index + 1).padStart(3, "0")}`));
-    expect(curriculum.questions.map(({ id }) => id)).toEqual(Array.from({ length: 250 }, (_, index) => `Q${String(index + 1).padStart(3, "0")}`));
-    expect(Object.keys(curriculum.byId)).toHaveLength(500);
+  it("mevcut maddeler kimliğini korur; yeni maddeler C201–C250 / Q201–Q250 olarak arkaya eklenir", () => {
+    expect(curriculum.cases.slice(0, 250).map(({ id }) => id)).toEqual(Array.from({ length: 250 }, (_, index) => `C${String(index + 1).padStart(3, "0")}`));
+    expect(curriculum.questions.slice(0, 250).map(({ id }) => id)).toEqual(Array.from({ length: 250 }, (_, index) => `Q${String(index + 1).padStart(3, "0")}`));
+    expect(Object.keys(curriculum.byId)).toHaveLength(curriculum.cases.length + curriculum.questions.length);
   });
 
   it("yeni bankalar p14_…p18_ önekli, benzersiz ve en fazla iki satırda kullanılır", () => {
@@ -141,7 +141,7 @@ describe("T210 havuz bütünlüğü", () => {
   });
 
   it("sınırlılık metni gerçek madde sayısını dinamik taşır", () => {
-    expect(curriculum.limitations).toContain("500 sentetik madde");
+    expect(curriculum.limitations).toContain("600 sentetik madde");
     expect(curriculum.limitations).toContain(`${modelApi.ALL_MODES.length} EKG sonucu`);
     expect(curriculum.limitations).toContain("Patern 14–23 (T204) sinyal ve içerikleri Kardiyoloji ABD onayı bekliyor.");
   });
@@ -259,10 +259,10 @@ describe("T210 eski oturum çözümü (C001–C200, Q001–Q200)", () => {
     const newBoundary = stateApi.decode(record([241, 242, 243, 244, 245, 246, 247, 248, 249, 250], [241, 242, 243, 244, 245, 246, 247, 248, 249, 250]));
     expect(newBoundary.caseSession.ids).toEqual(["C241", "C242", "C243", "C244", "C245", "C246", "C247", "C248", "C249", "C250"]);
     expect(newBoundary.quizSession.ids[9]).toBe("Q250");
-    const invalid = stateApi.decode(record([0, 1, 2, 3, 4, 5, 6, 7, 8, 9], [1, 2, 3, 4, 5, 6, 7, 8, 9, 251]));
+    const invalid = stateApi.decode(record([0, 1, 2, 3, 4, 5, 6, 7, 8, 9], [1, 2, 3, 4, 5, 6, 7, 8, 9, curriculum.questions.length + 1]));
     expect(invalid.caseSession.ids).toHaveLength(10);
     expect(invalid.quizSession.ids).toHaveLength(10);
-    expect(invalid.quizSession.ids.includes("Q251")).toBe(false);
+    expect(invalid.quizSession.ids.some((id) => Number(id.slice(1)) > curriculum.questions.length)).toBe(false);
     expect(invalid.caseSession.ids.every((id) => curriculum.byId[id] !== undefined)).toBe(true);
   });
 });
