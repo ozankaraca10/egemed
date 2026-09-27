@@ -3,6 +3,7 @@ import { endOfMonthTr } from "@egemed/gamification-core";
 import { defaultGamiIcons, GamiGainsView } from "@egemed/gami-ui";
 import { Fragment, useMemo, useState, type JSX, type ReactNode } from "react";
 import { firstWeakLibraryKey, weakDomainKeys } from "../core/flow";
+import { useStartMode } from "../core/LearnGate";
 import { aggregateResults } from "../core/scoring";
 import type { SimRuntime } from "../core/runtime";
 import { useStore } from "../core/StoreProvider";
@@ -79,6 +80,7 @@ export interface ResultsScreenProps {
 export function ResultsScreen({ embedded = false, env = NOOP_RESULTS_ENV, repository, onAchievements, onLeaderboard, serverData = false }: ResultsScreenProps): JSX.Element {
   const { state, dispatch, runtime, now } = useStore();
   const audience = useAudience();
+  const startMode = useStartMode();
   const isAssessment = state.mode === "assessment";
   const agg = aggregateResults(state.caseResults);
   const last = state.caseResults[state.caseResults.length - 1];
@@ -119,7 +121,8 @@ export function ResultsScreen({ embedded = false, env = NOOP_RESULTS_ENV, reposi
 
   const retry = () => {
     // Yeni oturumu sunucu sürücüsü başlatır (istemcide örneklem yok).
-    dispatch({ type: "startMode", mode: state.mode });
+    // T209: öğrenme kilidi burada da geçerli (koruma tek noktada).
+    startMode(state.mode);
   };
 
   // Sunucu sonucu bulgu/kütüphane anahtarı taşımaz; zayıf konu odağı şimdilik yok.
@@ -127,7 +130,7 @@ export function ResultsScreen({ embedded = false, env = NOOP_RESULTS_ENV, reposi
 
   const studyLearn = () => {
     if (weakLearnKey) dispatch({ type: "setLearnFocus", key: weakLearnKey });
-    dispatch({ type: "startMode", mode: "learn" });
+    startMode("learn");
     dispatch({ type: "goto", screen: "learn" });
   };
 

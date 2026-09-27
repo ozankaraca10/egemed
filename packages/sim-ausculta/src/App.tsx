@@ -1,8 +1,10 @@
 import type { AttemptRecord } from "@egemed/gamification-core";
 import type { GamiServerSource } from "@egemed/gami-ui";
 import type { GamiPageTab } from "@egemed/gami-ui";
-import type { SimAudience, SimChrome, SimSessionSource } from "@egemed/sim-host";
+import type { SimAudience, SimChrome, SimLearnPort, SimSessionSource } from "@egemed/sim-host";
 import { useEffect, useRef, useState, type JSX } from "react";
+import { LearnGateProvider, useLearnGate } from "./core/LearnGate";
+import { canStartMode } from "./core/learnLock";
 import { useStore } from "./core/StoreProvider";
 import { gamiStoragePort } from "./core/storage";
 import { resolveEntryScreen } from "./screens/entry";
@@ -53,6 +55,8 @@ export interface AppProps {
   readonly requestSignIn?: () => void;
   /** A1: sunucu vaka oturumu kanalı. */
   readonly sessions?: SimSessionSource;
+  /** T209: kabuğun öğrenme tamamlama kanalı (ziyaretçide verilmez). */
+  readonly learn?: SimLearnPort;
   readonly challengeId?: string;
   readonly onChallengeFinished?: (challengeId: string) => void;
 }
@@ -76,6 +80,7 @@ function Shell({
   onChallengeFinished,
 }: AppProps & { embedded: boolean }): JSX.Element {
   const { state, dispatch, bus, now, storage } = useStore();
+  const learnGate = useLearnGate();
   const gamiRef = useRef<LocalGamiRepository | null>(null);
   if (gamiRef.current === null) {
     gamiRef.current = new LocalGamiRepository({ storage: gamiStoragePort(storage), now: () => new Date(now()) });
@@ -93,12 +98,21 @@ function Shell({
   }, [audio, state.screen]);
 
   // ADR-010: düello bağlamıyla açılınca mod seçimi atlanır; oturumu sürücü düello ucundan açar.
+  // T209: öğrenme tamamlanmadıysa düello başlatılmaz; kullanıcı öğrenme ekranına düşer
+  // (bilgi notu LearnScreen'de gösterilir). Sunucu da `learn_required` ile korur.
   const challengeStarted = useRef<string | null>(null);
   useEffect(() => {
     if (challengeId === undefined || challengeStarted.current === challengeId) return;
+    if (!canStartMode("assessment", learnGate.complete)) {
+      // Kilitliyken düello başlatılmaz; öğrenme ekranına düşülür. Etki, öğrenme
+      // tamamlanınca (complete değişince) yeniden çalışıp düelloyu açar.
+      dispatch({ type: "startMode", mode: "learn" });
+      dispatch({ type: "goto", screen: "learn" });
+      return;
+    }
     challengeStarted.current = challengeId;
     dispatch({ type: "startMode", mode: "assessment", challengeId });
-  }, [challengeId, dispatch]);
+  }, [challengeId, dispatch, learnGate.complete]);
 
   useEffect(() => bus.subscribe((event) => {
     // Oyunlaştırma yalnız öğrenci kitlesi içindir (26 Eyl 2026 sözleşmesi):
@@ -189,7 +203,12 @@ function Shell({
   );
 }
 
-/** Gömülü kabuk. Üst bar platformdadır; sim ikinci bir `header` çizmez. */
-export function App({ embedded = true, ...props }: AppProps): JSX.Element {
-  return <Shell embedded={embedded} {...props} />;
+/** Gömülü kabuk. Üst bar platformdadır; sim ikinci bir `header` çizmez.
+ *  T209: öğrenme kilidi sağlayıcısı tüm ekranları sarar; `learn` kanalı host'tan gelir. */
+export function App({ embedded = true, learn, ...props }: AppProps): JSX.Element {
+  return (
+    <LearnGateProvider {...(learn === undefined ? {} : { learn })}>
+      <Shell embedded={embedded} {...props} />
+    </LearnGateProvider>
+  );
 }

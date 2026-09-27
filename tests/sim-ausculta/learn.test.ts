@@ -3,6 +3,8 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import {
   EmbeddedProvider,
+  LEARN_LISTENED_KEY,
+  LearnGateProvider,
   LearnScreen,
   StoreProvider,
   createMemoryRuntimeAdapter,
@@ -28,6 +30,16 @@ const storage: StoragePort = {
   set: () => undefined,
 };
 
+function memoryStorage(seed: Record<string, string> = {}): StoragePort {
+  const entries = new Map(Object.entries(seed));
+  return {
+    get: (key) => entries.get(key) ?? null,
+    set: (key, value) => {
+      entries.set(key, value);
+    },
+  };
+}
+
 /** renderToStaticMarkup kesme işaretini &#x27; yazar; beklenen metin aynı biçime çevrilir. */
 const esc = (text: string): string =>
   text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#x27;");
@@ -35,15 +47,19 @@ const esc = (text: string): string =>
 const EARLY_SYSTOLIC =
   "Erken sistolik üfürüm, S1'den hemen sonra başlayıp sistolün ilk yarısında söner.";
 
-function renderInStore(node: ReactNode, learnFocusKey: string | null = null): string {
+function renderInStore(
+  node: ReactNode,
+  learnFocusKey: string | null = null,
+  seedStorage: StoragePort = storage,
+): string {
   return renderToStaticMarkup(
     createElement(StoreProvider, {
-      children: node,
+      children: createElement(LearnGateProvider, { children: node }),
       env: inertWindow,
       initialState: { ...initialState, learnFocusKey },
       now: () => 1_728_000_000_000,
       runtime: createMemoryRuntimeAdapter(),
-      storage,
+      storage: seedStorage,
     }),
   );
 }
@@ -91,6 +107,18 @@ describe("LearnScreen", () => {
     expect(() => audio.stop()).not.toThrow();
     const html = renderInStore(createElement(LearnScreen, { env, audio }));
     expect(html).toContain("learn-grid");
+  });
+
+  it("öğrenme ilerlemesi, grup sayacı ve dinlendi işaretini gösterir (T209)", () => {
+    const html = renderInStore(
+      createElement(LearnScreen),
+      null,
+      memoryStorage({ [LEARN_LISTENED_KEY]: JSON.stringify(["heart.normal"]) }),
+    );
+    expect(html).toContain("Öğrenme: 1/20 ses dinlendi");
+    expect(html).toContain("1/10");
+    expect(html).toContain('aria-label="dinlendi"');
+    expect(html).toContain("lib-item active listened");
   });
 
   it("ziyaretçi kitlesinde açık olmayan öğeler kilit ikonuyla işaretlenir (T174)", () => {
