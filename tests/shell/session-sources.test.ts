@@ -49,7 +49,9 @@ function caseOf(publicCase: OpacaPublicCase): CaseDef {
         );
       }),
   );
-  expect(match).toHaveLength(1);
+  // Bankada içeriği birebir aynı vakalar olabilir (rastgele seçim); bu testlerde puanlama
+  // içerik ve boş yanıt üzerinden yapıldığı için eşdeğerdirler — ilki alınır.
+  expect(match.length).toBeGreaterThanOrEqual(1);
   return match[0]!;
 }
 
