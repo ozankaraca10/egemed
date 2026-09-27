@@ -47,6 +47,9 @@ importers:
 
   apps/api:
     dependencies:
+      '@egemed/assessment-bank':
+        specifier: workspace:*
+        version: link:../../packages/assessment-bank
       '@egemed/contracts':
         specifier: workspace:*
         version: link:../../packages/contracts

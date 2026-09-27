@@ -1,5 +1,6 @@
 import { createApp } from "../../apps/api/src/app";
 import { createMemoryRewardsRepo } from "../../apps/api/src/rewards";
+import { createMemorySimSessionRepo } from "../../apps/api/src/me/simSessions";
 import { createMemoryAdminBulkRepo, type AdminBulkRepo } from "../../apps/api/src/admin/bulk";
 import { createMemoryAdminOverviewRepo } from "../../apps/api/src/admin/extras";
 import {
@@ -189,6 +190,8 @@ export function createAdminHarness(
     readonly db?: { query(text: string, params: readonly unknown[]): Promise<unknown> };
     /** T87 — PostgreSQL satır şeklini taklit eden toplu işlem deposu. */
     readonly bulk?: AdminBulkRepo;
+    /** A1.3 — sunucu vaka oturumu; ses okuyucu ve deterministik jeton/rastgele. */
+    readonly readAudio?: (runtimeUrl: string) => Promise<Uint8Array | null>;
   } = {},
 ) {
   const users = options.users ?? DEFAULT_USERS;
@@ -215,6 +218,10 @@ export function createAdminHarness(
   };
   const importStore: MemoryAdminImportStore = createMemoryAdminImportRepo(adminStore, newId);
   const rewards = createMemoryRewardsRepo();
+  const simSessions = createMemorySimSessionRepo();
+  let tokenCounter = 0;
+  let randomSeed = 42;
+  let idCounter = 0;
   const app = createApp({
     db: options.db ?? fakeDb(),
     now: () => clock,
@@ -222,6 +229,16 @@ export function createAdminHarness(
     gamification: gamificationStore.repo,
     overview: createMemoryAdminOverviewRepo(adminStore, importStore),
     rewards,
+    simSessions: {
+      sessions: simSessions,
+      readAudio: options.readAudio ?? (() => Promise.resolve(null)),
+      newToken: () => `tok_${(tokenCounter++).toString(36).padStart(12, "0")}`,
+      random: () => {
+        randomSeed = (randomSeed * 16807) % 2147483647;
+        return randomSeed / 2147483647;
+      },
+      newId: () => generatedId(9000 + idCounter++),
+    },
     admin: {
       auth,
       users: adminStore.users,
@@ -238,6 +255,7 @@ export function createAdminHarness(
     importStore,
     gamificationStore,
     rewards,
+    simSessions,
     advance(ms: number) {
       clock += ms;
     },

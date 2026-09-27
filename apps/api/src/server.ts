@@ -3,6 +3,10 @@ import { randomUUID } from "node:crypto";
 import process from "node:process";
 import { createApp } from "./app.ts";
 import { createPgRewardsRepo } from "./rewards.ts";
+import { cryptoRandom, cryptoToken, cryptoUuid } from "./app.ts";
+import { createPgSimSessionRepo } from "./me/simSessions.ts";
+import { readFile } from "node:fs/promises";
+import path from "node:path";
 import { createPgAdminBulkRepo } from "./admin/bulk.ts";
 import { createPgAdminOverviewRepo } from "./admin/extras.ts";
 import { createPgAdminImportRepo } from "./admin/imports.ts";
@@ -54,6 +58,23 @@ const app = createApp({
   gamification: createPgGamificationRepo(db),
   overview: createPgAdminOverviewRepo(db),
   rewards: createPgRewardsRepo(db),
+  simSessions: {
+    sessions: createPgSimSessionRepo(db),
+    // Yol bankadaki güvenilir veriden gelir; yine de kök dışına çıkış reddedilir.
+    readAudio: async (runtimeUrl: string) => {
+      const root = path.resolve(env.AUSCULTA_AUDIO_DIR);
+      const target = path.resolve(root, runtimeUrl);
+      if (!target.startsWith(`${root}/`)) return null;
+      try {
+        return await readFile(target);
+      } catch {
+        return null;
+      }
+    },
+    newToken: cryptoToken,
+    random: cryptoRandom,
+    newId: cryptoUuid,
+  },
   admin: {
     auth,
     users: createPgAdminUsersRepo(db),

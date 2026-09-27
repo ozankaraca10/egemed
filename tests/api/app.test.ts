@@ -188,6 +188,7 @@ describe("ortam doğrulaması", () => {
       SESSION_IDLE_MINUTES: 30,
       AUTH_LOGIN_RATE_MAX: 8,
       ATTEMPT_RATE_MAX: 60,
+      AUSCULTA_AUDIO_DIR: "../../packages/sim-ausculta/public",
       SESSION_ABSOLUTE_HOURS: 12,
       SSO_PROVIDER: "none",
     });

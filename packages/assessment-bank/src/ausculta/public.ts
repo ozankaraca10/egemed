@@ -16,7 +16,7 @@ export interface AuscultaCaseKeys {
   /** qid → jeton → özgün seçenek kimliği */
   readonly options: Readonly<Record<string, Readonly<Record<string, string>>>>;
   /** ses jetonu → çalışma zamanı ses yolu (istemciye asla gitmez) */
-  readonly audio: Readonly<Record<string, { readonly runtimeUrl: string }>>;
+  readonly audio: Readonly<Record<string, { readonly runtimeUrl: string; readonly pointId: string }>>;
 }
 
 export interface BuildCaseInput {
@@ -45,12 +45,12 @@ export function buildPublicCase(caseDef: CaseDef, input: BuildCaseInput): { read
   // Değerlendirmede bildirimsiz yedek (posterior→anterior) sunumu yapılmaz (O7).
   const pointIds =
     input.mode === "assessment" ? assessmentPointFilter(caseDef.soundAssignments) : caseDef.soundAssignments.map((a) => a.pointId);
-  const audio: Record<string, { runtimeUrl: string }> = {};
+  const audio: Record<string, { runtimeUrl: string; pointId: string }> = {};
   const points = pointIds.flatMap((pointId) => {
     const record = records[pointId];
     if (record === null || record === undefined) return [];
     const token = input.newToken();
-    audio[token] = { runtimeUrl: record.runtimeUrl };
+    audio[token] = { runtimeUrl: record.runtimeUrl, pointId };
     // Tek kayıt; bell/diyafram süzgeci istemcide uygulanır — iki başlık aynı jetonu paylaşır.
     const heads: { bell?: string; diaphragm?: string } = {};
     for (const head of caseDef.allowedHeads) heads[head] = token;
