@@ -22,7 +22,13 @@ export const OPAQUE_TOKEN_PATTERN = /^[A-Za-z0-9_-]{8,64}$/;
 export const opaqueTokenSchema = z.string().regex(OPAQUE_TOKEN_PATTERN);
 
 /** Doğrudan başlatma yalnız uygulama/değerlendirme; düello oturumu `/me/challenges/:id/session` ile açılır. */
-export const simSessionStartRequestSchema = z.strictObject({ mode: z.enum(["practice", "assessment"]) });
+export const simSessionStartRequestSchema = z
+  .strictObject({
+    mode: z.enum(["practice", "assessment"]),
+    /** Yalnız uygulama: öğrenme kütüphanesindeki bir bulguya odaklı kısa oturum (ör. "s3"). */
+    focusFinding: z.string().regex(/^[a-z0-9_+]{1,60}$/).optional(),
+  })
+  .refine((value) => value.focusFinding === undefined || value.mode === "practice", { message: "focus_practice_only" });
 
 export const simSessionSchema = z.strictObject({
   sessionId: uuidSchema,
@@ -64,6 +70,8 @@ export const auscultaPublicCaseSchema = z.strictObject({
   /** Genel etiket ("Vaka 3"); gerçek başlık tanıyı ele verebildiği için gitmez. */
   label: z.string().min(1).max(40),
   patient: z.strictObject({ age: z.number().int().min(0).max(120), sex: z.enum(["kadın", "erkek"]) }),
+  /** Pediatrik gövde görünümü ve referans kartı için; tanı bilgisi taşımaz. */
+  population: z.enum(["pediatrik"]).nullable(),
   chiefComplaint: z.string().max(400),
   history: z.string().max(2000),
   vitalSigns: z.strictObject({

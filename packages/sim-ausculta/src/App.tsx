@@ -1,7 +1,7 @@
 import type { AttemptRecord } from "@egemed/gamification-core";
 import type { GamiServerSource } from "@egemed/gami-ui";
 import type { GamiPageTab } from "@egemed/gami-ui";
-import type { SimAudience, SimChrome } from "@egemed/sim-host";
+import type { SimAudience, SimChrome, SimSessionSource } from "@egemed/sim-host";
 import { useEffect, useRef, useState, type JSX } from "react";
 import { useStore } from "./core/StoreProvider";
 import { gamiStoragePort } from "./core/storage";
@@ -51,6 +51,8 @@ export interface AppProps {
   readonly audience?: SimAudience;
   /** Ziyaretçi kilidindeki "Öğrenci girişi" eylemi. */
   readonly requestSignIn?: () => void;
+  /** A1: sunucu vaka oturumu kanalı. */
+  readonly sessions?: SimSessionSource;
 }
 
 function Shell({
@@ -67,6 +69,7 @@ function Shell({
   fullscreenEnv,
   audience = "student",
   requestSignIn,
+  sessions,
 }: AppProps & { embedded: boolean }): JSX.Element {
   const { state, dispatch, bus, now, storage } = useStore();
   const gamiRef = useRef<LocalGamiRepository | null>(null);
@@ -127,6 +130,7 @@ function Shell({
     <EmbeddedProvider
       embedded={embedded}
       audience={audience}
+      {...(sessions === undefined ? {} : { sessions })}
       {...(setChrome === undefined ? {} : { setChrome })}
       {...(requestSignIn === undefined ? {} : { requestSignIn })}
     >

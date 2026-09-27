@@ -81,6 +81,7 @@ export function buildPublicCase(caseDef: CaseDef, input: BuildCaseInput): { read
     index: input.index,
     label: `Vaka ${input.index}`,
     patient: { age: caseDef.patient.age, sex: caseDef.patient.sex },
+    population: (caseDef as CaseDef & { population?: string }).population === "pediatrik" ? "pediatrik" : null,
     chiefComplaint: caseDef.chiefComplaint,
     history: caseDef.history,
     vitalSigns: { ...caseDef.vitalSigns },

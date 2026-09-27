@@ -19,8 +19,11 @@ export function caseById(id: string): CaseDef | undefined {
 }
 
 /** Havuzdan tekrar etmeyen `count` vaka seçer; `random` kriptografik kaynaktan gelmelidir. */
-export function selectCaseIds(mode: SimSessionMode, random: () => number, count = SESSION_CASE_COUNT): string[] {
-  const pool = [...poolFor(mode)];
+/** Odaklı uygulama oturumu en fazla bu kadar vaka içerir (öğrenme ekranı "bu bulguda çalış"). */
+export const FOCUS_CASE_COUNT = 5;
+
+export function selectCaseIds(mode: SimSessionMode, random: () => number, count = SESSION_CASE_COUNT, focusFinding?: string): string[] {
+  const pool = [...poolFor(mode)].filter((c) => focusFinding === undefined || c.primaryAcousticFinding === focusFinding);
   for (let i = pool.length - 1; i > 0; i -= 1) {
     const j = Math.floor(random() * (i + 1));
     const tmp = pool[i] as CaseDef;

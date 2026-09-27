@@ -1,0 +1,306 @@
+{
+  "totalCases": 199,
+  "practicePoolSize": 199,
+  "assessmentPoolSize": 84,
+  "assessmentQuestions": 219,
+  "pediatricCases": 7,
+  "mixedCases": 115,
+  "coverage": {
+    "atrial_fibrillation": {
+      "p": 4,
+      "a": 4
+    },
+    "atrial_fibrillation+coarse_crackles": {
+      "p": 2,
+      "a": 0
+    },
+    "atrial_fibrillation+fine_crackles": {
+      "p": 1,
+      "a": 0
+    },
+    "atrial_fibrillation+normal": {
+      "p": 2,
+      "a": 0
+    },
+    "atrial_fibrillation+pleural_rub": {
+      "p": 2,
+      "a": 0
+    },
+    "atrial_fibrillation+rhonchi": {
+      "p": 5,
+      "a": 0
+    },
+    "atrial_fibrillation+wheezing": {
+      "p": 1,
+      "a": 0
+    },
+    "av_block": {
+      "p": 3,
+      "a": 3
+    },
+    "av_block+coarse_crackles": {
+      "p": 1,
+      "a": 0
+    },
+    "av_block+fine_crackles": {
+      "p": 2,
+      "a": 0
+    },
+    "av_block+normal": {
+      "p": 3,
+      "a": 0
+    },
+    "av_block+pleural_rub": {
+      "p": 1,
+      "a": 0
+    },
+    "av_block+rhonchi": {
+      "p": 2,
+      "a": 0
+    },
+    "av_block+wheezing": {
+      "p": 2,
+      "a": 0
+    },
+    "coarse_crackles": {
+      "p": 6,
+      "a": 6
+    },
+    "early_systolic_murmur": {
+      "p": 7,
+      "a": 7
+    },
+    "early_systolic_murmur+coarse_crackles": {
+      "p": 2,
+      "a": 0
+    },
+    "early_systolic_murmur+fine_crackles": {
+      "p": 1,
+      "a": 0
+    },
+    "early_systolic_murmur+normal": {
+      "p": 3,
+      "a": 0
+    },
+    "early_systolic_murmur+pleural_rub": {
+      "p": 2,
+      "a": 0
+    },
+    "early_systolic_murmur+rhonchi": {
+      "p": 1,
+      "a": 0
+    },
+    "early_systolic_murmur+wheezing": {
+      "p": 2,
+      "a": 0
+    },
+    "fine_crackles": {
+      "p": 4,
+      "a": 4
+    },
+    "late_diastolic_murmur": {
+      "p": 4,
+      "a": 4
+    },
+    "late_diastolic_murmur+coarse_crackles": {
+      "p": 3,
+      "a": 0
+    },
+    "late_diastolic_murmur+fine_crackles": {
+      "p": 2,
+      "a": 0
+    },
+    "late_diastolic_murmur+normal": {
+      "p": 2,
+      "a": 0
+    },
+    "late_diastolic_murmur+pleural_rub": {
+      "p": 1,
+      "a": 0
+    },
+    "late_diastolic_murmur+rhonchi": {
+      "p": 2,
+      "a": 0
+    },
+    "late_diastolic_murmur+wheezing": {
+      "p": 2,
+      "a": 0
+    },
+    "late_systolic_murmur": {
+      "p": 6,
+      "a": 6
+    },
+    "late_systolic_murmur+coarse_crackles": {
+      "p": 3,
+      "a": 0
+    },
+    "late_systolic_murmur+fine_crackles": {
+      "p": 2,
+      "a": 0
+    },
+    "late_systolic_murmur+normal": {
+      "p": 2,
+      "a": 0
+    },
+    "late_systolic_murmur+pleural_rub": {
+      "p": 1,
+      "a": 0
+    },
+    "late_systolic_murmur+rhonchi": {
+      "p": 2,
+      "a": 0
+    },
+    "late_systolic_murmur+wheezing": {
+      "p": 3,
+      "a": 0
+    },
+    "mid_systolic_murmur": {
+      "p": 6,
+      "a": 6
+    },
+    "mid_systolic_murmur+coarse_crackles": {
+      "p": 1,
+      "a": 0
+    },
+    "mid_systolic_murmur+fine_crackles": {
+      "p": 4,
+      "a": 0
+    },
+    "mid_systolic_murmur+normal": {
+      "p": 3,
+      "a": 0
+    },
+    "mid_systolic_murmur+pleural_rub": {
+      "p": 2,
+      "a": 0
+    },
+    "mid_systolic_murmur+rhonchi": {
+      "p": 1,
+      "a": 0
+    },
+    "mid_systolic_murmur+wheezing": {
+      "p": 3,
+      "a": 0
+    },
+    "normal": {
+      "p": 14,
+      "a": 14
+    },
+    "normal+fine_crackles": {
+      "p": 2,
+      "a": 0
+    },
+    "normal+normal": {
+      "p": 2,
+      "a": 0
+    },
+    "normal+pleural_rub": {
+      "p": 1,
+      "a": 0
+    },
+    "normal+rhonchi": {
+      "p": 1,
+      "a": 0
+    },
+    "normal+wheezing": {
+      "p": 1,
+      "a": 0
+    },
+    "pleural_rub": {
+      "p": 7,
+      "a": 7
+    },
+    "rhonchi": {
+      "p": 6,
+      "a": 6
+    },
+    "s3": {
+      "p": 4,
+      "a": 4
+    },
+    "s3+coarse_crackles": {
+      "p": 1,
+      "a": 0
+    },
+    "s3+fine_crackles": {
+      "p": 1,
+      "a": 0
+    },
+    "s3+normal": {
+      "p": 4,
+      "a": 0
+    },
+    "s3+pleural_rub": {
+      "p": 3,
+      "a": 0
+    },
+    "s3+rhonchi": {
+      "p": 1,
+      "a": 0
+    },
+    "s3+wheezing": {
+      "p": 2,
+      "a": 0
+    },
+    "s4": {
+      "p": 2,
+      "a": 2
+    },
+    "s4+coarse_crackles": {
+      "p": 1,
+      "a": 0
+    },
+    "s4+fine_crackles": {
+      "p": 1,
+      "a": 0
+    },
+    "s4+normal": {
+      "p": 1,
+      "a": 0
+    },
+    "s4+pleural_rub": {
+      "p": 2,
+      "a": 0
+    },
+    "s4+rhonchi": {
+      "p": 3,
+      "a": 0
+    },
+    "s4+wheezing": {
+      "p": 3,
+      "a": 0
+    },
+    "tachycardia": {
+      "p": 3,
+      "a": 3
+    },
+    "tachycardia+coarse_crackles": {
+      "p": 1,
+      "a": 0
+    },
+    "tachycardia+fine_crackles": {
+      "p": 1,
+      "a": 0
+    },
+    "tachycardia+normal": {
+      "p": 1,
+      "a": 0
+    },
+    "tachycardia+pleural_rub": {
+      "p": 4,
+      "a": 0
+    },
+    "tachycardia+rhonchi": {
+      "p": 1,
+      "a": 0
+    },
+    "tachycardia+wheezing": {
+      "p": 3,
+      "a": 0
+    },
+    "wheezing": {
+      "p": 8,
+      "a": 8
+    }
+  }
+}

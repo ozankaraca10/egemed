@@ -83,6 +83,14 @@ describe("sunucu notlandırması", () => {
     expect(result.questions.every((q) => !q.correct)).toBe(true);
   });
 
+  it("odaklı uygulama oturumu yalnız o bulgudan en fazla 5 vaka seçer", () => {
+    const finding = ausculta.poolFor("practice")[0]?.primaryAcousticFinding ?? "normal";
+    const ids = ausculta.selectCaseIds("practice", () => 0.3, ausculta.FOCUS_CASE_COUNT, finding);
+    expect(ids.length).toBeGreaterThan(0);
+    expect(ids.length).toBeLessThanOrEqual(5);
+    for (const id of ids) expect(ausculta.caseById(id)?.primaryAcousticFinding).toBe(finding);
+  });
+
   it("oturum seçimi havuzdan tekrar etmeyen 10 vaka verir", () => {
     let seed = 1;
     const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
@@ -102,5 +110,14 @@ describe("paket sınırı", () => {
     // İzin: kabuğun DEV kapılı yerel oturum kaynağı (A1.4) — `devLocalSessions` adlı dosya.
     const offenders = files.filter((f) => !/devLocalSessions/.test(f) && (ts.sys.readFile(f) ?? "").includes("@egemed/assessment-bank"));
     expect(offenders).toEqual([]);
+  });
+});
+
+describe("istemci envanteri (A1.4)", () => {
+  it("sim paketindeki case-inventory.json bankayla birebir aynı ve yalnız sayı taşır", () => {
+    const client = JSON.parse(ts.sys.readFile("packages/sim-ausculta/src/data/case-inventory.json") ?? "{}") as unknown;
+    expect(client).toEqual(JSON.parse(JSON.stringify(ausculta.caseInventory())));
+    const raw = ts.sys.readFile("packages/sim-ausculta/src/data/case-inventory.json") ?? "";
+    expect(raw).not.toMatch(/case_|"correct"|title|\.wav/);
   });
 });

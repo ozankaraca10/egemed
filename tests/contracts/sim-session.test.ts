@@ -12,6 +12,7 @@ const BASE = {
   index: 1,
   label: "Vaka 1",
   patient: { age: 54, sex: "erkek" as const },
+  population: null,
   chiefComplaint: "Nefes darlığı",
   history: "Öykü",
   vitalSigns: { hr: 88 },
