@@ -8,7 +8,7 @@ import type { AuscultationPoint, SoundRecord } from "../core/types";
 import { isVisitorUnlocked } from "../core/visitorAccess";
 import pointsData from "../data/auscultation-points.json";
 import libraryData from "../data/library.json";
-import { ALL_CASES, poolFor } from "../data/pool";
+import { CASE_INVENTORY } from "../data/inventory";
 import { libraryShortTitle, librarySub, libraryTitle } from "../data/terminology";
 import { PatientStage, StageAudioProvider, type StageAudio, type StageHandle } from "../ui/PatientStage";
 import { PediatricRefModal } from "../ui/PediatricRefModal";
@@ -159,7 +159,7 @@ export function LearnScreen({
   env = NOOP_LEARN_ENV,
   audio,
 }: LearnScreenProps): JSX.Element {
-  const { state, dispatch, now } = useStore();
+  const { state, dispatch } = useStore();
   const contextual = useContext(LearnAudioContext);
   const engine = audio ?? contextual ?? NOOP_LEARN_AUDIO;
   const audience = useAudience();
@@ -185,38 +185,12 @@ export function LearnScreen({
   const isHeart = item.group === "heart";
   const isMixed = item.group === "mixed";
 
-  const coverage = useMemo(() => {
-    const totals: Record<string, { p: number; a: number }> = {};
-    for (const entry of ALL_CASES) {
-      const key = entry.primaryAcousticFinding;
-      const row = totals[key] ?? { p: 0, a: 0 };
-      if (entry.modes.includes("practice")) row.p += 1;
-      if (entry.modes.includes("assessment")) row.a += 1;
-      totals[key] = row;
-    }
-    return totals;
-  }, []);
-  const cov = coverage[item.acousticFinding] ?? { p: 0, a: 0 };
+  const cov = CASE_INVENTORY.coverage[item.acousticFinding] ?? { p: 0, a: 0 };
 
   const startPracticeForFinding = () => {
-    // A1.4: sunucu modunda odaklı uygulama oturumu (bulgu başına ≤5 vaka) sunucudan açılır.
-    if (sessions !== undefined) {
-      if (cov.p === 0) return;
-      dispatch({ type: "startMode", mode: "practice", focusFinding: item.acousticFinding });
-      return;
-    }
-    const ids = poolFor("practice")
-      .filter((entry) => entry.primaryAcousticFinding === item.acousticFinding)
-      .slice(0, 5)
-      .map((entry) => entry.id);
-    if (!ids.length) return;
-    dispatch({
-      type: "startSession",
-      practiceIds: ids,
-      assessmentIds: state.session.assessmentIds,
-      seed: (now() % 2147483647) | 0,
-    });
-    dispatch({ type: "startMode", mode: "practice" });
+    // T196: odaklı uygulama oturumu (bulgu başına ≤5 vaka) yalnız sunucudan açılır.
+    if (sessions === undefined || cov.p === 0) return;
+    dispatch({ type: "startMode", mode: "practice", focusFinding: item.acousticFinding });
   };
 
   useEffect(() => {

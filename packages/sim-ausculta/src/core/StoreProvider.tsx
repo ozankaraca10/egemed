@@ -14,7 +14,7 @@ import {
   type StoragePort,
 } from "./reducer";
 import { createSimRuntime, type RuntimeAdapter, type SimRuntime } from "./runtime";
-import { ALL_CASES } from "../data/pool";
+import { ASSESSMENT_CASE_COUNT } from "../data/inventory";
 
 /** Ausculta store sağlayıcısı (kaynak `StoreProvider`, S8c/S8d).
  *  Mount başına tek veri yolu, tek çalışma zamanı ve tek yaşam döngüsü kurulur.
@@ -23,8 +23,6 @@ import { ALL_CASES } from "../data/pool";
 
 const TIMER_INTERVAL_MS = 1000;
 
-/** Kaynak payda: `cases.filter(c => c.modes.includes('assessment')).length`. */
-const ASSESSMENT_CASE_COUNT = ALL_CASES.filter((c) => c.modes.includes("assessment")).length;
 
 export interface StoreContextValue {
   readonly state: AppState;

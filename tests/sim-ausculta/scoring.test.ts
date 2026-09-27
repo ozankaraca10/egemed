@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { CORE_CASES, MASTERY_THRESHOLD, aggregateResults, poolFor, practiceAdjusted, scoreCase } from "../../packages/sim-ausculta/src/index";
+import { MASTERY_THRESHOLD, aggregateResults, practiceAdjusted, scoreCase } from "../../packages/sim-ausculta/src/index";
+import { CORE_CASES, poolFor } from "./bank-cases";
 import type { Telemetry } from "../../packages/sim-ausculta/src/index";
 
 /** Kaynak tests/core.test.ts:236-315 (8 test → 8 test). Tam havuz: cases.json + poolFor('assessment'). */

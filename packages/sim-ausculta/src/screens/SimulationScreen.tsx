@@ -1,10 +1,8 @@
 import { useEffect, useMemo, useRef, useState, type JSX } from "react";
 import { countUnlistenedInOtherView, otherViewHintText } from "../core/flow";
-import { resolveCaseSoundsEx } from "../core/resolver";
 import { useStore } from "../core/StoreProvider";
 import type { AuscultationPoint, CaseDef, CaseResult, ScoringWeights, SoundRecord } from "../core/types";
 import pointsData from "../data/auscultation-points.json";
-import { ALL_CASES, poolFor } from "../data/pool";
 import { PatientStage, StageAudioProvider, type StageAudio, type StageHandle } from "../ui/PatientStage";
 import { PediatricRefModal } from "../ui/PediatricRefModal";
 import { RegionChipList } from "../ui/RegionChips";
@@ -12,34 +10,24 @@ import { ConfirmModal } from "../ui/ConfirmModal";
 import { FeedbackCard, QuestionCard } from "../ui/Questions";
 import { Toolbar, ToolbarAudioProvider, type ToolbarAudio } from "../ui/Toolbar";
 import { EcgDeco, Footer, touchTarget } from "../ui/chrome";
-import { IconArrowRight, IconChevronRight, IconDoc, IconInfo } from "../ui/icons";
+import { IconArrowRight, IconDoc, IconInfo } from "../ui/icons";
 import { NOOP_MODAL_ENV, type ModalEnv } from "../ui/modal-env";
 import {
   CASE_FLASH_MS,
   CASE_TRANSITION_MS,
   hasSessionProgress,
-  isAnswerCorrect,
   isLastQuestion,
   planAssessmentAutoAdvance,
-  planK3SessionRegeneration,
   planPrimaryAction,
-  planSessionAction,
-  planSessionCompletion,
   questionCursor,
-  resolveSimulationSession,
   shouldStartCaseTransition,
   showCaseEndCard,
-  simulationPointIds,
-  type SessionActionKind,
 } from "./simulation/derive";
 import {
-  applyPrimaryAction,
   armTimer,
   bindDismissListeners,
   createNoopSimulationScreenEnv,
   rememberQuestionShown,
-  reportSessionCompletion,
-  warmCaseSounds,
   type SimulationGamiPort,
   type SimulationPointerEvent,
   type SimulationScreenEnv,
@@ -63,8 +51,9 @@ interface ServerBinding {
 }
 
 /** Uygulama ve Değerlendirme (S15b/S15c).
- *  `document`/`window`/`Date.now` yok; zaman `now`, dinleyici ve süre `env`, rapor S8 `runtime`.
- *  Oyunlaştırma yalnız `gamiEnabled` açıkken tamamlanan değerlendirmeyi kaydeder. */
+ *  `document`/`window`/`Date.now` yok; zaman `now`, dinleyici ve süre `env`.
+ *  T196 (ADR-009): vakalar, doğru yanıtlar ve puanlama YALNIZ sunucu oturumundadır;
+ *  istemcide yerel vaka havuzu yoktur. Oturum kanalı yoksa bu modlar açılmaz. */
 
 const POINTS = pointsData.points as AuscultationPoint[];
 const HIT = touchTarget();
@@ -109,33 +98,19 @@ export function SimulationScreen({
   env = NOOP_ENV,
   modalEnv = NOOP_MODAL_ENV,
   audio = createNoopSimulationAudio(),
-  gamiEnabled = false,
-  gami,
 }: SimulationScreenProps): JSX.Element {
-  const { state, dispatch, runtime, bus, now } = useStore();
+  const { state, dispatch } = useStore();
   const sessions = useSessions();
-  // A1.4 (ADR-009): kanal varsa uygulama/değerlendirme vakaları YALNIZ sunucudan gelir.
   const serverMode = sessions !== undefined && state.mode !== "learn";
   const server = state.server;
   const startingRef = useRef(false);
   const loadingIndexRef = useRef(0);
   const finishingRef = useRef("");
-  const pool = poolFor(state.mode);
-  const local = resolveSimulationSession({
-    mode: state.mode,
-    practiceIds: state.session.practiceIds,
-    assessmentIds: state.session.assessmentIds,
-    caseIndex: state.caseIndex,
-    allCases: ALL_CASES,
-    pool,
-  });
-  const sessionCases = local.sessionCases;
-  const caseList = serverMode ? Array.from({ length: server?.caseCount ?? 0 }) : local.caseList;
-  const currentCase: CaseDef | undefined = serverMode
-    ? server?.currentCase !== null && server?.currentCase !== undefined && server.loadedIndex === state.caseIndex + 1
+  const total = server?.caseCount ?? 0;
+  const currentCase: CaseDef | undefined =
+    serverMode && server?.currentCase !== null && server?.currentCase !== undefined && server.loadedIndex === state.caseIndex + 1
       ? server.currentCase
-      : undefined
-    : local.currentCase;
+      : undefined;
 
   // Sunucu oturumunu başlat (yeni mod `server`ı sıfırlar).
   useEffect(() => {
@@ -168,44 +143,6 @@ export function SimulationScreen({
     void finishServerSession(sessions, dispatch, server.sessionId);
   }, [dispatch, server, serverMode, sessions, state.caseIndex]);
 
-  useEffect(() => {
-    if (serverMode) return;
-    const plan = planK3SessionRegeneration({
-      mode: state.mode,
-      sessionCasesCount: sessionCases.length,
-      seed: state.session.seed,
-      practiceIds: state.session.practiceIds,
-      assessmentIds: state.session.assessmentIds,
-      pool,
-      now: now(),
-    });
-    if (!plan) return;
-    dispatch({ type: "startSession", practiceIds: plan.practiceIds, assessmentIds: plan.assessmentIds, seed: plan.seed });
-  }, [
-    dispatch,
-    now,
-    pool,
-    sessionCases.length,
-    state.mode,
-    state.session.assessmentIds,
-    state.session.practiceIds,
-    state.session.seed,
-  ]);
-
-  useEffect(() => {
-    if (serverMode) return;
-    const plan = planSessionCompletion({
-      caseIndex: state.caseIndex,
-      caseCount: caseList.length,
-      mode: state.mode,
-      caseResults: state.caseResults,
-      now: now(),
-    });
-    if (!plan) return;
-    reportSessionCompletion({ plan, runtime, bus, gamiEnabled, gami });
-    dispatch(plan.dispatch);
-  }, [bus, caseList.length, dispatch, gami, gamiEnabled, now, runtime, serverMode, state.caseIndex, state.caseResults, state.mode]);
-
   if (serverMode && !currentCase) {
     return (
       <>
@@ -232,14 +169,15 @@ export function SimulationScreen({
     );
   }
 
-  if (!currentCase) {
+  if (!currentCase || sessions === undefined || server === null) {
     return (
       <>
         <EcgDeco embedded={embedded} />
         <div className="screen" style={{ position: "relative", zIndex: 1 }}>
           <div className="container screen-body">
-            <div className="card empty-state">
-              <h2>Bu modda henüz vaka yok</h2>
+            <div className="card empty-state" role="status">
+              <h2>Bu mod için sunucu bağlantısı gerekir</h2>
+              <p>Vakalar ve puanlama yalnız giriş yapılmış oturumda sunucudan gelir.</p>
             </div>
           </div>
         </div>
@@ -254,12 +192,12 @@ export function SimulationScreen({
         <CaseView
           key={`${state.mode}-${state.caseIndex}-${currentCase.id}`}
           caseDef={currentCase}
-          total={caseList.length}
+          total={total}
           embedded={embedded}
           env={env}
           modalEnv={modalEnv}
           audio={audio}
-          binding={serverMode && sessions !== undefined && server !== null ? { sessions, server } : null}
+          binding={{ sessions, server }}
         />
       </ToolbarAudioProvider>
     </StageAudioProvider>
@@ -281,27 +219,26 @@ function CaseView({
   env: SimulationScreenEnv;
   modalEnv: ModalEnv;
   audio: SimulationAudio;
-  binding: ServerBinding | null;
+  binding: ServerBinding;
 }): JSX.Element {
-  const { state, dispatch, runtime, bus, now } = useStore();
+  const { state, dispatch, bus, now } = useStore();
   const isAssessment = state.mode === "assessment";
   const stageRef = useRef<StageHandle>(null);
   const shownAtRef = useRef<Record<string, number>>({});
   const firstCaseRef = useRef(true);
   const [activePoint, setActivePoint] = useState<string | null>(null);
   const [pedModalOpen, setPedModalOpen] = useState(false);
-  const [sessionAction, setSessionAction] = useState<SessionActionKind | null>(null);
+  const [sessionAction, setSessionAction] = useState(false);
   const [caseFlash, setCaseFlash] = useState(false);
   const [transitioning, setTransitioning] = useState(false);
   const cursor = questionCursor(caseDef.questions, state.step, state.answers, state.revealed);
   const q = cursor.question;
-  const resolved = useMemo(() => resolveCaseSoundsEx(caseDef.soundAssignments), [caseDef]);
-  const serverCase = binding === null ? null : (caseDef as ServerClientCase);
-  const pointIds = serverCase !== null ? serverPointIds(serverCase) : simulationPointIds(isAssessment, caseDef.soundAssignments);
+  const serverCase = caseDef as ServerClientCase;
+  const pointIds = useMemo(() => serverPointIds(serverCase), [serverCase]);
   const [busy, setBusy] = useState(false);
   // Çift tıklama/yarış: sunucu isteği sürerken ikinci birincil eylem yok sayılır (409 case_already_answered önlenir).
   const busyRef = useRef(false);
-  const serverFeedback = binding !== null && q ? binding.server.feedback[q.id] : undefined;
+  const serverFeedback = q ? binding.server.feedback[q.id] : undefined;
   const pediatric = stageBody(caseDef) === "pediatrik";
   const endCard = showCaseEndCard(state.mode, state.pendingSummary);
   const progress = hasSessionProgress(state.answers, state.hintsUsed, state.caseResults.length);
@@ -310,7 +247,6 @@ function CaseView({
   useEffect(() => {
     dispatch({ type: "caseMount", caseDef });
     bus.emit({ type: "case_started", caseId: caseDef.id, mode: state.mode });
-    if (binding === null) warmCaseSounds(caseDef.soundAssignments);
   }, [bus, caseDef, dispatch, state.mode]);
 
   useEffect(() => {
@@ -336,22 +272,9 @@ function CaseView({
     if (action) dispatch(action);
   }, [dispatch, isAssessment, state.pendingSummary]);
 
-  const runSessionAction = (kind: SessionActionKind) => {
-    const steps = planSessionAction({
-      kind,
-      mode: state.mode,
-      practiceIds: state.session.practiceIds,
-      assessmentIds: state.session.assessmentIds,
-      pool: poolFor(state.mode),
-      now: now(),
-    });
-    for (const action of steps) dispatch(action);
-    setSessionAction(null);
-  };
-
   /** A1.4: sunucu modunda birincil eylem — uygulamada soru sunucuda kontrol edilir, vaka sonu sunucuya gönderilir. */
   const runServerPrimary = async (plan: ReturnType<typeof planPrimaryAction>, server: ServerBinding) => {
-    if (!serverCase || busyRef.current) return;
+    if (busyRef.current) return;
     busyRef.current = true;
     setBusy(true);
     try {
@@ -379,11 +302,6 @@ function CaseView({
     }
   };
 
-  const requestSessionAction = (kind: SessionActionKind) => {
-    if (progress) setSessionAction(kind);
-    else runSessionAction(kind);
-  };
-
   const onPrimary = () => {
     if (!q) return;
     const plan = planPrimaryAction({
@@ -396,25 +314,12 @@ function CaseView({
       shownAt: shownAtRef.current,
       now: now(),
     });
-    if (binding !== null) {
-      void runServerPrimary(plan, binding);
-      return;
-    }
-    applyPrimaryAction({
-      plan,
-      dispatch,
-      runtime,
-      caseId: caseDef.id,
-      questions: caseDef.questions,
-      answers: state.answers,
-    });
+    void runServerPrimary(plan, binding);
   };
 
   const otherHint = isAssessment
     ? null
     : otherViewHintText(state.view, countUnlistenedInOtherView(POINTS, pointIds, state.view, state.telemetry.visits));
-  const fallbackId = activePoint ? resolved.fallbacks[activePoint] : undefined;
-  const fallbackPoint = fallbackId ? POINTS.find((point) => point.id === fallbackId) : undefined;
 
   return (
     <>
@@ -433,7 +338,7 @@ function CaseView({
             <div className={`sim-main ${endCard ? "is-inert" : ""}`}>
               {isAssessment && (
                 <div className={`strict-banner ${state.caseIndex > 0 ? "compact" : ""}`} role="alert">
-                  {binding?.server.mode === "challenge" ? (
+                  {binding.server.mode === "challenge" ? (
                     <span>
                       <strong>Meydan Okuma.</strong> Rakibinizle aynı vakalar · vaka başı 2 dk, toplam 8 dk · tek dinleme
                     </span>
@@ -473,13 +378,10 @@ function CaseView({
                   mode={state.mode}
                   engine={audio}
                   soundFor={(pointId): SoundRecord | null => {
-                    if (binding !== null && serverCase !== null) {
-                      const audioToken = serverCase.serverAudio[pointId];
-                      return audioToken === undefined
-                        ? null
-                        : serverSoundRecord(pointId, audioToken, binding.sessions.audioUrl(binding.server.sessionId, audioToken));
-                    }
-                    return resolved.sounds[pointId] ?? null;
+                    const audioToken = serverCase.serverAudio[pointId];
+                    return audioToken === undefined
+                      ? null
+                      : serverSoundRecord(pointId, audioToken, binding.sessions.audioUrl(binding.server.sessionId, audioToken));
                   }}
                   onVisit={(pointId) => {
                     dispatch({ type: "visit", pointId });
@@ -500,25 +402,17 @@ function CaseView({
                   hideUntilFocus={isAssessment}
                   otherViewHint={otherHint}
                 />
-                {!isAssessment && fallbackPoint && (
-                  <div className="note-strip" style={{ marginTop: 0 }}>
-                    <IconInfo width={16} height={16} />
-                    <span className="small">
-                      Bu bölge için doğrulanmış posterior kayıt yok; aynı bulgunun <strong>{fallbackPoint.fullLabel}</strong> kaydı çalınmaktadır.
-                    </span>
-                  </div>
-                )}
               </div>
               <Toolbar
                 caseDef={caseDef}
                 stageRef={stageRef}
                 activePoint={activePoint}
                 {...(state.mode === "practice" && q
-                  ? { question: binding !== null ? { ...q, ...(q.hint === undefined ? {} : { hint: binding.server.hints[q.id] ?? q.hint }) } : q }
+                  ? { question: { ...q, ...(q.hint === undefined ? {} : { hint: binding.server.hints[q.id] ?? q.hint }) } }
                   : {})}
                 onHint={() => {
                   dispatch({ type: "useHint" });
-                  if (binding !== null && serverCase !== null && q) {
+                  if (q) {
                     void requestServerHint(binding.sessions, dispatch, binding.server.sessionId, serverCase.serverIndex, q.id);
                   }
                 }}
@@ -539,11 +433,8 @@ function CaseView({
                         <IconInfo width={14} height={14} /> Pediatrik referans
                       </button>
                     ) : null}
-                    {state.mode === "practice" && binding === null ? (
-                      <SessionMenu env={env} onResample={() => requestSessionAction("resample")} onRestart={() => requestSessionAction("restart")} />
-                    ) : null}
-                    {state.mode === "practice" && binding !== null ? (
-                      <button type="button" className="btn outline small" style={HIT} onClick={() => (progress ? setSessionAction("resample") : dispatch({ type: "startMode", mode: "practice" }))}>
+                    {state.mode === "practice" ? (
+                      <button type="button" className="btn outline small" style={HIT} onClick={() => (progress ? setSessionAction(true) : dispatch({ type: "startMode", mode: "practice" }))}>
                         Yeni oturum
                       </button>
                     ) : null}
@@ -565,7 +456,7 @@ function CaseView({
                 <CaseEndCard
                   summary={state.pendingSummary}
                   caseDef={caseDef}
-                  serverSummary={binding !== null ? binding.server.metas[caseDef.id]?.summary ?? "" : null}
+                  serverSummary={binding.server.metas[caseDef.id]?.summary ?? ""}
                   caseNumber={state.caseIndex + 1}
                   totalCases={total}
                   isLast={lastCase}
@@ -582,10 +473,7 @@ function CaseView({
                     index={state.step}
                     total={caseDef.questions.length}
                   />
-                  {state.mode === "practice" && cursor.revealed && binding === null ? (
-                    <FeedbackCard correct={isAnswerCorrect(q, state.answers[q.id] ?? [])} q={q} given={state.answers[q.id] ?? []} />
-                  ) : null}
-                  {state.mode === "practice" && cursor.revealed && binding !== null && serverFeedback !== undefined ? (
+                  {state.mode === "practice" && cursor.revealed && serverFeedback !== undefined ? (
                     <FeedbackCard
                       correct={serverFeedback.correct}
                       q={{ ...q, correct: [...serverFeedback.correctOptionIds], feedbackCorrect: serverFeedback.feedback, feedbackIncorrect: serverFeedback.feedback }}
@@ -598,7 +486,7 @@ function CaseView({
                       className={`btn ${isAssessment ? "purple" : "primary"}`}
                       style={{ flex: 1, ...HIT }}
                       onClick={onPrimary}
-                      disabled={busy || binding?.server.status === "submitting" || state.pendingSummary !== null || (!cursor.canSubmit && !(state.mode === "practice" && cursor.revealed))}
+                      disabled={busy || binding.server.status === "submitting" || state.pendingSummary !== null || (!cursor.canSubmit && !(state.mode === "practice" && cursor.revealed))}
                     >
                       {primaryLabel(isAssessment, isLastQuestion(caseDef.questions, q), lastCase, cursor.revealed)} <IconArrowRight />
                     </button>
@@ -618,61 +506,19 @@ function CaseView({
       <Footer embedded={embedded} />
       <PediatricRefModal open={pedModalOpen} onClose={() => setPedModalOpen(false)} env={modalEnv} />
       <ConfirmModal
-        open={sessionAction !== null}
-        title={sessionAction === "resample" ? "Yeni örneklem alınsın mı?" : "Oturum yeniden başlatılsın mı?"}
-        message={
-          sessionAction === "resample"
-            ? "Yeni örneklem alınsın mı? Bu oturumdaki yanıtlar silinir; ilerleme ve en iyi puan korunur."
-            : "Oturum yeniden başlatılsın mı? Bu oturumdaki yanıtlar silinir; aynı 10 vakalık örneklem ve en iyi puan korunur."
-        }
-        confirmLabel={sessionAction === "resample" ? "Yeni örneklem al" : "Yeniden başlat"}
+        open={sessionAction}
+        title="Yeni oturum başlatılsın mı?"
+        message="Bu oturumdaki yanıtlar silinir; ilerleme ve en iyi puan korunur."
+        confirmLabel="Yeni oturum"
         cancelLabel="Vazgeç"
         onConfirm={() => {
-          if (binding !== null) {
-            setSessionAction(null);
-            dispatch({ type: "startMode", mode: "practice" });
-            return;
-          }
-          if (sessionAction) runSessionAction(sessionAction);
+          setSessionAction(false);
+          dispatch({ type: "startMode", mode: "practice" });
         }}
-        onCancel={() => setSessionAction(null)}
+        onCancel={() => setSessionAction(false)}
         env={modalEnv}
       />
     </>
-  );
-}
-
-function SessionMenu({
-  env,
-  onResample,
-  onRestart,
-}: {
-  env: SimulationScreenEnv;
-  onResample: () => void;
-  onRestart: () => void;
-}): JSX.Element {
-  const [open, setOpen] = useState(false);
-  const wrapRef = useRef<unknown>(null);
-  useEffect(() => {
-    if (!open) return;
-    return bindDismissListeners(env, (target) => env.containsNode(wrapRef.current, target), () => setOpen(false));
-  }, [env, open]);
-  return (
-    <div className="popover-wrap" ref={(node) => { wrapRef.current = node; }}>
-      <button type="button" className="btn outline small" style={HIT} aria-expanded={open} aria-haspopup="menu" onClick={() => setOpen((value) => !value)}>
-        Oturum <IconChevronRight width={12} height={12} />
-      </button>
-      {open ? (
-        <div className="popover" role="menu">
-          <button type="button" className="btn outline small" style={{ width: "100%", marginBottom: 6, ...HIT }} role="menuitem" onClick={() => { setOpen(false); onResample(); }}>
-            Yeni 10 vaka örneklemi
-          </button>
-          <button type="button" className="btn outline small" style={{ width: "100%", ...HIT }} role="menuitem" onClick={() => { setOpen(false); onRestart(); }}>
-            Oturumu yeniden başlat
-          </button>
-        </div>
-      ) : null}
-    </div>
   );
 }
 
@@ -704,8 +550,8 @@ function CaseEndCard({
 }: {
   summary: CaseResult;
   caseDef: CaseDef;
-  /** A1.4: sunucu modunda klinik özet sunucu sonucundan gelir (yerel vaka tanımında yok). */
-  serverSummary: string | null;
+  /** Klinik özet sunucu sonucundan gelir (istemci vaka tanımında yok). */
+  serverSummary: string;
   caseNumber: number;
   totalCases: number;
   isLast: boolean;
@@ -737,10 +583,10 @@ function CaseEndCard({
           );
         })}
       </div>
-      {(serverSummary ?? caseDef.feedback.summary) ? (
+      {serverSummary ? (
         <div className="case-end-block">
           <b>Klinik özet</b>
-          <p>{serverSummary ?? caseDef.feedback.summary}</p>
+          <p>{serverSummary}</p>
         </div>
       ) : null}
       {caseDef.feedback.differential ? (

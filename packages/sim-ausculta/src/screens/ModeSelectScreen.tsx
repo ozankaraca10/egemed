@@ -1,17 +1,17 @@
 import type { JSX, ReactNode } from "react";
 import { audienceCanUseMode, VISITOR_LOCK_TEXT } from "@egemed/sim-host";
 import { useStore } from "../core/StoreProvider";
-import { sampleSession, SESSION_SIZE } from "../core/session";
+import { SESSION_SIZE } from "../core/session";
 import type { Mode } from "../core/types";
 import libraryData from "../data/library.json";
-import { poolFor } from "../data/pool";
+import { CASE_INVENTORY } from "../data/inventory";
 import { EcgDeco, Footer, touchTarget } from "../ui/chrome";
-import { ScreenHeading, useAudience, useRequestSignIn, useSetChrome } from "../ui/ScreenHeading";
+import { ScreenHeading, useAudience, useRequestSignIn, useSessions, useSetChrome } from "../ui/ScreenHeading";
 import { IconArrowRight, IconChart, IconCheck, IconGraduation, IconHeadphones, IconLock, IconStethoscope } from "../ui/icons";
 import { modePickTarget, modeRecommendLocked, sessionSeed } from "./entry";
 
-const practiceCases = poolFor("practice");
-const assessmentCases = poolFor("assessment");
+const practiceCases = { length: CASE_INVENTORY.practicePoolSize };
+const assessmentCases = { length: CASE_INVENTORY.assessmentPoolSize };
 const libraryCount = libraryData.groups.reduce((sum, group) => sum + group.items.length, 0);
 const HIT = touchTarget();
 
@@ -25,17 +25,11 @@ export function ModeSelectScreen({ embedded = false }: ModeSelectScreenProps): J
   const unified = useSetChrome() !== undefined;
   const audience = useAudience();
   const requestSignIn = useRequestSignIn();
+  // T196: uygulama/değerlendirme vakaları yalnız sunucu oturumundan gelir; kanal yoksa kapalı.
+  const serverReady = useSessions() !== undefined;
   const pick = (mode: Mode) => {
     const target = modePickTarget(mode, state.tutorialSeen, poolReady(mode));
-    if (target !== "learn") {
-      const seed = sessionSeed(now());
-      dispatch({
-        type: "startSession",
-        practiceIds: sampleSession(poolFor("practice"), seed, SESSION_SIZE),
-        assessmentIds: sampleSession(poolFor("assessment"), seed + 1, SESSION_SIZE),
-        seed,
-      });
-    }
+    if (target !== "learn") dispatch({ type: "startSession", practiceIds: [], assessmentIds: [], seed: sessionSeed(now()) });
     dispatch({ type: "startMode", mode: target });
     if (target === "learn") dispatch({ type: "goto", screen: "learn" });
   };
@@ -97,7 +91,7 @@ export function ModeSelectScreen({ embedded = false }: ModeSelectScreenProps): J
               }
               items={["Rastgele 10 vaka", "İpucu desteği", "Detaylı geri bildirim"]}
               cta={practiceVisitorLocked ? VISITOR_LOCK_TEXT.cta : practiceLocked ? "Öğrenmeye git" : "Vakaları çöz"}
-              disabled={!practiceVisitorLocked && practiceCases.length === 0}
+              disabled={!practiceVisitorLocked && !practiceLocked && (practiceCases.length === 0 || !serverReady)}
               recommendLocked={!practiceVisitorLocked && practiceLocked}
               visitorLocked={practiceVisitorLocked}
               onPick={() => (practiceVisitorLocked ? requestSignIn?.() : pick("practice"))}
@@ -115,7 +109,7 @@ export function ModeSelectScreen({ embedded = false }: ModeSelectScreenProps): J
               items={["Rastgele 10 vaka", "İpuçsuz + tek dinleme", embedded ? "Puan kaydedilir" : "SCORM puanı"]}
               rules={embedded ? "İpucu yok · tek dinleme · puan kaydedilir" : "İpucu yok · tek dinleme · SCORM'a puan yazılır"}
               cta={assessmentVisitorLocked ? VISITOR_LOCK_TEXT.cta : assessmentLocked ? "Öğrenmeye git" : "Değerlendirmeye gir"}
-              disabled={!assessmentVisitorLocked && assessmentCases.length === 0}
+              disabled={!assessmentVisitorLocked && !assessmentLocked && (assessmentCases.length === 0 || !serverReady)}
               recommendLocked={!assessmentVisitorLocked && assessmentLocked}
               visitorLocked={assessmentVisitorLocked}
               onPick={() => (assessmentVisitorLocked ? requestSignIn?.() : pick("assessment"))}

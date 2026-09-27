@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import { CORE_CASES, filterAssessmentPool, validateCase } from "../../packages/sim-ausculta/src/index";
+import { filterAssessmentPool, validateCase } from "../../packages/sim-ausculta/src/index";
+import { CORE_CASES } from "./bank-cases";
 import type { CaseDef } from "../../packages/sim-ausculta/src/index";
 
 /** Kaynak tests/core.test.ts:317-366 (5 test → 5 test). Tam çekirdek havuz: cases.json. */
