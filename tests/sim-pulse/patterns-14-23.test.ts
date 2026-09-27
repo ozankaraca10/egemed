@@ -64,7 +64,10 @@ describe("AV iletim paternleri (14–18)", () => {
     const m = make("sinbrady");
     const beats = m.between(0, 60);
     const events = m.atrialEvents(0, 60);
-    for (const rr of rrs(beats)) expect(bpm(rr)).toBeGreaterThanOrEqual(45), expect(bpm(rr)).toBeLessThanOrEqual(50);
+    for (const rr of rrs(beats)) {
+      expect(bpm(rr)).toBeGreaterThanOrEqual(45);
+      expect(bpm(rr)).toBeLessThanOrEqual(50);
+    }
     expect(Math.max(...rrs(beats)) - Math.min(...rrs(beats))).toBeLessThan(0.05);
     for (const b of beats.slice(1, -1)) {
       expect(conductedFor(events, b)).toBeDefined();
@@ -172,7 +175,10 @@ describe("Patern 19–23", () => {
     const m = make("junctional");
     const beats = m.between(0, 60);
     const events = m.atrialEvents(0, 60);
-    for (const rr of rrs(beats)) expect(bpm(rr)).toBeGreaterThanOrEqual(40), expect(bpm(rr)).toBeLessThanOrEqual(60);
+    for (const rr of rrs(beats)) {
+      expect(bpm(rr)).toBeGreaterThanOrEqual(40);
+      expect(bpm(rr)).toBeLessThanOrEqual(60);
+    }
     expect(beats.every((b) => b.qrs < 0.12 && b.pr === null)).toBe(true);
     expect(events.every((e) => e.kind === "retro")).toBe(true);
     // her retrograd P kendi QRS'ine bağlı (tam AV blok gibi bağımsız P treni değil)
