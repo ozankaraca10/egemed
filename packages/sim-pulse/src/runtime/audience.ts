@@ -106,6 +106,9 @@ function lockModeCards(shadow: ShadowRoot, requestSignIn: (() => void) | undefin
       const button = card.querySelector("button[data-view]");
       if (button !== null && button.getAttribute("data-eg-locked") !== "1") {
         button.setAttribute("data-eg-locked", "1");
+        // T208 öğrenme kilidi bu düğmeyi `disabled` bırakabilir; ziyaretçi CTA'sı
+        // tıklanabilir olmalı (T173 davranışı korunur).
+        button.removeAttribute("disabled");
         button.innerHTML = `${LOCK_ICON}<span>${escapeHtml(VISITOR_LOCK_TEXT.cta)}</span>`;
       }
       if (card.querySelector(".eg-lock-note") === null) {

@@ -109,6 +109,46 @@
       "use": "LBBB ve RBBB örneklerinde geniş QRS ve derivasyona özgü morfoloji."
     },
     {
+      "id": "BRADY2018",
+      "title": "2018 ACC/AHA/HRS Bradikardi ve Kardiyak İletim Gecikmesi Kılavuzu",
+      "org": "ACC / AHA / HRS",
+      "year": 2018,
+      "url": "https://doi.org/10.1161/CIR.0000000000000628",
+      "use": "Sinüs bradikardisi, AV blok dereceleri ve kavşak kaçış ritmi örneklerinin tanımı."
+    },
+    {
+      "id": "ECG2007",
+      "title": "AHA/ACCF/HRS EKG Standartlaştırma ve Yorumlama Önerileri",
+      "org": "AHA / ACCF / HRS",
+      "year": 2007,
+      "url": "https://doi.org/10.1161/CIRCULATIONAHA.106.180201",
+      "use": "P dalgası, PR aralığı ve ventriküler preeksitasyon (WPW) paterninin tanımı."
+    },
+    {
+      "id": "PERI2025",
+      "title": "2025 ESC Miyokardit ve Perikardit Yönetimi Kılavuzu",
+      "org": "Avrupa Kardiyoloji Derneği (ESC)",
+      "year": 2025,
+      "url": "https://doi.org/10.1093/eurheartj/ehaf192",
+      "use": "Akut perikardit EKG paterni: yaygın konkav ST yükselmesi ve PR segment çökmesi."
+    },
+    {
+      "id": "MON2017",
+      "title": "AHA Elektrokardiyografik İzlem Uygulama Standartları Güncellemesi",
+      "org": "American Heart Association (AHA)",
+      "year": 2017,
+      "url": "https://doi.org/10.1161/CIR.0000000000000527",
+      "use": "Hiperkalemi EKG paterninin izlem bağlamında değerlendirilmesi."
+    },
+    {
+      "id": "PAC2019",
+      "title": "Mond: Atriyal Ektopinin Elektrokardiyografik İzleri",
+      "org": "Heart, Lung and Circulation",
+      "year": 2019,
+      "url": "https://doi.org/10.1016/j.hlc.2019.03.005",
+      "use": "Atriyal erken atım (PAC): erken, farklı biçimli P ve dar QRS."
+    },
+    {
       "id": "ECG",
       "title": "Klabunde: Bipolar Ekstremite Derivasyonları",
       "org": "Cardiovascular Physiology Concepts",

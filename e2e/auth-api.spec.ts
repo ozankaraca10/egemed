@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test, type Locator, type Page } from "@playwright/test";
 import { curriculum } from "../packages/sim-pulse/src/data/curriculum";
 import { captureRouteScreenshot } from "./artifacts";
 import { clickSimBarAction, selectRadixOption, trackErrors } from "./helpers";
@@ -31,6 +31,53 @@ async function signIn(page: Page, username: string, password = "egemed"): Promis
 /** Üst bardaki hesap menüsü düğmesi (T152); erişilebilir adı sunucudan gelen görünen adı taşır. */
 function sessionRole(page: Page) {
   return page.getByRole("button", { name: /Hesap menüsü/ });
+}
+
+/**
+ * T208 öğrenme kilidi: sınav yalnız 23 patern izlenmiş ve 10 vaka gönderilmiş
+ * kayıtla açılır. Sunucu oturumunda kullanıcı ad alanı (actorId) önceden
+ * bilinmediğinden çalışma zamanının yazdığı anahtar bulunup tohumlanır ve
+ * sayfa yeniden yüklenir.
+ */
+async function openPulseQuiz(page: Page): Promise<Locator> {
+  await page.goto("/#/sims/pulse");
+  const root = page.locator(".egemed-pulse-runtime");
+  await expect(root.locator("#appRoot")).toBeVisible({ timeout: 20_000 });
+  if (await root.locator("#tutorialSkip").isVisible().catch(() => false)) await root.locator("#tutorialSkip").click();
+  const record = {
+    version: 6,
+    cv: curriculum.version,
+    m: 0,
+    t: 2,
+    p: 1,
+    f: 0,
+    v: Array.from({ length: 23 }, () => 16_000),
+    u: 4,
+    c: {
+      i: "egemed-seed-session-0001",
+      n: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+      a: Array.from({ length: 10 }, () => 0),
+      s: 1023,
+      l: Array.from({ length: 10 }, () => [0, 0, 0]),
+      x: Array.from({ length: 10 }, () => -1),
+    },
+  };
+  // İlk yükleme kayıt anahtarını (kullanıcı ad alanıyla) oluşturur; tohum bir
+  // sonraki belge yüklemesinde, kaynağın `pagehide` kaydından SONRA yazılmalıdır.
+  const namespaceKeys = await page.evaluate(() =>
+    Object.keys(localStorage).filter((key) => key.endsWith("pulse:egemed-pulse-6.0")),
+  );
+  expect(namespaceKeys.length, "Pulse kullanıcı kayıt ad alanı bulundu").toBeGreaterThan(0);
+  await page.addInitScript((value: Record<string, unknown>) => {
+    for (const key of Object.keys(localStorage)) {
+      if (key.endsWith("pulse:egemed-pulse-6.0")) localStorage.setItem(key, JSON.stringify(value));
+    }
+  }, record);
+  await page.reload();
+  await expect(root.locator("#appRoot")).toBeVisible({ timeout: 20_000 });
+  if (await root.locator("#tutorialSkip").isVisible().catch(() => false)) await root.locator("#tutorialSkip").click();
+  await root.locator('#modeCards [data-view="quiz"]').click();
+  return root;
 }
 
 /**
@@ -217,7 +264,7 @@ test.describe("API oturumu (dev sağlayıcı)", () => {
     expect(JSON.stringify(payload)).not.toContain("1450");
     await expect(page.getByRole("heading", { name: "İlerlemem" })).toBeVisible();
     await expect(page.getByText("1450", { exact: true })).toHaveCount(0);
-    await expect(page.locator("[data-sim-id='pulse']")).toHaveAttribute("data-xp", String(pulseXp));
+    await expect(page.locator("[data-sim-id='pulse']")).toHaveAttribute("data-xp", String(pulseXp ?? 0)); // Pulse denemesi yoksa özet girdisi yok; panel 0 XP (test sırasından bağımsız)
   });
 
   test("öğrenci liderlik anahtarını kapatır ve yenilemede kapalı kalır", async ({ page }) => {
@@ -334,11 +381,7 @@ test.describe("API oturumu (dev sağlayıcı)", () => {
         response.request().method() === "POST" &&
         (response.status() === 200 || response.status() === 201),
     );
-    await page.goto("/#/sims/pulse");
-    const root = page.locator(".egemed-pulse-runtime");
-    await expect(root.locator("#appRoot")).toBeVisible({ timeout: 20_000 });
-    if (await root.locator("#tutorialSkip").isVisible().catch(() => false)) await root.locator("#tutorialSkip").click();
-    await root.locator('#modeCards [data-view="quiz"]').click();
+    const root = await openPulseQuiz(page);
     for (let i = 0; i < 10; i += 1) {
       const id = /Q\d{3}/.exec(await root.locator("#quizForm").innerText())?.[0];
       expect(id, `soru ${i + 1} kimliği`).toBeDefined();
@@ -364,7 +407,7 @@ test.describe("API oturumu (dev sağlayıcı)", () => {
     expect(badgeKeys).toContain("rhythm-streak-3");
     expect(badgeKeys).toContain("rhythm-streak-10");
     await expect(page.getByRole("heading", { name: "İlerlemem" })).toBeVisible();
-    await expect(page.locator("[data-sim-id='pulse']")).toHaveAttribute("data-xp", String(pulseXp));
+    await expect(page.locator("[data-sim-id='pulse']")).toHaveAttribute("data-xp", String(pulseXp ?? 0)); // Pulse denemesi yoksa özet girdisi yok; panel 0 XP (test sırasından bağımsız)
     // T114: sunucu rozetleri katalog adlarıyla gösterilir (ADR-008 S4).
     await expect(page.getByText("Ritim izleyicisi")).toBeVisible();
   });
@@ -530,11 +573,7 @@ test.describe("API oturumu (dev sağlayıcı)", () => {
         response.request().method() === "POST" &&
         (response.status() === 200 || response.status() === 201),
     );
-    await page.goto("/#/sims/pulse");
-    const root = page.locator(".egemed-pulse-runtime");
-    await expect(root.locator("#appRoot")).toBeVisible({ timeout: 20_000 });
-    if (await root.locator("#tutorialSkip").isVisible().catch(() => false)) await root.locator("#tutorialSkip").click();
-    await root.locator('#modeCards [data-view="quiz"]').click();
+    const root = await openPulseQuiz(page);
     for (let i = 0; i < 10; i += 1) {
       const id = /Q\d{3}/.exec(await root.locator("#quizForm").innerText())?.[0];
       expect(id, `soru ${i + 1} kimliği`).toBeDefined();

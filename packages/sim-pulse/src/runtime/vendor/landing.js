@@ -4,10 +4,10 @@
 export default function run(env) {
 const { window, document, localStorage, setTimeout, clearTimeout, setInterval, clearInterval, requestAnimationFrame, cancelAnimationFrame, ResizeObserver, CardAIModel, CardAIScorm, PulseCurriculum, PulseState } = env;
 (function(){'use strict';
-const $=id=>document.getElementById(id),landing=$('landingPage'),app=$('appRoot'),pool=window.PulseCurriculum,model=window.CardAIModel,count=model.MODES.length;
+const $=id=>document.getElementById(id),landing=$('landingPage'),app=$('appRoot'),pool=window.PulseCurriculum,model=window.CardAIModel,count=model.ALL_MODES.length;
 document.querySelector('.landing-lead').textContent=count+' sentetik EKG sonucu, 12 derivasyon, '+pool.cases.length+' vaka ve '+pool.questions.length+' değerlendirme maddesi. Her oturumda rastgele 10 vaka ve 10 soru.';
 $('landingFeatures').innerHTML=[
- [count+' sentetik EKG sonucu','12 derivasyon; Kardiyoloji Anabilim Dalı öğretim üyelerince valide edilmiştir.'],
+ [count+' sentetik EKG sonucu','12 derivasyon; ilk 13 sonuç Kardiyoloji Anabilim Dalı öğretim üyelerince valide edilmiştir; patern 14–23 onay bekliyor.'],
  [pool.cases.length+' vaka · '+pool.questions.length+' soru','Her oturumda rastgele 10 vaka ve 10 soru.'],
  ['SCORM 1.2','Puan ve durum LMS’e raporlanır.']
 ].map(row=>'<article class="why-card"><strong>'+row[0]+'</strong><span>'+row[1]+'</span></article>').join('');
