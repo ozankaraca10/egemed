@@ -11,12 +11,13 @@ export function sessionSeed(nowMs: number): number {
   return (nowMs % 2147483647) | 0;
 }
 
-/** Kilit ≠ öneri: havuz hazır ve öğretici görülmediyse hedef öğrenmedir; düğme kapalı değildir. */
-export function modePickTarget(mode: Mode, tutorialSeen: boolean, poolReady: boolean): Mode {
-  if (!tutorialSeen && poolReady && mode !== "learn") return "learn";
+/** T209: öğrenme tamamlanmadan uygulama/değerlendirme hedefi öğrenmedir (kilit, öneri değil). */
+export function modePickTarget(mode: Mode, learnComplete: boolean, poolReady: boolean): Mode {
+  if (!learnComplete && poolReady && mode !== "learn") return "learn";
   return mode;
 }
 
-export function modeRecommendLocked(tutorialSeen: boolean, poolReady: boolean): boolean {
-  return !tutorialSeen && poolReady;
+/** T209: öğrenme kilidi — tamamlanmadıysa ve havuz hazırsa kart kilitlidir. */
+export function modeLearnLocked(learnComplete: boolean, poolReady: boolean): boolean {
+  return !learnComplete && poolReady;
 }

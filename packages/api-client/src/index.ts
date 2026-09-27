@@ -19,6 +19,8 @@ import {
   gamiSimIdParamSchema,
   gamiSummaryResponseSchema,
   isoDateTimeSchema,
+  learnCompleteRequestSchema,
+  learnStatusSchema,
   meRewardResponseSchema,
   meRewardsOverviewResponseSchema,
   mePreferencesResponseSchema,
@@ -58,6 +60,7 @@ import {
   type GamiLeaderboardQuery,
   type GamiLeaderboardResponse,
   type GamiSummaryResponse,
+  type LearnStatusResponse,
   type MePreferences,
   type RewardBody,
   type RewardUpsertRequest,
@@ -415,6 +418,12 @@ export interface ApiClient {
     finish(simId: SimId, sessionId: string): Promise<ApiSimSessionFinishResult>;
     /** İstek yapmaz; `<audio src>` için taban adres + yol (çerez aynı kökenden gider). */
     audioUrl(simId: SimId, sessionId: string, token: string): string;
+  };
+  readonly learn: {
+    /** Öğrenme tamamlama durumu: üç simin AYRI kaydı (27 Eyl 2026). */
+    status(): Promise<LearnStatusResponse>;
+    /** İlgili simin öğrenme modunu tamamlandı olarak yazar; ilk an korunur. */
+    complete(simId: SimId, contentVersion: string): Promise<LearnStatusResponse>;
   };
   readonly challenges: {
     create(simId: SimId): Promise<{ readonly data: ChallengeBody }>;
@@ -993,6 +1002,27 @@ export function createApiClient(options: CreateApiClientOptions): ApiClient {
         const parsedSessionId = parseSchema(uuidSchema, sessionId, `${context} path.sessionId`);
         const parsedToken = parseSchema(opaqueTokenSchema, token, `${context} path.token`);
         return buildUrl(baseUrl, `/me/sims/${parsedSimId}/sessions/${parsedSessionId}/audio/${parsedToken}`, undefined);
+      },
+    },
+    learn: {
+      async status(): Promise<LearnStatusResponse> {
+        return requestJson({
+          method: "GET",
+          path: "/me/learn",
+          parse: (value, context) => parseSchema(learnStatusSchema, value, `${context} response`),
+        });
+      },
+      async complete(simId: SimId, contentVersion: string): Promise<LearnStatusResponse> {
+        const context = "POST /me/sims/:simId/learn/complete";
+        const parsedSimId = parseSchema(simIdSchema, simId, `${context} path.simId`);
+        const parsedBody = parseSchema(learnCompleteRequestSchema, { contentVersion }, `${context} request`);
+        return requestJson({
+          method: "POST",
+          path: `/me/sims/${parsedSimId}/learn/complete`,
+          contentType: "application/json",
+          body: JSON.stringify(parsedBody),
+          parse: (value, ctx) => parseSchema(learnStatusSchema, value, `${ctx} response`),
+        });
       },
     },
     challenges: {

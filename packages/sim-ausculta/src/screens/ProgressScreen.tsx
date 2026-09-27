@@ -3,6 +3,7 @@ import { useMemo, useState } from "react";
 import type { AchievementsPeriod, Cohort, CohortFilter, Period, WeeklyGoal } from "@egemed/gamification-core";
 import { periodRangeTr } from "@egemed/gamification-core";
 import { buildAchievementsModel, buildLeaderboardModel, defaultGamiIcons, earnedFromServer, GamiAchievementsView, GamiLeaderboardView, GamiProgressPage, GamiServerFrame, gamiLoadingStatus, levelFromServer, serverHasActivity, streakFromServer, type GamiModalEnv, type GamiPageTab, type GamiServerSource, type ServerGamiData } from "@egemed/gami-ui";
+import { useLearnGate, useStartMode } from "../core/LearnGate";
 import { useStore } from "../core/StoreProvider";
 import type { ScoringWeights } from "../core/types";
 import { AUSCULTA_BADGES } from "../gamification/catalog";
@@ -74,6 +75,8 @@ function ProgressBody({
   setPrivacy: (update: (current: { public: boolean; displayName: string | null; cohort: Cohort | null }) => { public: boolean; displayName: string | null; cohort: Cohort | null }) => void;
 }): JSX.Element {
   const { dispatch, now } = useStore();
+  const gate = useLearnGate();
+  const startMode = useStartMode();
   const at = new Date(now());
   const progress = useGamiProgress(at, repository);
   const [localTab, setLocalTab] = useState<GamiPageTab>("achievements");
@@ -127,9 +130,10 @@ function ProgressBody({
     boardReady: true,
   }), [activeTab, at, boardPeriod, cohort, prevRows, rows, server]);
 
+  // T209: öğrenme tamamlanmadan değerlendirme başlatılamaz; kilitliyse istek öğrenmeye düşer.
   const startAssessment = () => {
-    dispatch({ type: "startSession", practiceIds: [], assessmentIds: [], seed: sessionSeed(now()) });
-    dispatch({ type: "startMode", mode: "assessment" });
+    if (gate.complete) dispatch({ type: "startSession", practiceIds: [], assessmentIds: [], seed: sessionSeed(now()) });
+    startMode("assessment");
   };
 
   return (
@@ -162,7 +166,7 @@ function ProgressBody({
               categories={achievements.categories}
               onStudy={(key) => {
                 dispatch({ type: "setLearnFocus", key });
-                dispatch({ type: "startMode", mode: "learn" });
+                startMode("learn");
                 dispatch({ type: "goto", screen: "learn" });
               }}
               onScrollBadges={() => undefined}

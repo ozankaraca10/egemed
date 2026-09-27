@@ -7,7 +7,7 @@ import {
   simSessionStartResponseSchema,
 } from "../../packages/contracts/src/index";
 import { ausculta } from "../../packages/assessment-bank/src/index";
-import { ADMIN_USER, ALI, DEFAULT_USERS, INSTITUTION_ID, OTHER_INSTITUTION_ID, createAdminHarness, login, user, type AdminHarness, type Login } from "./admin-harness";
+import { ADMIN_USER, ALI, DEFAULT_USERS, FIXED_NOW, INSTITUTION_ID, OTHER_INSTITUTION_ID, createAdminHarness, login, user, type AdminHarness, type Login } from "./admin-harness";
 
 // Meydan Okuma (ADR-010) API: davet kodu, katılım kuralları, aynı vakalar ve
 // aynı seçenek sırası, puan gizliliği, kazanan, düello XP'si ve liderlik dışı.
@@ -21,7 +21,13 @@ const UZAK = user({ id: "00000000-0000-4000-8000-000000000033", username: "uzak.
 
 function harness(): AdminHarness {
   const users = [...DEFAULT_USERS.map((entry) => (entry.id === ALI.id ? { ...ALI, simAccess: ["ausculta"] as const } : entry)), ZEYNEP, HOCA, UZAK];
-  return createAdminHarness({ users });
+  const h = createAdminHarness({ users });
+  // Öğrenme kilidi (27 Eyl 2026): düello testleri davranış kilidini ölçmez;
+  // kurulumda ilgili kullanıcılar için Ausculta tamamlama kaydı eklenir.
+  for (const userId of [ALI.id, ZEYNEP.id]) {
+    h.learn.records.set(`${userId}:ausculta`, { userId, simId: "ausculta", completedAt: FIXED_NOW, contentVersion: "test.1" });
+  }
+  return h;
 }
 
 async function call(h: AdminHarness, who: Login, method: string, path: string, body?: unknown) {

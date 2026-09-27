@@ -1,40 +1,44 @@
 import type { JSX, ReactNode } from "react";
 import { audienceCanUseMode, VISITOR_LOCK_TEXT } from "@egemed/sim-host";
+import { useLearnGate, useStartMode } from "../core/LearnGate";
 import { useStore } from "../core/StoreProvider";
 import { SESSION_SIZE } from "../core/session";
 import type { Mode } from "../core/types";
-import libraryData from "../data/library.json";
 import { CASE_INVENTORY } from "../data/inventory";
+import { LIBRARY_ITEM_COUNT } from "../data/library";
 import { EcgDeco, Footer, touchTarget } from "../ui/chrome";
 import { ScreenHeading, useAudience, useRequestSignIn, useSessions, useSetChrome } from "../ui/ScreenHeading";
 import { IconArrowRight, IconChart, IconCheck, IconGraduation, IconHeadphones, IconLock, IconStethoscope } from "../ui/icons";
-import { modePickTarget, modeRecommendLocked, sessionSeed } from "./entry";
+import { modeLearnLocked, modePickTarget, sessionSeed } from "./entry";
 
 const practiceCases = { length: CASE_INVENTORY.practicePoolSize };
 const assessmentCases = { length: CASE_INVENTORY.assessmentPoolSize };
-const libraryCount = libraryData.groups.reduce((sum, group) => sum + group.items.length, 0);
+const libraryCount = LIBRARY_ITEM_COUNT;
 const HIT = touchTarget();
 
 export interface ModeSelectScreenProps {
   readonly embedded?: boolean;
 }
 
-/** Mod seçimi: Öğrenme / Uygulama / Değerlendirme. Öneri kilidi gönderimi kapatmaz. */
+/** Mod seçimi: Öğrenme / Uygulama / Değerlendirme. T209: öğrenme tamamlanmadan
+ *  uygulama ve değerlendirme KİLİTLİDİR (öneri değil); ziyaretçi kilidi önceliklidir. */
 export function ModeSelectScreen({ embedded = false }: ModeSelectScreenProps): JSX.Element {
   const { state, dispatch, now } = useStore();
   const unified = useSetChrome() !== undefined;
   const audience = useAudience();
   const requestSignIn = useRequestSignIn();
+  const gate = useLearnGate();
+  const startMode = useStartMode();
   // T196: uygulama/değerlendirme vakaları yalnız sunucu oturumundan gelir; kanal yoksa kapalı.
   const serverReady = useSessions() !== undefined;
   const pick = (mode: Mode) => {
-    const target = modePickTarget(mode, state.tutorialSeen, poolReady(mode));
+    const target = modePickTarget(mode, gate.complete, poolReady(mode));
     if (target !== "learn") dispatch({ type: "startSession", practiceIds: [], assessmentIds: [], seed: sessionSeed(now()) });
-    dispatch({ type: "startMode", mode: target });
+    startMode(target);
     if (target === "learn") dispatch({ type: "goto", screen: "learn" });
   };
-  const practiceLocked = modeRecommendLocked(state.tutorialSeen, practiceCases.length > 0);
-  const assessmentLocked = modeRecommendLocked(state.tutorialSeen, assessmentCases.length > 0);
+  const practiceLocked = modeLearnLocked(gate.complete, practiceCases.length > 0);
+  const assessmentLocked = modeLearnLocked(gate.complete, assessmentCases.length > 0);
   const practiceVisitorLocked = !audienceCanUseMode(audience, "practice");
   const assessmentVisitorLocked = !audienceCanUseMode(audience, "assessment");
   return (
@@ -91,8 +95,9 @@ export function ModeSelectScreen({ embedded = false }: ModeSelectScreenProps): J
               }
               items={["Rastgele 10 vaka", "İpucu desteği", "Detaylı geri bildirim"]}
               cta={practiceVisitorLocked ? VISITOR_LOCK_TEXT.cta : practiceLocked ? "Öğrenmeye git" : "Vakaları çöz"}
-              disabled={!practiceVisitorLocked && !practiceLocked && (practiceCases.length === 0 || !serverReady)}
-              recommendLocked={!practiceVisitorLocked && practiceLocked}
+              disabled={!practiceVisitorLocked && (practiceLocked || practiceCases.length === 0 || !serverReady)}
+              learnLocked={!practiceVisitorLocked && practiceLocked}
+              lockText={gate.lockText}
               visitorLocked={practiceVisitorLocked}
               onPick={() => (practiceVisitorLocked ? requestSignIn?.() : pick("practice"))}
               bestScore={state.bestScore.practice}
@@ -109,8 +114,9 @@ export function ModeSelectScreen({ embedded = false }: ModeSelectScreenProps): J
               items={["Rastgele 10 vaka", "İpuçsuz + tek dinleme", embedded ? "Puan kaydedilir" : "SCORM puanı"]}
               rules={embedded ? "İpucu yok · tek dinleme · puan kaydedilir" : "İpucu yok · tek dinleme · SCORM'a puan yazılır"}
               cta={assessmentVisitorLocked ? VISITOR_LOCK_TEXT.cta : assessmentLocked ? "Öğrenmeye git" : "Değerlendirmeye gir"}
-              disabled={!assessmentVisitorLocked && !assessmentLocked && (assessmentCases.length === 0 || !serverReady)}
-              recommendLocked={!assessmentVisitorLocked && assessmentLocked}
+              disabled={!assessmentVisitorLocked && (assessmentLocked || assessmentCases.length === 0 || !serverReady)}
+              learnLocked={!assessmentVisitorLocked && assessmentLocked}
+              lockText={gate.lockText}
               visitorLocked={assessmentVisitorLocked}
               onPick={() => (assessmentVisitorLocked ? requestSignIn?.() : pick("assessment"))}
               bestScore={state.bestScore.assessment}
@@ -153,7 +159,8 @@ export function ModeCard({
   onPick,
   rules,
   disabled,
-  recommendLocked,
+  learnLocked,
+  lockText,
   visitorLocked,
   bestScore,
 }: {
@@ -166,15 +173,19 @@ export function ModeCard({
   onPick: () => void;
   rules?: string;
   disabled?: boolean;
-  recommendLocked?: boolean;
+  /** T209: öğrenme tamamlanmadı — kart kilit ikonu ve ilerleme metniyle işaretlenir,
+   *  düğme gönderime kapalıdır (`disabled`). */
+  learnLocked?: boolean;
+  /** Kilit metni: "Önce öğrenme modunu tamamlayın: X/Y ses dinlendi." */
+  lockText?: string;
   /** Ziyaretçi kilidi: renk dışında ikon+metinle işaretlenir, düğme "Öğrenci girişi"ne gider. */
   visitorLocked?: boolean;
   bestScore?: number;
 }): JSX.Element {
   return (
     <div
-      className={`mode-card ${kind}${recommendLocked ? " recommend-locked" : ""}${visitorLocked ? " visitor-locked" : ""}`}
-      data-recommend-locked={recommendLocked ? "true" : "false"}
+      className={`mode-card ${kind}${learnLocked ? " learn-locked" : ""}${visitorLocked ? " visitor-locked" : ""}`}
+      data-learn-locked={learnLocked ? "true" : "false"}
       data-visitor-locked={visitorLocked ? "true" : "false"}
     >
       <div className="ic">{icon}</div>
@@ -182,9 +193,9 @@ export function ModeCard({
         <p className="mode-lock-hint" role="status">
           <IconLock width={14} height={14} aria-hidden="true" /> {VISITOR_LOCK_TEXT.modeLocked}
         </p>
-      ) : recommendLocked ? (
+      ) : learnLocked ? (
         <p className="mode-lock-hint" role="status">
-          <IconLock width={14} height={14} aria-hidden="true" /> Önce öğrenme modunda dinleme sırasını oturtmanız önerilir.
+          <IconLock width={14} height={14} aria-hidden="true" /> {lockText}
         </p>
       ) : null}
       <h3>{title}</h3>

@@ -54,10 +54,21 @@ async function openPulseQuiz(page: Page): Promise<Locator> {
     v: Array.from({ length: 23 }, () => 16_000),
     u: 4,
     c: {
-      i: "egemed-seed-session-0001",
+      // Oturum kimliği her koşuda benzersiz olmalı; sunucu aynı kimlikli denemeyi 409 ile reddeder.
+      i: `egemed-seed-case-${randomUUID().slice(0, 8)}`,
       n: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
       a: Array.from({ length: 10 }, () => 0),
       s: 1023,
+      l: Array.from({ length: 10 }, () => [0, 0, 0]),
+      x: Array.from({ length: 10 }, () => -1),
+    },
+    // T210: runtime havuzu 500 maddeye büyüdü; doğru yanıt indeksleri TS veri
+    // aynasından (ilk 400 madde) okunduğu için değerlendirme oturumu Q001–Q010'a sabitlenir.
+    q: {
+      i: `egemed-seed-quiz-${randomUUID().slice(0, 8)}`,
+      n: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+      a: Array.from({ length: 10 }, () => -1),
+      s: 0,
       l: Array.from({ length: 10 }, () => [0, 0, 0]),
       x: Array.from({ length: 10 }, () => -1),
     },
@@ -78,6 +89,28 @@ async function openPulseQuiz(page: Page): Promise<Locator> {
   if (await root.locator("#tutorialSkip").isVisible().catch(() => false)) await root.locator("#tutorialSkip").click();
   await root.locator('#modeCards [data-view="quiz"]').click();
   return root;
+}
+
+/**
+ * Öğrenme kilidi (27 Eyl 2026): meydan okumadan önce ilgili simin öğrenme modu
+ * tamamlanmış olmalı. Kayıt sayfa içi fetch ile CSRF başlığıyla yazılır
+ * (ikinci öğrenci giriş ekranından geçemediği için aynı desen kullanılır).
+ */
+async function completeLearn(page: Page, simId: string): Promise<void> {
+  const status = await page.evaluate(
+    async ({ id, cookieName }) => {
+      const csrf = decodeURIComponent(document.cookie.match(new RegExp(`(?:^|;\\s*)${cookieName}=([^;]+)`))?.[1] ?? "");
+      const response = await fetch(`/api/me/sims/${id}/learn/complete`, {
+        method: "POST",
+        credentials: "include",
+        headers: { "content-type": "application/json", "x-csrf-token": csrf },
+        body: JSON.stringify({ contentVersion: "e2e.2026-09-27" }),
+      });
+      return response.status;
+    },
+    { id: simId, cookieName: CSRF_COOKIE },
+  );
+  expect(status, `${simId} öğrenme kaydı`).toBe(200);
 }
 
 test.describe("API oturumu (dev sağlayıcı)", () => {
@@ -242,7 +275,7 @@ test.describe("API oturumu (dev sağlayıcı)", () => {
     expect(JSON.stringify(payload)).not.toContain("1450");
     await expect(page.getByRole("heading", { name: "İlerlemem" })).toBeVisible();
     await expect(page.getByText("1450", { exact: true })).toHaveCount(0);
-    await expect(page.locator("[data-sim-id='pulse']")).toHaveAttribute("data-xp", String(pulseXp));
+    await expect(page.locator("[data-sim-id='pulse']")).toHaveAttribute("data-xp", String(pulseXp ?? 0)); // Pulse denemesi yoksa özet girdisi yok; panel 0 XP (test sırasından bağımsız)
   });
 
   test("öğrenci liderlik anahtarını kapatır ve yenilemede kapalı kalır", async ({ page }) => {
@@ -385,7 +418,7 @@ test.describe("API oturumu (dev sağlayıcı)", () => {
     expect(badgeKeys).toContain("rhythm-streak-3");
     expect(badgeKeys).toContain("rhythm-streak-10");
     await expect(page.getByRole("heading", { name: "İlerlemem" })).toBeVisible();
-    await expect(page.locator("[data-sim-id='pulse']")).toHaveAttribute("data-xp", String(pulseXp));
+    await expect(page.locator("[data-sim-id='pulse']")).toHaveAttribute("data-xp", String(pulseXp ?? 0)); // Pulse denemesi yoksa özet girdisi yok; panel 0 XP (test sırasından bağımsız)
     // T114: sunucu rozetleri katalog adlarıyla gösterilir (ADR-008 S4).
     await expect(page.getByText("Ritim izleyicisi")).toBeVisible();
   });
@@ -418,6 +451,8 @@ test.describe("API oturumu (dev sağlayıcı)", () => {
     await page.goto(STUDENT_ENTRY);
     await signIn(page, "ogrenci");
     await expect(page).toHaveURL(/#\/$/);
+    // T209: öğrenme kilidi — uygulama akışından önce öğrenme kaydı sunucuya yazılır.
+    await completeLearn(page, "ausculta");
     const caseBodies: string[] = [];
     const clientAttempts: string[] = [];
     page.on("response", async (response) => {
@@ -462,10 +497,11 @@ test.describe("API oturumu (dev sağlayıcı)", () => {
     expect(created.ok(), "ikinci öğrenci").toBe(true);
     await adminContext.close();
 
-    // 2) Öğrenci A kod oluşturur.
+    // 2) Öğrenci A kod oluşturur (önce öğrenme modu tamamlanır).
     await page.goto(STUDENT_ENTRY);
     await signIn(page, "ogrenci");
     await expect(page).toHaveURL(/#\/$/);
+    await completeLearn(page, "ausculta");
     await page.goto("/#/meydan-okuma");
     await page.getByRole("button", { name: "Kod oluştur" }).click();
     const code = (await page.locator(".eg-shell-duel__codeValue").first().innerText()).trim();
@@ -491,6 +527,7 @@ test.describe("API oturumu (dev sağlayıcı)", () => {
     // Kabuk oturumu açılışta `/auth/me` ile geri yükler; hash değişimi yeniden yüklemez.
     await rival.goto("/#/meydan-okuma");
     await rival.reload();
+    await completeLearn(rival, "ausculta");
     await rival.getByLabel("6 haneli kod").fill(code);
     await rival.getByRole("button", { name: "Katıl" }).click();
     await expect(rival).toHaveURL(/#\/meydan-okuma\/[0-9a-f-]{36}$/);

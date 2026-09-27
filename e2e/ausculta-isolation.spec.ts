@@ -62,8 +62,9 @@ test.describe("Ausculta kayıt izolasyonu", () => {
     await openAusculta(page);
     const practiceCard = page.locator(".mode-card.practice");
     await expect(practiceCard.locator(".mode-best-score")).toContainText("En iyi puan: 91");
-    // Bir işlem yap: mod seç (öğrenme moduna yönlendirir) ve ekran değişsin.
-    await practiceCard.locator("button").click();
+    // Bir işlem yap: öğrenme modunu aç (T209: öğrenme bitmeden uygulama kartı
+    // pasiftir) ve ekran değişsin.
+    await page.locator(".mode-card.learn button").click();
     // Kütüphane başlığı (h2) mobil düzende gizli (T133) — görünür ilk kayıt yeterli.
     await expect(page.locator(".lib-col .lib-item").first()).toBeVisible();
 

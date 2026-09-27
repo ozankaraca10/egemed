@@ -6,7 +6,8 @@ import { challengeHref, routeHref, simTitleKey } from "./routes";
 import { createBrowserAttemptReporter, createBrowserGamification, type ReportedAttempt } from "./reportAttempt";
 import { loadSimModule } from "./sims/loaders";
 import { SERVER_SESSION_SIMS, createBrowserSessionSource } from "./sims/sessionSources";
-import type { SimSessionSource } from "@egemed/sim-host";
+import { createBrowserLearnSource, createLearnPort } from "./learn/learnSource";
+import type { SimLearnPort, SimSessionSource } from "@egemed/sim-host";
 
 /**
  * A1.4 (ADR-009): uygulama/değerlendirme vakaları sunucu oturumundan gelir. Ziyaretçide
@@ -19,6 +20,27 @@ async function sessionSourceFor(simId: SimulatorId, audience: string, apiBaseUrl
   if (import.meta.env.DEV) {
     const module = await import("./sims/devLocalSessions");
     return module.createDevLocalSessionSource(shellNow);
+  }
+  return null;
+}
+
+/**
+ * Öğrenme tamamlama kanalı (27 Eyl 2026): API oturumunda kayıt sunucudan
+ * okunur ve sunucuya yazılır; API yoksa YALNIZ geliştirmede sekme deposuna
+ * yazan yerel port kurulur. Ziyaretçide kanal verilmez (yalnız öğrenme modunu
+ * görür). `import.meta.env.DEV` kapısı dev kodunu üretim paketinden eler.
+ */
+async function learnPortFor(simId: SimulatorId, audience: string, apiBaseUrl: string | null): Promise<SimLearnPort | null> {
+  if (audience === "visitor") return null;
+  if (apiBaseUrl !== null) {
+    const source = createBrowserLearnSource(apiBaseUrl);
+    if (source === null) return null;
+    // Durum okunamazsa sim açılışı engellenmez; kanal kurulmaz.
+    return createLearnPort(source, simId).catch(() => null);
+  }
+  if (import.meta.env.DEV) {
+    const module = await import("./sims/devLocalLearn");
+    return module.createDevLocalLearnPort(simId);
   }
   return null;
 }
@@ -204,6 +226,7 @@ function SimRouteHost({ actorId, apiBaseUrl = null, audience = "student", challe
             };
       const gamification = apiBaseUrl === null || !gamified ? null : createBrowserGamification(apiBaseUrl, simId);
       const sessions = await sessionSourceFor(simId, audience, apiBaseUrl);
+      const learn = await learnPortFor(simId, audience, apiBaseUrl);
       const options = {
         ...(actorId === undefined ? {} : { actorId }),
         ...(reportAttempt === undefined ? {} : { reportAttempt }),
@@ -212,6 +235,7 @@ function SimRouteHost({ actorId, apiBaseUrl = null, audience = "student", challe
         audience,
         requestSignIn: () => signInRef.current?.(),
         ...(sessions === null ? {} : { sessions }),
+        ...(learn === null ? {} : { learn }),
         ...(challengeId === undefined || sessions === null
           ? {}
           : {

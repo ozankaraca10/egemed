@@ -169,6 +169,10 @@
 .eg-sim-ausculta .mode-card.assessment li .ck { background: var(--purple-100); color: var(--purple-600); }
 .eg-sim-ausculta .mode-card .btn { margin-top: auto; width: 100%; }
 .eg-sim-ausculta .mode-card.visitor-locked { opacity: .7; }
+/* T209: öğrenme kilidi — kart soluklaşır, kilit ikonu + ilerleme metni çizilir. */
+.eg-sim-ausculta .mode-card.learn-locked { opacity: .78; }
+.eg-sim-ausculta .mode-lock-hint { display: flex; align-items: center; justify-content: center; gap: 6px; margin: 0; color: var(--ink-600); font-size: var(--fs-xs); font-weight: 600; }
+.eg-sim-ausculta .mode-lock-hint svg { color: var(--ink-400); flex-shrink: 0; }
 .eg-sim-ausculta .visitor-strip { margin-bottom: var(--sp-3); }
 .eg-sim-ausculta .visitor-strip .visitor-signin { display: inline-flex; padding: 0 2px; }
 .eg-sim-ausculta .faculty-note { color: var(--ink-600); font-style: italic; }
@@ -333,6 +337,12 @@
 .eg-sim-ausculta .lib-col::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: var(--r-pill); }
 .eg-sim-ausculta .lib-col h2 { font-size: var(--fs-2xl); color: var(--navy-800); margin: 0 0 2px; }
 .eg-sim-ausculta .lib-col .lib-sub { color: var(--ink-600); margin: 0 0 12px; font-size: var(--fs-sm); }
+/* T209: öğrenme ilerlemesi ve "dinlendi" işaretleri (renk dışında ✓ + aria-label). */
+.eg-sim-ausculta .learn-progress { margin: 10px 0 0; font-size: var(--fs-sm); font-weight: 700; color: var(--navy-800); }
+.eg-sim-ausculta .challenge-lock-notice { margin: 6px 0 0; }
+.eg-sim-ausculta .lib-group .g-title .g-count { margin-left: auto; font-size: var(--fs-xs); font-weight: 700; color: var(--ink-600); background: var(--card); border: 1px solid var(--border); border-radius: var(--r-pill); padding: 1px 8px; }
+.eg-sim-ausculta .lib-item .lib-done { color: var(--green-600); font-weight: 800; font-size: var(--fs-xs); }
+.eg-sim-ausculta .lib-item.listened .ic { background: var(--green-50); color: var(--green-600); }
 .eg-sim-ausculta .lib-group { margin-bottom: 14px; }
 .eg-sim-ausculta .lib-group .g-title { position: sticky; top: 0; z-index: 2; display: flex; align-items: center; gap: 8px; font-weight: 800; color: var(--ink-900); font-size: var(--fs-md); margin: 0 0 8px; padding: 6px 2px; background: linear-gradient(180deg, rgba(238,244,251,.98) 70%, rgba(238,244,251,0)); backdrop-filter: blur(2px); }
 .eg-sim-ausculta .lib-group .g-title svg { width: 16px; height: 16px; color: var(--blue-600); }
@@ -821,4 +831,33 @@
 @media (max-width: 720px) {
   .eg-sim-ausculta .kv-grid { flex-wrap: wrap; overflow-x: visible; }
   .eg-sim-ausculta .kv { flex: 1 1 84px; }
+}
+
+/* T206: 3 sütunlu öğrenme ızgarasında sol kütüphane sütunu satır yüksekliğini
+   belirliyor, ızgara onun içerik boyuna uzuyor ve orta sahne bu yüksekliğe
+   gerildiği için görüntünün üstünde/altında boş alan kalıyordu (1440×900'de
+   scrollHeight ≈1480). Düzeltme: satırlar içerik yüksekliğinde hizalanır
+   (align-items: start — orta sütun ve bilgi kartı gerilmez), kütüphane paneli
+   sim çubuğunun altına yapışır ve kendi içinde kayar (max-height + mevcut
+   overflow-y: auto), sahne ise gövde görselinin en-boy oranında kalır. Oranlar
+   auscultation-points.json `images.male` (ön 1000×933, arka 1000×915) ile
+   eşleşir; `data-view` LearnScreen'deki sahne kartına yazılır. 3 sütun yalnız
+   >1080 px'te etkindir (`max-width: 1080px` bloğu tek sütuna indirir); bu
+   yüzden kurallar `min-width: 1081px` ile sınırlanır, 768/390 akışı değişmez. */
+@media (min-width: 1081px) {
+  /* Kabuk sim kökünü ve gövdeyi `overflow: hidden` ile kırpıyor; bu, yapışkan
+     panelin en yakın kaydırma kabı olup sticky'yi etkisiz bırakıyordu. Öğrenme
+     ekranında (`.learn-body`) kaydırma belgeye bırakılır: içerik zaten sınırlı,
+     yatay taşma yok. `:has` yalnız bu ekranı hedefler; diğer ekranlar değişmez. */
+  .eg-sim-ausculta:has(.learn-body) { overflow: visible; }
+  .eg-sim-ausculta .screen-body.no-scroll.learn-body { overflow: visible; }
+  .eg-sim-ausculta .learn-grid { align-items: start; }
+  .eg-sim-ausculta .learn-grid > .lib-col {
+    position: sticky;
+    top: calc(var(--head-h) + var(--sp-2));
+    max-height: calc(100dvh - var(--head-h) - var(--sp-5));
+  }
+  .eg-sim-ausculta .learn-grid .stage-card { flex: 0 0 auto; }
+  .eg-sim-ausculta .learn-grid .stage-card .stage { flex: 0 0 auto; aspect-ratio: 1000 / 933; }
+  .eg-sim-ausculta .learn-grid .stage-card[data-view="back"] .stage { aspect-ratio: 1000 / 915; }
 }

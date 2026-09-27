@@ -121,6 +121,19 @@ export { authMeResponseSchema } from "./schemas/auth";
 export type { AuthMeResponse } from "./schemas/auth";
 
 export {
+  LEARN_CONTENT_VERSION_PATTERN,
+  learnCompleteRequestSchema,
+  learnSimStatusSchema,
+  learnStatusSchema,
+} from "./schemas/learn";
+export type {
+  LearnCompleteRequest,
+  LearnSimStatus,
+  LearnStatus,
+  LearnStatusResponse,
+} from "./schemas/learn";
+
+export {
   ATTEMPT_SUMMARY_MAX,
   attemptSummarySchema,
   attemptWriteRequestSchema,
