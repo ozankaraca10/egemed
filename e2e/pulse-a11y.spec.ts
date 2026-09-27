@@ -54,6 +54,7 @@ interface PulseScreen {
   id: ScreenId;
   label: string;
   route: string;
+  readonly seed?: PulseSeedOptions;
   open(root: Locator): Promise<void>;
 }
 
@@ -97,8 +98,57 @@ function correctOf(id: string): number {
   return item.correct;
 }
 
-/** Kaynak runtime'ı emsal akışla açar: başlat → öğreticiyi atla. */
-async function openPulse(page: Page): Promise<Locator> {
+const PULSE_STATE_KEY = "egemed-pulse-6.0";
+const PULSE_ACTORS = [null, "dev-admin-0001", "dev-student-0001"] as const;
+
+interface PulseSeedOptions {
+  readonly casesComplete?: boolean;
+}
+
+function pulseNamespaceOf(actorId: string | null): string {
+  return actorId === null ? "egemed:anon:pulse:" : `egemed:u:${actorId}:pulse:`;
+}
+
+/**
+ * T208 öğrenme kilidi: uygulama ve değerlendirme ekranları yalnız 23 paternin
+ * tümü izlenmiş (değerlendirme ayrıca 10 vaka gönderilmiş) kayıtla açılır.
+ */
+function pulseSeedRecord(options: PulseSeedOptions = {}): Record<string, unknown> {
+  return {
+    version: 6,
+    cv: curriculum.version,
+    m: 0,
+    t: 2,
+    p: 1,
+    f: 0,
+    v: Array.from({ length: 23 }, () => 16_000),
+    u: 4,
+    ...(options.casesComplete === true
+      ? {
+          c: {
+            i: "egemed-seed-session-0001",
+            n: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+            a: Array.from({ length: 10 }, () => 0),
+            s: 1023,
+            l: Array.from({ length: 10 }, () => [0, 0, 0]),
+            x: Array.from({ length: 10 }, () => -1),
+          },
+        }
+      : {}),
+  };
+}
+
+async function seedPulseLearning(page: Page, options: PulseSeedOptions = {}): Promise<void> {
+  const storageKeys = PULSE_ACTORS.map((actorId) => `${pulseNamespaceOf(actorId)}${PULSE_STATE_KEY}`);
+  const record = pulseSeedRecord(options);
+  await page.addInitScript((payload: { keys: string[]; value: Record<string, unknown> }) => {
+    for (const key of payload.keys) localStorage.setItem(key, JSON.stringify(payload.value));
+  }, { keys: storageKeys, value: record });
+}
+
+/** Kaynak runtime'ı emsal akışla açar: tohum → başlat → öğreticiyi atla. */
+async function openPulse(page: Page, options: PulseSeedOptions = {}): Promise<Locator> {
+  await seedPulseLearning(page, options);
   await page.goto("/#/sims/pulse");
   const root = page.locator(ROOT);
   // Birleşik barda kaynak açılış sayfası atlanır (T107); öğretici açıksa atlanır.
@@ -153,6 +203,7 @@ const SCREENS: readonly PulseScreen[] = [
     id: "quiz",
     label: "Değerlendirme",
     route: "#/sims/pulse/sinav",
+    seed: { casesComplete: true },
     async open(root) {
       await openMode(root, "quiz");
       await expect(root.locator("#quizView")).toBeVisible();
@@ -163,6 +214,7 @@ const SCREENS: readonly PulseScreen[] = [
     id: "results",
     label: "Sonuç (10 soru bitince)",
     route: "#/sims/pulse/sonuc",
+    seed: { casesComplete: true },
     async open(root) {
       await completeQuiz(root);
     },
@@ -378,7 +430,7 @@ test.describe("Pulse iç ekran erişilebilirliği (WCAG 2.2 AA + 44 px)", () => 
   for (const screen of SCREENS) {
     test(`${screen.label} (${screen.route})`, async ({ page }, testInfo: TestInfo) => {
       const errors = trackErrors(page);
-      const root = await openPulse(page);
+      const root = await openPulse(page, screen.seed);
       await screen.open(root);
 
       const smallTargets = await collectSmallTargets(page);
