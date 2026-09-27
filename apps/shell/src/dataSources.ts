@@ -17,6 +17,7 @@ import {
 import type { ShellSession } from "./session";
 import { createSyntheticShowcaseSource, type ShowcaseSource } from "./home/showcaseSource";
 import type { ChallengeSource } from "./challenges/challengeSource";
+import type { LearnSource } from "./learn/learnSource";
 
 export interface LeaderboardPreferencesSource {
   getVisible(): Promise<boolean>;
@@ -37,6 +38,8 @@ export interface ShellDataSources {
   showcase(session: ShellSession | null): ShowcaseSource | null;
   /** ADR-010 Meydan Okuma; yalnız API oturumunda (sahte oturumda null). */
   challenges(session: ShellSession | null): ChallengeSource | null;
+  /** Öğrenme tamamlama kaydı (27 Eyl 2026); yalnız API oturumunda (sahte oturumda null). */
+  learn(session: ShellSession | null): LearnSource | null;
 }
 
 const ShellDataSourcesContext = createContext<ShellDataSources | null>(null);
@@ -89,6 +92,9 @@ export function createMockShellDataSources(): ShellDataSources {
       return session === null ? null : syntheticShowcase;
     },
     challenges() {
+      return null;
+    },
+    learn() {
       return null;
     },
     imports,

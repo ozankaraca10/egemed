@@ -172,6 +172,17 @@ export interface SimSessionSource {
   startChallenge(challengeId: string): Promise<SimSession>;
 }
 
+/**
+ * Öğrenme tamamlama kanalı (27 Eyl 2026): sim, öğrenme içeriğinin tamamı
+ * görüldüğünde `markComplete` çağırır; `complete` başlangıç değerini kabuk
+ * sunucudan (API oturumu) okur. Ziyaretçide verilmez; kanal yoksa sim yalnız
+ * görsel/yerel davranışı sürdürür.
+ */
+export interface SimLearnPort {
+  readonly complete: boolean;
+  markComplete(contentVersion: string): Promise<void>;
+}
+
 /** Modüle taşınan oturum bağlamı; sim başına ayrıktır (veri izolasyonu). */
 export interface SimMountContext {
   readonly simId: SimulatorId;
@@ -203,6 +214,8 @@ export interface SimMountContext {
   readonly requestSignIn?: () => void;
   /** A1: sunucu vaka oturumu kanalı (ADR-009). Yoksa sim uygulama/değerlendirmeyi açmaz. */
   readonly sessions?: SimSessionSource;
+  /** Öğrenme tamamlama kanalı (27 Eyl 2026); ziyaretçide verilmez. */
+  readonly learn?: SimLearnPort;
   /** ADR-010: verilirse sim doğrudan bu düellonun oturumunu açar (mod seçimi atlanır). */
   readonly challengeId?: string;
   /** Düello oturumu bitince (sonuç karşılaştırması kabukta). */
@@ -245,6 +258,7 @@ export interface SimMountOptions {
   readonly audience?: SimAudience;
   readonly requestSignIn?: () => void;
   readonly sessions?: SimSessionSource;
+  readonly learn?: SimLearnPort;
   readonly challengeId?: string;
   readonly onChallengeFinished?: (challengeId: string) => void;
 }
@@ -285,6 +299,7 @@ function mountContext(simId: SimulatorId, now: () => number, mountOptions: SimMo
   const audience = mountOptions?.audience;
   const requestSignIn = mountOptions?.requestSignIn;
   const sessions = mountOptions?.sessions;
+  const learn = mountOptions?.learn;
   const challengeId = mountOptions?.challengeId;
   const onChallengeFinished = mountOptions?.onChallengeFinished;
   return {
@@ -298,6 +313,7 @@ function mountContext(simId: SimulatorId, now: () => number, mountOptions: SimMo
     ...(audience === undefined ? {} : { audience }),
     ...(requestSignIn === undefined ? {} : { requestSignIn }),
     ...(sessions === undefined ? {} : { sessions }),
+    ...(learn === undefined ? {} : { learn }),
     ...(challengeId === undefined ? {} : { challengeId }),
     ...(onChallengeFinished === undefined ? {} : { onChallengeFinished }),
   };

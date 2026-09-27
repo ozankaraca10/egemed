@@ -284,6 +284,27 @@ describe("SimHost release ve aktör bağlamı", () => {
     expect(pulse.contexts[1] !== undefined && "sessions" in pulse.contexts[1]).toBe(false);
   });
 
+  it("learn (öğrenme tamamlama) kanalı bağlama taşınır; verilmezse alan yoktur", async () => {
+    const pulse = fake("pulse");
+    const { host, target } = harness(() => Promise.resolve(pulse.module));
+    const marks: string[] = [];
+    const learn = {
+      complete: false,
+      markComplete: async (version: string) => {
+        marks.push(version);
+      },
+    };
+    host.mount(target, "pulse", { learn });
+    await flush();
+    host.mount(target, "pulse");
+    await flush();
+    expect(pulse.contexts[0]?.learn).toBe(learn);
+    expect(pulse.contexts[0]?.learn?.complete).toBe(false);
+    await pulse.contexts[0]?.learn?.markComplete("ausculta.2026-09");
+    expect(marks).toEqual(["ausculta.2026-09"]);
+    expect(pulse.contexts[1] !== undefined && "learn" in pulse.contexts[1]).toBe(false);
+  });
+
   it("reportAttempt bağlama taşınır; verilmezse alan hiç yoktur", async () => {
     const pulse = fake("pulse");
     const seen: string[] = [];
