@@ -193,6 +193,8 @@ export function createAdminHarness(
     readonly bulk?: AdminBulkRepo;
     /** A1.3 — sunucu vaka oturumu; ses okuyucu ve deterministik jeton/rastgele. */
     readonly readAudio?: (runtimeUrl: string) => Promise<Uint8Array | null>;
+    /** A2.2 — Opaca görüntü vekili; görüntü okuyucu. */
+    readonly readImage?: (runtimeUrl: string) => Promise<Uint8Array | null>;
   } = {},
 ) {
   const users = options.users ?? DEFAULT_USERS;
@@ -235,6 +237,7 @@ export function createAdminHarness(
     simSessions: {
       sessions: simSessions,
       readAudio: options.readAudio ?? (() => Promise.resolve(null)),
+      readImage: options.readImage ?? (() => Promise.resolve(null)),
       newToken: () => `tok_${(tokenCounter++).toString(36).padStart(12, "0")}`,
       random: () => {
         randomSeed = (randomSeed * 16807) % 2147483647;

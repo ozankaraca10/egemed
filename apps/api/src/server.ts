@@ -73,6 +73,17 @@ const app = createApp({
         return null;
       }
     },
+    // A2.2: Opaca görüntü kökü; ses ile aynı güvenli kök deseni.
+    readImage: async (runtimeUrl: string) => {
+      const root = path.resolve(env.OPACA_IMAGE_DIR);
+      const target = path.resolve(root, runtimeUrl);
+      if (!target.startsWith(`${root}/`)) return null;
+      try {
+        return await readFile(target);
+      } catch {
+        return null;
+      }
+    },
     newToken: cryptoToken,
     random: cryptoRandom,
     newId: cryptoUuid,

@@ -209,6 +209,7 @@ export function createApp(deps: AppDeps): Hono<AppEnv> {
   const simSessionDeps = deps.simSessions ?? {
     sessions: createMemorySimSessionRepo(),
     readAudio: () => Promise.resolve(null),
+    readImage: () => Promise.resolve(null),
     newToken: cryptoToken,
     random: cryptoRandom,
     newId: () => cryptoUuid(),
