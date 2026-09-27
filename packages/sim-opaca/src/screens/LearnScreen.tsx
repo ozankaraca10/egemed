@@ -179,47 +179,52 @@ export function LearnScreen({
         <div className="container tall screen-body no-scroll">
           <div className="learn-grid">
             <nav className="lib-col" aria-label="Öğrenme kütüphanesi">
-              <h2>Kütüphane</h2>
-              <p className="lib-sub">Konu seçin, filmi okuyun.</p>
-              {isVisitor && visitorNotice && (
-                <p className="mode-lock-hint" role="status">
-                  <IconLock width={14} height={14} aria-hidden="true" /> {visitorNotice}
-                </p>
-              )}
-              {LIBRARY_GROUPS.map((g) => (
-                <div className="lib-group" key={g.id}>
-                  <div className="g-title"><GroupIcon group={g.id} />{g.title}</div>
-                  <div className="lib-items">
-                    {g.items.map((it) => {
-                      const locked = isVisitor && !isVisitorUnlocked(it.key)
-                      return (
-                        <button
-                          key={it.key}
-                          type="button"
-                          className={`lib-item ${it.key === selectedKey ? 'active' : ''}${locked ? ' locked' : ''}`}
-                          onClick={() => selectLibraryItem(it.key)}
-                          aria-current={it.key === selectedKey ? 'true' : undefined}
-                          aria-disabled={locked ? 'true' : undefined}
-                          title={locked ? VISITOR_LOCK_TEXT.itemLocked : it.title}
-                        >
-                          <span className="ic"><GroupIcon group={g.id} /></span>
-                          <span className="lib-main">
-                            <b>{it.short}</b>
-                            <span>{it.sub}</span>
-                          </span>
-                          <span className="lib-right">
-                            {locked ? (
-                              <span className="lib-lock-badge" aria-hidden="true"><IconLock width={12} height={12} /></span>
-                            ) : (
-                              <span className="lib-count" title="Örnek film sayısı">{countFor(it)}</span>
-                            )}
-                          </span>
-                        </button>
-                      )
-                    })}
+              {/* T207: başlık panelde sabit kalır, yalnız liste (`.lib-scroll`) kayar. */}
+              <div className="lib-head">
+                <h2>Kütüphane</h2>
+                <p className="lib-sub">Konu seçin, filmi okuyun.</p>
+                {isVisitor && visitorNotice && (
+                  <p className="mode-lock-hint" role="status">
+                    <IconLock width={14} height={14} aria-hidden="true" /> {visitorNotice}
+                  </p>
+                )}
+              </div>
+              <div className="lib-scroll">
+                {LIBRARY_GROUPS.map((g) => (
+                  <div className="lib-group" key={g.id}>
+                    <div className="g-title"><GroupIcon group={g.id} />{g.title}</div>
+                    <div className="lib-items">
+                      {g.items.map((it) => {
+                        const locked = isVisitor && !isVisitorUnlocked(it.key)
+                        return (
+                          <button
+                            key={it.key}
+                            type="button"
+                            className={`lib-item ${it.key === selectedKey ? 'active' : ''}${locked ? ' locked' : ''}`}
+                            onClick={() => selectLibraryItem(it.key)}
+                            aria-current={it.key === selectedKey ? 'true' : undefined}
+                            aria-disabled={locked ? 'true' : undefined}
+                            title={locked ? VISITOR_LOCK_TEXT.itemLocked : it.title}
+                          >
+                            <span className="ic"><GroupIcon group={g.id} /></span>
+                            <span className="lib-main">
+                              <b>{it.short}</b>
+                              <span>{it.sub}</span>
+                            </span>
+                            <span className="lib-right">
+                              {locked ? (
+                                <span className="lib-lock-badge" aria-hidden="true"><IconLock width={12} height={12} /></span>
+                              ) : (
+                                <span className="lib-count" title="Örnek film sayısı">{countFor(it)}</span>
+                              )}
+                            </span>
+                          </button>
+                        )
+                      })}
+                    </div>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </nav>
 
             <div className="sim-main">
@@ -255,6 +260,7 @@ export function LearnScreen({
                     onTool={(tool) => dispatch({ type: 'toolUsed', tool })}
                     onToggleZones={() => dispatch({ type: 'toggleZones' })}
                     showInfoOverlay={tab === 'film'}
+                    fitContent
                     {...(onStackEnd ? { onStackEnd } : {})}
                     env={NOOP_FILM_ENV}
                   />

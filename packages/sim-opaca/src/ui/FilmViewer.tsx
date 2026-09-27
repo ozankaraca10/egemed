@@ -152,6 +152,9 @@ export interface FilmViewerProps {
   label?: string
   /** film bilgisi öğretim overlay'i (sentetik taraf işareti rozeti) — yalnız öğrenme modunda açılır */
   showInfoOverlay?: boolean
+  /** T207: sahne kalan yüksekliğe gerilmez; kendi en-boy oranında çizilir (öğrenme düzeni).
+   *  Verilmezse eski davranış korunur (uygulama/değerlendirme ekranları değişmez). */
+  fitContent?: boolean
   /** Kesit yığınında son kesite ulaşıldığında (görüntü başına bir kez) — oyunlaştırma "BT Kaşifi" için. */
   onStackEnd?: () => void
   /** Pencere/belge sınırı; verilmezse güvenli no-op kullanılır. */
@@ -179,6 +182,7 @@ export const FilmViewer = forwardRef<FilmViewerHandle, FilmViewerProps>(function
     inert = false,
     label,
     showInfoOverlay = false,
+    fitContent = false,
     onStackEnd,
     env = NOOP_FILM_ENV,
   },
@@ -498,7 +502,7 @@ export const FilmViewer = forwardRef<FilmViewerHandle, FilmViewerProps>(function
         onPointerLeave={onPointerLeave}
         onDoubleClick={reset}
         onKeyDown={onKeyDown}
-        style={{ cursor }}
+        style={fitContent ? { cursor, aspectRatio: String(aspect) } : { cursor }}
       >
         {!image && <div className="film-empty">Bu vaka için görüntü kaydı bulunamadı.</div>}
         {image && failed && (

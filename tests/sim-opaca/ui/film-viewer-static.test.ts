@@ -225,4 +225,15 @@ describe("FilmViewer (statik render)", () => {
     expect(html).toContain('tabindex="-1"');
     expect(html).not.toContain("film-mark-hint");
   });
+
+  it("fitContent kapalıyken sahne en-boy oranı taşımaz (diğer ekranlar değişmez)", () => {
+    const html = renderViewer();
+    expect(html).not.toContain("aspect-ratio");
+  });
+
+  it("fitContent açıkken sahne görüntünün en-boy oranıyla çizilir (T207)", () => {
+    const html = renderViewer({ fitContent: true });
+    // xr() 1024×1024 → oran 1; öğrenme düzeni sahneyi bu orana sabitler.
+    expect(html).toContain("aspect-ratio:1");
+  });
 });
