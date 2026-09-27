@@ -52,6 +52,8 @@ export interface AppState {
   server: ServerSessionState | null;
   /** Öğrenme ekranından "bu bulguda çalış": sonraki uygulama oturumunun odak bulgusu. */
   serverFocus: string | null;
+  /** ADR-010: düello oturumu (değerlendirme arayüzüyle, `challenge` sunucu moduyla çalışır). */
+  serverChallengeId: string | null;
 }
 
 export const initialTelemetry: Telemetry = {
@@ -92,6 +94,7 @@ export const initialState: AppState = {
   bestScore: { practice: 0, assessment: 0 },
   server: null,
   serverFocus: null,
+  serverChallengeId: null,
 };
 
 /* ---------------- en iyi puan deposu (K-P3 açık) ---------------- */
@@ -126,7 +129,7 @@ export function saveBestScore(storage: StoragePort, bestScore: { practice: numbe
 
 export type Action =
   | { type: "goto"; screen: Screen }
-  | { type: "startMode"; mode: Mode; focusFinding?: string }
+  | { type: "startMode"; mode: Mode; focusFinding?: string; challengeId?: string }
   | { type: "caseMount"; caseDef: CaseDef }
   | { type: "setBodySex"; sex: BodySex }
   | { type: "startSession"; practiceIds: string[]; assessmentIds: string[]; seed: number }
@@ -214,6 +217,7 @@ export function reducer(s: AppState, a: Action, seam: ReducerSeam = noopSeam): A
         // A1.4: yeni mod yeni sunucu oturumu ister (sürücü başlatır).
         server: null,
         serverFocus: a.mode === "practice" ? (a.focusFinding ?? null) : null,
+        serverChallengeId: a.mode === "assessment" ? (a.challengeId ?? null) : null,
       };
     case "setView":
       return { ...s, view: a.view };

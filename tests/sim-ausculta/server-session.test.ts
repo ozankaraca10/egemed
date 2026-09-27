@@ -98,6 +98,10 @@ function fakeSessions(mode: "practice" | "assessment", overrides: Partial<SimSes
       return { mode, total: 90, max: 100, passed: true, cases: [RESULT], xpGained: 50 };
     },
     audioUrl: (id, token) => `/api/me/sims/ausculta/sessions/${id}/audio/${token}`,
+    startChallenge: async (challengeId) => {
+      calls.push(`challenge:${challengeId}`);
+      return { sessionId: "00000000-0000-4000-8000-00000000cdef", mode: "challenge", caseCount: 2, perCaseLimitMs: 120000, totalLimitMs: 480000, startedAt: "2026-09-27T10:00:00.000+03:00" };
+    },
     ...overrides,
   };
   return { source, calls };
@@ -199,6 +203,17 @@ describe("sürücü + reducer", () => {
     await startServerSession(down.source, failing.dispatch, "practice", null);
     expect(failing.state.server).toBeNull();
     expect(serverErrorMessage(new Error("rate_limited"))).toContain("Çok sık");
+  });
+
+  it("düello: oturum düello ucundan açılır, değerlendirme gibi ilerler (ADR-010)", async () => {
+    const { source, calls } = fakeSessions("assessment");
+    const run = runner(reducer(initialState, { type: "startMode", mode: "assessment", challengeId: "11111111-1111-4111-8111-111111111111" }));
+    expect(run.state.serverChallengeId).toBe("11111111-1111-4111-8111-111111111111");
+    await startServerSession(source, run.dispatch, "assessment", null, run.state.serverChallengeId);
+    expect(run.state.server?.mode).toBe("challenge");
+    expect(calls[0]).toBe("challenge:11111111-1111-4111-8111-111111111111");
+    await submitServerCase(source, run.dispatch, "s", 1, {}, initialState.telemetry);
+    expect(run.state.pendingSummary?.total).toBe(0);
   });
 
   it("yeni mod sunucu oturumunu sıfırlar; odak yalnız uygulamada tutulur", () => {

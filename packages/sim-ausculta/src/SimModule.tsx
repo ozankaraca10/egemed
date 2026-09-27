@@ -230,6 +230,8 @@ export function createAuscultaModule(deps?: AuscultaModuleDeps): SimModule {
         ...(context.audience === undefined ? {} : { audience: context.audience }),
         ...(context.requestSignIn === undefined ? {} : { requestSignIn: context.requestSignIn }),
         ...(context.sessions === undefined ? {} : { sessions: context.sessions }),
+        ...(context.challengeId === undefined ? {} : { challengeId: context.challengeId }),
+        ...(context.onChallengeFinished === undefined ? {} : { onChallengeFinished: context.onChallengeFinished }),
       };
 
       root.render(

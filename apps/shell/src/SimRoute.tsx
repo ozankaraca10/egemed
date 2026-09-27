@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, type JSX } from "react";
 import { audienceShowsGamification, createSimHost, type SimAudience, type SimChrome, type SimHost, type SimulatorId } from "@egemed/sim-host";
 import { t } from "@egemed/ui/i18n";
 import { shellNow } from "./now";
-import { routeHref, simTitleKey } from "./routes";
+import { challengeHref, routeHref, simTitleKey } from "./routes";
 import { createBrowserAttemptReporter, createBrowserGamification, type ReportedAttempt } from "./reportAttempt";
 import { loadSimModule } from "./sims/loaders";
 import { SERVER_SESSION_SIMS, createBrowserSessionSource } from "./sims/sessionSources";
@@ -48,6 +48,8 @@ export interface SimRouteProps {
   readonly audience?: SimAudience | undefined;
   /** Ziyaretçi kilidindeki "Öğrenci girişi" eylemi. */
   readonly onRequestSignIn?: (() => void) | undefined;
+  /** ADR-010: düello modunda açılış (`#/sims/<sim>/duello/<id>`). */
+  readonly challengeId?: string | undefined;
 }
 
 /** Duyuru kartı simgesi: erişim reddi (kilit) ve hata (uyarı). Dekoratiftir. */
@@ -145,10 +147,11 @@ export function SimErrorNotice({ onRetry }: SimErrorNoticeProps): JSX.Element {
  * kutusu host'un kardeşidir; yükleniyor/hata sırasında host gizlenmez, boş
  * kalır ve aşama ızgarasında aynı hücreyi paylaşır.
  */
-export function SimRoute({ actorId, allowed = true, apiBaseUrl = null, audience, onChrome, onRequestSignIn, simId }: SimRouteProps): JSX.Element {
+export function SimRoute({ actorId, allowed = true, apiBaseUrl = null, audience, challengeId, onChrome, onRequestSignIn, simId }: SimRouteProps): JSX.Element {
   if (!allowed) return <SimAccessDenied />;
   return (
     <SimRouteHost
+      challengeId={challengeId}
       actorId={actorId}
       apiBaseUrl={apiBaseUrl}
       audience={audience}
@@ -159,7 +162,7 @@ export function SimRoute({ actorId, allowed = true, apiBaseUrl = null, audience,
   );
 }
 
-function SimRouteHost({ actorId, apiBaseUrl = null, audience = "student", onChrome, onRequestSignIn, simId }: Omit<SimRouteProps, "allowed">): JSX.Element {
+function SimRouteHost({ actorId, apiBaseUrl = null, audience = "student", challengeId, onChrome, onRequestSignIn, simId }: Omit<SimRouteProps, "allowed">): JSX.Element {
   // Kanal ref'te tutulur: üst bileşen yeniden çizilince sim yeniden mount edilmez.
   const chromeRef = useRef(onChrome);
   chromeRef.current = onChrome;
@@ -209,6 +212,15 @@ function SimRouteHost({ actorId, apiBaseUrl = null, audience = "student", onChro
         audience,
         requestSignIn: () => signInRef.current?.(),
         ...(sessions === null ? {} : { sessions }),
+        ...(challengeId === undefined || sessions === null
+          ? {}
+          : {
+              challengeId,
+              onChallengeFinished: (finishedId: string) => {
+                const scope = globalThis as { location?: { hash: string } };
+                if (scope.location !== undefined) scope.location.hash = challengeHref(finishedId);
+              },
+            }),
       };
       return host.mount(container, simId, options);
     });
@@ -226,7 +238,7 @@ function SimRouteHost({ actorId, apiBaseUrl = null, audience = "student", onChro
       void mounted.then((token) => host.release(token));
       chromeRef.current?.(null);
     };
-  }, [simId, actorId, apiBaseUrl, audience, attempt]);
+  }, [simId, actorId, apiBaseUrl, audience, challengeId, attempt]);
 
   // Başlık (h1) ve konum birleşik bardadır; sim tam alanı çerçevesiz kaplar.
   return (

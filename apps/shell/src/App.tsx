@@ -1,3 +1,4 @@
+import { ChallengeDetailPage } from "./challenges/ChallengeDetailPage";
 import { ToastProvider } from "@egemed/ui";
 import { AdminFrame } from "./admin/AdminFrame";
 import { useEffect, useMemo, useRef, useState, type JSX, type ReactNode } from "react";
@@ -75,9 +76,11 @@ function contentFor(
   if (route.kind === "adminRoles") return <AdminFrame active="roles"><RolesPage /></AdminFrame>;
   if (route.kind === "adminRewards") return <AdminFrame active="rewards"><RewardsPage /></AdminFrame>;
   if (route.kind === "adminAudit") return <AdminFrame active="audit"><AuditPage /></AdminFrame>;
+  if (route.kind === "challengeDetail") return <ChallengeDetailPage challengeId={route.challengeId} session={session} />;
   if (route.kind === "sim") {
     return (
       <SimRoute
+        {...(route.challengeId === undefined ? {} : { challengeId: route.challengeId })}
         actorId={session?.actorId}
         allowed={sessionAllowsSim(session, route.simId)}
         apiBaseUrl={apiBaseUrl}

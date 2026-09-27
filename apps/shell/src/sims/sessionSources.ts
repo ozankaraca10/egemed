@@ -28,7 +28,7 @@ async function guarded<T>(run: () => Promise<T>): Promise<T> {
   }
 }
 
-export function createApiSessionSource(client: Pick<ApiClient, "simSessions">, simId: SimId): SimSessionSource {
+export function createApiSessionSource(client: Pick<ApiClient, "simSessions" | "challenges">, simId: SimId): SimSessionSource {
   const api = client.simSessions;
   return {
     start: (mode, options) => guarded(async () => (await api.start(simId, mode, options?.focusFinding === undefined ? {} : { focusFinding: options.focusFinding })).data),
@@ -38,6 +38,7 @@ export function createApiSessionSource(client: Pick<ApiClient, "simSessions">, s
     answer: (sessionId, index, body) => guarded(async () => (await api.answer(simId, sessionId, index, body)).data),
     finish: (sessionId) => guarded(async () => (await api.finish(simId, sessionId)).data),
     audioUrl: (sessionId, token) => api.audioUrl(simId, sessionId, token),
+    startChallenge: (challengeId) => guarded(async () => (await client.challenges.startSession(challengeId)).data),
   };
 }
 

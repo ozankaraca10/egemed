@@ -271,6 +271,7 @@ describe("SimHost release ve aktör bağlamı", () => {
       getCase: () => Promise.reject(new Error("x")),
       hint: () => Promise.reject(new Error("x")),
       check: () => Promise.reject(new Error("x")),
+      startChallenge: () => Promise.reject(new Error("x")),
       answer: () => Promise.reject(new Error("x")),
       finish: () => Promise.reject(new Error("x")),
       audioUrl: (id: string, token: string) => `/api/${id}/${token}`,

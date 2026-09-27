@@ -168,6 +168,8 @@ export interface SimSessionSource {
   }>;
   /** Oturuma bağlı ses jetonunun oynatılabilir adresi. */
   audioUrl(sessionId: string, token: string): string;
+  /** ADR-010: Meydan Okuma oturumu (aynı vakalar/sıra; süreli). Desteklenmiyorsa reddeder. */
+  startChallenge(challengeId: string): Promise<SimSession>;
 }
 
 /** Modüle taşınan oturum bağlamı; sim başına ayrıktır (veri izolasyonu). */
@@ -201,6 +203,10 @@ export interface SimMountContext {
   readonly requestSignIn?: () => void;
   /** A1: sunucu vaka oturumu kanalı (ADR-009). Yoksa sim uygulama/değerlendirmeyi açmaz. */
   readonly sessions?: SimSessionSource;
+  /** ADR-010: verilirse sim doğrudan bu düellonun oturumunu açar (mod seçimi atlanır). */
+  readonly challengeId?: string;
+  /** Düello oturumu bitince (sonuç karşılaştırması kabukta). */
+  readonly onChallengeFinished?: (challengeId: string) => void;
 }
 
 /** Modül `mount` dönüşünde zorunlu cleanup verir; idempotent olmalıdır. */
@@ -239,6 +245,8 @@ export interface SimMountOptions {
   readonly audience?: SimAudience;
   readonly requestSignIn?: () => void;
   readonly sessions?: SimSessionSource;
+  readonly challengeId?: string;
+  readonly onChallengeFinished?: (challengeId: string) => void;
 }
 
 /** Bir `mount` çağrısının kimliği; yalnız o çağrının oturumunu bırakmak için. */
@@ -277,6 +285,8 @@ function mountContext(simId: SimulatorId, now: () => number, mountOptions: SimMo
   const audience = mountOptions?.audience;
   const requestSignIn = mountOptions?.requestSignIn;
   const sessions = mountOptions?.sessions;
+  const challengeId = mountOptions?.challengeId;
+  const onChallengeFinished = mountOptions?.onChallengeFinished;
   return {
     now,
     simId,
@@ -288,6 +298,8 @@ function mountContext(simId: SimulatorId, now: () => number, mountOptions: SimMo
     ...(audience === undefined ? {} : { audience }),
     ...(requestSignIn === undefined ? {} : { requestSignIn }),
     ...(sessions === undefined ? {} : { sessions }),
+    ...(challengeId === undefined ? {} : { challengeId }),
+    ...(onChallengeFinished === undefined ? {} : { onChallengeFinished }),
   };
 }
 

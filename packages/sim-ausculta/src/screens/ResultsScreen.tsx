@@ -1,3 +1,4 @@
+import { useChallenge } from "../ui/ScreenHeading";
 import { endOfMonthTr } from "@egemed/gamification-core";
 import { defaultGamiIcons, GamiGainsView } from "@egemed/gami-ui";
 import { Fragment, useMemo, useState, type JSX, type ReactNode } from "react";
@@ -109,6 +110,7 @@ export function ResultsScreen({ embedded = false, env = NOOP_RESULTS_ENV, reposi
     exitResults({ env, runtime, dispatch });
   };
 
+  const challenge = useChallenge();
   const server = state.server;
   const reviewFor = (caseId: string): { readonly title: string; readonly questions: readonly ReviewQuestion[] } | null => {
     if (server !== null) {
@@ -384,12 +386,26 @@ export function ResultsScreen({ embedded = false, env = NOOP_RESULTS_ENV, reposi
           ) : null}
 
           <div className="results-actions">
-            <button type="button" className="btn primary" style={HIT} onClick={exit}>
+            {state.serverChallengeId !== null && challenge.onChallengeFinished !== undefined ? (
+              <button
+                type="button"
+                className="btn primary"
+                style={HIT}
+                onClick={() => {
+                  if (state.serverChallengeId !== null) challenge.onChallengeFinished?.(state.serverChallengeId);
+                }}
+              >
+                Düello sonucunu gör
+              </button>
+            ) : null}
+            <button type="button" className={state.serverChallengeId !== null ? "btn outline" : "btn primary"} style={HIT} onClick={exit}>
               <IconExit /> Modülden Çık
             </button>
-            <button type="button" className="btn outline" style={HIT} onClick={retry}>
-              Tekrar dene
-            </button>
+            {state.serverChallengeId === null ? (
+              <button type="button" className="btn outline" style={HIT} onClick={retry}>
+                Tekrar dene
+              </button>
+            ) : null}
             <button type="button" className="btn outline" style={HIT} onClick={studyLearn}>
               Öğrenme modunda çalış
             </button>

@@ -19,7 +19,7 @@ describe("giriş rotaları", () => {
       titleKey: "entry.student.title",
     });
     expect(ENTRY_PATHS).toEqual({ admin: "/giris/admin", student: "/giris/test-ogrenci" });
-    expect(ROUTES).toHaveLength(2);
+    expect(ROUTES).toHaveLength(3);
   });
 
   it.each(["admin", "student"] as const)("%s ekranı erişilebilir form işaretlemesi üretir", (role) => {

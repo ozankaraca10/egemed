@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto";
 import { expect, test, type Page } from "@playwright/test";
 import { curriculum } from "../packages/sim-pulse/src/data/curriculum";
 import { captureRouteScreenshot } from "./artifacts";
@@ -399,6 +400,98 @@ test.describe("API oturumu (dev sağlayıcı)", () => {
     expect(clientAttempts, "istemci deneme yazmaz (sunucu yazar)").toEqual([]);
     const after = await page.request.get("/api/me/gamification/ausculta");
     expect(((await after.json()) as { data: { xp: number } }).data.xp).toBeGreaterThan(xpBefore);
+  });
+
+  test("Meydan Okuma: kod ile davet, iki öğrenci aynı vakaları oynar, sonuç ve kazanan görünür (ADR-010)", async ({ page, browser, baseURL }, testInfo) => {
+    test.setTimeout(240_000);
+    // 1) Admin ikinci bir geliştirme öğrencisi oluşturur (Ausculta erişimli).
+    const adminContext = await browser.newContext(baseURL === undefined ? {} : { baseURL });
+    const admin = await adminContext.newPage();
+    await admin.goto(ADMIN_ENTRY);
+    await signIn(admin, "admin");
+    await expect(admin).toHaveURL(/#\/admin$/);
+    const csrf = (await adminContext.cookies()).find((cookie) => cookie.name === CSRF_COOKIE)?.value ?? "";
+    const username = `duello.${randomUUID().slice(0, 8)}`;
+    const created = await admin.request.post("/api/admin/users", {
+      headers: { "x-csrf-token": csrf },
+      data: { username, displayName: "Düello Rakibi", authMethod: "dev", role: "kullanici", simAccess: ["ausculta"] },
+    });
+    expect(created.ok(), "ikinci öğrenci").toBe(true);
+    await adminContext.close();
+
+    // 2) Öğrenci A kod oluşturur.
+    await page.goto(STUDENT_ENTRY);
+    await signIn(page, "ogrenci");
+    await expect(page).toHaveURL(/#\/$/);
+    await page.goto("/#/meydan-okuma");
+    await page.getByRole("button", { name: "Kod oluştur" }).click();
+    const code = (await page.locator(".eg-shell-duel__codeValue").first().innerText()).trim();
+    expect(code).toMatch(/^[0-9]{6}$/);
+    await captureRouteScreenshot(page, testInfo.project.name, "#/meydan-okuma kod");
+
+    // 3) Öğrenci B kodla katılır.
+    const rivalContext = await browser.newContext(baseURL === undefined ? {} : { baseURL });
+    const rival = await rivalContext.newPage();
+    // Giriş ekranı yalnız sabit geliştirme hesaplarını kabul eder; ikinci öğrenci
+    // sayfa kökeninden doğrudan `/auth/dev/login` ile oturum açar.
+    await rival.goto(STUDENT_ENTRY);
+    const login = await rival.evaluate(async (name) => {
+      const response = await fetch("/api/auth/dev/login", {
+        method: "POST",
+        credentials: "include",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ username: name }),
+      });
+      return response.status;
+    }, username);
+    expect(login, "ikinci öğrenci girişi").toBe(200);
+    // Kabuk oturumu açılışta `/auth/me` ile geri yükler; hash değişimi yeniden yüklemez.
+    await rival.goto("/#/meydan-okuma");
+    await rival.reload();
+    await rival.getByLabel("6 haneli kod").fill(code);
+    await rival.getByRole("button", { name: "Katıl" }).click();
+    await expect(rival).toHaveURL(/#\/meydan-okuma\/[0-9a-f-]{36}$/);
+    await expect(rival.getByText("Devam ediyor")).toBeVisible();
+
+    /** Düello oturumunu (10 vaka, değerlendirme arayüzü) sonuna kadar oynar. */
+    async function playDuel(target: Page, correctFirst: boolean): Promise<void> {
+      await target.getByRole("button", { name: "Şimdi oyna" }).click();
+      const root = target.locator(".eg-sim-ausculta").first();
+      await expect(root.getByText("Meydan Okuma.", { exact: false }).first()).toBeVisible({ timeout: 20_000 });
+      const report = target.getByRole("heading", { name: "Değerlendirme Tamamlandı" });
+      for (let step = 0; step < 120; step += 1) {
+        if ((await report.count()) > 0) break;
+        const options = root.locator(".opt");
+        if ((await options.count()) > 0) {
+          await options.nth(correctFirst ? 0 : (await options.count()) - 1).click();
+          await root.locator(".q-nav button.btn").first().click();
+        }
+        await target.waitForTimeout(120);
+      }
+      await expect(report).toBeVisible({ timeout: 20_000 });
+      await target.getByRole("button", { name: "Düello sonucunu gör" }).click();
+      await expect(target).toHaveURL(/#\/meydan-okuma\/[0-9a-f-]{36}$/);
+    }
+
+    // 4) A oynar → rakibi bekler; puanlar gizli.
+    await rival.close();
+    await page.goto(`/#/meydan-okuma`);
+    await page.locator(".eg-shell-duel__rowLink").first().click();
+    await playDuel(page, true);
+    await expect(page.getByText("Rakibin bitirmesi bekleniyor", { exact: false })).toBeVisible();
+
+    // 5) B oynar → iki tarafta sonuç ve kazanan şeridi.
+    const rivalAgain = await rivalContext.newPage();
+    await rivalAgain.goto("/#/meydan-okuma");
+    await rivalAgain.locator(".eg-shell-duel__rowLink").first().click();
+    await playDuel(rivalAgain, false);
+    await expect(rivalAgain.locator(".eg-shell-duel__banner")).toBeVisible();
+    await page.getByRole("button", { name: "Yenile" }).click();
+    await expect(page.locator(".eg-shell-duel__banner")).toBeVisible();
+    await captureRouteScreenshot(page, testInfo.project.name, "#/meydan-okuma/sonuc");
+    const scores = await page.locator(".eg-shell-duel__stats dd").allInnerTexts();
+    expect(scores.filter((value) => value !== "—").length).toBeGreaterThanOrEqual(2);
+    await rivalContext.close();
   });
 
   test("Pulse sınavı bitince İlerlemem sunucu rozetini gösterir ve demo bandı yoktur", async ({ page }) => {

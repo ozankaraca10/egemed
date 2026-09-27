@@ -2,7 +2,7 @@ import { isSimulatorId, type SimulatorId } from "@egemed/sim-host";
 import type { TrKey } from "@egemed/ui/i18n";
 
 /** Kabukta tanımlı sayfa kimlikleri. */
-export type RouteId = "home" | "simulators";
+export type RouteId = "home" | "simulators" | "challenges";
 export type EntryRole = "admin" | "student";
 
 /** Tek sayfa rotası: hash yolu, gezinme etiketi ve sayfa başlığı anahtarı. */
@@ -25,7 +25,8 @@ export type ResolvedRoute =
   | { kind: "adminRoles"; titleKey: TrKey }
   | { kind: "adminAudit"; titleKey: TrKey }
   | { kind: "adminRewards"; titleKey: TrKey }
-  | { kind: "sim"; simId: SimulatorId; titleKey: TrKey }
+  | { kind: "sim"; simId: SimulatorId; titleKey: TrKey; challengeId?: string }
+  | { kind: "challengeDetail"; challengeId: string; titleKey: TrKey }
   | { kind: "notFound"; path: string };
 
 export const ENTRY_PATHS: Record<EntryRole, `/giris/${string}`> = {
@@ -57,7 +58,20 @@ export const ADMIN_REWARDS_PATH = "/admin/oduller" as const;
 export const ROUTES: readonly RouteDef[] = [
   { id: "home", path: "/", labelKey: "shell.nav.home", titleKey: "shell.home.title" },
   { id: "simulators", path: "/simulatorler", labelKey: "shell.nav.simulators", titleKey: "shell.simulators.title" },
+  { id: "challenges", path: "/meydan-okuma", labelKey: "shell.nav.challenges", titleKey: "challenges.title" },
 ];
+
+/** ADR-010: düello ayrıntısı ve düello modunda sim açılışı. */
+export const CHALLENGES_PATH = "/meydan-okuma" as const;
+const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+export function challengeHref(challengeId: string): `#${string}` {
+  return `#${CHALLENGES_PATH}/${challengeId}`;
+}
+
+export function challengePlayHref(simId: SimulatorId, challengeId: string): `#${string}` {
+  return `#/sims/${simId}/duello/${challengeId}`;
+}
 
 /**
  * Simülatör rotaları: kimlik başına hash yolu. `sims/*` paketleri burada içe
@@ -115,6 +129,14 @@ export function resolveRoute(hash: string): ResolvedRoute {
   if (path === ADMIN_PATH) return { kind: "admin", titleKey: "admin.title" };
   if (path === ENTRY_PATHS.admin) return { kind: "entry", role: "admin", titleKey: "entry.admin.title" };
   if (path === ENTRY_PATHS.student) return { kind: "entry", role: "student", titleKey: "entry.student.title" };
+  if (path.startsWith(`${CHALLENGES_PATH}/`)) {
+    const challengeId = path.slice(CHALLENGES_PATH.length + 1);
+    if (UUID_PATTERN.test(challengeId)) return { kind: "challengeDetail", challengeId, titleKey: "challenges.detail.title" };
+  }
+  const duel = /^\/sims\/([a-z]+)\/duello\/([0-9a-f-]{36})$/i.exec(path);
+  if (duel !== null && isSimulatorId(duel[1]) && UUID_PATTERN.test(duel[2] ?? "")) {
+    return { kind: "sim", simId: duel[1], titleKey: simTitleKey(duel[1]), challengeId: duel[2] ?? "" };
+  }
   const simId = simIdForPath(path);
   if (simId !== null) return { kind: "sim", simId, titleKey: simTitleKey(simId) };
   const route = ROUTES.find((candidate) => candidate.path === path);
