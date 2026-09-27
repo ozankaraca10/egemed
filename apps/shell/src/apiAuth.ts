@@ -6,7 +6,7 @@ import {
   type ApiFetchInit,
   type ApiResponse,
 } from "@egemed/api-client";
-import { checkDevCredentials } from "./devAuth";
+import { checkApiDevCredentials } from "./devAuth";
 import type { EntryRole } from "./routes";
 import { shellSessionFromMe, type ShellSession } from "./session";
 
@@ -106,7 +106,7 @@ export interface ApiSubmitHandlers {
 
 /**
  * API modunda giriş: parola ve rol karışması yerel sahte hesap kuralıyla
- * doğrulanır (`checkDevCredentials`), oturum `/auth/dev/login` ile kurulur.
+ * doğrulanır (`checkApiDevCredentials`), oturum `/auth/dev/login` ile kurulur.
  * Sunucu yalnız kullanıcı adı alır; `Date.now()` veya oturum yazımı yoktur.
  */
 export async function submitApiEntry(
@@ -116,7 +116,7 @@ export async function submitApiEntry(
   handlers: ApiSubmitHandlers,
 ): Promise<ShellSession | null> {
   const auth = createShellApiAuth(baseUrl);
-  if (checkDevCredentials(role, values.username, values.password) === null || auth === null) {
+  if (!checkApiDevCredentials(role, values.username, values.password) || auth === null) {
     handlers.onInvalid();
     return null;
   }

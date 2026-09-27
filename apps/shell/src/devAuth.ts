@@ -94,3 +94,17 @@ export function isDevAuthEnabled(env: { DEV: boolean }): boolean {
 export function sessionWhenEnabled(enabled: boolean, store: DevSessionStore): DevSession | null {
   return enabled ? store.read() : null;
 }
+
+/**
+ * API modunda (yalnız geliştirme) giriş ön denetimi: yönetici sekmesi sabit
+ * yönetici hesabıyla aynıdır; öğrenci sekmesi veritabanındaki HERHANGİ bir `dev`
+ * öğrenciyi kabul eder (Meydan Okuma için ikinci öğrenci). Parola sabit
+ * geliştirme parolasıdır; kullanıcının varlığına ve rolüne sunucu karar verir.
+ * Rol karışması (yönetici kimliği öğrenci formunda) yine reddedilir.
+ */
+export function checkApiDevCredentials(role: EntryRole, username: string, password: string): boolean {
+  if (role === "admin") return checkDevCredentials(role, username, password) !== null;
+  const name = username.trim().toLowerCase();
+  if (name === DEV_ACCOUNTS.admin.username || password !== DEV_ACCOUNTS.student.password) return false;
+  return /^[a-z0-9][a-z0-9._-]{2,63}$/.test(name);
+}
