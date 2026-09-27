@@ -264,7 +264,7 @@ test.describe("API oturumu (dev sağlayıcı)", () => {
     expect(JSON.stringify(payload)).not.toContain("1450");
     await expect(page.getByRole("heading", { name: "İlerlemem" })).toBeVisible();
     await expect(page.getByText("1450", { exact: true })).toHaveCount(0);
-    await expect(page.locator("[data-sim-id='pulse']")).toHaveAttribute("data-xp", String(pulseXp));
+    await expect(page.locator("[data-sim-id='pulse']")).toHaveAttribute("data-xp", String(pulseXp ?? 0)); // Pulse denemesi yoksa özet girdisi yok; panel 0 XP (test sırasından bağımsız)
   });
 
   test("öğrenci liderlik anahtarını kapatır ve yenilemede kapalı kalır", async ({ page }) => {
@@ -407,7 +407,7 @@ test.describe("API oturumu (dev sağlayıcı)", () => {
     expect(badgeKeys).toContain("rhythm-streak-3");
     expect(badgeKeys).toContain("rhythm-streak-10");
     await expect(page.getByRole("heading", { name: "İlerlemem" })).toBeVisible();
-    await expect(page.locator("[data-sim-id='pulse']")).toHaveAttribute("data-xp", String(pulseXp));
+    await expect(page.locator("[data-sim-id='pulse']")).toHaveAttribute("data-xp", String(pulseXp ?? 0)); // Pulse denemesi yoksa özet girdisi yok; panel 0 XP (test sırasından bağımsız)
     // T114: sunucu rozetleri katalog adlarıyla gösterilir (ADR-008 S4).
     await expect(page.getByText("Ritim izleyicisi")).toBeVisible();
   });
