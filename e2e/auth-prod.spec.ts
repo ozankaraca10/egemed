@@ -1,4 +1,7 @@
+import { readdirSync, readFileSync } from "node:fs";
 import { expect, test } from "@playwright/test";
+import auscultaCasesCore from "../packages/assessment-bank/data/ausculta/cases.json" with { type: "json" };
+import auscultaCasesAuto from "../packages/assessment-bank/data/ausculta/cases-auto.json" with { type: "json" };
 
 test.describe("üretim önizlemesi güvenlik kontrolleri", () => {
   test("elle yazılmış geçerli görünen oturum admin açmaz", async ({ page }) => {
@@ -24,5 +27,20 @@ test.describe("üretim önizlemesi güvenlik kontrolleri", () => {
     await page.goto("/#/_vitrin");
     await page.waitForLoadState("networkidle");
     await expect(page.getByRole("heading", { name: "Bileşen vitrini" })).toHaveCount(0);
+  });
+
+  test("T196: üretim paketi anahtarlı Ausculta vakalarını ve DEV yerel oturumunu taşımaz", () => {
+    const dir = "apps/shell/dist/assets";
+    const bundle = readdirSync(dir)
+      .filter((name) => name.endsWith(".js"))
+      .map((name) => readFileSync(`${dir}/${name}`, "utf8"))
+      .join("\n");
+    expect(bundle.length).toBeGreaterThan(0);
+    const ids = [...(auscultaCasesCore as { cases: { id: string }[] }).cases, ...(auscultaCasesAuto as { cases: { id: string }[] }).cases].map(
+      (entry) => entry.id,
+    );
+    expect(ids.length).toBeGreaterThan(100);
+    expect(ids.filter((id) => bundle.includes(`"${id}"`))).toEqual([]);
+    expect(bundle).not.toContain("createDevLocalSessionSource");
   });
 });

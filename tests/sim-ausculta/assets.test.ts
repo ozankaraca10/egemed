@@ -54,7 +54,9 @@ function collect(value: unknown, audio: Set<string>, images: Set<string>): void 
 const audio = new Set<string>();
 const images = new Set<string>();
 for (const name of JSON_NAMES) {
-  collect(JSON.parse(readFileSync(`${DATA_DIR}/${name}`, "utf8")) as unknown, audio, images);
+  // T196: anahtarlı vaka dosyaları sunucu tarafı bankadadır.
+  const dir = name.startsWith("cases") ? "packages/assessment-bank/data/ausculta" : DATA_DIR;
+  collect(JSON.parse(readFileSync(`${dir}/${name}`, "utf8")) as unknown, audio, images);
 }
 
 function missingPaths(paths: readonly string[]): string[] {

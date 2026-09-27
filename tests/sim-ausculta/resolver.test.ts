@@ -68,7 +68,7 @@ function mapCircorLocations(locationsField: string) {
 }
 
 const DATA = "packages/sim-ausculta/src/data";
-const cases = (JSON.parse(readFileSync(`${DATA}/cases.json`, "utf8")) as { cases: CaseDef[] }).cases;
+const cases = (JSON.parse(readFileSync("packages/assessment-bank/data/ausculta/cases.json", "utf8")) as { cases: CaseDef[] }).cases;
 const pointIds = (JSON.parse(readFileSync(`${DATA}/auscultation-points.json`, "utf8")) as { points: { id: string }[] }).points.map(
   (p) => p.id,
 );
