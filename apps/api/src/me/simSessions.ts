@@ -2,6 +2,7 @@ import type { Context, Hono } from "hono";
 import {
   gamiSimIdParamSchema,
   simSessionAnswerRequestSchema,
+  simSessionCheckRequestSchema,
   simSessionHintRequestSchema,
   simSessionStartRequestSchema,
   isTimedSessionMode,
@@ -67,6 +68,8 @@ export interface SimCaseState {
   answers: Record<string, string[]> | null;
   telemetry: SimTelemetry | null;
   hintedQuestions: string[];
+  /** Uygulamada kontrol edilip kilitlenen yanıtlar (qid → jetonlar). */
+  checked?: Record<string, string[]>;
   heardTokens: string[];
   timedOut: boolean;
   result: SimCaseResult | null;
@@ -298,6 +301,28 @@ export function registerSimSessionRoutes(app: Hono<AppEnv>, deps: SimSessionDeps
     return c.json({ data: { hint, hintsUsed: item.hintedQuestions.length } });
   });
 
+  /** Uygulama: tek soru kontrolü — anında geri bildirim; kontrol edilen yanıt kilitlenir. */
+  app.post("/me/sims/:simId/sessions/:sessionId/cases/:index/check", async (c) => {
+    const loaded = await loadSession(c);
+    if ("error" in loaded) return loaded.error;
+    const row = loaded.row;
+    if (row.mode !== "practice") return jsonError(c, "forbidden");
+    const index = parseIndex(c, row);
+    if (index === null) return jsonError(c, "not_found");
+    const parsed = simSessionCheckRequestSchema.safeParse(await readJson(c));
+    if (!parsed.success) return jsonError(c, "invalid_request", validationDetails(parsed.error));
+    const item = row.state.cases[index - 1] as SimCaseState;
+    if (item.openedAt === null || item.answeredAt !== null || item.keys === null) return jsonError(c, "conflict", { issues: [{ code: "case_not_open" }] });
+    const checked = item.checked ?? {};
+    if (checked[parsed.data.questionId] !== undefined) return jsonError(c, "conflict", { issues: [{ code: "question_already_checked" }] });
+    const caseDef = ausculta.caseById(item.caseId);
+    const feedback = caseDef === undefined ? null : ausculta.checkQuestion(caseDef, item.keys, parsed.data.questionId, parsed.data.answer);
+    if (feedback === null) return jsonError(c, "not_found");
+    item.checked = { ...checked, [parsed.data.questionId]: [...parsed.data.answer] };
+    await deps.sessions.save(row);
+    return c.json({ data: feedback });
+  });
+
   app.post("/me/sims/:simId/sessions/:sessionId/cases/:index/answer", async (c) => {
     const loaded = await loadSession(c);
     if ("error" in loaded) return loaded.error;
@@ -313,7 +338,8 @@ export function registerSimSessionRoutes(app: Hono<AppEnv>, deps: SimSessionDeps
     const perCase = limitsFor(row.mode).perCaseMs;
     const late = perCase !== null && at - item.openedAt > perCase + TIME_GRACE_MS;
     // Süre aşımında yanıt yok sayılır (boş yanıtla puanlanır); oturum sonraki vakayla sürer.
-    const answers = late ? {} : parsed.data.answers;
+    // Kontrol edilmiş sorularda kilitli yanıt geçerlidir (kontrolden sonra değiştirilemez).
+    const answers = late ? {} : { ...parsed.data.answers, ...(item.checked ?? {}) };
     const telemetry = late ? EMPTY_TELEMETRY : parsed.data.telemetry;
     const result = gradeItem(row, index, item, answers, telemetry);
     if (result === null) return jsonError(c, "not_found");

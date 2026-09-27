@@ -154,3 +154,25 @@ export function gradeCase(caseDef: CaseDef, keys: AuscultaCaseKeys, input: Grade
 export function hintFor(caseDef: CaseDef, questionId: string): string | null {
   return caseDef.questions.find((question) => question.id === questionId)?.hint ?? null;
 }
+
+/** Uygulamada tek soru kontrolü (anında geri bildirim; A1.4). Soru yoksa null. */
+export function checkQuestion(
+  caseDef: CaseDef,
+  keys: AuscultaCaseKeys,
+  questionId: string,
+  answer: readonly string[],
+): { readonly questionId: string; readonly correct: boolean; readonly correctOptionIds: string[]; readonly feedback: string } | null {
+  const question = caseDef.questions.find((q) => q.id === questionId);
+  if (question === undefined) return null;
+  const given = decodeAnswers(keys, { [questionId]: answer })[questionId] ?? [];
+  const correct = question.correct.length > 0 && given.length === question.correct.length && given.every((g) => question.correct.includes(g));
+  return {
+    questionId,
+    correct,
+    correctOptionIds: question.correct.flatMap((optionId) => {
+      const token = encodeOption(keys, questionId, optionId);
+      return token === null ? [] : [token];
+    }),
+    feedback: correct ? question.feedbackCorrect : question.feedbackIncorrect,
+  };
+}

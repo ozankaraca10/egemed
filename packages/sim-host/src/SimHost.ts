@@ -145,6 +145,13 @@ export interface SimSessionSource {
   start(mode: SimSessionMode): Promise<SimSession>;
   getCase(sessionId: string, index: number): Promise<AuscultaPublicCase>;
   hint(sessionId: string, index: number, questionId: string): Promise<{ readonly hint: string; readonly hintsUsed: number }>;
+  /** Yalnız uygulama: tek soruyu kontrol eder (anında geri bildirim); soru kilitlenir. */
+  check(
+    sessionId: string,
+    index: number,
+    questionId: string,
+    answer: readonly string[],
+  ): Promise<{ readonly questionId: string; readonly correct: boolean; readonly correctOptionIds: readonly string[]; readonly feedback: string }>;
   answer(
     sessionId: string,
     index: number,
