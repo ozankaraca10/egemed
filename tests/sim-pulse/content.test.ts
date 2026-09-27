@@ -1,4 +1,4 @@
-import { readFileSync } from "node:fs";
+import { readdirSync, readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { MODES, PULSE_MODE_CONTENT } from "../../packages/sim-pulse/src/index";
 
@@ -34,23 +34,20 @@ describe("Pulse vendor çıktısı (T138)", () => {
     const appVendor = readFileSync("packages/sim-pulse/src/runtime/vendor/app.js", "utf8");
     expect(appVendor).not.toContain("SCORM");
     expect(appVendor).toContain("Puan kaydedilir");
-
-    const manifest = JSON.parse(readFileSync("packages/sim-pulse/src/runtime/vendor/manifest.json", "utf8")) as {
-      patches: { file: string; id: string; matches: number }[];
-    };
-    const patch = manifest.patches.find((entry) => entry.id === "PULSE-ADR006-SCORM-TEXT");
-    expect(patch).toMatchObject({ file: "app.js", id: "PULSE-ADR006-SCORM-TEXT", matches: 1 });
   });
 
   it("sınav açıklamasında LMS'ye yazılır ifadesi yok (T160)", () => {
     const appVendor = readFileSync("packages/sim-pulse/src/runtime/vendor/app.js", "utf8");
     expect(appVendor).not.toContain("LMS’ye yazılır");
     expect(appVendor).toContain("en iyi puan kaydedilir");
+  });
 
-    const manifest = JSON.parse(readFileSync("packages/sim-pulse/src/runtime/vendor/manifest.json", "utf8")) as {
-      patches: { file: string; id: string; matches: number }[];
-    };
-    const patch = manifest.patches.find((entry) => entry.id === "PULSE-NO-LMS-QUIZ-TEXT");
-    expect(patch).toMatchObject({ file: "app.js", id: "PULSE-NO-LMS-QUIZ-TEXT", matches: 1 });
+  it("vendor platform kaynağıdır: üretilmiş dosya işareti ve manifest yok (ADR-011)", () => {
+    const dir = "packages/sim-pulse/src/runtime/vendor";
+    const files = readdirSync(dir);
+    expect(files).not.toContain("manifest.json");
+    for (const file of files) {
+      expect(readFileSync(`${dir}/${file}`, "utf8"), file).not.toContain("ÜRETİLMİŞ DOSYA");
+    }
   });
 });

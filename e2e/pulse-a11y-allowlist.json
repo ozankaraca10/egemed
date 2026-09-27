@@ -1,5 +1,5 @@
 {
-  "note": "T102/PULSE-10 — Pulse iç ekranlarında kaynaktan devralınmış erişilebilirlik borcu. Kayıtlar yalnız küçülür: düzeltilen bir kayıt testi 'düzeltildi — listeden çıkar' diye başarısız eder. T113 (host.ts EMBED_CSS): kontrast token'ları ve 44 px dokunma hedefleri düzeltildi; liste 17→5 ihlal, 55→8 küçük hedefe indi. Kalan küçük hedefler: satır içi kaynak bağlantıları (WCAG 2.5.8 satır içi istisnası; hedefi büyütmek satır akışını bozar) ve katman menüsü onay kutuları (44 px kutu kalp sahnesini örter). T136: seçenek etiketlerindeki role=radio/aria-checked sync-runtime yamasıyla kaldırıldı (anlam ve klavye yerel radyodan) — ihlal 5→0.",
+  "note": "T102/PULSE-10 — Pulse iç ekranlarında kaynaktan devralınmış erişilebilirlik borcu. Kayıtlar yalnız küçülür: düzeltilen bir kayıt testi 'düzeltildi — listeden çıkar' diye başarısız eder. T113 (host.ts EMBED_CSS): kontrast token'ları ve 44 px dokunma hedefleri düzeltildi; liste 17→5 ihlal, 55→8 küçük hedefe indi. Kalan küçük hedefler: satır içi kaynak bağlantıları (WCAG 2.5.8 satır içi istisnası; hedefi büyütmek satır akışını bozar) ve katman menüsü onay kutuları (44 px kutu kalp sahnesini örter). T136: seçenek etiketlerindeki role=radio/aria-checked vendor kaynağında kaldırıldı (ADR-011; anlam ve klavye yerel radyodan) — ihlal 5→0.",
   "violations": [],
   "smallTargets": [
     {

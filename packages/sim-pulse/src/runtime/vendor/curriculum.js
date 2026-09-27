@@ -1,5 +1,5 @@
-// ÜRETİLMİŞ DOSYA — elle düzenleme. Kaynak: EGEMED_PULSE/cardai/curriculum.js
-// Yeniden üretmek için: pnpm --filter @egemed/sim-pulse sync:runtime
+// EGEMED Pulse runtime — platform kaynağı (ADR-011). Doğrudan düzenlenir; kaynak depo artık yetkili değil.
+// Köken: EGEMED_PULSE/cardai/curriculum.js (2026-09-27 anlık görüntüsü).
 /* eslint-disable */
 export default function run(env) {
 const { window, document, localStorage, setTimeout, clearTimeout, setInterval, clearInterval, requestAnimationFrame, cancelAnimationFrame, ResizeObserver, CardAIModel, CardAIScorm, PulseCurriculum, PulseState } = env;

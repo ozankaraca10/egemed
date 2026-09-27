@@ -1,9 +1,9 @@
 /// <reference lib="dom" />
 /**
- * Pulse kaynak runtime'ını (EGEMED_PULSE/cardai) platform içinde çalıştırır.
+ * Pulse runtime'ını (`vendor/`, ADR-011 ile platform kaynağı) platform içinde
+ * çalıştırır.
  *
- * Kaynak betikler değiştirilmeden (`vendor/`, bkz. `tools/sync-runtime.mjs`)
- * bir gölge DOM kökünde çalışır. Platforma uyarlanan yalnız sınırlardır:
+ * Betikler bir gölge DOM kökünde çalışır. Platforma uyarlanan yalnız sınırlardır:
  * - DOM: `document.getElementById/querySelector*` gölge köke, `body` /
  *   `documentElement` köke ait sarmalayıcılara yönlenir; CSS gölge kökte kalır.
  * - Olaylar: `cardai:*`, `pagehide`, `pageshow` bağlama özel bir veri yolunda
