@@ -50,9 +50,9 @@ describe("Pulse screens yardımcıları", () => {
     });
     expect(view.module.name).toBe("EGEMED Pulse™");
     expect(view.module.logoUrl).toBe("/sims/pulse/assets/ege-tip-logo.png");
-    expect(view.references).toHaveLength(13);
+    expect(view.references).toHaveLength(14);
     expect(view.references.map((reference) => reference.id)).toEqual(
-      expect.arrayContaining(["BRADY2018", "ECG2007", "PERI2025", "MON2017", "PAC2019"]),
+      expect.arrayContaining(["BRADY2018", "ECG2007", "ESCPACE2021", "PERI2025", "MON2017", "PAC2019"]),
     );
     expect(view.credits[0]?.people[0]?.name).toBe("Doç. Dr. Ozan KARACA");
     expect(view.note).toBe(PULSE_SOURCES.note);

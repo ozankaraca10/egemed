@@ -138,3 +138,50 @@
 - Perikarditte yaygın ST, aVR karşılığı, PR çökmesi ve bölgesel karşılığın olmaması.
 - Hiperkalemide T/P/PR/QRS ve derivasyon farklılığı; sinüs dalgası olmaması.
 - 12 derivasyonun senkronu, Einthoven/Goldberger türetmesi ve animasyon olaylarının yalnız ilgili paternde görülmesi.
+
+## Soru havuzu 14–18 (T210)
+
+- Kapsam: Patern 14–18 için 50 uygulama + 50 değerlendirme maddesi. Havuz 200+200'den **250+250'ye (500 madde)** büyüdü; yeni maddeler mevcut kimliklerin arkasına eklenir, eski kimlikler değişmez.
+- Kimlik aralığı: uygulama `C201–C250`, değerlendirme `Q201–Q250`. Her patern 10 + 10 madde alır.
+- Bankalar: `p14_…`–`p18_…` önekli 50 bank; her bank bir uygulama ve bir değerlendirme maddesinde (toplam en fazla 2 satır, farklı kök ve soru) kullanılır. İlk satır doğru seçenektir; `seededPermutation` ile karıştırılır.
+- Motor tutarlılığı: kök ve ölçüm soruları motor parametreleriyle uyumludur — sinüs bradikardisi ≈48/dk, PR 160 ms; 1. derece AV blok ≈63/dk, PR 260 ms sabit; Mobitz I P–P 750 ms, 4:3, PR 160→220→260 ms, duraklama 1400 ms; Mobitz II P–P 800 ms, PR 180 ms sabit, QRS 120 ms; tam AV blok atriyum ≈83/dk, ventrikül ≈38/dk, kaçış QRS 140 ms, PR ölçülemez.
+- `itemMeta` (PulseCurriculum.meta): her bank için `bloom`, `difficulty`, `objective` ve `refs` (`BRADY2018`, `ECG2007`, `ESCPACE2021`; ESCPACE2021 = Glikson 2021, DOI 10.1093/eurheartj/ehab364, `sources.json`'a eklendi).
+- Zorunlu ayrımlar içerikte kapsanır: sinüs bradikardisi vs AV blok; 1. derece AV blok vs normal PR; Mobitz I vs Mobitz II; Mobitz II vs 2:1 iletim; Mobitz II vs tam AV blok; tam AV blokta AV dissosiyasyon; P:QRS ilişkisi, PR davranışı ve düşen atım mekanizması. 2:1 iletim yalnız çeldirici/ayırıcı olarak geçer ve "yalnız 2:1 iletimde tip ayrımı yüzey EKG'sinden kesin yapılamaz" biçiminde doğru tanımlanır.
+- 12 derivasyon senkronu, düşen atımın başka derivasyonda görünmemesi ve türetme ilişkileri T204 kayıtlarındaki gibidir; motor ve kartlar bu görevde değişmedi.
+
+### Patern başına madde sayıları
+
+| # | Patern | Mode | Uygulama | Değerlendirme | Banka |
+|---|---|---|---|---|---|
+| 14 | Sinüs bradikardisi | `sinbrady` | 10 (C201–C210) | 10 (Q201–Q210) | `p14_*` (10) |
+| 15 | 1. derece AV blok | `avb1` | 10 (C211–C220) | 10 (Q211–Q220) | `p15_*` (10) |
+| 16 | Mobitz Tip I | `mobitz1` | 10 (C221–C230) | 10 (Q221–Q230) | `p16_*` (10) |
+| 17 | Mobitz Tip II | `mobitz2` | 10 (C231–C240) | 10 (Q231–Q240) | `p17_*` (10) |
+| 18 | Tam AV blok | `chb` | 10 (C241–C250) | 10 (Q241–Q250) | `p18_*` (10) |
+
+### Bloom dağılımı (yeni 100 madde)
+
+| Bloom | sinbrady | avb1 | mobitz1 | mobitz2 | chb | Toplam | Hedef |
+|---|---|---|---|---|---|---|---|
+| Bilgi/anlama | 4 | 4 | 4 | 4 | 4 | 20 | ≈%20 |
+| Uygulama | 10 | 10 | 10 | 10 | 10 | 50 | ≈%50 |
+| Analiz/ayırt etme | 6 | 6 | 6 | 6 | 6 | 30 | ≈%30 |
+
+Her bank iki maddede (bir uygulama + bir değerlendirme) kullanıldığı için Bloom sayıları patern başına 2'şer banka karşılık gelir.
+
+### Otomatik QC sonuçları (T210)
+
+`tests/sim-pulse/questions-14-18.test.ts`: 12/12 test geçti. Kapsanan kontroller:
+
+- Patern başına 10 uygulama + 10 değerlendirme; toplam 100 yeni madde.
+- Mevcut 400 madde kimliği değişmez; yeni kimlikler C201–C250 / Q201–Q250.
+- Her maddede 5 benzersiz seçenek ve gerekçe; doğru indeks bankın ilk satırını gösterir.
+- Bankalar `p14_`–`p18_` önekli, benzersiz ve en fazla iki satırda kullanılır.
+- Kök+soru tam kopyası yok; aynı patern içinde kök kelime Jaccard < 0,8.
+- Yasaklı ifadelerin hiçbiri madde metinlerinde geçmez; "hepsi/hiçbiri" seçeneği yok; kökte tanı kelimesi yok.
+- Doğru seçeneğin en uzun olduğu madde oranı patern başına ≤ %40 (ölçülen: sinbrady/avb1/mobitz1/mobitz2 %0, chb %10).
+- `itemMeta` her yeni bank için dolu; `refs` kayıtları `sources.json`'da; Bloom dağılımı hedefin ±10 puanında.
+- Eski oturumlar (C001–C200 / Q001–Q200) `state.js` doğrulamasından aynen geçer; sınır kimlikleri (C200/C250) kabul edilir, sınır dışı numara yeniden örneklemeye düşer.
+- Sınırlılık metni madde sayısını dinamik taşır ("500 sentetik madde … 23 EKG sonucu").
+
+> Not: Yeni maddelerin motorla tutarlılığı ve ayırıcı tanı örüntüleri Kardiyoloji ABD onayı bekleyen T204 kaydının kapsamındadır.
