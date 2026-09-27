@@ -1,10 +1,10 @@
 /**
- * Anahtarlı Ausculta verisi (A1, ADR-009). Geçiş: A1.4'e dek JSON dosyaları sim
- * paketinde durur ve buradan okunur; A1.4 dosyaları bu pakete taşır ve sim
- * paketi yalnız öğrenme kütüphanesi alt kümesini tutar.
+ * Anahtarlı Ausculta verisi (A1, ADR-009). Vaka dosyaları (doğru yanıt, geri
+ * bildirim, ipucu) YALNIZ bu pakettedir (T196); ses manifestleri öğrenme
+ * kütüphanesi için sim paketinde kalır ve buradan okunur.
  */
-import casesJson from "../../../sim-ausculta/src/data/cases.json" with { type: "json" };
-import casesAutoJson from "../../../sim-ausculta/src/data/cases-auto.json" with { type: "json" };
+import casesJson from "../../data/ausculta/cases.json" with { type: "json" };
+import casesAutoJson from "../../data/ausculta/cases-auto.json" with { type: "json" };
 import soundsJson from "../../../sim-ausculta/src/data/sounds.json" with { type: "json" };
 import externalJson from "../../../sim-ausculta/src/data/sounds-external.json" with { type: "json" };
 import type { CaseDef, SoundsManifest } from "./types";

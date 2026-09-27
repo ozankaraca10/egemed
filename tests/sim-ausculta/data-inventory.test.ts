@@ -4,8 +4,6 @@ import { describe, expect, it } from "vitest";
 const DATA_DIR = "packages/sim-ausculta/src/data";
 const JSON_NAMES = [
   "auscultation-points.json",
-  "cases-auto.json",
-  "cases.json",
   "fixture.json",
   "library.json",
   "pediatric-reference.json",
@@ -14,8 +12,12 @@ const JSON_NAMES = [
   "sources.json",
 ] as const;
 
+/** T196: anahtarlı vaka dosyaları sunucu tarafı bankadadır. */
+const BANK_DIR = "packages/assessment-bank/data/ausculta";
+
 function load(name: string): unknown {
-  return JSON.parse(readFileSync(`${DATA_DIR}/${name}`, "utf8")) as unknown;
+  const dir = name.startsWith("cases") ? BANK_DIR : DATA_DIR;
+  return JSON.parse(readFileSync(`${dir}/${name}`, "utf8")) as unknown;
 }
 
 function recordsOf(value: unknown): readonly { id?: unknown; runtimeUrl?: unknown }[] {

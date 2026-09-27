@@ -1,5 +1,5 @@
-import casesCore from "../../packages/sim-ausculta/src/data/cases.json" with { type: "json" };
-import casesAuto from "../../packages/sim-ausculta/src/data/cases-auto.json" with { type: "json" };
+import casesCore from "../../packages/assessment-bank/data/ausculta/cases.json" with { type: "json" };
+import casesAuto from "../../packages/assessment-bank/data/ausculta/cases-auto.json" with { type: "json" };
 import type { CaseDef, Mode } from "../../packages/sim-ausculta/src/core/types";
 
 /**

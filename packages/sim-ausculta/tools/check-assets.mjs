@@ -52,9 +52,13 @@ function collect(value, audio, images) {
 
 const audio = new Set();
 const images = new Set();
-const jsonNames = readdirSync(dataDir).filter((name) => name.endsWith(".json") && name !== "fixture.json").sort();
-for (const name of jsonNames) {
-  const manifestPath = join(dataDir, name);
+// T196: anahtarlı vaka dosyaları sunucu tarafı bankadadır; ses yolları oradan da toplanır.
+const bankDir = join(packageRoot, "../assessment-bank/data/ausculta");
+const manifestPaths = [
+  ...readdirSync(dataDir).filter((name) => name.endsWith(".json") && name !== "fixture.json").map((name) => join(dataDir, name)),
+  ...readdirSync(bankDir).filter((name) => name.endsWith(".json")).map((name) => join(bankDir, name)),
+].sort();
+for (const manifestPath of manifestPaths) {
   let manifest;
   try {
     manifest = JSON.parse(readFileSync(manifestPath, "utf8"));
@@ -81,7 +85,7 @@ for (const assetPath of expected) {
 }
 
 console.log("Ausculta varlık kapısı (runtime dahil zorunlu)");
-console.log(`JSON: ${jsonNames.length} dosya, ${audio.size} ses yolu, ${images.size} görsel yolu, ${BRAND_REFERENCES.length} marka`);
+console.log(`JSON: ${manifestPaths.length} dosya, ${audio.size} ses yolu, ${images.size} görsel yolu, ${BRAND_REFERENCES.length} marka`);
 for (const [group, groupTotals] of [...totals.entries()].sort()) {
   console.log(`  ${group}: ${groupTotals.total - groupTotals.missing}/${groupTotals.total}`);
 }

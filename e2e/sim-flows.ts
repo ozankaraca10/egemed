@@ -1,8 +1,8 @@
 import { expect, type Locator } from "@playwright/test";
 import opacaCasesCore from "../packages/sim-opaca/src/data/cases.json" with { type: "json" };
 import opacaCasesAuto from "../packages/sim-opaca/src/data/cases-auto.json" with { type: "json" };
-import auscultaCasesCore from "../packages/sim-ausculta/src/data/cases.json" with { type: "json" };
-import auscultaCasesAuto from "../packages/sim-ausculta/src/data/cases-auto.json" with { type: "json" };
+import auscultaCasesCore from "../packages/assessment-bank/data/ausculta/cases.json" with { type: "json" };
+import auscultaCasesAuto from "../packages/assessment-bank/data/ausculta/cases-auto.json" with { type: "json" };
 
 /**
  * Opaca/Ausculta ortak sim akışları (T143): öğrenme → konu uygulaması → oturum sonu.
