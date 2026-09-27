@@ -99,6 +99,7 @@ function fakeSessions(mode: "practice" | "assessment", overrides: Partial<SimSes
       return { mode, total: 90, max: 100, passed: true, cases: [RESULT], xpGained: 50 };
     },
     audioUrl: (id, token) => `/api/me/sims/ausculta/sessions/${id}/audio/${token}`,
+    imageUrl: (id, token) => `/api/me/sims/ausculta/sessions/${id}/image/${token}`,
     startChallenge: async (challengeId) => {
       calls.push(`challenge:${challengeId}`);
       return { sessionId: "00000000-0000-4000-8000-00000000cdef", mode: "challenge", caseCount: 2, perCaseLimitMs: 120000, totalLimitMs: 480000, startedAt: "2026-09-27T10:00:00.000+03:00" };

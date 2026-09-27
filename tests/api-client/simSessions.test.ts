@@ -241,6 +241,15 @@ describe("api-client simSessions — başarı yolları", () => {
     expect(url).toBe(`https://api.example.invalid/me/sims/${SIM_ID}/sessions/${SESSION_ID}/audio/${TOKEN}`);
     expect(mock.calls).toHaveLength(0);
   });
+
+  it("imageUrl istek yapmaz; taban adres + yolu döner (A2.2 Opaca vekili)", () => {
+    const mock = createFetchMock([]);
+    const client = createClient(mock);
+
+    const url = client.simSessions.imageUrl("opaca", SESSION_ID, TOKEN);
+    expect(url).toBe(`https://api.example.invalid/me/sims/opaca/sessions/${SESSION_ID}/image/${TOKEN}`);
+    expect(mock.calls).toHaveLength(0);
+  });
 });
 
 describe("api-client simSessions — hata yolları", () => {
@@ -288,6 +297,13 @@ describe("api-client simSessions — hata yolları", () => {
     const client = createClient(mock);
 
     expect(() => client.simSessions.audioUrl(SIM_ID, SESSION_ID, "short")).toThrow(ApiSchemaError);
+  });
+
+  it("imageUrl geçersiz token'da ApiSchemaError fırlatır", () => {
+    const mock = createFetchMock([]);
+    const client = createClient(mock);
+
+    expect(() => client.simSessions.imageUrl("opaca", SESSION_ID, "short")).toThrow(ApiSchemaError);
   });
 
   it("sözleşme dışı yanıt ApiSchemaError fırlatır", async () => {

@@ -275,12 +275,14 @@ describe("SimHost release ve aktör bağlamı", () => {
       answer: () => Promise.reject(new Error("x")),
       finish: () => Promise.reject(new Error("x")),
       audioUrl: (id: string, token: string) => `/api/${id}/${token}`,
+      imageUrl: (id: string, token: string) => `/api/img/${id}/${token}`,
     };
     host.mount(target, "pulse", { sessions });
     await flush();
     host.mount(target, "pulse");
     await flush();
     expect(pulse.contexts[0]?.sessions?.audioUrl("s", "t")).toBe("/api/s/t");
+    expect(pulse.contexts[0]?.sessions?.imageUrl("s", "t")).toBe("/api/img/s/t");
     expect(pulse.contexts[1] !== undefined && "sessions" in pulse.contexts[1]).toBe(false);
   });
 

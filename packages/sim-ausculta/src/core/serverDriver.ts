@@ -53,6 +53,7 @@ export async function loadServerCase(
 ): Promise<void> {
   try {
     const publicCase = await sessions.getCase(sessionId, index);
+    if (publicCase.simId !== "ausculta") throw new Error("not_found");
     dispatch({ type: "serverCaseLoaded", index, clientCase: toClientCase(publicCase, mode) });
   } catch (error) {
     dispatch({ type: "serverError", message: serverErrorMessage(error) });
