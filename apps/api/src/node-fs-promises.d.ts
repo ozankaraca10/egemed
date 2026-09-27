@@ -6,4 +6,6 @@
 declare module "node:fs/promises" {
   export function mkdir(path: string, options?: { recursive?: boolean }): Promise<string | undefined>;
   export function writeFile(path: string, data: string, encoding: "utf8"): Promise<void>;
+  /** A1.3 ses vekili: dosyayı bayt olarak okur. */
+  export function readFile(path: string): Promise<Uint8Array>;
 }

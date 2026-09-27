@@ -223,6 +223,8 @@ export interface GamificationRepo {
   getSummary(query: GamiSummaryQuery): Promise<GamiSimSummaryRecord>;
   getLeaderboard(query: GamiLeaderboardQuery): Promise<GamiLeaderboardRecord>;
   writeAttempt(input: GamiAttemptInput): Promise<GamiAttemptWriteResult>;
+  /** Sunucu oturumu (A1) denemeleri için kullanıcı×sim sıradaki deneme numarası. */
+  nextAttemptNo(userId: string, simId: SimId): Promise<number>;
   getPreferences(userId: string): Promise<GamiPreferences>;
   setPreferences(userId: string, preferences: GamiPreferences, at: number): Promise<GamiPreferences>;
 }
@@ -337,6 +339,14 @@ export function createPgGamificationRepo(db: GamiDb): GamificationRepo {
         leaderboard: { rank, total },
         attempts: attemptResult.rows.map((row) => toAttemptSummaryRecord(row as GamiAttemptSummaryRow)),
       };
+    },
+
+    async nextAttemptNo(userId, simId) {
+      const result = await db.query(
+        "select coalesce(max(attempt_no), 0) + 1 as next from gami_attempts where user_id = $1 and sim_id = $2",
+        [userId, simId],
+      );
+      return Number((result.rows[0] as { readonly next?: unknown } | undefined)?.next ?? 1);
     },
 
     async writeAttempt(input) {
@@ -761,6 +771,11 @@ export function createMemoryGamificationRepo(
         leaderboard: { rank, total },
         attempts: userAttempts,
       };
+    },
+
+    async nextAttemptNo(userId, simId) {
+      const own = [...attempts.values()].filter((attempt) => attempt.userId === userId && attempt.simId === simId);
+      return own.reduce((max, attempt) => Math.max(max, attempt.attemptNo), 0) + 1;
     },
 
     async writeAttempt(input) {

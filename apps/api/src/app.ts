@@ -9,6 +9,7 @@ import { registerAdminExtrasRoutes, type AdminOverviewRepo } from "./admin/extra
 import { registerAdminImportRoutes } from "./admin/imports";
 import { registerAdminRoleRoutes } from "./admin/roles";
 import { registerAdminUserRoutes, type AdminDeps } from "./admin/users";
+import { createMemorySimSessionRepo, registerSimSessionRoutes, type SimSessionDeps } from "./me/simSessions";
 import { createMemoryRewardsRepo, registerAdminRewardRoutes, registerMeRewardRoutes, type RewardsRepo } from "./rewards";
 import { registerAuthRoutes, type AuthDeps } from "./auth/routes";
 import { registerSsoRoutes } from "./auth/sso/routes";
@@ -44,6 +45,38 @@ export interface AppDeps {
   readonly overview: AdminOverviewRepo;
   /** Aylık ödüller (26 Eyl 2026); verilmezse bellek deposu (yalnız test/DB'siz geliştirme). */
   readonly rewards?: RewardsRepo;
+  /** A1 sunucu vaka oturumu (ADR-009); verilmezse bellek deposu ve ses yok (yalnız test/DB'siz geliştirme). */
+  readonly simSessions?: Omit<SimSessionDeps, "gamification">;
+}
+
+/** WebCrypto (Node 20+ genel `crypto`); kök tsconfig DOM'suz olduğu için yapısal tip. */
+interface WebCryptoLike {
+  getRandomValues<T extends Uint32Array | Uint8Array>(array: T): T;
+  randomUUID(): string;
+}
+function webCrypto(): WebCryptoLike {
+  const value = (globalThis as { crypto?: WebCryptoLike }).crypto;
+  if (value === undefined) throw new Error("webcrypto_unavailable");
+  return value;
+}
+/** Kriptografik [0,1). */
+export function cryptoRandom(): number {
+  return (webCrypto().getRandomValues(new Uint32Array(1))[0] ?? 0) / 2 ** 32;
+}
+/** 16 bayt kriptografik rastgele, base64url opak jeton. */
+export function cryptoToken(): string {
+  const bytes = webCrypto().getRandomValues(new Uint8Array(16));
+  const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
+  // 16 bayt → 22 karakter base64url (her bayttan 6 bit alınır; 128 bit entropi korunur ~).
+  let text = "";
+  for (let i = 0; i < bytes.length; i += 3) {
+    const chunk = ((bytes[i] ?? 0) << 16) | ((bytes[i + 1] ?? 0) << 8) | (bytes[i + 2] ?? 0);
+    text += (alphabet[(chunk >> 18) & 63] ?? "") + (alphabet[(chunk >> 12) & 63] ?? "") + (alphabet[(chunk >> 6) & 63] ?? "") + (alphabet[chunk & 63] ?? "");
+  }
+  return text.slice(0, 22);
+}
+export function cryptoUuid(): string {
+  return webCrypto().randomUUID();
 }
 
 /** Gelen `x-request-id` biçimi: başlık güvenli ASCII, 8–128 karakter. */
@@ -170,6 +203,20 @@ export function createApp(deps: AppDeps): Hono<AppEnv> {
   registerMeGamificationRoutes(app, { auth: deps.auth, gamification: deps.gamification }, deps.now);
   // `/me/*` ara katmanı `registerMeGamificationRoutes` içinde bağlanır; ödül okumaları ondan sonra.
   registerMeRewardRoutes(app, { rewards }, deps.now);
+  registerSimSessionRoutes(
+    app,
+    {
+      gamification: deps.gamification,
+      ...(deps.simSessions ?? {
+        sessions: createMemorySimSessionRepo(),
+        readAudio: () => Promise.resolve(null),
+        newToken: cryptoToken,
+        random: cryptoRandom,
+        newId: () => cryptoUuid(),
+      }),
+    },
+    deps.now,
+  );
 
   app.notFound((c) => c.json(errorBody("not_found"), statusForErrorCode("not_found")));
 

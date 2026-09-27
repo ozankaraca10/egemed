@@ -143,7 +143,8 @@ export const simSessionFinishResponseSchema = z.strictObject({
     passed: z.boolean(),
     cases: z.array(caseResultSchema),
     /** Sunucunun yazdığı deneme (XP/rozet/liderlik ADR-008 yolu). */
-    attemptId: uuidSchema,
+    /** Öğretim üyesinde (oyunlaştırma yok) null. */
+    attemptId: uuidSchema.nullable(),
     xpGained: z.number().int().min(0),
   }),
 });
