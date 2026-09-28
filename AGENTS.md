@@ -21,5 +21,12 @@ Her görev tek paket/uygulama ve yaklaşık en fazla 400 satır diff hedefler. A
 ## Okuma sınırı
 `sims/*/src/data/*.json`, `sims/*/public/assets/**`, `**/dist/**`, `**/*.lock`, `reports/**` topluca okunmaz. Gerekirse sadece hedefli `head` veya `jq`. Gerçek veri veya sır içeren dosyayı ajan bağlamına alma.
 
+## Kodlama ilkeleri
+(Kaynak: forrestchang/andrej-karpathy-skills, projeye uyarlandı.) Önemsiz işlerde sağduyu kullan.
+- **Önce düşün:** Varsayımlarını açıkça yaz; birden çok yorum varsa sessizce seçme. Daha basit yol varsa söyle. Claude belirsizlikte kullanıcıya sorar; DeepSeek işçisi soramaz — varsayımını `summary.md`'ye yazar, riskli/geri dönüşsüz belirsizlikte o adımı yapmadan raporlar.
+- **Önce sadelik:** İsteneni çözen en az kod. İstenmemiş özellik, tek kullanımlık soyutlama, istenmemiş yapılandırılabilirlik, imkânsız durum için hata yönetimi yok. 200 satır 50 olabiliyorsa yeniden yaz.
+- **Cerrahi değişiklik:** Yalnız gerekeni değiştir; komşu kodu, yorumu, biçimi "iyileştirme"; bozuk olmayanı yeniden düzenleme; mevcut üsluba uy. İlgisiz ölü kodu silme, raporla. Kendi değişikliğinin kullanılmaz bıraktığı import/değişken/fonksiyonu kaldır. Her değişen satır doğrudan isteğe bağlanabilmeli.
+- **Hedefe göre yürüt:** İşi doğrulanabilir hedefe çevir ("hatayı düzelt" → önce hatayı yeniden üreten test, sonra geçir; "yeniden düzenle" → öncesi ve sonrası testler yeşil). Çok adımlı işte kısa plan: `adım → doğrulama`. Başarı ölçütü `pnpm turbo lint typecheck test` ve ilgili e2e'dir.
+
 ## Ajanlar ve iş akışı
 Claude Code planlar, işi dağıtır, gözden geçirir, test eder ve merge eder; uygulama işleri (Z1–Z4) OpenCode DeepSeek V4.1 Flash `max` ile ayrı worktree'lerde yürür, yalnız Z5 işleri Claude yazar. Merge yalnız `scripts/agtx/claude/merge-gated.sh` ile. Ayrıntılar ve süren işler: `docs/agentic/CLAUDE-DEVIR.md`. Codex Astra bağımsız denetim ve ikinci görüş verir; bulgularını raporlar, merge etmez.
