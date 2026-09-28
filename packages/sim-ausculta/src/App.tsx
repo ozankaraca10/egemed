@@ -164,7 +164,6 @@ function Shell({
     >
       <div className={`eg-sim-ausculta app-shell${doc ? " app-shell--doc" : ""}`}>
         <UnifiedChrome
-          audio={audio}
           {...(fullscreenEnv ? { fullscreen: fullscreenEnv } : {})}
           {...(modalEnv ? { modalEnv } : {})}
         />

@@ -53,7 +53,6 @@ function stubAudio(): AuscultaAudio {
     replay: async () => undefined,
     stop: () => undefined,
     setVolume: () => undefined,
-    setMuted: () => undefined,
     getActive: () => null,
     ensureContext: async () => ({
       currentTime: 0,

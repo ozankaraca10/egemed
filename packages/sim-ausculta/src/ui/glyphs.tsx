@@ -52,16 +52,6 @@ export function IconVolume(props: IconProps) {
   );
 }
 
-export function IconVolumeX(props: IconProps) {
-  return (
-    <svg {...base(props)}>
-      <path d="M11 5 6 9H3v6h3l5 4z" />
-      <path d="M22 9l-6 6" />
-      <path d="M16 9l6 6" />
-    </svg>
-  );
-}
-
 export function IconLightbulb(props: IconProps) {
   return (
     <svg {...base(props)}>
