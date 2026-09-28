@@ -444,7 +444,7 @@ export const PatientStage = forwardRef<StageHandle, PatientStageProps>(function 
     if (!path || box.w <= 0 || box.h <= 0) return;
     const size = { w: box.w, h: box.h };
     const anchor = tubeAnchor(size);
-    const tip = tubeTip({ x: posRef.current.x * size.w, y: posRef.current.y * size.h }, anchor);
+    const tip = tubeTip({ x: posRef.current.x * size.w, y: posRef.current.y * size.h });
     const d = tubePath(anchor, tip, size);
     path.setAttribute("d", d);
     asPath(tubeShineRef.current)?.setAttribute("d", d);
@@ -662,9 +662,12 @@ export const PatientStage = forwardRef<StageHandle, PatientStageProps>(function 
               className="tube-fork"
               transform={`translate(${(box.w * TUBE_ANCHOR_RATIO.x).toFixed(1)} ${(box.h * TUBE_ANCHOR_RATIO.y).toFixed(1)})`}
             >
-              <line x1={0} y1={0} x2={-11} y2={-4.5} stroke="#1f2b38" strokeWidth={5} strokeLinecap="round" />
-              <line x1={0} y1={0} x2={-4.5} y2={-11} stroke="#1f2b38" strokeWidth={5} strokeLinecap="round" />
-              <circle cx={0} cy={0} r={4.6} fill="#1f2b38" />
+              {/* Y-parça: iki kulak borusu yukarı ayrılır, gövde aşağı iner. */}
+              <path d="M 0 0 L -10 -16 L -12 -30" fill="none" stroke="#1f2b38" strokeWidth={5} strokeLinecap="round" strokeLinejoin="round" />
+              <path d="M 0 0 L 10 -16 L 12 -30" fill="none" stroke="#1f2b38" strokeWidth={5} strokeLinecap="round" strokeLinejoin="round" />
+              <circle cx={-12} cy={-31} r={3.6} fill="#5b6b7a" />
+              <circle cx={12} cy={-31} r={3.6} fill="#5b6b7a" />
+              <rect x={-4.5} y={-5} width={9} height={11} rx={3} fill="#3d4854" />
             </g>
           </svg>
           <div

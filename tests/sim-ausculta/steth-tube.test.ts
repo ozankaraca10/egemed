@@ -5,6 +5,7 @@ import {
   tubeAnchor,
   tubePath,
   tubeTip,
+  TUBE_ATTACH_DIR,
 } from "../../packages/sim-ausculta/src/index";
 
 /** T228 — stetoskop ses iletim tüpü saf geometrisi. */
@@ -36,7 +37,7 @@ describe("stetoskop tüpü geometrisi (T228)", () => {
     expect(anchor.x).toBeCloseTo(size.w * TUBE_ANCHOR_RATIO.x, 5);
     expect(anchor.y).toBeCloseTo(size.h * TUBE_ANCHOR_RATIO.y, 5);
 
-    const tip = tubeTip({ x: 200, y: 230 }, anchor);
+    const tip = tubeTip({ x: 200, y: 230 });
     const parsed = parseTube(tubePath(anchor, tip, size));
     expect(parsed.start.x).toBeCloseTo(anchor.x, 1);
     expect(parsed.start.y).toBeCloseTo(anchor.y, 1);
@@ -47,27 +48,34 @@ describe("stetoskop tüpü geometrisi (T228)", () => {
   it("uç göğüs parçası kenarına yarıçap kadar uzaklıkta oturur", () => {
     const anchor = tubeAnchor(size);
     const center = { x: 240, y: 220 };
-    const tip = tubeTip(center, anchor);
+    const tip = tubeTip(center);
     expect(Math.hypot(tip.x - center.x, tip.y - center.y)).toBeCloseTo(TUBE_CHESTPIECE_RADIUS, 5);
+    // T231: bağlantı daima sol alt 45° (−x, +y) — anchor nerede olursa olsun.
+    expect(tip.x).toBeLessThan(center.x);
+    expect(tip.y).toBeGreaterThan(center.y);
+    expect(center.x - tip.x).toBeCloseTo(tip.y - center.y, 5);
+    void anchor;
   });
 
-  it("kontrol noktaları mesafeyle orantılı aşağı sarkar", () => {
+  it("bağlantıdan dikey sarkar, uca 45° doğrultusunda girer", () => {
     const anchor = tubeAnchor(size);
-    const tip = tubeTip({ x: 220, y: 230 }, anchor);
+    const tip = tubeTip({ x: 220, y: 230 });
     const parsed = parseTube(tubePath(anchor, tip, size));
+    expect(parsed.c1.x).toBeCloseTo(anchor.x, 1);
     expect(parsed.c1.y).toBeGreaterThan(anchor.y);
+    // c2, uçtan sol alt 45° doğrultusunda
+    expect(parsed.c2.x).toBeLessThan(tip.x);
     expect(parsed.c2.y).toBeGreaterThan(tip.y);
-    // Yol sahnenin altına taşmaz; sarkma tavanı sahne yüksekliğiyle sınırlıdır.
+    expect(tip.x - parsed.c2.x).toBeCloseTo(parsed.c2.y - tip.y, 0);
+    expect(TUBE_ATTACH_DIR).toEqual({ x: -Math.SQRT1_2, y: Math.SQRT1_2 });
     expect(parsed.c1.y).toBeLessThanOrEqual(size.h);
     expect(parsed.c2.y).toBeLessThanOrEqual(size.h);
   });
 
-  it("yakın uçlar NaN üretmez ve uç bağlantıya çekilir", () => {
+  it("yakın uçlar NaN üretmez", () => {
     const anchor = tubeAnchor(size);
     const center = { x: anchor.x + 6, y: anchor.y + 8 };
-    const tip = tubeTip(center, anchor);
-    expect(tip.x).toBeCloseTo(anchor.x, 5);
-    expect(tip.y).toBeCloseTo(anchor.y, 5);
+    const tip = tubeTip(center);
 
     const parsed = parseTube(tubePath(anchor, tip, size));
     for (const point of [parsed.start, parsed.c1, parsed.c2, parsed.end]) {
