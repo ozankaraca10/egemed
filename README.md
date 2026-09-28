@@ -37,7 +37,7 @@ yönetici `#/giris/admin` → `admin` / `egemed`; test öğrencisi `#/giris/test
 | `apps/api` | Hono + PostgreSQL API (ADR-002): migration'lar (`migrations/`; append-only denetim tetikleyicisi), oturum/CSRF, admin uçları (`/admin/users`, toplu işlem, CSV içe aktarma, rol, `/admin/audit`), `/me/gamification` (sim erişimi, sunucu XP'si ve rozet değerlendirmesi; migration 005 + ADR-008), `/me/preferences` (liderlik görünürlüğü; migration 006), `migrate:up` ve `seed:admin`; SSO adaptör iskeleti | SSO protokolü kararı bekliyor |
 | `packages/sim-host` | **SimHost sözleşmesi**: `mount(target, context) → dispose`, lazy yükleme, epoch iptali, tek etkin oturum, birleşik bar kanalı (`SimChrome`/`setChrome`) | Tüm simler bu sözleşmeyle bağlanır |
 | `packages/sim-opaca` | Opaca modülü: çekirdek, veri, UI ve SimHost adaptörü | Kabukta canlı; röntgen `public/assets/xray/runtime/` git dışı, `sync:xray` ile yerel kaynaktan alınır |
-| `packages/sim-pulse` | Pulse modülü: kaynak runtime (`src/runtime/host.ts`, `module.ts`, `chrome.ts`, `gami.ts`, `vendor/`) ile EKG motoru, durum ve müfredat; eski `src/mount.ts` + `ui/*` ekranları kabukta kullanılmıyor | Kabukta canlı; vendor dosyaları `pnpm --filter @egemed/sim-pulse sync:runtime` ile kaynaktan üretilir |
+| `packages/sim-pulse` | Pulse modülü: kaynak runtime (`src/runtime/host.ts`, `module.ts`, `chrome.ts`, `gami.ts`, `vendor/`) ile EKG motoru, durum ve müfredat; eski `src/mount.ts` + `ui/*` ekranları kabukta kullanılmıyor | Kabukta canlı; vendor dosyaları platform kaynağıdır ve doğrudan düzenlenir (ADR-011) |
 | `packages/sim-ausculta` | Ausculta modülü: çekirdek, ses motoru, store/runtime, UI, ekranlar ve SimHost adaptörü | Kabukta canlı; ses varlıkları git dışı, `sync:audio` ile yerel kaynaktan alınır |
 | `packages/gamification-core` | **Sim-bağımsız oyunlaştırma çekirdeği**: XP, seviye, seri, haftalık hedef, zaman (Europe/Istanbul), jenerik rozet motoru, sıralama, ödül, grafik | Rozet kataloğu ve kurallar her simde ayrı (parametre) |
 | `packages/gami-catalogs` | Sime özgü rozet katalogları, kuralları ve kodlu deneme özeti/istatistiği (ADR-008; Pulse, Opaca, Ausculta); simler ve API aynı paketi kullanır | S2 (Ausculta kataloğu) tamamlandı (T109) |
@@ -75,7 +75,7 @@ yönetici `#/giris/admin` → `admin` / `egemed`; test öğrencisi `#/giris/test
   içermez (vanilla modül güvenle `appendChild`/temizlik yapar). Birleşik bar kararıyla (25 Eylül) sim rotasında bar EGEMED barıdır:
   simler adım/çip/eylemlerini `SimHost` kanalıyla (`setChrome`, `SimChrome`) kabuğa yazar; Pulse kaynağının açılış sayfası atlanır
   ve kaynak üst çubuğu/footer'ı gizlenir (`packages/sim-pulse/src/runtime/chrome.ts`). Kaynak Pulse'un ilk girişte açtığı kalıcı tam
-  ekran önerisi (popup) platformda hiç açılmaz (25 Eylül kararı, T139; kaynak yaması `vendor/manifest.json`
+  ekran önerisi (popup) platformda hiç açılmaz (25 Eylül kararı, T139; ADR-011 sonrası doğrudan vendor kaynağında
   `EGEMED-NO-FULLSCREEN-PROMPT`, `landing.js`); tam ekran yalnız birleşik bardaki ikondan tetiklenir.
 - **Kimlik ve veri (ADR-007, Kabul):** EGEMED kullanıcı kaydı tutar; kullanıcıları admin kaydeder (tek tek ve toplu CSV); giriş tipi
   **SSO** (protokol henüz belirlenmedi; o zamana kadar geliştirme sağlayıcısı). EGEMED parola saklamaz. Roller şimdilik yalnız
@@ -188,6 +188,8 @@ uygulanması.
 
 ## 6. Çalışma biçimi (ajanlar ve insanlar)
 
+Claude Code devir notu: `docs/agentic/CLAUDE-DEVIR.md`.
+
 - **Görev = tek paket, ~400 satır diff.** Her görev kendi worktree'sinde (`.agtx/worktrees/<Txx>`, dal `task/<Txx>`), artefaktlar
   git dışı `.egemed-run/{plan,summary,review}.md`. Aynı pakette eşzamanlı iki görev açılmaz.
 - **Kapı:** `pnpm turbo lint typecheck test` + `git diff --check`; kabuk görevlerinde ek olarak `pnpm e2e:mobile`.
@@ -215,8 +217,7 @@ uygulanması.
   Kayıtlar kullanıcı×sim ad alanında tutulur (`egemed:u:<actorId>:opaca:`; anonimde `egemed:anon:opaca:`).
 - **Pulse:** kabukta canlı (`#/sims/pulse`); platform kaynak runtime'ı EGEMED_PULSE/cardai betiklerini değiştirmeden gölge DOM'da
   çalıştırır (`packages/sim-pulse/src/runtime/host.ts`, `module.ts`, `vendor/`). Vendor dosyaları
-  `pnpm --filter @egemed/sim-pulse sync:runtime` ile kaynaktan üretilir; kaynaktan bilinçli sapmalar yalnız
-  `vendor/manifest.json`'daki yamalardır. Oyunlaştırma köprüsü (`src/runtime/gami.ts`) kaynağın kendi kayıt çağrısını izler;
+  platform kaynağıdır (ADR-011); kaynak depodan senkron ve `manifest.json` yama listesi kaldırıldı. Oyunlaştırma köprüsü (`src/runtime/gami.ts`) kaynağın kendi kayıt çağrısını izler;
   görünür tek ek, birleşik bardaki **İlerlemem** eylemi/diyaloğu ve sonuç ekranındaki kazanım kartıdır. Kaynağın yerel liderlik
   tablosu demo akran verisi içerdiği için gösterilmez (gerçek sıralama API'den gelecektir). Kayıtlar kullanıcı×sim ad alanında
   tutulur (`egemed:u:<actorId>:pulse:`; anonimde `egemed:anon:pulse:`) ve SimHost `release(token)` ertelenen temizliğin yeni mount'u
