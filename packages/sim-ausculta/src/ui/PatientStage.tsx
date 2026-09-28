@@ -36,7 +36,7 @@ import {
   type StageCoordPoint,
   type StageRect,
 } from "./patient-stage/geometry";
-import { TUBE_ANCHOR_RATIO, tubeAnchor, tubePath, tubeTip } from "./patient-stage/tube";
+import { tubeAnchor, tubeHeadsetHeight, tubePath, tubeTip } from "./patient-stage/tube";
 
 export interface StagePoint extends StageCoordPoint {
   readonly label: string;
@@ -658,17 +658,24 @@ export const PatientStage = forwardRef<StageHandle, PatientStageProps>(function 
               opacity={0.45}
               transform="translate(-1.4 -1.4)"
             />
-            <g
-              className="tube-fork"
-              transform={`translate(${(box.w * TUBE_ANCHOR_RATIO.x).toFixed(1)} ${(box.h * TUBE_ANCHOR_RATIO.y).toFixed(1)})`}
-            >
-              {/* Y-parça: iki kulak borusu yukarı ayrılır, gövde aşağı iner. */}
-              <path d="M 0 0 L -10 -16 L -12 -30" fill="none" stroke="#1f2b38" strokeWidth={5} strokeLinecap="round" strokeLinejoin="round" />
-              <path d="M 0 0 L 10 -16 L 12 -30" fill="none" stroke="#1f2b38" strokeWidth={5} strokeLinecap="round" strokeLinejoin="round" />
-              <circle cx={-12} cy={-31} r={3.6} fill="#5b6b7a" />
-              <circle cx={12} cy={-31} r={3.6} fill="#5b6b7a" />
-              <rect x={-4.5} y={-5} width={9} height={11} rx={3} fill="#3d4854" />
-            </g>
+            {(() => {
+              const size = { w: box.w || 0, h: box.h || 0 };
+              const at = tubeAnchor(size);
+              const k = tubeHeadsetHeight(size) / 100;
+              return (
+                <g className="tube-fork" transform={`translate(${at.x.toFixed(1)} ${at.y.toFixed(1)}) scale(${k.toFixed(3)})`}>
+                  {/* Gerçek oranlı kulaklık (birim yükseklik 100): Y-parça lastik kolları,
+                      metal kulak boruları, yay köprüsü ve kulak uçları. */}
+                  <path d="M 0 0 L -12 -26 M 0 0 L 12 -26" fill="none" stroke="#1f2b38" strokeWidth={7} strokeLinecap="round" vectorEffect="non-scaling-stroke" />
+                  <path d="M -12 -26 C -20 -50 -34 -78 -26 -95 M 12 -26 C 20 -50 34 -78 26 -95" fill="none" stroke="#98a6b3" strokeWidth={4.5} strokeLinecap="round" vectorEffect="non-scaling-stroke" />
+                  <path d="M -12 -26 C -20 -50 -34 -78 -26 -95 M 12 -26 C 20 -50 34 -78 26 -95" fill="none" stroke="#eef1f4" strokeWidth={1.4} strokeLinecap="round" opacity={0.7} vectorEffect="non-scaling-stroke" />
+                  <path d="M -17 -40 Q 0 -44 17 -40" fill="none" stroke="#7d8b98" strokeWidth={3} strokeLinecap="round" vectorEffect="non-scaling-stroke" />
+                  <ellipse cx={-23} cy={-97} rx={6.5} ry={4.6} transform="rotate(-25 -23 -97)" fill="#2b3642" />
+                  <ellipse cx={23} cy={-97} rx={6.5} ry={4.6} transform="rotate(25 23 -97)" fill="#2b3642" />
+                  <rect x={-5} y={-6} width={10} height={12} rx={3} fill="#3d4854" />
+                </g>
+              );
+            })()}
           </svg>
           <div
             ref={(node) => {

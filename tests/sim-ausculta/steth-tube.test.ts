@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
-  TUBE_ANCHOR_RATIO,
+  HEADSET_TO_CHESTPIECE,
+  tubeHeadsetHeight,
   TUBE_CHESTPIECE_RADIUS,
   tubeAnchor,
   tubePath,
@@ -34,8 +35,10 @@ describe("stetoskop tüpü geometrisi (T228)", () => {
 
   it("bağlantı sabit oranda, uçlar path uçlarıyla birebir", () => {
     const anchor = tubeAnchor(size);
-    expect(anchor.x).toBeCloseTo(size.w * TUBE_ANCHOR_RATIO.x, 5);
-    expect(anchor.y).toBeCloseTo(size.h * TUBE_ANCHOR_RATIO.y, 5);
+    // T232: bağlantı kulaklığın hemen altında; kulaklık gerçek oranlı, sahneye sığar.
+    expect(anchor.y).toBeCloseTo(tubeHeadsetHeight(size) + 10, 5);
+    expect(tubeHeadsetHeight({ w: 900, h: 900 })).toBeCloseTo(HEADSET_TO_CHESTPIECE * 2 * TUBE_CHESTPIECE_RADIUS, 5);
+    expect(tubeHeadsetHeight(size)).toBeLessThanOrEqual(size.h * 0.42);
 
     const tip = tubeTip({ x: 200, y: 230 });
     const parsed = parseTube(tubePath(anchor, tip, size));
@@ -89,6 +92,8 @@ describe("stetoskop tüpü geometrisi (T228)", () => {
     const zero = { w: 0, h: 0 };
     const d = tubePath({ x: 0, y: 0 }, { x: 0, y: 0 }, zero);
     expect(d).not.toMatch(/NaN/);
-    expect(tubeAnchor(zero)).toEqual({ x: 0, y: 0 });
+    const zeroAnchor = tubeAnchor(zero);
+    expect(Number.isFinite(zeroAnchor.x) && Number.isFinite(zeroAnchor.y)).toBe(true);
+    expect(tubeHeadsetHeight(zero)).toBe(0);
   });
 });

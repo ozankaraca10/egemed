@@ -13,8 +13,18 @@ export interface TubeSize {
   readonly h: number;
 }
 
-/** Sabit bağlantı noktası — sahnenin sol kenarı, üstten biraz aşağıda (gövde sahnesi oranı). */
-export const TUBE_ANCHOR_RATIO = { x: 0.06, y: 0.12 } as const;
+/** Kulaklık (çatal) bölümünün göğüs parçası çapına oranı: gerçek stetoskopta
+ *  ~4,5 cm göğüs parçasına karşı ~15 cm Y-parça + kulak boruları + kulak uçları. */
+export const HEADSET_TO_CHESTPIECE = 3.2;
+
+/** Küçük sahnede kulaklık sahne yüksekliğinin bu oranını aşmaz. */
+const HEADSET_MAX_STAGE_RATIO = 0.42;
+
+/** Kulaklık yüksekliği (px): gerçek oran, sahneye sığacak şekilde sınırlı. */
+export function tubeHeadsetHeight(size: TubeSize): number {
+  const real = HEADSET_TO_CHESTPIECE * 2 * TUBE_CHESTPIECE_RADIUS;
+  return Math.max(0, Math.min(real, size.h * HEADSET_MAX_STAGE_RATIO));
+}
 
 /** Göğüs parçası yarıçapı (px): `.steth` 76 px kutu, merkez hizalı. */
 export const TUBE_CHESTPIECE_RADIUS = 38;
@@ -36,9 +46,10 @@ function clamp(value: number, min: number, max: number): number {
   return Math.min(Math.max(value, min), Math.max(min, max));
 }
 
-/** Sabit bağlantı noktasının sahne koordinatı. */
+/** Sabit bağlantı (Y-parça) noktası: sol kenarda, kulaklığın hemen altında. */
 export function tubeAnchor(size: TubeSize): TubePoint {
-  return { x: size.w * TUBE_ANCHOR_RATIO.x, y: size.h * TUBE_ANCHOR_RATIO.y };
+  const head = tubeHeadsetHeight(size);
+  return { x: Math.max(size.w * 0.06, head * 0.34 + 8), y: head + 10 };
 }
 
 /** Göğüs parçası kenarında sol alt 45° bağlantı noktası. */

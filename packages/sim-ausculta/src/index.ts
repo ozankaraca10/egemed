@@ -166,7 +166,8 @@ export {
 } from "./ui/patient-stage/geometry";
 export type { BodyType, NormPoint, StageBox, StageCoordPoint, StageRect, StageViewConfig } from "./ui/patient-stage/geometry";
 export {
-  TUBE_ANCHOR_RATIO,
+  HEADSET_TO_CHESTPIECE,
+  tubeHeadsetHeight,
   TUBE_CHESTPIECE_RADIUS,
   TUBE_ATTACH_DIR,
   tubeAnchor,
