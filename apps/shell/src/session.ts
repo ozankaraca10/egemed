@@ -14,6 +14,25 @@ export interface ShellSession {
   readonly simAccess: readonly SimId[] | null;
   /** Öğretim üyesi rolü (T171): simleri tam kullanır, oyunlaştırmaya katılmaz. Sahte oturumda yok. */
   readonly faculty?: boolean;
+  /** Uzmanlık öğrencisi rolü (T219): oyunlaştırmada öğretim üyesi gibi davranır. Sahte oturumda yok. */
+  readonly resident?: boolean;
+}
+
+/**
+ * Öğretim üyesi görünümü (T171 + T219): öğretim üyesi ve uzmanlık öğrencisi
+ * simleri tam içerikle kullanır; sim ve kabuk oyunlaştırma yüzeyleri gösterilmez.
+ */
+export function isFacultyLike(session: ShellSession | null | undefined): boolean {
+  return session?.faculty === true || session?.resident === true;
+}
+
+/**
+ * Öğrenme kilidi muafiyeti (T219, depo sahibi kararı 28 Eyl 2026): admin,
+ * öğretim üyesi ve uzmanlık öğrencisi rollerinde sime verilen öğrenme portu
+ * tamamlanmış sayılır; sunucuya kayıt yazılmaz.
+ */
+export function isLearnUnlocked(session: ShellSession | null | undefined): boolean {
+  return session?.role === "admin" || isFacultyLike(session);
 }
 
 /** Sahte depodan okunan oturumun en dar yüzeyi (`devAuth.DevSession` yapısal olarak uyar). */
@@ -62,5 +81,6 @@ export function shellSessionFromMe(me: {
     role: shellRoleFromApiRoles(me.roles),
     simAccess: [...me.simAccess],
     faculty: me.roles.some((entry) => entry.role === "ogretim_uyesi"),
+    resident: me.roles.some((entry) => entry.role === "uzmanlik_ogrencisi"),
   };
 }

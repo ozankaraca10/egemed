@@ -309,6 +309,9 @@ describe("i18n/tr sözlüğü", () => {
     expect(t("admin.users.title")).toBe("Kullanıcılar");
     expect(t("admin.users.role.admin")).toBe("Yönetici");
     expect(t("admin.users.role.kullanici")).toBe("Kullanıcı");
+    expect(t("admin.users.role.ogretim_uyesi")).toBe("Öğretim üyesi");
+    expect(t("admin.users.role.uzmanlik_ogrencisi")).toBe("Uzmanlık öğrencisi");
+    expect(t("shell.account.role.resident")).toBe("Uzmanlık öğrencisi");
     expect(t("admin.users.status.invited")).toBe("Davetli");
     expect(t("admin.users.status.active")).toBe("Etkin");
     expect(t("admin.users.status.suspended")).toBe("Askıda");

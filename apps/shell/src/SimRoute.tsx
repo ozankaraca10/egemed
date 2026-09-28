@@ -6,7 +6,7 @@ import { challengeHref, routeHref, simTitleKey } from "./routes";
 import { createBrowserAttemptReporter, createBrowserGamification, type ReportedAttempt } from "./reportAttempt";
 import { loadSimModule } from "./sims/loaders";
 import { SERVER_SESSION_SIMS, createBrowserSessionSource } from "./sims/sessionSources";
-import { createBrowserLearnSource, createLearnPort } from "./learn/learnSource";
+import { createBrowserLearnSource, createLearnPort, createUnlockedLearnPort } from "./learn/learnSource";
 import type { SimLearnPort, SimSessionSource } from "@egemed/sim-host";
 
 /**
@@ -28,10 +28,13 @@ async function sessionSourceFor(simId: SimulatorId, audience: string, apiBaseUrl
  * Öğrenme tamamlama kanalı (27 Eyl 2026): API oturumunda kayıt sunucudan
  * okunur ve sunucuya yazılır; API yoksa YALNIZ geliştirmede sekme deposuna
  * yazan yerel port kurulur. Ziyaretçide kanal verilmez (yalnız öğrenme modunu
- * görür). `import.meta.env.DEV` kapısı dev kodunu üretim paketinden eler.
+ * görür). Ayrıcalıklı rollerde (admin, öğretim üyesi, uzmanlık öğrencisi;
+ * T219) kilit uygulanmaz: kanal her zaman tamamlanmış görünür ve sunucuya
+ * yazmaz. `import.meta.env.DEV` kapısı dev kodunu üretim paketinden eler.
  */
-async function learnPortFor(simId: SimulatorId, audience: string, apiBaseUrl: string | null): Promise<SimLearnPort | null> {
+async function learnPortFor(simId: SimulatorId, audience: string, apiBaseUrl: string | null, unlocked: boolean): Promise<SimLearnPort | null> {
   if (audience === "visitor") return null;
+  if (unlocked) return createUnlockedLearnPort();
   if (apiBaseUrl !== null) {
     const source = createBrowserLearnSource(apiBaseUrl);
     if (source === null) return null;
@@ -64,6 +67,11 @@ export interface SimRouteProps {
   readonly apiBaseUrl?: string | null;
   /** API oturumunda sim `simAccess` dışında ise modül mount edilmez. */
   readonly allowed?: boolean;
+  /**
+   * Öğrenme kilidi muafiyeti (T219): admin, öğretim üyesi ve uzmanlık
+   * öğrencisi rollerinde sime verilen `learn` portu tamamlanmış sayılır.
+   */
+  readonly learnUnlocked?: boolean;
   /** Birleşik bar kanalı: simin adım/çip/eylemleri kabuğun üst barına gider. */
   readonly onChrome?: ((chrome: SimChrome | null) => void) | undefined;
   /** Kitle (26 Eyl 2026): öğrenci / öğretim üyesi / ziyaretçi; yoksa öğrenci. */
@@ -169,7 +177,7 @@ export function SimErrorNotice({ onRetry }: SimErrorNoticeProps): JSX.Element {
  * kutusu host'un kardeşidir; yükleniyor/hata sırasında host gizlenmez, boş
  * kalır ve aşama ızgarasında aynı hücreyi paylaşır.
  */
-export function SimRoute({ actorId, allowed = true, apiBaseUrl = null, audience, challengeId, onChrome, onRequestSignIn, simId }: SimRouteProps): JSX.Element {
+export function SimRoute({ actorId, allowed = true, apiBaseUrl = null, audience, challengeId, learnUnlocked = false, onChrome, onRequestSignIn, simId }: SimRouteProps): JSX.Element {
   if (!allowed) return <SimAccessDenied />;
   return (
     <SimRouteHost
@@ -177,6 +185,7 @@ export function SimRoute({ actorId, allowed = true, apiBaseUrl = null, audience,
       actorId={actorId}
       apiBaseUrl={apiBaseUrl}
       audience={audience}
+      learnUnlocked={learnUnlocked}
       onChrome={onChrome}
       onRequestSignIn={onRequestSignIn}
       simId={simId}
@@ -184,7 +193,7 @@ export function SimRoute({ actorId, allowed = true, apiBaseUrl = null, audience,
   );
 }
 
-function SimRouteHost({ actorId, apiBaseUrl = null, audience = "student", challengeId, onChrome, onRequestSignIn, simId }: Omit<SimRouteProps, "allowed">): JSX.Element {
+function SimRouteHost({ actorId, apiBaseUrl = null, audience = "student", challengeId, learnUnlocked, onChrome, onRequestSignIn, simId }: Omit<SimRouteProps, "allowed">): JSX.Element {
   // Kanal ref'te tutulur: üst bileşen yeniden çizilince sim yeniden mount edilmez.
   const chromeRef = useRef(onChrome);
   chromeRef.current = onChrome;
@@ -226,7 +235,7 @@ function SimRouteHost({ actorId, apiBaseUrl = null, audience = "student", challe
             };
       const gamification = apiBaseUrl === null || !gamified ? null : createBrowserGamification(apiBaseUrl, simId);
       const sessions = await sessionSourceFor(simId, audience, apiBaseUrl);
-      const learn = await learnPortFor(simId, audience, apiBaseUrl);
+      const learn = await learnPortFor(simId, audience, apiBaseUrl, learnUnlocked === true);
       const options = {
         ...(actorId === undefined ? {} : { actorId }),
         ...(reportAttempt === undefined ? {} : { reportAttempt }),
@@ -262,7 +271,7 @@ function SimRouteHost({ actorId, apiBaseUrl = null, audience = "student", challe
       void mounted.then((token) => host.release(token));
       chromeRef.current?.(null);
     };
-  }, [simId, actorId, apiBaseUrl, audience, challengeId, attempt]);
+  }, [simId, actorId, apiBaseUrl, audience, challengeId, learnUnlocked, attempt]);
 
   // Başlık (h1) ve konum birleşik bardadır; sim tam alanı çerçevesiz kaplar.
   return (

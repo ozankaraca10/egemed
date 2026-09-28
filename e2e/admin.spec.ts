@@ -94,8 +94,8 @@ async function expectStep(page: Page, label: string): Promise<void> {
   await expect(currentStep(page)).toContainText(label);
 }
 
-/** Ekle formunu geçerli değerlerle doldurur; rol seçilmezse varsayılan `kullanici` kalır (T184). */
-async function fillCreateUserForm(dialog: Locator, username: string, role?: "Kullanıcı" | "Öğretim üyesi"): Promise<void> {
+/** Ekle formunu geçerli değerlerle doldurur; rol seçilmezse varsayılan `kullanici` kalır (T184/T219). */
+async function fillCreateUserForm(dialog: Locator, username: string, role?: "Kullanıcı" | "Öğretim üyesi" | "Uzmanlık öğrencisi"): Promise<void> {
   const textInputs = dialog.locator('input[type="text"]');
   await textInputs.nth(0).fill(username);
   await textInputs.nth(1).fill("Örnek Kullanıcı T75");
@@ -260,6 +260,19 @@ test.describe("kullanıcı ekle (E3 §e.2)", () => {
     await dialog.getByRole("button", { name: "Onayla" }).click();
     await expect(page).toHaveURL(/#\/admin\/kullanicilar$/);
   });
+
+  test("uzmanlık öğrencisi rolüyle kullanıcı oluşturma (T219)", async ({ page }) => {
+    await signInAsAdmin(page);
+    await openAdmin(page, USER_CREATE);
+    const dialog = page.getByRole("dialog");
+    await fillCreateUserForm(dialog, "yeni.uzmanlik.ogrencisi.t219", "Uzmanlık öğrencisi");
+    await dialog.getByRole("button", { name: "Kaydet" }).click();
+    await expect(dialog.getByRole("heading", { name: "Kullanıcıyı oluştur" })).toBeVisible();
+    // Onay adımı özetinde seçilen rol "Uzmanlık öğrencisi" olarak görünür.
+    await expect(dialog.getByText("Uzmanlık öğrencisi")).toBeVisible();
+    await dialog.getByRole("button", { name: "Onayla" }).click();
+    await expect(page).toHaveURL(/#\/admin\/kullanicilar$/);
+  });
 });
 
 test.describe("kullanıcı ayrıntı/düzenle (E3 §e.3)", () => {
@@ -311,8 +324,11 @@ test.describe("roller ve erişim (E3 §e.6)", () => {
     ).toBeVisible();
     await expect(page.getByText("6 kullanıcı")).toBeVisible();
     await expect(page.getByText("234 kullanıcı")).toBeVisible();
-    // T184: üçüncü rol kartı (öğretim üyesi); mock veride henüz kimse bu rolde değildir.
-    await expect(page.getByText("0 kullanıcı")).toBeVisible();
+    // T184/T219: öğretim üyesi ve uzmanlık öğrencisi kartları; mock veride henüz
+    // kimse bu rollerde değildir (iki kart da "0 kullanıcı" taşır).
+    await expect(page.locator(".eg-shell-roles__cards").getByText("Öğretim üyesi")).toBeVisible();
+    await expect(page.locator(".eg-shell-roles__cards").getByText("Uzmanlık öğrencisi")).toBeVisible();
+    await expect(page.locator(".eg-shell-roles__count").filter({ hasText: "0 kullanıcı" })).toHaveCount(2);
     await expect(page.getByText("Pulse: 172 kullanıcı")).toBeVisible();
     await expect(page.getByText("Ausculta: 154 kullanıcı")).toBeVisible();
     await expect(page.getByText("Opaca: 171 kullanıcı")).toBeVisible();
@@ -373,6 +389,22 @@ test.describe("roller ve erişim (E3 §e.6)", () => {
     await revokeFaculty.getByRole("button", { name: "Kullanıcı yap" }).click();
     await expect(roleBadges.getByText("Öğretim üyesi")).toHaveCount(0);
     await expect(panel.getByRole("button", { name: "Öğretim üyesi yap" })).toBeVisible();
+
+    // T219: uzmanlık öğrencisi ↔ kullanıcı (temel rol) geçişi; admin biti korunur.
+    await panel.getByRole("button", { name: "Uzmanlık öğrencisi yap" }).click();
+    const grantResident = page.getByRole("dialog");
+    await expect(grantResident.getByRole("heading", { name: "Uzmanlık öğrencisi yap" })).toBeVisible();
+    await grantResident.getByRole("button", { name: "Uzmanlık öğrencisi yap" }).click();
+    await expect(roleBadges.getByText("Uzmanlık öğrencisi")).toBeVisible();
+    await expect(roleBadges.getByText("Yönetici")).toBeVisible();
+    await expect(panel.getByRole("button", { name: "Kullanıcı yap" })).toBeVisible();
+
+    await panel.getByRole("button", { name: "Kullanıcı yap" }).click();
+    const revokeResident = page.getByRole("dialog");
+    await expect(revokeResident.getByRole("heading", { name: "Kullanıcı yap" })).toBeVisible();
+    await revokeResident.getByRole("button", { name: "Kullanıcı yap" }).click();
+    await expect(roleBadges.getByText("Uzmanlık öğrencisi")).toHaveCount(0);
+    await expect(panel.getByRole("button", { name: "Uzmanlık öğrencisi yap" })).toBeVisible();
   });
 });
 
