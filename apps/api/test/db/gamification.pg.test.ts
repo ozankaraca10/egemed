@@ -181,8 +181,8 @@ if (databaseUrl === "") {
         expect(expectedXp).toBe(660);
       });
 
-      it("seri: ardışık gün +1, boşlukta 1, geç gelen eski gün etkisiz", async () => {
-        const days: readonly string[] = ["2026-09-20", "2026-09-21", "2026-09-19", "2026-09-24", "2026-09-24"];
+      it("seri yalnız sunucu alım gününden (createdAt) sayılır; istemci finishedAt'i etkisiz (T149)", async () => {
+        const serverDays: readonly string[] = ["2026-09-20", "2026-09-21", "2026-09-19", "2026-09-24", "2026-09-24"];
         const expected: readonly string[] = [
           "1/1/2026-09-20",
           "2/2/2026-09-21",
@@ -190,10 +190,12 @@ if (databaseUrl === "") {
           "1/2/2026-09-24",
           "1/2/2026-09-24",
         ];
-        for (const [index, day] of days.entries()) {
-          const finishedAt = Date.parse(`${day}T09:00:00.000Z`);
+        for (const [index, day] of serverDays.entries()) {
+          // İstemci denemeyi 2020'ye damgalasa da seri günü sunucunun alım günüdür.
+          const createdAt = Date.parse(`${day}T09:00:00.000Z`);
+          const finishedAt = Date.parse("2020-01-01T09:00:00.000Z");
           await repo().writeAttempt(
-            attemptInput({ id: uuidLike(300 + index), attemptNo: index + 1, startedAt: finishedAt - HOUR, finishedAt }),
+            attemptInput({ id: uuidLike(300 + index), attemptNo: index + 1, startedAt: finishedAt - HOUR, finishedAt, createdAt }),
           );
           const profile = await profileOf(ALI_ID);
           expect(
@@ -225,6 +227,41 @@ if (databaseUrl === "") {
         expect((await repo().writeAttempt(attemptInput({ maxScore: 0, score: 0 }))).kind).toBe("invalid");
         expect(await attemptCount()).toBe(0);
         expect(await profileOf(ALI_ID)).toBeUndefined();
+      });
+    });
+
+    describe("recordLearn: puansız öğrenme kaydı (A4)", () => {
+      it("ilk kayıt sabit XP verir; konu tekrarı yeni satır/XP üretmez", async () => {
+        const first = await repo().recordLearn({ userId: ALI_ID, simId: "pulse", topic: "pulse:topic:af", at: FIXED_NOW, institutionId: INSTITUTION_ID });
+        expect(first).toEqual({
+          kind: "created",
+          learn: { simId: "pulse", topic: "pulse:topic:af", learnedAt: FIXED_NOW, xpGained: DEFAULT_RULES.xp.learnTopicFirstView },
+        });
+        const profile = await profileOf(ALI_ID);
+        expect(profile?.xp).toBe(DEFAULT_RULES.xp.learnTopicFirstView);
+        expect(profile?.level).toBe(levelForXpClosedForm(DEFAULT_RULES.xp.learnTopicFirstView));
+        // Seri öğrenme kaydıyla üretilmez; yalnız denemeler seri sayar.
+        expect(profile?.streak_current).toBe(0);
+
+        const repeated = await repo().recordLearn({ userId: ALI_ID, simId: "pulse", topic: "pulse:topic:af", at: FIXED_NOW + HOUR, institutionId: INSTITUTION_ID });
+        expect(repeated.kind).toBe("existing");
+        expect(repeated.learn.xpGained).toBe(0);
+        expect((await profileOf(ALI_ID))?.xp).toBe(DEFAULT_RULES.xp.learnTopicFirstView);
+        const rows = await client.query("select count(*)::int as count from gami_learn");
+        expect((rows.rows[0] as { readonly count: number }).count).toBe(1);
+        expect(await attemptCount()).toBe(0);
+      });
+
+      it("aynı konu başka simde ayrı kayıttır; başka kullanıcı aynı konuyu yazabilir", async () => {
+        expect((await repo().recordLearn({ userId: ALI_ID, simId: "pulse", topic: "ortak:konu", at: FIXED_NOW, institutionId: INSTITUTION_ID })).kind).toBe("created");
+        expect((await repo().recordLearn({ userId: ALI_ID, simId: "opaca", topic: "ortak:konu", at: FIXED_NOW, institutionId: INSTITUTION_ID })).kind).toBe("created");
+        expect((await repo().recordLearn({ userId: MERT_ID, simId: "pulse", topic: "ortak:konu", at: FIXED_NOW, institutionId: INSTITUTION_ID })).kind).toBe("created");
+        const rows = await client.query("select count(*)::int as count from gami_learn");
+        expect((rows.rows[0] as { readonly count: number }).count).toBe(3);
+        // Üç ayrı profil: her biri kendi XP'sini alır.
+        expect((await profileOf(ALI_ID, "pulse"))?.xp).toBe(DEFAULT_RULES.xp.learnTopicFirstView);
+        expect((await profileOf(ALI_ID, "opaca"))?.xp).toBe(DEFAULT_RULES.xp.learnTopicFirstView);
+        expect((await profileOf(MERT_ID, "pulse"))?.xp).toBe(DEFAULT_RULES.xp.learnTopicFirstView);
       });
     });
 

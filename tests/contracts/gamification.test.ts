@@ -1,13 +1,14 @@
 import { describe, expect, it } from "vitest";
 import {
-  ATTEMPT_SUMMARY_MAX,
-  attemptWriteRequestSchema,
+  LEARN_TOPIC_PATTERN,
   authMeResponseSchema,
   gamiAllResponseSchema,
   gamiLeaderboardQuerySchema,
   gamiLeaderboardResponseSchema,
   gamiSimIdParamSchema,
   gamiSummaryResponseSchema,
+  learnRecordResponseSchema,
+  learnWriteRequestSchema,
 } from "../../packages/contracts/src/index";
 
 const INSTITUTION = "00000000-0000-4000-8000-000000000010";
@@ -32,16 +33,6 @@ const simSummary = () => ({
   ],
 });
 
-const attemptBody = () => ({
-  id: "00000000-0000-4000-8000-000000000030",
-  attemptNo: 2,
-  startedAt: "2026-09-22T13:40:00.000+03:00",
-  finishedAt: "2026-09-22T14:05:00.000+03:00",
-  score: 80,
-  maxScore: 100,
-  passed: true,
-  summary: { ritim: 80, tani: 60 },
-});
 
 describe("GET /auth/me yanıtı", () => {
   const authMe = () => ({
@@ -183,56 +174,52 @@ describe("GET /me/gamification/:simId/leaderboard yanıtı", () => {
   });
 });
 
-describe("POST /me/gamification/:simId/attempts gövdesi", () => {
-  it("istemci kimliği ve kodlu özetle geçerli gövdeyi kabul eder", () => {
-    const parsed = attemptWriteRequestSchema.safeParse(attemptBody());
+describe("POST /me/gamification/:simId/attempts gövdesi (A4/ADR-009)", () => {
+  it("yalnız puansız öğrenme kaydını kabul eder: tek alan `topic`", () => {
+    const parsed = learnWriteRequestSchema.safeParse({ topic: "opaca:topic:finding.pleura" });
     expect(parsed.success).toBe(true);
-    if (parsed.success) expect(parsed.data.summary).toEqual({ ritim: 80, tani: 60 });
+    if (parsed.success) expect(parsed.data.topic).toBe("opaca:topic:finding.pleura");
+    expect(LEARN_TOPIC_PATTERN.test("pulse:mode:af")).toBe(true);
   });
 
-  it("bilinmeyen alanı reddeder (serbest metin/ham yanıt yasak)", () => {
-    const parsed = attemptWriteRequestSchema.safeParse({ ...attemptBody(), answers: ["ham cevap"] });
-    expect(parsed.success).toBe(false);
-    if (!parsed.success) {
-      expect(parsed.error.issues.map((issue) => issue.code)).toContain("unrecognized_keys");
+  it("puanlı deneme alanlarını (skor, özet, mod, zaman) reddeder", () => {
+    for (const body of [
+      { topic: "pulse:mode:af", score: 80 },
+      { topic: "pulse:mode:af", maxScore: 100, passed: true },
+      { topic: "pulse:mode:af", summary: { "pulse.streak": 4 } },
+      { topic: "pulse:mode:af", mode: "assessment" },
+      { topic: "pulse:mode:af", attemptNo: 2 },
+      { topic: "pulse:mode:af", startedAt: "2026-09-22T13:40:00.000+03:00", finishedAt: "2026-09-22T14:05:00.000+03:00" },
+    ]) {
+      const parsed = learnWriteRequestSchema.safeParse(body);
+      expect(parsed.success, JSON.stringify(body)).toBe(false);
+      if (!parsed.success) {
+        expect(parsed.error.issues.map((issue) => issue.code), JSON.stringify(body)).toContain("unrecognized_keys");
+      }
     }
-    expect(
-      attemptWriteRequestSchema.safeParse({ ...attemptBody(), summary: { "serbest metin": "cevap" } }).success,
-    ).toBe(false);
-    expect(attemptWriteRequestSchema.safeParse({ ...attemptBody(), summary: { ritim: "iyi" } }).success).toBe(false);
   });
 
-  it("istemci kimliğini ve puan tutarlılığını doğrular", () => {
-    expect(attemptWriteRequestSchema.safeParse({ ...attemptBody(), id: undefined }).success).toBe(false);
-    expect(attemptWriteRequestSchema.safeParse({ ...attemptBody(), score: 120, maxScore: 100 }).success).toBe(false);
-    expect(attemptWriteRequestSchema.safeParse({ ...attemptBody(), score: undefined }).success).toBe(true);
+  it("serbest metni ve serbest metin anahtarlarını reddeder", () => {
+    for (const topic of ["serbest metin", "OPACA:topic:x", "opaca:topic:ÇĞÜ", "-topic", ""]) {
+      expect(learnWriteRequestSchema.safeParse({ topic }).success, topic).toBe(false);
+    }
+    expect(learnWriteRequestSchema.safeParse({ topic: "x".repeat(121) }).success).toBe(false);
   });
 
-  it("özet sayısını sınırlar ve bitişi başlangıçtan önce reddeder", () => {
-    expect(attemptWriteRequestSchema.safeParse({ ...attemptBody(), summary: { xp: 0 } }).success).toBe(true);
-    expect(
-      attemptWriteRequestSchema.safeParse({ ...attemptBody(), summary: { xp: ATTEMPT_SUMMARY_MAX } }).success,
-    ).toBe(true);
-    expect(attemptWriteRequestSchema.safeParse({ ...attemptBody(), summary: { xp: -100 } }).success).toBe(false);
-    expect(
-      attemptWriteRequestSchema.safeParse({
-        ...attemptBody(),
-        summary: { xp: ATTEMPT_SUMMARY_MAX + 1 },
-      }).success,
-    ).toBe(false);
-    const inverted = attemptWriteRequestSchema.safeParse({
-      ...attemptBody(),
-      startedAt: "2026-09-22T14:05:00.000+03:00",
-      finishedAt: "2026-09-22T14:04:00.000+03:00",
+  it("yanıt şeması XP'yi yalnız sunucu alanlarından okur", () => {
+    const parsed = learnRecordResponseSchema.safeParse({
+      data: {
+        simId: "pulse",
+        topic: "pulse:mode:af",
+        recordedAt: "2026-09-28T12:00:00.000+03:00",
+        xpGained: 2,
+      },
     });
-    expect(inverted.success).toBe(false);
-    if (!inverted.success) expect(inverted.error.issues.map((issue) => issue.message)).toContain("finished_before_started");
+    expect(parsed.success).toBe(true);
     expect(
-      attemptWriteRequestSchema.safeParse({
-        ...attemptBody(),
-        startedAt: attemptBody().finishedAt,
-        finishedAt: attemptBody().finishedAt,
+      learnRecordResponseSchema.safeParse({
+        data: { simId: "pulse", topic: "pulse:mode:af", recordedAt: "2026-09-28T12:00:00.000+03:00", xpGained: -1 },
       }).success,
-    ).toBe(true);
+    ).toBe(false);
   });
 });

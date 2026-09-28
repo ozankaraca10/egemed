@@ -143,9 +143,9 @@ export type {
 export {
   ATTEMPT_SUMMARY_MAX,
   attemptSummarySchema,
-  attemptWriteRequestSchema,
   GAMI_COHORTS,
   GAMI_PERIODS,
+  LEARN_TOPIC_PATTERN,
   gamiAllResponseSchema,
   gamiAttemptSummarySchema,
   gamiBadgeSchema,
@@ -164,11 +164,13 @@ export {
   gamiStreakSchema,
   gamiSummaryResponseSchema,
   gamiWeeklyGoalSchema,
+  learnRecordResponseSchema,
+  learnTopicSchema,
+  learnWriteRequestSchema,
   mePreferencesResponseSchema,
   mePreferencesSchema,
 } from "./schemas/gamification";
 export type {
-  AttemptWriteRequest,
   GamiAllResponse,
   GamiCohort,
   GamiCohortFilter,
@@ -178,6 +180,8 @@ export type {
   GamiPeriod,
   GamiSimSummary,
   GamiSummaryResponse,
+  LearnRecordResponse,
+  LearnWriteRequest,
   MePreferences,
 } from "./schemas/gamification";
 export {

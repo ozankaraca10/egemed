@@ -165,6 +165,7 @@ const expectedColumns: Record<string, readonly string[]> = {
     "summary",
     "created_at",
   ],
+  gami_learn: ["id", "user_id", "sim_id", "topic", "xp", "learned_at", "created_at"],
 };
 
 const expectedConstraints = [
@@ -215,6 +216,11 @@ const expectedConstraints = [
   "constraint sim_learn_completions_sim_id_check check (sim_id in ('pulse', 'ausculta', 'opaca'))",
   "constraint sim_learn_completions_content_version_check check (content_version ~ '^[a-z0-9._-]{1,40}$')",
   "constraint sim_learn_completions_pkey primary key (user_id, sim_id)",
+  "constraint gami_learn_user_id_fkey foreign key (user_id) references users (id) on delete cascade",
+  "constraint gami_learn_sim_id_check check (sim_id in ('pulse', 'ausculta', 'opaca'))",
+  "constraint gami_learn_topic_check check (topic ~ '^[a-z0-9][a-z0-9:._-]{0,119}$')",
+  "constraint gami_learn_xp_check check (xp >= 0)",
+  "constraint gami_learn_user_sim_topic_key unique (user_id, sim_id, topic)",
 ] as const;
 
 const expectedIndexes = [
@@ -239,6 +245,7 @@ const expectedIndexes = [
   "create index audit_log_actor_idx on audit_log (actor_user_id, occurred_at desc)",
   "create index gami_profiles_sim_xp_idx on gami_profiles (sim_id, xp desc)",
   "create index gami_attempts_user_sim_finished_idx on gami_attempts (user_id, sim_id, finished_at desc)",
+  "create index gami_learn_user_sim_learned_idx on gami_learn (user_id, sim_id, learned_at desc)",
 ] as const;
 
 describe("migration dosyaları", () => {
@@ -288,7 +295,7 @@ describe("kısıtlar", () => {
 
   it("her sim_id CHECK'i tam olarak üç simi içerir", () => {
     const simChecks = [...allUp.matchAll(/check \(\s*sim_id\s+in \(([^)]*)\)/g)];
-    expect(simChecks).toHaveLength(7);
+    expect(simChecks).toHaveLength(8);
     for (const check of simChecks) {
       const values = [...(check[1] ?? "").matchAll(/'([^']+)'/g)].map((value) => value[1] ?? "").sort();
       expect(values).toEqual(["ausculta", "opaca", "pulse"]);

@@ -3,7 +3,7 @@ import { audienceShowsGamification, createSimHost, type SimAudience, type SimChr
 import { t } from "@egemed/ui/i18n";
 import { shellNow } from "./now";
 import { challengeHref, routeHref, simTitleKey } from "./routes";
-import { createBrowserAttemptReporter, createBrowserGamification, type ReportedAttempt } from "./reportAttempt";
+import { createBrowserGamification, createBrowserLearnReporter, type ReportedLearnActivity } from "./reportLearn";
 import { loadSimModule } from "./sims/loaders";
 import { SERVER_SESSION_SIMS, createBrowserSessionSource } from "./sims/sessionSources";
 import { createBrowserLearnSource, createLearnPort, createUnlockedLearnPort } from "./learn/learnSource";
@@ -224,21 +224,22 @@ function SimRouteHost({ actorId, apiBaseUrl = null, audience = "student", challe
     // kapanışı React render'ı sırasında değil, ondan sonra olur. Sıra korunur:
     // önceki cleanup'ın `release`ı bu mount'tan önce kuyruğa girer.
     const mounted = Promise.resolve().then(async () => {
-      // Oyunlaştırma hattı (deneme raporu, sunucu özeti) yalnız öğrenciye kurulur (T171/T172).
+      // Oyunlaştırma hattı (puansız öğrenme kaydı, sunucu özeti) yalnız öğrenciye kurulur (T171/T172).
+      // A4 (ADR-009): puanlı deneme gönderilmez; denemeyi sunucu oturumu yazar.
       const gamified = audienceShowsGamification(audience);
-      const reporter = apiBaseUrl === null || !gamified ? null : createBrowserAttemptReporter(apiBaseUrl);
-      const reportAttempt =
-        reporter === null
+      const learnReporter = apiBaseUrl === null || !gamified ? null : createBrowserLearnReporter(apiBaseUrl);
+      const reportLearn =
+        learnReporter === null
           ? undefined
-          : (attempt: ReportedAttempt) => {
-              void reporter(simId, attempt).catch(() => undefined);
+          : (activity: ReportedLearnActivity) => {
+              void learnReporter(simId, activity).catch(() => undefined);
             };
       const gamification = apiBaseUrl === null || !gamified ? null : createBrowserGamification(apiBaseUrl, simId);
       const sessions = await sessionSourceFor(simId, audience, apiBaseUrl);
       const learn = await learnPortFor(simId, audience, apiBaseUrl, learnUnlocked === true);
       const options = {
         ...(actorId === undefined ? {} : { actorId }),
-        ...(reportAttempt === undefined ? {} : { reportAttempt }),
+        ...(reportLearn === undefined ? {} : { reportLearn }),
         ...(gamification === null ? {} : { gamification }),
         setChrome: (chrome: SimChrome | null) => chromeRef.current?.(chrome),
         audience,

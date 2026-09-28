@@ -15,6 +15,8 @@ const ERROR_STATUS_BY_CODE = {
   auth_subject_mismatch: 401,
   forbidden: 403,
   role_not_permitted: 403,
+  /** A4 (ADR-009): puanlı deneme istemciden yazılamaz; sunucu oturumu yazar. */
+  server_scored: 403,
   not_found: 404,
   duplicate_mapping_key: 409,
   conflict: 409,

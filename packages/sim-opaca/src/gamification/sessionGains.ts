@@ -9,7 +9,7 @@ import { useGamiContext } from "./GamiContext";
 import { daysLeft } from "./leaderboardView";
 import { isLocalRepo, type OpacaGamiRepo } from "./repo";
 import { OPACA_RULES } from "./rules";
-import { computeStats, withServerCounters, type OpacaStats } from "./stats";
+import { computeStats, type OpacaStats } from "./stats";
 import type { OpacaGamiState } from "./storage";
 
 type OpacaBadgeView = BadgeView<OpacaStats, OpacaBadgeContext>;
@@ -40,11 +40,12 @@ export function useOpacaSessionGains(input: {
   seed: number;
   durationMs: number;
   finishedAt: Date;
-  /** A2.3: sunucu oturumunda denemeyi sunucu yazar; `false` ise yerel yazım/rapor yapılmaz
-   *  (kazanım kartı yalnız bu oturumun tahmini kazanımını gösterir). Varsayılan `true`. */
+  /** A2.3: sunucu oturumunda denemeyi sunucu yazar; `false` ise yerel yazım yapılmaz
+   *  (kazanım kartı yalnız bu oturumun tahmini kazanımını gösterir). Varsayılan `true`.
+   *  A4: istemci hiçbir durumda puanlı denemeyi sunucuya göndermez. */
   persist?: boolean;
 } | null): GamiGainsModel | null {
-  const { reportAttempt, reportSyncError } = useGamiContext();
+  const { reportSyncError } = useGamiContext();
   const [gains, setGains] = useState<GamiGainsModel | null>(null);
   const mode = input?.mode;
   const seed = input?.seed;
@@ -68,25 +69,8 @@ export function useOpacaSessionGains(input: {
         const beforeEarned = new Set(beforeState.earned.map((e) => e.id));
         const before = mode === "assessment" ? await rankOf(repo, period, at) : null;
         if (persist) await repo.recordAttempt(attempt);
-        const report = (reportedAttempt: typeof attempt): void => {
-          if (!persist) return;
-          try {
-            const reported = reportAttempt?.(reportedAttempt) as void | Promise<void>;
-            if (reported instanceof Promise) void reported.catch(() => undefined);
-          } catch {
-            // Rapor hatası sonuç ekranını bozmaz.
-          }
-        };
-        let afterState: OpacaGamiState;
-        try {
-          afterState = persist ? await loadRepoState(repo) : beforeState;
-        } catch (error: unknown) {
-          report(attempt);
-          throw error;
-        }
+        const afterState = persist ? await loadRepoState(repo) : beforeState;
         const stats = computeStats(afterState.attempts, afterState.learn, afterState.earned, at);
-        // ADR-008 S4: konu ve öğrenme rozetleri için sunucuya sim verisinden sayaçlar gider.
-        report(withServerCounters(attempt, stats, isLocalRepo(repo)));
         const views: OpacaBadgeView[] = badgeViews(OPACA_BADGES, stats, afterState.earned, { now: at });
         const fresh = already ? [] : views.filter((v) => v.state === "earned" && !beforeEarned.has(v.def.id));
         const next = views.filter((v) => v.state === "progress").sort((a, b) => b.value / b.max - a.value / a.max)[0] ?? null;
@@ -113,6 +97,6 @@ export function useOpacaSessionGains(input: {
       }
     })();
     return () => { alive = false; };
-  }, [caseById, durationMs, finishedAt, mode, persist, repo, reportAttempt, reportSyncError, results, seed]);
+  }, [caseById, durationMs, finishedAt, mode, persist, repo, reportSyncError, results, seed]);
   return input ? gains : null;
 }

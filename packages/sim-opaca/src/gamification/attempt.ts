@@ -18,18 +18,6 @@ export interface OpacaExtra {
   qualityCorrect: number;
   interpretationCorrect: number;
   fastPerfect: boolean;
-  /** ADR-008 S4: yalnız sunucuya raporlanan kopyada — bu değerlendirme denemesinin konu başına doğru bulgu sayısı. */
-  topicCorrect?: Record<string, number>;
-  /** ADR-008 S4: yalnız sunucuya raporlanan kopyada — deneme anındaki birikimli öğrenme sayaçları. */
-  learn?: OpacaLearnCounters;
-}
-
-/** Sunucu rozet istatistiği için birikimli öğrenme sayaçları (`@egemed/gami-catalogs` `OpacaSummaryInput.learn`). */
-export interface OpacaLearnCounters {
-  topicsCount: number;
-  stacksCount: number;
-  libraryTopicsTotal: number;
-  libraryTopicsCovered: number;
 }
 
 export type OpacaAttemptRecord = AttemptRecord<DomainKey, OpacaExtra>;

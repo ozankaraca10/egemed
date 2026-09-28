@@ -1,4 +1,4 @@
-import type { AttemptRecord, CohortFilter, GamiLeaderboardRow, Period } from "@egemed/gamification-core";
+import type { CohortFilter, GamiLeaderboardRow, Period } from "@egemed/gamification-core";
 import type {
   SimCaseResult,
   SimPublicCase,
@@ -185,6 +185,17 @@ export interface SimLearnPort {
   markComplete(contentVersion: string): Promise<void>;
 }
 
+/**
+ * A4 (ADR-009): puansız öğrenme kaydı. Puanlı deneme kanalı yoktur; uygulama,
+ * değerlendirme ve düello denemesini sunucu oturumu yazar. Sim yalnız hangi
+ * içeriğin incelendiğini bildirir; skor/doğru sayısı/zaman taşınmaz, XP sunucu
+ * kuralıyla konu başına bir kez verilir.
+ */
+export interface SimLearnRecord {
+  /** Sim ad alanlı öğrenme anahtarı (ör. `pulse:mode:af`, `opaca:topic:finding.pleura`). */
+  readonly topic: string;
+}
+
 /** Modüle taşınan oturum bağlamı; sim başına ayrıktır (veri izolasyonu). */
 export interface SimMountContext {
   readonly simId: SimulatorId;
@@ -196,10 +207,10 @@ export interface SimMountContext {
    */
   readonly actorId?: string;
   /**
-   * API oturumunda kabuğun verdiği rapor hattı. Yerel deneme yazımı
-   * başarıyla bitince sim bunu çağırır; yoksa alan hiç yoktur.
+   * API oturumunda kabuğun verdiği puansız öğrenme kaydı hattı (A4). Sim
+   * içerik incelendiğinde çağırır; yoksa alan hiç yoktur.
    */
-  readonly reportAttempt?: (attempt: AttemptRecord) => void;
+  readonly reportLearn?: (record: SimLearnRecord) => void;
   /**
    * API oturumunda kabuğun verdiği okuma hattı. Varsa İlerlemem sunucudan gelir;
    * yoksa alan hiç yoktur ve yerel davranış sürer.
@@ -254,7 +265,7 @@ export interface SimHostOptions {
 /** `mount`a eşlik eden, kabuktan gelen oturum bilgisi. */
 export interface SimMountOptions {
   readonly actorId?: string;
-  readonly reportAttempt?: (attempt: AttemptRecord) => void;
+  readonly reportLearn?: (record: SimLearnRecord) => void;
   readonly gamification?: SimGamificationSource;
   readonly setChrome?: (chrome: SimChrome | null) => void;
   readonly audience?: SimAudience;
@@ -295,7 +306,7 @@ interface PendingLoad {
 
 function mountContext(simId: SimulatorId, now: () => number, mountOptions: SimMountOptions | undefined): SimMountContext {
   const actorId = mountOptions?.actorId;
-  const reportAttempt = mountOptions?.reportAttempt;
+  const reportLearn = mountOptions?.reportLearn;
   const gamification = mountOptions?.gamification;
   const setChrome = mountOptions?.setChrome;
   const audience = mountOptions?.audience;
@@ -308,7 +319,7 @@ function mountContext(simId: SimulatorId, now: () => number, mountOptions: SimMo
     now,
     simId,
     ...(actorId === undefined ? {} : { actorId }),
-    ...(reportAttempt === undefined ? {} : { reportAttempt }),
+    ...(reportLearn === undefined ? {} : { reportLearn }),
     ...(gamification === undefined ? {} : { gamification }),
     ...(setChrome === undefined ? {} : { setChrome }),
     // T180: kitle ve ziyaretçi "Öğrenci girişi" kanalı sime aktarılır (T172'de eksik kalmıştı).

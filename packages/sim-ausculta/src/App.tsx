@@ -1,4 +1,3 @@
-import type { AttemptRecord } from "@egemed/gamification-core";
 import type { GamiServerSource } from "@egemed/gami-ui";
 import type { GamiPageTab } from "@egemed/gami-ui";
 import type { SimAudience, SimChrome, SimLearnPort, SimSessionSource } from "@egemed/sim-host";
@@ -45,7 +44,6 @@ export interface AppProps {
   readonly modalEnv?: ModalEnv;
   readonly resultsEnv?: ResultsScreenEnv;
   readonly scrollToTop?: () => void;
-  readonly reportAttempt?: (attempt: AttemptRecord) => void;
   readonly gamification?: GamiServerSource;
   readonly setChrome?: (chrome: SimChrome | null) => void;
   readonly fullscreenEnv?: FullscreenEnv;
@@ -69,7 +67,6 @@ function Shell({
   modalEnv,
   resultsEnv,
   scrollToTop,
-  reportAttempt,
   gamification,
   setChrome,
   fullscreenEnv,
@@ -116,20 +113,12 @@ function Shell({
 
   useEffect(() => bus.subscribe((event) => {
     // Oyunlaştırma yalnız öğrenci kitlesi içindir (26 Eyl 2026 sözleşmesi):
-    // öğretim üyesi/ziyaretçi için yerel kayıt ve `reportAttempt` hiç çağrılmaz.
+    // öğretim üyesi/ziyaretçi için yerel kayıt hiç yapılmaz.
+    // A4 (ADR-009): puanlı deneme sunucuya gönderilmez; denemeyi sunucu oturumu
+    // yazar, burada yalnız yerel (API'siz) görünüm için kayıt tutulur.
     if (audience !== "student") return;
     const write = (payload: Parameters<LocalGamiRepository["recordEvent"]>[0]): void => {
-      const seen = gami.snapshot().seenEvents.includes(payload.id);
       gami.recordEvent(payload);
-      if (seen || payload.type !== "case_completed" || reportAttempt === undefined) return;
-      const record = gami.snapshot().attempts.find((item) => item.id === payload.id);
-      if (record === undefined) return;
-      try {
-        const reported = reportAttempt(record) as void | Promise<void>;
-        if (reported instanceof Promise) void reported.catch(() => undefined);
-      } catch {
-        // Rapor hatası dinleme akışını bozmaz.
-      }
     };
     if (event.type === "case_completed" && event.mode === "practice") {
       write({ type: "case_completed", id: `${event.caseId}:${event.mode}:${event.at}`, finishedAt: new Date(event.at).toISOString(), mode: event.mode, score: event.score, mastery: event.mastery, hintsUsed: event.hintsUsed, domains: event.domains });
@@ -138,7 +127,7 @@ function Shell({
     } else if (event.type === "correct_diagnosis") {
       gami.recordEvent({ type: "correct_diagnosis", id: `${event.caseId}:${event.qid}:${event.at}`, finishedAt: new Date(event.at).toISOString() });
     }
-  }), [audience, bus, gami, reportAttempt]);
+  }), [audience, bus, gami]);
 
   useEffect(() => {
     scrollToTop?.();

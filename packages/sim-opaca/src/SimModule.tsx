@@ -1,6 +1,6 @@
 import { createElement, type ReactNode } from "react";
 import { createRoot as reactCreateRoot } from "react-dom/client";
-import type { SimChrome, SimDispose, SimModule, SimMountContext, SimMountTarget } from "@egemed/sim-host";
+import type { SimChrome, SimDispose, SimLearnRecord, SimModule, SimMountContext, SimMountTarget } from "@egemed/sim-host";
 import { audienceOf } from "@egemed/sim-host";
 import { App } from "./App";
 import { StoreProvider } from "./core/StoreProvider";
@@ -127,10 +127,11 @@ export function createOpacaModule(deps?: OpacaModuleDeps): SimModule {
           }
         : undefined;
       // T175: kitle (öğrenci/öğretim üyesi/ziyaretçi) sözleşmesi — oyunlaştırma yüzeyleri
-      // App içinde audience'a göre indirgenir (tek kaynak); burada yalnız deneme raporlama
-      // öğrenci dışına kapatılır (depo sahibi kararı, plan.md).
+      // App içinde audience'a göre indirgenir (tek kaynak); burada yalnız puansız öğrenme
+      // kaydı öğrenci dışına kapatılır (depo sahibi kararı, plan.md). A4: puanlı deneme
+      // kanalı yoktur; denemeyi sunucu oturumu yazar.
       const audience = audienceOf(context);
-      const forwardReportAttempt = audience === "student" ? context.reportAttempt : undefined;
+      const forwardReportLearn = audience === "student" ? context.reportLearn : undefined;
       const appProps = {
         embedded: true as const,
         gamiEnabled: resolved.gamiEnabled ?? true,
@@ -156,9 +157,9 @@ export function createOpacaModule(deps?: OpacaModuleDeps): SimModule {
         createElement(GamiProvider, {
           repository: resolved.gamiRepository ?? null,
           now: context.now,
-          ...(forwardReportAttempt === undefined
+          ...(forwardReportLearn === undefined
             ? {}
-            : { reportAttempt: (attempt: OpacaAttemptRecord) => forwardReportAttempt?.(attempt) }),
+            : { reportLearn: (record: SimLearnRecord) => forwardReportLearn?.(record) }),
           ...(context.gamification === undefined ? {} : { gamification: context.gamification }),
           children: createElement(StoreProvider, {
             now: context.now,

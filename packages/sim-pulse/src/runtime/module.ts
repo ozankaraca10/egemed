@@ -1,7 +1,6 @@
 /// <reference lib="dom" />
 import { audienceOf, audienceShowsGamification } from "@egemed/sim-host";
 import type { SimDispose, SimModule, SimMountContext, SimMountTarget } from "@egemed/sim-host";
-import type { PulseAttemptRecord } from "../gamification/attempt";
 import { createStorageGamiRepo } from "../gamification/repo";
 import type { PulseGamiRepo } from "../gamification/repo";
 import { attachPulseAudience } from "./audience";
@@ -97,14 +96,14 @@ export function createPulseRuntimeModule(deps: PulseRuntimeModuleDeps = {}): Sim
       // Opaca ile aynı); ziyaretçide kartları zaten kitle kilitleri kapatır.
       const detachRequired = server === null && audienceOf(context) !== "visitor" ? attachPulseServerRequired(handle) : null;
       // Kitle (T173, sim-host T172 sözleşmesi): oyunlaştırma yalnız öğrenciye
-      // çizilir (öğretim üyesi/ziyaretçi rozet, liderlik, İlerlemem görmez;
-      // `reportAttempt` bağlamda olsa bile bu köprü hiç kurulmadığı için
-      // çağrılmaz).
+      // çizilir (öğretim üyesi/ziyaretçi rozet, liderlik, İlerlemem görmez).
+      // A4 (ADR-009): puanlı deneme kanalı yoktur; yalnız puansız öğrenme kaydı
+      // sunucuya gider (`reportLearn`).
       const audience = audienceOf(context);
       let detachGami: (() => void) | null = null;
       if (deps.gamiEnabled !== false && audienceShowsGamification(audience)) {
         try {
-          const reportAttempt = context.reportAttempt;
+          const reportLearn = context.reportLearn;
           const gamification = context.gamification;
           detachGami = attachPulseGamification(handle, {
             now: context.now,
@@ -112,9 +111,7 @@ export function createPulseRuntimeModule(deps: PulseRuntimeModuleDeps = {}): Sim
             // A3.3: sunucu oturumunda deneme SUNUCUDA yazılır; istemci yerel
             // skor kaydı yapmaz (çift kayıt yok, ADR-008/009).
             recordAttempts: server === null,
-            ...(reportAttempt === undefined
-              ? {}
-              : { reportAttempt: (record: PulseAttemptRecord) => reportAttempt(record) }),
+            ...(reportLearn === undefined ? {} : { reportLearn }),
             ...(gamification === undefined ? {} : { gamification }),
           });
         } catch {

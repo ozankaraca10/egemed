@@ -1,11 +1,17 @@
 import { describe, expect, it } from "vitest";
 import {
-  attemptWriteRequestSchema,
   gamiAllResponseSchema,
   gamiSummaryResponseSchema,
+  learnRecordResponseSchema,
   type SimId,
 } from "../../packages/contracts/src/index";
-import { WEEKLY_XP_TARGET, createPgGamificationRepo, levelForXpClosedForm, nextStreak } from "../../apps/api/src/me/gamification";
+import {
+  WEEKLY_XP_TARGET,
+  createPgGamificationRepo,
+  levelForXpClosedForm,
+  nextStreak,
+  type GamiAttemptInput,
+} from "../../apps/api/src/me/gamification";
 import { DEFAULT_RULES, levelForXp } from "../../packages/gamification-core/src/index";
 import { encodeAuscultaSummary, encodeOpacaSummary, encodePulseSummary } from "../../packages/gami-catalogs/src/index";
 import {
@@ -19,9 +25,11 @@ import {
   type AdminHarness,
 } from "./admin-harness";
 
-// T67 — `/me/gamification*` (E3 §d): oturum sahibinin kendi verisi; üç simin
-// AYRI özeti; idempotent deneme yazımı ve `.strict()` kodlu özet reddi. DB
-// gerekmez; bellek deposu, sabit saat ve sentetik tohum kullanılır.
+// T67 + A4 (ADR-009) — `/me/gamification*` (E3 §d): oturum sahibinin kendi
+// verisi; üç simin AYRI özeti. `POST /me/gamification/:simId/attempts` artık
+// PUANLI deneme kabul etmez (403 `server_scored`); yalnız puansız öğrenme
+// kaydı (`{ topic }`) yazılır, XP sabit sunucu kuralından gelir. DB gerekmez;
+// bellek deposu, sabit saat ve sentetik tohum kullanılır.
 
 const HOUR = 3_600_000;
 const DAY = 24 * HOUR;
@@ -109,7 +117,8 @@ function harness(access: Readonly<Record<string, readonly SimId[]>> = {}): Admin
   return createAdminHarness({ gamification: GAMIFICATION_SEED, users });
 }
 
-function attemptBody(overrides: Record<string, unknown> = {}) {
+/** A4: eski puanlı deneme gövdesi; uç artık 403 `server_scored` döndürür. */
+function scoredAttemptBody(overrides: Record<string, unknown> = {}) {
   return {
     id: ATTEMPT_ID,
     attemptNo: 3,
@@ -118,7 +127,6 @@ function attemptBody(overrides: Record<string, unknown> = {}) {
     score: 80,
     maxScore: 100,
     passed: true,
-    // Kabuğun genel kodları (`codedAttemptSummary`); T149'dan beri diğer kodlar `<simId>.` önekli olmalı.
     summary: { score: 80, correct: 8, total: 10 },
     ...overrides,
   };
@@ -130,7 +138,7 @@ interface JsonResponse {
   json(): Promise<unknown>;
 }
 
-async function postAttempt(
+async function postWrite(
   harnessUnderTest: AdminHarness,
   headers: Record<string, string>,
   body: unknown,
@@ -143,12 +151,34 @@ async function postAttempt(
   });
 }
 
+/** Sunucu oturumunun deneme yazımı (A1/A4): puanlı yol YALNIZ buradan geçer. */
+function serverAttemptInput(overrides: Partial<GamiAttemptInput> = {}): GamiAttemptInput {
+  return {
+    id: ATTEMPT_ID,
+    userId: ALI_ID,
+    simId: "opaca",
+    attemptNo: 1,
+    startedAt: FIXED_NOW - 2 * HOUR,
+    finishedAt: FIXED_NOW - HOUR,
+    score: 80,
+    maxScore: 100,
+    passed: true,
+    summary: { score: 80, correct: 8, total: 10 },
+    createdAt: FIXED_NOW,
+    institutionId: INSTITUTION_ID,
+    mode: "assessment",
+    caseCount: 10,
+    hintsUsed: 0,
+    ...overrides,
+  };
+}
+
 describe("yetki ve kendi verisi (E3 §d)", () => {
   it("öğretim üyesi deneme yazamaz (403 role_not_permitted); özetini okuyabilir (26 Eyl 2026)", async () => {
     const users = DEFAULT_USERS.map((entry) => (entry.id === ALI_ID ? { ...entry, roles: ["ogretim_uyesi" as const] } : entry));
     const testHarness = createAdminHarness({ gamification: GAMIFICATION_SEED, users });
     const ali = await login(testHarness, "ali.veli");
-    const write = await postAttempt(testHarness, ali.headers, attemptBody());
+    const write = await postWrite(testHarness, ali.headers, scoredAttemptBody());
     expect(write.status).toBe(403);
     expect(await write.json()).toMatchObject({ error: { code: "role_not_permitted" } });
     const read = await testHarness.app.request("/me/gamification/pulse", { headers: ali.headers });
@@ -159,10 +189,10 @@ describe("yetki ve kendi verisi (E3 §d)", () => {
     const users = DEFAULT_USERS.map((entry) => (entry.id === ALI_ID ? { ...entry, roles: ["uzmanlik_ogrencisi" as const] } : entry));
     const testHarness = createAdminHarness({ gamification: GAMIFICATION_SEED, users });
     const ali = await login(testHarness, "ali.veli");
-    const write = await postAttempt(testHarness, ali.headers, attemptBody());
+    const write = await postWrite(testHarness, ali.headers, { topic: "pulse:topic:af" });
     expect(write.status).toBe(403);
     expect(await write.json()).toMatchObject({ error: { code: "role_not_permitted" } });
-    expect(testHarness.gamificationStore.attempts.has(ATTEMPT_ID)).toBe(false);
+    expect(testHarness.gamificationStore.learn.size).toBe(0);
     const read = await testHarness.app.request("/me/gamification/pulse", { headers: ali.headers });
     expect(read.status).toBe(200);
   });
@@ -217,13 +247,10 @@ describe("yetki ve kendi verisi (E3 §d)", () => {
     );
     expect(((await viaQuery.json()) as { data: { xp: number } }).data.xp).toBe(1450);
 
-    const injected = await postAttempt(testHarness, ali.headers, {
-      ...attemptBody(),
-      userId: MERT_ID,
-    });
+    const injected = await postWrite(testHarness, ali.headers, { topic: "pulse:topic:af", userId: MERT_ID });
     expect(injected.status).toBe(400);
     expect(await injected.json()).toMatchObject({ error: { code: "invalid_request" } });
-    expect(testHarness.gamificationStore.attempts.has(ATTEMPT_ID)).toBe(false);
+    expect(testHarness.gamificationStore.learn.size).toBe(0);
   });
 });
 
@@ -270,7 +297,7 @@ describe("GET /me/gamification/:simId", () => {
     expect(data.xp).toBe(1450);
     expect(data.level).toBe(4);
     expect(data.streak).toEqual({ current: 3, best: 7, lastDate: "2026-09-22" });
-    // Haftalık XP yalnız bu hafta biten denemenin kodlu özetinden gelir.
+    // Haftalık XP yalnız bu hafta biten denemenin sunucu XP'sinden gelir.
     expect(data.weeklyGoal).toEqual({ targetXp: WEEKLY_XP_TARGET, currentXp: 120 });
     expect(data.badges.map((badge) => badge.key)).toEqual(["ritim-ustasi", "ilk-adim"]);
     // MERT'in 9999 XP'i önde; ALI ikinci sıradadır.
@@ -305,142 +332,101 @@ describe("GET /me/gamification/:simId", () => {
   });
 });
 
-describe("POST /me/gamification/:simId/attempts", () => {
-  it("kodlu özeti yazar ve idempotent tekrarda aynı yanıtı döner", async () => {
+describe("POST /me/gamification/:simId/attempts — puanlı yol kapalı (A4/ADR-009)", () => {
+  it("practice/assessment/challenge gövdeleri 403 server_scored döner; hiçbir kayıt yazılmaz", async () => {
     const testHarness = harness();
     const ali = await login(testHarness, "ali.veli");
-    const body = attemptBody();
-    expect(attemptWriteRequestSchema.safeParse(body).success).toBe(true);
+    const bodies: Record<string, unknown>[] = [
+      scoredAttemptBody(),
+      { ...scoredAttemptBody(), mode: "practice" },
+      { ...scoredAttemptBody(), mode: "assessment" },
+      { ...scoredAttemptBody(), mode: "challenge" },
+    ];
+    for (const body of bodies) {
+      const response = await postWrite(testHarness, ali.headers, body);
+      expect(response.status, JSON.stringify(body)).toBe(403);
+      expect(await response.json(), JSON.stringify(body)).toMatchObject({ error: { code: "server_scored" } });
+    }
+    // Modsuz ama skor taşıyan eski gövde de puanlı sayılır.
+    const legacy = await postWrite(testHarness, ali.headers, {
+      ...scoredAttemptBody(),
+      mode: undefined,
+    });
+    expect(legacy.status).toBe(403);
+    expect(await legacy.json()).toMatchObject({ error: { code: "server_scored" } });
+    expect(testHarness.gamificationStore.attempts.size).toBe(3);
+    expect(testHarness.gamificationStore.learn.size).toBe(0);
+  });
 
-    const created = await postAttempt(testHarness, ali.headers, body);
+  it("puansız öğrenme kaydı 201 kabul edilir; tekrarı 200 ve yeni XP üretmez", async () => {
+    const testHarness = harness();
+    const ali = await login(testHarness, "ali.veli");
+    const created = await postWrite(testHarness, ali.headers, { topic: "pulse:topic:af" });
     expect(created.status).toBe(201);
-    const createdBody = (await created.json()) as { data: { attemptNo: number; summary: unknown } };
-    expect(createdBody.data.attemptNo).toBe(3);
-    expect(createdBody.data.summary).toEqual({ score: 80, correct: 8, total: 10 });
-    expect(testHarness.gamificationStore.attempts.size).toBe(4);
-
-    const repeated = await postAttempt(testHarness, ali.headers, body);
-    expect(repeated.status).toBe(200);
-    expect(await repeated.json()).toEqual(createdBody);
-    expect(testHarness.gamificationStore.attempts.size).toBe(4);
-
-    // Yazım özeti de görünür: yeni deneme artık okuma yanıtındadır.
-    const summary = await testHarness.app.request("/me/gamification/pulse", {
-      headers: ali.headers,
+    const body = await created.json();
+    const parsed = learnRecordResponseSchema.safeParse(body);
+    if (!parsed.success) expect.unreachable(JSON.stringify(parsed.error.issues));
+    expect(parsed.data.data).toMatchObject({
+      simId: "pulse",
+      topic: "pulse:topic:af",
+      xpGained: DEFAULT_RULES.xp.learnTopicFirstView,
     });
-    const attempts = ((await summary.json()) as { data: { attempts: readonly { attemptNo: number }[] } })
-      .data.attempts;
-    expect(attempts.map((attempt) => attempt.attemptNo)).toEqual([3, 2, 1]);
+    expect(testHarness.gamificationStore.learn.size).toBe(1);
+
+    const repeated = await postWrite(testHarness, ali.headers, { topic: "pulse:topic:af" });
+    expect(repeated.status).toBe(200);
+    expect(await repeated.json()).toMatchObject({ data: { topic: "pulse:topic:af", xpGained: 0 } });
+    expect(testHarness.gamificationStore.learn.size).toBe(1);
   });
 
-  it("aynı id farklı gövdeyle veya aynı attemptNo başka id ile 409 conflict", async () => {
+  it("öğrenme kaydı XP'yi yalnız sunucu kuralından alır; seri ve deneme saymaz", async () => {
     const testHarness = harness();
     const ali = await login(testHarness, "ali.veli");
-    expect((await postAttempt(testHarness, ali.headers, attemptBody())).status).toBe(201);
-
-    const differentBody = await postAttempt(testHarness, ali.headers, {
-      ...attemptBody(),
-      score: 70,
-    });
-    expect(differentBody.status).toBe(409);
-    expect(await differentBody.json()).toMatchObject({ error: { code: "conflict" } });
-
-    const differentId = await postAttempt(testHarness, ali.headers, {
-      ...attemptBody(),
-      id: "00000000-0000-4000-8000-000000000034",
-    });
-    expect(differentId.status).toBe(409);
-    expect(testHarness.gamificationStore.attempts.size).toBe(4);
+    expect((await postWrite(testHarness, ali.headers, { topic: "pulse:topic:af" })).status).toBe(201);
+    expect((await postWrite(testHarness, ali.headers, { topic: "pulse:topic:svt" })).status).toBe(201);
+    const summary = await testHarness.app.request("/me/gamification/pulse", { headers: ali.headers });
+    const data = ((await summary.json()) as { data: { xp: number; level: number; streak: { current: number; best: number; lastDate: string | null }; attempts: unknown[]; weeklyGoal: { currentXp: number } } }).data;
+    // 1450 + 2 × 2 XP; istemci hiçbir XP/doğru sayısı bildirmez.
+    expect(data.xp).toBe(1450 + 2 * DEFAULT_RULES.xp.learnTopicFirstView);
+    expect(data.level).toBe(levelForXp(data.xp, DEFAULT_RULES).level);
+    // Öğrenme kaydı seri üretmez ve deneme listesine girmez.
+    expect(data.streak).toEqual({ current: 3, best: 7, lastDate: "2026-09-22" });
+    expect(data.attempts).toHaveLength(2);
+    // Haftalık hedef deneme XP'sini sayar; öğrenme kaydı eklenmez (A4 kuralı).
+    expect(data.weeklyGoal.currentXp).toBe(120);
   });
 
-  it("strict gövde: serbest metin, ham yanıt ve fazla alan reddedilir", async () => {
+  it("strict gövde: serbest metin ve fazla alan reddedilir", async () => {
     const testHarness = harness();
     const ali = await login(testHarness, "ali.veli");
     const rejected = [
-      { ...attemptBody(), answers: ["ham cevap"] },
-      { ...attemptBody(), summary: { "serbest metin": "cevap" } },
-      { ...attemptBody(), summary: { ritim: "iyi" } },
-      { ...attemptBody(), notes: "hasta iyi görünüyordu" },
+      { topic: "serbest metin" },
+      { topic: "pulse:topic:af", answers: ["ham cevap"] },
+      { topic: "pulse:topic:af", xp: 999_999 },
+      { topic: "" },
     ];
     for (const body of rejected) {
-      const response = await postAttempt(testHarness, ali.headers, body);
+      const response = await postWrite(testHarness, ali.headers, body);
       expect(response.status, JSON.stringify(body)).toBe(400);
       expect(await response.json(), JSON.stringify(body)).toMatchObject({
         error: { code: "invalid_request" },
       });
     }
-    expect(testHarness.gamificationStore.attempts.size).toBe(3);
-  });
-
-  it("puan tutarsızlığı 422 validation_failed döner", async () => {
-    const testHarness = harness();
-    const ali = await login(testHarness, "ali.veli");
-    const response = await postAttempt(testHarness, ali.headers, {
-      ...attemptBody(),
-      score: 120,
-      maxScore: 100,
-    });
-    expect(response.status).toBe(422);
-    expect(await response.json()).toMatchObject({
-      error: { code: "validation_failed", details: { issues: [{ code: "score_exceeds_max" }] } },
-    });
-    // Şema `maxScore = 0`ı kabul eder; `gami_attempts` check kısıtı pozitif
-    // ister, bu yüzden uç 500 yerine doğrulama hatası döner.
-    const zeroMax = await postAttempt(testHarness, ali.headers, {
-      ...attemptBody(),
-      score: 0,
-      maxScore: 0,
-    });
-    expect(zeroMax.status).toBe(422);
-    expect(await zeroMax.json()).toMatchObject({
-      error: { code: "validation_failed", details: { issues: [{ code: "max_score_positive" }] } },
-    });
-    expect(testHarness.gamificationStore.attempts.size).toBe(3);
+    expect(testHarness.gamificationStore.learn.size).toBe(0);
   });
 
   it("bilinmeyen sim 404, oturumsuz 401, CSRF'siz 403 döner", async () => {
     const testHarness = harness();
     const ali = await login(testHarness, "ali.veli");
-    expect((await postAttempt(testHarness, ali.headers, attemptBody(), "kalp")).status).toBe(404);
-    expect((await postAttempt(testHarness, {}, attemptBody())).status).toBe(401);
-    const withoutCsrf = await postAttempt(testHarness, { cookie: ali.headers["cookie"] ?? "" }, attemptBody());
+    expect((await postWrite(testHarness, ali.headers, { topic: "pulse:topic:af" }, "kalp")).status).toBe(404);
+    expect((await postWrite(testHarness, {}, { topic: "pulse:topic:af" })).status).toBe(401);
+    const withoutCsrf = await postWrite(testHarness, { cookie: ali.headers["cookie"] ?? "" }, { topic: "pulse:topic:af" });
     expect(withoutCsrf.status).toBe(403);
-    expect(testHarness.gamificationStore.attempts.size).toBe(3);
-  });
-
-  it("negatif özet ve ters zaman reddedilir; GET yanıtı kendi şemasını sağlar", async () => {
-    const testHarness = harness();
-    const ali = await login(testHarness, "ali.veli");
-    const negative = await postAttempt(testHarness, ali.headers, {
-      ...attemptBody(),
-      summary: { xp: -100, ritim: 80 },
-    });
-    expect(negative.status).toBe(400);
-    const inverted = await postAttempt(testHarness, ali.headers, {
-      ...attemptBody(),
-      startedAt: "2023-11-14T22:05:00.000+03:00",
-      finishedAt: "2023-11-14T21:40:00.000+03:00",
-    });
-    expect(inverted.status).toBe(400);
-    expect(testHarness.gamificationStore.attempts.size).toBe(3);
-
-    const summary = await testHarness.app.request("/me/gamification/pulse", { headers: ali.headers });
-    const summaryBody = await summary.json();
-    const parsedSummary = gamiSummaryResponseSchema.safeParse(summaryBody);
-    if (!parsedSummary.success) expect.unreachable(JSON.stringify(parsedSummary.error.issues));
-    expect(parsedSummary.data.data.weeklyGoal.currentXp).toBeGreaterThanOrEqual(0);
-
-    const all = await testHarness.app.request("/me/gamification", { headers: ali.headers });
-    const allBody = await all.json();
-    const parsedAll = gamiAllResponseSchema.safeParse(allBody);
-    if (!parsedAll.success) expect.unreachable(JSON.stringify(parsedAll.error.issues));
-    for (const sim of parsedAll.data.data.sims) {
-      expect(sim.weeklyGoal.currentXp).toBeGreaterThanOrEqual(0);
-    }
+    expect(testHarness.gamificationStore.learn.size).toBe(0);
   });
 });
 
-describe("sim erişim yetkisi ve deneme kapsamı (API-03/API-04)", () => {
+describe("sim erişim yetkisi ve yazım kapsamı (API-03/API-04)", () => {
   it("erişimi olmayan sim için okuma, liderlik ve yazma 403 forbidden döner", async () => {
     const testHarness = harness();
     const ali = await login(testHarness, "ali.veli");
@@ -449,44 +435,20 @@ describe("sim erişim yetkisi ve deneme kapsamı (API-03/API-04)", () => {
       expect(response.status, path).toBe(403);
       expect(await response.json(), path).toMatchObject({ error: { code: "forbidden" } });
     }
-    const write = await testHarness.app.request("/me/gamification/opaca/attempts", {
-      method: "POST",
-      headers: { ...ali.headers, "content-type": "application/json" },
-      body: JSON.stringify(attemptBody()),
-    });
-    expect(write.status).toBe(403);
+    const learnWrite = await postWrite(testHarness, ali.headers, { topic: "opaca:topic:finding.pleura" }, "opaca");
+    expect(learnWrite.status).toBe(403);
+    // Puanlı gövde de erişim kapısına takılır (gövde hiç okunmaz).
+    const scoredWrite = await postWrite(testHarness, ali.headers, scoredAttemptBody(), "opaca");
+    expect(scoredWrite.status).toBe(403);
+    expect(testHarness.gamificationStore.learn.size).toBe(0);
   });
 
-  it("aynı deneme kimliği başka sime yazılırsa 409; aynı sime tekrar 200 ve yol simId'si döner", async () => {
+  it("öğrenme kaydı sim başına ayrıdır: aynı anahtar başka simde yeni kayıt ve XP üretir", async () => {
     const testHarness = harness({ [ALI_ID]: ["pulse", "opaca"] });
     const ali = await login(testHarness, "ali.veli");
-    const post = (simId: SimId) =>
-      testHarness.app.request(`/me/gamification/${simId}/attempts`, {
-        method: "POST",
-        headers: { ...ali.headers, "content-type": "application/json" },
-        body: JSON.stringify(attemptBody()),
-      });
-    expect((await post("pulse")).status).toBe(201);
-    const again = await post("pulse");
-    expect(again.status).toBe(200);
-    expect(await again.json()).toMatchObject({ data: { simId: "pulse" } });
-    const crossSim = await post("opaca");
-    expect(crossSim.status).toBe(409);
-    expect(await crossSim.json()).toMatchObject({ error: { code: "conflict" } });
-  });
-
-  it("başka kullanıcının deneme kimliği idempotent tekrar sayılmaz (409)", async () => {
-    const testHarness = harness({ [MERT_ID]: ["pulse"] });
-    const ali = await login(testHarness, "ali.veli");
-    const mert = await login(testHarness, "mert.ikinci");
-    const post = (headers: Record<string, string>) =>
-      testHarness.app.request("/me/gamification/pulse/attempts", {
-        method: "POST",
-        headers: { ...headers, "content-type": "application/json" },
-        body: JSON.stringify(attemptBody()),
-      });
-    expect((await post(ali.headers)).status).toBe(201);
-    expect((await post(mert.headers)).status).toBe(409);
+    expect((await postWrite(testHarness, ali.headers, { topic: "ortak:konu" }, "pulse")).status).toBe(201);
+    expect((await postWrite(testHarness, ali.headers, { topic: "ortak:konu" }, "opaca")).status).toBe(201);
+    expect(testHarness.gamificationStore.learn.size).toBe(2);
   });
 });
 
@@ -513,19 +475,15 @@ describe("sunucu yetkili XP, düzey ve seri (API-05)", () => {
     expect(nextStreak(d2, "2026-09-24")).toEqual({ current: 1, best: 2, lastDate: "2026-09-24" });
   });
 
-  it("XP istemci özetinden değil sunucu kuralından gelir; profil oluşur, tekrar XP'yi çoğaltmaz", async () => {
-    const testHarness = harness({ [ALI_ID]: ["pulse", "opaca"] });
+  it("sunucu oturumu denemesinin XP'si özetten değil sunucu kuralından gelir (A1 yolu)", async () => {
+    const testHarness = harness({ [ALI_ID]: ["opaca"] });
     const ali = await login(testHarness, "ali.veli");
-    const post = () =>
-      testHarness.app.request("/me/gamification/opaca/attempts", {
-        method: "POST",
-        headers: { ...ali.headers, "content-type": "application/json" },
-        body: JSON.stringify(
-          attemptBody({ caseCount: 10, maxScore: 100, mode: "assessment", score: 80, summary: { score: 80, "opaca.xp": 999_999 } }),
-        ),
-      });
-    expect((await post()).status).toBe(201);
-    expect((await post()).status).toBe(200);
+    // Özet içindeki `opaca.xp` kodu yetkili değildir; assessment XP'si sunucu kuralıdır.
+    const input = serverAttemptInput({
+      summary: { score: 80, correct: 8, total: 10, "opaca.xp": 999_999 },
+    });
+    expect((await testHarness.gamificationStore.repo.writeAttempt(input)).kind).toBe("created");
+    expect((await testHarness.gamificationStore.repo.writeAttempt(input)).kind).toBe("existing");
     const summary = await testHarness.app.request("/me/gamification/opaca", { headers: ali.headers });
     const data = ((await summary.json()) as { data: { xp: number; level: number; streak: { current: number } } }).data;
     // assessment: 10 vaka × 10 XP + 80 eşiği bonusu 20 = 120 XP (özetteki 999999 yok sayılır).
@@ -574,7 +532,7 @@ describe("liderlik tablosuna katılım tercihi (opt-out)", () => {
   });
 });
 
-describe("sunucu rozet değerlendirmesi (ADR-008)", () => {
+describe("sunucu rozet değerlendirmesi (ADR-008) — deneme sunucu yazımından", () => {
   it("Pulse denemesinin kodlu özetinden rozetler sunucuda verilir; tekrar rozet çoğaltmaz", async () => {
     const testHarness = harness();
     const ali = await login(testHarness, "ali.veli");
@@ -582,14 +540,10 @@ describe("sunucu rozet değerlendirmesi (ADR-008)", () => {
       score: 90,
       extra: { ecgMode: "af", modeMastered: true, correctlyReadLeads: 3, caliperAccurate: null, rhythmRecognitionStreak: 4 },
     });
-    const post = () =>
-      testHarness.app.request("/me/gamification/pulse/attempts", {
-        method: "POST",
-        headers: { ...ali.headers, "content-type": "application/json" },
-        body: JSON.stringify(attemptBody({ summary })),
-      });
-    expect((await post()).status).toBe(201);
-    expect((await post()).status).toBe(200);
+    // Tohumda ALI'nin iki Pulse denemesi var; sunucu sıradaki numarayı kullanır.
+    const input = serverAttemptInput({ simId: "pulse", attemptNo: 3, summary });
+    expect((await testHarness.gamificationStore.repo.writeAttempt(input)).kind).toBe("created");
+    expect((await testHarness.gamificationStore.repo.writeAttempt(input)).kind).toBe("existing");
     const response = await testHarness.app.request("/me/gamification/pulse", { headers: ali.headers });
     const keys = ((await response.json()) as { data: { badges: readonly { key: string }[] } }).data.badges.map((badge) => badge.key);
     expect(keys).toContain("rhythm-streak-3");
@@ -617,14 +571,9 @@ describe("sunucu rozet değerlendirmesi (ADR-008)", () => {
       },
       learn: { topicsCount: 2, stacksCount: 0, libraryTopicsTotal: 30, libraryTopicsCovered: 1 },
     });
-    const post = () =>
-      testHarness.app.request("/me/gamification/opaca/attempts", {
-        method: "POST",
-        headers: { ...ali.headers, "content-type": "application/json" },
-        body: JSON.stringify(attemptBody({ summary })),
-      });
-    expect((await post()).status).toBe(201);
-    expect((await post()).status).toBe(200);
+    const input = serverAttemptInput({ simId: "opaca", score: 100, passed: true, summary, hintsUsed: 0 });
+    expect((await testHarness.gamificationStore.repo.writeAttempt(input)).kind).toBe("created");
+    expect((await testHarness.gamificationStore.repo.writeAttempt(input)).kind).toBe("existing");
     const response = await testHarness.app.request("/me/gamification/opaca", { headers: ali.headers });
     const keys = ((await response.json()) as { data: { badges: readonly { key: string }[] } }).data.badges.map((badge) => badge.key);
     expect(keys).toContain("first-step");
@@ -654,14 +603,9 @@ describe("sunucu rozet değerlendirmesi (ADR-008)", () => {
       headChoiceCorrect: 5,
       correctDiagnosisCount: 3,
     });
-    const post = () =>
-      testHarness.app.request("/me/gamification/ausculta/attempts", {
-        method: "POST",
-        headers: { ...ali.headers, "content-type": "application/json" },
-        body: JSON.stringify(attemptBody({ summary })),
-      });
-    expect((await post()).status).toBe(201);
-    expect((await post()).status).toBe(200);
+    const input = serverAttemptInput({ simId: "ausculta", summary });
+    expect((await testHarness.gamificationStore.repo.writeAttempt(input)).kind).toBe("created");
+    expect((await testHarness.gamificationStore.repo.writeAttempt(input)).kind).toBe("existing");
     const response = await testHarness.app.request("/me/gamification/ausculta", { headers: ali.headers });
     const keys = ((await response.json()) as { data: { badges: readonly { key: string }[] } }).data.badges.map((badge) => badge.key);
     expect(keys).toContain("listen-3");

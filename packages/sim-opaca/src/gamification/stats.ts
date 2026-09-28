@@ -4,7 +4,7 @@ import type { EarnedBadge, LearnActivity } from "@egemed/gamification-core";
 import { computeStreak, levelForXp, totalXpFor } from "@egemed/gamification-core";
 import type { OpacaStats as OpacaBadgeStats } from "@egemed/gami-catalogs";
 import { FINDINGS, LIBRARY_ITEMS } from "../data/terminology";
-import type { OpacaAttemptRecord, OpacaLearnCounters } from "./attempt";
+import type { OpacaAttemptRecord } from "./attempt";
 import { CT_STACKS_ITEM_KEY } from "./attempt";
 import { OPACA_RULES } from "./rules";
 
@@ -105,41 +105,5 @@ export function computeStats(
     allTopicsCoveredCount,
     allTopicsTotal: LIBRARY_ITEMS.length,
     earnedBadgeCount: earned.length,
-  };
-}
-
-/** Bu denemedeki konu başına doğru bulgu sayısı (yalnız değerlendirme; `computeStats` ile aynı sayım). */
-export function attemptTopicCorrect(attempt: OpacaAttemptRecord): Record<string, number> {
-  const counts: Record<string, number> = {};
-  if (attempt.mode !== "assessment") return counts;
-  for (const f of attempt.extra.findings) {
-    if (!f.correct) continue;
-    for (const [topicId, match] of Object.entries(TOPIC_BADGE_MATCH)) {
-      if (match(f.finding)) counts[topicId] = (counts[topicId] ?? 0) + 1;
-    }
-  }
-  return counts;
-}
-
-/**
- * ADR-008 S4: sunucuya raporlanan deneme, konu ve öğrenme rozetleri için sim verisi gerektiren
- * sayaçlarla zenginleştirilir (kabuk bunları kodlu özete çevirir). Yerel kayıt değişmez.
- * `learnKnown` false ise (öğrenme etkinliği bu depoda tutulmuyorsa) öğrenme sayaçları eklenmez;
- * sunucu bunları en büyük değer olarak birleştirdiği için eksik değer eskisini düşürmez.
- */
-export function withServerCounters(attempt: OpacaAttemptRecord, stats: OpacaStats, learnKnown: boolean): OpacaAttemptRecord {
-  const learn: OpacaLearnCounters = {
-    topicsCount: stats.learnTopicsCount,
-    stacksCount: stats.ctStacksCompletedCount,
-    libraryTopicsTotal: stats.allTopicsTotal,
-    libraryTopicsCovered: stats.allTopicsCoveredCount,
-  };
-  return {
-    ...attempt,
-    extra: {
-      ...attempt.extra,
-      topicCorrect: attemptTopicCorrect(attempt),
-      ...(learnKnown ? { learn } : {}),
-    },
   };
 }
