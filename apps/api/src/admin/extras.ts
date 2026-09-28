@@ -76,7 +76,7 @@ function emptyCounts(): {
   return {
     // Tüm durumlar başlangıçta sıfırdır; yeni durum eklenirse typecheck kırılır.
     byStatus: { invited: 0, active: 0, suspended: 0 },
-    byRole: { admin: 0, kullanici: 0, ogretim_uyesi: 0 },
+    byRole: { admin: 0, kullanici: 0, ogretim_uyesi: 0, uzmanlik_ogrencisi: 0 },
   };
 }
 
@@ -207,7 +207,12 @@ export const adminOverviewResponseSchema = z.strictObject({
         active: countSchema,
         suspended: countSchema,
       }),
-      byRole: z.strictObject({ admin: countSchema, kullanici: countSchema, ogretim_uyesi: countSchema }),
+      byRole: z.strictObject({
+        admin: countSchema,
+        kullanici: countSchema,
+        ogretim_uyesi: countSchema,
+        uzmanlik_ogrencisi: countSchema,
+      }),
     }),
     loginsLast7Days: countSchema,
     pendingImports: countSchema,

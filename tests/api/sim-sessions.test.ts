@@ -39,7 +39,7 @@ function wav(samples: number[]): Uint8Array {
 
 const AUDIO = wav(Array.from({ length: 400 }, (_, i) => Math.round(Math.sin(i / 5) * 8000)));
 
-function harness(roles: readonly ("kullanici" | "ogretim_uyesi")[] = ["kullanici"]): AdminHarness {
+function harness(roles: readonly ("kullanici" | "ogretim_uyesi" | "uzmanlik_ogrencisi")[] = ["kullanici"]): AdminHarness {
   const users = DEFAULT_USERS.map((entry) => (entry.id === ALI_ID ? { ...ALI, simAccess: ["pulse", "ausculta"] as const, roles } : entry));
   return createAdminHarness({ users, readAudio: () => Promise.resolve(AUDIO) });
 }
@@ -214,6 +214,20 @@ describe("sunucu vaka oturumu (A1.3)", () => {
     const h = harness(["ogretim_uyesi"]);
     const ali = await login(h, "ali.veli");
     const session = await start(h, ali, "practice");
+    await openCase(h, ali, session.sessionId, 1);
+    await call(h, ali, "POST", `/me/sims/ausculta/sessions/${session.sessionId}/cases/1/answer`, {
+      answers: correctAnswers(h, session.sessionId, 1),
+      telemetry: TELEMETRY,
+    });
+    const done = simSessionFinishResponseSchema.parse(await (await call(h, ali, "POST", `/me/sims/ausculta/sessions/${session.sessionId}/finish`)).json()).data;
+    expect(done.attemptId).toBeNull();
+    expect(done.xpGained).toBe(0);
+  });
+
+  it("uzmanlık öğrencisi sim erişimiyle oturum açar; deneme yazılmaz (T219)", async () => {
+    const h = harness(["uzmanlik_ogrencisi"]);
+    const ali = await login(h, "ali.veli");
+    const session = await start(h, ali, "assessment");
     await openCase(h, ali, session.sessionId, 1);
     await call(h, ali, "POST", `/me/sims/ausculta/sessions/${session.sessionId}/cases/1/answer`, {
       answers: correctAnswers(h, session.sessionId, 1),

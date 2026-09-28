@@ -11,6 +11,7 @@ import {
   isAssignableRole,
   isAuthMethod,
   isErrorCode,
+  isGamificationEligible,
   isRole,
   isSimId,
   isUserStatus,
@@ -34,11 +35,13 @@ describe("kimlik birlikleri", () => {
   it("kimlik korumaları birlik dışı değerleri reddeder", () => {
     for (const value of ["pulse", "ausculta", "opaca"]) expect(isSimId(value)).toBe(true);
     for (const value of ["kalp", "", null, 42, { id: "pulse" }]) expect(isSimId(value)).toBe(false);
-    expect(ROLES).toEqual(["admin", "kullanici", "ogretim_uyesi"]);
+    expect(ROLES).toEqual(["admin", "kullanici", "ogretim_uyesi", "uzmanlik_ogrencisi"]);
     expect(isRole("admin")).toBe(true);
+    expect(isRole("uzmanlik_ogrencisi")).toBe(true);
     expect(isRole("egitmen")).toBe(false);
-    expect(ASSIGNABLE_ROLES).toEqual(["kullanici", "ogretim_uyesi"]);
+    expect(ASSIGNABLE_ROLES).toEqual(["kullanici", "ogretim_uyesi", "uzmanlik_ogrencisi"]);
     expect(isAssignableRole("kullanici")).toBe(true);
+    expect(isAssignableRole("uzmanlik_ogrencisi")).toBe(true);
     expect(isAssignableRole("admin")).toBe(false);
     expect(AUTH_METHODS).toEqual(["sso", "dev"]);
     expect(isAuthMethod("dev")).toBe(true);
@@ -46,6 +49,14 @@ describe("kimlik birlikleri", () => {
     expect(USER_STATUSES).toEqual(["invited", "active", "suspended", "deleted"]);
     expect(isUserStatus("active")).toBe(true);
     expect(isUserStatus("silinmis")).toBe(false);
+  });
+
+  it("oyunlaştırma uygunluğu öğretim üyesi ve uzmanlık öğrencisini dışlar (T184/T219)", () => {
+    expect(isGamificationEligible(["kullanici"])).toBe(true);
+    expect(isGamificationEligible([])).toBe(true);
+    expect(isGamificationEligible(["ogretim_uyesi"])).toBe(false);
+    expect(isGamificationEligible(["uzmanlik_ogrencisi"])).toBe(false);
+    expect(isGamificationEligible(["admin", "uzmanlik_ogrencisi"])).toBe(false);
   });
 });
 

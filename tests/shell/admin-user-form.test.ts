@@ -284,18 +284,23 @@ describe("usersDataSource.ts T70 genişletmesi: ayrıntı üretimi", () => {
     expect(patched.unitId).toBe("unit-4");
   });
 
-  it("primaryRoleFor: admin > ogretim_uyesi > kullanici öncelik sırasıyla tekil rolü türetir (T184)", () => {
+  it("primaryRoleFor: admin > ogretim_uyesi > uzmanlik_ogrencisi > kullanici öncelik sırasıyla tekil rolü türetir (T184/T219)", () => {
     expect(primaryRoleFor(["kullanici"])).toBe("kullanici");
     expect(primaryRoleFor(["ogretim_uyesi"])).toBe("ogretim_uyesi");
+    expect(primaryRoleFor(["uzmanlik_ogrencisi"])).toBe("uzmanlik_ogrencisi");
     expect(primaryRoleFor(["admin"])).toBe("admin");
     expect(primaryRoleFor(["ogretim_uyesi", "admin"])).toBe("admin");
+    expect(primaryRoleFor(["uzmanlik_ogrencisi", "ogretim_uyesi"])).toBe("ogretim_uyesi");
     expect(primaryRoleFor([])).toBe("kullanici");
   });
 
-  it("swapBaseRole: temel rolü değiştirir, admin bitini korur (T184)", () => {
+  it("swapBaseRole: temel rolü değiştirir, admin bitini korur (T184/T219)", () => {
     expect(swapBaseRole(["kullanici"], "ogretim_uyesi")).toEqual(["ogretim_uyesi"]);
     expect(swapBaseRole(["ogretim_uyesi"], "kullanici")).toEqual(["kullanici"]);
     expect(swapBaseRole(["admin", "kullanici"], "ogretim_uyesi")).toEqual(["admin", "ogretim_uyesi"]);
+    expect(swapBaseRole(["kullanici"], "uzmanlik_ogrencisi")).toEqual(["uzmanlik_ogrencisi"]);
+    expect(swapBaseRole(["uzmanlik_ogrencisi"], "kullanici")).toEqual(["kullanici"]);
+    expect(swapBaseRole(["admin", "ogretim_uyesi"], "uzmanlik_ogrencisi")).toEqual(["admin", "uzmanlik_ogrencisi"]);
   });
 });
 
@@ -411,7 +416,7 @@ describe("UserFormView işaretlemesi (E3 §e.2)", () => {
     expect(footer).toContain(t("admin.users.form.action.save"));
   });
 
-  it("rol seçeneklerinde admin YOKTUR; Kullanıcı ve Öğretim üyesi seçilebilir (E3 §b, T184)", () => {
+  it("rol seçeneklerinde admin YOKTUR; Kullanıcı, Öğretim üyesi ve Uzmanlık öğrencisi seçilebilir (E3 §b, T184/T219)", () => {
     const tree = UserFormView(baseFormViewProps({})) as ReactElement;
     const dialog = dialogPropsOf(tree);
     const [roleSelect] = collectElements(
@@ -426,6 +431,7 @@ describe("UserFormView işaretlemesi (E3 §e.2)", () => {
     expect(options).toEqual([
       { label: t("admin.users.role.kullanici"), value: "kullanici" },
       { label: t("admin.users.role.ogretim_uyesi"), value: "ogretim_uyesi" },
+      { label: t("admin.users.role.uzmanlik_ogrencisi"), value: "uzmanlik_ogrencisi" },
     ]);
     expect(options.some((option) => option.value === "admin")).toBe(false);
   });
@@ -481,6 +487,13 @@ describe("UserFormView işaretlemesi (E3 §e.2)", () => {
     const props = { step: "confirm" as const, values: { ...BASE_VALUES, role: "ogretim_uyesi" as const } };
     const html = bodyHtml(props);
     expect(html).toContain(t("admin.users.role.ogretim_uyesi"));
+    expect(html).not.toContain(t("admin.users.role.admin"));
+  });
+
+  it("onay diyaloğu: rol 'uzmanlik_ogrencisi' seçilmişse özet Uzmanlık öğrencisi gösterir (T219)", () => {
+    const props = { step: "confirm" as const, values: { ...BASE_VALUES, role: "uzmanlik_ogrencisi" as const } };
+    const html = bodyHtml(props);
+    expect(html).toContain(t("admin.users.role.uzmanlik_ogrencisi"));
     expect(html).not.toContain(t("admin.users.role.admin"));
   });
 

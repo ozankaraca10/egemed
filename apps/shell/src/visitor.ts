@@ -1,5 +1,5 @@
 import type { SimAudience } from "@egemed/sim-host";
-import type { ShellSession } from "./session";
+import { isFacultyLike, type ShellSession } from "./session";
 
 /**
  * Ziyaretçi modu (depo sahibi kararı, 26 Eylül 2026): hesapsız gezinme. Giriş
@@ -43,7 +43,7 @@ export function endVisitor(storage: VisitorStorage | null): void {
 
 /**
  * Sime giden kitle:
- * - oturum varsa: öğretim üyesi rolü → `faculty`, değilse `student`;
+ * - oturum varsa: öğretim üyesi ya da uzmanlık öğrencisi rolü → `faculty`, değilse `student`;
  * - oturum yoksa: ziyaretçi işareti ya da üretim (giriş olmadan gezinme) → `visitor`;
  * - geliştirmede işaretsiz oturumsuz gezinme bugünkü gibi `student` kalır (demo/e2e).
  */
@@ -52,6 +52,6 @@ export function audienceFor(input: {
   readonly visitor: boolean;
   readonly dev: boolean;
 }): SimAudience {
-  if (input.session !== null) return input.session.faculty === true ? "faculty" : "student";
+  if (input.session !== null) return isFacultyLike(input.session) ? "faculty" : "student";
   return input.visitor || !input.dev ? "visitor" : "student";
 }
