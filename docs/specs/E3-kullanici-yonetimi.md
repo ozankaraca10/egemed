@@ -363,7 +363,7 @@ rozet kataloğu ve hedefler sim başına farklıdır (ortak kurallar, ayrı kata
 
 | Kolon | Tip | Kısıt / açıklama |
 |---|---|---|
-| `id` | uuid | PK; istemci üretir, yazma idempotenttir |
+| `id` | uuid | PK; sunucu üretir, yazma idempotenttir |
 | `user_id` | uuid | not null, FK → `users(id)` on delete cascade |
 | `sim_id` | text | not null, check in (`pulse`,`ausculta`,`opaca`) |
 | `attempt_no` | int | not null, check `attempt_no > 0` |
@@ -590,11 +590,16 @@ Yükleme sınırları §f'dedir.
 
 `GET /me/gamification` yanıtı `{ "data": { "sims": [ … ] } }` biçimindedir; dizi
 üç simin ayrı özetini taşır, toplam/türetilmiş tek puan dönmez. Bilinmeyen sim
-için 404. Deneme **yazma** ucu aynı sözleşmedendir:
-`POST /me/gamification/:simId/attempts` gövdesi yalnız kodlu özet taşır (ham
-yanıt yasak); `id` istemci üretir ve yazma idempotenttir. Oyunlaştırma kuralları
-(hangi olay XP üretir, hedefler) `gamification-core` kararıdır; bu belge yalnız
-veri yolunu tanımlar.
+için 404. Deneme **yazma** yolu A4'te değişti (ADR-009): puanlı denemeyi
+uygulama/değerlendirme/düello oturumunun kapanışında yalnız sunucu yazar
+(`POST /me/sims/:simId/sessions/:id/finish`); istemci puanlı gövde gönderirse
+`403 server_scored` alır. `POST /me/gamification/:simId/attempts` yalnız puansız
+öğrenme kaydı kabul eder: `{ topic }` gövdesi `gami_learn` tablosuna kullanıcı ×
+sim × konu başına bir kez yazılır (ilk kayıt 201 ve sabit sunucu XP'si; tekrar
+200 ve `xpGained: 0`, idempotent). Öğretim üyesi ve uzmanlık öğrencisi yazamaz
+(`403 role_not_permitted`); hız sınırı ve 1 MB gövde sınırı geçerlidir.
+Oyunlaştırma kuralları (hangi olay XP üretir, hedefler) `gamification-core`
+kararıdır; bu belge yalnız veri yolunu tanımlar.
 
 ## e. Ekranlar (`@egemed/ui` ile)
 

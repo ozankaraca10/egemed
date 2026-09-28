@@ -57,3 +57,14 @@ Ausculta ve Opaca'daki `scoreCase` saf ve deterministiktir, DOM kullanmaz; sunuc
   - Banka güncellemesi API sürümüne bağlanır.
 - **Açık kalan:** bir yapay zekâ görseli doğrudan yorumlayabilir. Karşılığı süre sınırı, çeşitleme, davranış sinyalleri ve gerekirse gözetimli ödül oturumudur. Tam engel mümkün değildir; hedef maliyeti artırmak ve hileyi görünür kılmaktır.
 - **KVKK:** sunucu yalnız seçenek kimliklerini ve süreyi saklar, serbest metin almaz.
+
+## Güncelleme (28 Eylül 2026, T226)
+
+A4 uygulandı ve karar 5'teki tasarım değişti: `POST /me/gamification/:simId/attempts`
+puanlı gövdeyi **403 `server_scored`** ile reddeder (410 değil), çünkü uç puansız
+öğrenme kaydı için yaşamaya devam eder. Kabul ettiği tek biçim `{ topic }`
+kaydıdır: `gami_learn` tablosu (migration 014), kullanıcı × sim × konu başına bir
+kez, sabit XP (`DEFAULT_RULES.xp.learnTopicFirstView`); aynı konu tekrarı yeni
+satır ve yeni XP üretmez (idempotent). Puanlı denemeyi yalnız sunucu oturumu
+yazar (`simSessions.ts` `finish`); istemci skor, özet ya da mod bildirmez.
+Öğretim üyesi ve uzmanlık öğrencisi bu uca yazamaz (403 `role_not_permitted`).
