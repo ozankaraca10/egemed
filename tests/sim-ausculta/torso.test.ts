@@ -10,21 +10,17 @@ function markup(node: ReturnType<typeof createElement>): string {
 }
 
 describe("stetoskop göğüs parçası", () => {
-  it("gövde üzerindeyken tüp görünür, dışında gizlenir", () => {
-    const onBody = markup(createElement(Chestpiece, { onBody: true }));
-    const offBody = markup(createElement(Chestpiece, {}));
+  it("tüp taşımaz, zil/diyafram kasasını ve taktik çizgileri korur", () => {
+    const html = markup(createElement(Chestpiece));
 
-    expect(onBody).toContain('viewBox="0 0 100 100"');
-    expect(onBody).toContain('opacity="0.95"');
-    expect(offBody).toContain('opacity="0"');
-    expect(onBody).not.toContain('opacity="0"');
-    expect(onBody.match(/<line /g)?.length).toBe(12);
-    expect(offBody.match(/<line /g)?.length).toBe(12);
+    expect(html).toContain('viewBox="0 0 100 100"');
+    expect(html).not.toContain("<path");
+    expect(html.match(/<line /g)?.length).toBe(12);
   });
 
-  it("aynı prop ile işaretleme sabittir ve üretici adı taşımaz", () => {
-    const first = markup(createElement(Chestpiece, { onBody: true }));
-    const second = markup(createElement(Chestpiece, { onBody: true }));
+  it("işaretleme sabittir ve üretici adı taşımaz", () => {
+    const first = markup(createElement(Chestpiece));
+    const second = markup(createElement(Chestpiece));
     expect(first).toBe(second);
     expect(first.toLowerCase()).not.toMatch(/littmann|3m|littman/);
   });
