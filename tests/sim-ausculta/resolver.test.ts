@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import {
+  EXTERNAL_RECORDS,
   RECORDS,
   assessmentPointFilter,
   resolveAssignment,
@@ -8,6 +9,7 @@ import {
   resolveCaseSounds,
   resolveCaseSoundsEx,
   resolveLibrarySound,
+  resolveLibrarySoundEx,
 } from "../../packages/sim-ausculta/src/index";
 import type { CaseDef } from "../../packages/sim-ausculta/src/index";
 
@@ -73,6 +75,15 @@ const pointIds = (JSON.parse(readFileSync(`${DATA}/auscultation-points.json`, "u
   (p) => p.id,
 );
 const soundIdList = RECORDS.map((r) => r.id);
+
+const POSTERIOR_TO_ANTERIOR: Record<string, string> = {
+  lung_right_upper_posterior: "lung_right_upper_anterior",
+  lung_left_upper_posterior: "lung_left_upper_anterior",
+  lung_right_middle_posterior: "lung_right_middle_anterior",
+  lung_left_middle_posterior: "lung_left_middle_anterior",
+  lung_right_lower_posterior: "lung_right_lower_anterior",
+  lung_left_lower_posterior: "lung_left_lower_anterior",
+};
 
 describe("CirCor dış eşleme kuralları (§6)", () => {
   it("Murmur=Absent → normal (validated)", () => {
@@ -155,8 +166,8 @@ describe("ses eşleme", () => {
     expect(resolveLibrarySound("lung", "coarse_crackles")).not.toBeNull();
   });
 
-  it("posterior nokta ataması anterior kayda fallback yapar ve kaynak bölgeyi bildirir (§14)", () => {
-    const res = resolveAssignmentEx({ pointId: "lung_left_upper_posterior", category: "lung", acousticFinding: "normal" });
+  it("posterior nokta ataması kaydı yoksa anterior kayda fallback yapar ve kaynak bölgeyi bildirir (§14)", () => {
+    const res = resolveAssignmentEx({ pointId: "lung_left_upper_posterior", category: "lung", acousticFinding: "rhonchi" });
     expect(res.record).not.toBeNull();
     expect(res.record!.simulationLocation).toBe("lung_left_upper_anterior");
     expect(res.fallbackFrom).toBe("lung_left_upper_anterior");
@@ -179,11 +190,100 @@ describe("ses eşleme", () => {
     }
   });
 
-  it("O7: assessmentPointFilter fallback (kaynak bölgeden alınmamış) noktaları dışlar", () => {
-    const lungCase = cases.find((c) => c.id === "case_normal_lung")!;
-    const filtered = assessmentPointFilter(lungCase.soundAssignments);
-    for (const pid of filtered) expect(pid.includes("posterior")).toBe(false);
-    expect(filtered.length).toBeGreaterThan(0);
-    expect(filtered.length).toBeLessThan(lungCase.soundAssignments.length);
+  it("O7: assessmentPointFilter yalnız kaydı olmayan fallback noktaları dışlar", () => {
+    // T227: KAUH posterior kayıtları gelince normal noktalar artık gerçek kaynaktan sunulur.
+    const normalLung = cases.find((c) => c.id === "case_normal_lung")!;
+    const normalFiltered = assessmentPointFilter(normalLung.soundAssignments);
+    expect(normalFiltered).toHaveLength(normalLung.soundAssignments.length);
+    expect(normalFiltered.some((pid) => pid.includes("posterior"))).toBe(true);
+    // Kaydı olmayan bulguda (rhonchi) posterior noktalar hâlâ dışlanır.
+    const rhonchi = cases.find((c) => c.id === "case_rhonchi")!;
+    const rhonchiFiltered = assessmentPointFilter(rhonchi.soundAssignments);
+    for (const pid of rhonchiFiltered) expect(pid.includes("posterior")).toBe(false);
+    expect(rhonchiFiltered.length).toBeGreaterThan(0);
+    expect(rhonchiFiltered.length).toBeLessThan(rhonchi.soundAssignments.length);
+  });
+});
+
+describe("KAUH posterior kayıtları (T227)", () => {
+  const posteriorPoints = Object.keys(POSTERIOR_TO_ANTERIOR);
+
+  it("6 posterior nokta × normal/wheezing gerçek posterior kayda çözülür (fallback yok)", () => {
+    for (const pointId of posteriorPoints) {
+      for (const finding of ["normal", "wheezing"]) {
+        const res = resolveAssignmentEx({ pointId, category: "lung", acousticFinding: finding });
+        expect(res.record, `${pointId} ${finding}`).not.toBeNull();
+        expect(res.fallbackFrom, `${pointId} ${finding}`).toBeUndefined();
+        expect(res.record!.sourceDataset).toBe("kauh-v3");
+        expect(res.record!.simulationLocation).toBe(pointId);
+        expect(res.record!.nativeFilter).toBe("diaphragm");
+      }
+    }
+  });
+
+  it("KAUH kaydı olan her posterior nokta × ince/kaba ral gerçek kayda çözülür", () => {
+    for (const finding of ["fine_crackles", "coarse_crackles"]) {
+      for (const pointId of posteriorPoints) {
+        const hasKauh = EXTERNAL_RECORDS.some(
+          (r) => r.sourceDataset === "kauh-v3" && r.simulationLocation === pointId && r.acousticFinding === finding,
+        );
+        const res = resolveAssignmentEx({ pointId, category: "lung", acousticFinding: finding });
+        expect(res.record, `${pointId} ${finding}`).not.toBeNull();
+        if (hasKauh) {
+          expect(res.fallbackFrom, `${pointId} ${finding}`).toBeUndefined();
+          expect(res.record!.simulationLocation).toBe(pointId);
+        } else {
+          expect(res.fallbackFrom, `${pointId} ${finding}`).toBe(POSTERIOR_TO_ANTERIOR[pointId]);
+        }
+      }
+    }
+  });
+
+  it("rhonchi/pleural_rub posterior KAUH kaydı üretmez; kayıt varsa anterior fallback olur", () => {
+    let fallbackCount = 0;
+    for (const finding of ["rhonchi", "pleural_rub"]) {
+      for (const pointId of posteriorPoints) {
+        const res = resolveAssignmentEx({ pointId, category: "lung", acousticFinding: finding });
+        if (res.record === null) {
+          expect(res.fallbackFrom, `${pointId} ${finding}`).toBeUndefined();
+          continue;
+        }
+        expect(res.record.sourceDataset, `${pointId} ${finding}`).toBe("hls-cmds-v3");
+        expect(res.fallbackFrom, `${pointId} ${finding}`).toBe(POSTERIOR_TO_ANTERIOR[pointId]);
+        expect(res.record.simulationLocation).toBe(POSTERIOR_TO_ANTERIOR[pointId]);
+        fallbackCount += 1;
+      }
+    }
+    expect(fallbackCount).toBeGreaterThan(0);
+  });
+
+  it("CirCor eşlemesi değişmedi: yalnız soundId ile hedeflenir", () => {
+    const circor = resolveAssignment({
+      pointId: "cardiac_aortic",
+      category: "heart",
+      acousticFinding: "early_systolic_murmur",
+      soundId: "circor_early_systolic_murmur_cardiac_aortic_001",
+    });
+    expect(circor?.sourceDataset).toBe("physionet-circor");
+    // Konum eşleşmesinde birincil veri seti önceliği korunur (CirCor ezmez).
+    const normal = resolveAssignment({
+      pointId: "cardiac_aortic",
+      category: "heart",
+      acousticFinding: "normal",
+      recordedLocation: "RUSB",
+    });
+    expect(normal?.sourceDataset).toBe("hls-cmds-v3");
+  });
+
+  it("kütüphane posterior noktada KAUH kaydını çalar; anterior HLS'te kalır", () => {
+    const posterior = resolveLibrarySoundEx("lung", "wheezing", "lung_left_upper_posterior");
+    expect(posterior.record?.sourceDataset).toBe("kauh-v3");
+    expect(posterior.fallbackFrom).toBeUndefined();
+    const anterior = resolveLibrarySoundEx("lung", "wheezing", "lung_left_upper_anterior");
+    expect(anterior.record?.sourceDataset).toBe("hls-cmds-v3");
+    expect(anterior.fallbackFrom).toBeUndefined();
+    const rhonchi = resolveLibrarySoundEx("lung", "rhonchi", "lung_left_upper_posterior");
+    expect(rhonchi.record?.simulationLocation).toBe("lung_left_upper_anterior");
+    expect(rhonchi.fallbackFrom).toBe("lung_left_upper_anterior");
   });
 });
