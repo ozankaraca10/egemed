@@ -1,12 +1,12 @@
 import { useAudience, useChallenge, useRequestSignIn, useSessions } from "../ui/ScreenHeading";
 import { createContext, useContext, useEffect, useMemo, useRef, useState, type JSX, type ReactNode } from "react";
 import { VISITOR_LOCK_TEXT } from "@egemed/sim-host";
-import { countUnlistenedInOtherView, otherViewHintText } from "../core/flow";
+import { countUnlistenedInOtherView, otherViewHintText, planLibraryViews } from "../core/flow";
 import { useLearnGate, useStartMode } from "../core/LearnGate";
 import { challengeLearnLockText, listenedKeyOnPlay } from "../core/learnLock";
 import { resolveLibrarySound, resolveLibrarySoundEx, type LibrarySoundResult } from "../core/resolver";
 import { useStore } from "../core/StoreProvider";
-import type { AuscultationPoint, SoundRecord } from "../core/types";
+import type { AuscultationPoint, PatientView, SoundRecord } from "../core/types";
 import { isVisitorUnlocked } from "../core/visitorAccess";
 import pointsData from "../data/auscultation-points.json";
 import { CASE_INVENTORY } from "../data/inventory";
@@ -34,6 +34,8 @@ import {
  *  ses motoru bağlamdan gelir. DevPanel bu rotada yoktur. */
 
 const POINTS = pointsData.points as AuscultationPoint[];
+/** T233: nokta → gövde görünümü haritası (kütüphane kuralı bununla beslenir). */
+const POINT_VIEW = new Map(POINTS.map((point) => [point.id, point.view]));
 
 /** Aktif kütüphane öğesini görünür alana kaydırma (kaynak: `document.querySelector('.lib-item.active')`). */
 export interface LearnScreenEnv {
@@ -145,6 +147,23 @@ export function LearnScreen({
   }, [item]);
 
   const soundsForStage = (pointId: string): SoundRecord | null => stageSounds.resolve(pointId).record;
+  // T233: kategori kuralı (kalp→ön, akciğer→arka, karma→ikisi) ∩ çalınabilir noktası
+  // olan görünümler; `bestPoints` izinli görünüme süzülür.
+  const stagePlan = useMemo(
+    () =>
+      planLibraryViews(
+        item.category,
+        item.bestPoints,
+        (pointId) => POINT_VIEW.get(pointId),
+        (pointId) => stageSounds.resolve(pointId).record !== null,
+      ),
+    [item, stageSounds],
+  );
+  // İzinli olmayan görünümde kalındıysa sahne izinli ilk görünümü gösterir; durum eşitlenir.
+  const view: PatientView = stagePlan.views.includes(state.view) ? state.view : (stagePlan.views[0] ?? state.view);
+  useEffect(() => {
+    if (view !== state.view) dispatch({ type: "setView", view });
+  }, [dispatch, state.view, view]);
   const activeSound = activePoint ? stageSounds.resolve(activePoint) : undefined;
   const activeFallback = activeSound?.fallbackFrom;
   const fallbackPoint = activeFallback ? POINTS.find((point) => point.id === activeFallback) : undefined;
@@ -153,8 +172,8 @@ export function LearnScreen({
   const title = libraryTitle(item.key);
   const libSound = resolveLibrarySound(item.category, item.acousticFinding);
   const otherHint = otherViewHintText(
-    state.view,
-    countUnlistenedInOtherView(POINTS, item.bestPoints, state.view, state.telemetry.visits),
+    view,
+    countUnlistenedInOtherView(POINTS, stagePlan.pointIds, view, state.telemetry.visits),
   );
 
   return (
@@ -244,12 +263,12 @@ export function LearnScreen({
               <div className="sim-main">
                 {/* T206: masaüstünde sahne, `data-view` ile seçilen gövde görselinin
                     en-boy oranında kalır (CSS: .learn-grid .stage-card .stage). */}
-                <div className="stage-card" data-view={state.view}>
+                <div className="stage-card" data-view={view}>
                   <PatientStage
                     ref={stageRef}
                     points={POINTS}
-                    {...(item.bestPoints.length ? { filterIds: item.bestPoints } : {})}
-                    view={state.view}
+                    {...(stagePlan.pointIds.length ? { filterIds: stagePlan.pointIds } : {})}
+                    view={view}
                     head={state.head}
                     volume={state.volume}
                     showPoints
@@ -263,14 +282,14 @@ export function LearnScreen({
                     onPlayingChange={(playing, pointId) => {
                       setActivePoint(pointId);
                       // T209: ses gerçekten oynatılınca öğe "dinlendi" sayılır; yalnız seçmek yetmez.
-                      const listenedKey = listenedKeyOnPlay(playing, pointId, item.key, item.bestPoints);
+                      const listenedKey = listenedKeyOnPlay(playing, pointId, item.key, stagePlan.pointIds);
                       if (listenedKey !== null) gate.markListened(listenedKey);
                     }}
                   />
                   <RegionChipList
                     points={POINTS}
-                    view={state.view}
-                    pointIds={item.bestPoints}
+                    view={view}
+                    pointIds={stagePlan.pointIds}
                     activePoint={activePoint}
                     visits={state.telemetry.visits}
                     onSelect={(pointId) => stageRef.current?.placeAt(pointId)}
@@ -294,7 +313,7 @@ export function LearnScreen({
                     </div>
                   )}
                 </div>
-                <Toolbar stageRef={stageRef} activePoint={activePoint} />
+                <Toolbar stageRef={stageRef} activePoint={activePoint} allowedViews={stagePlan.views} />
               </div>
 
               <div className="sim-side">

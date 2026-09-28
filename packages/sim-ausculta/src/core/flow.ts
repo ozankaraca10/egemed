@@ -1,3 +1,4 @@
+import { allowedAuscultaViews } from "@egemed/contracts";
 import type { Mode, PatientView, PointVisit } from "./types";
 
 /** Madde 1: uygulama (practice) modunda submit sonrası advance ÇAĞRILMAZ — kullanıcı
@@ -70,6 +71,32 @@ export function otherViewHintText(currentView: PatientView, unlistenedCount: num
   if (unlistenedCount <= 0) return null;
   const otherLabel = currentView === "front" ? "Arka" : "Ön";
   return `${otherLabel} görünümde ${unlistenedCount} bölge daha`;
+}
+
+/* ---------------- T233: kütüphane öğesi görünüm kuralı ----------------
+ * Depo sahibi kararı: yalnız kalp sesi → ön, yalnız akciğer sesi → arka,
+ * karma → iki görünüm (dinlenecek noktası olanlar). Kuralın kendisi
+ * `@egemed/contracts` içindedir; burada kütüphane verisiyle beslenir. */
+
+export interface LibraryViewPlan {
+  /** İzinli görünümler (kanonik sıra: ön → arka); ilk görünüm açılış görünümüdür. */
+  readonly views: PatientView[];
+  /** İzinli görünümlerde kalan, çalınabilir dinleme noktaları. */
+  readonly pointIds: string[];
+}
+
+export function planLibraryViews(
+  category: string,
+  bestPoints: readonly string[],
+  viewOf: (pointId: string) => PatientView | undefined,
+  playable: (pointId: string) => boolean,
+): LibraryViewPlan {
+  const present = (["front", "back"] as const).filter((view) =>
+    bestPoints.some((pointId) => viewOf(pointId) === view && playable(pointId)),
+  );
+  const views = allowedAuscultaViews(category, present, ["front", "back"]);
+  const allowed = new Set<PatientView>(views);
+  return { views, pointIds: bestPoints.filter((pointId) => { const view = viewOf(pointId); return view !== undefined && allowed.has(view); }) };
 }
 
 /* ---------------- Zayıf alan → Öğrenme odağı (madde 5, wave 2) ---------------- */

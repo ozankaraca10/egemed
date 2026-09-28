@@ -237,6 +237,11 @@
 .eg-sim-ausculta .view-toggle { display: flex; background: var(--card); border: 1.5px solid var(--border-strong); border-radius: var(--r-md); padding: 3px; gap: 3px; }
 .eg-sim-ausculta .view-toggle button { border: 0; background: transparent; color: var(--ink-600); font-size: var(--fs-sm); font-weight: 600; padding: 6px 7px; border-radius: var(--r-md); display: flex; align-items: center; gap: 4px; white-space: nowrap; }
 .eg-sim-ausculta .view-toggle button.active { background: var(--blue-600); color: var(--card); box-shadow: 0 2px 8px rgba(22,115,230,.35); }
+/* T233: izinli olmayan görünüm devre dışı — renk dışı kilit imi ve soluk stil. */
+.eg-sim-ausculta .view-toggle button:disabled { opacity: .55; cursor: not-allowed; }
+.eg-sim-ausculta .view-toggle button .view-locked { display: inline-flex; color: var(--ink-400); }
+.eg-sim-ausculta .view-note { margin: 0; font-size: var(--fs-xs); color: var(--ink-600); display: flex; align-items: center; gap: 5px; }
+.eg-sim-ausculta .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 .eg-sim-ausculta .strict-banner { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; background: var(--orange-100); border: 1.5px solid var(--orange-500); color: var(--amber-700); border-radius: var(--r-md); padding: 9px var(--sp-3); font-size: var(--fs-sm); line-height: 1.4; }
 .eg-sim-ausculta .strict-banner strong { color: var(--amber-700); }
 .eg-sim-ausculta .strict-banner b { color: var(--red-600); }

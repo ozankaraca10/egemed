@@ -14,6 +14,13 @@ export {
 export type { AssignableRole, AuthMethod, Role, SimId, UserStatus } from "./ids";
 
 export {
+  allowedAuscultaViews,
+  auscultaViewCategory,
+  preferredAuscultaViews,
+} from "./ausculta-views";
+export type { AuscultaView, AuscultaViewCategory } from "./ausculta-views";
+
+export {
   AUSCULTA_EVENT_MAP,
   INTERACTION_CODES,
   MODE_CODES,

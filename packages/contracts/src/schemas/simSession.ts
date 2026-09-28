@@ -84,6 +84,8 @@ export const auscultaPublicCaseSchema = z.strictObject({
     temp: z.string().max(20).optional(),
   }),
   tasks: z.array(z.string().max(300)).max(10),
+  /** T233: izinli gövde görünümleri (kalp→ön, akciğer→arka, karma→ikisi; sunulabilir
+   *  noktası olmayan görünüm düşer). İzinli olmayan görünümün noktaları `points`te yoktur. */
   views: z.array(z.enum(["front", "back"])).min(1).max(2),
   allowedHeads: z.array(z.enum(["bell", "diaphragm"])).min(1).max(2),
   points: z.array(auscultaPublicPointSchema).max(30),
