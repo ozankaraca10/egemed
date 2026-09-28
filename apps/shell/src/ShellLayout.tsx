@@ -86,7 +86,15 @@ export function ShellLayout({ route, session, onLogout, simChrome = null, visito
   const synthetic = session !== undefined && session !== null && session.displayName === null;
   // T152: API oturumunda ad altında rol; sahte oturumda ad zaten rol etiketidir.
   const accountRole = session !== undefined && session !== null && !synthetic
-    ? t(session.role === "admin" ? "shell.account.role.admin" : session.faculty === true ? "shell.account.role.faculty" : "shell.account.role.student")
+    ? t(
+        session.role === "admin"
+          ? "shell.account.role.admin"
+          : session.resident === true
+            ? "shell.account.role.resident"
+            : session.faculty === true
+              ? "shell.account.role.faculty"
+              : "shell.account.role.student",
+      )
     : undefined;
   const adminHref = session?.role === "admin" ? (`#${ADMIN_PATH}` as const) : null;
   const visitorBox = roleLabel === null && visitor && (

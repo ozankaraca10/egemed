@@ -32,8 +32,14 @@ const ALL_OPACA_CASES: readonly CaseDef[] = [
 
 const labelsOf = (options: readonly { readonly label: string }[]): string => options.map((option) => option.label).sort().join("|");
 
-/** Açık vakayı içerikten (başlık/görüntü yolu sızmaz) anahtarlı banka vakasına eşler. */
-function caseOf(publicCase: OpacaPublicCase): CaseDef {
+/**
+ * Açık vakayı içerikten (başlık/görüntü yolu sızmaz) anahtarlı banka vakasına
+ * eşler. Bankada içeriği birebir aynı vakalar olabilir (rastgele seçim); bu
+ * testlerde puanlama içerik üzerinden yapıldığı için eşdeğerdirler. Görüntü
+ * doğrulaması için `runtimeUrl` verilirse jeton çözümüyle birebir eşleşen vaka
+ * seçilir (aksi hâlde rastgele seçim flake üretir).
+ */
+function caseOf(publicCase: OpacaPublicCase, runtimeUrl?: string): CaseDef {
   const match = ALL_OPACA_CASES.filter(
     (caseDef) =>
       caseDef.chiefComplaint === publicCase.chiefComplaint &&
@@ -49,9 +55,11 @@ function caseOf(publicCase: OpacaPublicCase): CaseDef {
         );
       }),
   );
-  // Bankada içeriği birebir aynı vakalar olabilir (rastgele seçim); bu testlerde puanlama
-  // içerik ve boş yanıt üzerinden yapıldığı için eşdeğerdirler — ilki alınır.
   expect(match.length).toBeGreaterThanOrEqual(1);
+  if (runtimeUrl !== undefined) {
+    const exact = match.find((caseDef) => `/sims/opaca/${imageById(caseDef.imageId)?.runtimeUrl ?? ""}` === runtimeUrl);
+    if (exact !== undefined) return exact;
+  }
   return match[0]!;
 }
 
@@ -147,14 +155,17 @@ describe("createDevLocalSessionSource — Opaca (A2.3)", () => {
     const publicCase = opacaPublicCaseSchema.parse(await source.getCase(session.sessionId, 1));
     expect(publicCase.simId).toBe("opaca");
     expect(publicCase.label).toBe("Vaka 1");
-    const caseDef = caseOf(publicCase);
+    const imageUrl = source.imageUrl(session.sessionId, publicCase.image.token);
+    // İçeriği birebir aynı vakalar olabilir (rastgele seçim); jeton çözümü
+    // katalog adresiyle eşleşen vaka seçilir, aksi hâlde eşleşme kalmaz.
+    const caseDef = caseOf(publicCase, imageUrl);
     const runtimeUrl = imageById(caseDef.imageId)?.runtimeUrl ?? "";
     const raw = JSON.stringify(publicCase);
     expect(raw).not.toContain(caseDef.title);
     expect(raw).not.toContain(caseDef.id);
     expect(raw).not.toContain(runtimeUrl);
     expect(raw).not.toContain('"correct"');
-    expect(source.imageUrl(session.sessionId, publicCase.image.token)).toBe(`/sims/opaca/${runtimeUrl}`);
+    expect(imageUrl).toBe(`/sims/opaca/${runtimeUrl}`);
     // Sıralı açılış: ilk vaka yanıtlanmadan ikinci açılamaz.
     await expect(source.getCase(session.sessionId, 2)).rejects.toThrow("case_out_of_order");
   });
@@ -163,7 +174,8 @@ describe("createDevLocalSessionSource — Opaca (A2.3)", () => {
     const source = createDevLocalSessionSource("opaca", () => NOW);
     const session = await source.start("practice");
     const publicCase = opacaPublicCaseSchema.parse(await source.getCase(session.sessionId, 1));
-    const caseDef = caseOf(publicCase);
+    // İçeriği birebir aynı vakalar olabilir; jeton çözümüyle ayırt edilir.
+    const caseDef = caseOf(publicCase, source.imageUrl(session.sessionId, publicCase.image.token));
     const keys = keysFor(publicCase, caseDef);
     const answers = answersFor(publicCase, caseDef, keys);
     let hintsUsed = 0;
@@ -209,7 +221,8 @@ describe("createDevLocalSessionSource — Opaca (A2.3)", () => {
     await expect(source.hint(session.sessionId, 1, first.id)).rejects.toThrow("forbidden");
     const answered = await source.answer(session.sessionId, 1, { answers: {}, telemetry: TELEMETRY });
     expect(answered).toEqual({ mode: "assessment", accepted: true });
-    const caseDef = caseOf(publicCase);
+    // İçeriği birebir aynı vakalar olabilir; jeton çözümüyle ayırt edilir.
+    const caseDef = caseOf(publicCase, source.imageUrl(session.sessionId, publicCase.image.token));
     const expected = opaca.gradeCase(caseDef, keysFor(publicCase, caseDef), {
       index: 1,
       mode: "assessment",

@@ -6,7 +6,7 @@ import type { LearnStatus } from "../../packages/contracts/src/index";
 import { t } from "../../packages/ui/i18n/tr";
 import { ChallengeWorkspace, challengeSimOptions } from "../../apps/shell/src/challenges/ChallengesPage";
 import { challengeErrorKey, type ChallengeSource } from "../../apps/shell/src/challenges/challengeSource";
-import { createLearnPort, type LearnSource } from "../../apps/shell/src/learn/learnSource";
+import { createLearnPort, createUnlockedLearnPort, type LearnSource } from "../../apps/shell/src/learn/learnSource";
 import { DEV_LEARN_KEY_PREFIX, createDevLocalLearnPort } from "../../apps/shell/src/sims/devLocalLearn";
 
 /**
@@ -99,6 +99,13 @@ describe("öğrenme portu", () => {
     expect(port.complete).toBe(false);
     await port.markComplete("ausculta.2026-09");
     expect(calls).toEqual(["ausculta.2026-09"]);
+    expect(port.complete).toBe(true);
+  });
+
+  it("ayrıcalıklı rollerde (admin/öğretim üyesi/uzmanlık öğrencisi) port tamamlanmış açılır ve kaynak çağrılmaz (T219)", async () => {
+    const port = createUnlockedLearnPort();
+    expect(port.complete).toBe(true);
+    await expect(port.markComplete("ausculta.2026-09")).resolves.toBeUndefined();
     expect(port.complete).toBe(true);
   });
 

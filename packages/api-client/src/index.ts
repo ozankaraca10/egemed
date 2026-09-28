@@ -1625,7 +1625,8 @@ function normalizeUnitId(value: string | undefined): string | null | undefined {
 
 function primaryRole(roles: readonly Role[]): UsersSourceRole {
   if (roles.includes("admin")) return "admin";
-  return roles.includes("ogretim_uyesi") ? "ogretim_uyesi" : "kullanici";
+  if (roles.includes("ogretim_uyesi")) return "ogretim_uyesi";
+  return roles.includes("uzmanlik_ogrencisi") ? "uzmanlik_ogrencisi" : "kullanici";
 }
 
 function toUsersSourceUser(item: ApiAdminUserListItem): UsersSourceUser {

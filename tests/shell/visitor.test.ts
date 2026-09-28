@@ -4,11 +4,11 @@ import { describe, expect, it } from "vitest";
 import { t } from "../../packages/ui/i18n/tr";
 import { ShellLayout } from "../../apps/shell/src/ShellLayout";
 import { resolveRoute, routeHref } from "../../apps/shell/src/routes";
-import { shellSessionFromMe } from "../../apps/shell/src/session";
+import { isFacultyLike, isLearnUnlocked, shellSessionFromDev, shellSessionFromMe } from "../../apps/shell/src/session";
 import { VISITOR_STORAGE_KEY, audienceFor, endVisitor, readVisitor, startVisitor } from "../../apps/shell/src/visitor";
 
 // Ziyaretçi modu ve kitle (26 Eyl 2026): oturum yoksa ziyaretçi işareti/üretim → visitor;
-// öğretim üyesi rolü → faculty; aksi halde student.
+// öğretim üyesi ve uzmanlık öğrencisi (T219) → faculty; aksi halde student.
 
 function memory() {
   const data = new Map<string, string>();
@@ -38,13 +38,42 @@ describe("ziyaretçi işareti", () => {
 describe("audienceFor", () => {
   const student = shellSessionFromMe({ id: "u1", displayName: "Öğrenci A", roles: [{ role: "kullanici" }], simAccess: [] });
   const faculty = shellSessionFromMe({ id: "u2", displayName: "Hoca B", roles: [{ role: "ogretim_uyesi" }], simAccess: [] });
+  const resident = shellSessionFromMe({ id: "u3", displayName: "Asistan C", roles: [{ role: "uzmanlik_ogrencisi" }], simAccess: [] });
   it("oturum rolüne göre öğrenci/öğretim üyesi; oturumsuzlukta ziyaretçi (üretim ya da işaret)", () => {
     expect(audienceFor({ session: student, visitor: true, dev: true })).toBe("student");
     expect(audienceFor({ session: faculty, visitor: false, dev: false })).toBe("faculty");
+    // T219: uzmanlık öğrencisi sim görünümünde öğretim üyesi gibi davranır.
+    expect(audienceFor({ session: resident, visitor: false, dev: true })).toBe("faculty");
     expect(audienceFor({ session: null, visitor: true, dev: true })).toBe("visitor");
     expect(audienceFor({ session: null, visitor: false, dev: false })).toBe("visitor");
     // Geliştirmede işaretsiz oturumsuz gezinme bugünkü gibi öğrenci kalır (demo/e2e).
     expect(audienceFor({ session: null, visitor: false, dev: true })).toBe("student");
+  });
+});
+
+describe("öğretim üyesi görünümü ve öğrenme kilidi muafiyeti (T219)", () => {
+  const student = shellSessionFromMe({ id: "u1", displayName: "Öğrenci A", roles: [{ role: "kullanici" }], simAccess: [] });
+  const faculty = shellSessionFromMe({ id: "u2", displayName: "Hoca B", roles: [{ role: "ogretim_uyesi" }], simAccess: [] });
+  const resident = shellSessionFromMe({ id: "u3", displayName: "Asistan C", roles: [{ role: "uzmanlik_ogrencisi" }], simAccess: [] });
+  const admin = shellSessionFromMe({ id: "u4", displayName: "Deniz Yönetici", roles: [{ role: "admin" }], simAccess: [] });
+
+  it("isFacultyLike yalnız öğretim üyesi ve uzmanlık öğrencisinde true döner", () => {
+    expect(isFacultyLike(student)).toBe(false);
+    expect(isFacultyLike(faculty)).toBe(true);
+    expect(isFacultyLike(resident)).toBe(true);
+    expect(isFacultyLike(null)).toBe(false);
+    expect(isFacultyLike(undefined)).toBe(false);
+  });
+
+  it("isLearnUnlocked admin, öğretim üyesi ve uzmanlık öğrencisinde true; öğrenci ve oturumsuzda false", () => {
+    expect(isLearnUnlocked(admin)).toBe(true);
+    expect(isLearnUnlocked(faculty)).toBe(true);
+    expect(isLearnUnlocked(resident)).toBe(true);
+    expect(isLearnUnlocked(student)).toBe(false);
+    expect(isLearnUnlocked(null)).toBe(false);
+    // DEV sahte oturumlar da aynı kuralı izler (T219): admin açık, test öğrencisi kapalı.
+    expect(isLearnUnlocked(shellSessionFromDev({ actorId: "dev-admin-0001", role: "admin" }))).toBe(true);
+    expect(isLearnUnlocked(shellSessionFromDev({ actorId: "dev-student-0001", role: "student" }))).toBe(false);
   });
 });
 
@@ -63,5 +92,12 @@ describe("ShellLayout ziyaretçi göstergesi", () => {
     const html = renderToStaticMarkup(createElement(ShellLayout, { children: null, route: resolveRoute(routeHref("home")), session }));
     expect(html).toContain(t("shell.account.role.faculty"));
     expect(html).not.toContain("eg-shell-visitor");
+  });
+
+  it("uzmanlık öğrencisi oturumunda hesap menüsü rol etiketi 'Uzmanlık öğrencisi'dir (T219)", () => {
+    const session = shellSessionFromMe({ id: "u3", displayName: "Asistan C", roles: [{ role: "uzmanlik_ogrencisi" }], simAccess: [] });
+    const html = renderToStaticMarkup(createElement(ShellLayout, { children: null, route: resolveRoute(routeHref("home")), session }));
+    expect(html).toContain(t("shell.account.role.resident"));
+    expect(html).not.toContain(t("shell.account.role.faculty"));
   });
 });

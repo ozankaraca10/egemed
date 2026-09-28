@@ -327,7 +327,7 @@ describe("RolesView işaretlemesi (E3 §e.6, T73)", () => {
         baseRolesViewProps({
           status: "ready",
           summary: {
-            roleCounts: { admin: 2, kullanici: 48, ogretim_uyesi: 3 },
+            roleCounts: { admin: 2, kullanici: 48, ogretim_uyesi: 3, uzmanlik_ogrencisi: 4 },
             simCounts: { ausculta: 10, opaca: 5, pulse: 20 },
           },
         }),
@@ -340,6 +340,10 @@ describe("RolesView işaretlemesi (E3 §e.6, T73)", () => {
     expect(html).toContain(t("admin.roles.card.ogretim_uyesi"));
     expect(html).toContain("3 " + t("admin.roles.card.suffix"));
     expect(html).toContain(t("admin.roles.matrix.ogretim_uyesi"));
+    // T219: dördüncü rol kartı ve matris sütunu (uzmanlık öğrencisi).
+    expect(html).toContain(t("admin.roles.card.uzmanlik_ogrencisi"));
+    expect(html).toContain("4 " + t("admin.roles.card.suffix"));
+    expect(html).toContain(t("admin.roles.matrix.uzmanlik_ogrencisi"));
     expect(html).toContain(t("admin.roles.matrix.simUsage"));
     // Apostrof `renderToStaticMarkup` çıktısında `&#x27;` olarak kaçışlanır; alt dizi apostrofsuz aranır.
     expect(html).toContain("Rozet, liderlik ve Meydan Okuma");
@@ -588,6 +592,35 @@ describe("Roller ve erişim sekmesi — öğretim üyesi ↔ kullanıcı geçiş
     const html = render(createElement(UserDetailView, baseDetailViewProps({ detail: faculty })));
     expect(html).toContain(t("admin.users.detail.roles.revokeFaculty"));
     expect(html).toContain(t("admin.users.role.ogretim_uyesi"));
+  });
+});
+
+describe("Roller ve erişim sekmesi — uzmanlık öğrencisi geçişi (UserDetailPage, T219)", () => {
+  it("kullanıcı (öğrenci) kaydında 'Uzmanlık öğrencisi yap' düğmesi görünür", () => {
+    const html = render(createElement(UserDetailView, baseDetailViewProps({})));
+    expect(html).toContain(t("admin.users.detail.roles.grantResident"));
+    expect(html).not.toContain(t("admin.users.detail.roles.revokeResident"));
+  });
+
+  it("uzmanlık öğrencisi kaydında 'Kullanıcı yap' düğmesi ve rol rozeti görünür", () => {
+    const resident: AdminUserDetail = { ...BASE_DETAIL, role: "uzmanlik_ogrencisi", roles: ["uzmanlik_ogrencisi"] };
+    const html = render(createElement(UserDetailView, baseDetailViewProps({ detail: resident })));
+    expect(html).toContain(t("admin.users.detail.roles.revokeResident"));
+    expect(html).toContain(t("admin.users.role.uzmanlik_ogrencisi"));
+  });
+
+  it("swapBaseRole ile üretilen tam küme setRoles'e verildiğinde uzmanlık öğrencisi ↔ kullanıcı geçişi yapılır (T219)", async () => {
+    const source = createMockUsersSource(69, 5);
+    const first = generateSyntheticUsers(69, 5)[0];
+    if (first === undefined) throw new Error("Test verisi boş.");
+    const madeResident = await source.setRoles(first.id, ["uzmanlik_ogrencisi"], null);
+    expect(madeResident.roles).toEqual(["uzmanlik_ogrencisi"]);
+    expect(madeResident.role).toBe("uzmanlik_ogrencisi");
+    expect(madeResident.history.at(-1)?.action).toBe("role.resident.grant");
+    const madeStudent = await source.setRoles(first.id, ["kullanici"], null);
+    expect(madeStudent.roles).toEqual(["kullanici"]);
+    expect(madeStudent.role).toBe("kullanici");
+    expect(madeStudent.history.at(-1)?.action).toBe("role.resident.revoke");
   });
 });
 

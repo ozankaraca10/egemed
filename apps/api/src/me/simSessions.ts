@@ -553,7 +553,7 @@ export function registerSimSessionRoutes(app: Hono<AppEnv>, deps: SimSessionDeps
     const hintsUsed = counted.reduce((sum, entry) => sum + entry.result.hintsUsed, 0);
     let attemptId: string | null = null;
     let xpGained = 0;
-    // Öğretim üyesi (T171) oyunlaştırmaya katılmaz: deneme yazılmaz.
+    // Öğretim üyesi (T171) ve uzmanlık öğrencisi (T219) oyunlaştırmaya katılmaz: deneme yazılmaz.
     if (actor.gamified) {
       // Rozet özeti sime özgüdür: Ausculta kodlu, Opaca/Pulse yalnız genel alanlarla yazılır.
       // (Pulse rozet özeti istemci sayaçlarına dayanır — sunucu oturumunda üretilemez, T202 Opaca kararı.)

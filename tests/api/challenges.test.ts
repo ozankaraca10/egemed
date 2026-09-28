@@ -18,10 +18,11 @@ const MINUTE = 60_000;
 
 const ZEYNEP = user({ id: "00000000-0000-4000-8000-000000000031", username: "zeynep.a", displayName: "Zeynep A", authMethod: "dev", simAccess: ["ausculta"] });
 const HOCA = user({ id: "00000000-0000-4000-8000-000000000032", username: "hoca.b", displayName: "Hoca B", authMethod: "dev", roles: ["ogretim_uyesi"], simAccess: ["ausculta"] });
+const UZMAN = user({ id: "00000000-0000-4000-8000-000000000034", username: "uzman.d", displayName: "Uzman D", authMethod: "dev", roles: ["uzmanlik_ogrencisi"], simAccess: ["ausculta"] });
 const UZAK = user({ id: "00000000-0000-4000-8000-000000000033", username: "uzak.c", displayName: "Uzak C", authMethod: "dev", institutionId: OTHER_INSTITUTION_ID, simAccess: ["ausculta"] });
 
 function harness(): AdminHarness {
-  const users = [...DEFAULT_USERS.map((entry) => (entry.id === ALI.id ? { ...ALI, simAccess: ["ausculta"] as const } : entry)), ZEYNEP, HOCA, UZAK];
+  const users = [...DEFAULT_USERS.map((entry) => (entry.id === ALI.id ? { ...ALI, simAccess: ["ausculta"] as const } : entry)), ZEYNEP, HOCA, UZMAN, UZAK];
   const h = createAdminHarness({ users });
   // Öğrenme kilidi (27 Eyl 2026): düello testleri davranış kilidini ölçmez;
   // kurulumda ilgili kullanıcılar için Ausculta tamamlama kaydı eklenir.
@@ -119,15 +120,19 @@ describe("Meydan Okuma (ADR-010)", () => {
     expect(list.map((c) => c.challengeId)).toContain(invite.challengeId);
   });
 
-  it("kurallar: öğretim üyesi katılamaz/oluşturamaz, kendi davetine katılamaz, başka kurum bulamaz, tek rakip", async () => {
+  it("kurallar: öğretim üyesi ve uzmanlık öğrencisi katılamaz/oluşturamaz, kendi davetine katılamaz, başka kurum bulamaz, tek rakip", async () => {
     const h = harness();
     const ali = await login(h, "ali.veli");
     const zeynep = await login(h, "zeynep.a");
     const hoca = await login(h, "hoca.b");
+    const uzman = await login(h, "uzman.d");
     const uzak = await login(h, "uzak.c");
     const invite = await create(h, ali);
     expect((await call(h, hoca, "POST", "/me/challenges", { simId: "ausculta" })).status).toBe(403);
     expect((await call(h, hoca, "POST", "/me/challenges/join", { code: invite.code })).status).toBe(403);
+    // T219: uzmanlık öğrencisi oyunlaştırma dışıdır; düello oluşturamaz/katılamaz.
+    expect((await call(h, uzman, "POST", "/me/challenges", { simId: "ausculta" })).status).toBe(403);
+    expect((await call(h, uzman, "POST", "/me/challenges/join", { code: invite.code })).status).toBe(403);
     expect((await call(h, ali, "POST", "/me/challenges/join", { code: invite.code })).status).toBe(409);
     expect((await call(h, uzak, "POST", "/me/challenges/join", { code: invite.code })).status).toBe(404);
     expect((await call(h, zeynep, "POST", "/me/challenges/join", { code: invite.code })).status).toBe(200);

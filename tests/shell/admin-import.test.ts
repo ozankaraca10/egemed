@@ -212,6 +212,16 @@ describe("validateImportRow (E3 §f satır kuralları)", () => {
     expect(row.status).toBe("valid");
   });
 
+  it("rol 'uzmanlik_ogrencisi' hatasızdır (T219: atanabilir roller genişledi)", () => {
+    const row = validateImportRow(
+      { ...emptyRaw(), ad_soyad: "Ad Soyad", kullanici_adi: "gecerli.uzmanlik.ogrencisi", rol: "uzmanlik_ogrencisi" },
+      1,
+      context(),
+    );
+    expect(row.errors.map((e) => e.code)).not.toContain("role_forbidden");
+    expect(row.status).toBe("valid");
+  });
+
   it("bilinmeyen birim kodu unknown_unit döner; bilinen kod hatasızdır", () => {
     const unknown = validateImportRow(
       { ...emptyRaw(), ad_soyad: "Ad Soyad", birim_kodu: "yok-boyle-birim", kullanici_adi: "gecerli.kullanici" },

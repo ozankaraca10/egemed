@@ -42,10 +42,11 @@ const AUTH_METHOD_KEYS: Record<UserAuthMethod, TrKey> = {
   sso: "admin.users.authMethod.sso",
 };
 
-/** Form/onay adımında sunulan roller (§b: `admin` hariç, T184). */
+/** Form/onay adımında sunulan roller (§b: `admin` hariç; T184, T219). */
 const ASSIGNABLE_ROLE_KEYS: Record<AssignableRole, TrKey> = {
   kullanici: "admin.users.role.kullanici",
   ogretim_uyesi: "admin.users.role.ogretim_uyesi",
+  uzmanlik_ogrencisi: "admin.users.role.uzmanlik_ogrencisi",
 };
 
 export interface UserFormViewProps {
@@ -190,6 +191,7 @@ export function UserFormView({
                 options={[
                   { label: t("admin.users.role.kullanici"), value: "kullanici" },
                   { label: t("admin.users.role.ogretim_uyesi"), value: "ogretim_uyesi" },
+                  { label: t("admin.users.role.uzmanlik_ogrencisi"), value: "uzmanlik_ogrencisi" },
                 ]}
                 value={values.role}
               />
