@@ -168,6 +168,7 @@ export type { BodyType, NormPoint, StageBox, StageCoordPoint, StageRect, StageVi
 export {
   TUBE_ANCHOR_RATIO,
   TUBE_CHESTPIECE_RADIUS,
+  TUBE_ATTACH_DIR,
   tubeAnchor,
   tubePath,
   tubeTip,

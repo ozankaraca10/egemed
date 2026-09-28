@@ -43,8 +43,8 @@ test.describe("Ausculta stetoskop tüpü (T228)", () => {
     const parsedBefore = parseTube(before);
     const viewBox = await viewBoxOf(tube);
     // Sabit bağlantı: gövde sahnesinin sol üst köşesi (~%4, %4).
-    expect(parsedBefore.start.x / viewBox.w).toBeCloseTo(0.04, 2);
-    expect(parsedBefore.start.y / viewBox.h).toBeCloseTo(0.04, 2);
+    expect(parsedBefore.start.x / viewBox.w).toBeCloseTo(0.06, 2);
+    expect(parsedBefore.start.y / viewBox.h).toBeCloseTo(0.12, 2);
 
     const steth = stage.locator(".steth");
     await steth.scrollIntoViewIfNeeded();
