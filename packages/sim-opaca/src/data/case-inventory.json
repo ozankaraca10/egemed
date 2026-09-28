@@ -1,0 +1,105 @@
+{
+  "totalCases": 188,
+  "practicePoolSize": 188,
+  "assessmentPoolSize": 124,
+  "assessmentQuestions": 399,
+  "pediatricCases": 8,
+  "coverage": {
+    "air_trapping": {
+      "p": 1,
+      "a": 0
+    },
+    "airspace_opacity": {
+      "p": 25,
+      "a": 25
+    },
+    "atelectasis": {
+      "p": 12,
+      "a": 9
+    },
+    "cardiomegaly": {
+      "p": 14,
+      "a": 8
+    },
+    "clavicle_fracture": {
+      "p": 2,
+      "a": 0
+    },
+    "diaphragm_hernia_congenital": {
+      "p": 1,
+      "a": 0
+    },
+    "edema": {
+      "p": 1,
+      "a": 0
+    },
+    "elevated_hemidiaphragm": {
+      "p": 1,
+      "a": 0
+    },
+    "emphysema": {
+      "p": 2,
+      "a": 0
+    },
+    "hampton_hump": {
+      "p": 1,
+      "a": 0
+    },
+    "hiatal_hernia": {
+      "p": 3,
+      "a": 0
+    },
+    "hyperinflation": {
+      "p": 2,
+      "a": 0
+    },
+    "miliary_pattern": {
+      "p": 2,
+      "a": 2
+    },
+    "no_finding_report": {
+      "p": 1,
+      "a": 0
+    },
+    "nodule_mass": {
+      "p": 20,
+      "a": 14
+    },
+    "normal": {
+      "p": 30,
+      "a": 28
+    },
+    "pleural_effusion": {
+      "p": 12,
+      "a": 9
+    },
+    "pneumothorax": {
+      "p": 15,
+      "a": 11
+    },
+    "rib_fracture": {
+      "p": 3,
+      "a": 0
+    },
+    "steeple_sign": {
+      "p": 1,
+      "a": 0
+    },
+    "tuberculosis": {
+      "p": 18,
+      "a": 0
+    },
+    "tuberculosis_cavity": {
+      "p": 10,
+      "a": 8
+    },
+    "tuberculosis_fibrosis": {
+      "p": 10,
+      "a": 10
+    },
+    "westermark_sign": {
+      "p": 1,
+      "a": 0
+    }
+  }
+}

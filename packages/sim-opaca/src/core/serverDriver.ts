@@ -4,7 +4,7 @@ import type { Telemetry } from "./types";
 import { fromServerResult, pendingAssessmentResult, serverCaseId, toClientCase, type ServerCaseMeta } from "./serverSession";
 
 /**
- * A1.4 (ADR-009): sunucu vaka oturumu sürücüsü. Ekranlardan bağımsız eşzamansız
+ * A2.3 (ADR-009): sunucu vaka oturumu sürücüsü. Ekranlardan bağımsız eşzamansız
  * adımlar; her adım sonucu reducer eylemi olarak `dispatch` edilir. Hata metinleri
  * kullanıcıya gösterilecek Türkçe iletiye çevrilir (ayrıntı sızdırılmaz).
  */
@@ -37,7 +37,7 @@ export async function startServerSession(
       challengeId !== null
         ? await sessions.startChallenge(challengeId)
         : await sessions.start(mode, focusFinding === null ? {} : { focusFinding });
-    dispatch({ type: "serverStarted", sessionId: session.sessionId, mode: session.mode, caseCount: session.caseCount });
+    dispatch({ type: "serverStarted", sessionId: session.sessionId, mode: session.mode, caseCount: session.caseCount, perCaseLimitMs: session.perCaseLimitMs });
     await loadServerCase(sessions, dispatch, session.sessionId, 1, session.mode);
   } catch (error) {
     dispatch({ type: "serverError", message: serverErrorMessage(error) });
@@ -53,8 +53,8 @@ export async function loadServerCase(
 ): Promise<void> {
   try {
     const publicCase = await sessions.getCase(sessionId, index);
-    if (publicCase.simId !== "ausculta") throw new Error("not_found");
-    dispatch({ type: "serverCaseLoaded", index, clientCase: toClientCase(publicCase, mode) });
+    if (publicCase.simId !== "opaca") throw new Error("not_found");
+    dispatch({ type: "serverCaseLoaded", index, clientCase: toClientCase(publicCase, mode, sessionId, sessions.imageUrl) });
   } catch (error) {
     dispatch({ type: "serverError", message: serverErrorMessage(error) });
   }
@@ -103,20 +103,16 @@ export async function submitServerCase(
       answers: Object.fromEntries(Object.entries(answers).map(([qid, values]) => [qid, [...values]])),
       telemetry: {
         visits: Object.fromEntries(
-          Object.entries(telemetry.visits).map(([pointId, visit]) => [
-            pointId,
-            {
-              dwellMs: Math.round(visit.dwellMs),
-              listenMs: Math.round(visit.listenMs),
-              visits: visit.visits,
-              firstOrder: visit.firstOrder,
-            },
+          Object.entries(telemetry.visits).map(([zoneId, visit]) => [
+            zoneId,
+            { dwellMs: Math.round(visit.dwellMs), listenMs: 0, visits: visit.visits, firstOrder: visit.firstOrder },
           ]),
         ),
         order: [...telemetry.order],
-        headChanges: telemetry.headChanges,
-        headUse: { ...telemetry.headUse },
-        replayCount: telemetry.replayCount,
+        // Opaca görüntüleyicisi ses başlığı/kayıt sayacı taşımaz; sözleşme nötr değerler ister.
+        headChanges: 0,
+        headUse: { bell: 0, diaphragm: 0 },
+        replayCount: 0,
       },
     });
     if (response.mode === "practice") {

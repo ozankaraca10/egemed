@@ -2,9 +2,6 @@ import { documentLike, locationSearch } from '../platform-dom'
 import type { ModalEnv } from '../ui/modal-env'
 import { useMemo, useState } from 'react'
 import { useStore } from '../core/StoreProvider'
-import { poolFor } from '../data/pool'
-import { sampleSession, SESSION_SIZE } from '../core/session'
-import { sessionSeedFromNow } from './simulation-core'
 import { OPACA_BADGES } from '../gamification/catalog'
 import { OPACA_RULES } from '../gamification/rules'
 import { Footer } from '../ui/chrome'
@@ -27,7 +24,7 @@ const goalIcon = (id: WeeklyGoal['id']) => {
 
 /** Başarılarım (tasarım promptu §4). Yalnız oyunlaştırma bayrağı açıkken erişilir. */
 function AchievementsBody({ embedded = false, devBuild = false, modalEnv, server }: { embedded?: boolean; devBuild?: boolean; modalEnv?: ModalEnv; server: ServerGamiData | null }) {
-  const { dispatch, now } = useStore()
+  const { dispatch } = useStore()
   const demo = gamiDemoFrom(locationSearch(), devBuild)
   const view = useGami(0, demo)
   const [period, setPeriod] = useState<AchievementsPeriod>('last30')
@@ -70,13 +67,7 @@ function AchievementsBody({ embedded = false, devBuild = false, modalEnv, server
   const scrollToBadges = () => documentLike()?.getElementById('gami-badges')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
 
   const startAssessment = () => {
-    const seed = sessionSeedFromNow(now())
-    dispatch({
-      type: 'startSession',
-      practiceIds: sampleSession(poolFor('practice'), seed, SESSION_SIZE),
-      assessmentIds: sampleSession(poolFor('assessment'), seed + 1, SESSION_SIZE),
-      seed,
-    })
+    // A2.3: örneklemi sunucu sürücüsü çeker (istemcide havuz yok).
     dispatch({ type: 'startMode', mode: 'assessment' })
   }
 

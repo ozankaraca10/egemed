@@ -19,7 +19,7 @@ async function sessionSourceFor(simId: SimulatorId, audience: string, apiBaseUrl
   if (apiBaseUrl !== null) return createBrowserSessionSource(apiBaseUrl, simId);
   if (import.meta.env.DEV) {
     const module = await import("./sims/devLocalSessions");
-    return module.createDevLocalSessionSource(shellNow, simId);
+    return module.createDevLocalSessionSource(simId, shellNow);
   }
   return null;
 }

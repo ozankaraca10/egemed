@@ -1,18 +1,17 @@
-import { Fragment, useMemo, useState, type JSX, type ReactNode } from 'react'
+import { Fragment, useCallback, useMemo, useState, type JSX, type ReactNode } from 'react'
 import { useStore } from '../core/StoreProvider'
+import { useChallenge } from '../EmbeddedContext'
 import { Footer, EcgDeco } from '../ui/chrome'
 import { ScreenHeading } from '../ui/ScreenHeading'
 import { aggregateResults } from '../core/scoring'
-import { ALL_CASES, poolFor } from '../data/pool'
-import { sampleSession, SESSION_SIZE } from '../core/session'
 import { firstWeakLibraryKey, weakDomainKeys } from '../core/flow'
-import { libraryKeyForFinding } from '../data/terminology'
 import { decodeMark } from '../core/geometry'
+import { reviewOf, type ServerReview } from '../core/serverSession'
 import { GamiGainsView } from '@egemed/gami-ui'
 import { useOpacaSessionGains } from '../gamification/sessionGains'
 import { opacaGamiIcons } from '../ui/opacaGami'
 import { useGamiContext } from '../gamification/GamiContext'
-import { caseById, getGamiRepo } from '../gamification/bindings'
+import { getGamiRepo } from '../gamification/bindings'
 import {
   IconScan,
   IconLungs,
@@ -28,9 +27,9 @@ import type { ScoringWeights } from '../core/types'
 
 /** Sonuç ekranı (E2 §8 S17): özet şerit, alan bazlı yüzde performans, genişleyebilir vaka raporu.
  *  Port: `Date.now`/`window` yok; tohum `now`, çıkış `ResultsScreenEnv`, oyunlaştırma `gamiEnabled`
- *  seam'i arkasında; `cmi.learner_name` ve `opaca.gami.v1` profil adı yolu kesilir (§7.1, KVKK). */
-
-const cases = ALL_CASES
+ *  seam'i arkasında; `cmi.learner_name` ve `opaca.gami.v1` profil adı yolu kesilir (§7.1, KVKK).
+ *  A2.3 (ADR-009): vaka raporu sunucu anlık görüntüsü + sonuç meta verisinden kurulur;
+ *  istemcide yerel vaka havuzu yoktur. */
 
 /** LMS çıkış seam'i (kaynak: `runtime.flags.scormAvailable` + `window.close`). */
 export interface ResultsScreenEnv {
@@ -94,21 +93,19 @@ export function ResultsScreen({
   }
 
   const retrySame = () => {
+    // Yeni oturumu sunucu sürücüsü başlatır (istemcide örneklem yok).
     dispatch({ type: 'startMode', mode: state.mode })
   }
 
-  const retryNewSample = () => {
-    const seed = (now() % 2_147_483_647) | 0
-    const practiceIds = sampleSession(poolFor('practice'), seed, SESSION_SIZE)
-    const assessmentIds = sampleSession(poolFor('assessment'), seed + 1, SESSION_SIZE)
-    dispatch({ type: 'startSession', practiceIds, assessmentIds, seed })
-    dispatch({ type: 'startMode', mode: state.mode })
-  }
+  // ADR-010: düelloda sonuç ekranından kazanan ekranına dönüş (Ausculta deseni).
+  const challenge = useChallenge()
 
-  const weakLearnKey = firstWeakLibraryKey(state.caseResults, (caseId) => {
-    const c = cases.find((x) => x.id === caseId)
-    return c ? c.libraryKey ?? libraryKeyForFinding(c.primaryFinding) : null
-  })
+  /** A2.3: vaka raporu sunucu anlık görüntüsü (soru metni/seçenekler) + sonuç
+   *  meta verisinden (doğru seçenek jetonları, geri bildirim, başlık) kurulur. */
+  const reviewFor = (caseId: string): ServerReview => (state.server === null ? { title: caseId, questions: [] } : reviewOf(state.server, caseId))
+
+  // Sunucu sonucu bulgu/kütüphane anahtarı taşımaz; zayıf konu odağı şimdilik yok.
+  const weakLearnKey = firstWeakLibraryKey(state.caseResults, () => null)
 
   const studyLearn = () => {
     if (weakLearnKey) dispatch({ type: 'setLearnFocus', key: weakLearnKey })
@@ -136,6 +133,12 @@ export function ResultsScreen({
   // useOpacaSessionGains etkisi finishedAt'ı bağımlılık okur; her render'da yeni
   // Date kimliği etkiyi sonsuz döngüye sokup sonuç ekranını kilitler (T116b).
   const finishedAt = useMemo(() => new Date(now()), [now])
+  // A2.3: sunucu oturumunda denemeyi sunucu yazar; kazanım kartı yerel yazım yapmaz
+  // (`persist: false`), yalnız bu oturumun tahmini kazanımını gösterir.
+  const serverManaged = state.server !== null
+  const cases = state.server?.cases
+  // Kimlik sabit olmalı: her render'da yeni fonksiyon, kazanım etkisini sonsuz döngüye sokar.
+  const caseById = useCallback((id: string) => cases?.[id], [cases])
   const gainsModel = useOpacaSessionGains(
     gamiEnabled && state.mode !== 'learn' && state.caseResults.length > 0
       ? {
@@ -146,6 +149,7 @@ export function ResultsScreen({
           seed: state.session.seed,
           durationMs: state.assessmentTimer,
           finishedAt,
+          persist: !serverManaged,
         }
       : null,
   )
@@ -261,13 +265,13 @@ export function ResultsScreen({
                 </thead>
                 <tbody>
                   {state.caseResults.map((r) => {
-                    const c = cases.find((x) => x.id === r.caseId)
+                    const review = reviewFor(r.caseId)
                     const isOpen = expanded === r.caseId
                     return (
                       <Fragment key={r.caseId}>
                         <tr className="report-row" onClick={() => setExpanded(isOpen ? null : r.caseId)}>
                           <td className="report-chev"><IconChevronRight className={isOpen ? 'rot' : ''} width={14} height={14} /></td>
-                          <td>{c?.title ?? r.caseId}</td>
+                          <td>{review.title}</td>
                           <td>{Math.round(r.total)}/100</td>
                           <td className={r.mastery ? 'ok' : 'no'}>{r.mastery ? 'Başarılı' : 'Başarısız'}</td>
                           <td>{r.hintsUsed}</td>
@@ -277,7 +281,7 @@ export function ResultsScreen({
                             <td colSpan={5}>
                               <ul className="report-detail-list">
                                 {r.answers.map((a) => {
-                                  const question = c?.questions.find((qq) => qq.id === a.qid)
+                                  const question = review.questions.find((qq) => qq.id === a.qid)
                                   if (!question) return null
                                   const isMark = question.type === 'localization'
                                   const givenLabels = isMark
@@ -314,11 +318,23 @@ export function ResultsScreen({
           </div>
 
           <div className="results-actions">
-            <button type="button" className="btn primary" onClick={exit}>
+            {state.serverChallengeId !== null && challenge.onChallengeFinished !== undefined ? (
+              <button
+                type="button"
+                className="btn primary"
+                onClick={() => {
+                  if (state.serverChallengeId !== null) challenge.onChallengeFinished?.(state.serverChallengeId)
+                }}
+              >
+                Düello sonucunu gör
+              </button>
+            ) : null}
+            <button type="button" className={state.serverChallengeId !== null ? 'btn outline' : 'btn primary'} onClick={exit}>
               <IconExit /> Modülden Çık
             </button>
-            <button type="button" className="btn outline" onClick={retrySame}>Tekrar dene</button>
-            <button type="button" className="btn outline" onClick={retryNewSample}>Yeni örneklem</button>
+            {state.serverChallengeId === null ? (
+              <button type="button" className="btn outline" onClick={retrySame}>Tekrar dene</button>
+            ) : null}
             {state.topicReturn ? (
               <button type="button" className="btn outline" onClick={() => dispatch({ type: 'returnToTopic' })}>
                 Görüntüye dön: {state.topicReturn.title}

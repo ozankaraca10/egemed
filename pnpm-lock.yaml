@@ -226,6 +226,9 @@ importers:
 
   packages/sim-opaca:
     dependencies:
+      '@egemed/contracts':
+        specifier: workspace:*
+        version: link:../contracts
       '@egemed/gami-catalogs':
         specifier: workspace:*
         version: link:../gami-catalogs

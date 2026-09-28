@@ -9,8 +9,8 @@ import { browserApiWindow, csrfTokenFromCookie } from "../apiAuth";
  * API hataları sim sürücüsünün tanıdığı kodlu iletiye çevrilir (ör. `case_time_exceeded`).
  */
 
-/** Sunucu oturumu olan simler (A3.3: Pulse eklendi; A2'de Opaca genişler). */
-export const SERVER_SESSION_SIMS: readonly SimId[] = ["ausculta", "pulse"];
+/** Sunucu oturumu olan simler: uygulama/değerlendirme vakaları yalnız sunucu kanalından gelir (ADR-009; A1 Ausculta, A2.3 Opaca, A3.3 Pulse). */
+export const SERVER_SESSION_SIMS: readonly SimId[] = ["ausculta", "opaca", "pulse"];
 
 function rethrow(error: unknown): never {
   if (error instanceof ApiError) {
@@ -38,6 +38,7 @@ export function createApiSessionSource(client: Pick<ApiClient, "simSessions" | "
     answer: (sessionId, index, body) => guarded(async () => (await api.answer(simId, sessionId, index, body)).data),
     finish: (sessionId) => guarded(async () => (await api.finish(simId, sessionId)).data),
     audioUrl: (sessionId, token) => api.audioUrl(simId, sessionId, token),
+    imageUrl: (sessionId, token) => api.imageUrl(simId, sessionId, token),
     startChallenge: (challengeId) => guarded(async () => (await client.challenges.startSession(challengeId)).data),
   };
 }

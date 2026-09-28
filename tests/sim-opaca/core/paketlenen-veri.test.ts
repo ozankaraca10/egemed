@@ -1,6 +1,5 @@
 import { describe, expect, it } from "vitest";
 import {
-  ALL_CASES,
   EXPERT_SOURCES,
   FINDINGS,
   IMAGES,
@@ -8,13 +7,13 @@ import {
   ZONES,
   ZONE_IDS,
   getImage,
-  poolFor,
   validateCase,
 } from "../../../packages/sim-opaca/src/index";
+import { ALL_CASES, poolFor } from "../bank-cases";
 
-/** Paketlenen veri grubu — kaynak egemed-opaca tests/core.test.ts `describe('paketlenen veri')` portu (7 test).
- *  JSON içerikleri T15b-0 ile kopyalandı (checksum eşit); testler import edilen gerçek veriyi doğrular,
- *  fixture veri yoktur. */
+/** Paketlenen veri grubu — kaynak egemed-opaca tests/core.test.ts `describe('paketlenen veri')` portu.
+ *  A2.3 (ADR-009): istemci vaka havuzu taşımaz; anahtarlı vakalar bankanın veri yolundan
+ *  (test-yalnız `bank-cases.ts`) okunur, saf doğrulayıcılar istemciden gelir. */
 
 const findingIds = new Set(Object.keys(FINDINGS));
 

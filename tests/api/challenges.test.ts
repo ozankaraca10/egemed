@@ -1,3 +1,4 @@
+import type { AuscultaPublicCase } from "../../packages/contracts/src/index";
 import { describe, expect, it } from "vitest";
 import {
   challengeListResponseSchema,
@@ -59,10 +60,11 @@ async function play(h: AdminHarness, who: Login, challengeId: string, correctCou
   expect(response.status).toBe(201);
   const session = simSessionStartResponseSchema.parse(await response.json()).data;
   expect(session).toMatchObject({ mode: "challenge", perCaseLimitMs: 2 * MINUTE, totalLimitMs: 8 * MINUTE });
-  const opened = [];
+  const opened: AuscultaPublicCase[] = [];
   for (let index = 1; index <= session.caseCount; index += 1) {
     const caseResponse = await call(h, who, "GET", `/me/sims/ausculta/sessions/${session.sessionId}/cases/${index}`);
     const publicCase = simSessionCaseResponseSchema.parse(await caseResponse.json()).data;
+    if (publicCase.simId !== "ausculta") throw new Error("düello testi Ausculta vakası bekler");
     opened.push(publicCase);
     h.advance(stepMs);
     const answers = index <= correctCount ? correctFor(h, session.sessionId, index) : {};

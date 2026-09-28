@@ -92,6 +92,7 @@ function fakeSessions(overrides: Partial<SimSessionSource> = {}) {
       return { mode: "practice", total: 100, max: 100, passed: true, cases: [RESULT], xpGained: 40 };
     },
     audioUrl: () => "",
+    imageUrl: () => "",
     startChallenge: async () => Promise.reject(new Error("not_found")),
     ...overrides,
   };

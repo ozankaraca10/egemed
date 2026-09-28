@@ -187,7 +187,8 @@
 .eg-sim-opaca .report-table th, .eg-sim-opaca .report-table td{ border-bottom: 1px solid var(--border); padding: 8px 9px; }
 .eg-sim-opaca .report-table th{ color: var(--ink-600); font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: .6px; }
 .eg-sim-opaca .report-table td.ok{ color: var(--green-600); font-weight: 700; }
-.eg-sim-opaca .report-table td.no{ color: var(--red-500); font-weight: 700; }
+/* A2.3: sunucu sonuçlarıyla 'Başarısız' hücreleri sık görünür; --red-500 AA altı (3.9:1). */
+.eg-sim-opaca .report-table td.no{ color: var(--red-600); font-weight: 700; }
 .eg-sim-opaca .report-table-v2 .report-row{ cursor: pointer; }
 .eg-sim-opaca .report-table-v2 .report-row:hover{ background: var(--blue-50); }
 .eg-sim-opaca .report-chev{ width: 20px; }
@@ -200,7 +201,7 @@
 .eg-sim-opaca .rd-q{ grid-area: q; font-weight: 700; color: var(--ink-900); }
 .eg-sim-opaca .rd-mark{ grid-area: mark; font-weight: 800; }
 .eg-sim-opaca .report-detail-list li.ok .rd-mark{ color: var(--green-600); }
-.eg-sim-opaca .report-detail-list li.no .rd-mark{ color: var(--red-500); }
+.eg-sim-opaca .report-detail-list li.no .rd-mark{ color: var(--red-600); }
 .eg-sim-opaca .rd-given{ grid-area: given; color: var(--ink-600); }
 .eg-sim-opaca .rd-correct{ grid-area: correct; color: var(--green-600); }
 .eg-sim-opaca .rd-feedback{ grid-area: feedback; color: var(--ink-600); font-style: italic; margin-top: 2px; }

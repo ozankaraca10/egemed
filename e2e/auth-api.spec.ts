@@ -266,7 +266,9 @@ test.describe("API oturumu (dev sağlayıcı)", () => {
 
   test("dashboard gerçek oturumda demo 1450 XP göstermez", async ({ page }) => {
     const summary = page.waitForResponse(
-      (response) => response.url().includes("/me/gamification") && response.request().method() === "GET" && response.ok(),
+      // Yalnız özet ucu: liderlik/ödül istekleri aynı öneki taşır ve yarışta
+      // yakalanırsa `data.sims` boş okunup karşılaştırmayı bozar.
+      (response) => /\/me\/gamification$/.test(new URL(response.url()).pathname) && response.request().method() === "GET" && response.ok(),
     );
     await page.goto(STUDENT_ENTRY);
     await signIn(page, "ogrenci");
@@ -419,7 +421,7 @@ test.describe("API oturumu (dev sağlayıcı)", () => {
     for (const body of caseBodies) expect(body).not.toMatch(/"correct"|feedback|explanations/);
 
     const summary = page.waitForResponse(
-      (response) => response.url().includes("/me/gamification") && !response.url().includes("/attempts") && response.request().method() === "GET" && response.ok(),
+      (response) => /\/me\/gamification$/.test(new URL(response.url()).pathname) && response.request().method() === "GET" && response.ok(),
     );
     await page.goto("/#/");
     const payload = (await (await summary).json()) as {
@@ -431,26 +433,43 @@ test.describe("API oturumu (dev sağlayıcı)", () => {
     await expect(page.locator("[data-sim-id='pulse']")).toHaveAttribute("data-xp", String(pulseXp)); // Pulse denemesi yoksa özet girdisi yok; panel 0 XP (test sırasından bağımsız)
   });
 
-  test("Opaca konu oturumu API oturumunda öğrenme sayaçlarıyla sunucuya yazılır (ADR-008 S4, T143)", async ({ page }) => {
+  test("Opaca uygulaması sunucu oturumundan gelir: anahtarsız vaka, görüntü vekili 200 ve sunucu denemesi (A2.3, ADR-009)", async ({ page }) => {
+    // 5 vaka × (vaka, kontrol, görüntü, yanıt) sunucu gidiş-dönüşü: varsayılan 30 sn yetmez.
+    test.setTimeout(120_000);
     await page.goto(STUDENT_ENTRY);
     await signIn(page, "ogrenci");
     await expect(page).toHaveURL(/#\/$/);
-    const posted = page.waitForRequest(
-      (request) => request.url().includes("/me/gamification/opaca/attempts") && request.method() === "POST",
-    );
+    const caseBodies: string[] = [];
+    page.on("response", async (response) => {
+      const url = response.url();
+      if (/\/me\/sims\/opaca\/sessions\/[^/]+\/cases\/\d+$/.test(url) && response.request().method() === "GET") {
+        caseBodies.push(await response.text().catch(() => ""));
+      }
+    });
+    const clientAttempts: string[] = [];
+    page.on("request", (request) => {
+      if (request.url().includes("/me/gamification/opaca/attempts")) clientAttempts.push(request.url());
+    });
+    const before = await page.request.get("/api/me/gamification/opaca");
+    const xpBefore = ((await before.json()) as { data: { xp: number } }).data.xp;
+    const imageOk = page.waitForResponse((response) => /\/me\/sims\/opaca\/sessions\/[^/]+\/image\//.test(response.url()) && response.status() === 200);
+    const checked = page.waitForResponse((response) => /\/me\/sims\/opaca\/sessions\/[^/]+\/cases\/\d+\/check$/.test(response.url()) && response.ok());
+    const finished = page.waitForResponse((response) => /\/me\/sims\/opaca\/sessions\/[^/]+\/finish$/.test(response.url()));
     await page.goto("/#/sims/opaca");
     const root = page.locator(".eg-sim-opaca").first();
     await expect(page.getByRole("heading", { name: "Çalışma modunu seçin" })).toBeVisible({ timeout: 20_000 });
-    // Öğrenme ekranında konu açmak öğrenme etkinliği yazar; ardından konu uygulaması biter.
     await startTopicPractice(root);
-    await completeTopicPractice(root, "opaca");
-    const request = await posted;
-    const body = request.postDataJSON() as { summary?: Record<string, number> };
-    expect(body.summary?.["opaca.v"]).toBe(1);
-    expect(body.summary?.["opaca.mode"]).toBe(0);
-    expect(body.summary?.["opaca.learn"] ?? 0, "birikimli öğrenme konusu").toBeGreaterThanOrEqual(1);
-    expect(body.summary?.["opaca.lib"] ?? 0, "kütüphane konu toplamı").toBeGreaterThan(0);
-    expect((await request.response())?.ok(), "deneme yazımı").toBe(true);
+    // İlk vaka: yanıt ver → uygulama kontrolü (check) sunucuda yapılır; görüntü vekilden gelir.
+    const completion = completeTopicPractice(root, "opaca");
+    await checked;
+    await imageOk;
+    await completion;
+    expect((await finished).ok(), "sunucu oturumu kapanışı").toBe(true);
+    expect(caseBodies.length, "sunucudan gelen vaka").toBeGreaterThan(0);
+    for (const body of caseBodies) expect(body).not.toMatch(/"correct"|feedbackCorrect|targetFinding|\.webp|runtimeUrl|sourceFile|clinicalDiagnosis/);
+    expect(clientAttempts, "istemci deneme yazmaz (sunucu yazar)").toEqual([]);
+    const after = await page.request.get("/api/me/gamification/opaca");
+    expect(((await after.json()) as { data: { xp: number } }).data.xp).toBeGreaterThan(xpBefore);
   });
 
   test("Ausculta uygulaması sunucu oturumundan gelir: anahtarsız vaka, sunucu puanı ve denemesi (A1.4, ADR-009)", async ({ page }) => {

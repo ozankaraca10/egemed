@@ -1,7 +1,7 @@
 import type { AttemptRecord, CohortFilter, GamiLeaderboardRow, Period } from "@egemed/gamification-core";
 import type {
-  AuscultaPublicCase,
   SimCaseResult,
+  SimPublicCase,
   SimSession,
   SimSessionAnswerRequest,
   SimSessionMode,
@@ -144,7 +144,7 @@ export const VISITOR_LOCK_TEXT = {
 export interface SimSessionSource {
   /** Doğrudan başlatma (uygulama/değerlendirme); `focusFinding` yalnız uygulamada (öğrenme → "bu bulguda çalış"). */
   start(mode: "practice" | "assessment", options?: { readonly focusFinding?: string }): Promise<SimSession>;
-  getCase(sessionId: string, index: number): Promise<AuscultaPublicCase>;
+  getCase(sessionId: string, index: number): Promise<SimPublicCase>;
   hint(sessionId: string, index: number, questionId: string): Promise<{ readonly hint: string; readonly hintsUsed: number }>;
   /** Yalnız uygulama: tek soruyu kontrol eder (anında geri bildirim); soru kilitlenir. */
   check(
@@ -168,6 +168,8 @@ export interface SimSessionSource {
   }>;
   /** Oturuma bağlı ses jetonunun oynatılabilir adresi. */
   audioUrl(sessionId: string, token: string): string;
+  /** Oturuma bağlı görüntü jetonunun oynatılabilir adresi (A2.2: Opaca vekili). */
+  imageUrl(sessionId: string, token: string): string;
   /** ADR-010: Meydan Okuma oturumu (aynı vakalar/sıra; süreli). Desteklenmiyorsa reddeder. */
   startChallenge(challengeId: string): Promise<SimSession>;
 }

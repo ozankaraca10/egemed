@@ -235,12 +235,11 @@ const simSessionAnyCaseResponseSchema = z.strictObject({
 });
 
 /**
- * Sunucunun vaka yanıtı: üç simin de anahtarsız gövdesini doğrular. Dışa vuran
- * tip, istemcileri hazır olana dek AuscultaPublicCase olarak kalır (A2.2 opaca,
- * A3.2 pulse istemcileriyle birlikte birleşime genişletilir).
+ * Sunucunun vaka yanıtı: üç simin de anahtarsız gövdesini doğrular. Tüketiciler
+ * `data.simId` ayrımıyla daraltır (ör. Ausculta istemcisi `"ausculta"` koruması).
  */
 export const simSessionCaseResponseSchema = simSessionAnyCaseResponseSchema as unknown as z.ZodType<{
-  readonly data: AuscultaPublicCase;
+  readonly data: SimPublicCase;
 }>;
 
 // --- İpucu, yanıt, bitiş --------------------------------------------------------

@@ -63,3 +63,15 @@ interface ImportMeta {
   readonly env: ImportMetaEnv;
   readonly url: string;
 }
+
+/**
+ * A2.3 — `devLocalSessions` jeton ve oturum kimliği üretiminde `globalThis.crypto`
+ * kullanır; kök test programı DOM lib'i taşımadığı için (uygulama programı
+ * `apps/shell` DOM ile derlenir) gereken en dar yüzey burada bildirilir.
+ */
+interface Crypto {
+  getRandomValues<T extends ArrayBufferView>(array: T): T;
+  randomUUID(): string;
+}
+
+declare const crypto: Crypto;
