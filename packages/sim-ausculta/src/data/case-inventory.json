@@ -1,9 +1,9 @@
 {
-  "totalCases": 199,
-  "practicePoolSize": 199,
-  "assessmentPoolSize": 84,
-  "assessmentQuestions": 219,
-  "pediatricCases": 7,
+  "totalCases": 200,
+  "practicePoolSize": 200,
+  "assessmentPoolSize": 85,
+  "assessmentQuestions": 223,
+  "pediatricCases": 8,
   "mixedCases": 115,
   "coverage": {
     "atrial_fibrillation": {
@@ -211,8 +211,8 @@
       "a": 7
     },
     "rhonchi": {
-      "p": 6,
-      "a": 6
+      "p": 7,
+      "a": 7
     },
     "s3": {
       "p": 4,

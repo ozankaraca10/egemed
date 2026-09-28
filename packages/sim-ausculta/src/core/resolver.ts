@@ -7,8 +7,9 @@ import externalManifest from "../data/sounds-external.json";
 
 export const manifest = soundsManifest as unknown as SoundsManifest;
 /** Birincil (HLS-CMDS) + envanter kayıtları (CirCor — pediatrik, ODC-BY 1.0; KAUH v3 — gerçek hasta
- *  posterior, CC BY 4.0). CirCor kayıtları yalnızca açıkça soundId ile hedeflendiğinde kullanılır;
- *  KAUH posterior kayıtları ise simulationLocation eşleşmesiyle (nokta bazlı) devreye girer. */
+ *  posterior, CC BY 4.0; SPRSound — pediatrik posterior, CC BY 4.0). CirCor ve SPRSound kayıtları
+ *  yalnızca açıkça soundId ile hedeflenir; KAUH posterior kayıtları ise simulationLocation
+ *  eşleşmesiyle (nokta bazlı) devreye girer. */
 export const RECORDS: SoundRecord[] = [
   ...manifest.records,
   ...((externalManifest as unknown as { records?: SoundRecord[] }).records ?? []),
@@ -30,6 +31,11 @@ const POSTERIOR_TO_ANTERIOR: Record<string, string> = {
   lung_left_lower_posterior: "lung_left_lower_anterior",
 };
 
+/** Otomatik (soundId'siz) konum eşleşmesine açık veri setleri: paket içi HLS-CMDS ile gerçek
+ *  hastadan bölge etiketli KAUH posterior kayıtları. CirCor ve SPRSound yalnızca açıkça
+ *  soundId ile hedeflenir; pediatrik SPRSound kayıtları yetişkin vakalara ASLA sızmaz (T234). */
+const AUTO_MATCH_DATASETS = new Set(["hls-cmds-v3", "kauh-v3"]);
+
 export function resolveAssignment(a: SoundAssignment): SoundRecord | null {
   if (a.soundId) return byId.get(a.soundId) ?? null;
   const matches = RECORDS.filter(
@@ -37,6 +43,7 @@ export function resolveAssignment(a: SoundAssignment): SoundRecord | null {
       r.category === a.category &&
       r.acousticFinding === a.acousticFinding &&
       r.validationStatus === "validated" &&
+      AUTO_MATCH_DATASETS.has(r.sourceDataset) &&
       // dürüst eşleme (§13): RC/LC gibi net olmayan kayıt konumları adlandırılmış
       // odak noktasına sunulmaz — sim konumu uyuşmalı ya da kayıt eşlemesiz olmalı
       (!a.pointId || r.simulationLocation === a.pointId) &&

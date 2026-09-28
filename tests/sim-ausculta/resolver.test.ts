@@ -71,6 +71,7 @@ function mapCircorLocations(locationsField: string) {
 
 const DATA = "packages/sim-ausculta/src/data";
 const cases = (JSON.parse(readFileSync("packages/assessment-bank/data/ausculta/cases.json", "utf8")) as { cases: CaseDef[] }).cases;
+const autoCases = (JSON.parse(readFileSync("packages/assessment-bank/data/ausculta/cases-auto.json", "utf8")) as { cases: CaseDef[] }).cases;
 const pointIds = (JSON.parse(readFileSync(`${DATA}/auscultation-points.json`, "utf8")) as { points: { id: string }[] }).points.map(
   (p) => p.id,
 );
@@ -285,5 +286,76 @@ describe("KAUH posterior kayıtları (T227)", () => {
     const rhonchi = resolveLibrarySoundEx("lung", "rhonchi", "lung_left_upper_posterior");
     expect(rhonchi.record?.simulationLocation).toBe("lung_left_upper_anterior");
     expect(rhonchi.fallbackFrom).toBe("lung_left_upper_anterior");
+  });
+});
+
+describe("SPRSound pediatrik posterior kayıtları (T234)", () => {
+  const allBankCases = [...cases, ...autoCases];
+  const sprsoundRecords = RECORDS.filter((record) => record.sourceDataset === "sprsound");
+  const populationOf = (caseDef: CaseDef): string | undefined => (caseDef as CaseDef & { population?: string }).population;
+
+  it("12 kayıt; hiçbiri konum eşleşmesiyle otomatik seçilmez (yalnız soundId)", () => {
+    expect(sprsoundRecords).toHaveLength(12);
+    for (const pointId of Object.keys(POSTERIOR_TO_ANTERIOR)) {
+      for (const finding of ["rhonchi", "wheezing"]) {
+        const res = resolveAssignment({ pointId, category: "lung", acousticFinding: finding });
+        if (res !== null) expect(res.sourceDataset, `${pointId} ${finding}`).not.toBe("sprsound");
+      }
+    }
+  });
+
+  it("yetişkin vakaların hiçbir ataması SPRSound kaydına çözülmez", () => {
+    const adultCases = allBankCases.filter((caseDef) => populationOf(caseDef) !== "pediatrik");
+    expect(adultCases.length).toBeGreaterThan(150);
+    let resolved = 0;
+    for (const caseDef of adultCases) {
+      for (const assignment of caseDef.soundAssignments) {
+        const record = resolveAssignment(assignment);
+        if (record === null) continue;
+        resolved += 1;
+        expect(record.sourceDataset, `${caseDef.id}/${assignment.pointId}`).not.toBe("sprsound");
+      }
+    }
+    expect(resolved).toBeGreaterThan(0);
+  });
+
+  it("case_pediatric_wheezing posterior noktaları SPRSound wheezing kayıtlarına sabitlidir", () => {
+    const caseDef = cases.find((entry) => entry.id === "case_pediatric_wheezing");
+    if (caseDef === undefined) throw new Error("case_pediatric_wheezing yok");
+    const posterior = caseDef.soundAssignments.filter((assignment) => assignment.pointId.includes("posterior"));
+    expect(posterior).toHaveLength(4);
+    for (const assignment of posterior) {
+      expect(assignment.soundId, assignment.pointId).toBeDefined();
+      const res = resolveAssignmentEx(assignment);
+      expect(res.record?.sourceDataset, assignment.pointId).toBe("sprsound");
+      expect(res.record?.acousticFinding, assignment.pointId).toBe("wheezing");
+      expect((res.record as unknown as { population?: string })?.population, assignment.pointId).toBe("pediatric");
+      expect(res.record?.simulationLocation, assignment.pointId).toBe(assignment.pointId);
+      expect(res.fallbackFrom, assignment.pointId).toBeUndefined();
+    }
+  });
+
+  it("case_pediatric_rhonchi posterior noktaları SPRSound ronküs kayıtlarına sabitlidir ve O7'den geçer", () => {
+    const caseDef = cases.find((entry) => entry.id === "case_pediatric_rhonchi");
+    if (caseDef === undefined) throw new Error("case_pediatric_rhonchi yok");
+    expect(populationOf(caseDef)).toBe("pediatrik");
+    expect(caseDef.modes).toEqual(["practice", "assessment"]);
+    const posterior = caseDef.soundAssignments.filter((assignment) => assignment.pointId.includes("posterior"));
+    expect(posterior).toHaveLength(4);
+    for (const assignment of posterior) {
+      const res = resolveAssignmentEx(assignment);
+      expect(res.record?.sourceDataset, assignment.pointId).toBe("sprsound");
+      expect(res.record?.acousticFinding, assignment.pointId).toBe("rhonchi");
+      expect(res.fallbackFrom, assignment.pointId).toBeUndefined();
+    }
+    // Gerçek posterior kayıt olduğu için değerlendirmede de sunulur (O7).
+    expect(assessmentPointFilter(caseDef.soundAssignments)).toEqual(caseDef.soundAssignments.map((assignment) => assignment.pointId));
+  });
+
+  it("öğrenme kütüphanesi SPRSound kaydı çalmaz", () => {
+    for (const finding of ["rhonchi", "wheezing"]) {
+      const posterior = resolveLibrarySoundEx("lung", finding, "lung_left_lower_posterior");
+      expect(posterior.record?.sourceDataset ?? "", finding).not.toBe("sprsound");
+    }
   });
 });

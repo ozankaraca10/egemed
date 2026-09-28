@@ -40,7 +40,9 @@ const externalRecords = recordsOf(external);
 const libraryItems = (library.groups ?? []).flatMap((group) => group.items ?? []);
 
 interface ExternalRecordShape {
+  id: string;
   sourceDataset: string;
+  acousticFinding: string;
   mappingStatus: string;
   mappingNote: string;
   simulationLocation: string;
@@ -48,12 +50,18 @@ interface ExternalRecordShape {
   nativeFilter: string;
   gender: string;
   sourceFile: string;
+  internalSourceId: string;
+  population: string;
   sampleRate: number;
   channels: number;
 }
 
 const kauhRecords = ((external.records ?? []) as ExternalRecordShape[]).filter(
   (record) => record.sourceDataset === "kauh-v3",
+);
+
+const sprsoundRecords = ((external.records ?? []) as ExternalRecordShape[]).filter(
+  (record) => record.sourceDataset === "sprsound",
 );
 
 describe("Ausculta veri envanteri", () => {
@@ -66,16 +74,16 @@ describe("Ausculta veri envanteri", () => {
   it("kayıt sayıları kaynak kopyasıyla aynıdır", () => {
     expect(sounds.count).toBe(245);
     expect(soundRecords).toHaveLength(245);
-    expect(external.count).toBe(90);
-    expect(externalRecords).toHaveLength(90);
-    expect(cases.cases).toHaveLength(23);
+    expect(external.count).toBe(102);
+    expect(externalRecords).toHaveLength(102);
+    expect(cases.cases).toHaveLength(24);
     expect(casesAuto.count).toBe(176);
     expect(casesAuto.cases).toHaveLength(176);
     expect(points.points).toHaveLength(17);
     expect(library.groups).toHaveLength(3);
     expect(libraryItems).toHaveLength(20);
     expect(pediatric.rows).toHaveLength(6);
-    expect(sources.datasets).toHaveLength(3);
+    expect(sources.datasets).toHaveLength(4);
     expect(sources.inventory).toHaveLength(2);
   });
 
@@ -96,6 +104,30 @@ describe("Ausculta veri envanteri", () => {
       expect(record.sourceFile).toMatch(/^kauh\/DP\d+$/);
       expect(record).not.toHaveProperty("age");
       expect(JSON.stringify(record)).not.toMatch(/"(age|patientAge|patientName)"/i);
+    }
+  });
+
+  it("SPRSound pediatrik posterior kayıtları KVKK'ya uygun ve onay bekler (T234)", () => {
+    expect(sprsoundRecords).toHaveLength(12);
+    const ids = (points.points as { id: string }[]).map((point) => point.id);
+    for (const record of sprsoundRecords) {
+      expect(record.mappingStatus).toBe("pending_faculty");
+      expect(record.mappingNote).toContain("SPRSound");
+      expect(record.population).toBe("pediatric");
+      expect(ids).toContain(record.simulationLocation);
+      expect(record.simulationLocation.endsWith("_posterior")).toBe(true);
+      expect(["p1", "p3"]).toContain(record.recordedLocation);
+      expect(record.nativeFilter).toBe("unspecified");
+      expect(record.sampleRate).toBe(8000);
+      expect(record.channels).toBe(1);
+      // Hasta numarası, yaş ve cinsiyet kayda geçmez: yalnız kayıt numarası redakte biçimde.
+      expect(record.sourceFile).toMatch(/^sprsound\/\d+$/);
+      expect(record.internalSourceId).toMatch(/^sprsound-\d+$/);
+      expect(record).not.toHaveProperty("age");
+      expect(record).not.toHaveProperty("gender");
+      expect(JSON.stringify(record)).not.toMatch(/"(age|patientAge|patientName|patientNo|gender)"/i);
+      expect(["rhonchi", "wheezing"]).toContain(record.acousticFinding);
+      expect(record.id).toMatch(new RegExp(`^sprsound_${record.acousticFinding}_${record.simulationLocation}_\\d{3}$`));
     }
   });
 
