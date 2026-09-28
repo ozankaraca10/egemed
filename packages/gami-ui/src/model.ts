@@ -53,6 +53,31 @@ export const GAMI_BADGE_CATEGORIES = (Object.keys(BADGE_CATEGORY_LABEL) as Badge
   label: BADGE_CATEGORY_LABEL[id],
 }));
 
+export const GAMI_BADGE_CATEGORY_ALL = "all" as const;
+export type GamiBadgeCategoryFilter = typeof GAMI_BADGE_CATEGORY_ALL | BadgeCategory;
+
+/**
+ * Rozet koleksiyonu kategori filtresi: "Tümü" + yalnız o anda listede bulunan
+ * kategoriler (seçim yereldir; URL/depoya yazılmaz).
+ */
+export function badgeCategoryOptions(
+  badges: readonly { readonly category: BadgeCategory }[],
+  categories: readonly { readonly id: BadgeCategory; readonly label: string }[],
+): { readonly id: GamiBadgeCategoryFilter; readonly label: string }[] {
+  return [
+    { id: GAMI_BADGE_CATEGORY_ALL, label: "Tümü" },
+    ...categories.filter((category) => badges.some((badge) => badge.category === category.id)),
+  ];
+}
+
+/** Kategori filtresi; "Tümü" listedeki tüm rozetleri döner. */
+export function filterBadgesByCategory<T extends { readonly category: BadgeCategory }>(
+  badges: readonly T[],
+  category: GamiBadgeCategoryFilter,
+): T[] {
+  return category === GAMI_BADGE_CATEGORY_ALL ? [...badges] : badges.filter((badge) => badge.category === category);
+}
+
 const MONTHS = ["Oca", "Şub", "Mar", "Nis", "May", "Haz", "Tem", "Ağu", "Eyl", "Eki", "Kas", "Ara"];
 const parts = (d: Date) => {
   const w = new Date(d.getTime() + 3 * 3_600_000);

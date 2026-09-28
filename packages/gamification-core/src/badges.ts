@@ -6,7 +6,7 @@
 
 import type { EarnedBadge } from "./types";
 
-export type BadgeCategory = "topic" | "skill" | "streak" | "learn" | "milestone";
+export type BadgeCategory = "topic" | "skill" | "streak" | "learn" | "milestone" | "challenge";
 export type BadgeTier = "bronze" | "silver" | "gold";
 
 export interface BadgeProgress {

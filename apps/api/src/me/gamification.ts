@@ -229,6 +229,20 @@ export interface GamificationRepo {
   nextAttemptNo(userId: string, simId: SimId): Promise<number>;
   getPreferences(userId: string): Promise<GamiPreferences>;
   setPreferences(userId: string, preferences: GamiPreferences, at: number): Promise<GamiPreferences>;
+  /**
+   * ADR-010/T221: düello rozetlerini idempotent yazar (`on conflict do nothing`).
+   * Profil satırı yoksa yazılmaz (FK: `gami_badges` → `gami_profiles`); bu yol
+   * deneme yazımından bağımsızdır ve oturum kaydını etkilemez.
+   */
+  awardBadges(input: GamiBadgeAwardInput): Promise<void>;
+}
+
+/** Rozet yazımı girdisi; anahtarlar `gami_badges` biçimindedir. */
+export interface GamiBadgeAwardInput {
+  readonly userId: string;
+  readonly simId: SimId;
+  readonly badgeKeys: readonly string[];
+  readonly at: number;
 }
 
 /** Havuzun depo katmanına görünen dar yüzeyi; `db.ts` çıktısı bunu karşılar. */
@@ -456,6 +470,17 @@ export function createPgGamificationRepo(db: GamiDb): GamificationRepo {
       );
       const row = result.rows[0] as { readonly leaderboard_visible?: unknown } | undefined;
       return { leaderboardVisible: row?.leaderboard_visible !== false };
+    },
+
+    async awardBadges(input) {
+      if (input.badgeKeys.length === 0) return;
+      await db.query(
+        `insert into gami_badges (user_id, sim_id, badge_key, awarded_at)
+         select $1, $2, key, $4 from unnest($3::text[]) as key
+         where exists (select 1 from gami_profiles p where p.user_id = $1 and p.sim_id = $2)
+         on conflict (user_id, sim_id, badge_key) do nothing`,
+        [input.userId, input.simId, input.badgeKeys, new Date(input.at)],
+      );
     },
   };
 }
@@ -869,6 +894,17 @@ export function createMemoryGamificationRepo(
       if (preferences.leaderboardVisible) hiddenFromLeaderboard.delete(userId);
       else hiddenFromLeaderboard.add(userId);
       return { leaderboardVisible: preferences.leaderboardVisible };
+    },
+
+    async awardBadges(input) {
+      // PG kuralıyla aynı: profilsiz kullanıcıya rozet yazılmaz (FK).
+      if (profiles.get(profileKey(input.userId, input.simId)) === undefined) return;
+      for (const key of input.badgeKeys) {
+        const exists = badges.some(
+          (badge) => badge.userId === input.userId && badge.simId === input.simId && badge.key === key,
+        );
+        if (!exists) badges.push({ userId: input.userId, simId: input.simId, key, awardedAt: input.at });
+      }
     },
 
     async getLeaderboard(query) {

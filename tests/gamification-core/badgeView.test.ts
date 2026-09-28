@@ -34,7 +34,8 @@ const ctx: TestCtx = { now: new Date("2026-09-23T10:00:00.000Z") };
 
 describe("rozet görünüm modeli", () => {
   it("kategori/tier etiketleri Türkçe", () => {
-    expect(Object.keys(BADGE_CATEGORY_LABEL)).toEqual(["topic", "skill", "streak", "learn", "milestone"]);
+    expect(Object.keys(BADGE_CATEGORY_LABEL)).toEqual(["topic", "skill", "streak", "learn", "milestone", "challenge"]);
+    expect(BADGE_CATEGORY_LABEL.challenge).toBe("Meydan Okuma");
     expect(BADGE_TIER_LABEL).toEqual({ bronze: "Bronz", silver: "Gümüş", gold: "Altın" });
   });
 

@@ -3,6 +3,7 @@ import { assessmentXp, computeWeeklyGoals, evaluateBadges } from "../../packages
 import type { AttemptRecord, EarnedBadge } from "../../packages/gamification-core/src/index";
 import { PULSE_BADGES, PULSE_MODE_LABELS } from "../../packages/sim-pulse/src/gamification/catalog";
 import type { PulseStats } from "../../packages/sim-pulse/src/gamification/catalog";
+import { DUEL_BADGES } from "../../packages/gami-catalogs/src/index";
 import { buildAttemptRecord } from "../../packages/sim-pulse/src/gamification/attempt";
 import { PULSE_RULES } from "../../packages/sim-pulse/src/gamification/rules";
 import { LEADS, MODES } from "../../packages/sim-pulse/src/engine/shapes";
@@ -14,7 +15,11 @@ describe("Pulse oyunlaştırması", () => {
   it("en az 16 Türkçe rozeti benzersiz kimlik ve kategori/tier bilgisiyle tanımlar", () => {
     expect(PULSE_BADGES.length).toBeGreaterThanOrEqual(16);
     expect(new Set(PULSE_BADGES.map((badge) => badge.id)).size).toBe(PULSE_BADGES.length);
-    expect(new Set(PULSE_BADGES.map((badge) => badge.category))).toEqual(new Set(["skill", "streak", "topic"]));
+    expect(new Set(PULSE_BADGES.map((badge) => badge.category))).toEqual(new Set(["skill", "streak", "topic", "challenge"]));
+    // T221: düello rozetleri her simin kataloğunda ayrı listelenir (kazanım sunucuda).
+    expect(PULSE_BADGES.filter((badge) => badge.category === "challenge").map((badge) => badge.id)).toEqual(
+      DUEL_BADGES.map((badge) => badge.id),
+    );
     expect(PULSE_BADGES.some((badge) => badge.tier === "bronze")).toBe(true);
     expect(PULSE_BADGES.every((badge) => /[A-Za-z]/.test(badge.name) && badge.description.length > 0)).toBe(true);
     expect(Object.keys(PULSE_MODE_LABELS)).toEqual([...MODES]);

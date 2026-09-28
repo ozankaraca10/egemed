@@ -7,7 +7,7 @@ export function GamiEmptyCard({ onAssessment, icons, badgeCount = 28 }: { onAsse
       <p>Değerlendirme ve uygulama oturumların XP ve rozet olarak burada toplanır. İlk değerlendirmeni tamamladığında sıralamaya da girebilirsin.</p>
       <div className="eg-gami-empty-steps">
         <div><span className="ic eg-gami-tone-blue">{icons.star({ width: 24, height: 24 })}</span><b>XP kazan</b><span>Her oturum ve doğru yanıt XP getirir.</span></div>
-        <div><span className="ic eg-gami-tone-amber">{icons.award({ width: 24, height: 24 })}</span><b>Rozet topla</b><span>{badgeCount} rozet: konu, beceri, seri ve öğrenme.</span></div>
+        <div><span className="ic eg-gami-tone-amber">{icons.award({ width: 24, height: 24 })}</span><b>Rozet topla</b><span>{badgeCount} rozet: konu, beceri, seri, öğrenme ve Meydan Okuma.</span></div>
         <div><span className="ic eg-gami-tone-purple">{icons.chart({})}</span><b>Sıralamada yüksel</b><span>En iyi 3 değerlendirmenin ortalaması sayılır.</span></div>
         <div><span className="ic eg-gami-tone-green">{icons.target({ width: 24, height: 24 })}</span><b>İlerlemeni izle</b><span>Alan bazlı güçlü ve zayıf yönlerin.</span></div>
       </div>

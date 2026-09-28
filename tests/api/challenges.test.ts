@@ -8,6 +8,7 @@ import {
   simSessionStartResponseSchema,
 } from "../../packages/contracts/src/index";
 import { ausculta } from "../../packages/assessment-bank/src/index";
+import { challengeFinishedHook } from "../../apps/api/src/me/challenges";
 import { ADMIN_USER, ALI, DEFAULT_USERS, FIXED_NOW, INSTITUTION_ID, OTHER_INSTITUTION_ID, createAdminHarness, login, user, type AdminHarness, type Login } from "./admin-harness";
 
 // Meydan Okuma (ADR-010) API: davet kodu, katılım kuralları, aynı vakalar ve
@@ -176,5 +177,82 @@ describe("Meydan Okuma (ADR-010)", () => {
       telemetry: TELEMETRY,
     });
     expect(late.status).toBe(422);
+  });
+});
+
+// T221 — düello rozetleri sunucuda `challenges` sonuçlarından değerlendirilir;
+// iki taraf da bitince kazanan ve rozetler yazılır, oyunlaştırma dışı roller
+// hiçbir rozet almaz.
+
+async function badgeKeys(h: AdminHarness, who: Login, simId = "ausculta"): Promise<string[]> {
+  const response = await call(h, who, "GET", `/me/gamification/${simId}`);
+  expect(response.status).toBe(200);
+  return ((await response.json()) as { data: { badges: readonly { key: string }[] } }).data.badges.map((badge) => badge.key);
+}
+
+/** İki öğrenci arasında sonuçlanmış düello: davet → katılım → iki taraf oynar. */
+async function duel(h: AdminHarness, inviter: Login, opponent: Login, inviterCorrect: number, opponentCorrect: number): Promise<string> {
+  const invite = await create(h, inviter);
+  const join = await call(h, opponent, "POST", "/me/challenges/join", { code: invite.code });
+  expect(join.status).toBe(200);
+  await play(h, inviter, invite.challengeId, inviterCorrect);
+  await play(h, opponent, invite.challengeId, opponentCorrect);
+  return invite.challengeId;
+}
+
+describe("düello rozetleri (T221)", () => {
+  it("kazanana ilk düello + ilk galibiyet, kaybedene ilk düello; tekrar işleme çoğaltmaz; oyunlaştırma dışı roller almaz", async () => {
+    const h = harness();
+    const ali = await login(h, "ali.veli");
+    const zeynep = await login(h, "zeynep.a");
+    const challengeId = await duel(h, ali, zeynep, 8, 5);
+
+    const aliKeys = await badgeKeys(h, ali);
+    expect(aliKeys.filter((key) => key === "duel-first")).toHaveLength(1);
+    expect(aliKeys.filter((key) => key === "duel-first-win")).toHaveLength(1);
+    expect(aliKeys).not.toContain("duel-wins-3");
+    const zeynepKeys = await badgeKeys(h, zeynep);
+    expect(zeynepKeys).toContain("duel-first");
+    expect(zeynepKeys).not.toContain("duel-first-win");
+    // Kaybedenin düellosu da sonuçlanmış sayılır ama galibiyet rozeti yoktur.
+    expect(h.challenges.records.get(challengeId)?.winner).toBe("inviter");
+    expect(h.challenges.records.get(challengeId)?.finishedAt).not.toBeNull();
+
+    // Tekrarlanan sonuç: kancayı aynı bitmiş oturumla yeniden işle, rozet çoğalmaz.
+    const finished = [...h.simSessions.rows.values()].find((row) => row.challengeId === challengeId && row.userId === ZEYNEP.id);
+    expect(finished).toBeDefined();
+    await challengeFinishedHook({ challenges: h.challenges, sessions: h.simSessions, gamification: h.gamificationStore.repo })(finished!);
+    const aliAgain = await badgeKeys(h, ali);
+    expect(aliAgain.filter((key) => key === "duel-first")).toHaveLength(1);
+    expect(aliAgain.filter((key) => key === "duel-first-win")).toHaveLength(1);
+
+    // Öğretim üyesi ve uzmanlık öğrencisi düelloya giremez; hiçbir rozet yazılmaz.
+    expect(await badgeKeys(h, await login(h, "hoca.b"))).toEqual([]);
+    expect(await badgeKeys(h, await login(h, "uzman.d"))).toEqual([]);
+    expect(h.gamificationStore.badges.some((badge) => badge.userId === HOCA.id || badge.userId === UZMAN.id)).toBe(false);
+  });
+
+  it("üç galibiyette Düello serisi (bronz) verilir; eşik aşılmadan üst kademe yoktur", async () => {
+    const h = harness();
+    const ali = await login(h, "ali.veli");
+    const zeynep = await login(h, "zeynep.a");
+    for (let index = 0; index < 3; index += 1) await duel(h, ali, zeynep, 8, 5);
+    const aliKeys = await badgeKeys(h, ali);
+    expect(aliKeys).toEqual(expect.arrayContaining(["duel-first", "duel-first-win", "duel-wins-3"]));
+    expect(aliKeys).not.toContain("duel-wins-10");
+    expect(aliKeys).not.toContain("duel-rivals-3");
+    expect(await badgeKeys(h, zeynep)).not.toContain("duel-wins-3");
+  });
+
+  it("önce kaybedip aynı rakibi yenince Rövanş (gümüş) verilir", async () => {
+    const h = harness();
+    const ali = await login(h, "ali.veli");
+    const zeynep = await login(h, "zeynep.a");
+    await duel(h, ali, zeynep, 2, 8);
+    expect(await badgeKeys(h, ali)).not.toContain("duel-rematch");
+    await duel(h, ali, zeynep, 8, 5);
+    const aliKeys = await badgeKeys(h, ali);
+    expect(aliKeys).toContain("duel-rematch");
+    expect(aliKeys).toContain("duel-first-win");
   });
 });

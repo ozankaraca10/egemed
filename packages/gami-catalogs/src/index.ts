@@ -31,3 +31,12 @@ export type { PulseMode, PulseStats, PulseSummaryInput } from "./pulse";
 export { SIM_BADGE_EVALUATORS } from "./evaluators";
 export { createSimBadgeEvaluator } from "./evaluators";
 export type { CodedSummary, GamiCatalogSimId, SimBadgeEvaluator } from "./evaluators";
+export {
+  DUEL_BADGES,
+  DUEL_BADGE_RULES,
+  EMPTY_DUEL_STATS,
+  duelBadgeIds,
+  duelBadges,
+  duelStatsFrom,
+} from "./duel";
+export type { DuelOutcome, DuelOutcomeRow, DuelStats } from "./duel";

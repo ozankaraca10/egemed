@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import type { LearnActivity } from "../../../packages/gamification-core/src/types";
 import { evaluateBadges } from "../../../packages/gamification-core/src/badges";
 import { OPACA_BADGES } from "../../../packages/sim-opaca/src/gamification/catalog";
+import { DUEL_BADGES } from "../../../packages/gami-catalogs/src/index";
 import { CT_STACKS_ITEM_KEY } from "../../../packages/sim-opaca/src/gamification/attempt";
 import { computeStats } from "../../../packages/sim-opaca/src/gamification/stats";
 import { attempt } from "./helpers";
@@ -14,11 +15,14 @@ const ids = (xs: { id: string }[]) => xs.map((x) => x.id);
 const ctx = { now };
 
 describe("rozetler", () => {
-  it("28 rozet, benzersiz kimlik, 5 kategori", () => {
-    expect(OPACA_BADGES).toHaveLength(28);
-    expect(new Set(ids(OPACA_BADGES)).size).toBe(28);
+  it("37 rozet, benzersiz kimlik, 6 kategori; düello rozetleri T221'dedir", () => {
+    expect(OPACA_BADGES).toHaveLength(37);
+    expect(new Set(ids(OPACA_BADGES)).size).toBe(37);
     expect(new Set(OPACA_BADGES.map((b) => b.category))).toEqual(
-      new Set(["topic", "skill", "streak", "learn", "milestone"]),
+      new Set(["topic", "skill", "streak", "learn", "milestone", "challenge"]),
+    );
+    expect(OPACA_BADGES.filter((badge) => badge.category === "challenge").map((badge) => badge.id)).toEqual(
+      DUEL_BADGES.map((badge) => badge.id),
     );
   });
   it("ilk değerlendirme → İlk Adım; eşik tam 80 → Eşik Aşıldı, 79 değil", () => {

@@ -8,9 +8,11 @@ import {
   type SimId,
 } from "@egemed/contracts";
 import { ausculta } from "@egemed/assessment-bank";
+import { duelBadgeIds, duelStatsFrom, type DuelOutcomeRow } from "@egemed/gami-catalogs";
 import { jsonError, validationDetails, type AppEnv } from "../http";
 import { toIstanbulIso } from "../admin/users";
 import type { AuthDeps } from "../auth/routes";
+import type { GamificationRepo } from "./gamification";
 import type { LearnRepo } from "./learn";
 import {
   CHALLENGE_PER_CASE_MS,
@@ -41,6 +43,9 @@ const CHALLENGE_SIMS: readonly SimId[] = ["ausculta"];
 
 export type ChallengeStatus = "open" | "accepted" | "finished" | "expired";
 
+/** Düello sonucu: beraberlikte kazanan yoktur (`winner` null değil "draw"). */
+export type ChallengeWinner = "inviter" | "opponent" | "draw";
+
 export interface ChallengeRecord {
   readonly id: string;
   readonly institutionId: string;
@@ -54,6 +59,10 @@ export interface ChallengeRecord {
   readonly createdAt: number;
   readonly expiresAt: number;
   readonly acceptedAt: number | null;
+  /** İki taraf da bitirdiyse sonuç; sonuçlanmamışsa null. */
+  readonly winner: ChallengeWinner | null;
+  /** İki taraf da bitirdiğinde yazılan bitiş anı. */
+  readonly finishedAt: number | null;
 }
 
 export interface ChallengeRepo {
@@ -63,10 +72,13 @@ export interface ChallengeRepo {
   findOpenByCodeHash(codeHash: string, at: number): Promise<ChallengeRecord | null>;
   /** Yalnız açık ve rakipsizse kabul eder (yarış koşuluna karşı koşullu güncelleme). */
   accept(id: string, opponentId: string, at: number): Promise<boolean>;
-  setStatus(id: string, status: ChallengeStatus): Promise<void>;
+  /** İki taraf da bitirince sonucu ve bitiş anını yazar (T221 düello rozetleri). */
+  finish(id: string, winner: ChallengeWinner, at: number): Promise<void>;
   countOpenByInviter(userId: string, at: number): Promise<number>;
   countCreatedSince(userId: string, since: number): Promise<number>;
   listForUser(userId: string, limit: number): Promise<readonly ChallengeRecord[]>;
+  /** Kullanıcının o simdeki sonuçlanmış düelloları (rozet istatistiği; T221). */
+  listDuelOutcomes(simId: SimId, userId: string): Promise<readonly DuelOutcomeRow[]>;
 }
 
 export interface ChallengeDeps {
@@ -98,6 +110,14 @@ function decideWinner(inviter: { score: number; durationMs: number }, opponent: 
   return "draw";
 }
 
+/** Oturumun düello puanı/süresi; oturum yoksa ya da bitmemişse sıfır. */
+function duelScore(session: SimSessionRow | undefined): { readonly score: number; readonly durationMs: number } {
+  return {
+    score: session?.state.total ?? 0,
+    durationMs: session === undefined || session.finishedAt === null ? 0 : session.finishedAt - session.startedAt,
+  };
+}
+
 export function registerChallengeRoutes(app: Hono<AppEnv>, deps: ChallengeDeps, now: () => number): void {
   async function displayName(userId: string): Promise<string> {
     const context = await deps.auth.users.getMeContext(userId);
@@ -123,21 +143,17 @@ export function registerChallengeRoutes(app: Hono<AppEnv>, deps: ChallengeDeps, 
       ...(record.opponentId === null ? [] : [{ role: "opponent" as const, userId: record.opponentId, session: sessionOf(record.opponentId) }]),
     ];
     const bothDone = results.length === 2 && results.every((entry) => entry.session?.status === "finished");
-    const scoreOf = (session: SimSessionRow | undefined) => ({
-      score: session?.state.total ?? 0,
-      durationMs: session?.finishedAt === null || session === undefined ? 0 : (session.finishedAt ?? session.startedAt) - session.startedAt,
-    });
     const participants = await Promise.all(
       results.map(async (entry) => ({
         role: entry.role,
         displayName: await displayName(entry.userId),
         isMe: entry.userId === viewerId,
         finished: entry.session?.status === "finished",
-        score: bothDone ? scoreOf(entry.session).score : null,
-        durationMs: bothDone ? scoreOf(entry.session).durationMs : null,
+        score: bothDone ? duelScore(entry.session).score : null,
+        durationMs: bothDone ? duelScore(entry.session).durationMs : null,
       })),
     );
-    const winner = bothDone ? decideWinner(scoreOf(results[0]?.session), scoreOf(results[1]?.session)) : null;
+    const winner = bothDone ? decideWinner(duelScore(results[0]?.session), duelScore(results[1]?.session)) : null;
     return {
       challengeId: record.id,
       simId: record.simId,
@@ -199,6 +215,8 @@ export function registerChallengeRoutes(app: Hono<AppEnv>, deps: ChallengeDeps, 
       createdAt: at,
       expiresAt: at + CHALLENGE_TTL_MS,
       acceptedAt: null,
+      winner: null,
+      finishedAt: null,
     };
     await deps.challenges.create(record);
     return c.json({ data: await body(record, actor.userId, at, code) }, 201);
@@ -268,16 +286,55 @@ export function registerChallengeRoutes(app: Hono<AppEnv>, deps: ChallengeDeps, 
   });
 }
 
-/** Sim oturumu bitince: iki taraf da bitirdiyse düello `finished` olur. */
-export function challengeFinishedHook(deps: Pick<ChallengeDeps, "challenges" | "sessions">) {
+/**
+ * Sim oturumu bitince: iki taraf da bitirdiyse düello `finished` olur; kazanan,
+ * bitiş anı ve düello rozetleri (T221) yazılır. Rozet yazımı oturum kaydını
+ * geri almaz: hata yutulur, sonraki bitişte yeniden değerlendirilir.
+ */
+export function challengeFinishedHook(
+  deps: Pick<ChallengeDeps, "challenges" | "sessions"> & { readonly gamification: GamificationRepo },
+) {
   return async (row: SimSessionRow): Promise<void> => {
     if (row.challengeId === null) return;
     const record = await deps.challenges.get(row.challengeId);
     if (record === null || record.opponentId === null) return;
     const sessions = await deps.sessions.listByChallenge(record.id);
-    const done = [record.inviterId, record.opponentId].every((userId) => sessions.some((session) => session.userId === userId && session.status === "finished"));
-    if (done) await deps.challenges.setStatus(record.id, "finished");
+    const inviter = sessions.find((session) => session.userId === record.inviterId);
+    const opponent = sessions.find((session) => session.userId === record.opponentId);
+    if (inviter?.status !== "finished" || opponent?.status !== "finished") return;
+    const at = row.finishedAt ?? opponent.finishedAt ?? inviter.finishedAt;
+    if (at === null) return;
+    const winner = decideWinner(duelScore(inviter), duelScore(opponent));
+    if (record.status !== "finished") await deps.challenges.finish(record.id, winner, at);
+    try {
+      await awardDuelBadges(deps.challenges, deps.gamification, record, at);
+    } catch {
+      // Rozet yazımı düello sonucunu geri almaz.
+    }
   };
+}
+
+/**
+ * ADR-010/T221: düello sonuçlarından — deneme özetlerinden DEĞİL — her iki
+ * tarafın o simdeki düello rozetleri değerlendirilir ve idempotent yazılır
+ * (`sim_id` düellonun simi). Kazanılanlar kümesi `on conflict do nothing` ile
+ * yazılır; aynı sonuç tekrar işlense de rozet çoğaltmaz.
+ */
+async function awardDuelBadges(
+  challenges: ChallengeRepo,
+  gamification: GamificationRepo,
+  record: ChallengeRecord,
+  at: number,
+): Promise<void> {
+  const now = new Date(at);
+  for (const userId of [record.inviterId, record.opponentId]) {
+    if (userId === null) continue;
+    const rows = await challenges.listDuelOutcomes(record.simId, userId);
+    const badgeKeys = duelBadgeIds(duelStatsFrom(rows, userId), now);
+    if (badgeKeys.length > 0) {
+      await gamification.awardBadges({ userId, simId: record.simId, badgeKeys, at });
+    }
+  }
 }
 
 // --- Depolar -------------------------------------------------------------------
@@ -299,9 +356,11 @@ interface PgChallengeRow {
   readonly created_at: Date;
   readonly expires_at: Date;
   readonly accepted_at: Date | null;
+  readonly winner_id: string | null;
+  readonly finished_at: Date | null;
 }
 
-const COLUMNS = "id, institution_id, sim_id, inviter_id, opponent_id, code_hash, case_ids, shuffle_seed, status, created_at, expires_at, accepted_at";
+const COLUMNS = "id, institution_id, sim_id, inviter_id, opponent_id, code_hash, case_ids, shuffle_seed, status, created_at, expires_at, accepted_at, winner_id, finished_at";
 
 function fromRow(row: PgChallengeRow): ChallengeRecord {
   return {
@@ -317,6 +376,15 @@ function fromRow(row: PgChallengeRow): ChallengeRecord {
     createdAt: row.created_at.getTime(),
     expiresAt: row.expires_at.getTime(),
     acceptedAt: row.accepted_at === null ? null : row.accepted_at.getTime(),
+    winner:
+      row.finished_at === null || row.opponent_id === null
+        ? null
+        : row.winner_id === null
+          ? "draw"
+          : row.winner_id === row.inviter_id
+            ? "inviter"
+            : "opponent",
+    finishedAt: row.finished_at === null ? null : row.finished_at.getTime(),
   };
 }
 
@@ -360,8 +428,15 @@ export function createPgChallengeRepo(db: ChallengeDb): ChallengeRepo {
       );
       return result.rows.length === 1;
     },
-    async setStatus(id, status) {
-      await db.query("update challenges set status = $2 where id = $1", [id, status]);
+    async finish(id, winner, at) {
+      await db.query(
+        `update challenges
+         set status = 'finished',
+             winner_id = case when $2 = 'draw' then null when $2 = 'inviter' then inviter_id else opponent_id end,
+             finished_at = $3
+         where id = $1`,
+        [id, winner, new Date(at)],
+      );
     },
     async countOpenByInviter(userId, at) {
       const result = await db.query("select count(*)::int as n from challenges where inviter_id = $1 and status = 'open' and expires_at > $2", [
@@ -380,6 +455,21 @@ export function createPgChallengeRepo(db: ChallengeDb): ChallengeRepo {
         [userId, limit],
       );
       return (result.rows as readonly PgChallengeRow[]).map(fromRow);
+    },
+    async listDuelOutcomes(simId, userId) {
+      const result = await db.query(
+        `select inviter_id, opponent_id, winner_id, finished_at from challenges
+         where sim_id = $1 and status = 'finished' and finished_at is not null and (inviter_id = $2 or opponent_id = $2)`,
+        [simId, userId],
+      );
+      return (result.rows as readonly Pick<PgChallengeRow, "inviter_id" | "opponent_id" | "winner_id" | "finished_at">[]).map(
+        (row): DuelOutcomeRow => ({
+          inviterId: row.inviter_id,
+          opponentId: row.opponent_id,
+          winner: row.finished_at === null || row.opponent_id === null ? null : row.winner_id === null ? "draw" : row.winner_id === row.inviter_id ? "inviter" : "opponent",
+          finishedAt: row.finished_at === null ? null : row.finished_at.getTime(),
+        }),
+      );
     },
   };
 }
@@ -404,9 +494,9 @@ export function createMemoryChallengeRepo(): ChallengeRepo & { readonly records:
       records.set(id, { ...record, opponentId, status: "accepted", acceptedAt: at });
       return true;
     },
-    async setStatus(id, status) {
+    async finish(id, winner, at) {
       const record = records.get(id);
-      if (record !== undefined) records.set(id, { ...record, status });
+      if (record !== undefined) records.set(id, { ...record, status: "finished", winner, finishedAt: at });
     },
     async countOpenByInviter(userId, at) {
       return [...records.values()].filter((record) => record.inviterId === userId && record.status === "open" && record.expiresAt > at).length;
@@ -419,6 +509,21 @@ export function createMemoryChallengeRepo(): ChallengeRepo & { readonly records:
         .filter((record) => record.inviterId === userId || record.opponentId === userId)
         .sort((a, b) => b.createdAt - a.createdAt)
         .slice(0, limit);
+    },
+    async listDuelOutcomes(simId, userId) {
+      return [...records.values()]
+        .filter(
+          (record) =>
+            record.simId === simId &&
+            record.status === "finished" &&
+            (record.inviterId === userId || record.opponentId === userId),
+        )
+        .map((record): DuelOutcomeRow => ({
+          inviterId: record.inviterId,
+          opponentId: record.opponentId,
+          winner: record.finishedAt === null || record.opponentId === null ? null : record.winner,
+          finishedAt: record.finishedAt,
+        }));
     },
   };
 }
