@@ -490,6 +490,39 @@ test.describe("API oturumu (dev sağlayıcı)", () => {
     expect(((await after.json()) as { data: { xp: number } }).data.xp).toBeGreaterThan(xpBefore);
   });
 
+  test("Opaca öğrenmede konu açılınca sunucu rozet ilerlemesi artar: explorer eşikte kazanılır (T235)", async ({ page }) => {
+    await page.goto(STUDENT_ENTRY);
+    await signIn(page, "ogrenci");
+    await expect(page).toHaveURL(/#\/$/);
+    const before = await page.request.get("/api/me/gamification/opaca");
+    const xpBefore = ((await before.json()) as { data: { xp: number } }).data.xp;
+    // Öğrenme kaydı sayfa içi fetch ile yazılır (öğrenme ekranındaki desenin aynısı).
+    const tag = randomUUID().slice(0, 8);
+    const statuses = await page.evaluate(
+      async ({ cookieName, prefix }) => {
+        const csrf = decodeURIComponent(document.cookie.match(new RegExp(`(?:^|;\\s*)${cookieName}=([^;]+)`))?.[1] ?? "");
+        const codes: number[] = [];
+        for (let index = 0; index < 10; index += 1) {
+          const response = await fetch("/api/me/gamification/opaca/attempts", {
+            method: "POST",
+            credentials: "include",
+            headers: { "content-type": "application/json", "x-csrf-token": csrf },
+            body: JSON.stringify({ topic: `${prefix}:${index}` }),
+          });
+          codes.push(response.status);
+        }
+        return codes;
+      },
+      { cookieName: CSRF_COOKIE, prefix: `opaca:topic:t235-${tag}` },
+    );
+    for (const [index, code] of statuses.entries()) expect(code, `konu ${index}`).toBe(201);
+    const after = await page.request.get("/api/me/gamification/opaca");
+    const data = ((await after.json()) as { data: { xp: number; badges: readonly { key: string }[] } }).data;
+    // On farklı konu sunucu rozet istatistiğini eşiğe taşır: explorer kazanılır.
+    expect(data.xp).toBeGreaterThan(xpBefore);
+    expect(data.badges.map((badge) => badge.key)).toContain("explorer");
+  });
+
   test("Ausculta uygulaması sunucu oturumundan gelir: anahtarsız vaka, sunucu puanı ve denemesi (A1.4, ADR-009)", async ({ page }) => {
     // 5 vaka × (vaka, kontrol, yanıt) sunucu gidiş-dönüşü: seri koşuda varsayılan 30 sn yetmez.
     test.setTimeout(90_000);

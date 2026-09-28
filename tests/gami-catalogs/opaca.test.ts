@@ -15,6 +15,7 @@ import type { OpacaAttemptRecord } from "../../packages/sim-opaca/src/gamificati
 import { CT_STACKS_ITEM_KEY } from "../../packages/sim-opaca/src/gamification/attempt";
 import { attemptSummarySchema, BADGE_KEY_PATTERN } from "../../packages/contracts/src/index";
 import { evaluateBadges } from "../../packages/gamification-core/src/badges";
+import { OPACA_LIBRARY_ITEMS, opacaLibraryLearnCoverage } from "../../packages/assessment-bank/src/opaca/index";
 
 /** Deterministik tohumlu üreteç (mulberry32). */
 function rng(seed: number): () => number {
@@ -179,6 +180,68 @@ describe("Opaca kodlu özet ve rozet istatistiği (ADR-008)", () => {
         evaluateBadges(SIM_OPACA_BADGES, badgeStats, [], ctx).map((b) => b.id),
       );
     }
+  });
+
+  it("T235: gami_learn sayaçları istatistiğe girer; eski özet kodlarıyla en büyükle birleşir", () => {
+    const fromLearn = opacaStatsFromSummaries([], { topicsCount: 10, stacksCount: 1 });
+    expect(fromLearn.learnTopicsCount).toBe(10);
+    expect(fromLearn.ctStacksCompletedCount).toBe(1);
+    expect(evaluateBadges(OPACA_BADGES, fromLearn, [], { now: FIXED_NOW }).map((badge) => badge.id)).toContain("explorer");
+    // Geriye uyum: eski istemci denemelerindeki birikimli kodlar okunmaya devam eder.
+    const legacy = opacaStatsFromSummaries([{ "opaca.v": 1, "opaca.mode": 0, "opaca.learn": 12, "opaca.stacks": 3 }]);
+    expect(legacy.learnTopicsCount).toBe(12);
+    expect(legacy.ctStacksCompletedCount).toBe(3);
+    // Canlı sayaç daha büyükse kazanç geri alınmaz (en büyük değer).
+    const merged = opacaStatsFromSummaries([{ "opaca.v": 1, "opaca.mode": 0, "opaca.learn": 12 }], { topicsCount: 4, stacksCount: 2 });
+    expect(merged.learnTopicsCount).toBe(12);
+    expect(merged.ctStacksCompletedCount).toBe(2);
+    const live = opacaStatsFromSummaries([{ "opaca.v": 1, "opaca.mode": 0, "opaca.learn": 2 }], { topicsCount: 15, stacksCount: 4 });
+    expect(live.learnTopicsCount).toBe(15);
+    expect(live.ctStacksCompletedCount).toBe(4);
+  });
+
+  it("T239: sunucu kütüphane kapsamı doğru konu başına sayılır; eski sayaçlar en büyükle korunur", () => {
+    const findingTopics = OPACA_LIBRARY_ITEMS.filter((item) => item.finding !== null).map((item) => item.key);
+    const learnOnlyTopics = OPACA_LIBRARY_ITEMS.filter((item) => item.finding === null).map((item) => item.key);
+    const learn = opacaLibraryLearnCoverage(learnOnlyTopics.map((key) => `opaca:topic:${key}`));
+    expect(learn).toEqual({ total: OPACA_LIBRARY_ITEMS.length, covered: learnOnlyTopics.length });
+
+    const encodeCoverage = (libraryTopicsCorrect: readonly string[]) =>
+      encodeOpacaSummary({
+        mode: "assessment",
+        finishedAt: "2026-09-24T09:00:00.000Z",
+        score: 0,
+        caseCount: 10,
+        hintsUsed: 0,
+        extra: {
+          localizationHits: 0,
+          abcdeComplete: 0,
+          qualityCorrect: 0,
+          interpretationCorrect: 0,
+          fastPerfect: false,
+          libraryTopicsCorrect,
+        },
+      });
+    const counters = {
+      topicsCount: 0,
+      stacksCount: 0,
+      libraryTopicsTotal: learn.total,
+      libraryTopicsCovered: learn.covered,
+    };
+    const completeStats = opacaStatsFromSummaries([encodeCoverage(findingTopics)], counters);
+    const allTopics = OPACA_BADGES.find((badge) => badge.id === "all-topics");
+    if (allTopics?.progress === undefined) throw new Error("all-topics ilerlemesi yok");
+    expect(allTopics.progress(completeStats, { now: FIXED_NOW })).toEqual({ value: OPACA_LIBRARY_ITEMS.length, max: OPACA_LIBRARY_ITEMS.length });
+
+    const incompleteStats = opacaStatsFromSummaries([encodeCoverage(findingTopics.slice(1))], counters);
+    expect(allTopics.progress(incompleteStats, { now: FIXED_NOW })).toEqual({ value: OPACA_LIBRARY_ITEMS.length - 1, max: OPACA_LIBRARY_ITEMS.length });
+
+    const legacy = opacaStatsFromSummaries(
+      [{ "opaca.v": 1, "opaca.mode": 0, "opaca.lib": 35, "opaca.cov": 31 }],
+      { topicsCount: 0, stacksCount: 0, libraryTopicsTotal: learn.total, libraryTopicsCovered: 0 },
+    );
+    expect(legacy.allTopicsTotal).toBe(35);
+    expect(legacy.allTopicsCoveredCount).toBe(31);
   });
 
   it("bozuk, sürümsüz ya da sınır dışı kodlar istatistiği şişiremez", () => {

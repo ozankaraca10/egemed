@@ -18,7 +18,7 @@ export {
   opacaDayIndex,
   opacaStatsFromSummaries,
 } from "./opaca";
-export type { OpacaBadgeContext, OpacaStats, OpacaSummaryInput, OpacaTopic } from "./opaca";
+export type { OpacaBadgeContext, OpacaLearnCounters, OpacaStats, OpacaSummaryInput, OpacaTopic } from "./opaca";
 export {
   PULSE_BADGES,
   PULSE_MODE_LABELS,
@@ -30,7 +30,7 @@ export {
 export type { PulseMode, PulseStats, PulseSummaryInput } from "./pulse";
 export { SIM_BADGE_EVALUATORS } from "./evaluators";
 export { createSimBadgeEvaluator } from "./evaluators";
-export type { CodedSummary, GamiCatalogSimId, SimBadgeEvaluator } from "./evaluators";
+export type { CodedSummary, GamiCatalogSimId, SimBadgeEvaluator, SimLearnCounters } from "./evaluators";
 export {
   DUEL_BADGES,
   DUEL_BADGE_RULES,
