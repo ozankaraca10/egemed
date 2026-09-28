@@ -1,7 +1,8 @@
 /**
- * Anahtarlı Pulse verisi (A3.1, ADR-009). Maddeler `packages/sim-pulse` runtime
- * kaynağından (`vendor/curriculum.js`) `tools/export-bank.mjs` ile dışa aktarılır;
- * banka sim paketine kod bağımlılığı almaz, yalnız üretilmiş JSON okur.
+ * Anahtarlı Pulse verisi (A3.1/A3.4, ADR-009). T220 ile tek doğruluk kaynağı bu
+ * dosyadır (`data/pulse/items.json` doğrudan düzenlenir); dışa aktarma betiği
+ * kaldırıldı ve istemci müfredatı madde içeriğini taşımaz. Banka sim paketine kod
+ * bağımlılığı almaz, yalnız bu JSON okur.
  */
 import type { PulseEcgLead, PulseEcgMode } from "@egemed/contracts";
 import itemsJson from "../../data/pulse/items.json" with { type: "json" };
