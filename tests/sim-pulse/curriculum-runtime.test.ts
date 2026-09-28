@@ -114,8 +114,9 @@ describe("Pulse runtime müfredatı — madde içeriği kaldırıldı (T220)", (
       expect(curriculum.modeSources[mode]?.length, mode).toBeGreaterThan(0);
       expect(curriculum.leads[mode], mode).toHaveLength(3);
     }
-    expect(curriculum.limitations).toContain("600 sentetik madde");
-    expect(curriculum.limitations).toContain(`${model.ALL_MODES.length} EKG sonucu`);
+    expect(curriculum.limitations).toBe(
+      "Pulse'taki EKG'ler, hekimlerce etiketlenmiş açık erişimli veri kümelerindeki gerçek hasta kayıtlarından güncel kılavuz ölçütleriyle seçilmiş ve Ege Üniversitesi Tıp Fakültesi Kardiyoloji Anabilim Dalı'ndan Doç. Dr. Evrim Şimşek tarafından doğrulanmıştır.",
+    );
   });
 
   it("sözleşmedeki EKG mod listesi motorun ALL_MODES'u ve banka modlarıyla aynıdır", () => {
