@@ -14,7 +14,7 @@ import {
   type StoragePort,
 } from "./reducer";
 import { createSimRuntime, type RuntimeAdapter, type SimRuntime } from "./runtime";
-import { ALL_CASES } from "../data/pool";
+import { CASE_INVENTORY } from "../data/inventory";
 
 /** Opaca store sağlayıcısı (kaynak `core/store.tsx` portu, E2 §7.2/§7.4/§7.5).
  *  Mount başına tek olay veri yolu (`createBus(now)`), tek çalışma zamanı (`createSimRuntime`)
@@ -25,8 +25,8 @@ import { ALL_CASES } from "../data/pool";
 /** Kaynak `window.setInterval(…, 1000)` süresi; portta yaşam döngüsü ticker'ı kurar. */
 const TIMER_INTERVAL_MS = 1000;
 
-/** Değerlendirme paydası (kaynak: `cases.filter(c => c.modes.includes('assessment')).length`). */
-const ASSESSMENT_CASE_COUNT = ALL_CASES.filter((c) => c.modes.includes("assessment")).length;
+/** Değerlendirme paydası (A2.3: istemci havuz taşımaz; sayı banka envanterinden gelir). */
+const ASSESSMENT_CASE_COUNT = CASE_INVENTORY.assessmentPoolSize;
 
 export interface StoreContextValue {
   readonly state: AppState;

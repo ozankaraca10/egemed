@@ -112,9 +112,9 @@ describe("paket sınırı", () => {
     expect(offenders).toEqual([]);
   });
 
-  it("T196: istemci kaynağı anahtarlı vaka dosyalarını içe aktarmaz", () => {
+  it("T196/A2.3: Ausculta ve Opaca istemci kaynağı anahtarlı vaka dosyalarını içe aktarmaz", () => {
     const files = [
-      ...ts.sys.readDirectory("packages", [".ts", ".tsx"]).filter((f) => /packages\/sim-ausculta\/src\//.test(f)),
+      ...ts.sys.readDirectory("packages", [".ts", ".tsx"]).filter((f) => /packages\/sim-(ausculta|opaca)\/src\//.test(f)),
       ...ts.sys.readDirectory("apps/shell/src", [".ts", ".tsx"]),
     ].filter((f) => !f.includes("node_modules"));
     const offenders = files.filter((f) => /cases(-auto)?\.json/.test(ts.sys.readFile(f) ?? ""));

@@ -1,6 +1,7 @@
 import { createElement } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { describe, expect, it, vi } from 'vitest'
+import { EmbeddedProvider } from '../../../packages/sim-opaca/src/EmbeddedContext'
 import {
   BEST_SCORE_KEY,
   DEFAULT_WEIGHTS,
@@ -212,6 +213,27 @@ describe('ResultsScreen (statik render)', () => {
   it('gömülü modda footer çizilmez', () => {
     const { html } = renderResults(preparedState([highResult()], 'practice'), trackingStorage(), { embedded: true })
     expect(html).not.toContain('<footer')
+  })
+
+  it('düelloda "Düello sonucunu gör" eylemi çizilir; tekrar dene gizlenir', () => {
+    const prepared: AppState = { ...preparedState([highResult()], 'assessment'), serverChallengeId: 'ch-1' }
+    const html = renderToStaticMarkup(
+      createElement(StoreProvider, {
+        initialState: prepared,
+        env: inertWindow,
+        now: () => 1_728_000_000_000,
+        runtime: createMemoryRuntimeAdapter(),
+        storage: trackingStorage(),
+        children: createElement(EmbeddedProvider, {
+          embedded: true,
+          challengeId: 'ch-1',
+          onChallengeFinished: () => undefined,
+          children: createElement(ResultsScreen, { embedded: true }),
+        }),
+      })
+    )
+    expect(html).toContain('Düello sonucunu gör')
+    expect(html).not.toContain('Tekrar dene')
   })
 })
 

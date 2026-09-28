@@ -1,11 +1,11 @@
-import { type JSX } from "react";
+import { useEffect, useRef, type JSX } from "react";
 import { EmbeddedProvider } from "./EmbeddedContext";
-import type { SimAudience, SimChrome } from "@egemed/sim-host";
+import type { SimAudience, SimChrome, SimSessionSource } from "@egemed/sim-host";
 import { audienceShowsGamification } from "@egemed/sim-host";
 import { useStore } from "./core/StoreProvider";
 import type { Screen } from "./core/types";
 import { DevPanel } from "./DevPanel";
-import { useLearnGamiPort, useSimulationGamiPort } from "./gamification/bindings";
+import { useLearnGamiPort } from "./gamification/bindings";
 import { GamiSyncErrorBanner } from "@egemed/gami-ui";
 import { useGamiContext } from "./gamification/GamiContext";
 import { IconInfo } from "./ui/icons";
@@ -25,14 +25,12 @@ import type { ModalEnv } from "./ui/modal-env";
 import type { LearnScreenEnv } from "./screens/LearnScreen";
 import type { ResultsScreenEnv } from "./screens/ResultsScreen";
 import type { StartScreenEnv } from "./screens/StartScreen";
-import type { SimulationPopoverEnv } from "./screens/SimulationScreen";
 import type { WindowLike } from "./core/lifecycle";
 import { createNoopChromeEnv } from "./ui/chrome";
 import { createNoopModalEnv } from "./ui/modal-env";
 import { createNoopLearnScreenEnv } from "./screens/LearnScreen";
 import { createNoopResultsScreenEnv } from "./screens/ResultsScreen";
 import { createNoopStartScreenEnv } from "./screens/StartScreen";
-import { createNoopSimulationPopoverEnv } from "./screens/SimulationScreen";
 
 export interface AppProps {
   readonly embedded?: boolean;
@@ -40,7 +38,6 @@ export interface AppProps {
   readonly modalEnv?: ModalEnv;
   readonly startEnv?: StartScreenEnv;
   readonly learnEnv?: LearnScreenEnv;
-  readonly popoverEnv?: SimulationPopoverEnv;
   readonly resultsEnv?: ResultsScreenEnv;
   readonly timing?: WindowLike;
   readonly gamiEnabled?: boolean;
@@ -52,6 +49,11 @@ export interface AppProps {
   readonly audience?: SimAudience;
   /** Ziyaretçi kilidindeki "Öğrenci girişi" eylemi. */
   readonly requestSignIn?: () => void;
+  /** A2.3 (ADR-009): sunucu vaka oturumu kanalı; yoksa uygulama/değerlendirme açılmaz. */
+  readonly sessions?: SimSessionSource;
+  /** ADR-010: düello bağlamı; verilirse değerlendirme oturumu düellodan açılır. */
+  readonly challengeId?: string;
+  readonly onChallengeFinished?: (challengeId: string) => void;
 }
 
 function PendingScreen({ screen, embedded }: { screen: Screen; embedded: boolean }): JSX.Element {
@@ -75,7 +77,6 @@ function ScreenBody({
   embedded,
   startEnv,
   learnEnv,
-  popoverEnv,
   resultsEnv,
   modalEnv,
   timing,
@@ -87,7 +88,6 @@ function ScreenBody({
   embedded: boolean;
   startEnv: StartScreenEnv;
   learnEnv: LearnScreenEnv;
-  popoverEnv: SimulationPopoverEnv;
   resultsEnv: ResultsScreenEnv;
   modalEnv: ModalEnv;
   timing?: WindowLike;
@@ -98,9 +98,7 @@ function ScreenBody({
 }): JSX.Element | null {
   const { state } = useStore();
   const learnGamiPort = useLearnGamiPort();
-  const simGamiPort = useSimulationGamiPort();
   const learnGami = gamiEnabled ? learnGamiPort : undefined;
-  const simGami = gamiEnabled ? simGamiPort : undefined;
   switch (state.screen) {
     case "start":
       if (embedded) {
@@ -140,15 +138,7 @@ function ScreenBody({
         />
       );
     case "simulation":
-      return (
-        <SimulationScreen
-          embedded={embedded}
-          popoverEnv={popoverEnv}
-          modalEnv={modalEnv}
-          gamiEnabled={gamiEnabled}
-          {...(simGami ? { gami: simGami } : {})}
-        />
-      );
+      return <SimulationScreen embedded={embedded} modalEnv={modalEnv} />;
     case "results":
       return (
         <ResultsScreen embedded={embedded} env={resultsEnv} gamiEnabled={gamiEnabled} devBuild={devBuild} />
@@ -178,7 +168,6 @@ export function App({
   modalEnv = createNoopModalEnv(),
   startEnv = createNoopStartScreenEnv(),
   learnEnv = createNoopLearnScreenEnv(),
-  popoverEnv = createNoopSimulationPopoverEnv(),
   resultsEnv = createNoopResultsScreenEnv(),
   timing,
   gamiEnabled = true,
@@ -187,14 +176,31 @@ export function App({
   setChrome,
   audience = "student",
   requestSignIn,
+  sessions,
+  challengeId,
+  onChallengeFinished,
 }: AppProps): JSX.Element {
+  const { dispatch } = useStore();
   const { syncError, clearSyncError } = useGamiContext();
   // T175: kitle sözleşmesi — oyunlaştırma yüzeyleri (rozet/XP/liderlik/aylık ödül) yalnız
   // öğrenciye çizilir; çağıran `gamiEnabled=true` verse bile öğretim üyesi/ziyaretçide gizlenir
   // (depo sahibi kararı, plan.md). Tek kaynak burada: alt bileşenler yalnız bunu sorgular.
   const effectiveGami = gamiEnabled && audienceShowsGamification(audience);
+  // ADR-010: düello bağlamıyla açılınca mod seçimi atlanır; oturumu sürücü düello ucundan açar.
+  const challengeStarted = useRef<string | null>(null);
+  useEffect(() => {
+    if (challengeId === undefined || challengeStarted.current === challengeId || sessions === undefined) return;
+    challengeStarted.current = challengeId;
+    dispatch({ type: "startMode", mode: "assessment", challengeId });
+  }, [challengeId, dispatch, sessions]);
   return (
-    <EmbeddedProvider embedded={embedded} {...(setChrome === undefined ? {} : { setChrome })}>
+    <EmbeddedProvider
+      embedded={embedded}
+      {...(setChrome === undefined ? {} : { setChrome })}
+      {...(sessions === undefined ? {} : { sessions })}
+      {...(challengeId === undefined ? {} : { challengeId })}
+      {...(onChallengeFinished === undefined ? {} : { onChallengeFinished })}
+    >
       <div className="eg-sim-opaca app-shell">
         <Header embedded={embedded} env={chromeEnv} modals={{ help: HelpModal, confirm: ConfirmModal }} gamiEnabled={effectiveGami} />
         {effectiveGami && syncError ? <GamiSyncErrorBanner message={syncError.message} onDismiss={clearSyncError} icon={<IconInfo width={16} height={16} />} /> : null}
@@ -204,7 +210,6 @@ export function App({
               embedded={embedded}
               startEnv={startEnv}
               learnEnv={learnEnv}
-              popoverEnv={popoverEnv}
               resultsEnv={resultsEnv}
               modalEnv={modalEnv}
               timing={timing}
@@ -218,7 +223,6 @@ export function App({
               embedded={embedded}
               startEnv={startEnv}
               learnEnv={learnEnv}
-              popoverEnv={popoverEnv}
               resultsEnv={resultsEnv}
               modalEnv={modalEnv}
               gamiEnabled={effectiveGami}

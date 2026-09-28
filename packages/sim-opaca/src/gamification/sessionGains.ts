@@ -40,6 +40,9 @@ export function useOpacaSessionGains(input: {
   seed: number;
   durationMs: number;
   finishedAt: Date;
+  /** A2.3: sunucu oturumunda denemeyi sunucu yazar; `false` ise yerel yazım/rapor yapılmaz
+   *  (kazanım kartı yalnız bu oturumun tahmini kazanımını gösterir). Varsayılan `true`. */
+  persist?: boolean;
 } | null): GamiGainsModel | null {
   const { reportAttempt, reportSyncError } = useGamiContext();
   const [gains, setGains] = useState<GamiGainsModel | null>(null);
@@ -50,6 +53,7 @@ export function useOpacaSessionGains(input: {
   const repo = input?.repo;
   const caseById = input?.caseById;
   const results = input?.results;
+  const persist = input?.persist ?? true;
   useEffect(() => {
     if (!repo || !caseById || !results || mode === undefined || seed === undefined || durationMs === undefined || !finishedAt) return;
     let alive = true;
@@ -63,8 +67,9 @@ export function useOpacaSessionGains(input: {
         const already = beforeState.attempts.some((a) => a.id === attempt.id);
         const beforeEarned = new Set(beforeState.earned.map((e) => e.id));
         const before = mode === "assessment" ? await rankOf(repo, period, at) : null;
-        await repo.recordAttempt(attempt);
+        if (persist) await repo.recordAttempt(attempt);
         const report = (reportedAttempt: typeof attempt): void => {
+          if (!persist) return;
           try {
             const reported = reportAttempt?.(reportedAttempt) as void | Promise<void>;
             if (reported instanceof Promise) void reported.catch(() => undefined);
@@ -74,7 +79,7 @@ export function useOpacaSessionGains(input: {
         };
         let afterState: OpacaGamiState;
         try {
-          afterState = await loadRepoState(repo);
+          afterState = persist ? await loadRepoState(repo) : beforeState;
         } catch (error: unknown) {
           report(attempt);
           throw error;
@@ -108,6 +113,6 @@ export function useOpacaSessionGains(input: {
       }
     })();
     return () => { alive = false; };
-  }, [caseById, durationMs, finishedAt, mode, repo, reportAttempt, reportSyncError, results, seed]);
+  }, [caseById, durationMs, finishedAt, mode, persist, repo, reportAttempt, reportSyncError, results, seed]);
   return input ? gains : null;
 }

@@ -145,9 +145,12 @@ export interface FeedbackCardProps {
   readonly correct: boolean
   readonly q: Question
   readonly given: string[]
+  /** Lokalizasyonda uzman kutusu katmanı yoksa (A2.3 sunucu oturumu) kapalı:
+   *  yalnız doğru/yanlış ve sunucu geri bildirimi gösterilir. */
+  readonly showMarkGuidance?: boolean
 }
 
-export function FeedbackCard({ correct, q, given }: FeedbackCardProps) {
+export function FeedbackCard({ correct, q, given, showMarkGuidance = true }: FeedbackCardProps) {
   const isMark = q.type === 'localization'
   const correctLabels = q.correct.map((cid) => q.options.find((o) => o.id === cid)?.label ?? '').filter(Boolean)
   return (
@@ -158,9 +161,11 @@ export function FeedbackCard({ correct, q, given }: FeedbackCardProps) {
       </div>
       {isMark ? (
         <p className="feedback-verdict">
-          {correct
-            ? `İşaretiniz ${findingShort(q.targetFinding)} için uzman işaretlemesinin içinde.`
-            : `İşaretiniz uzman işaretlemesinin dışında kaldı. Filmde ${findingShort(q.targetFinding)} alanı şimdi kutuyla gösteriliyor.`}
+          {!showMarkGuidance
+            ? 'İşaretiniz sunucuda değerlendirildi.'
+            : correct
+              ? `İşaretiniz ${findingShort(q.targetFinding)} için uzman işaretlemesinin içinde.`
+              : `İşaretiniz uzman işaretlemesinin dışında kaldı. Filmde ${findingShort(q.targetFinding)} alanı şimdi kutuyla gösteriliyor.`}
         </p>
       ) : (
         <>
