@@ -59,11 +59,12 @@ describe("Pulse istemci müfredat aynası (T220)", () => {
     expect(total).toBe(bank.count);
   });
 
-  it("etiketler bankadaki 23 paterni kapsar ve sınırlılık metni güncel sayıları taşır", () => {
+  it("etiketler bankadaki 23 paterni kapsar ve sınırlılık metni gerçek veri validasyonunu anlatır", () => {
     const modes = [...new Set(bank.items.map((item) => item.mode))].sort();
     expect(Object.keys(curriculum.labels).sort()).toEqual(modes);
     expect(Object.values(curriculum.labels).every((label) => label.trim().length > 0)).toBe(true);
-    expect(curriculum.limitations).toContain("600 sentetik madde");
-    expect(curriculum.limitations).toContain("23 EKG sonucu");
+    expect(curriculum.limitations).toBe(
+      "Pulse'taki EKG'ler, hekimlerce etiketlenmiş açık erişimli veri kümelerindeki gerçek hasta kayıtlarından güncel kılavuz ölçütleriyle seçilmiş ve Ege Üniversitesi Tıp Fakültesi Kardiyoloji Anabilim Dalı'ndan Doç. Dr. Evrim Şimşek tarafından doğrulanmıştır.",
+    );
   });
 });

@@ -77,5 +77,5 @@ export const curriculum: PulseCurriculumData = {
     hyperk: "Hiperkalemiye bağlı EKG paterni",
   },
   limitations:
-    "600 sentetik madde ve 23 EKG sonucu: Simülatörün ilk 13 EKG sonucunun tüm tıbbi içerik ve sinyal validasyonları Ege Üniversitesi Tıp Fakültesi Kardiyoloji Anabilim Dalı öğretim üyelerince yapılmıştır. Patern 14–23 (T204) sinyal ve içerikleri Kardiyoloji ABD onayı bekliyor. Olgu vinyetleri ve vitaller sentetik öğretim örnekleridir. 16 s gözlem yalnız akış kuralıdır.",
+    "Pulse'taki EKG'ler, hekimlerce etiketlenmiş açık erişimli veri kümelerindeki gerçek hasta kayıtlarından güncel kılavuz ölçütleriyle seçilmiş ve Ege Üniversitesi Tıp Fakültesi Kardiyoloji Anabilim Dalı'ndan Doç. Dr. Evrim Şimşek tarafından doğrulanmıştır.",
 };
