@@ -9,15 +9,8 @@ import { browserApiWindow, csrfTokenFromCookie } from "../apiAuth";
  * API hataları sim sürücüsünün tanıdığı kodlu iletiye çevrilir (ör. `case_time_exceeded`).
  */
 
-/**
- * T212b: Opaca istemcisi sunucu oturumuna hazır olunca `true` yapılır (liste
- * `"opaca"` ile genişler). T212a yalnız altyapıyı hazırlar; kullanıcı davranışı
- * değişmez (Opaca kanalı kapalı kalır).
- */
-const OPACA_SERVER_SESSIONS = false;
-
-/** Sunucu oturumu olan simler (A2 Opaca, A3 Pulse ile genişler). */
-export const SERVER_SESSION_SIMS: readonly SimId[] = OPACA_SERVER_SESSIONS ? ["ausculta", "opaca"] : ["ausculta"];
+/** Sunucu oturumu olan simler: uygulama/değerlendirme vakaları yalnız sunucu kanalından gelir (ADR-009; A1 Ausculta, A2.3 Opaca, A3.3 Pulse). */
+export const SERVER_SESSION_SIMS: readonly SimId[] = ["ausculta", "opaca", "pulse"];
 
 function rethrow(error: unknown): never {
   if (error instanceof ApiError) {

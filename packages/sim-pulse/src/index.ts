@@ -28,6 +28,27 @@ export {
   pulseLearnPort,
 } from "./runtime/learn";
 export type { PulseLearnBridge, PulseLearnPort } from "./runtime/learn";
+export {
+  PULSE_QUESTION_ID,
+  PULSE_SERVER_ITEMS_GLOBAL,
+  PULSE_SERVER_REQUIRED_TEXT,
+  PULSE_SERVER_RESULTS_GLOBAL,
+  PULSE_SERVER_RESULT_EVENT,
+  adaptServerItem,
+  asPulsePublicCase,
+  attachPulseServerRequired,
+  createPulseServerItemsBridge,
+  pulseServerErrorMessage,
+} from "./runtime/serverItems";
+export type {
+  PulseServerCheck,
+  PulseServerItemsBridge,
+  PulseServerItemsPort,
+  PulseServerPublicCase,
+  PulseServerResultCase,
+  PulseServerResults,
+  PulseServerRuntimeItem,
+} from "./runtime/serverItems";
 import { createPulseRuntimeModule } from "./runtime/module";
 export const pulseModule = createPulseRuntimeModule();
 export type { PulseMountElement, PulseModuleDeps, PulseModuleEnv } from "./mount";

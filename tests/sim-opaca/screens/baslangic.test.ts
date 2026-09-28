@@ -1,6 +1,7 @@
 import { createElement, type ReactNode } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
+import { EmbeddedProvider } from "../../../packages/sim-opaca/src/EmbeddedContext";
 import {
   FS_PROMPT_KEY,
   ModeSelectScreen,
@@ -12,6 +13,7 @@ import {
   saveFsPromptDone,
 } from "../../../packages/sim-opaca/src/index";
 import type { StoragePort, WindowLike } from "../../../packages/sim-opaca/src/index";
+import { fakeSessions } from "../session-fixture";
 
 /** Başlangıç ekranları — E2 §8 S13 kabulü (statik render): başlangıç CTA'ları, üç mod kartı
  *  (İnceleme/Öğrenme · Uygulama · Değerlendirme tonları), kilitli öneri kartı, öğretici adımları,
@@ -35,10 +37,12 @@ function memoryStorage(seed: Record<string, string> = {}): StoragePort {
   };
 }
 
-function renderInStore(node: ReactNode, storage: StoragePort = memoryStorage()): string {
+function renderInStore(node: ReactNode, storage: StoragePort = memoryStorage(), withSessions = false): string {
   return renderToStaticMarkup(
     createElement(StoreProvider, {
-      children: node,
+      children: withSessions
+        ? createElement(EmbeddedProvider, { embedded: true, sessions: fakeSessions({ mode: "practice" }), children: node })
+        : node,
       env: inertWindow,
       now: () => 1_728_000_000_000,
       runtime: createMemoryRuntimeAdapter(),
@@ -82,12 +86,19 @@ describe("ModeSelectScreen (statik render)", () => {
   });
 
   it("kilitli öneri kartı görünür ve tıklanabilir (gönderim kilidi değil)", () => {
-    const html = renderInStore(createElement(ModeSelectScreen));
+    const html = renderInStore(createElement(ModeSelectScreen), memoryStorage(), true);
     expect(html).toContain('data-recommend-locked="true"');
     expect(html).toContain("mode-lock-hint");
     expect(html).toContain("Öğrenmeye git");
     expect(html).not.toMatch(/disabled=""[^>]*>Öğrenmeye git/);
     expect(html).not.toContain("Bu ayın ödülü");
+  });
+
+  it("A2.3: oturum kanalı yokken uygulama/değerlendirme kartları pasiftir", () => {
+    const html = renderInStore(createElement(ModeSelectScreen));
+    const segments = html.split('class="mode-card ');
+    expect(segments.find((segment) => segment.startsWith("practice")) ?? "").toContain('disabled=""');
+    expect(segments.find((segment) => segment.startsWith("assessment")) ?? "").toContain('disabled=""');
   });
 
   it("oyunlaştırma bayrağı açıkken ayın ödülü satırı çizilir", () => {

@@ -3,13 +3,15 @@ import type { SimAudience } from '@egemed/sim-host'
 import { audienceCanUseMode, VISITOR_LOCK_TEXT } from '@egemed/sim-host'
 import { useStore } from '../core/StoreProvider'
 import type { Mode } from '../core/types'
-import { poolFor } from '../data/pool'
+import { CASE_INVENTORY } from '../data/inventory'
 import { LIBRARY_ITEMS } from '../data/terminology'
-import { sampleSession, SESSION_SIZE } from '../core/session'
 import { Footer, EcgDeco } from '../ui/chrome'
-import { useSetChrome } from '../EmbeddedContext'
+import { useSessions, useSetChrome } from '../EmbeddedContext'
 import { ScreenHeading } from '../ui/ScreenHeading'
 import { IconGraduation, IconFilm, IconChart, IconCheck, IconGift, IconLock } from '../ui/icons'
+
+/** Sunucu oturumu vaka sayısı (banka `SESSION_CASE_COUNT` ile aynı). */
+const SESSION_SIZE = 10
 
 /** Ay sonuna kalan tam gün (TR; kaynak `gamification/leaderboardView.ts:daysLeft`). */
 function daysLeftInMonth(nowMs: number): number {
@@ -41,24 +43,18 @@ export function ModeSelectScreen({
 }: ModeSelectScreenProps): JSX.Element {
   const { state, dispatch, now } = useStore()
   const unified = useSetChrome() !== undefined
-  const practiceCount = poolFor('practice').length
-  const assessmentCount = poolFor('assessment').length
+  const practiceCount = CASE_INVENTORY.practicePoolSize
+  const assessmentCount = CASE_INVENTORY.assessmentPoolSize
   const recommendLearn = !state.tutorialSeen
   const isVisitor = audience === 'visitor'
   const isFaculty = audience === 'faculty'
+  // Ziyaretçi kilidi gönderim kilidi değildir: kart pasifleşmez, düğme girişe yönlendirir.
   const canPractice = audienceCanUseMode(audience, 'practice')
   const canAssessment = audienceCanUseMode(audience, 'assessment')
+  // A2.3: uygulama/değerlendirme vakaları yalnız sunucu oturumundan gelir; kanal yoksa kapalı.
+  const serverReady = useSessions() !== undefined
   const signIn = () => requestSignIn?.()
   const pick = (mode: Mode) => {
-    if (mode !== 'learn') {
-      const seed = (now() % 2147483647) | 0
-      dispatch({
-        type: 'startSession',
-        practiceIds: sampleSession(poolFor('practice'), seed, SESSION_SIZE),
-        assessmentIds: sampleSession(poolFor('assessment'), seed + 1, SESSION_SIZE),
-        seed,
-      })
-    }
     dispatch({ type: 'startMode', mode })
     if (mode === 'learn') dispatch({ type: 'goto', screen: 'learn' })
   }
@@ -108,7 +104,7 @@ export function ModeSelectScreen({
               text={practiceCount ? `${practiceCount} vakalık havuzdan her oturumda rastgele ${Math.min(SESSION_SIZE, practiceCount)} vaka; ipucu ve geri bildirimle.` : 'Uygulama havuzu boş: önce veri setini içe aktarın.'}
               items={['Görüntü üzerinde işaretleme', 'İpucu desteği', 'Yanıttan sonra uzman işaretlemesi']}
               cta={!canPractice ? VISITOR_LOCK_TEXT.cta : recommendLearn && practiceCount ? 'Öğrenmeye git' : 'Vakaları çöz'}
-              disabled={canPractice ? !practiceCount : false}
+              disabled={canPractice && (!practiceCount || !serverReady)}
               recommendLocked={canPractice && recommendLearn && !!practiceCount}
               locked={!canPractice}
               lockedText={VISITOR_LOCK_TEXT.modeLocked}
@@ -123,7 +119,7 @@ export function ModeSelectScreen({
               items={['Okuma bölgesi ve uzman katmanı yok', 'Vaka başına süre sınırı', embedded ? 'Puan kaydedilir' : 'SCORM puanı']}
               rules="İpucu yok · geri bildirim yalnız sonunda · puan kaydedilir"
               cta={!canAssessment ? VISITOR_LOCK_TEXT.cta : recommendLearn && assessmentCount ? 'Öğrenmeye git' : 'Değerlendirmeye gir'}
-              disabled={canAssessment ? !assessmentCount : false}
+              disabled={canAssessment && (!assessmentCount || !serverReady)}
               recommendLocked={canAssessment && recommendLearn && !!assessmentCount}
               locked={!canAssessment}
               lockedText={VISITOR_LOCK_TEXT.modeLocked}

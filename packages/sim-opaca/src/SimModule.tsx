@@ -17,7 +17,6 @@ import type { ModalEnv } from "./ui/modal-env";
 import type { LearnScreenEnv } from "./screens/LearnScreen";
 import type { ResultsScreenEnv } from "./screens/ResultsScreen";
 import type { StartScreenEnv } from "./screens/StartScreen";
-import type { SimulationPopoverEnv } from "./screens/SimulationScreen";
 import type { OpacaAttemptRecord } from "./gamification/attempt";
 import type { GamiRepository } from "@egemed/gamification-core";
 import { GamiProvider, bindGamiRepository } from "./gamification/GamiContext";
@@ -45,7 +44,6 @@ export interface OpacaModuleDeps {
   readonly modalEnv?: ModalEnv;
   readonly startEnv?: StartScreenEnv;
   readonly learnEnv?: LearnScreenEnv;
-  readonly popoverEnv?: SimulationPopoverEnv;
   readonly resultsEnv?: ResultsScreenEnv;
   readonly gamiEnabled?: boolean;
   readonly gamiRepository?: GamiRepository<OpacaAttemptRecord>;
@@ -99,7 +97,6 @@ function defaultProductionDeps(): OpacaModuleDeps {
     modalEnv: bindings.modalEnv,
     startEnv: bindings.startEnv,
     learnEnv: bindings.learnEnv,
-    popoverEnv: bindings.popoverEnv,
     resultsEnv: bindings.resultsEnv,
     devBuild: isDevBuild(),
   };
@@ -146,8 +143,11 @@ export function createOpacaModule(deps?: OpacaModuleDeps): SimModule {
         ...(resolved.modalEnv ? { modalEnv: resolved.modalEnv } : {}),
         ...(resolved.startEnv ? { startEnv: resolved.startEnv } : {}),
         ...(resolved.learnEnv ? { learnEnv: resolved.learnEnv } : {}),
-        ...(resolved.popoverEnv ? { popoverEnv: resolved.popoverEnv } : {}),
         ...(resolved.resultsEnv ? { resultsEnv: resolved.resultsEnv } : {}),
+        // A2.3: sunucu vaka oturumu ve düello bağlamı App'e (dolayısıyla ekranlara) geçer.
+        ...(context.sessions === undefined ? {} : { sessions: context.sessions }),
+        ...(context.challengeId === undefined ? {} : { challengeId: context.challengeId }),
+        ...(context.onChallengeFinished === undefined ? {} : { onChallengeFinished: context.onChallengeFinished }),
       };
 
       root.render(

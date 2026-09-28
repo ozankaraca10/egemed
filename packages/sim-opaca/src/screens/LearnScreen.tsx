@@ -1,11 +1,12 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type JSX } from 'react'
 import type { SimAudience } from '@egemed/sim-host'
 import { VISITOR_LOCK_TEXT } from '@egemed/sim-host'
+import { useSessions } from '../EmbeddedContext'
 import { useStore } from '../core/StoreProvider'
 import { examplesFor, isExpertSource } from '../core/images'
 import type { ImageRecord } from '../core/types'
 import { ZONES } from '../data/zones'
-import { ALL_CASES, poolFor } from '../data/pool'
+import { CASE_INVENTORY } from '../data/inventory'
 import { isVisitorUnlocked } from '../core/visitorAccess'
 import { LIBRARY_GROUPS, LIBRARY_ITEMS, LABEL_SOURCE_TEXT, findingShort, type LibraryItem } from '../data/terminology'
 import { FilmViewer, createNoopFilmEnv, type FilmViewerHandle } from '../ui/FilmViewer'
@@ -128,22 +129,19 @@ export function LearnScreen({
     env.scrollActiveLibraryItem()
   }, [env, selectedKey])
 
-  const coverage = useMemo(() => {
-    if (!item.finding) return { p: 0, a: 0 }
-    const list = ALL_CASES.filter((c) => c.primaryFinding === item.finding)
-    return { p: list.filter((c) => c.modes.includes('practice')).length, a: list.filter((c) => c.modes.includes('assessment')).length }
-  }, [item])
+  // A2.3: vaka kapsamı banka envanterinden gelir (istemci havuz taşımaz).
+  const coverage = item.finding ? CASE_INVENTORY.coverage[item.finding] ?? { p: 0, a: 0 } : { p: 0, a: 0 }
+  const sessions = useSessions()
 
   const startPractice = () => {
-    const ids = poolFor('practice').filter((c) => c.primaryFinding === item.finding).slice(0, 5).map((c) => c.id)
-    if (!ids.length) return
+    // A2.3: odaklı uygulama oturumu (bulgu başına ≤5 vaka) yalnız sunucudan açılır.
+    if (sessions === undefined || !item.finding || coverage.p === 0) return
     dispatch({
       type: 'startTopicPractice',
       key: item.key,
       exampleIdx,
       title: item.title,
-      practiceIds: ids,
-      seed: (now() % 2147483647) | 0,
+      focusFinding: item.finding,
     })
   }
 
@@ -351,7 +349,7 @@ export function LearnScreen({
                           {coverage.a ? `, ${coverage.a} değerlendirme vakası` : ''}
                         </p>
                         {coverage.p > 0 && (
-                          <button type="button" className="btn outline small" onClick={startPractice}>
+                          <button type="button" className="btn outline small" onClick={startPractice} disabled={sessions === undefined}>
                             Bu konuda uygulama yap <IconArrowRight width={14} height={14} />
                           </button>
                         )}

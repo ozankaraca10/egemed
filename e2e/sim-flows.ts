@@ -1,6 +1,5 @@
 import { expect, type Locator, type Page } from "@playwright/test";
-import opacaCasesCore from "../packages/sim-opaca/src/data/cases.json" with { type: "json" };
-import opacaCasesAuto from "../packages/sim-opaca/src/data/cases-auto.json" with { type: "json" };
+import { ALL_CASES as OPACA_BANK_CASES } from "../packages/assessment-bank/src/opaca/data";
 import auscultaCasesCore from "../packages/assessment-bank/data/ausculta/cases.json" with { type: "json" };
 import auscultaCasesAuto from "../packages/assessment-bank/data/ausculta/cases-auto.json" with { type: "json" };
 import auscultaLibrary from "../packages/sim-ausculta/src/data/library.json" with { type: "json" };
@@ -53,10 +52,8 @@ function practiceQuestions(...sources: readonly { cases: unknown[] }[]): Map<str
   return byPrompt;
 }
 
-const OPACA_CORRECT_BY_PROMPT = practiceQuestions(
-  opacaCasesCore as unknown as { cases: unknown[] },
-  opacaCasesAuto as unknown as { cases: unknown[] },
-);
+// A2.3: Opaca doğru-cevap haritası da bankanın veri yolundan okunur (Ausculta gibi).
+const OPACA_CORRECT_BY_PROMPT = practiceQuestions({ cases: [...OPACA_BANK_CASES] });
 const AUSCULTA_CORRECT_BY_PROMPT = practiceQuestions(
   auscultaCasesCore as unknown as { cases: unknown[] },
   auscultaCasesAuto as unknown as { cases: unknown[] },
@@ -134,6 +131,21 @@ export async function submitAnswer(root: Locator): Promise<void> {
   await expect(root.locator(".feedback-head").first()).toBeVisible();
 }
 
+/** Bir soruyu yanıtlar: seçenek/işaret + sunucu kontrolü + geri bildirim + ilerleme.
+ *  A2.3: sunucu yanıtı gelirken vaka bitiş kartı açılabilir; kısa zaman aşımlı
+ *  tıklamalar yarışta sessizce düşer ve dış tur güncel duruma yeniden bakar. */
+async function answerCurrentQuestion(root: Locator, sim: SimId): Promise<void> {
+  const options = root.locator(".opt");
+  const filmStage = root.locator(".film-stage");
+  const primary = root.locator(".q-nav button.btn.primary");
+  if ((await options.count()) > 0) await options.first().click({ timeout: 2_000 });
+  else if (sim === "opaca" && (await filmStage.count()) > 0) await filmStage.click({ timeout: 2_000 });
+  else return;
+  await primary.click({ timeout: 5_000 });
+  await expect(root.locator(".feedback-head").first()).toBeVisible({ timeout: 5_000 });
+  await primary.click({ timeout: 5_000 });
+}
+
 /** 5 vakalık konu oturumunu uçtan uca çözüp sonuç ekranına getirir. */
 export async function completeTopicPractice(root: Locator, sim: SimId): Promise<void> {
   const page = root.page();
@@ -141,34 +153,20 @@ export async function completeTopicPractice(root: Locator, sim: SimId): Promise<
   const endCard = root.locator(".case-end-card");
   const options = root.locator(".opt");
   const filmStage = root.locator(".film-stage");
-  for (let round = 0; round < 80; round += 1) {
+  for (let round = 0; round < 120; round += 1) {
     if ((await resultsHeading.count()) > 0) return;
     // Ekranlar arası tek karelik render boşlukları beklenir; dört durumdan biri
     // görünür olana dek otomatik yeniden denenir.
     const anyState = resultsHeading.or(endCard).or(options.first()).or(filmStage.first()).first();
     await expect(anyState, `konu oturumunda beklenmeyen ekran durumu (tur ${round})`).toBeVisible();
-    // expect ile dal seçimi arasında ekran değişebilir (ör. son vakadan sonuca
-    // geçiş); hiçbir dal eşleşmezse kısa bekleyip aynı turda yeniden bakılır.
-    for (let attempt = 0; attempt < 6; attempt += 1) {
-      if ((await resultsHeading.count()) > 0) return;
-      if ((await endCard.count()) > 0) {
-        await endCard.locator(".q-nav button.btn.primary").click();
-        break;
-      }
-      if ((await options.count()) > 0) {
-        await options.first().click();
-        await submitAnswer(root);
-        await root.locator(".q-nav button.btn.primary").click();
-        break;
-      }
-      if (sim === "opaca" && (await filmStage.count()) > 0) {
-        await filmStage.click();
-        await submitAnswer(root);
-        await root.locator(".q-nav button.btn.primary").click();
-        break;
-      }
-      await page.waitForTimeout(150);
+    if ((await endCard.count()) > 0) {
+      // Vaka bitiş kartı: sonraki vaka ya da sonuçlara geç.
+      await endCard.locator(".q-nav button.btn.primary").click({ timeout: 5_000 }).catch(() => undefined);
+      continue;
     }
+    // expect ile dal seçimi arasında ekran değişebilir (ör. sunucu yanıtı gelirken
+    // bitiş kartı açılır); tıklama yarışı yutulur ve yeni tur güncel duruma bakar.
+    await answerCurrentQuestion(root, sim).catch(() => undefined);
   }
   throw new Error("Konu oturumu sürede tamamlanamadı");
 }
