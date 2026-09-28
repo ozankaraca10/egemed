@@ -146,6 +146,8 @@ export function createOpacaModule(deps?: OpacaModuleDeps): SimModule {
         ...(resolved.resultsEnv ? { resultsEnv: resolved.resultsEnv } : {}),
         // A2.3: sunucu vaka oturumu ve düello bağlamı App'e (dolayısıyla ekranlara) geçer.
         ...(context.sessions === undefined ? {} : { sessions: context.sessions }),
+        // T218: kabuğun öğrenme tamamlama kanalı (kilit kararını besler).
+        ...(context.learn === undefined ? {} : { learn: context.learn }),
         ...(context.challengeId === undefined ? {} : { challengeId: context.challengeId }),
         ...(context.onChallengeFinished === undefined ? {} : { onChallengeFinished: context.onChallengeFinished }),
       };

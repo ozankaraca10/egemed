@@ -2,6 +2,8 @@ import { describe, expect, it } from "vitest";
 import {
   firstWeakLibraryKey,
   isTimedOut,
+  modeLearnLocked,
+  modePickTarget,
   needsExitConfirm,
   nextActionForSubmit,
   remainingSec,
@@ -87,5 +89,18 @@ describe("akış (kaynak davranışı)", () => {
     expect(needsExitConfirm("modes")).toBe(false);
     expect(needsExitConfirm("results")).toBe(false);
     expect(needsExitConfirm("start")).toBe(false);
+  });
+
+  it("T218: öğrenme kilidi tamamlanmadan hedefi öğrenmeye çevirir (öneri değil)", () => {
+    expect(modeLearnLocked(false, true)).toBe(true);
+    expect(modeLearnLocked(true, true)).toBe(false);
+    expect(modeLearnLocked(false, false)).toBe(false);
+    expect(modePickTarget("practice", false, true)).toBe("learn");
+    expect(modePickTarget("assessment", false, true)).toBe("learn");
+    expect(modePickTarget("learn", false, true)).toBe("learn");
+    expect(modePickTarget("practice", true, true)).toBe("practice");
+    expect(modePickTarget("assessment", true, true)).toBe("assessment");
+    // Havuz boşken kilit değil, veri eksikliği devrededir.
+    expect(modePickTarget("practice", false, false)).toBe("practice");
   });
 });

@@ -1,9 +1,12 @@
 import { createElement, type ReactNode } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
+import { EmbeddedProvider } from "../../../packages/sim-opaca/src/EmbeddedContext";
 import {
+  LEARN_OPENED_KEY,
   LIBRARY_GROUPS,
   LIBRARY_ITEMS,
+  LearnGateProvider,
   LearnScreen,
   STEP_TITLES,
   StoreProvider,
@@ -14,7 +17,8 @@ import {
 import type { ImageRecord, StoragePort, WindowLike } from "../../../packages/sim-opaca/src/index";
 
 /** Öğrenme ekranı — E2 §8 S14 kabulü (statik render): konu listesi, ABCDE okuma rehberi,
- *  film paneli, erişilebilir başlıklar; sentetik konu/görüntü fixture'ı. */
+ *  film paneli, erişilebilir başlıklar; sentetik konu/görüntü fixture'ı; T218 öğrenme kilidi
+ *  işaretleri (ilerleme, grup sayacı, açıldı). */
 
 const inertWindow: WindowLike = {
   addEventListener: () => undefined,
@@ -24,8 +28,8 @@ const inertWindow: WindowLike = {
   visibilityState: "visible",
 };
 
-function memoryStorage(): StoragePort {
-  const entries = new Map<string, string>();
+function memoryStorage(seed: Record<string, string> = {}): StoragePort {
+  const entries = new Map(Object.entries(seed));
   return {
     get: (key) => entries.get(key) ?? null,
     set: (key, value) => {
@@ -34,14 +38,14 @@ function memoryStorage(): StoragePort {
   };
 }
 
-function renderInStore(node: ReactNode): string {
+function renderInStore(node: ReactNode, storage: StoragePort = memoryStorage()): string {
   return renderToStaticMarkup(
     createElement(StoreProvider, {
-      children: node,
+      children: createElement(LearnGateProvider, { children: node }),
       env: inertWindow,
       now: () => 1_728_000_000_000,
       runtime: createMemoryRuntimeAdapter(),
-      storage: memoryStorage(),
+      storage,
     }),
   );
 }
@@ -150,6 +154,37 @@ describe("LearnScreen (statik render)", () => {
   it("film sahnesi öğrenme düzeninde görüntünün en-boy oranını taşır (T207)", () => {
     const html = renderInStore(createElement(LearnScreen));
     expect(html).toMatch(/class="film-stage"[^>]*style="[^"]*aspect-ratio/);
+  });
+
+  it("T218: öğrenme ilerlemesi, grup sayacı ve açıldı işaretini gösterir", () => {
+    const html = renderInStore(
+      createElement(LearnScreen),
+      memoryStorage({ [LEARN_OPENED_KEY]: JSON.stringify(["technique.systematic"]) }),
+    );
+    expect(html).toContain("Öğrenme: 1/33 konu açıldı");
+    // İlk grup (Temel okuma) 4 öğedir; varsayılan seçili öğe işaretlidir.
+    expect(html).toContain("1/4");
+    expect(html).toContain('aria-label="açıldı"');
+    expect(html).toContain("lib-item active opened");
+  });
+
+  it("T218: düello bağlamında kilitliyken öğrenme ekranı bilgi notu gösterir", () => {
+    const html = renderToStaticMarkup(
+      createElement(StoreProvider, {
+        children: createElement(LearnGateProvider, {
+          children: createElement(EmbeddedProvider, {
+            embedded: true,
+            challengeId: "11111111-1111-4111-8111-111111111111",
+            children: createElement(LearnScreen),
+          }),
+        }),
+        env: inertWindow,
+        now: () => 1_728_000_000_000,
+        runtime: createMemoryRuntimeAdapter(),
+        storage: memoryStorage(),
+      }),
+    );
+    expect(html).toContain("Meydan okuma için önce öğrenme modunu tamamlayın: 0/33 konu açıldı.");
   });
 });
 

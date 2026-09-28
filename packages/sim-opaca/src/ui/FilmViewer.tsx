@@ -157,6 +157,9 @@ export interface FilmViewerProps {
   fitContent?: boolean
   /** Kesit yığınında son kesite ulaşıldığında (görüntü başına bir kez) — oyunlaştırma "BT Kaşifi" için. */
   onStackEnd?: () => void
+  /** T218: görüntü dosyası gerçekten yüklendiğinde (görüntü başına bir kez) — öğrenme
+   *  kütüphanesinde öğenin "açıldı" sayılması için; yalnız seçmek yetmez. */
+  onImageReady?: () => void
   /** Pencere/belge sınırı; verilmezse güvenli no-op kullanılır. */
   env?: FilmEnv
 }
@@ -184,6 +187,7 @@ export const FilmViewer = forwardRef<FilmViewerHandle, FilmViewerProps>(function
     showInfoOverlay = false,
     fitContent = false,
     onStackEnd,
+    onImageReady,
     env = NOOP_FILM_ENV,
   },
   ref,
@@ -223,6 +227,18 @@ export const FilmViewer = forwardRef<FilmViewerHandle, FilmViewerProps>(function
     stackEndFired.current = image.id
     onStackEnd()
   }, [clampedSlice, stackFramesList.length, image, onStackEnd])
+
+  // T218: görüntü dosyası GERÇEKTEN yüklendiğinde bir kez bildir (öğrenme kaydı "açıldı"
+  // tetikleyicisi). `loaded` önceki görüntüden bayat kalabildiği için (konu değişince
+  // sıfırlama etkisi bu etkiden SONRA koşar) hangi görüntünün yüklendiği kimlikle izlenir;
+  // yalnız seçmek ya da yüklenmemiş görüntü kaydı büyütmez.
+  const imageReadyFired = useRef<string | null>(null)
+  const loadedImage = useRef<string | null>(null)
+  useEffect(() => {
+    if (!onImageReady || !image || loadedImage.current !== image.id || imageReadyFired.current === image.id) return
+    imageReadyFired.current = image.id
+    onImageReady()
+  }, [image, loaded, onImageReady])
 
   const frameSrc = assetUrl(stackFramesList[clampedSlice] ?? image?.runtimeUrl)
   const goSlice = (next: number) => setSliceIndex(goToSlice(next, stackFramesList.length))
@@ -523,7 +539,10 @@ export const FilmViewer = forwardRef<FilmViewerHandle, FilmViewerProps>(function
               src={frameSrc}
               alt={multiSlice ? `Toraks BT — kesit ${clampedSlice + 1}/${stackFramesList.length}` : 'Akciğer grafisi'}
               draggable={false}
-              onLoad={() => setLoaded(true)}
+              onLoad={() => {
+                loadedImage.current = image.id
+                setLoaded(true)
+              }}
               onError={() => setFailed(true)}
               style={{ filter: filterStyle }}
               className={loaded ? 'is-loaded' : ''}

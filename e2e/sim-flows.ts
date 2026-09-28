@@ -3,6 +3,7 @@ import { ALL_CASES as OPACA_BANK_CASES } from "../packages/assessment-bank/src/o
 import auscultaCasesCore from "../packages/assessment-bank/data/ausculta/cases.json" with { type: "json" };
 import auscultaCasesAuto from "../packages/assessment-bank/data/ausculta/cases-auto.json" with { type: "json" };
 import auscultaLibrary from "../packages/sim-ausculta/src/data/library.json" with { type: "json" };
+import opacaLibrary from "../packages/sim-opaca/src/data/library.json" with { type: "json" };
 
 /**
  * Opaca/Ausculta ortak sim akışları (T143): öğrenme → konu uygulaması → oturum sonu.
@@ -76,6 +77,27 @@ export async function unlockAuscultaLearn(page: Page): Promise<void> {
       sessionStorage.setItem("egemed.learn.ausculta", "1");
     },
     { listened, namespaces },
+  );
+}
+
+/**
+ * T218 — öğrenme kilidi tohumu: uygulama/değerlendirme akışından önce Opaca
+ * öğrenmesini tamamlanmış sayar. İki yol birlikte açılır: yerel açıldı kümesi
+ * tüm kütüphane anahtarlarıyla yazılır ve DEV kabuğun sekme deposu öğrenme kaydı
+ * (`egemed.learn.opaca`) işaretlenir. `addInitScript` her gezinmeden önce koşar.
+ * (E2E'de XR görüntü dosyaları git-dışı olduğundan kayıt gerçek yüklemeyle üretilemez.)
+ */
+export async function unlockOpacaLearn(page: Page): Promise<void> {
+  const opened = JSON.stringify(
+    (opacaLibrary.groups as { items: { key: string }[] }[]).flatMap((group) => group.items.map((item) => item.key)),
+  );
+  const namespaces = ["egemed:anon:opaca:", "egemed:u:dev-student-0001:opaca:", "egemed:u:dev-admin-0001:opaca:"];
+  await page.addInitScript(
+    (seed: { opened: string; namespaces: string[] }) => {
+      for (const namespace of seed.namespaces) localStorage.setItem(`${namespace}opaca.learn.opened`, seed.opened);
+      sessionStorage.setItem("egemed.learn.opaca", "1");
+    },
+    { opened, namespaces },
   );
 }
 

@@ -1,6 +1,7 @@
 import { documentLike, locationSearch } from '../platform-dom'
 import type { ModalEnv } from '../ui/modal-env'
 import { useMemo, useState } from 'react'
+import { useStartMode } from '../core/LearnGate'
 import { useStore } from '../core/StoreProvider'
 import { OPACA_BADGES } from '../gamification/catalog'
 import { OPACA_RULES } from '../gamification/rules'
@@ -25,6 +26,7 @@ const goalIcon = (id: WeeklyGoal['id']) => {
 /** Başarılarım (tasarım promptu §4). Yalnız oyunlaştırma bayrağı açıkken erişilir. */
 function AchievementsBody({ embedded = false, devBuild = false, modalEnv, server }: { embedded?: boolean; devBuild?: boolean; modalEnv?: ModalEnv; server: ServerGamiData | null }) {
   const { dispatch } = useStore()
+  const startMode = useStartMode()
   const demo = gamiDemoFrom(locationSearch(), devBuild)
   const view = useGami(0, demo)
   const [period, setPeriod] = useState<AchievementsPeriod>('last30')
@@ -61,14 +63,15 @@ function AchievementsBody({ embedded = false, devBuild = false, modalEnv, server
   }), [congrats, earned, period, server, view, week])
   const study = (key: string) => {
     dispatch({ type: 'setLearnFocus', key })
-    dispatch({ type: 'startMode', mode: 'learn' })
+    startMode('learn')
     dispatch({ type: 'goto', screen: 'learn' })
   }
   const scrollToBadges = () => documentLike()?.getElementById('gami-badges')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
 
+  // T218: öğrenme tamamlanmadan değerlendirme başlatılamaz; kilitliyse istek öğrenmeye düşer.
   const startAssessment = () => {
     // A2.3: örneklemi sunucu sürücüsü çeker (istemcide havuz yok).
-    dispatch({ type: 'startMode', mode: 'assessment' })
+    startMode('assessment')
   }
 
   return (

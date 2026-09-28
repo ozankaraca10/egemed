@@ -1,6 +1,7 @@
 import { Fragment, useCallback, useMemo, useState, type JSX, type ReactNode } from 'react'
 import { useStore } from '../core/StoreProvider'
 import { useChallenge } from '../EmbeddedContext'
+import { useStartMode } from '../core/LearnGate'
 import { Footer, EcgDeco } from '../ui/chrome'
 import { ScreenHeading } from '../ui/ScreenHeading'
 import { aggregateResults } from '../core/scoring'
@@ -67,6 +68,7 @@ export function ResultsScreen({
   gains,
 }: ResultsScreenProps): JSX.Element {
   const { state, dispatch, runtime, now } = useStore()
+  const startMode = useStartMode()
   // API oturumunda veri sunucudan: kazanım kartında “Demo verisi” etiketi yok.
   const gamiServer = useGamiContext().gamification !== undefined
   const isAssessment = state.mode === 'assessment'
@@ -94,7 +96,8 @@ export function ResultsScreen({
 
   const retrySame = () => {
     // Yeni oturumu sunucu sürücüsü başlatır (istemcide örneklem yok).
-    dispatch({ type: 'startMode', mode: state.mode })
+    // T218: öğrenme kilidi burada da geçerli (koruma tek noktada: `canStartMode`).
+    startMode(state.mode)
   }
 
   // ADR-010: düelloda sonuç ekranından kazanan ekranına dönüş (Ausculta deseni).
@@ -109,7 +112,7 @@ export function ResultsScreen({
 
   const studyLearn = () => {
     if (weakLearnKey) dispatch({ type: 'setLearnFocus', key: weakLearnKey })
-    dispatch({ type: 'startMode', mode: 'learn' })
+    startMode('learn')
     dispatch({ type: 'goto', screen: 'learn' })
   }
 
