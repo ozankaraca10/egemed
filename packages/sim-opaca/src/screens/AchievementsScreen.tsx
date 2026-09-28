@@ -41,6 +41,7 @@ function AchievementsBody({ embedded = false, devBuild = false, modalEnv, server
     return { monthName: `${MONTHS[Number(r.month.slice(5, 7)) - 1]} ${r.month.slice(0, 4)}`, title: r.title, sponsor: r.sponsor }
   }, [demo, view.now])
   const earned = server ? earnedFromServer(OPACA_BADGES, server.summary.badges) : view.state.earned
+  const serverBadgeIds = server ? new Set(server.summary.badges.map((badge) => badge.key)) : null
   const model = useMemo(() => buildAchievementsModel({
     now: view.now,
     period,
@@ -99,7 +100,15 @@ function AchievementsBody({ embedded = false, devBuild = false, modalEnv, server
             weekLabel={model.weekLabel}
             domains={model.domains}
             domainRange={model.domainRange}
-            badges={model.badges}
+            badges={serverBadgeIds === null ? model.badges : model.badges.map((badge) => {
+              const isEarned = serverBadgeIds.has(badge.id)
+              return {
+                ...badge,
+                state: isEarned ? 'earned' : 'locked',
+                value: isEarned ? badge.max : 0,
+                earnedLabel: isEarned ? badge.earnedLabel : null,
+              }
+            })}
             categories={model.categories}
             onStudy={study}
             onScrollBadges={scrollToBadges}

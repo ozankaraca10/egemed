@@ -62,5 +62,8 @@ describe("Opaca İlerlemem sunucu kaynağı", () => {
     expect(html).toContain("Sistematik Okuyucu");
     expect(html).toContain("is-earned");
     expect(html).toContain("kazanıldı");
+    expect(html).toContain("Öğrenme Kaşifi");
+    expect(html).toContain("is-locked");
+    expect(html).not.toContain("0/10");
   });
 });
