@@ -110,6 +110,40 @@
       "licenseUrl": "https://creativecommons.org/licenses/by/4.0/",
       "usage": "King Abdullah University Hospital'da gerçek hastalardan 3M Littmann 3200 elektronik stetoskopla alınmış, bölge etiketli posterior akciğer kayıtları. Yalnız D (diyafram) filtresi kullanılır; ses/tanı etiketleri uzman hekim anotasyonludur ve bölge-bulgu eşlemesi öğretim üyesi onayı bekler.",
       "attributionText": "Fraiwan, M., Fraiwan, L., Khassawneh, B., & Ibnian, A. (2021). A dataset of lung sounds recorded from the chest wall using an electronic stethoscope (Version 3). Mendeley Data. https://doi.org/10.17632/jwyy9np4gv.3 — CC BY 4.0"
+    },
+    {
+      "id": "sprsound",
+      "title": "SPRSound: Open-Source SJTU Paediatric Respiratory Sound Database",
+      "authors": [
+        "Qing Zhang",
+        "Jing Zhang",
+        "Jiajun Yuan",
+        "Huajie Huang",
+        "Yuhang Zhang",
+        "Baoqin Zhang",
+        "Gaomei Lv",
+        "Shuzhu Lin",
+        "Na Wang",
+        "Xin Liu",
+        "Mingyu Tang",
+        "Yahua Wang",
+        "Hui Ma",
+        "Lu Liu",
+        "Shuhua Yuan",
+        "Hongyuan Zhou",
+        "Jian Zhao",
+        "Yongfu Li",
+        "Yong Yin",
+        "Liebin Zhao",
+        "Guoxing Wang",
+        "Yong Lian"
+      ],
+      "datasetDoi": "10.21227/nfkk-1x47",
+      "articleDoi": "10.1109/TBCAS.2022.3204910",
+      "license": "Creative Commons Attribution 4.0 International (CC BY 4.0)",
+      "licenseUrl": "https://creativecommons.org/licenses/by/4.0/",
+      "usage": "Shanghai Children's Medical Center'da pediatrik hastalardan Yunting model II stetoskopla alınmış sol/sağ posterior (p1/p3) akciğer kayıtları. Yalnız kayıt düzeyi Poor Quality olmayan, Normal dışı olayları tek tür (ronküs ya da wheezing) olan ve kapsamı %30 ve üzeri kayıtlar alınır; kaynakta seviye bilgisi yoktur, üst/alt ataması eğitim amaçlıdır ve öğretim üyesi onayı bekler.",
+      "attributionText": "Zhang, Q., et al. (2022). SPRSound: Open-Source SJTU Paediatric Respiratory Sound Database. IEEE Transactions on Biomedical Circuits and Systems, 16(5), 867–881. https://doi.org/10.1109/TBCAS.2022.3204910 (veri kümesi: IEEE DataPort, https://doi.org/10.21227/nfkk-1x47) — CC BY 4.0"
     }
   ],
   "assets": [
@@ -199,5 +233,5 @@
       ]
     }
   ],
-  "disclaimer": "Ses kayıtlarının büyük bölümü klinik manikinden alınmıştır; CirCor kaynaklı gerçek pediatrik hasta kayıtları ile KAUH kaynaklı gerçek hasta posterior kayıtları ilgili vakalarda açıkça belirtilir; KAUH bölge-bulgu eşlemeleri öğretim üyesi onayı bekler. Simülasyon eğitim amaçlıdır; tek başına klinik tanı koymak için kullanılamaz."
+  "disclaimer": "Ses kayıtlarının büyük bölümü klinik manikinden alınmıştır; CirCor ve SPRSound kaynaklı gerçek pediatrik hasta kayıtları ile KAUH kaynaklı gerçek hasta posterior kayıtları ilgili vakalarda açıkça belirtilir; KAUH bölge-bulgu ve SPRSound seviye eşlemeleri öğretim üyesi onayı bekler. Simülasyon eğitim amaçlıdır; tek başına klinik tanı koymak için kullanılamaz."
 }

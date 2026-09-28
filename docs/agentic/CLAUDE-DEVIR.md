@@ -32,7 +32,7 @@ Bu belge, başka bir Claude Code hesabının (ya da oturumunun) işi kaldığı 
 
 - Kabuk: `http://127.0.0.1:5180` (API modu; `VITE_API_BASE_URL=/api`, `VITE_API_PROXY_TARGET=http://127.0.0.1:3100`, ana depodan `apps/shell` vite). Hesaplar `ogrenci`, `ogrenci2`, `admin` — parola `egemed` (yalnız DEV).
 - API: `cd apps/api && source scripts/agtx/claude/demo-env.sh && pnpm -s migrate:up && nohup node --import ./ts-register.mjs src/server.ts &` (3100). DB: `egemed_local_demo` (kalıcı).
-- Git-dışı ses varlıkları: paket içi HLS/CirCor için `pnpm --filter @egemed/sim-ausculta sync:audio`; T227 sonrası posterior KAUH kayıtları için `pnpm --filter @egemed/sim-ausculta import:kauh` (kaynak kökü `KAUH_DIR` ile değiştirilir; WAV'lar ve `external/kauh` repoya girmez, dağıtımda bu klasör de paketlenmelidir).
+- Git-dışı ses varlıkları: paket içi HLS/CirCor için `pnpm --filter @egemed/sim-ausculta sync:audio`; T227 sonrası posterior KAUH kayıtları için `pnpm --filter @egemed/sim-ausculta import:kauh` (kaynak kökü `KAUH_DIR` ile değiştirilir; WAV'lar ve `external/kauh` repoya girmez, dağıtımda bu klasör de paketlenmelidir); T234 sonrası pediatrik posterior SPRSound kayıtları için `pnpm --filter @egemed/sim-ausculta import:sprsound` (kaynak kökü `SPRSOUND_DIR` ile değiştirilir; WAV'lar ve `external/sprsound` repoya girmez, dağıtımda bu klasör de paketlenmelidir).
 - Her API/migration merge'ünden sonra demo API'yi yeniden başlat.
 
 ## 4. Bugüne kadar (dev'de)

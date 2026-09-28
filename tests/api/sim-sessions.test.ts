@@ -244,6 +244,40 @@ describe("sunucu vaka oturumu (A1.3)", () => {
     expect(audio.headers.get("content-type")).toBe("audio/wav");
   });
 
+  it("pediatrik ronküs oturumunda ses vekili SPRSound dosyasını 200 audio/wav döner (T234)", async () => {
+    const h = harness();
+    const ali = await login(h, "ali.veli");
+    const session = await start(h, ali, "assessment");
+    const stored = h.simSessions.rows.get(session.sessionId);
+    expect(stored).toBeDefined();
+    if (stored === undefined) return;
+    const firstItem = stored.state.cases[0];
+    expect(firstItem).toBeDefined();
+    if (firstItem === undefined) return;
+    stored.state.cases[0] = { ...firstItem, caseId: "case_pediatric_rhonchi" };
+    const opened = await openCase(h, ali, session.sessionId, 1);
+    expect(opened.views).toEqual(["back"]);
+    const point = opened.points.find((entry) => entry.pointId === "lung_left_lower_posterior");
+    expect(point, "posterior nokta sunulmalı").toBeDefined();
+    const token = point?.audio.diaphragm ?? point?.audio.bell;
+    expect(token).toBeDefined();
+    const caseDef = ausculta.caseById("case_pediatric_rhonchi");
+    const assignment = caseDef?.soundAssignments.find((a) => a.pointId === "lung_left_lower_posterior");
+    expect(assignment).toBeDefined();
+    const resolved = resolveAssignmentEx(assignment!);
+    expect(resolved.fallbackFrom).toBeUndefined();
+    expect(resolved.record?.sourceDataset).toBe("sprsound");
+    expect(resolved.record?.runtimeUrl).toContain("external/sprsound/");
+    const keys = h.simSessions.rows.get(session.sessionId)?.state.cases[0]?.keys;
+    if (keys === null || keys === undefined || !("audio" in keys)) throw new Error("Ausculta anahtarı bekleniyordu");
+    expect(keys.audio[token ?? ""]?.runtimeUrl).toBe(resolved.record?.runtimeUrl);
+    expect(keys.audio[token ?? ""]?.pointId).toBe("lung_left_lower_posterior");
+    // Ses vekili SPRSound dosyasını sunar.
+    const audio = await call(h, ali, "GET", `/me/sims/ausculta/sessions/${session.sessionId}/audio/${token}`);
+    expect(audio.status).toBe(200);
+    expect(audio.headers.get("content-type")).toBe("audio/wav");
+  });
+
   it("öğretim üyesi oturum kullanır ama deneme yazılmaz (attemptId null, XP 0)", async () => {
     const h = harness(["ogretim_uyesi"]);
     const ali = await login(h, "ali.veli");

@@ -3668,28 +3668,32 @@
         {
           "pointId": "lung_right_upper_posterior",
           "category": "lung",
-          "acousticFinding": "wheezing"
+          "acousticFinding": "wheezing",
+          "soundId": "sprsound_wheezing_lung_right_upper_posterior_001"
         },
         {
           "pointId": "lung_left_upper_posterior",
           "category": "lung",
-          "acousticFinding": "wheezing"
+          "acousticFinding": "wheezing",
+          "soundId": "sprsound_wheezing_lung_left_upper_posterior_001"
         },
         {
           "pointId": "lung_right_lower_posterior",
           "category": "lung",
-          "acousticFinding": "wheezing"
+          "acousticFinding": "wheezing",
+          "soundId": "sprsound_wheezing_lung_right_lower_posterior_001"
         },
         {
           "pointId": "lung_left_lower_posterior",
           "category": "lung",
-          "acousticFinding": "wheezing"
+          "acousticFinding": "wheezing",
+          "soundId": "sprsound_wheezing_lung_left_lower_posterior_001"
         }
       ],
       "primaryAcousticFinding": "wheezing",
       "clinicalDiagnosis": null,
       "mappingValidation": "validated",
-      "mappingNote": "Akustik sınıf (wheezing) doğrulanmıştır; hastalık tanısı (bronşiolit/astım) iddia edilmez. Posterior noktalarda kayıt anterior alandan fallback ile gelir.",
+      "mappingNote": "Akustik sınıf (wheezing) doğrulanmıştır; hastalık tanısı (bronşiolit/astım) iddia edilmez. Posterior noktalar gerçek pediatrik SPRSound posterior kayıtlarına soundId ile sabitlenmiştir; üst/alt ataması eğitim amaçlıdır (öğretim üyesi onayı bekliyor).",
       "technique": {
         "requiredPoints": [
           "lung_right_upper_anterior",
@@ -3768,7 +3772,8 @@
         "techniqueNotes": "Küçük çocuklarda bilateral ve posterior karşılaştırma önemlidir."
       },
       "references": [
-        "HLS-CMDS v3 — Wheezing kayıtları"
+        "HLS-CMDS v3 — Wheezing kayıtları (anterior)",
+        "SPRSound — Pediatrik posterior wheezing kayıtları (p1/p3, CC BY 4.0)"
       ],
       "scoringWeights": {
         "technique": 20,
@@ -3777,6 +3782,224 @@
         "interpretation": 15,
         "diagnosis": 0,
         "systematic": 0
+      },
+      "masteryThreshold": 80,
+      "clinicalReview": "beklemede"
+    },
+    {
+      "id": "case_pediatric_rhonchi",
+      "title": "Pediatrik Ronküs (Alt Solunum Yolu Enfeksiyonu)",
+      "modes": [
+        "practice",
+        "assessment"
+      ],
+      "population": "pediatrik",
+      "patient": {
+        "age": 4,
+        "sex": "erkek"
+      },
+      "chiefComplaint": "Balgamlı öksürük ve ateş",
+      "history": "4 yaşında çocuk, bir haftadır süren balgamlı öksürük ve ateş tarif ediliyor. Alt solunum yolu enfeksiyonu düşünülüyor.",
+      "vitalSigns": {
+        "hr": 108,
+        "rr": 26,
+        "bp": "92/56",
+        "spo2": 96,
+        "temp": "38.2 °C"
+      },
+      "objectives": [
+        "Çocukta ronküsü tanımak",
+        "Ronküsü wheezing'den ayırt etmek",
+        "Sekresyona bağlı ses değişimini yorumlamak"
+      ],
+      "tasks": [
+        "Her iki akciğer arkasını dinleyin.",
+        "Sesi tanımlayın.",
+        "Öksürükle değişip değişmediğini değerlendirin."
+      ],
+      "views": [
+        "back"
+      ],
+      "allowedHeads": [
+        "bell",
+        "diaphragm"
+      ],
+      "soundAssignments": [
+        {
+          "pointId": "lung_left_lower_posterior",
+          "category": "lung",
+          "acousticFinding": "rhonchi",
+          "soundId": "sprsound_rhonchi_lung_left_lower_posterior_001"
+        },
+        {
+          "pointId": "lung_left_upper_posterior",
+          "category": "lung",
+          "acousticFinding": "rhonchi",
+          "soundId": "sprsound_rhonchi_lung_left_upper_posterior_001"
+        },
+        {
+          "pointId": "lung_right_lower_posterior",
+          "category": "lung",
+          "acousticFinding": "rhonchi",
+          "soundId": "sprsound_rhonchi_lung_right_lower_posterior_001"
+        },
+        {
+          "pointId": "lung_right_upper_posterior",
+          "category": "lung",
+          "acousticFinding": "rhonchi",
+          "soundId": "sprsound_rhonchi_lung_right_upper_posterior_001"
+        }
+      ],
+      "primaryAcousticFinding": "rhonchi",
+      "clinicalDiagnosis": null,
+      "mappingValidation": "validated",
+      "mappingNote": "Akustik sınıf (ronküs) doğrulanmıştır; hastalık tanısı (bronşit/pnömoni) iddia edilmez. Posterior noktalar gerçek pediatrik SPRSound posterior kayıtlarına soundId ile sabitlenmiştir; üst/alt ataması kaynakta seviye bilgisi olmadığı için eğitim amaçlıdır (öğretim üyesi onayı bekliyor).",
+      "technique": {
+        "requiredPoints": [
+          "lung_right_upper_posterior",
+          "lung_left_upper_posterior",
+          "lung_right_lower_posterior",
+          "lung_left_lower_posterior"
+        ],
+        "minPointsVisited": 4,
+        "minDwellMs": 1500,
+        "minListenMsPerPoint": 2000,
+        "systematicOrder": true
+      },
+      "questions": [
+        {
+          "id": "q1",
+          "type": "sound_identify",
+          "domain": "recognition",
+          "prompt": "Duyduğunuz ses hangisidir?",
+          "options": [
+            {
+              "id": "a",
+              "label": "Ronküs"
+            },
+            {
+              "id": "b",
+              "label": "Wheezing"
+            },
+            {
+              "id": "c",
+              "label": "İnce raller"
+            },
+            {
+              "id": "d",
+              "label": "Plevral frotman"
+            }
+          ],
+          "correct": [
+            "a"
+          ],
+          "feedbackCorrect": "Doğru. Ronküs düşük frekanslı, kaba ve sürekli bir sestir; büyük hava yolu sekresyonuyla ilişkilidir ve öksürükle değişebilir.",
+          "feedbackIncorrect": "Ses kaba ve sürekli niteliktedir; müzikal değildir ve kesintili patlamalar içermez — ronküs.",
+          "hint": "Balgamlı öksürüğü olan çocukta kaba, sürekli sesi düşünün."
+        },
+        {
+          "id": "q2",
+          "type": "single_choice",
+          "domain": "interpretation",
+          "prompt": "Ronküsün zamanlama özelliği hangisidir?",
+          "options": [
+            {
+              "id": "a",
+              "label": "Yalnızca inspiryumda duyulan kısa kesintili patlamalar"
+            },
+            {
+              "id": "b",
+              "label": "Sürekli bir ses; inspiryum ve ekspiryumda duyulabilir, ekspiryumda belirginleşebilir"
+            },
+            {
+              "id": "c",
+              "label": "Yalnızca ekspiryumun sonunda duyulan tek patlama"
+            },
+            {
+              "id": "d",
+              "label": "Kalp siklusuyla eşzamanlı bir üfürüm"
+            }
+          ],
+          "correct": [
+            "b"
+          ],
+          "feedbackCorrect": "Doğru. Ronküs sürekli (devamlı) bir adventisiyöz sestir; her iki solunum fazında duyulabilir ve ekspiryumda belirginleşebilir.",
+          "feedbackIncorrect": "Ronküs kesintili patlamalar değil, sürekli bir sestir; inspiryum ve ekspiryumda duyulabilir."
+        },
+        {
+          "id": "q3",
+          "type": "single_choice",
+          "domain": "interpretation",
+          "prompt": "Bu çocukta ronküs oluşumunda en olası mekanizma hangisidir?",
+          "options": [
+            {
+              "id": "a",
+              "label": "Büyük hava yollarında sekresyon ve türbülan hava akımı"
+            },
+            {
+              "id": "b",
+              "label": "Plevra yapraklarının birbirine sürtünmesi"
+            },
+            {
+              "id": "c",
+              "label": "Alveollerin inspiryumda ani açılması"
+            },
+            {
+              "id": "d",
+              "label": "Mitral kapak yetmezliği"
+            }
+          ],
+          "correct": [
+            "a"
+          ],
+          "feedbackCorrect": "Doğru. Ronküs, büyük hava yollarındaki sekresyon ve buna bağlı türbülan akım nedeniyle oluşur; öksürükle sekresyon temizlenince ses değişebilir.",
+          "feedbackIncorrect": "Ronküsün kaynağı plevra ya da kalp değil, büyük hava yollarındaki sekresyon ve türbülan akımdır."
+        },
+        {
+          "id": "q4",
+          "type": "single_choice",
+          "domain": "interpretation",
+          "prompt": "Ronküsü wheezing'den ayıran ve öksürükle ilişkili özellik hangisidir?",
+          "options": [
+            {
+              "id": "a",
+              "label": "Öksürükle değişebilir veya kaybolabilir"
+            },
+            {
+              "id": "b",
+              "label": "Yalnız ekspiryumda duyulur, öksürükle değişmez"
+            },
+            {
+              "id": "c",
+              "label": "Kalp sesleriyle birlikte duyulur"
+            },
+            {
+              "id": "d",
+              "label": "Öksürükle her zaman şiddetlenir"
+            }
+          ],
+          "correct": [
+            "a"
+          ],
+          "feedbackCorrect": "Doğru. Ronküs sekresyona bağlı olduğundan öksürükle değişebilir veya kaybolabilir; wheezing daha çok yüksek frekanslı, müzikal ve ekspiratuar ağırlıklıdır.",
+          "feedbackIncorrect": "Sekresyona bağlı sesler öksürükle değişebilir; wheezing ise müzikal, yüksek frekanslı ve ekspiratuar ağırlıklıdır."
+        }
+      ],
+      "feedback": {
+        "summary": "Pediatrik ronküs: alt solunum yolu enfeksiyonunda büyük hava yolu sekresyonuna bağlı düşük frekanslı, kaba, sürekli ses. Öksürükle değişebilir; tek başına tanı koydurmaz, klinik bağlamla değerlendirilir.",
+        "differential": "Bronşit, sekresyon artışı ve hava yolu daralması düşünülür; wheezing ayrımında frekans, müzikalite ve öksürükle değişim kullanılır.",
+        "techniqueNotes": "Küçük çocuklarda bilateral posterior karşılaştırma ve öksürük öncesi/sonrası dinleme ayırt edicidir."
+      },
+      "references": [
+        "SPRSound — Pediatrik posterior ronküs kayıtları (p1/p3, CC BY 4.0)"
+      ],
+      "scoringWeights": {
+        "technique": 20,
+        "localization": 0,
+        "recognition": 30,
+        "interpretation": 45,
+        "diagnosis": 0,
+        "systematic": 5
       },
       "masteryThreshold": 80,
       "clinicalReview": "beklemede"

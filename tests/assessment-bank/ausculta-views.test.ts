@@ -29,7 +29,7 @@ function categoryOf(caseDef: ausculta.CaseDef): "heart" | "lung" | "mixed" {
 
 describe("T233 görünüm kuralı — tüm vakalar", () => {
   it(`${ALL_CASES.length} vaka × ${MODES.length} mod için izinli görünüm boş değil`, () => {
-    expect(ALL_CASES).toHaveLength(199);
+    expect(ALL_CASES).toHaveLength(200);
     for (const caseDef of ALL_CASES) {
       for (const mode of MODES) {
         const plan = ausculta.publicCaseViewPlan(caseDef, mode);
@@ -114,6 +114,50 @@ describe("T233 görünüm kuralı — tüm vakalar", () => {
     // Posterior kayıtlar değerlendirmede O7 ile sunulmaz; ön gerçek kayıtlar kalır.
     expect(assessment.views).toEqual(["front"]);
     for (const point of assessment.points) expect(ausculta.viewOfPoint(point.pointId)).toBe("front");
+  });
+
+  it("T234: pediatrik ronküs vakası üç modda yalnız arka görünüm açar; sorular cevaplanabilir", () => {
+    const caseDef = ausculta.caseById("case_pediatric_rhonchi");
+    if (caseDef === undefined) throw new Error("case_pediatric_rhonchi yok");
+    expect((caseDef as ausculta.CaseDef & { readonly population?: string }).population).toBe("pediatrik");
+    for (const mode of MODES) {
+      const plan = ausculta.publicCaseViewPlan(caseDef, mode);
+      expect(plan.allowed, mode).toEqual(["back"]);
+      expect(plan.pointIds, mode).toHaveLength(4);
+      for (const pointId of plan.pointIds) {
+        expect(ausculta.viewOfPoint(pointId), `${mode}/${pointId}`).toBe("back");
+        expect(pointId.endsWith("_posterior"), `${mode}/${pointId}`).toBe(true);
+      }
+      const { publicCase } = build(caseDef, mode);
+      expect(publicCase.views, mode).toEqual(["back"]);
+      expect(publicCase.points.map((point) => point.pointId).sort(), mode).toEqual([...plan.pointIds].sort());
+      for (const point of publicCase.points) {
+        expect(point.audio.diaphragm ?? point.audio.bell, `${mode}/${point.pointId}`).toBeDefined();
+      }
+      expect(publicCase.questions, mode).toHaveLength(4);
+      for (const question of publicCase.questions) {
+        expect(question.options.length, `${mode}/${question.id}`).toBeGreaterThanOrEqual(2);
+      }
+    }
+    // Değerlendirmede posterior noktalar gerçek SPRSound kayıtları olduğu için sunulur (O7).
+    const { publicCase, keys } = build(caseDef, "assessment");
+    const pointIds = publicCase.points.map((point) => point.pointId);
+    expect(pointIds).toHaveLength(4);
+    const answers = Object.fromEntries(
+      caseDef.questions.map((question) => [
+        question.id,
+        question.correct.map((optionId) => Object.keys(keys.options[question.id] ?? {}).find((token) => keys.options[question.id]?.[token] === optionId) ?? ""),
+      ]),
+    );
+    const telemetry = {
+      visits: Object.fromEntries(pointIds.map((id, index) => [id, { dwellMs: 60_000, listenMs: 60_000, visits: 1, firstOrder: index }])),
+      order: [...pointIds],
+      headChanges: 0,
+      headUse: { bell: 0, diaphragm: 0 },
+      replayCount: 0,
+    };
+    const result = ausculta.gradeCase(caseDef, keys, { index: 1, mode: "assessment", answers, telemetry, hintsUsed: 0 });
+    expect(result.questions.every((question) => question.correct)).toBe(true);
   });
 
   it("teknik rubriği yalnız sunulan noktaları ölçer: tam dinleme teknik tam puan", () => {

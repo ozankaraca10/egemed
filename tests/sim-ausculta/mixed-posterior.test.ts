@@ -111,8 +111,8 @@ for (const { name, resolver } of COPIES) {
   });
 }
 
-describe("banka kapsamı (T230)", () => {
-  it("199 vaka: 158 tam, 41 fallback'li, 0 kayıtsız", () => {
+describe("banka kapsamı (T230/T234)", () => {
+  it("200 vaka: 159 tam, 41 fallback'li, 0 kayıtsız", () => {
     let full = 0;
     let fallback = 0;
     let unresolved = 0;
@@ -129,8 +129,8 @@ describe("banka kapsamı (T230)", () => {
       else full += 1;
     }
     expect({ total: ALL_CASES.length, full, fallback, unresolved }).toEqual({
-      total: 199,
-      full: 158,
+      total: 200,
+      full: 159,
       fallback: 41,
       unresolved: 0,
     });

@@ -31,7 +31,7 @@ describe("anahtarsız projeksiyon — tüm vakalar", () => {
         // Başlık bir seçenek etiketiyle aynı olabilir (ör. "Wheezing"); seçenekler dışındaki alanlarda aranır.
         const withoutOptions = JSON.stringify({ ...publicCase, questions: publicCase.questions.map((q) => ({ ...q, options: [] })) });
         expect(withoutOptions, caseDef.id).not.toContain(`"${caseDef.title}"`);
-        expect(json, caseDef.id).not.toMatch(/\.wav|runtime\/|acousticFinding|"correct"|feedback|hls-cmds/);
+        expect(json, caseDef.id).not.toMatch(/\.wav|runtime\/|acousticFinding|"correct"|feedback|hls-cmds|kauh|sprsound/);
         // T214: kütüphane anahtarı vaka açılışında gitmez (yalnız sonuç yanıtında).
         expect(json, caseDef.id).not.toContain("libraryKey");
         for (const objective of caseDef.objectives) expect(withoutOptions, caseDef.id).not.toContain(objective);
