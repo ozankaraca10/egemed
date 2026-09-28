@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import type { BadgeCategory } from "@egemed/gamification-core";
 import { GamiSeg } from "./GamiSeg";
+import { badgeCategoryOptions, filterBadgesByCategory, GAMI_BADGE_CATEGORY_ALL, type GamiBadgeCategoryFilter } from "./model";
 import { NOOP_GAMI_MODAL_ENV, gamiTabTrapTarget, type GamiFocusable, type GamiKeyEvent, type GamiModalEnv } from "./modal";
 import type { GamiBadgeModel, GamiIcons } from "./types";
 
@@ -55,8 +56,10 @@ export function GamiBadgeGrid({ views, categories, onStudy, id, env = NOOP_GAMI_
   icons: Pick<GamiIcons, "badge" | "lock" | "check" | "close" | "book">;
 }) {
   const [filter, setFilter] = useState<Filter>("all");
+  const [category, setCategory] = useState<GamiBadgeCategoryFilter>(GAMI_BADGE_CATEGORY_ALL);
   const [open, setOpen] = useState<{ v: GamiBadgeModel; from: GamiFocusable } | null>(null);
-  const shown = filter === "all" ? views : views.filter((v) => v.state === filter);
+  const byCategory = filterBadgesByCategory(views, category);
+  const shown = filter === "all" ? byCategory : byCategory.filter((v) => v.state === filter);
   const earned = views.filter((v) => v.state === "earned").length;
   return (
     <section className="card" id={id} aria-labelledby="gami-badges-t">
@@ -65,8 +68,13 @@ export function GamiBadgeGrid({ views, categories, onStudy, id, env = NOOP_GAMI_
         <GamiSeg options={FILTERS} value={filter} onChange={setFilter} label="Rozet filtresi" />
         <span className="eg-gami-count">{earned} / {views.length} kazanıldı</span>
       </div>
-      <div className="eg-gami-cat-legend" aria-label="Rozet kategorileri">
-        {categories.map((c) => <span key={c.id} className={`eg-gami-cat-${c.id}`}><i />{c.label}</span>)}
+      <div className="eg-gami-cat-filter">
+        <GamiSeg
+          options={badgeCategoryOptions(views, categories)}
+          value={category}
+          onChange={setCategory}
+          label="Rozet kategorisi"
+        />
       </div>
       <div className="eg-gami-badge-grid">
         {shown.map((v) => <GamiBadgeCard key={v.id} v={v} icons={icons} onOpen={(bv, el) => setOpen({ v: bv, from: el })} />)}

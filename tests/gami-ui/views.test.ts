@@ -8,6 +8,7 @@ import {
   GamiLeaderboardView,
   GamiProgressPage,
   gamiUiStyles,
+  type GamiBadgeModel,
   type GamiIcons,
 } from "../../packages/gami-ui/src/index";
 
@@ -89,6 +90,58 @@ describe("gami-ui görünüm sözleşmesi", () => {
     expect(html).toContain("Başarılarım burada birikecek");
     expect(html).toContain("eg-gami-empty");
     expect(html).not.toContain("eg-gami-profile");
+  });
+
+  it("kategori filtresi 'Meydan Okuma' çipini ve düello rozetini çizer", () => {
+    const badge: GamiBadgeModel = {
+      id: "duel-first",
+      name: "İlk düello",
+      tier: "bronze",
+      tierLabel: "Bronz",
+      description: "İki tarafın da bitirdiği ilk düelloyu tamamla.",
+      category: "challenge",
+      categoryLabel: "Meydan Okuma",
+      state: "locked",
+      value: 0,
+      max: 1,
+      earnedLabel: null,
+      rule: "1 düello",
+      studyKey: null,
+      iconName: "Medal",
+      lockedNote: null,
+      assessmentOnly: false,
+    };
+    const html = renderToStaticMarkup(createElement(GamiAchievementsView, {
+      title: createElement("h1", null, "Başarılarım"),
+      subtitle: "ilerleme",
+      period: null,
+      periods: [],
+      onPeriod: () => undefined,
+      congrats: null,
+      congratsIcon: null as ReactNode,
+      hasAttempts: false,
+      profile: null,
+      avatarOf,
+      onLeaderboard: () => undefined,
+      onAssessment: () => undefined,
+      points: [],
+      rangeLabel: "",
+      goals: null,
+      goalIcon: () => null,
+      doneIcon: null,
+      weekLabel: "",
+      domains: [],
+      domainRange: "",
+      badges: [badge],
+      categories: [{ id: "challenge", label: "Meydan Okuma" }],
+      onStudy: () => undefined,
+      onScrollBadges: () => undefined,
+      icons,
+    }));
+    expect(html).toContain("Rozet kategorisi");
+    expect(html).toContain("Meydan Okuma");
+    expect(html).toContain('aria-pressed="true"');
+    expect(html).toContain("İlk düello");
   });
 
   it("liderlik görünümü dönem ve boş sıralama metnini çizer", () => {

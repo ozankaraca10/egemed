@@ -19,8 +19,8 @@ export { GamiWeeklyGoals } from "./GamiWeeklyGoals";
 export { NOOP_GAMI_MODAL_ENV, createNoopGamiModalEnv, gamiTabTrapTarget } from "./modal";
 export type { GamiFocusable, GamiKeyEvent, GamiModalEnv, GamiTabTrapTarget } from "./modal";
 export { defaultGamiIcons } from "./icons";
-export { buildAchievementsModel, buildLeaderboardModel, GAMI_ACHIEVEMENT_PERIODS, GAMI_BADGE_CATEGORIES, GAMI_LEADERBOARD_COHORTS, GAMI_LEADERBOARD_PERIODS } from "./model";
-export type { AchievementsModel, AchievementsModelInput, LeaderboardModel, LeaderboardModelInput } from "./model";
+export { badgeCategoryOptions, buildAchievementsModel, buildLeaderboardModel, filterBadgesByCategory, GAMI_ACHIEVEMENT_PERIODS, GAMI_BADGE_CATEGORIES, GAMI_BADGE_CATEGORY_ALL, GAMI_LEADERBOARD_COHORTS, GAMI_LEADERBOARD_PERIODS } from "./model";
+export type { AchievementsModel, AchievementsModelInput, GamiBadgeCategoryFilter, LeaderboardModel, LeaderboardModelInput } from "./model";
 export { gamiUiStyles } from "./styles-inline";
 export { GamiAchievementsView, GamiLeaderboardView, GamiProgressPage } from "./views";
 export type {

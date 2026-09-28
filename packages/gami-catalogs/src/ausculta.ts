@@ -8,6 +8,7 @@
  * bu yüzden özet kodları toplam yerine en büyük değerle birleşir.
  */
 import type { BadgeDef, BadgeProgress, BadgeTier } from "@egemed/gamification-core";
+import { EMPTY_DUEL_STATS, duelBadges } from "./duel";
 
 /** Kalp konuları — sim `AuscultaStats.heartCorrect` anahtarlarıyla aynı sıra (test eşitliği doğrular). */
 export const AUSCULTA_HEART_TOPICS = ["normal", "extraSounds", "murmurTiming", "rhythm"] as const;
@@ -122,6 +123,9 @@ export const AUSCULTA_BADGES: BadgeDef<AuscultaStats>[] = [
   countBadge("mixed-sounds", "Kalp ve akciğer birlikte", "Aynı vakada hem kalp hem akciğer ses sınıfını doğru ayırt et.", "3 vaka", "topic", "Stethoscope", (s) => s.mixedCorrect, b.mixed),
   countBadge("head-choice", "Bell ve diyafram", "Düşük ve yüksek frekans için bell veya diyafram seçimini doğru yap.", "5 doğru", "skill", "Stethoscope", (s) => s.headChoiceCorrect, b.headChoice),
   countBadge("diagnosis-3", "Tanı eşleştirmesi", "Tanı sorularında üç doğru yanıt ver.", "3 doğru tanı", "skill", "Check", (s) => s.correctDiagnosisCount ?? 0, 3),
+  // Düello rozetleri (ADR-010): kazanım sunucuda `challenges` sonuçlarından
+  // değerlendirilir; sim görünümünde erişim boştur, kazanılan `earnedFromServer` ile işaretlenir.
+  ...duelBadges<AuscultaStats>(() => EMPTY_DUEL_STATS),
 ];
 
 /** Kod sözlüğü v1. Kod ekle/çıkar = sürüm değişikliği (`ausculta.v`). */

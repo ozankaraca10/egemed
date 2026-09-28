@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 import type { BadgeCategory } from "../../packages/gamification-core/src/index";
 import { defaultGamiIcons } from "../../packages/gami-ui/src/icons";
 
-const CATEGORIES: BadgeCategory[] = ["topic", "skill", "streak", "learn", "milestone"];
+const CATEGORIES: BadgeCategory[] = ["topic", "skill", "streak", "learn", "milestone", "challenge"];
 
 describe("defaultGamiIcons.badge", () => {
   it("bilinen bir iconName için eşlenen ikonu çizer", () => {

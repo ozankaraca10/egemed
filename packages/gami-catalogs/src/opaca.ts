@@ -8,6 +8,7 @@
  */
 import type { BadgeContext, BadgeDef, GamiMode } from "@egemed/gamification-core";
 import { startOfDayTr } from "@egemed/gamification-core";
+import { EMPTY_DUEL_STATS, duelBadges } from "./duel";
 
 /** Rozet konuları — sim `TOPIC_BADGE_MATCH` anahtarlarıyla aynı sıra (test eşitliği doğrular). */
 export const OPACA_TOPICS = [
@@ -331,6 +332,9 @@ export const OPACA_BADGES: BadgeDef<OpacaStats, OpacaBadgeContext>[] = [
     rule: "Tüm konular",
     progress: (s) => ({ value: s.allTopicsCoveredCount, max: s.allTopicsTotal }),
   },
+  // Düello rozetleri (ADR-010): kazanım sunucuda `challenges` sonuçlarından
+  // değerlendirilir; sim görünümünde erişim boştur, kazanılan `earnedFromServer` ile işaretlenir.
+  ...duelBadges<OpacaStats>(() => EMPTY_DUEL_STATS),
 ];
 
 /** Rozet kimliği → öğrenme modu çalışma anahtarı (katalogdan türetilir). */

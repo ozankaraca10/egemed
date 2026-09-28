@@ -1,7 +1,7 @@
 import { createElement } from "react";
 import { describe, expect, it } from "vitest";
 import { DEFAULT_RULES, computeStreak, computeWeeklyGoals, levelForXp, type AttemptRecord, type BadgeDef } from "../../packages/gamification-core/src/index";
-import { buildAchievementsModel, buildLeaderboardModel, defaultGamiIcons } from "../../packages/gami-ui/src/index";
+import { badgeCategoryOptions, buildAchievementsModel, buildLeaderboardModel, defaultGamiIcons, filterBadgesByCategory, GAMI_BADGE_CATEGORIES } from "../../packages/gami-ui/src/index";
 import type { GamiLeaderboardRow } from "../../packages/gamification-core/src/index";
 
 const now = new Date("2026-09-24T09:00:00.000Z");
@@ -88,6 +88,45 @@ describe("gami-ui model sözleşmesi", () => {
     expect(defaultGamiIcons.badge("Star", 16, "skill")).not.toBeNull();
     // bilinmeyen iconName için de asla boş kalmaz — kategoriye göre yedek ikon döner
     expect(defaultGamiIcons.badge("Yok", 16, "skill")).not.toBeNull();
+  });
+
+  it("kategori filtresi: 'Meydan Okuma' yalnız düello rozetlerini, 'Tümü' hepsini gösterir", () => {
+    const duelCatalog: BadgeDef<{ n: number }>[] = [
+      { id: "skill-one", category: "skill", name: "Beceri bir", description: "Bir beceri.", progress: (s) => ({ value: s.n, max: 1 }) },
+      {
+        id: "duel-first",
+        category: "challenge",
+        tier: "bronze",
+        name: "İlk düello",
+        description: "İlk düelloyu tamamla.",
+        progress: (s) => ({ value: s.n, max: 1 }),
+      },
+    ];
+    const model = buildAchievementsModel({
+      now,
+      period: "last30",
+      attempts: [attempt],
+      rules: DEFAULT_RULES,
+      catalog: duelCatalog,
+      stats: { n: 1 },
+      earned: [],
+      badgeContext: { now },
+      level: levelForXp(80, DEFAULT_RULES),
+      streak: computeStreak([attempt], now),
+      goals: computeWeeklyGoals([attempt], [], now, DEFAULT_RULES),
+      profile: { public: true, displayName: "Ayşe Yılmaz" },
+      weekRows: null,
+      domainMeta: [],
+    });
+    expect(GAMI_BADGE_CATEGORIES.find((category) => category.id === "challenge")?.label).toBe("Meydan Okuma");
+    expect(badgeCategoryOptions(model.badges, model.categories).map((option) => option.label)).toEqual([
+      "Tümü",
+      "Beceri",
+      "Meydan Okuma",
+    ]);
+    expect(filterBadgesByCategory(model.badges, "challenge").map((badge) => badge.id)).toEqual(["duel-first"]);
+    expect(filterBadgesByCategory(model.badges, "all").map((badge) => badge.id)).toEqual(["skill-one", "duel-first"]);
+    expect(filterBadgesByCategory(model.badges, "milestone")).toEqual([]);
   });
 
   it("liderlik dönem etiketini, boş sıralamayı ve kalan denemeyi üretir", () => {

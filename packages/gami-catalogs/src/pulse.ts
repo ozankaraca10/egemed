@@ -6,6 +6,7 @@
  * öğrenci yanıtı içermez (KVKK).
  */
 import type { BadgeDef, BadgeProgress } from "@egemed/gamification-core";
+import { EMPTY_DUEL_STATS, duelBadges } from "./duel";
 
 /** `packages/sim-pulse/src/engine/shapes.ts` MODES ile aynı sıra (test eşitliği doğrular). */
 export const PULSE_MODES = [
@@ -102,6 +103,9 @@ export const PULSE_BADGES: BadgeDef<PulseStats>[] = [
     progress: (s) => progress(s.accurateCaliperCount, 25),
   },
   ...modeBadges,
+  // Düello rozetleri (ADR-010): kazanım sunucuda `challenges` sonuçlarından
+  // değerlendirilir; sim görünümünde erişim boştur, kazanılan `earnedFromServer` ile işaretlenir.
+  ...duelBadges<PulseStats>(() => EMPTY_DUEL_STATS),
 ];
 
 export { modeLabels as PULSE_MODE_LABELS };
