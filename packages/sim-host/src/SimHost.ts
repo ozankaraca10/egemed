@@ -91,6 +91,7 @@ export interface SimGamificationSummary {
   readonly level: number;
   readonly streak: { readonly current: number; readonly best: number };
   readonly badges: readonly { readonly key: string; readonly awardedAt: string }[];
+  readonly badgeProgress?: Readonly<Record<string, { readonly value: number; readonly max: number }>> | undefined;
 }
 
 export interface SimGamificationSource {

@@ -17,6 +17,25 @@ import { DOMAIN_META, WEAK_DOMAIN_PCT } from '../ui/gami/domainMeta'
 import { opacaAvatarOf, opacaGamiIcons } from '../ui/opacaGami'
 import type { WeeklyGoal } from '@egemed/gamification-core'
 
+export function applyServerBadgeProgress<T extends { id: string; state: 'earned' | 'progress' | 'locked'; value: number; max: number; earnedLabel: string | null }>(
+  badges: readonly T[],
+  summary: Pick<ServerGamiData['summary'], 'badges' | 'badgeProgress'>,
+): T[] {
+  const earnedIds = new Set(summary.badges.map((badge) => badge.key))
+  return badges.map((badge) => {
+    if (earnedIds.has(badge.id)) return { ...badge, state: 'earned', value: badge.max }
+    const progress = summary.badgeProgress?.[badge.id]
+    if (progress !== undefined) return {
+      ...badge,
+      state: progress.value > 0 ? 'progress' : 'locked',
+      value: Math.min(progress.value, progress.max),
+      max: progress.max,
+      earnedLabel: null,
+    }
+    return { ...badge, state: 'locked', value: 0, earnedLabel: null }
+  })
+}
+
 const goalIcon = (id: WeeklyGoal['id']) => {
   if (id === 'weekly-assessments') return opacaGamiIcons.chart({})
   if (id === 'weekly-avg-score') return opacaGamiIcons.checkCircle({ width: 16, height: 16 })
@@ -41,7 +60,6 @@ function AchievementsBody({ embedded = false, devBuild = false, modalEnv, server
     return { monthName: `${MONTHS[Number(r.month.slice(5, 7)) - 1]} ${r.month.slice(0, 4)}`, title: r.title, sponsor: r.sponsor }
   }, [demo, view.now])
   const earned = server ? earnedFromServer(OPACA_BADGES, server.summary.badges) : view.state.earned
-  const serverBadgeIds = server ? new Set(server.summary.badges.map((badge) => badge.key)) : null
   const model = useMemo(() => buildAchievementsModel({
     now: view.now,
     period,
@@ -100,15 +118,7 @@ function AchievementsBody({ embedded = false, devBuild = false, modalEnv, server
             weekLabel={model.weekLabel}
             domains={model.domains}
             domainRange={model.domainRange}
-            badges={serverBadgeIds === null ? model.badges : model.badges.map((badge) => {
-              const isEarned = serverBadgeIds.has(badge.id)
-              return {
-                ...badge,
-                state: isEarned ? 'earned' : 'locked',
-                value: isEarned ? badge.max : 0,
-                earnedLabel: isEarned ? badge.earnedLabel : null,
-              }
-            })}
+            badges={server === null ? model.badges : applyServerBadgeProgress(model.badges, server.summary)}
             categories={model.categories}
             onStudy={study}
             onScrollBadges={scrollToBadges}

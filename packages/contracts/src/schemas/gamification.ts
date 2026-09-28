@@ -30,6 +30,11 @@ export const gamiBadgeSchema = z.strictObject({
   awardedAt: isoDateTimeSchema,
 });
 
+export const gamiBadgeProgressSchema = z.strictObject({
+  value: z.number().int().min(0),
+  max: z.number().int().min(0),
+});
+
 export const gamiLeaderboardSchema = z.strictObject({
   rank: z.number().int().min(1),
   total: z.number().int().min(0),
@@ -50,6 +55,7 @@ export const gamiSimSummarySchema = z.strictObject({
   streak: gamiStreakSchema,
   weeklyGoal: gamiWeeklyGoalSchema,
   badges: z.array(gamiBadgeSchema),
+  badgeProgress: z.record(z.string().regex(BADGE_KEY_PATTERN), gamiBadgeProgressSchema).optional(),
   leaderboard: gamiLeaderboardSchema,
   attempts: z.array(gamiAttemptSummarySchema),
 });
