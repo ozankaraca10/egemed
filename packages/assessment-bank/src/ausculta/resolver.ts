@@ -5,9 +5,9 @@ import { externalManifest, soundsManifest } from "./data";
  *  sounds.json kayıtlarına eşler. Varsayılan sıralama: kaynak konum eşleşmesi > cinsiyet "any" > id. */
 
 export const manifest = soundsManifest as unknown as SoundsManifest;
-/** Birincil (HLS-CMDS) + envanter kayıtları (ör. CirCor — pediatrik, ODC-BY 1.0).
- *  Kütüphane/vaka çözümünde birincil veri seti tercih edilir; harici kayıtlar
- *  yalnızca açıkça soundId ile hedeflendiğinde kullanılır. */
+/** Birincil (HLS-CMDS) + envanter kayıtları (CirCor — pediatrik, ODC-BY 1.0; KAUH v3 — gerçek hasta
+ *  posterior, CC BY 4.0). CirCor kayıtları yalnızca açıkça soundId ile hedeflendiğinde kullanılır;
+ *  KAUH posterior kayıtları ise simulationLocation eşleşmesiyle (nokta bazlı) devreye girer. */
 export const RECORDS: SoundRecord[] = [
   ...manifest.records,
   ...((externalManifest as unknown as { records?: SoundRecord[] }).records ?? []),
@@ -85,6 +85,10 @@ export function resolveCaseSounds(assignments: SoundAssignment[]): Record<string
   return out;
 }
 
+/** Kütüphanede konum eşleşmesiyle yer alabilen veri setleri: paket içi HLS-CMDS ve gerçek
+ *  hastadan bölge etiketli posterior kayıtlar (KAUH v3). CirCor yalnız soundId ile hedeflenir. */
+const LIBRARY_LOCATION_DATASETS = new Set(["hls-cmds-v3", "kauh-v3"]);
+
 /** Öğrenme kütüphanesi sesi: kategori + akustik bulgu + tercihen odak noktası konumu. */
 export function resolveLibrarySound(category: string, finding: string, simLocation?: string): SoundRecord | null {
   const pool = RECORDS.filter(
@@ -92,7 +96,7 @@ export function resolveLibrarySound(category: string, finding: string, simLocati
       r.category === category &&
       r.acousticFinding === finding &&
       r.validationStatus === "validated" &&
-      r.sourceDataset === "hls-cmds-v3",
+      LIBRARY_LOCATION_DATASETS.has(r.sourceDataset),
   );
   if (simLocation) {
     const loc = pool.filter((r) => r.simulationLocation === simLocation);

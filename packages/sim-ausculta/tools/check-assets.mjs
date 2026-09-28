@@ -6,6 +6,7 @@ const { console, process } = globalThis;
 
 const packageRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const dataDir = join(packageRoot, "src/data");
+const publicDir = join(packageRoot, "public");
 
 const BRAND_REFERENCES = [
   "brand/appicon.png",
@@ -23,12 +24,18 @@ const BRAND_REFERENCES = [
   "brand/logo-vertical-web.png",
 ];
 
+const RUNTIME_PREFIX = "assets/audio/runtime/";
+
 function normalize(assetPath) {
   return assetPath.replace(/^\/+/, "");
 }
 
 function groupOf(assetPath) {
-  if (assetPath.startsWith("assets/audio/runtime/")) return "assets/audio/runtime";
+  if (assetPath.startsWith(RUNTIME_PREFIX)) {
+    const parts = assetPath.slice(RUNTIME_PREFIX.length).split("/");
+    const head = parts[0] ?? "";
+    return head === "external" ? `assets/audio/runtime/external/${parts[1] ?? ""}` : `assets/audio/runtime/${head}`;
+  }
   if (assetPath.startsWith("assets/body/")) return "assets/body";
   if (assetPath.startsWith("brand/")) return "brand";
   return "diğer";
@@ -37,7 +44,7 @@ function groupOf(assetPath) {
 function collect(value, audio, images) {
   if (typeof value === "string") {
     const assetPath = normalize(value);
-    if (assetPath.startsWith("assets/audio/runtime/") && assetPath.endsWith(".wav")) audio.add(assetPath);
+    if (assetPath.startsWith(RUNTIME_PREFIX) && assetPath.endsWith(".wav")) audio.add(assetPath);
     else if (/^(assets|brand)\/.+\.(png|jpe?g|webp)$/.test(assetPath)) images.add(assetPath);
     return;
   }
@@ -70,22 +77,48 @@ for (const manifestPath of manifestPaths) {
   collect(manifest, audio, images);
 }
 
-const expected = [...audio, ...images, ...BRAND_REFERENCES];
+/**
+ * T227: dış veri setleri (external/<id>) git-dışıdır ve `import:kauh` gibi ayrı
+ * betiklerle doldurulur; klasörü olmayan dış grup atlanır (CirCor ve KAUH aynı
+ * davranış). Klasör varsa içindeki her dosya zorunludur. Paket içi runtime
+ * (heart/lung/mixed), görseller ve marka her koşulda zorunludur.
+ */
+const audioGroups = new Map();
+for (const assetPath of [...audio].sort()) {
+  const group = groupOf(assetPath);
+  if (!audioGroups.has(group)) audioGroups.set(group, []);
+  audioGroups.get(group).push(assetPath);
+}
+const expected = [];
+const skippedGroups = [];
+for (const [group, paths] of [...audioGroups.entries()].sort()) {
+  const external = group.startsWith(`${RUNTIME_PREFIX}external/`);
+  if (external && !existsSync(join(publicDir, group))) {
+    skippedGroups.push({ group, count: paths.length });
+    continue;
+  }
+  expected.push(...paths);
+}
+expected.push(...images, ...BRAND_REFERENCES);
+
 const missing = [];
 const totals = new Map();
 for (const assetPath of expected) {
   const group = groupOf(assetPath);
   const groupTotals = totals.get(group) ?? { total: 0, missing: 0 };
   groupTotals.total += 1;
-  if (!existsSync(join(packageRoot, "public", assetPath))) {
+  if (!existsSync(join(publicDir, assetPath))) {
     groupTotals.missing += 1;
     missing.push(assetPath);
   }
   totals.set(group, groupTotals);
 }
 
-console.log("Ausculta varlık kapısı (runtime dahil zorunlu)");
+console.log("Ausculta varlık kapısı (paket içi runtime zorunlu; dış veri setleri klasörü varsa zorunlu)");
 console.log(`JSON: ${manifestPaths.length} dosya, ${audio.size} ses yolu, ${images.size} görsel yolu, ${BRAND_REFERENCES.length} marka`);
+for (const { group, count } of skippedGroups) {
+  console.log(`  ${group}: ATLANDI — git-dışı klasör yok (${count} dosya)`);
+}
 for (const [group, groupTotals] of [...totals.entries()].sort()) {
   console.log(`  ${group}: ${groupTotals.total - groupTotals.missing}/${groupTotals.total}`);
 }

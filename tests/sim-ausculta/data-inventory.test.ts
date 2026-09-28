@@ -39,6 +39,23 @@ const soundRecords = recordsOf(sounds);
 const externalRecords = recordsOf(external);
 const libraryItems = (library.groups ?? []).flatMap((group) => group.items ?? []);
 
+interface ExternalRecordShape {
+  sourceDataset: string;
+  mappingStatus: string;
+  mappingNote: string;
+  simulationLocation: string;
+  recordedLocation: string;
+  nativeFilter: string;
+  gender: string;
+  sourceFile: string;
+  sampleRate: number;
+  channels: number;
+}
+
+const kauhRecords = ((external.records ?? []) as ExternalRecordShape[]).filter(
+  (record) => record.sourceDataset === "kauh-v3",
+);
+
 describe("Ausculta veri envanteri", () => {
   it("kopyalanan JSON dosyaları okunur", () => {
     for (const name of JSON_NAMES) {
@@ -49,8 +66,8 @@ describe("Ausculta veri envanteri", () => {
   it("kayıt sayıları kaynak kopyasıyla aynıdır", () => {
     expect(sounds.count).toBe(245);
     expect(soundRecords).toHaveLength(245);
-    expect(external.count).toBe(4);
-    expect(externalRecords).toHaveLength(4);
+    expect(external.count).toBe(90);
+    expect(externalRecords).toHaveLength(90);
     expect(cases.cases).toHaveLength(23);
     expect(casesAuto.count).toBe(176);
     expect(casesAuto.cases).toHaveLength(176);
@@ -58,8 +75,28 @@ describe("Ausculta veri envanteri", () => {
     expect(library.groups).toHaveLength(3);
     expect(libraryItems).toHaveLength(20);
     expect(pediatric.rows).toHaveLength(6);
-    expect(sources.datasets).toHaveLength(2);
+    expect(sources.datasets).toHaveLength(3);
     expect(sources.inventory).toHaveLength(2);
+  });
+
+  it("KAUH posterior kayıtları KVKK'ya uygun, nokta eşlemeli ve onay bekler (T227)", () => {
+    expect(kauhRecords).toHaveLength(86);
+    const ids = (points.points as { id: string }[]).map((point) => point.id);
+    for (const record of kauhRecords) {
+      expect(record.mappingStatus).toBe("pending_faculty");
+      expect(record.mappingNote.length).toBeGreaterThan(10);
+      expect(ids).toContain(record.simulationLocation);
+      expect(record.simulationLocation.endsWith("_posterior")).toBe(true);
+      expect(record.recordedLocation).toMatch(/^P[RL][UML]$/);
+      expect(record.nativeFilter).toBe("diaphragm");
+      expect(["F", "M"]).toContain(record.gender);
+      expect(record.sampleRate).toBe(4000);
+      expect(record.channels).toBe(1);
+      // Yaş/ad kaydı yok: özgün dosya adı yerine redakte biçim kullanılır.
+      expect(record.sourceFile).toMatch(/^kauh\/DP\d+$/);
+      expect(record).not.toHaveProperty("age");
+      expect(JSON.stringify(record)).not.toMatch(/"(age|patientAge|patientName)"/i);
+    }
   });
 
   it("her ses kaydında id ve runtimeUrl vardır", () => {

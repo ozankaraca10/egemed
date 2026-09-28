@@ -5488,7 +5488,7 @@
           "pointId": "lung_right_upper_posterior",
           "category": "lung",
           "acousticFinding": "normal",
-          "simulationNote": "posterior fallback (kaynak anterior)"
+          "simulationNote": "KAUH v3 gerçek posterior kayıt (öğretim üyesi onayı bekliyor)"
         }
       ],
       "primaryAcousticFinding": "normal",
@@ -5660,7 +5660,7 @@
           "pointId": "lung_left_upper_posterior",
           "category": "lung",
           "acousticFinding": "normal",
-          "simulationNote": "posterior fallback (kaynak anterior)"
+          "simulationNote": "KAUH v3 gerçek posterior kayıt (öğretim üyesi onayı bekliyor)"
         }
       ],
       "primaryAcousticFinding": "normal",
@@ -5832,7 +5832,7 @@
           "pointId": "lung_right_middle_posterior",
           "category": "lung",
           "acousticFinding": "normal",
-          "simulationNote": "posterior fallback (kaynak anterior)"
+          "simulationNote": "KAUH v3 gerçek posterior kayıt (öğretim üyesi onayı bekliyor)"
         }
       ],
       "primaryAcousticFinding": "normal",
@@ -6004,7 +6004,7 @@
           "pointId": "lung_left_middle_posterior",
           "category": "lung",
           "acousticFinding": "normal",
-          "simulationNote": "posterior fallback (kaynak anterior)"
+          "simulationNote": "KAUH v3 gerçek posterior kayıt (öğretim üyesi onayı bekliyor)"
         }
       ],
       "primaryAcousticFinding": "normal",
@@ -6176,7 +6176,7 @@
           "pointId": "lung_right_lower_posterior",
           "category": "lung",
           "acousticFinding": "normal",
-          "simulationNote": "posterior fallback (kaynak anterior)"
+          "simulationNote": "KAUH v3 gerçek posterior kayıt (öğretim üyesi onayı bekliyor)"
         }
       ],
       "primaryAcousticFinding": "normal",
@@ -6348,7 +6348,7 @@
           "pointId": "lung_left_lower_posterior",
           "category": "lung",
           "acousticFinding": "normal",
-          "simulationNote": "posterior fallback (kaynak anterior)"
+          "simulationNote": "KAUH v3 gerçek posterior kayıt (öğretim üyesi onayı bekliyor)"
         }
       ],
       "primaryAcousticFinding": "normal",
@@ -6520,7 +6520,7 @@
           "pointId": "lung_left_upper_posterior",
           "category": "lung",
           "acousticFinding": "wheezing",
-          "simulationNote": "posterior fallback (kaynak anterior)"
+          "simulationNote": "KAUH v3 gerçek posterior kayıt (öğretim üyesi onayı bekliyor)"
         }
       ],
       "primaryAcousticFinding": "wheezing",
@@ -6692,7 +6692,7 @@
           "pointId": "lung_right_upper_posterior",
           "category": "lung",
           "acousticFinding": "wheezing",
-          "simulationNote": "posterior fallback (kaynak anterior)"
+          "simulationNote": "KAUH v3 gerçek posterior kayıt (öğretim üyesi onayı bekliyor)"
         }
       ],
       "primaryAcousticFinding": "wheezing",
@@ -6864,7 +6864,7 @@
           "pointId": "lung_right_lower_posterior",
           "category": "lung",
           "acousticFinding": "wheezing",
-          "simulationNote": "posterior fallback (kaynak anterior)"
+          "simulationNote": "KAUH v3 gerçek posterior kayıt (öğretim üyesi onayı bekliyor)"
         }
       ],
       "primaryAcousticFinding": "wheezing",
@@ -7036,7 +7036,7 @@
           "pointId": "lung_right_middle_posterior",
           "category": "lung",
           "acousticFinding": "wheezing",
-          "simulationNote": "posterior fallback (kaynak anterior)"
+          "simulationNote": "KAUH v3 gerçek posterior kayıt (öğretim üyesi onayı bekliyor)"
         }
       ],
       "primaryAcousticFinding": "wheezing",
@@ -7208,7 +7208,7 @@
           "pointId": "lung_left_lower_posterior",
           "category": "lung",
           "acousticFinding": "wheezing",
-          "simulationNote": "posterior fallback (kaynak anterior)"
+          "simulationNote": "KAUH v3 gerçek posterior kayıt (öğretim üyesi onayı bekliyor)"
         }
       ],
       "primaryAcousticFinding": "wheezing",
@@ -7380,7 +7380,7 @@
           "pointId": "lung_left_middle_posterior",
           "category": "lung",
           "acousticFinding": "wheezing",
-          "simulationNote": "posterior fallback (kaynak anterior)"
+          "simulationNote": "KAUH v3 gerçek posterior kayıt (öğretim üyesi onayı bekliyor)"
         }
       ],
       "primaryAcousticFinding": "wheezing",
@@ -8518,7 +8518,7 @@
           "pointId": "lung_right_upper_posterior",
           "category": "lung",
           "acousticFinding": "fine_crackles",
-          "simulationNote": "posterior fallback (kaynak anterior)"
+          "simulationNote": "KAUH v3 gerçek posterior kayıt (öğretim üyesi onayı bekliyor)"
         }
       ],
       "primaryAcousticFinding": "fine_crackles",
@@ -8672,7 +8672,7 @@
           "pointId": "lung_right_lower_posterior",
           "category": "lung",
           "acousticFinding": "fine_crackles",
-          "simulationNote": "posterior fallback (kaynak anterior)"
+          "simulationNote": "KAUH v3 gerçek posterior kayıt (öğretim üyesi onayı bekliyor)"
         }
       ],
       "primaryAcousticFinding": "fine_crackles",
@@ -9004,7 +9004,7 @@
           "pointId": "lung_left_upper_posterior",
           "category": "lung",
           "acousticFinding": "coarse_crackles",
-          "simulationNote": "posterior fallback (kaynak anterior)"
+          "simulationNote": "KAUH v3 gerçek posterior kayıt (öğretim üyesi onayı bekliyor)"
         }
       ],
       "primaryAcousticFinding": "coarse_crackles",
@@ -9170,7 +9170,7 @@
           "pointId": "lung_right_lower_posterior",
           "category": "lung",
           "acousticFinding": "coarse_crackles",
-          "simulationNote": "posterior fallback (kaynak anterior)"
+          "simulationNote": "KAUH v3 gerçek posterior kayıt (öğretim üyesi onayı bekliyor)"
         }
       ],
       "primaryAcousticFinding": "coarse_crackles",
@@ -9502,7 +9502,7 @@
           "pointId": "lung_right_middle_posterior",
           "category": "lung",
           "acousticFinding": "coarse_crackles",
-          "simulationNote": "posterior fallback (kaynak anterior)"
+          "simulationNote": "KAUH v3 gerçek posterior kayıt (öğretim üyesi onayı bekliyor)"
         }
       ],
       "primaryAcousticFinding": "coarse_crackles",

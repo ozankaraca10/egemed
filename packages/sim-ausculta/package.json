@@ -8,6 +8,7 @@
   },
   "scripts": {
     "check:assets": "node tools/check-assets.mjs",
+    "import:kauh": "node tools/import-kauh.mjs",
     "sync:audio": "node tools/sync-audio.mjs",
     "typecheck": "tsc --noEmit"
   },
