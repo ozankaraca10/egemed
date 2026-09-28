@@ -5,14 +5,12 @@ import { clickSimBarAction, trackErrors } from "./helpers";
 import { answerPulseQuizItem, completePulseCases, completePulseQuiz } from "./pulse-flows";
 
 /**
- * Doğru seçenekler çalışan runtime havuzundan okunur (ADR-011): statik
- * `data/curriculum` anlık görüntüsü 200 maddede sabittir; oturumlar ise
- * runtime havuzundan örneklenir. Havuz büyüdükçe (T210/T211 ile C201+/Q201+)
- * statik `byId` araması "Bilinmeyen madde" hatası verirdi.
+ * T220 (A3.4, ADR-009): İstemci müfredatı madde içeriği taşımaz; doğru seçenekler
+ * yalnız bankadan (`e2e/pulse-flows.ts`) okunur. Runtime'dan gereken tek alan
+ * içerik sürümüdür (`cv` tohumu).
  */
 interface RuntimeCurriculum {
   readonly version: number;
-  readonly byId: Readonly<Record<string, { readonly correct: number } | undefined>>;
 }
 function loadRuntimeCurriculum(): RuntimeCurriculum {
   const VENDOR = "packages/sim-pulse/src/runtime/vendor";

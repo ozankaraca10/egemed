@@ -7,8 +7,7 @@
     ".": "./src/index.ts"
   },
   "scripts": {
-    "typecheck": "tsc --noEmit",
-    "export:bank": "node tools/export-bank.mjs"
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@egemed/gami-catalogs": "workspace:*",

@@ -1,64 +1,69 @@
+import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { curriculum } from "../../packages/sim-pulse/src/data/curriculum";
-import { LEADS, MODES } from "../../packages/sim-pulse/src/engine/shapes";
 
-declare const process: {
-  getBuiltinModule(id: "node:crypto"): {
-    createHash(algorithm: "sha256"): { update(value: string): { digest(encoding: "hex"): string } };
-  };
-};
+// T220 (A3.4, ADR-009): TS müfredat aynası madde içeriği taşımaz; kalan sayılar
+// sunucu bankasıyla (`packages/assessment-bank/data/pulse/items.json`) birebir eşit olmalıdır.
 
-const { createHash } = process.getBuiltinModule("node:crypto");
+const BANK_FILE = "packages/assessment-bank/data/pulse/items.json";
 
-const SOURCE_SHA256 = "7547ab0ac10352e0d85462f729cf0f65099ae94b665406cf0b85f46d76451046";
-const REQUIRED_ITEM_KEYS = [
-  "id", "mode", "title", "ariaLabel", "stem", "question", "text", "vitals", "options", "correct",
-  "explanations", "feedback", "objectiveIds", "sourceIds", "decisionId", "note", "ecg",
-] as const;
+interface BankItem {
+  readonly id: string;
+  readonly section: "case" | "quiz";
+  readonly mode: string;
+}
 
-describe("Pulse müfredat verisi", () => {
-  it("200 vaka ve 200 soruyu eksiksiz kimlik dizileriyle taşır", () => {
-    expect(curriculum.version).toBe(8);
-    expect(curriculum.sessionSize).toBe(10);
-    expect(curriculum.cases).toHaveLength(200);
-    expect(curriculum.questions).toHaveLength(200);
-    expect(Object.keys(curriculum.byId)).toHaveLength(400);
-    expect(curriculum.cases.map(({ id }) => id)).toEqual(
-      Array.from({ length: 200 }, (_, index) => `C${String(index + 1).padStart(3, "0")}`),
-    );
-    expect(curriculum.questions.map(({ id }) => id)).toEqual(
-      Array.from({ length: 200 }, (_, index) => `Q${String(index + 1).padStart(3, "0")}`),
-    );
-  });
+interface BankFile {
+  readonly version: number;
+  readonly sessionSize: number;
+  readonly count: number;
+  readonly items: readonly BankItem[];
+}
 
-  it("her vaka ve sorunun zorunlu klinik içerik alanlarını doğrular", () => {
-    for (const item of [...curriculum.cases, ...curriculum.questions]) {
-      expect(Object.keys(item), item.id).toEqual(REQUIRED_ITEM_KEYS);
-      expect(item.id, item.id).toMatch(/^[CQ]\d{3}$/);
-      expect(MODES, item.id).toContain(item.mode);
-      for (const value of [item.title, item.ariaLabel, item.stem, item.question, item.text, item.feedback, item.decisionId]) {
-        expect(value.trim().length, item.id).toBeGreaterThan(0);
-      }
-      expect(item.vitals.length, item.id).toBeGreaterThan(0);
-      expect(item.vitals.every(({ k, v }) => k.length > 0 && v.length > 0), item.id).toBe(true);
-      expect(item.options, item.id).toHaveLength(5);
-      expect(item.options.every((option) => option.trim().length > 0), item.id).toBe(true);
-      expect(item.explanations, item.id).toHaveLength(5);
-      expect(item.explanations.every((explanation) => explanation.trim().length > 0), item.id).toBe(true);
-      expect(Number.isInteger(item.correct) && item.correct >= 0 && item.correct < 5, item.id).toBe(true);
-      expect(item.objectiveIds.length > 0 && item.objectiveIds.every((id) => /^O[1-6]$/.test(id)), item.id).toBe(true);
-      expect(item.sourceIds.length > 0 && item.sourceIds.every((id) => id.length > 0), item.id).toBe(true);
-      expect(item.ecg.mode, item.id).toBe(item.mode);
-      expect(item.ecg.leads, item.id).toHaveLength(3);
-      expect(item.ecg.leads.every((lead) => LEADS.includes(lead)), item.id).toBe(true);
-      expect(Number.isFinite(item.ecg.start) && item.ecg.start >= 0, item.id).toBe(true);
-      expect(Number.isFinite(item.ecg.seconds) && item.ecg.seconds > 0, item.id).toBe(true);
-      expect(curriculum.byId[item.id], item.id).toBe(item);
+const bank = JSON.parse(readFileSync(BANK_FILE, "utf8")) as BankFile;
+
+function patternsOf(items: readonly BankItem[]): Record<string, { case: number; quiz: number }> {
+  const patterns: Record<string, { case: number; quiz: number }> = {};
+  for (const item of items) {
+    const row = patterns[item.mode] ?? { case: 0, quiz: 0 };
+    row[item.section] += 1;
+    patterns[item.mode] = row;
+  }
+  return Object.fromEntries(Object.keys(patterns).sort().map((key) => [key, patterns[key]!]));
+}
+
+describe("Pulse istemci müfredat aynası (T220)", () => {
+  it("madde içeriği alanları yoktur; yalnız etiket, sayı ve sınırlılık kalır", () => {
+    const keys = Object.keys(curriculum);
+    for (const removed of ["cases", "questions", "byId", "meta", "banks", "itemMeta"]) {
+      expect(keys, removed).not.toContain(removed);
     }
+    expect(Object.keys(curriculum).sort()).toEqual(
+      ["caseCount", "labels", "limitations", "patterns", "quizCount", "sessionSize", "version"].sort(),
+    );
+    expect(JSON.stringify(curriculum)).not.toMatch(/"correct"|"explanations"|"feedback"/);
   });
 
-  it("kaynak PulseCurriculum nesnesinin sabit SHA-256 özetini korur", () => {
-    const actual = createHash("sha256").update(JSON.stringify(curriculum)).digest("hex");
-    expect(actual).toBe(SOURCE_SHA256);
+  it("sürüm, oturum boyutu ve madde sayıları bankayla birebir aynıdır", () => {
+    expect(curriculum.version).toBe(bank.version);
+    expect(curriculum.sessionSize).toBe(bank.sessionSize);
+    expect(curriculum.caseCount + curriculum.quizCount).toBe(bank.count);
+    expect(curriculum.caseCount).toBe(bank.items.filter((item) => item.section === "case").length);
+    expect(curriculum.quizCount).toBe(bank.items.filter((item) => item.section === "quiz").length);
+  });
+
+  it("patern başına vaka/değerlendirme sayıları banka envanteriyle aynıdır", () => {
+    expect(curriculum.patterns).toEqual(patternsOf(bank.items));
+    expect(Object.keys(curriculum.patterns)).toHaveLength(23);
+    const total = Object.values(curriculum.patterns).reduce((sum, row) => sum + row.case + row.quiz, 0);
+    expect(total).toBe(bank.count);
+  });
+
+  it("etiketler bankadaki 23 paterni kapsar ve sınırlılık metni güncel sayıları taşır", () => {
+    const modes = [...new Set(bank.items.map((item) => item.mode))].sort();
+    expect(Object.keys(curriculum.labels).sort()).toEqual(modes);
+    expect(Object.values(curriculum.labels).every((label) => label.trim().length > 0)).toBe(true);
+    expect(curriculum.limitations).toContain("600 sentetik madde");
+    expect(curriculum.limitations).toContain("23 EKG sonucu");
   });
 });

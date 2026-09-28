@@ -39,8 +39,14 @@ interface SourceState {
   readonly caseSession: SourceSession;
 }
 
+/**
+ * T220: istemci müfredatında madde anahtarı yoktur (`byId` kaldırıldı); sunucu
+ * oturumunda yerel kayıt zaten yapılmaz (`recordAttempts:false`). Kanal yoksa
+ * uygulama/değerlendirme kartları kapalıdır; yerel doğrulama yalnız "gönderildi"
+ * işaretine dayanır ve doğru sayısı istemcide hesaplanamaz.
+ */
 interface SourceCurriculum {
-  readonly byId: Readonly<Record<string, { readonly correct: number } | undefined>>;
+  readonly byId?: Readonly<Record<string, { readonly correct: number } | undefined>>;
 }
 
 interface SourceScorm {
@@ -55,7 +61,7 @@ const GAMI_PROGRESS_ID = "egemedGamiProgress";
 const GAMI_GAINS_ID = "egemedGamiGains";
 
 function correctness(session: SourceSession, curriculum: SourceCurriculum): boolean[] {
-  return session.ids.map((id, index) => curriculum.byId[id]?.correct === session.answers[index]);
+  return session.ids.map((id, index) => curriculum.byId?.[id]?.correct === session.answers[index]);
 }
 
 function lastRhythmStreak(state: PulseGamiState): number {
