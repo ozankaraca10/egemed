@@ -9,12 +9,13 @@ import {
   uuidSchema,
   type AuscultaPublicCase,
   type OpacaPublicCase,
+  type PulsePublicCase,
   type SimCaseResult,
   type SimId,
   type SimSessionMode,
   type SimTelemetry,
 } from "@egemed/contracts";
-import { ausculta, opaca } from "@egemed/assessment-bank";
+import { ausculta, opaca, pulse } from "@egemed/assessment-bank";
 import { encodeAuscultaSummary } from "@egemed/gami-catalogs";
 import { jsonError, validationDetails, type AppEnv } from "../http";
 import { createLoginRateLimiter } from "../auth/rate-limit";
@@ -57,13 +58,13 @@ export function seededRandom(seed: number): () => number {
   };
 }
 const SESSION_START_WINDOW_MS = 60 * 60 * 1000;
-/** A2.2: sunucu oturumu destekleyen simler (A3 Pulse ile genişler). */
-const SERVER_SESSION_SIMS: readonly SimId[] = ["ausculta", "opaca"];
+/** A2.2: sunucu oturumu destekleyen simler (A3.2 Pulse ile genişledi). */
+const SERVER_SESSION_SIMS: readonly SimId[] = ["ausculta", "opaca", "pulse"];
 
-/** İki bankanın anahtar tiplerinin birleşimi; jsonb biçimi sim başına değişmez (geriye uyumlu). */
-type SimCaseKeys = ausculta.AuscultaCaseKeys | opaca.OpacaCaseKeys;
-/** İki bankanın anahtarsız vaka tiplerinin birleşimi. */
-type SimPublicCase = AuscultaPublicCase | OpacaPublicCase;
+/** Üç bankanın anahtar tiplerinin birleşimi; jsonb biçimi sim başına değişmez (geriye uyumlu). */
+type SimCaseKeys = ausculta.AuscultaCaseKeys | opaca.OpacaCaseKeys | pulse.PulseCaseKeys;
+/** Üç bankanın anahtarsız vaka tiplerinin birleşimi. */
+type SimPublicCase = AuscultaPublicCase | OpacaPublicCase | PulsePublicCase;
 
 function isAuscultaKeys(keys: SimCaseKeys): keys is ausculta.AuscultaCaseKeys {
   return "audio" in keys;
@@ -71,6 +72,11 @@ function isAuscultaKeys(keys: SimCaseKeys): keys is ausculta.AuscultaCaseKeys {
 
 function isOpacaKeys(keys: SimCaseKeys): keys is opaca.OpacaCaseKeys {
   return "images" in keys;
+}
+
+/** A3.2: Pulse anahtarı ne ses ne görüntü kaydı taşır; kalan tek banka budur. */
+function isPulseKeys(keys: SimCaseKeys): keys is pulse.PulseCaseKeys {
+  return !isAuscultaKeys(keys) && !isOpacaKeys(keys);
 }
 
 interface QuestionFeedback {
@@ -139,10 +145,33 @@ const OPACA_BANK: SimBank = {
   },
 };
 
-/** Sunucu oturumunda desteklenmeyen sim (ör. pulse) null döner. */
+const PULSE_BANK: SimBank = {
+  MASTERY_THRESHOLD: pulse.MASTERY_THRESHOLD,
+  FOCUS_CASE_COUNT: pulse.FOCUS_CASE_COUNT,
+  selectCaseIds: pulse.selectCaseIds,
+  buildPublicCase(caseId, input) {
+    const item = pulse.caseById(caseId);
+    return item === undefined ? null : pulse.buildPublicCase(item, input);
+  },
+  gradeCase(caseId, keys, input) {
+    const item = pulse.caseById(caseId);
+    return item === undefined || !isPulseKeys(keys) ? null : pulse.gradeCase(item, keys, input);
+  },
+  checkQuestion(caseId, keys, questionId, answer) {
+    const item = pulse.caseById(caseId);
+    return item === undefined || questionId !== pulse.QUESTION_ID || !isPulseKeys(keys) ? null : pulse.checkQuestion(item, keys, answer);
+  },
+  /** A3.2: Pulse'ta ipucu yoktur; uç 404 döner. */
+  hintFor() {
+    return null;
+  },
+};
+
+/** Sunucu oturumunda desteklenmeyen sim null döner. */
 function bankFor(simId: SimId): SimBank | null {
   if (simId === "ausculta") return AUSCULTA_BANK;
   if (simId === "opaca") return OPACA_BANK;
+  if (simId === "pulse") return PULSE_BANK;
   return null;
 }
 
@@ -526,7 +555,8 @@ export function registerSimSessionRoutes(app: Hono<AppEnv>, deps: SimSessionDeps
     let xpGained = 0;
     // Öğretim üyesi (T171) oyunlaştırmaya katılmaz: deneme yazılmaz.
     if (actor.gamified) {
-      // Rozet özeti sime özgüdür: Ausculta kodlu, Opaca yalnız genel alanlarla yazılır.
+      // Rozet özeti sime özgüdür: Ausculta kodlu, Opaca/Pulse yalnız genel alanlarla yazılır.
+      // (Pulse rozet özeti istemci sayaçlarına dayanır — sunucu oturumunda üretilemez, T202 Opaca kararı.)
       const summaryExtra = row.simId === "ausculta" ? auscultaSummaryOf(counted) : {};
       const written = await deps.gamification.writeAttempt({
         id: deps.newId(),
@@ -577,6 +607,8 @@ export function registerSimSessionRoutes(app: Hono<AppEnv>, deps: SimSessionDeps
     const loaded = await loadSession(c);
     if ("error" in loaded) return loaded.error;
     const row = loaded.row;
+    // A3.2: ses vekili yalnız Ausculta'da; Pulse/Opaca oturumunda uç yoktur.
+    if (row.simId !== "ausculta") return jsonError(c, "not_found");
     const token = c.req.param("token");
     const item = row.state.cases.find((entry) => entry.openedAt !== null && entry.keys !== null && isAuscultaKeys(entry.keys) && entry.keys.audio[token] !== undefined);
     if (item === undefined || item.keys === null || !isAuscultaKeys(item.keys)) return jsonError(c, "not_found");

@@ -74,6 +74,7 @@ function correctAnswers(h: AdminHarness, sessionId: string, index: number): Reco
   const caseDef = item === undefined ? undefined : ausculta.caseById(item.caseId);
   if (item?.keys === null || item?.keys === undefined || caseDef === undefined) throw new Error("vaka yok");
   const keys = item.keys;
+  if (!("audio" in keys)) throw new Error("Ausculta anahtarı bekleniyordu");
   return Object.fromEntries(
     caseDef.questions.map((q) => [q.id, q.correct.map((id) => Object.keys(keys.options[q.id] ?? {}).find((t) => keys.options[q.id]?.[t] === id) ?? "")]),
   );
@@ -248,10 +249,11 @@ describe("sunucu vaka oturumu (A1.3)", () => {
     expect((await call(h, ali, "POST", `/me/sims/ausculta/sessions/${assess.sessionId}/cases/1/check`, { questionId: aCase.questions[0]?.id, answer: [aCase.questions[0]?.options[0]?.id] })).status).toBe(403);
   });
 
-  it("sim erişimi yoksa 403; sunucu oturumu olmayan sim 404", async () => {
+  it("sim erişimi yoksa 403; bilinmeyen sim 404", async () => {
     const h = createAdminHarness({});
     const ali = await login(h, "ali.veli");
     expect((await call(h, ali, "POST", "/me/sims/ausculta/sessions", { mode: "practice" })).status).toBe(403);
-    expect((await call(h, ali, "POST", "/me/sims/pulse/sessions", { mode: "practice" })).status).toBe(404);
+    // A3.2 ile üç sim de sunucu oturumu destekler; bilinmeyen sim kimliği 404.
+    expect((await call(h, ali, "POST", "/me/sims/gecersiz/sessions", { mode: "practice" })).status).toBe(404);
   });
 });

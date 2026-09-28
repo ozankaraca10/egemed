@@ -50,6 +50,7 @@ function correctFor(h: AdminHarness, sessionId: string, index: number): Record<s
   const caseDef = item === undefined ? undefined : ausculta.caseById(item.caseId);
   if (item?.keys === null || item?.keys === undefined || caseDef === undefined) throw new Error("vaka yok");
   const keys = item.keys;
+  if (!("audio" in keys)) throw new Error("Ausculta anahtarı bekleniyordu");
   return Object.fromEntries(caseDef.questions.map((q) => [q.id, q.correct.map((id) => Object.keys(keys.options[q.id] ?? {}).find((t) => keys.options[q.id]?.[t] === id) ?? "")]));
 }
 
