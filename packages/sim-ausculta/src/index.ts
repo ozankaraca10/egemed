@@ -166,6 +166,14 @@ export {
 } from "./ui/patient-stage/geometry";
 export type { BodyType, NormPoint, StageBox, StageCoordPoint, StageRect, StageViewConfig } from "./ui/patient-stage/geometry";
 export {
+  TUBE_ANCHOR_RATIO,
+  TUBE_CHESTPIECE_RADIUS,
+  tubeAnchor,
+  tubePath,
+  tubeTip,
+} from "./ui/patient-stage/tube";
+export type { TubePoint, TubeSize } from "./ui/patient-stage/tube";
+export {
   PatientStage,
   StageAudioProvider,
   createNoopStageEnv,
