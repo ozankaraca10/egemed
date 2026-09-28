@@ -76,8 +76,8 @@ function answersFor(publicCase: OpacaPublicCase, caseDef: CaseDef, keys: opaca.O
 }
 
 describe("SERVER_SESSION_SIMS (A2.3)", () => {
-  it("T212b: Opaca kanalı açıktır; liste Ausculta + Opaca taşır", () => {
-    expect(SERVER_SESSION_SIMS).toEqual(["ausculta", "opaca"]);
+  it("üç simin de sunucu kanalı açıktır (A1, A2.3, A3.3)", () => {
+    expect(SERVER_SESSION_SIMS).toEqual(["ausculta", "opaca", "pulse"]);
   });
 });
 
@@ -120,8 +120,9 @@ describe("createDevLocalSessionSource — Ausculta (mevcut davranış)", () => {
     expect(source.imageUrl(session.sessionId, audioToken ?? "")).toBe("");
   });
 
-  it("oturum kaynağı olmayan sim reddedilir", () => {
-    expect(() => createDevLocalSessionSource("pulse", () => NOW)).toThrow(/Yerel oturum kaynağı/);
+  it("Pulse DEV yerel kaynağı vardır (görüntü vekili yok)", () => {
+    // A3.3: Pulse DEV yerel kaynağı artık vardır (API Pulse oturumuyla aynı anlam).
+    expect(createDevLocalSessionSource("pulse", () => NOW).imageUrl("s", "t")).toBe("");
   });
 });
 

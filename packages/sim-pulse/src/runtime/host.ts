@@ -61,6 +61,18 @@ export interface PulseRuntimeOptions {
    * footer'ı gizlenir; kontroller kabuğun barına taşınır (`chrome.ts`).
    */
   readonly unifiedChrome?: boolean;
+  /**
+   * T213: host kaydına göre öğrenme başka cihazda tamamlanmış
+   * (`context.learn.complete`). true ise kaynağın `derive()` kapısı vaka/sınav
+   * kilidini açar (`window.__pulseLearnComplete`); yerel izlenme kaydı değişmez.
+   */
+  readonly learnComplete?: boolean;
+  /**
+   * A3.3: sunucu vaka/sınav oturumu köprüsü (ADR-009). Verilirse kaynak
+   * maddeleri `window.__pulseServerItems`ten okur; yoksa kaynak kanalsız sürer
+   * (kabuk kanalsız kurulumda kartları kapatır).
+   */
+  readonly serverItems?: unknown;
 }
 
 export interface PulseRuntimeHandle {
@@ -70,6 +82,10 @@ export interface PulseRuntimeHandle {
   readonly storage: Storage;
   /** Kaynak `window.*` API'leri (CardAIController, CardAIScorm …); testler ve köprü için. */
   global(name: string): unknown;
+  /** Gölge pencerede bir global yazar (ör. `__pulseServerResults`). */
+  setGlobal(name: string, value: unknown): void;
+  /** Gölge pencerede olay yayınlar; köprüye `cardai:*`/`pulse:*` iletilir. */
+  emit(type: string, detail: unknown): void;
   dispose(): void;
 }
 
@@ -169,7 +185,14 @@ export function mountPulseRuntime(target: HTMLElement, options: PulseRuntimeOpti
   const observers = new Set<ResizeObserver>();
   const audioContexts = new Set<AudioContext>();
   const bus = new EventTarget();
-  const local: Record<PropertyKey, unknown> = { __pulseAssetBase: options.assetBase };
+  const local: Record<PropertyKey, unknown> = {
+    __pulseAssetBase: options.assetBase,
+    // T213: host tamamlaması `derive()` kilit kararında VEYA'lanır; bayrak
+    // yoksa (ziyaretçi/kanalsız) kilit yerel izlenme kaydına göre kalır.
+    __pulseLearnComplete: options.learnComplete === true,
+    // A3.3: sunucu oturumu köprüsü (varsa) madde önbelleğini buradan okur.
+    ...(options.serverItems === undefined ? {} : { __pulseServerItems: options.serverItems }),
+  };
 
   const addTracked = (
     realTarget: EventTarget,
@@ -336,7 +359,8 @@ export function mountPulseRuntime(target: HTMLElement, options: PulseRuntimeOpti
         case "dispatchEvent":
           return (event: Event) => {
             // `pulse:*` (ör. T208 `pulse:learn-complete`) platform köprüsüne
-            // `cardai:*` ile aynı yoldan iletilir; köprü sonraki görevde bağlanır.
+            // `cardai:*` ile aynı yoldan iletilir; T213 bu olayı
+            // `markComplete`e bağlar (`learn.ts`).
             if (event.type.startsWith("cardai:") || event.type.startsWith("pulse:")) {
               options.bridge?.onEvent?.(event.type, (event as CustomEvent<unknown>).detail);
             }
@@ -364,6 +388,15 @@ export function mountPulseRuntime(target: HTMLElement, options: PulseRuntimeOpti
     shadow,
     storage,
     global: (name) => local[name],
+    setGlobal(name, value) {
+      local[name] = value;
+    },
+    emit(type, detail) {
+      // Gölge penceredeki `dispatchEvent` ile aynı yol: olay yerel veri yolunda
+      // yayınlanır ve `cardai:*`/`pulse:*` köprüye iletilir.
+      if (type.startsWith("cardai:") || type.startsWith("pulse:")) options.bridge?.onEvent?.(type, detail);
+      bus.dispatchEvent(new CustomEvent(type, { detail }));
+    },
     dispose() {
       if (disposed) return;
       // Kaynak kendi kayıt yolunu çalıştırsın (app.js / scorm.js `pagehide`).

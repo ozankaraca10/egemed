@@ -104,6 +104,15 @@ export function firstWeakLibraryKey(
   return null;
 }
 
+/** T214: zayıf konu anahtarını sunucu sonuç meta verisinden çözer (vaka sonucu vaka
+ *  bulgusunu taşımadığı için anahtar sunucudan gelir). */
+export function firstWeakLibraryKeyFromServer(
+  results: { caseId: string; answers: { correct: boolean }[] }[],
+  metas: Readonly<Record<string, { readonly libraryKey?: string | null } | undefined>>,
+): string | null {
+  return firstWeakLibraryKey(results, (caseId) => metas[caseId]?.libraryKey ?? null);
+}
+
 /** %60 eşiğinin altında kalan (ve o vakalarda hiç sorulmamış olmayan, max>0) alan anahtarları. */
 export function weakDomainKeys<K extends string>(
   domains: Record<K, { earned: number; max: number }> | null | undefined,

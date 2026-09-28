@@ -276,13 +276,13 @@ describe("tablolar ve kolonlar", () => {
 });
 
 describe("kısıtlar", () => {
-  it("rol CHECK'i admin, kullanici ve (007) ogretim_uyesi içerir", () => {
+  it("rol CHECK'i admin, kullanici, (007) ogretim_uyesi ve (012) uzmanlik_ogrencisi içerir", () => {
     const roleChecks = [...allUp.matchAll(/check \(\s*role\s+in \(([^)]*)\)/g)];
-    expect(roleChecks).toHaveLength(2);
+    expect(roleChecks).toHaveLength(3);
     expect(checkValues("constraint user_roles_role_check")).toEqual(["admin", "kullanici"]);
-    // 007 kısıtı yeniden kurar; son geçerli küme üç roldür.
-    const latest = [...(roleChecks[1]?.[1] ?? "").matchAll(/'([^']+)'/g)].map((value) => value[1] ?? "").sort();
-    expect(latest).toEqual(["admin", "kullanici", "ogretim_uyesi"]);
+    // 007 ve 012 kısıtı yeniden kurar; son geçerli küme dört roldür.
+    const latest = [...(roleChecks[2]?.[1] ?? "").matchAll(/'([^']+)'/g)].map((value) => value[1] ?? "").sort();
+    expect(latest).toEqual(["admin", "kullanici", "ogretim_uyesi", "uzmanlik_ogrencisi"]);
     expect(allUp).not.toMatch(/platform_admin|kurum_admin|egitmen|denetci/i);
   });
 

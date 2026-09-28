@@ -256,8 +256,9 @@ export function validateImportRow(
   if (displayName.length < 2 || displayName.length > 120) {
     errors.push({ code: "display_name_invalid", column: "ad_soyad", message: "Ad soyad 2-120 karakter olmalıdır." });
   }
-  // T184: `rol` sütunu `kullanici` veya `ogretim_uyesi` kabul eder; `admin` (ve
-  // tanınmayan değerler) CSV ile atanamaz (E3 §b, `ASSIGNABLE_ROLES`ten türer).
+  // T184/T219: `rol` sütunu `kullanici`, `ogretim_uyesi` veya
+  // `uzmanlik_ogrencisi` kabul eder; `admin` (ve tanınmayan değerler) CSV ile
+  // atanamaz (E3 §b, `ASSIGNABLE_ROLES`ten türer).
   const role = roleRaw.length === 0 ? "kullanici" : roleRaw;
   if (!(ASSIGNABLE_ROLES as readonly string[]).includes(role)) {
     errors.push({ code: "role_forbidden", column: "rol", message: "admin rolü CSV ile atanamaz." });

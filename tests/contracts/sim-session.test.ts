@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   auscultaPublicCaseSchema,
   opacaPublicCaseSchema,
+  pulsePublicCaseSchema,
   simSessionAnswerRequestSchema,
   simSessionAnswerResponseSchema,
   simSessionCaseResponseSchema,
@@ -170,7 +171,7 @@ describe("anahtarsız Opaca vakası", () => {
     }
   });
 
-  it("yanıt zarfı iki simin de anahtarsız gövdesini doğrular", () => {
+  it("yanıt zarfı anahtarsız gövdeyi doğrular ve sızdırıcı alanı reddeder", () => {
     expect(simSessionCaseResponseSchema.safeParse({ data: BASE }).success).toBe(true);
     expect(simSessionCaseResponseSchema.safeParse({ data: OPACA_BASE }).success).toBe(true);
     expect(simSessionCaseResponseSchema.safeParse({ data: { ...OPACA_BASE, simId: "pulse" } }).success).toBe(false);
@@ -184,6 +185,66 @@ describe("anahtarsız Opaca vakası", () => {
     // @ts-expect-error pulse gövdesi birleşimde yok
     const pulseCase: SimPublicCase = { ...BASE, simId: "pulse" };
     expect(pulseCase).toBeDefined();
+  });
+});
+
+// A3.1 (ADR-009): Pulse anahtarsız vakası doğru seçeneği, gerekçeleri, geri
+// bildirimi ve madde kimliğini taşıyamaz. `ecg.mode` bilinçli kabul edilen
+// sınırdır (istemci EKG'yi moddan üretir; A3.3 değerlendirecek).
+const PULSE_BASE = {
+  simId: "pulse" as const,
+  index: 1,
+  label: "Vaka 1",
+  section: "case" as const,
+  stem: "42 yaşında erkek hasta. Başvuru: çarpıntı.",
+  question: "Bu bulgularla en uyumlu örüntü hangisidir?",
+  vitals: [
+    { label: "Nabız", value: "142/dk düzensiz" },
+    { label: "TA", value: "110/72 mmHg" },
+  ],
+  options: [
+    { id: "tok_aaaaaaaa", label: "Atriyal fibrilasyon" },
+    { id: "tok_bbbbbbbb", label: "Sinüs taşikardisi" },
+    { id: "tok_cccccccc", label: "Atriyal flutter" },
+    { id: "tok_dddddddd", label: "Fokal atriyal taşikardi" },
+    { id: "tok_eeeeeeee", label: "Ventriküler erken atım" },
+  ],
+  ecg: { mode: "af" as const, options: { afProfile: "rapid" }, leads: ["II" as const, "aVF" as const, "V1" as const], start: 0.58, seconds: 3.2 },
+  openedAt: "2026-09-27T10:00:00.000+03:00",
+};
+
+describe("anahtarsız Pulse vakası", () => {
+  it("geçerli anahtarsız vakayı kabul eder", () => {
+    expect(pulsePublicCaseSchema.safeParse(PULSE_BASE).success).toBe(true);
+  });
+
+  it.each([
+    ["title", { title: "Sentetik vaka C001" }],
+    ["correct", { correct: 0 }],
+    ["explanations", { explanations: ["P yok."] }],
+    ["feedback", { feedback: "P yok ve R–R düzensiz." }],
+    ["objectiveIds", { objectiveIds: ["O2"] }],
+    ["sourceIds", { sourceIds: ["AF2024"] }],
+    ["decisionId", { decisionId: "af" }],
+    ["note", { note: "retrospektif" }],
+    ["vitals (k/v biçimi)", { vitals: [{ k: "Nabız", v: "142" }] }],
+  ])("sızdırıcı alan reddedilir: %s", (_name, extra) => {
+    expect(pulsePublicCaseSchema.safeParse({ ...PULSE_BASE, ...extra }).success).toBe(false);
+  });
+
+  it("seçenekler tam 5 ve opak olmalı; EKG modu motor listesiyle sınırlıdır", () => {
+    expect(pulsePublicCaseSchema.safeParse({ ...PULSE_BASE, options: PULSE_BASE.options.slice(0, 4) }).success).toBe(false);
+    expect(
+      pulsePublicCaseSchema.safeParse({ ...PULSE_BASE, options: [{ id: "correct", label: "AF" }, ...PULSE_BASE.options.slice(1)] }).success,
+    ).toBe(false);
+    expect(pulsePublicCaseSchema.safeParse({ ...PULSE_BASE, ecg: { ...PULSE_BASE.ecg, mode: "unknown" } }).success).toBe(false);
+    expect(pulsePublicCaseSchema.safeParse({ ...PULSE_BASE, ecg: { ...PULSE_BASE.ecg, leads: ["II", "aVF"] } }).success).toBe(false);
+  });
+
+  it("yanıt zarfı üç simin de anahtarsız gövdesini doğrular", () => {
+    expect(simSessionCaseResponseSchema.safeParse({ data: PULSE_BASE }).success).toBe(true);
+    expect(simSessionCaseResponseSchema.safeParse({ data: { ...PULSE_BASE, feedback: "sızıntı" } }).success).toBe(false);
+    expect(simSessionCaseResponseSchema.safeParse({ data: { ...PULSE_BASE, simId: "ausculta" } }).success).toBe(false);
   });
 });
 

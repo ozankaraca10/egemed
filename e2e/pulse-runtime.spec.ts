@@ -1,7 +1,30 @@
+import { readFileSync } from "node:fs";
 import { expect, test, type Locator, type Page } from "@playwright/test";
-import { curriculum } from "../packages/sim-pulse/src/data/curriculum";
 import { captureRouteScreenshot } from "./artifacts";
-import { trackErrors } from "./helpers";
+import { clickSimBarAction, trackErrors } from "./helpers";
+import { answerPulseQuizItem, completePulseCases, completePulseQuiz } from "./pulse-flows";
+
+/**
+ * T220 (A3.4, ADR-009): İstemci müfredatı madde içeriği taşımaz; doğru seçenekler
+ * yalnız bankadan (`e2e/pulse-flows.ts`) okunur. Runtime'dan gereken tek alan
+ * içerik sürümüdür (`cv` tohumu).
+ */
+interface RuntimeCurriculum {
+  readonly version: number;
+}
+function loadRuntimeCurriculum(): RuntimeCurriculum {
+  const VENDOR = "packages/sim-pulse/src/runtime/vendor";
+  const win: Record<string, unknown> = {};
+  const load = (path: string): void => {
+    const source = readFileSync(path, "utf8").replace("export default function run", "return function run");
+    (new Function("module", source)(undefined) as (env: Record<string, unknown>) => void)({ window: win });
+  };
+  load(`${VENDOR}/model.js`);
+  win["CardAIScorm"] = { previousStatus: "" };
+  load(`${VENDOR}/curriculum.js`);
+  return win["PulseCurriculum"] as RuntimeCurriculum;
+}
+const curriculum = loadRuntimeCurriculum();
 
 /**
  * Pulse kaynak runtime'ı (EGEMED_PULSE/cardai) platform içinde (PULSE-00).
@@ -101,12 +124,6 @@ async function openMode(root: Locator, view: "sim" | "case" | "quiz"): Promise<v
   await root.locator(`#modeCards [data-view="${view}"]`).click();
 }
 
-function correctOf(id: string): number {
-  const item = curriculum.byId[id];
-  if (item === undefined) throw new Error(`Bilinmeyen madde: ${id}`);
-  return item.correct;
-}
-
 test.describe("Pulse kaynak runtime", () => {
   test.beforeEach(async ({ page }) => {
     await suppressFullscreenPrompt(page, [null, ADMIN.actorId, STUDENT.actorId]);
@@ -146,56 +163,47 @@ test.describe("Pulse kaynak runtime", () => {
     expect(states.size, "farklı kalp durumu sayısı").toBeGreaterThan(1);
   });
 
-  test("10 vaka oturumu tamamlanma raporuyla biter (PULSE-05)", async ({ page }) => {
+  test("10 vaka oturumu sunucu oturumundan çözülür ve tamamlanma raporuyla biter (PULSE-05, A3.3)", async ({ page }) => {
     const errors = trackErrors(page);
     await seedViewed(page);
     const root = await openPulse(page);
     await openMode(root, "case");
-    for (let i = 0; i < 10; i += 1) {
-      const eyebrow = await root.locator("#caseQuestionCard .eyebrow").innerText();
-      const id = /C\d{3}/.exec(eyebrow)?.[0];
-      expect(id, `vaka ${i + 1} kimliği`).toBeDefined();
-      await root.locator(`input[name="activeCase"][value="${correctOf(id ?? "")}"]`).check();
-      await root.locator("#caseCheck").click();
-      await root.locator("#caseContinue").click();
-    }
+    // Maddeler sunucudan gelir: ekranda madde kimliği değil genel etiket ("Vaka 3") görünür
+    // ve seçenekler opak jetonlarla karıştırılmıştır (cevap anahtarı istemcide yok).
+    await expect(root.locator("#caseQuestionCard .eyebrow")).toHaveText(/EKG YORUMU · Vaka \d+$/, { timeout: 20_000 });
+    await completePulseCases(root);
     await expect(root.getByText("Oturum tamamlandı")).toBeVisible();
+    await expect(root.locator("#caseEnd")).toContainText("10/10 doğru");
+    // Rapor başlıkları sunucu sonucundan gelir (madde kimliği bitişte açılır).
+    await expect(root.locator("#caseEnd .dot").first()).toHaveAttribute("aria-label", /Sentetik vaka C\d{3}/);
     expect(errors).toEqual([]);
   });
 
-  test("10 soru gönderilince sonuç ekranı ve 'Tekrar dene' gelir (PULSE-06)", async ({ page }) => {
+  test("10 soru sunucu oturumundan gönderilir; sonuç ekranı puanı sunucudan gelir (PULSE-06, A3.3)", async ({ page }) => {
     const errors = trackErrors(page);
     await seedPulseLearning(page, [null, ADMIN.actorId, STUDENT.actorId], { casesComplete: true });
     const root = await openPulse(page);
     await openMode(root, "quiz");
-    for (let i = 0; i < 10; i += 1) {
-      const id = /Q\d{3}/.exec(await root.locator("#quizForm").innerText())?.[0];
-      expect(id, `soru ${i + 1} kimliği`).toBeDefined();
-      await root.locator(`#quizForm input[value="${correctOf(id ?? "")}"]`).check();
-      await root.locator("#quizSubmit").click();
-      if (i < 9) await root.locator("#quizItemNext").click();
-    }
-    await expect(root.locator("#resultsView")).toBeVisible();
+    await completePulseQuiz(root);
     await expect(root.getByRole("button", { name: /Tekrar dene/ })).toBeVisible();
-    // KAYNAK-01: doğrudan sınava girip 100 alan öğrenci "Hedefin altında" görmez;
-    // modül tamamlama (inceleme + vakalar) ayrı not olarak gösterilir.
+    // KAYNAK-01: doğrudan sınava girip 100 alan öğrenci "Hedefin altında" görmez.
     await expect(root.locator("#resultsView")).toContainText("✓ Başarılı");
     await expect(root.locator("#resultsView")).not.toContainText("Hedefin altında");
-    // T208 öğrenme kilidi: sınav yalnız 23 patern izlenip 10 vaka gönderildikten
-    // sonra açıldığından modül tamamlanmıştır; "Modül henüz tamamlanmadı" notu çizilmez.
-    await expect(root.locator("[data-egemed-module-note]")).toHaveCount(0);
+    // Rapor sunucu geri bildirimiyle çizilir; doğru yanıt ve puan sunucudan gelir.
+    await expect(root.locator("#resultsView .report-row-v2")).toHaveCount(10);
+    await expect(root.locator("#resultsView .report-row-v2").first()).toContainText("10/10");
 
-    // Platform oyunlaştırması: deneme kullanıcı×sim ad alanına tek kez yazılır,
-    // sonuç ekranında kazanım kartı ve "İlerlemem" diyaloğu açılır.
-    // Kart Opaca/Ausculta ile ortak tasarımdır (@egemed/gami-ui GamiGainsView).
-    await expect(root.locator("#egemedGamiGains")).toContainText("Bu oturumda kazandıkların");
+    // A3.3: sunucu oturumunda denemeyi sunucu yazar; istemci yerel skor kaydı YAPMAZ
+    // (çift kayıt yok) ve sonuç ekranında yerel kazanım kartı çizilmez.
     const gami = await page.evaluate(
-      (key) => JSON.parse(localStorage.getItem(key) ?? "null") as { attempts: { score: number; mode: string }[] } | null,
+      (key) => JSON.parse(localStorage.getItem(key) ?? "null") as { attempts: unknown[] } | null,
       `${namespaceOf(null)}egemed-pulse-gami-1.0`,
     );
-    expect(gami?.attempts.map((attempt) => [attempt.mode, attempt.score])).toEqual([["assessment", 100]]);
-    await root.locator("#egemedGamiGains").getByRole("button", { name: "Başarılarımı gör" }).click();
-    // Ortak tasarım (@egemed/gami-ui): Opaca/Ausculta ile aynı Başarılarım / Liderlik sayfası.
+    expect(gami?.attempts ?? [], "istemci yerel deneme kaydı yok").toEqual([]);
+    await expect(root.locator("#egemedGamiGains")).toBeHidden();
+
+    // "İlerlemem" İlerlemem sayfası yerel kayıt olmadan da açılır (demo verisi).
+    await clickSimBarAction(page, "İlerlemem");
     const progress = root.locator("#egemedGamiProgress");
     await expect(progress).toBeVisible();
     await expect(progress.getByRole("tab", { name: "Başarılarım" })).toBeVisible();
@@ -215,9 +223,7 @@ test.describe("Pulse kaynak runtime", () => {
     await asUser(ADMIN);
     let root = await openPulse(page);
     await openMode(root, "quiz");
-    const id = /Q\d{3}/.exec(await root.locator("#quizForm").innerText())?.[0] ?? "";
-    await root.locator(`#quizForm input[value="${correctOf(id)}"]`).check();
-    await root.locator("#quizSubmit").click();
+    await answerPulseQuizItem(root);
     await page.goto("/#/simulatorler");
     const adminState = await page.evaluate(
       (key) => localStorage.getItem(key),
@@ -232,7 +238,9 @@ test.describe("Pulse kaynak runtime", () => {
       (key) => localStorage.getItem(key),
       `${namespaceOf(STUDENT.actorId)}${PULSE_STATE_KEY}`,
     );
-    expect(studentState === null || !studentState.includes(id), "öğrenci admin oturumunu yüklemez").toBe(true);
+    // Sunucu oturumu kullanıcıya bağlıdır; öğrenci yeni bir oturum açar ve
+    // maddeler hazır olduğunda hiçbir seçenek işaretli gelmez.
+    expect(studentState === null || !studentState.includes(ADMIN.actorId), "öğrenci admin kaydını taşımaz").toBe(true);
     await openMode(root, "quiz");
     await expect(root.locator("#quizForm input:checked"), "öğrencide seçili yanıt yok").toHaveCount(0);
   });
@@ -245,13 +253,10 @@ test.describe("Pulse kaynak runtime", () => {
     const root = await openPulse(page);
     const stepButton = (label: string) => page.locator(".eg-shell-simbar__stepButton", { hasText: label });
 
-    // Uygulama modu: yanıtlar otomatik kaydedildiğinden onay istenmeden döner.
-    await openMode(root, "case");
-    await expect(stepButton("Mod seçimi")).toBeVisible();
-    await stepButton("Mod seçimi").click();
-    await expect(root.locator("#modeCards")).toBeVisible();
-
     // Değerlendirme modu: kaynağın kendi süre kaybı uyarısı (quizExitDialog) devreye girer.
+    // (A3.3: sunucu oturumunda uygulama kartına girmek YENİ bir uygulama oturumu
+    // başlatır ve yerel "10 vaka gönderildi" ilerlemesini sıfırlar — bu yüzden sınav
+    // denemesi uygulama turundan ÖNCE yapılır; T208 kapısı tohumla açıktır.)
     await openMode(root, "quiz");
     await expect(stepButton("Mod seçimi")).toBeVisible();
     await stepButton("Mod seçimi").click();
@@ -269,19 +274,22 @@ test.describe("Pulse kaynak runtime", () => {
 
     // "Tamamla" adımından geri (index 1) desteklenmez; yalnız 0 (Mod seçimi) çalışır.
     await openMode(root, "quiz");
-    for (let i = 0; i < 10; i += 1) {
-      const id = /Q\d{3}/.exec(await root.locator("#quizForm").innerText())?.[0] ?? "";
-      await root.locator(`#quizForm input[value="${correctOf(id)}"]`).check();
-      await root.locator("#quizSubmit").click();
-      if (i < 9) await root.locator("#quizItemNext").click();
-    }
-    await expect(root.locator("#resultsView")).toBeVisible();
+    await completePulseQuiz(root);
     // Tamamlanan her adım kabukta düğme olur, ama sim yalnız 0'ı (Mod seçimi)
     // destekler; "Çalışma" (1) tıklanınca sonuç ekranından ayrılmaz.
     const workStep = stepButton("Çalışma");
     await expect(workStep).toBeVisible();
     await workStep.click();
     await expect(root.locator("#resultsView")).toBeVisible();
+
+    // Uygulama modu: yanıtlar otomatik kaydedildiğinden onay istenmeden döner.
+    await stepButton("Mod seçimi").click();
+    await expect(root.locator("#modeCards")).toBeVisible();
+    await openMode(root, "case");
+    await expect(root.locator("#caseView")).toBeVisible({ timeout: 20_000 });
+    await expect(stepButton("Mod seçimi")).toBeVisible();
+    await stepButton("Mod seçimi").click();
+    await expect(root.locator("#modeCards")).toBeVisible();
     expect(errors).toEqual([]);
   });
 

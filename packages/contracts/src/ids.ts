@@ -16,16 +16,17 @@ export function isSimId(value: unknown): value is SimId {
 
 /**
  * ADR-007 depo sahibi kararı (E3 §b) + 26 Eyl 2026: `ogretim_uyesi` rolü.
- * Öğretim üyesi simleri tam içerikle kullanır ama oyunlaştırmaya (rozet, XP,
- * liderlik, Meydan Okuma) katılmaz ve bu listelerde seçilemez.
+ * 28 Eyl 2026: `uzmanlik_ogrencisi` rolü. İki rol de simleri tam içerikle
+ * kullanır ama oyunlaştırmaya (rozet, XP, liderlik, Meydan Okuma) katılmaz
+ * ve bu listelerde seçilemez.
  */
-export type Role = "admin" | "kullanici" | "ogretim_uyesi";
+export type Role = "admin" | "kullanici" | "ogretim_uyesi" | "uzmanlik_ogrencisi";
 
-export const ROLES = ["admin", "kullanici", "ogretim_uyesi"] as const satisfies readonly Role[];
+export const ROLES = ["admin", "kullanici", "ogretim_uyesi", "uzmanlik_ogrencisi"] as const satisfies readonly Role[];
 
-/** Oyunlaştırmaya katılım: öğretim üyesi rolü taşıyan hiçbir hesap katılmaz. */
+/** Oyunlaştırmaya katılım: öğretim üyesi ya da uzmanlık öğrencisi rolü taşıyan hesap katılmaz. */
 export function isGamificationEligible(roles: readonly Role[]): boolean {
-  return !roles.includes("ogretim_uyesi");
+  return !roles.includes("ogretim_uyesi") && !roles.includes("uzmanlik_ogrencisi");
 }
 
 export function isRole(value: unknown): value is Role {
@@ -38,7 +39,7 @@ export function isRole(value: unknown): value is Role {
  * görülürse yetki katmanı 403 `role_not_permitted` döner; bu yüzden istek
  * şemaları tam `Role` tipini kabul eder, kısıt yetki katmanındadır.
  */
-export const ASSIGNABLE_ROLES = ["kullanici", "ogretim_uyesi"] as const satisfies readonly Role[];
+export const ASSIGNABLE_ROLES = ["kullanici", "ogretim_uyesi", "uzmanlik_ogrencisi"] as const satisfies readonly Role[];
 
 export type AssignableRole = (typeof ASSIGNABLE_ROLES)[number];
 

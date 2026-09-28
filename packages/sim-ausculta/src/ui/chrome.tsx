@@ -73,10 +73,6 @@ export function createNoopFullscreenEnv(): FullscreenEnv {
   };
 }
 
-export interface AuscultaChromeAudio {
-  setMuted(muted: boolean): void;
-}
-
 function stepFor(screen: Screen, previous: number): number {
   if (screen === "modes") return 0;
   if (screen === "learn" || screen === "simulation") return 1;
@@ -143,11 +139,9 @@ function usePublishChrome(chrome: SimChrome | null): void {
 
 /** Birleşik bar: adım, mod çipi, süre ve eylemler kabuğa gider. Modallar simde kalır. */
 export function UnifiedChrome({
-  audio,
   fullscreen = createNoopFullscreenEnv(),
   modalEnv,
 }: {
-  readonly audio?: AuscultaChromeAudio;
   readonly fullscreen?: FullscreenEnv;
   readonly modalEnv?: ModalEnv;
 }): JSX.Element | null {
@@ -155,7 +149,6 @@ export function UnifiedChrome({
   const audience = useAudience();
   const { state, dispatch } = useStore();
   const [fs, setFs] = useState(false);
-  const [muted, setMuted] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
   const [exitAsk, setExitAsk] = useState(false);
   const stepRef = useRef(0);
@@ -186,12 +179,6 @@ export function UnifiedChrome({
     if (resolveStepSelect(index, state.screen) === "ignore") return;
     goModes();
   };
-  const toggleMute = () => {
-    const next = !muted;
-    setMuted(next);
-    audio?.setMuted(next);
-  };
-
   const chips: SimChromeChip[] = [];
   if (setChrome && inWork) chips.push({ id: "mode", label: modeLabel, tone: modeTone(state.mode) });
   if (setChrome && inAssessment) chips.push({ id: "timer", label: fmtTimer(state.assessmentTimer), tone: "neutral" });
@@ -209,15 +196,6 @@ export function UnifiedChrome({
       pressed: fs,
       onSelect: toggleFs,
     });
-    if (audio) {
-      actions.push({
-        id: "sound",
-        icon: "sound",
-        label: muted ? "Sesi aç" : "Sesi kıs",
-        pressed: muted,
-        onSelect: toggleMute,
-      });
-    }
     actions.push({ id: "help", icon: "help", label: "Yardım", onSelect: () => setHelpOpen(true) });
   }
   usePublishChrome(setChrome ? { actions, chips, steps: { current: step, labels: STEP_LABELS, onSelect: onStepSelect } } : null);

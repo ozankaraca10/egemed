@@ -1,3 +1,4 @@
+import type { AuscultaPublicCase } from "../../packages/contracts/src/index";
 import { describe, expect, it } from "vitest";
 import {
   challengeListResponseSchema,
@@ -17,10 +18,11 @@ const MINUTE = 60_000;
 
 const ZEYNEP = user({ id: "00000000-0000-4000-8000-000000000031", username: "zeynep.a", displayName: "Zeynep A", authMethod: "dev", simAccess: ["ausculta"] });
 const HOCA = user({ id: "00000000-0000-4000-8000-000000000032", username: "hoca.b", displayName: "Hoca B", authMethod: "dev", roles: ["ogretim_uyesi"], simAccess: ["ausculta"] });
+const UZMAN = user({ id: "00000000-0000-4000-8000-000000000034", username: "uzman.d", displayName: "Uzman D", authMethod: "dev", roles: ["uzmanlik_ogrencisi"], simAccess: ["ausculta"] });
 const UZAK = user({ id: "00000000-0000-4000-8000-000000000033", username: "uzak.c", displayName: "Uzak C", authMethod: "dev", institutionId: OTHER_INSTITUTION_ID, simAccess: ["ausculta"] });
 
 function harness(): AdminHarness {
-  const users = [...DEFAULT_USERS.map((entry) => (entry.id === ALI.id ? { ...ALI, simAccess: ["ausculta"] as const } : entry)), ZEYNEP, HOCA, UZAK];
+  const users = [...DEFAULT_USERS.map((entry) => (entry.id === ALI.id ? { ...ALI, simAccess: ["ausculta"] as const } : entry)), ZEYNEP, HOCA, UZMAN, UZAK];
   const h = createAdminHarness({ users });
   // Öğrenme kilidi (27 Eyl 2026): düello testleri davranış kilidini ölçmez;
   // kurulumda ilgili kullanıcılar için Ausculta tamamlama kaydı eklenir.
@@ -49,6 +51,7 @@ function correctFor(h: AdminHarness, sessionId: string, index: number): Record<s
   const caseDef = item === undefined ? undefined : ausculta.caseById(item.caseId);
   if (item?.keys === null || item?.keys === undefined || caseDef === undefined) throw new Error("vaka yok");
   const keys = item.keys;
+  if (!("audio" in keys)) throw new Error("Ausculta anahtarı bekleniyordu");
   return Object.fromEntries(caseDef.questions.map((q) => [q.id, q.correct.map((id) => Object.keys(keys.options[q.id] ?? {}).find((t) => keys.options[q.id]?.[t] === id) ?? "")]));
 }
 
@@ -58,10 +61,11 @@ async function play(h: AdminHarness, who: Login, challengeId: string, correctCou
   expect(response.status).toBe(201);
   const session = simSessionStartResponseSchema.parse(await response.json()).data;
   expect(session).toMatchObject({ mode: "challenge", perCaseLimitMs: 2 * MINUTE, totalLimitMs: 8 * MINUTE });
-  const opened = [];
+  const opened: AuscultaPublicCase[] = [];
   for (let index = 1; index <= session.caseCount; index += 1) {
     const caseResponse = await call(h, who, "GET", `/me/sims/ausculta/sessions/${session.sessionId}/cases/${index}`);
     const publicCase = simSessionCaseResponseSchema.parse(await caseResponse.json()).data;
+    if (publicCase.simId !== "ausculta") throw new Error("düello testi Ausculta vakası bekler");
     opened.push(publicCase);
     h.advance(stepMs);
     const answers = index <= correctCount ? correctFor(h, session.sessionId, index) : {};
@@ -116,15 +120,19 @@ describe("Meydan Okuma (ADR-010)", () => {
     expect(list.map((c) => c.challengeId)).toContain(invite.challengeId);
   });
 
-  it("kurallar: öğretim üyesi katılamaz/oluşturamaz, kendi davetine katılamaz, başka kurum bulamaz, tek rakip", async () => {
+  it("kurallar: öğretim üyesi ve uzmanlık öğrencisi katılamaz/oluşturamaz, kendi davetine katılamaz, başka kurum bulamaz, tek rakip", async () => {
     const h = harness();
     const ali = await login(h, "ali.veli");
     const zeynep = await login(h, "zeynep.a");
     const hoca = await login(h, "hoca.b");
+    const uzman = await login(h, "uzman.d");
     const uzak = await login(h, "uzak.c");
     const invite = await create(h, ali);
     expect((await call(h, hoca, "POST", "/me/challenges", { simId: "ausculta" })).status).toBe(403);
     expect((await call(h, hoca, "POST", "/me/challenges/join", { code: invite.code })).status).toBe(403);
+    // T219: uzmanlık öğrencisi oyunlaştırma dışıdır; düello oluşturamaz/katılamaz.
+    expect((await call(h, uzman, "POST", "/me/challenges", { simId: "ausculta" })).status).toBe(403);
+    expect((await call(h, uzman, "POST", "/me/challenges/join", { code: invite.code })).status).toBe(403);
     expect((await call(h, ali, "POST", "/me/challenges/join", { code: invite.code })).status).toBe(409);
     expect((await call(h, uzak, "POST", "/me/challenges/join", { code: invite.code })).status).toBe(404);
     expect((await call(h, zeynep, "POST", "/me/challenges/join", { code: invite.code })).status).toBe(200);

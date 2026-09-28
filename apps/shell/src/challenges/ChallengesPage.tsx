@@ -4,7 +4,7 @@ import { t, type TrKey } from "@egemed/ui/i18n";
 import type { ChallengeBody, LearnStatus, SimId } from "@egemed/contracts";
 import { useShellDataSources } from "../dataSources";
 import { challengeHref, challengePlayHref } from "../routes";
-import type { ShellSession } from "../session";
+import { isFacultyLike, type ShellSession } from "../session";
 import { challengeErrorKey, outcomeFor, type ChallengeSource } from "./challengeSource";
 
 /**
@@ -270,7 +270,7 @@ export function ChallengesPage({ session = null }: { readonly session?: ShellSes
         <p className="eg-shell-duel__lead">{t("challenges.lead")}</p>
         <p className="eg-shell-duel__rules">{t("challenges.rules")}</p>
       </header>
-      {session?.faculty === true ? (
+      {isFacultyLike(session) ? (
         <EmptyState description={t("challenges.faculty.body")} icon={<icons.ShieldCheck />} title={t("challenges.faculty.title")} />
       ) : source === null ? (
         <EmptyState description={t("challenges.unavailable.body")} icon={<icons.Users />} title={t("challenges.unavailable.title")} />

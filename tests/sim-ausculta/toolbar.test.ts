@@ -95,7 +95,7 @@ function memoryStorage(): StoragePort {
 }
 
 function engine(): ToolbarAudio {
-  return { setMuted: () => undefined, setVolume: () => undefined };
+  return { setVolume: () => undefined };
 }
 
 function ports(overrides: Partial<ToolbarPorts> = {}): ToolbarPorts {
@@ -105,7 +105,6 @@ function ports(overrides: Partial<ToolbarPorts> = {}): ToolbarPorts {
     engine: engine(),
     env: createNoopToolbarEnv(),
     stage: { current: null },
-    setMuted: () => undefined,
     openHint: () => undefined,
     ...overrides,
   };
@@ -116,7 +115,6 @@ function renderToolbar(
   extra: {
     strict?: boolean;
     activePoint?: string | null;
-    initialMuted?: boolean;
     initialHintOpen?: boolean;
     withCase?: boolean;
     withQuestion?: boolean;
@@ -137,7 +135,6 @@ function renderToolbar(
         ...(extra.withQuestion === false ? {} : { question }),
         ...(extra.withCase === false ? {} : { caseDef: { allowedHeads: ["bell", "diaphragm"] } as CaseDef }),
         ...(extra.strict ? { strict: true } : {}),
-        ...(extra.initialMuted ? { initialMuted: true } : {}),
         ...(extra.initialHintOpen ? { initialHintOpen: true } : {}),
       }),
     }),
@@ -156,19 +153,17 @@ describe("araç çubuğu etkileri", () => {
   it("kafa, görünüm, ses, tekrar, kaydırma ve ipucunu sınırlara iletir", () => {
     const dispatch = vi.fn();
     const emit = vi.fn();
-    const setMuted = vi.fn();
     const setVolume = vi.fn();
     const replay = vi.fn();
     const openHint = vi.fn();
     const onHint = vi.fn();
     const scroll = vi.fn();
-    const audio = { setMuted, setVolume };
+    const audio = { setVolume };
     const bound = ports({
       dispatch,
       emit,
       engine: audio,
       stage: { current: { replay } },
-      setMuted,
       openHint,
       onHint,
       env: { query: (selector) => (selector === QUESTION_JUMP_SELECTOR ? { scrollIntoView: scroll } : null) },
@@ -176,7 +171,6 @@ describe("araç çubuğu etkileri", () => {
 
     performToolbar(bound, { kind: "head", head: "bell" });
     performToolbar(bound, { kind: "view", view: "back" });
-    performToolbar(bound, { kind: "mute", muted: true });
     performToolbar(bound, { kind: "volume", volume: 0.4 });
     performToolbar(bound, { kind: "replay", activePoint: "aortic" });
     performToolbar(bound, { kind: "replay", activePoint: null });
@@ -194,7 +188,6 @@ describe("araç çubuğu etkileri", () => {
       { type: "view_changed", view: "back" },
       { type: "sound_replayed", pointId: "aortic" },
     ]);
-    expect(setMuted).toHaveBeenCalledWith(true);
     expect(setVolume).toHaveBeenCalledWith(0.4);
     expect(replay).toHaveBeenCalledTimes(2);
     expect(scroll).toHaveBeenCalledWith({ behavior: "smooth", block: "start" });
@@ -232,19 +225,28 @@ describe("araç çubuğu (statik render)", () => {
     expect(html).toContain("Tekrar Dinle");
     expect(html).toContain("Soruya git");
     expect(html).toContain("İpucu");
-    expect(html).toContain('aria-label="Sesi kıs"');
+    expect(html).not.toContain("Sesi kıs");
+    expect(html).not.toContain("Sesi aç");
     expect(html).toContain("min-width:44px");
     expect(html).not.toContain("hint-box");
   });
 
-  it("kısık ses, açık ipucu, sıkı mod ve boş noktayı yansıtır", () => {
-    const muted = renderToolbar({}, { initialMuted: true, initialHintOpen: true });
-    expect(muted).toContain('aria-label="Sesi aç"');
-    expect(muted).toContain('aria-pressed="true"');
-    expect(muted).toContain('role="note"');
-    expect(muted).toContain("Çanı deneyin");
-    expect(muted).toContain("puanı -5");
-    expect(muted).not.toContain(">İpucu<");
+  it("eski muted: true kaydı yok sayılır; açılış kısık değil", () => {
+    const legacyRecord = { muted: true } as Partial<AppState>;
+    const html = renderToolbar(legacyRecord);
+    expect(html).toContain('aria-label="Ses düzeyi"');
+    expect(html).toContain('value="85"');
+    expect(html).toContain(">%85<");
+    expect(html).not.toContain("Sesi kıs");
+    expect(html).not.toContain("Sesi aç");
+  });
+
+  it("açık ipucu, sıkı mod ve boş noktayı yansıtır", () => {
+    const hinted = renderToolbar({}, { initialHintOpen: true });
+    expect(hinted).toContain('role="note"');
+    expect(hinted).toContain("Çanı deneyin");
+    expect(hinted).toContain("puanı -5");
+    expect(hinted).not.toContain(">İpucu<");
 
     const strict = renderToolbar({ hintsUsed: 1 }, { strict: true, activePoint: null, withCase: false });
     expect(strict).not.toContain("Tekrar Dinle");

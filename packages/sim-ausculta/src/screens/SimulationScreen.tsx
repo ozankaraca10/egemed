@@ -67,7 +67,6 @@ export function createNoopSimulationAudio(): SimulationAudio {
     replay: async () => undefined,
     stop: () => undefined,
     setVolume: () => undefined,
-    setMuted: () => undefined,
     getActive: () => null,
     ensureContext: async () => undefined,
   };

@@ -150,15 +150,92 @@ export const opacaPublicCaseSchema = z.strictObject({
 });
 export type OpacaPublicCase = z.infer<typeof opacaPublicCaseSchema>;
 
-const simSessionAnyCaseResponseSchema = z.strictObject({
-  data: z.discriminatedUnion("simId", [auscultaPublicCaseSchema, opacaPublicCaseSchema]),
-});
-
-/** Sunucunun anahtarsız vaka gövdelerinin birleşimi (A2.2: iki sim). */
-export type SimPublicCase = AuscultaPublicCase | OpacaPublicCase;
+// --- Pulse anahtarsız vaka (A3.1, ADR-009) -------------------------------------
 
 /**
- * Sunucunun vaka yanıtı: iki simin de anahtarsız gövdesini doğrular. Tüketiciler
+ * Pulse EKG motoru modları: 13 temel sonuç + 10 patern. Motorun `ALL_MODES`
+ * listesiyle birebir aynı olmalıdır; eşitliği test korur.
+ */
+export const PULSE_ECG_MODES = [
+  "normal",
+  "af",
+  "stemi",
+  "pvc",
+  "svt",
+  "inferior",
+  "vt",
+  "vf",
+  "pat",
+  "flutter",
+  "sintach",
+  "lbbb",
+  "rbbb",
+  "sinbrady",
+  "avb1",
+  "mobitz1",
+  "mobitz2",
+  "chb",
+  "pac",
+  "junctional",
+  "wpw",
+  "pericarditis",
+  "hyperk",
+] as const;
+export type PulseEcgMode = (typeof PULSE_ECG_MODES)[number];
+
+/** Gerçek 12 derivasyon (motor `LEADS`); vaka yanıtı yalnız seçilen 3 derivasyonu taşır. */
+export const PULSE_ECG_LEADS = ["I", "II", "III", "aVR", "aVL", "aVF", "V1", "V2", "V3", "V4", "V5", "V6"] as const;
+export type PulseEcgLead = (typeof PULSE_ECG_LEADS)[number];
+
+/** Pulse vitalleri metin çiftleridir (müfredat `{k, v}`; istemciye `{label, value}` gider). */
+export const pulsePublicVitalSchema = z.strictObject({
+  label: z.string().min(1).max(40),
+  value: z.string().min(1).max(80),
+});
+
+/**
+ * EKG çizim parametreleri. `mode` doğru cevabı ele verebilir (tanı soruları):
+ * Pulse'ta öğrenci kaydı görmek zorundadır ve istemci EKG'yi `mode`dan üretir.
+ * Bu bilinçli kabul edilen sınırdır (A3.3 motor parametrelerini sunucudan
+ * göndermeyi değerlendirecek); `mode` opak takma adla değil gerçek adıyla gider.
+ */
+export const pulsePublicEcgSchema = z.strictObject({
+  mode: z.enum(PULSE_ECG_MODES),
+  /** Motor parametreleri (ör. `afProfile`); yalnız ilkel değerler taşınır. */
+  options: z.record(z.string(), z.union([z.string(), z.number(), z.boolean()])),
+  leads: z.array(z.enum(PULSE_ECG_LEADS)).length(3),
+  start: z.number().min(0).max(60),
+  seconds: z.number().positive().max(60),
+});
+
+/** Pulse maddesi tek soruludur; gövde soru dizisi yerine tek `options` taşır. */
+export const pulsePublicCaseSchema = z.strictObject({
+  simId: z.literal("pulse"),
+  index: z.number().int().min(1).max(20),
+  /** Genel etiket ("Vaka 3"); madde başlığı (tanı içermez) sonuçla gelir. */
+  label: z.string().min(1).max(40),
+  /** Uygulama (`case`) veya değerlendirme (`quiz`) maddesi. */
+  section: z.enum(["case", "quiz"]),
+  stem: z.string().min(1).max(2000),
+  question: z.string().min(1).max(600),
+  vitals: z.array(pulsePublicVitalSchema).min(1).max(6),
+  /** Seçenekler karıştırılmış ve opak jetonludur; doğru şık işareti gitmez. */
+  options: z.array(publicOptionSchema).length(5),
+  ecg: pulsePublicEcgSchema,
+  /** Vaka süresi başladığında (ilk okuma). */
+  openedAt: isoDateTimeSchema,
+});
+export type PulsePublicCase = z.infer<typeof pulsePublicCaseSchema>;
+
+/** Üç simin anahtarsız vaka gövdesi birleşimi (A3.1; tüketici banka yüzeyi). */
+export type SimPublicCase = AuscultaPublicCase | OpacaPublicCase | PulsePublicCase;
+
+const simSessionAnyCaseResponseSchema = z.strictObject({
+  data: z.discriminatedUnion("simId", [auscultaPublicCaseSchema, opacaPublicCaseSchema, pulsePublicCaseSchema]),
+});
+
+/**
+ * Sunucunun vaka yanıtı: üç simin de anahtarsız gövdesini doğrular. Tüketiciler
  * `data.simId` ayrımıyla daraltır (ör. Ausculta istemcisi `"ausculta"` koruması).
  */
 export const simSessionCaseResponseSchema = simSessionAnyCaseResponseSchema as unknown as z.ZodType<{
@@ -223,6 +300,10 @@ export const caseResultSchema = z.strictObject({
   domains: z.record(z.string(), z.strictObject({ earned: z.number().min(0), max: z.number().min(0) })),
   hintsUsed: z.number().int().min(0),
   questions: z.array(questionFeedbackSchema),
+  /** T214: vaka BİTTİKTEN sonra öğrenme kütüphanesi odak anahtarı (ör. "heart.normal").
+   *  Yalnız sonuç yanıtında (answer/finish) döner; vaka açılışında (PublicCase) ASLA yoktur.
+   *  Opaca sonucu bu alanı taşımayabilir (geriye uyumlu: isteğe bağlı, null olabilir). */
+  libraryKey: z.string().regex(/^[a-z0-9_.-]{1,40}$/).nullable().optional(),
 });
 
 export const simSessionCheckResponseSchema = z.strictObject({ data: questionFeedbackSchema });

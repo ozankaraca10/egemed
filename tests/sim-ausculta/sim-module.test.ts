@@ -53,7 +53,6 @@ function stubAudio(disposed: { count: number; closed: number }): AuscultaAudio {
     replay: async () => undefined,
     stop: () => undefined,
     setVolume: () => undefined,
-    setMuted: () => undefined,
     getActive: () => null,
     ensureContext: async () => ({
       currentTime: 0,
@@ -245,7 +244,7 @@ describe("createAuscultaModule (SimHost adaptörü)", () => {
       labels: ["Mod seçimi", "Çalışma", "Tamamla"],
       onSelect: expect.any(Function),
     });
-    expect(chrome?.actions?.map((action) => action.id)).toEqual(["progress", "fullscreen", "sound", "help"]);
+    expect(chrome?.actions?.map((action) => action.id)).toEqual(["progress", "fullscreen", "help"]);
     dispose();
     expect(sent.at(-1)).toBeNull();
   });
@@ -263,7 +262,7 @@ describe("createAuscultaModule (SimHost adaptörü)", () => {
     });
     renderToStaticMarkup(target.children[0]?.tree as ReactNode);
     await Promise.resolve();
-    expect(sent.at(-1)?.actions?.map((action) => action.id)).toEqual(["fullscreen", "sound", "help"]);
+    expect(sent.at(-1)?.actions?.map((action) => action.id)).toEqual(["fullscreen", "help"]);
   });
 
   it("ziyaretçi kitlesinde mod seçiminde kilit şeridi ve kilitli kart CTA'ları görünür", async () => {

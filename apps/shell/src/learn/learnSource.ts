@@ -34,6 +34,15 @@ export function createBrowserLearnSource(baseUrl: string): LearnSource | null {
 }
 
 /**
+ * Ayrıcalıklı rollerde (admin, öğretim üyesi, uzmanlık öğrencisi) öğrenme kilidi
+ * uygulanmaz (T219, depo sahibi kararı 28 Eyl 2026): port baştan tamamlanmış
+ * görünür ve `markComplete` sunucuya kayıt yazmaz.
+ */
+export function createUnlockedLearnPort(): SimLearnPort {
+  return { complete: true, markComplete: async () => undefined };
+}
+
+/**
  * Sim modülüne verilen port: başlangıç `complete` değeri kaynaktan okunur,
  * `markComplete` kaynağa yazar ve yerel değeri sunucunun döndürdüğü hâlle
  * günceller.

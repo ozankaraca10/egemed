@@ -9,6 +9,8 @@ import { attachPulseChrome } from "./chrome";
 import { attachPulseGamification } from "./gami";
 import { mountPulseRuntime } from "./host";
 import type { PulseRuntimeBridge } from "./host";
+import { createPulseLearnBridge, pulseLearnPort } from "./learn";
+import { attachPulseServerRequired, createPulseServerItemsBridge } from "./serverItems";
 
 export const DEFAULT_PULSE_RUNTIME_ASSET_BASE = "/sims/pulse/";
 
@@ -65,6 +67,13 @@ export function createPulseRuntimeModule(deps: PulseRuntimeModuleDeps = {}): Sim
   return {
     id: "pulse",
     mount(target: SimMountTarget, context: SimMountContext): SimDispose {
+      // T213: öğrenme kanalı (T205) oturumlu kullanıcıda gelir;
+      // ziyaretçide/kanalsız kurulumda yoktur ve sim kanalsız sürer.
+      const learn = pulseLearnPort(context);
+      const learnBridge = createPulseLearnBridge(learn, deps.bridge);
+      // A3.3: uygulama/değerlendirme maddeleri sunucu oturumundan gelir (ADR-009).
+      // Kanal yoksa (ziyaretçi, API'siz üretim) kartlar kapalı tutulur.
+      const server = context.sessions === undefined ? null : createPulseServerItemsBridge(context.sessions, learnBridge.bridge);
       const handle = mountPulseRuntime(target as unknown as HTMLElement, {
         assetBase: deps.assetBase ?? DEFAULT_PULSE_RUNTIME_ASSET_BASE,
         storage: deps.storage ?? browserStorage(),
@@ -73,8 +82,20 @@ export function createPulseRuntimeModule(deps: PulseRuntimeModuleDeps = {}): Sim
         // gezinme kabuğundadır ve modal onu kilitler. Tam ekran düğmesi kalır.
         defaultPreferences: { "pulse.fsPromptDone": "1" },
         unifiedChrome: context.setChrome !== undefined,
-        ...(deps.bridge === undefined ? {} : { bridge: deps.bridge }),
+        // Başka cihazda tamamlanmış öğrenme vaka/sınav kilidini açar; yerel
+        // izlenme kaydı değişmez.
+        learnComplete: learn?.complete === true,
+        ...(server === null ? {} : { serverItems: server.port }),
+        bridge: server === null ? learnBridge.bridge : server.bridge,
       });
+      // İçerik sürümü (`pulse-23-8`) runtime küresellerinden çözülür; yerel
+      // öğrenme açılışta zaten tamamsa olay mount içinde gelir ve kayıt burada
+      // tamamlanır.
+      learnBridge.bind((name) => handle.global(name));
+      const detachServer = server?.attach(handle) ?? null;
+      // Oturum kanalı yoksa uygulama/değerlendirme kartları kapalıdır (Ausculta/
+      // Opaca ile aynı); ziyaretçide kartları zaten kitle kilitleri kapatır.
+      const detachRequired = server === null && audienceOf(context) !== "visitor" ? attachPulseServerRequired(handle) : null;
       // Kitle (T173, sim-host T172 sözleşmesi): oyunlaştırma yalnız öğrenciye
       // çizilir (öğretim üyesi/ziyaretçi rozet, liderlik, İlerlemem görmez;
       // `reportAttempt` bağlamda olsa bile bu köprü hiç kurulmadığı için
@@ -88,6 +109,9 @@ export function createPulseRuntimeModule(deps: PulseRuntimeModuleDeps = {}): Sim
           detachGami = attachPulseGamification(handle, {
             now: context.now,
             repo: deps.gamiRepository ?? createStorageGamiRepo(handle.storage),
+            // A3.3: sunucu oturumunda deneme SUNUCUDA yazılır; istemci yerel
+            // skor kaydı yapmaz (çift kayıt yok, ADR-008/009).
+            recordAttempts: server === null,
             ...(reportAttempt === undefined
               ? {}
               : { reportAttempt: (record: PulseAttemptRecord) => reportAttempt(record) }),
@@ -110,6 +134,8 @@ export function createPulseRuntimeModule(deps: PulseRuntimeModuleDeps = {}): Sim
         detachAudience();
         detachChrome?.();
         detachGami?.();
+        detachRequired?.();
+        detachServer?.();
         handle.dispose();
       };
     },

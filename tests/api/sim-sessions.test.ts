@@ -39,7 +39,7 @@ function wav(samples: number[]): Uint8Array {
 
 const AUDIO = wav(Array.from({ length: 400 }, (_, i) => Math.round(Math.sin(i / 5) * 8000)));
 
-function harness(roles: readonly ("kullanici" | "ogretim_uyesi")[] = ["kullanici"]): AdminHarness {
+function harness(roles: readonly ("kullanici" | "ogretim_uyesi" | "uzmanlik_ogrencisi")[] = ["kullanici"]): AdminHarness {
   const users = DEFAULT_USERS.map((entry) => (entry.id === ALI_ID ? { ...ALI, simAccess: ["pulse", "ausculta"] as const, roles } : entry));
   return createAdminHarness({ users, readAudio: () => Promise.resolve(AUDIO) });
 }
@@ -74,6 +74,7 @@ function correctAnswers(h: AdminHarness, sessionId: string, index: number): Reco
   const caseDef = item === undefined ? undefined : ausculta.caseById(item.caseId);
   if (item?.keys === null || item?.keys === undefined || caseDef === undefined) throw new Error("vaka yok");
   const keys = item.keys;
+  if (!("audio" in keys)) throw new Error("Ausculta anahtarı bekleniyordu");
   return Object.fromEntries(
     caseDef.questions.map((q) => [q.id, q.correct.map((id) => Object.keys(keys.options[q.id] ?? {}).find((t) => keys.options[q.id]?.[t] === id) ?? "")]),
   );
@@ -112,6 +113,26 @@ describe("sunucu vaka oturumu (A1.3)", () => {
     expect(((await summary.json()) as { data: { xp: number } }).data.xp).toBeGreaterThan(0);
     // Bitmiş oturum yeniden kullanılamaz.
     expect((await call(h, ali, "GET", `/me/sims/ausculta/sessions/${session.sessionId}/cases/2`)).status).toBe(409);
+  });
+
+  it("sonuç yanıtları öğrenme kütüphanesi anahtarını taşır (T214)", async () => {
+    const h = harness();
+    const ali = await login(h, "ali.veli");
+    const response = await call(h, ali, "POST", "/me/sims/ausculta/sessions", { mode: "practice", focusFinding: "s3" });
+    expect(response.status).toBe(201);
+    const session = simSessionStartResponseSchema.parse(await response.json()).data;
+    await openCase(h, ali, session.sessionId, 1);
+    const answer = await call(h, ali, "POST", `/me/sims/ausculta/sessions/${session.sessionId}/cases/1/answer`, {
+      answers: correctAnswers(h, session.sessionId, 1),
+      telemetry: TELEMETRY,
+    });
+    expect(answer.status).toBe(200);
+    const body = simSessionAnswerResponseSchema.parse(await answer.json()).data;
+    if (body.mode !== "practice") throw new Error("uygulama yanıtı bekleniyordu");
+    expect(body.result.libraryKey).toBe("heart.s3");
+    const finish = await call(h, ali, "POST", `/me/sims/ausculta/sessions/${session.sessionId}/finish`);
+    const done = simSessionFinishResponseSchema.parse(await finish.json()).data;
+    expect(done.cases[0]?.libraryKey).toBe("heart.s3");
   });
 
   it("değerlendirme: yanıtta geri bildirim yok, ipucu yasak, bitişte açılır; açılmayan vakalar sıfır sayılır", async () => {
@@ -203,6 +224,20 @@ describe("sunucu vaka oturumu (A1.3)", () => {
     expect(done.xpGained).toBe(0);
   });
 
+  it("uzmanlık öğrencisi sim erişimiyle oturum açar; deneme yazılmaz (T219)", async () => {
+    const h = harness(["uzmanlik_ogrencisi"]);
+    const ali = await login(h, "ali.veli");
+    const session = await start(h, ali, "assessment");
+    await openCase(h, ali, session.sessionId, 1);
+    await call(h, ali, "POST", `/me/sims/ausculta/sessions/${session.sessionId}/cases/1/answer`, {
+      answers: correctAnswers(h, session.sessionId, 1),
+      telemetry: TELEMETRY,
+    });
+    const done = simSessionFinishResponseSchema.parse(await (await call(h, ali, "POST", `/me/sims/ausculta/sessions/${session.sessionId}/finish`)).json()).data;
+    expect(done.attemptId).toBeNull();
+    expect(done.xpGained).toBe(0);
+  });
+
   it("uygulamada soru kontrolü anında geri bildirim verir ve yanıtı kilitler; değerlendirmede yasak", async () => {
     const h = harness();
     const ali = await login(h, "ali.veli");
@@ -228,10 +263,11 @@ describe("sunucu vaka oturumu (A1.3)", () => {
     expect((await call(h, ali, "POST", `/me/sims/ausculta/sessions/${assess.sessionId}/cases/1/check`, { questionId: aCase.questions[0]?.id, answer: [aCase.questions[0]?.options[0]?.id] })).status).toBe(403);
   });
 
-  it("sim erişimi yoksa 403; sunucu oturumu olmayan sim 404", async () => {
+  it("sim erişimi yoksa 403; bilinmeyen sim 404", async () => {
     const h = createAdminHarness({});
     const ali = await login(h, "ali.veli");
     expect((await call(h, ali, "POST", "/me/sims/ausculta/sessions", { mode: "practice" })).status).toBe(403);
-    expect((await call(h, ali, "POST", "/me/sims/pulse/sessions", { mode: "practice" })).status).toBe(404);
+    // A3.2 ile üç sim de sunucu oturumu destekler; bilinmeyen sim kimliği 404.
+    expect((await call(h, ali, "POST", "/me/sims/gecersiz/sessions", { mode: "practice" })).status).toBe(404);
   });
 });

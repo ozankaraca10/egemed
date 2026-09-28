@@ -21,7 +21,7 @@ import { createSessionStore, sessionWhenEnabled } from "./devAuth";
 import { EntryPage } from "./EntryPage";
 import { NotFoundPage, pageFor } from "./pages";
 import { adminGuardHref, entryHref, isAdminProtected, routeHref, type ResolvedRoute } from "./routes";
-import { sessionAllowsSim, shellSessionFromDev, type ShellSession } from "./session";
+import { isLearnUnlocked, sessionAllowsSim, shellSessionFromDev, type ShellSession } from "./session";
 import { ShellLayout } from "./ShellLayout";
 import { SimRoute } from "./SimRoute";
 import type { SimChrome } from "@egemed/sim-host";
@@ -85,6 +85,7 @@ function contentFor(
         allowed={sessionAllowsSim(session, route.simId)}
         apiBaseUrl={apiBaseUrl}
         audience={audience}
+        learnUnlocked={isLearnUnlocked(session)}
         onChrome={onChrome}
         onRequestSignIn={onRequestSignIn}
         simId={route.simId}

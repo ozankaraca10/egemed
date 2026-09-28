@@ -174,6 +174,16 @@ describe("Ausculta ses motoru yaşam döngüsü", () => {
     vi.useRealTimers();
   });
 
+  it("aç/kapa yüzeyi yoktur; eski muted tercihi sesi kısamaz", async () => {
+    const { engine, fake } = harness();
+    await engine.ensureContext();
+    expect("setMuted" in engine).toBe(false);
+    expect("isMuted" in engine).toBe(false);
+    expect(fake.master?.gain.value).toBe(AUDIO_CONFIG.defaultVolume * AUDIO_CONFIG.clipGuardGain);
+    engine.setVolume(0.4);
+    expect(fake.master?.gain.value).toBe(0.4 * AUDIO_CONFIG.clipGuardGain);
+  });
+
   it("uçuştaki decode dispose sonrası ses başlatmaz", async () => {
     const gate = deferred<AudioBufferLike>();
     const { engine, fake, fetches } = harness({

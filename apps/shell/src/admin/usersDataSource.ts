@@ -16,18 +16,19 @@
 import { shellNow } from "../now";
 
 /**
- * `ogretim_uyesi` (öğretim üyesi) 26 Eyl 2026 depo sahibi kararıyla eklendi
- * (`@egemed/contracts` `Role`/`ROLES` ile aynı birlik — T171, T184). Öğretim
- * üyesi simleri tam kullanır ama oyunlaştırmaya (rozet, XP, liderlik, Meydan
- * Okuma) katılmaz; bu ekran hâlâ `@egemed/contracts`'a bağımlı değildir
- * (AGENTS.md), bu yüzden değer kümesi burada yerel bir kopya olarak tutulur.
+ * `ogretim_uyesi` (öğretim üyesi) 26 Eyl 2026, `uzmanlik_ogrencisi` (uzmanlık
+ * öğrencisi) 28 Eyl 2026 depo sahibi kararlarıyla eklendi (`@egemed/contracts`
+ * `Role`/`ROLES` ile aynı birlik — T171, T184, T219). İki rol de simleri tam
+ * kullanır ama oyunlaştırmaya (rozet, XP, liderlik, Meydan Okuma) katılmaz; bu
+ * ekran hâlâ `@egemed/contracts`'a bağımlı değildir (AGENTS.md), bu yüzden
+ * değer kümesi burada yerel bir kopya olarak tutulur.
  */
-export type UserRole = "admin" | "kullanici" | "ogretim_uyesi";
-export const USER_ROLES: readonly UserRole[] = ["admin", "kullanici", "ogretim_uyesi"];
+export type UserRole = "admin" | "kullanici" | "ogretim_uyesi" | "uzmanlik_ogrencisi";
+export const USER_ROLES: readonly UserRole[] = ["admin", "kullanici", "ogretim_uyesi", "uzmanlik_ogrencisi"];
 
 /** Kullanıcı ekle formundan ve CSV içe aktarmadan atanabilir roller (§b): `admin` hariç. */
-export type AssignableRole = "kullanici" | "ogretim_uyesi";
-export const ASSIGNABLE_ROLES: readonly AssignableRole[] = ["kullanici", "ogretim_uyesi"];
+export type AssignableRole = "kullanici" | "ogretim_uyesi" | "uzmanlik_ogrencisi";
+export const ASSIGNABLE_ROLES: readonly AssignableRole[] = ["kullanici", "ogretim_uyesi", "uzmanlik_ogrencisi"];
 
 export type UserStatus = "invited" | "active" | "suspended" | "deleted";
 export const USER_STATUSES: readonly UserStatus[] = ["invited", "active", "suspended", "deleted"];
@@ -121,7 +122,9 @@ export type UserHistoryAction =
   | "role.grant"
   | "role.revoke"
   | "role.faculty.grant"
-  | "role.faculty.revoke";
+  | "role.faculty.revoke"
+  | "role.resident.grant"
+  | "role.resident.revoke";
 
 export interface AdminUserHistoryEntry {
   readonly id: string;
@@ -288,21 +291,25 @@ export function planBulkEdit(
 
 /**
  * `AdminUser.role` (tekil, liste/tablo sütunu) rol kümesinden türetilir: `admin`
- * en yüksek önceliktedir, ardından `ogretim_uyesi`, sonra `kullanici` (T184).
+ * en yüksek önceliktedir, ardından `ogretim_uyesi`, `uzmanlik_ogrencisi`, sonra
+ * `kullanici` (T184, T219).
  */
 export function primaryRoleFor(roles: readonly UserRole[]): UserRole {
   if (roles.includes("admin")) return "admin";
   if (roles.includes("ogretim_uyesi")) return "ogretim_uyesi";
+  if (roles.includes("uzmanlik_ogrencisi")) return "uzmanlik_ogrencisi";
   return "kullanici";
 }
 
 /**
- * Temel rolü (kullanici ↔ ogretim_uyesi) değiştirir; `admin` biti korunur
- * (T184, E3 §e.6: öğretim üyesi ↔ kullanıcı geçişi `PUT /admin/users/:id/roles`
- * ile tam küme olarak yapılır).
+ * Temel rolü (kullanici ↔ ogretim_uyesi ↔ uzmanlik_ogrencisi) değiştirir;
+ * `admin` biti korunur (T184/T219, E3 §e.6: temel rol geçişi
+ * `PUT /admin/users/:id/roles` ile tam küme olarak yapılır).
  */
 export function swapBaseRole(roles: readonly UserRole[], target: AssignableRole): UserRole[] {
-  const withoutBase = roles.filter((role) => role !== "kullanici" && role !== "ogretim_uyesi");
+  const withoutBase = roles.filter(
+    (role) => role !== "kullanici" && role !== "ogretim_uyesi" && role !== "uzmanlik_ogrencisi",
+  );
   return [...withoutBase, target];
 }
 
@@ -326,7 +333,7 @@ export interface UsersSummary {
 
 /** Roller ve erişim ekranı (E3 §e.6) için rol/sim sayıları; saf, tam listeden hesaplanır. */
 export function computeUsersSummary(users: readonly AdminUserDetail[]): UsersSummary {
-  const roleCounts: Record<UserRole, number> = { admin: 0, kullanici: 0, ogretim_uyesi: 0 };
+  const roleCounts: Record<UserRole, number> = { admin: 0, kullanici: 0, ogretim_uyesi: 0, uzmanlik_ogrencisi: 0 };
   const simCounts: Record<SimId, number> = { ausculta: 0, opaca: 0, pulse: 0 };
   for (const user of users) {
     roleCounts[user.role] += 1;
@@ -649,6 +656,8 @@ export function createMockUsersSource(
       const revokedAdmin = !roles.includes("admin") && current.roles.includes("admin");
       const grantedFaculty = roles.includes("ogretim_uyesi") && !current.roles.includes("ogretim_uyesi");
       const revokedFaculty = !roles.includes("ogretim_uyesi") && current.roles.includes("ogretim_uyesi");
+      const grantedResident = roles.includes("uzmanlik_ogrencisi") && !current.roles.includes("uzmanlik_ogrencisi");
+      const revokedResident = !roles.includes("uzmanlik_ogrencisi") && current.roles.includes("uzmanlik_ogrencisi");
       const action: UserHistoryAction | null = grantedAdmin
         ? "role.grant"
         : revokedAdmin
@@ -657,7 +666,11 @@ export function createMockUsersSource(
             ? "role.faculty.grant"
             : revokedFaculty
               ? "role.faculty.revoke"
-              : null;
+              : grantedResident
+                ? "role.resident.grant"
+                : revokedResident
+                  ? "role.resident.revoke"
+                  : null;
       const history =
         action === null ? current.history : [...current.history, historyEntry(id, current.history.length + 1, toIso(now()), action)];
       const updated: AdminUserDetail = { ...current, history, role: primaryRoleFor(roles), roles };

@@ -5,7 +5,7 @@ import {
   gamiSummaryResponseSchema,
   type SimId,
 } from "../../packages/contracts/src/index";
-import { WEEKLY_XP_TARGET, levelForXpClosedForm, nextStreak } from "../../apps/api/src/me/gamification";
+import { WEEKLY_XP_TARGET, createPgGamificationRepo, levelForXpClosedForm, nextStreak } from "../../apps/api/src/me/gamification";
 import { DEFAULT_RULES, levelForXp } from "../../packages/gamification-core/src/index";
 import { encodeAuscultaSummary, encodeOpacaSummary, encodePulseSummary } from "../../packages/gami-catalogs/src/index";
 import {
@@ -153,6 +153,40 @@ describe("yetki ve kendi verisi (E3 §d)", () => {
     expect(await write.json()).toMatchObject({ error: { code: "role_not_permitted" } });
     const read = await testHarness.app.request("/me/gamification/pulse", { headers: ali.headers });
     expect(read.status).toBe(200);
+  });
+
+  it("uzmanlık öğrencisi deneme yazamaz (403 role_not_permitted); özetini okuyabilir (T219)", async () => {
+    const users = DEFAULT_USERS.map((entry) => (entry.id === ALI_ID ? { ...entry, roles: ["uzmanlik_ogrencisi" as const] } : entry));
+    const testHarness = createAdminHarness({ gamification: GAMIFICATION_SEED, users });
+    const ali = await login(testHarness, "ali.veli");
+    const write = await postAttempt(testHarness, ali.headers, attemptBody());
+    expect(write.status).toBe(403);
+    expect(await write.json()).toMatchObject({ error: { code: "role_not_permitted" } });
+    expect(testHarness.gamificationStore.attempts.has(ATTEMPT_ID)).toBe(false);
+    const read = await testHarness.app.request("/me/gamification/pulse", { headers: ali.headers });
+    expect(read.status).toBe(200);
+  });
+
+  it("liderlik sorgusu öğretim üyesi ve uzmanlık öğrencisini dışlar (T184/T219)", async () => {
+    const queries: string[] = [];
+    const repo = createPgGamificationRepo({
+      query: (text) => {
+        queries.push(text);
+        return Promise.resolve({ rows: [] });
+      },
+    });
+    await repo.getLeaderboard({
+      at: FIXED_NOW,
+      cohort: "all",
+      institutionId: INSTITUTION_ID,
+      page: 1,
+      pageSize: 20,
+      period: "month",
+      simId: "pulse",
+      userId: ALI_ID,
+    });
+    expect(queries).toHaveLength(1);
+    expect(queries[0]).toContain("r.role in ('ogretim_uyesi', 'uzmanlik_ogrencisi')");
   });
 
   it("oturumsuz istek 401 unauthorized döner", async () => {

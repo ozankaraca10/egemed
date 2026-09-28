@@ -39,8 +39,14 @@ interface SourceState {
   readonly caseSession: SourceSession;
 }
 
+/**
+ * T220: istemci müfredatında madde anahtarı yoktur (`byId` kaldırıldı); sunucu
+ * oturumunda yerel kayıt zaten yapılmaz (`recordAttempts:false`). Kanal yoksa
+ * uygulama/değerlendirme kartları kapalıdır; yerel doğrulama yalnız "gönderildi"
+ * işaretine dayanır ve doğru sayısı istemcide hesaplanamaz.
+ */
 interface SourceCurriculum {
-  readonly byId: Readonly<Record<string, { readonly correct: number } | undefined>>;
+  readonly byId?: Readonly<Record<string, { readonly correct: number } | undefined>>;
 }
 
 interface SourceScorm {
@@ -55,7 +61,7 @@ const GAMI_PROGRESS_ID = "egemedGamiProgress";
 const GAMI_GAINS_ID = "egemedGamiGains";
 
 function correctness(session: SourceSession, curriculum: SourceCurriculum): boolean[] {
-  return session.ids.map((id, index) => curriculum.byId[id]?.correct === session.answers[index]);
+  return session.ids.map((id, index) => curriculum.byId?.[id]?.correct === session.answers[index]);
 }
 
 function lastRhythmStreak(state: PulseGamiState): number {
@@ -69,6 +75,11 @@ function lastRhythmStreak(state: PulseGamiState): number {
 export interface PulseGamiBridgeOptions {
   readonly repo: PulseGamiRepo;
   readonly now: () => number;
+  /**
+   * false: tamamlanan oturumlar yerel skor kaydına yazılmaz (sunucu oturumunda
+   * denemeyi sunucu yazar; çift kayıt olmaz, ADR-008/009). Açılışta varsayılan true.
+   */
+  readonly recordAttempts?: boolean;
   /** Yerel yazım başarıyla bitince kabuğa iletilir; hata akışı bozmaz. */
   readonly reportAttempt?: (attempt: PulseAttemptRecord) => void;
   readonly gamification?: GamiServerSource;
@@ -196,6 +207,17 @@ export function attachPulseGamification(handle: PulseRuntimeHandle, options: Pul
   const observe = (state: SourceState): void => {
     for (const session of [state.quizSession, state.caseSession]) {
       if (!sessionStart.has(session.id)) sessionStart.set(session.id, options.now());
+    }
+    // A3.3: sunucu oturumunda puanlama sunucuda; yerel deneme kaydı yapılmaz.
+    if (options.recordAttempts === false) {
+      const viewedOnly = state.viewed[state.mode] ?? 0;
+      if (viewedOnly >= STUDY_SECONDS && !studied.has(state.mode)) {
+        studied.add(state.mode);
+        void repo.recordLearn(pulseLearnTopic(state.mode), nowDate()).then((result) => {
+          if (!detached) gamiState = result.state;
+        });
+      }
+      return;
     }
     const quiz = state.quizSession;
     if (quiz.submitted.length > 0 && quiz.submitted.every(Boolean) && !recorded.has(`q:${quiz.id}`)) {

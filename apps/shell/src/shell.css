@@ -286,6 +286,20 @@ html, body { margin: 0; }
 .eg-shell-roles__unitList, .eg-shell-roles__simList {
   display: grid; gap: var(--sp-1); margin: 0; padding: 0; list-style: none; color: var(--text);
 }
+/* 768px altı: `Table` başlığı görsel gizlenir ama mutlak konumda kalır; dört
+   rol sütunlu matris (T219) dar ekranda yatay taşma üretmesin diye başlık
+   hücreleri sıfır ölçüye alınır (satırlar `data-label` ile kart olur). */
+@media (max-width: 767.98px) {
+  .eg-shell-roles table thead,
+  .eg-shell-roles table thead tr,
+  .eg-shell-roles table thead th {
+    display: block;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+}
 
 /* --- Denetim günlüğü (T73 → T156, E3 §e.7): `eg-shell-users__*`/`eg-shell-adminlist__*`
    sınıflarını yeniden kullanır (salt okunur ekran); tablo/sayfalama/"Ayrıntı"
