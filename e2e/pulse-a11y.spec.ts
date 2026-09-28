@@ -3,6 +3,7 @@ import { expect, test, type Locator, type Page, type TestInfo } from "@playwrigh
 import { curriculum } from "../packages/sim-pulse/src/data/curriculum";
 import { captureRouteScreenshot, writeAxeArtifact } from "./artifacts";
 import { clickSimBarAction, trackErrors } from "./helpers";
+import { answerPulseCase, completePulseQuiz } from "./pulse-flows";
 import allowlist from "./pulse-a11y-allowlist.json" with { type: "json" };
 
 /**
@@ -25,8 +26,6 @@ const MIN_TARGET_PX = 44;
  * katı) izin listesinde izleniyor.
  */
 const DISABLED_RULES = ["target-size"];
-const QUESTION_ID = /Q\d{3}/;
-const CASE_ID = /C\d{3}/;
 
 type ScreenId = "sim" | "case" | "quiz" | "results" | "about" | "gami";
 
@@ -92,12 +91,6 @@ function deepSelector(target: unknown): string {
   return normalizeSelector(rawSelector(target));
 }
 
-function correctOf(id: string): number {
-  const item = curriculum.byId[id];
-  if (item === undefined) throw new Error(`Bilinmeyen madde: ${id}`);
-  return item.correct;
-}
-
 const PULSE_STATE_KEY = "egemed-pulse-6.0";
 const PULSE_ACTORS = [null, "dev-admin-0001", "dev-student-0001"] as const;
 
@@ -114,9 +107,9 @@ function pulseNamespaceOf(actorId: string | null): string {
  * tümü izlenmiş (değerlendirme ayrıca 10 vaka gönderilmiş) kayıtla açılır.
  */
 /**
- * T210: runtime havuzu 500 maddeye büyüdü; bu spec doğru yanıt indekslerini TS
- * veri aynasından (ilk 400 madde) okuduğu için oturumlar C001–C010 / Q001–Q010
- * maddelerine sabitlenir (deterministik tohum).
+ * T210: runtime havuzu büyüdü (500 madde). A3.3'te uygulama/değerlendirme
+ * maddeleri SUNUCU oturumundan gelir (seçenekler karıştırılır, cevap anahtarı
+ * gitmez); doğru seçenek bankadan olgu+soru metniyle bulunur (`pulse-flows`).
  */
 function seedSession(role: "case" | "quiz", submitted: boolean): Record<string, unknown> {
   return {
@@ -168,18 +161,11 @@ async function openMode(root: Locator, view: "sim" | "case" | "quiz"): Promise<v
   await root.locator(`#modeCards [data-view="${view}"]`).click();
 }
 
-/** 10 soruyu doğru yanıtlayıp sonuç ekranını ve oyunlaştırma kaydını bekler. */
+/** 10 soruyu sunucu oturumunda doğru yanıtlayıp sonuç ekranını bekler (A3.3). */
 async function completeQuiz(root: Locator): Promise<void> {
+  // T208 kilidi: uygulama kartının açılması için 10 vaka gönderilmiş tohum gerekir.
   await openMode(root, "quiz");
-  await expect(root.locator("#quizView")).toBeVisible();
-  for (let index = 0; index < 10; index += 1) {
-    const id = QUESTION_ID.exec(await root.locator("#quizForm").innerText())?.[0] ?? "";
-    await root.locator(`#quizForm input[type="radio"][value="${correctOf(id)}"]`).check();
-    await root.locator("#quizSubmit").click();
-    if (index < 9) await root.locator("#quizItemNext").click();
-  }
-  await expect(root.locator("#resultsView")).toBeVisible();
-  await expect(root.locator("#egemedGamiGains")).toBeVisible();
+  await completePulseQuiz(root);
 }
 
 const SCREENS: readonly PulseScreen[] = [
@@ -199,10 +185,8 @@ const SCREENS: readonly PulseScreen[] = [
     route: "#/sims/pulse/vaka",
     async open(root) {
       await openMode(root, "case");
-      await expect(root.locator("#caseView")).toBeVisible();
-      const id = CASE_ID.exec(await root.locator("#caseQuestionCard .eyebrow").innerText())?.[0] ?? "";
-      await root.locator(`#caseQuestionCard input[name="activeCase"][value="${correctOf(id)}"]`).check();
-      await root.locator("#caseCheck").click();
+      await expect(root.locator("#caseView")).toBeVisible({ timeout: 20_000 });
+      await answerPulseCase(root);
       await expect(root.locator("#caseContinue")).toBeVisible();
     },
   },

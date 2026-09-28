@@ -3,6 +3,7 @@ import { expect, test, type Locator, type Page } from "@playwright/test";
 import { curriculum } from "../packages/sim-pulse/src/data/curriculum";
 import { captureRouteScreenshot } from "./artifacts";
 import { clickSimBarAction, selectRadixOption, trackErrors } from "./helpers";
+import { completePulseQuiz } from "./pulse-flows";
 import { completeTopicPractice, startTopicPractice } from "./sim-flows";
 
 /**
@@ -88,6 +89,9 @@ async function openPulseQuiz(page: Page): Promise<Locator> {
   await expect(root.locator("#appRoot")).toBeVisible({ timeout: 20_000 });
   if (await root.locator("#tutorialSkip").isVisible().catch(() => false)) await root.locator("#tutorialSkip").click();
   await root.locator('#modeCards [data-view="quiz"]').click();
+  // A3.3: maddeler sunucu oturumundan gelir; görünüm ilk madde yüklenince açılır.
+  await expect(root.locator("#quizView")).toBeVisible({ timeout: 20_000 });
+  await expect(root.locator("#quizSubmit")).toBeVisible({ timeout: 20_000 });
   return root;
 }
 
@@ -382,45 +386,49 @@ test.describe("API oturumu (dev sağlayıcı)", () => {
     }
   });
 
-  test("Pulse sınavı API oturumunda sunucuya yazılır ve dashboard XP eşleşir", async ({ page }) => {
+  test("Pulse sınavı sunucu oturumunda puanlanır, denemeyi sunucu yazar; dashboard XP eşleşir (A3.3)", async ({ page }) => {
+    test.setTimeout(90_000);
     await page.goto(STUDENT_ENTRY);
     await signIn(page, "ogrenci");
     await expect(page).toHaveURL(/#\/$/);
-    const posted = page.waitForResponse(
-      (response) =>
-        response.url().includes("/me/gamification/pulse/attempts") &&
-        response.request().method() === "POST" &&
-        (response.status() === 200 || response.status() === 201),
+    const clientAttempts: string[] = [];
+    page.on("request", (request) => {
+      if (request.url().includes("/me/gamification/pulse/attempts")) clientAttempts.push(request.url());
+    });
+    const caseBodies: string[] = [];
+    page.on("response", async (response) => {
+      if (/\/me\/sims\/pulse\/sessions\/[^/]+\/cases\/\d+$/.test(response.url()) && response.request().method() === "GET") {
+        caseBodies.push(await response.text().catch(() => ""));
+      }
+    });
+    const before = await page.request.get("/api/me/gamification/pulse");
+    const xpBefore = ((await before.json()) as { data: { xp: number } }).data.xp;
+    const finished = page.waitForResponse(
+      (response) => /\/me\/sims\/pulse\/sessions\/[^/]+\/finish$/.test(response.url()) && response.request().method() === "POST",
     );
     const root = await openPulseQuiz(page);
-    for (let i = 0; i < 10; i += 1) {
-      const id = /Q\d{3}/.exec(await root.locator("#quizForm").innerText())?.[0];
-      expect(id, `soru ${i + 1} kimliği`).toBeDefined();
-      const item = curriculum.byId[id ?? ""];
-      expect(item, id).toBeDefined();
-      await root.locator(`#quizForm input[value="${item?.correct ?? ""}"]`).check();
-      await root.locator("#quizSubmit").click();
-      if (i < 9) await root.locator("#quizItemNext").click();
-    }
-    await posted;
+    await completePulseQuiz(root);
+    const done = (await (await finished).json()) as { data: { attemptId: string | null; xpGained: number; total: number; passed: boolean } };
+    expect(done.data.total).toBe(100);
+    expect(done.data.passed).toBe(true);
+    expect(done.data.attemptId, "deneme sunucuda yazıldı").not.toBeNull();
+    expect(done.data.xpGained).toBeGreaterThan(0);
+    // İstemci deneme yazmaz (çift kayıt yok); maddelerde cevap anahtarı yoktur.
+    expect(clientAttempts, "istemci deneme yazmaz (sunucu yazar)").toEqual([]);
+    expect(caseBodies.length).toBeGreaterThan(0);
+    for (const body of caseBodies) expect(body).not.toMatch(/"correct"|feedback|explanations/);
+
     const summary = page.waitForResponse(
       (response) => response.url().includes("/me/gamification") && !response.url().includes("/attempts") && response.request().method() === "GET" && response.ok(),
     );
     await page.goto("/#/");
     const payload = (await (await summary).json()) as {
-      data?: { sims?: readonly { simId?: string; xp?: number; badges?: readonly { key?: string }[] }[] };
+      data?: { sims?: readonly { simId?: string; xp?: number }[] };
     };
-    const pulse = payload.data?.sims?.find((sim) => sim.simId === "pulse");
-    const pulseXp = pulse?.xp ?? 0;
-    expect(pulseXp).toBeGreaterThan(0);
-    // ADR-008: 10/10 sınav → 10'luk ritim serisi; rozetler sunucuda kodlu özetten verilir.
-    const badgeKeys = (pulse?.badges ?? []).map((badge) => badge.key);
-    expect(badgeKeys).toContain("rhythm-streak-3");
-    expect(badgeKeys).toContain("rhythm-streak-10");
+    const pulseXp = payload.data?.sims?.find((sim) => sim.simId === "pulse")?.xp ?? 0;
+    expect(pulseXp).toBeGreaterThan(xpBefore);
     await expect(page.getByRole("heading", { name: "İlerlemem" })).toBeVisible();
-    await expect(page.locator("[data-sim-id='pulse']")).toHaveAttribute("data-xp", String(pulseXp ?? 0)); // Pulse denemesi yoksa özet girdisi yok; panel 0 XP (test sırasından bağımsız)
-    // T114: sunucu rozetleri katalog adlarıyla gösterilir (ADR-008 S4).
-    await expect(page.getByText("Ritim izleyicisi")).toBeVisible();
+    await expect(page.locator("[data-sim-id='pulse']")).toHaveAttribute("data-xp", String(pulseXp)); // Pulse denemesi yoksa özet girdisi yok; panel 0 XP (test sırasından bağımsız)
   });
 
   test("Opaca konu oturumu API oturumunda öğrenme sayaçlarıyla sunucuya yazılır (ADR-008 S4, T143)", async ({ page }) => {
@@ -574,29 +582,20 @@ test.describe("API oturumu (dev sağlayıcı)", () => {
     await rivalContext.close();
   });
 
-  test("Pulse sınavı bitince İlerlemem sunucu rozetini gösterir ve demo bandı yoktur", async ({ page }) => {
+  test("Pulse sınavı bitince İlerlemem sunucu verisini gösterir; demo bandı yoktur (A3.3)", async ({ page }) => {
+    test.setTimeout(90_000);
     await page.goto(STUDENT_ENTRY);
     await signIn(page, "ogrenci");
     await expect(page).toHaveURL(/#\/$/);
-    const posted = page.waitForResponse(
-      (response) =>
-        response.url().includes("/me/gamification/pulse/attempts") &&
-        response.request().method() === "POST" &&
-        (response.status() === 200 || response.status() === 201),
-    );
     const root = await openPulseQuiz(page);
-    for (let i = 0; i < 10; i += 1) {
-      const id = /Q\d{3}/.exec(await root.locator("#quizForm").innerText())?.[0];
-      expect(id, `soru ${i + 1} kimliği`).toBeDefined();
-      const item = curriculum.byId[id ?? ""];
-      expect(item, id).toBeDefined();
-      await root.locator(`#quizForm input[value="${item?.correct ?? ""}"]`).check();
-      await root.locator("#quizSubmit").click();
-      if (i < 9) await root.locator("#quizItemNext").click();
-    }
-    await posted;
+    await completePulseQuiz(root);
     await clickSimBarAction(page, "İlerlemem");
-    await expect(page.getByRole("button", { name: /Ritim izleyicisi.*kazanıldı/i }).first()).toBeVisible();
+    const progress = page.locator("#egemedGamiProgress");
+    await expect(progress).toBeVisible();
+    // Sunucu kaynağı: "Demo verisi" bandı yoktur, seviye/XP sunucu özetinden gelir.
+    // Not: Pulse rozet istatistiği istemci sayaçlarına dayanır (T216 kararı); sunucu
+    // oturumunda deneme genel özetle yazılır, rozetler sonraki görevde sunucuya taşınır.
     await expect(page.getByText("Demo verisi")).toHaveCount(0);
+    await expect(progress.getByText(/^Seviye \d+$/).first()).toBeVisible();
   });
 });

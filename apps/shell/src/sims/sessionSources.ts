@@ -9,8 +9,8 @@ import { browserApiWindow, csrfTokenFromCookie } from "../apiAuth";
  * API hataları sim sürücüsünün tanıdığı kodlu iletiye çevrilir (ör. `case_time_exceeded`).
  */
 
-/** Sunucu oturumu olan simler (A2 Opaca, A3 Pulse ile genişler). */
-export const SERVER_SESSION_SIMS: readonly SimId[] = ["ausculta"];
+/** Sunucu oturumu olan simler (A3.3: Pulse eklendi; A2'de Opaca genişler). */
+export const SERVER_SESSION_SIMS: readonly SimId[] = ["ausculta", "pulse"];
 
 function rethrow(error: unknown): never {
   if (error instanceof ApiError) {

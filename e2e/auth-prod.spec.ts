@@ -2,6 +2,7 @@ import { readdirSync, readFileSync } from "node:fs";
 import { expect, test } from "@playwright/test";
 import auscultaCasesCore from "../packages/assessment-bank/data/ausculta/cases.json" with { type: "json" };
 import auscultaCasesAuto from "../packages/assessment-bank/data/ausculta/cases-auto.json" with { type: "json" };
+import pulseItems from "../packages/assessment-bank/data/pulse/items.json" with { type: "json" };
 
 test.describe("üretim önizlemesi güvenlik kontrolleri", () => {
   test("elle yazılmış geçerli görünen oturum admin açmaz", async ({ page }) => {
@@ -42,5 +43,13 @@ test.describe("üretim önizlemesi güvenlik kontrolleri", () => {
     expect(ids.length).toBeGreaterThan(100);
     expect(ids.filter((id) => bundle.includes(`"${id}"`))).toEqual([]);
     expect(bundle).not.toContain("createDevLocalSessionSource");
+    // A3.3: DEV Pulse yerel bankası (600 madde) istemci müfredat aynasından (ilk
+    // 200'er madde) büyüktür; yalnız bankada olan maddeler pakete girmemelidir.
+    const bankOnly = (pulseItems as { items: { id: string }[] }).items
+      .filter((item) => Number(item.id.slice(1)) > 200)
+      .slice(0, 20)
+      .map((item) => item.id);
+    expect(bankOnly.length).toBeGreaterThan(0);
+    expect(bankOnly.filter((id) => bundle.includes(`"${id}"`))).toEqual([]);
   });
 });
