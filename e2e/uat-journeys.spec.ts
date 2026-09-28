@@ -1,6 +1,6 @@
 import { expect, test, type Locator, type Page } from "@playwright/test";
 import { chooseFromSimSwitcher, clickSimBarAction, fillAdminFilter, openRoute, trackErrors } from "./helpers";
-import { completeTopicPractice, giveAnswer, startTopicPractice, submitAnswer } from "./sim-flows";
+import { completeTopicPractice, giveAnswer, startTopicPractice, submitAnswer, unlockOpacaLearn } from "./sim-flows";
 
 /**
  * T155 — kullanıcı kabul (UAT) yolculukları ve zor koşullar (geliştirme/sahte
@@ -71,6 +71,8 @@ test.describe("T155 UAT yolculukları", () => {
   }) => {
     const errors = trackErrors(page);
 
+    // T218: Opaca uygulama akışı öğrenme tamamlanmadan kilitlidir; akış öğrenmeyi tamamlanmış sayar.
+    await unlockOpacaLearn(page);
     await signInStudent(page);
     await page.locator("nav").getByRole("link", { name: "Simülatörler", exact: true }).click();
     await expect(page).toHaveURL(/#\/simulatorler$/);
@@ -115,6 +117,8 @@ test.describe("T155 UAT yolculukları", () => {
   }) => {
     const errors = trackErrors(page);
 
+    // T218: öğrenme kilidi tohumu (Opaca uygulama akışı).
+    await unlockOpacaLearn(page);
     await signInStudent(page);
     await page.locator('a[href="#/sims/opaca"]').first().click();
     await expect(page).toHaveURL(/#\/sims\/opaca$/);
@@ -148,6 +152,8 @@ test.describe("T155 UAT yolculukları", () => {
   }) => {
     const errors = trackErrors(page);
 
+    // T218: öğrenme kilidi tohumu; reload sonrası da yeniden uygulanır (addInitScript).
+    await unlockOpacaLearn(page);
     await signInStudent(page);
     await page.locator('a[href="#/sims/opaca"]').first().click();
     const root = page.locator(".eg-sim-opaca").first();
@@ -173,6 +179,8 @@ test.describe("T155 UAT yolculukları", () => {
   }) => {
     const errors = trackErrors(page);
 
+    // T218: öğrenme kilidi tohumu (Opaca uygulama akışı).
+    await unlockOpacaLearn(page);
     await openRoute(page, "#/sims/opaca");
     const root = page.locator(".eg-sim-opaca").first();
     await startTopicPractice(root);

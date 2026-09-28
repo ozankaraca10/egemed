@@ -44,6 +44,8 @@ export type { EventBus, SimEventDraft } from "./core/events";
 export {
   firstWeakLibraryKey,
   isTimedOut,
+  modeLearnLocked,
+  modePickTarget,
   needsExitConfirm,
   nextActionForSubmit,
   remainingSec,
@@ -102,6 +104,25 @@ export {
 export type { Action, AppState, ReducerSeam, StoragePort } from "./core/reducer";
 export { createFlushHandlers, createLifecycle } from "./core/lifecycle";
 export type { FlushTarget, Lifecycle, LifecycleHandlers, WindowLike } from "./core/lifecycle";
+export {
+  LEARN_OPENED_KEY,
+  LOCKED_LEARN_SNAPSHOT,
+  OPACA_CONTENT_VERSION,
+  canStartMode,
+  challengeLearnLockText,
+  contentVersion,
+  createLearnCompletionNotifier,
+  createLearnTracker,
+  learnLockText,
+  learnProgressText,
+  loadOpened,
+  parseOpened,
+  saveOpened,
+} from "./core/learnLock";
+export type { LearnCompletionNotifier, LearnSnapshot, LearnTracker, LearnTrackerDeps } from "./core/learnLock";
+export { LearnGateProvider, useLearnGate, useStartMode } from "./core/LearnGate";
+export type { LearnGateProviderProps, LearnGateValue, StartModeOptions } from "./core/LearnGate";
+export { libraryExampleCount, libraryExamples } from "./core/examples";
 export { StoreProvider, useStore } from "./core/StoreProvider";
 export type { StoreContextValue, StoreProviderProps } from "./core/StoreProvider";
 export { BrandMark, EcgDeco, Footer, Header, createNoopChromeEnv } from "./ui/chrome";
@@ -305,6 +326,7 @@ export {
   libraryItem,
   libraryKeyForFinding,
 } from "./data/terminology";
+export { FIRST_LIBRARY_ITEM, LIBRARY_ITEM_COUNT, LIBRARY_ITEM_KEYS, findLibraryItem } from "./data/library";
 export type {
   FindingDef,
   InterpretationTemplate,

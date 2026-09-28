@@ -109,6 +109,7 @@ const BADGE_ICON_FALLBACK: Record<BadgeCategory, (p: P) => ReactElement> = {
   streak: IconFlame,
   learn: IconLightbulb,
   milestone: IconTrophy,
+  challenge: IconAward,
 };
 
 const icon = (C: (p: P) => ReactElement) => (p: { width?: number; height?: number }) => <C {...p} />;

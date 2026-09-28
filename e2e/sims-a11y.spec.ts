@@ -2,7 +2,7 @@ import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Locator, type Page, type TestInfo } from "@playwright/test";
 import { captureRouteScreenshot, writeAxeArtifact } from "./artifacts";
 import { clickSimBarAction, trackErrors } from "./helpers";
-import { completeTopicPractice, giveAnswer, startTopicPractice, submitAnswer, unlockAuscultaLearn, type SimId } from "./sim-flows";
+import { completeTopicPractice, giveAnswer, startTopicPractice, submitAnswer, unlockAuscultaLearn, unlockOpacaLearn, type SimId } from "./sim-flows";
 import auscultaAllowlistJson from "./ausculta-a11y-allowlist.json" with { type: "json" };
 import opacaAllowlistJson from "./opaca-a11y-allowlist.json" with { type: "json" };
 
@@ -495,9 +495,10 @@ for (const sim of SIMS) {
           test.skip(testInfo.project.name !== "desktop-1440", "sonuç akışı yalnız desktop-1440 (kapı bütçesi)");
         }
         const errors = trackErrors(page);
-        // T209: Ausculta uygulama/değerlendirme akışı öğrenme tamamlanmadan kilitlidir;
-        // ekran kapısı öğrenmeyi tamamlanmış sayarak akışı açar.
+        // T209/T218: Ausculta ve Opaca'da uygulama/değerlendirme akışı öğrenme
+        // tamamlanmadan kilitlidir; ekran kapısı öğrenmeyi tamamlanmış sayarak akışı açar.
         if (sim.id === "ausculta") await unlockAuscultaLearn(page);
+        if (sim.id === "opaca") await unlockOpacaLearn(page);
         const root = await openSim(page, sim);
         await screen.open(root);
 

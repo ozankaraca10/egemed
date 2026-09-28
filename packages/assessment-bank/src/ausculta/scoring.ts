@@ -7,12 +7,16 @@ import { DEFAULT_WEIGHTS } from "./types";
 export const MASTERY_THRESHOLD = 80;
 export const HINT_PENALTY_PRACTICE = 5;
 
-/** Tek bir vakanın sonucunu hesaplar. */
+/** Tek bir vakanın sonucunu hesaplar.
+ *  `presentedPoints` verilirse teknik rubriği yalnız bu noktaları ölçer (T233: izinli
+ *  görünüm dışında kalan zorunlu nokta öğrenciden istenemez; sunulan zorunlu nokta
+ *  kalmadıysa mevcut "zorunlu nokta yok" kuralı gibi tam puan verilir). */
 export function scoreCase(
   caseDef: CaseDef,
   answers: Record<string, string[]>,
   telemetry: Telemetry,
   hintsUsed: number,
+  presentedPoints?: readonly string[],
 ): CaseResult {
   const w: ScoringWeights = { ...DEFAULT_WEIGHTS, ...(caseDef.scoringWeights ?? {}) };
   const domains = {} as CaseResult["domains"];
@@ -47,7 +51,9 @@ export function scoreCase(
   domains.diagnosis = fraction("diagnosis", w.diagnosis);
 
   // teknik: nitelikli nokta oranı (dwell + dinleme eşiği)
-  const { requiredPoints, minDwellMs = 1500, minListenMsPerPoint = 2000 } = caseDef.technique;
+  const { minDwellMs = 1500, minListenMsPerPoint = 2000 } = caseDef.technique;
+  const presented = presentedPoints === undefined ? undefined : new Set(presentedPoints);
+  const requiredPoints = presented === undefined ? caseDef.technique.requiredPoints : caseDef.technique.requiredPoints.filter((id) => presented.has(id));
   const qualifies = (id: string) => {
     const v: PointVisit | undefined = telemetry.visits[id];
     return !!v && v.dwellMs >= minDwellMs && v.listenMs >= minListenMsPerPoint;

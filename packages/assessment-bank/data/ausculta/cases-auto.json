@@ -5488,7 +5488,7 @@
           "pointId": "lung_right_upper_posterior",
           "category": "lung",
           "acousticFinding": "normal",
-          "simulationNote": "posterior fallback (kaynak anterior)"
+          "simulationNote": "KAUH v3 gerçek posterior kayıt (öğretim üyesi onayı bekliyor)"
         }
       ],
       "primaryAcousticFinding": "normal",
@@ -5660,7 +5660,7 @@
           "pointId": "lung_left_upper_posterior",
           "category": "lung",
           "acousticFinding": "normal",
-          "simulationNote": "posterior fallback (kaynak anterior)"
+          "simulationNote": "KAUH v3 gerçek posterior kayıt (öğretim üyesi onayı bekliyor)"
         }
       ],
       "primaryAcousticFinding": "normal",
@@ -5832,7 +5832,7 @@
           "pointId": "lung_right_middle_posterior",
           "category": "lung",
           "acousticFinding": "normal",
-          "simulationNote": "posterior fallback (kaynak anterior)"
+          "simulationNote": "KAUH v3 gerçek posterior kayıt (öğretim üyesi onayı bekliyor)"
         }
       ],
       "primaryAcousticFinding": "normal",
@@ -6004,7 +6004,7 @@
           "pointId": "lung_left_middle_posterior",
           "category": "lung",
           "acousticFinding": "normal",
-          "simulationNote": "posterior fallback (kaynak anterior)"
+          "simulationNote": "KAUH v3 gerçek posterior kayıt (öğretim üyesi onayı bekliyor)"
         }
       ],
       "primaryAcousticFinding": "normal",
@@ -6176,7 +6176,7 @@
           "pointId": "lung_right_lower_posterior",
           "category": "lung",
           "acousticFinding": "normal",
-          "simulationNote": "posterior fallback (kaynak anterior)"
+          "simulationNote": "KAUH v3 gerçek posterior kayıt (öğretim üyesi onayı bekliyor)"
         }
       ],
       "primaryAcousticFinding": "normal",
@@ -6348,7 +6348,7 @@
           "pointId": "lung_left_lower_posterior",
           "category": "lung",
           "acousticFinding": "normal",
-          "simulationNote": "posterior fallback (kaynak anterior)"
+          "simulationNote": "KAUH v3 gerçek posterior kayıt (öğretim üyesi onayı bekliyor)"
         }
       ],
       "primaryAcousticFinding": "normal",
@@ -6520,7 +6520,7 @@
           "pointId": "lung_left_upper_posterior",
           "category": "lung",
           "acousticFinding": "wheezing",
-          "simulationNote": "posterior fallback (kaynak anterior)"
+          "simulationNote": "KAUH v3 gerçek posterior kayıt (öğretim üyesi onayı bekliyor)"
         }
       ],
       "primaryAcousticFinding": "wheezing",
@@ -6692,7 +6692,7 @@
           "pointId": "lung_right_upper_posterior",
           "category": "lung",
           "acousticFinding": "wheezing",
-          "simulationNote": "posterior fallback (kaynak anterior)"
+          "simulationNote": "KAUH v3 gerçek posterior kayıt (öğretim üyesi onayı bekliyor)"
         }
       ],
       "primaryAcousticFinding": "wheezing",
@@ -6864,7 +6864,7 @@
           "pointId": "lung_right_lower_posterior",
           "category": "lung",
           "acousticFinding": "wheezing",
-          "simulationNote": "posterior fallback (kaynak anterior)"
+          "simulationNote": "KAUH v3 gerçek posterior kayıt (öğretim üyesi onayı bekliyor)"
         }
       ],
       "primaryAcousticFinding": "wheezing",
@@ -7036,7 +7036,7 @@
           "pointId": "lung_right_middle_posterior",
           "category": "lung",
           "acousticFinding": "wheezing",
-          "simulationNote": "posterior fallback (kaynak anterior)"
+          "simulationNote": "KAUH v3 gerçek posterior kayıt (öğretim üyesi onayı bekliyor)"
         }
       ],
       "primaryAcousticFinding": "wheezing",
@@ -7208,7 +7208,7 @@
           "pointId": "lung_left_lower_posterior",
           "category": "lung",
           "acousticFinding": "wheezing",
-          "simulationNote": "posterior fallback (kaynak anterior)"
+          "simulationNote": "KAUH v3 gerçek posterior kayıt (öğretim üyesi onayı bekliyor)"
         }
       ],
       "primaryAcousticFinding": "wheezing",
@@ -7380,7 +7380,7 @@
           "pointId": "lung_left_middle_posterior",
           "category": "lung",
           "acousticFinding": "wheezing",
-          "simulationNote": "posterior fallback (kaynak anterior)"
+          "simulationNote": "KAUH v3 gerçek posterior kayıt (öğretim üyesi onayı bekliyor)"
         }
       ],
       "primaryAcousticFinding": "wheezing",
@@ -8518,7 +8518,7 @@
           "pointId": "lung_right_upper_posterior",
           "category": "lung",
           "acousticFinding": "fine_crackles",
-          "simulationNote": "posterior fallback (kaynak anterior)"
+          "simulationNote": "KAUH v3 gerçek posterior kayıt (öğretim üyesi onayı bekliyor)"
         }
       ],
       "primaryAcousticFinding": "fine_crackles",
@@ -8672,7 +8672,7 @@
           "pointId": "lung_right_lower_posterior",
           "category": "lung",
           "acousticFinding": "fine_crackles",
-          "simulationNote": "posterior fallback (kaynak anterior)"
+          "simulationNote": "KAUH v3 gerçek posterior kayıt (öğretim üyesi onayı bekliyor)"
         }
       ],
       "primaryAcousticFinding": "fine_crackles",
@@ -9004,7 +9004,7 @@
           "pointId": "lung_left_upper_posterior",
           "category": "lung",
           "acousticFinding": "coarse_crackles",
-          "simulationNote": "posterior fallback (kaynak anterior)"
+          "simulationNote": "KAUH v3 gerçek posterior kayıt (öğretim üyesi onayı bekliyor)"
         }
       ],
       "primaryAcousticFinding": "coarse_crackles",
@@ -9170,7 +9170,7 @@
           "pointId": "lung_right_lower_posterior",
           "category": "lung",
           "acousticFinding": "coarse_crackles",
-          "simulationNote": "posterior fallback (kaynak anterior)"
+          "simulationNote": "KAUH v3 gerçek posterior kayıt (öğretim üyesi onayı bekliyor)"
         }
       ],
       "primaryAcousticFinding": "coarse_crackles",
@@ -9502,7 +9502,7 @@
           "pointId": "lung_right_middle_posterior",
           "category": "lung",
           "acousticFinding": "coarse_crackles",
-          "simulationNote": "posterior fallback (kaynak anterior)"
+          "simulationNote": "KAUH v3 gerçek posterior kayıt (öğretim üyesi onayı bekliyor)"
         }
       ],
       "primaryAcousticFinding": "coarse_crackles",
@@ -10808,7 +10808,8 @@
         {
           "pointId": "lung_right_lower_posterior",
           "category": "mixed",
-          "acousticFinding": "s3+normal"
+          "acousticFinding": "s3+normal",
+          "simulationNote": "posterior: akciğer bileşeni (KAUH gerçek kayıt)"
         }
       ],
       "primaryAcousticFinding": "s3+normal",
@@ -10948,7 +10949,8 @@
         {
           "pointId": "lung_left_middle_posterior",
           "category": "mixed",
-          "acousticFinding": "atrial_fibrillation+normal"
+          "acousticFinding": "atrial_fibrillation+normal",
+          "simulationNote": "posterior: akciğer bileşeni (KAUH gerçek kayıt)"
         }
       ],
       "primaryAcousticFinding": "atrial_fibrillation+normal",
@@ -11633,7 +11635,8 @@
         {
           "pointId": "lung_left_upper_posterior",
           "category": "mixed",
-          "acousticFinding": "mid_systolic_murmur+wheezing"
+          "acousticFinding": "mid_systolic_murmur+wheezing",
+          "simulationNote": "posterior: akciğer bileşeni (KAUH gerçek kayıt)"
         }
       ],
       "primaryAcousticFinding": "mid_systolic_murmur+wheezing",
@@ -11773,7 +11776,8 @@
         {
           "pointId": "lung_left_upper_posterior",
           "category": "mixed",
-          "acousticFinding": "early_systolic_murmur+coarse_crackles"
+          "acousticFinding": "early_systolic_murmur+coarse_crackles",
+          "simulationNote": "posterior: akciğer bileşeni (KAUH gerçek kayıt)"
         }
       ],
       "primaryAcousticFinding": "early_systolic_murmur+coarse_crackles",
@@ -12328,7 +12332,8 @@
         {
           "pointId": "lung_left_upper_posterior",
           "category": "mixed",
-          "acousticFinding": "late_diastolic_murmur+coarse_crackles"
+          "acousticFinding": "late_diastolic_murmur+coarse_crackles",
+          "simulationNote": "posterior: akciğer bileşeni (KAUH gerçek kayıt)"
         }
       ],
       "primaryAcousticFinding": "late_diastolic_murmur+coarse_crackles",
@@ -12608,7 +12613,8 @@
         {
           "pointId": "lung_right_middle_posterior",
           "category": "mixed",
-          "acousticFinding": "late_systolic_murmur+wheezing"
+          "acousticFinding": "late_systolic_murmur+wheezing",
+          "simulationNote": "posterior: akciğer bileşeni (KAUH gerçek kayıt)"
         }
       ],
       "primaryAcousticFinding": "late_systolic_murmur+wheezing",
@@ -12888,7 +12894,8 @@
         {
           "pointId": "lung_right_lower_posterior",
           "category": "mixed",
-          "acousticFinding": "late_diastolic_murmur+normal"
+          "acousticFinding": "late_diastolic_murmur+normal",
+          "simulationNote": "posterior: akciğer bileşeni (KAUH gerçek kayıt)"
         }
       ],
       "primaryAcousticFinding": "late_diastolic_murmur+normal",
@@ -13163,7 +13170,8 @@
         {
           "pointId": "lung_left_middle_posterior",
           "category": "mixed",
-          "acousticFinding": "av_block+fine_crackles"
+          "acousticFinding": "av_block+fine_crackles",
+          "simulationNote": "posterior: akciğer bileşeni (KAUH gerçek kayıt)"
         }
       ],
       "primaryAcousticFinding": "av_block+fine_crackles",
@@ -13573,7 +13581,8 @@
         {
           "pointId": "lung_right_middle_posterior",
           "category": "mixed",
-          "acousticFinding": "late_diastolic_murmur+coarse_crackles"
+          "acousticFinding": "late_diastolic_murmur+coarse_crackles",
+          "simulationNote": "posterior: akciğer bileşeni (KAUH gerçek kayıt)"
         }
       ],
       "primaryAcousticFinding": "late_diastolic_murmur+coarse_crackles",
@@ -13988,7 +13997,8 @@
         {
           "pointId": "lung_right_lower_posterior",
           "category": "mixed",
-          "acousticFinding": "s4+fine_crackles"
+          "acousticFinding": "s4+fine_crackles",
+          "simulationNote": "posterior: akciğer bileşeni (KAUH gerçek kayıt)"
         }
       ],
       "primaryAcousticFinding": "s4+fine_crackles",
@@ -14128,7 +14138,8 @@
         {
           "pointId": "lung_left_upper_posterior",
           "category": "mixed",
-          "acousticFinding": "s3+normal"
+          "acousticFinding": "s3+normal",
+          "simulationNote": "posterior: akciğer bileşeni (KAUH gerçek kayıt)"
         }
       ],
       "primaryAcousticFinding": "s3+normal",
@@ -14538,7 +14549,8 @@
         {
           "pointId": "lung_left_lower_posterior",
           "category": "mixed",
-          "acousticFinding": "atrial_fibrillation+normal"
+          "acousticFinding": "atrial_fibrillation+normal",
+          "simulationNote": "posterior: akciğer bileşeni (KAUH gerçek kayıt)"
         }
       ],
       "primaryAcousticFinding": "atrial_fibrillation+normal",
@@ -14678,7 +14690,8 @@
         {
           "pointId": "lung_right_upper_posterior",
           "category": "mixed",
-          "acousticFinding": "mid_systolic_murmur+coarse_crackles"
+          "acousticFinding": "mid_systolic_murmur+coarse_crackles",
+          "simulationNote": "posterior: akciğer bileşeni (KAUH gerçek kayıt)"
         }
       ],
       "primaryAcousticFinding": "mid_systolic_murmur+coarse_crackles",
@@ -15228,7 +15241,8 @@
         {
           "pointId": "lung_right_lower_posterior",
           "category": "mixed",
-          "acousticFinding": "s4+wheezing"
+          "acousticFinding": "s4+wheezing",
+          "simulationNote": "posterior: akciğer bileşeni (KAUH gerçek kayıt)"
         }
       ],
       "primaryAcousticFinding": "s4+wheezing",
@@ -16048,7 +16062,8 @@
         {
           "pointId": "lung_right_lower_posterior",
           "category": "mixed",
-          "acousticFinding": "late_diastolic_murmur+coarse_crackles"
+          "acousticFinding": "late_diastolic_murmur+coarse_crackles",
+          "simulationNote": "posterior: akciğer bileşeni (KAUH gerçek kayıt)"
         }
       ],
       "primaryAcousticFinding": "late_diastolic_murmur+coarse_crackles",
@@ -16463,7 +16478,8 @@
         {
           "pointId": "lung_left_middle_posterior",
           "category": "mixed",
-          "acousticFinding": "late_diastolic_murmur+wheezing"
+          "acousticFinding": "late_diastolic_murmur+wheezing",
+          "simulationNote": "posterior: akciğer bileşeni (KAUH gerçek kayıt)"
         }
       ],
       "primaryAcousticFinding": "late_diastolic_murmur+wheezing",
@@ -16738,7 +16754,8 @@
         {
           "pointId": "lung_right_middle_posterior",
           "category": "mixed",
-          "acousticFinding": "tachycardia+coarse_crackles"
+          "acousticFinding": "tachycardia+coarse_crackles",
+          "simulationNote": "posterior: akciğer bileşeni (KAUH gerçek kayıt)"
         }
       ],
       "primaryAcousticFinding": "tachycardia+coarse_crackles",
@@ -17698,7 +17715,8 @@
         {
           "pointId": "lung_right_lower_posterior",
           "category": "mixed",
-          "acousticFinding": "late_systolic_murmur+coarse_crackles"
+          "acousticFinding": "late_systolic_murmur+coarse_crackles",
+          "simulationNote": "posterior: akciğer bileşeni (KAUH gerçek kayıt)"
         }
       ],
       "primaryAcousticFinding": "late_systolic_murmur+coarse_crackles",
@@ -17838,7 +17856,8 @@
         {
           "pointId": "lung_left_upper_posterior",
           "category": "mixed",
-          "acousticFinding": "late_systolic_murmur+normal"
+          "acousticFinding": "late_systolic_murmur+normal",
+          "simulationNote": "posterior: akciğer bileşeni (KAUH gerçek kayıt)"
         }
       ],
       "primaryAcousticFinding": "late_systolic_murmur+normal",
@@ -18388,7 +18407,8 @@
         {
           "pointId": "lung_right_upper_posterior",
           "category": "mixed",
-          "acousticFinding": "normal+normal"
+          "acousticFinding": "normal+normal",
+          "simulationNote": "posterior: akciğer bileşeni (KAUH gerçek kayıt)"
         }
       ],
       "primaryAcousticFinding": "normal+normal",
@@ -18663,7 +18683,8 @@
         {
           "pointId": "lung_left_middle_posterior",
           "category": "mixed",
-          "acousticFinding": "mid_systolic_murmur+fine_crackles"
+          "acousticFinding": "mid_systolic_murmur+fine_crackles",
+          "simulationNote": "posterior: akciğer bileşeni (KAUH gerçek kayıt)"
         }
       ],
       "primaryAcousticFinding": "mid_systolic_murmur+fine_crackles",
@@ -18943,7 +18964,8 @@
         {
           "pointId": "lung_right_middle_posterior",
           "category": "mixed",
-          "acousticFinding": "late_systolic_murmur+normal"
+          "acousticFinding": "late_systolic_murmur+normal",
+          "simulationNote": "posterior: akciğer bileşeni (KAUH gerçek kayıt)"
         }
       ],
       "primaryAcousticFinding": "late_systolic_murmur+normal",
@@ -19628,7 +19650,8 @@
         {
           "pointId": "lung_left_middle_posterior",
           "category": "mixed",
-          "acousticFinding": "early_systolic_murmur+normal"
+          "acousticFinding": "early_systolic_murmur+normal",
+          "simulationNote": "posterior: akciğer bileşeni (KAUH gerçek kayıt)"
         }
       ],
       "primaryAcousticFinding": "early_systolic_murmur+normal",
@@ -19768,7 +19791,8 @@
         {
           "pointId": "lung_left_middle_posterior",
           "category": "mixed",
-          "acousticFinding": "mid_systolic_murmur+wheezing"
+          "acousticFinding": "mid_systolic_murmur+wheezing",
+          "simulationNote": "posterior: akciğer bileşeni (KAUH gerçek kayıt)"
         }
       ],
       "primaryAcousticFinding": "mid_systolic_murmur+wheezing",
@@ -21283,7 +21307,8 @@
         {
           "pointId": "lung_left_lower_posterior",
           "category": "mixed",
-          "acousticFinding": "normal+wheezing"
+          "acousticFinding": "normal+wheezing",
+          "simulationNote": "posterior: akciğer bileşeni (KAUH gerçek kayıt)"
         }
       ],
       "primaryAcousticFinding": "normal+wheezing",
@@ -21968,7 +21993,8 @@
         {
           "pointId": "lung_left_lower_posterior",
           "category": "mixed",
-          "acousticFinding": "mid_systolic_murmur+fine_crackles"
+          "acousticFinding": "mid_systolic_murmur+fine_crackles",
+          "simulationNote": "posterior: akciğer bileşeni (KAUH gerçek kayıt)"
         }
       ],
       "primaryAcousticFinding": "mid_systolic_murmur+fine_crackles",
@@ -22108,7 +22134,8 @@
         {
           "pointId": "lung_right_lower_posterior",
           "category": "mixed",
-          "acousticFinding": "early_systolic_murmur+normal"
+          "acousticFinding": "early_systolic_murmur+normal",
+          "simulationNote": "posterior: akciğer bileşeni (KAUH gerçek kayıt)"
         }
       ],
       "primaryAcousticFinding": "early_systolic_murmur+normal",
@@ -22248,7 +22275,8 @@
         {
           "pointId": "lung_left_lower_posterior",
           "category": "mixed",
-          "acousticFinding": "normal+fine_crackles"
+          "acousticFinding": "normal+fine_crackles",
+          "simulationNote": "posterior: akciğer bileşeni (KAUH gerçek kayıt)"
         }
       ],
       "primaryAcousticFinding": "normal+fine_crackles",
@@ -22798,7 +22826,8 @@
         {
           "pointId": "lung_left_lower_posterior",
           "category": "mixed",
-          "acousticFinding": "atrial_fibrillation+fine_crackles"
+          "acousticFinding": "atrial_fibrillation+fine_crackles",
+          "simulationNote": "posterior: akciğer bileşeni (KAUH gerçek kayıt)"
         }
       ],
       "primaryAcousticFinding": "atrial_fibrillation+fine_crackles",
@@ -22938,7 +22967,8 @@
         {
           "pointId": "lung_right_upper_posterior",
           "category": "mixed",
-          "acousticFinding": "s4+coarse_crackles"
+          "acousticFinding": "s4+coarse_crackles",
+          "simulationNote": "posterior: akciğer bileşeni (KAUH gerçek kayıt)"
         }
       ],
       "primaryAcousticFinding": "s4+coarse_crackles",
@@ -23218,7 +23248,8 @@
         {
           "pointId": "lung_right_middle_posterior",
           "category": "mixed",
-          "acousticFinding": "tachycardia+fine_crackles"
+          "acousticFinding": "tachycardia+fine_crackles",
+          "simulationNote": "posterior: akciğer bileşeni (KAUH gerçek kayıt)"
         }
       ],
       "primaryAcousticFinding": "tachycardia+fine_crackles",
@@ -23358,7 +23389,8 @@
         {
           "pointId": "lung_left_lower_posterior",
           "category": "mixed",
-          "acousticFinding": "s3+wheezing"
+          "acousticFinding": "s3+wheezing",
+          "simulationNote": "posterior: akciğer bileşeni (KAUH gerçek kayıt)"
         }
       ],
       "primaryAcousticFinding": "s3+wheezing",
@@ -23498,7 +23530,8 @@
         {
           "pointId": "lung_left_lower_posterior",
           "category": "mixed",
-          "acousticFinding": "early_systolic_murmur+fine_crackles"
+          "acousticFinding": "early_systolic_murmur+fine_crackles",
+          "simulationNote": "posterior: akciğer bileşeni (KAUH gerçek kayıt)"
         }
       ],
       "primaryAcousticFinding": "early_systolic_murmur+fine_crackles",
@@ -23638,7 +23671,8 @@
         {
           "pointId": "lung_left_lower_posterior",
           "category": "mixed",
-          "acousticFinding": "av_block+wheezing"
+          "acousticFinding": "av_block+wheezing",
+          "simulationNote": "posterior: akciğer bileşeni (KAUH gerçek kayıt)"
         }
       ],
       "primaryAcousticFinding": "av_block+wheezing",
@@ -23778,7 +23812,8 @@
         {
           "pointId": "lung_right_middle_posterior",
           "category": "mixed",
-          "acousticFinding": "av_block+wheezing"
+          "acousticFinding": "av_block+wheezing",
+          "simulationNote": "posterior: akciğer bileşeni (KAUH gerçek kayıt)"
         }
       ],
       "primaryAcousticFinding": "av_block+wheezing",
@@ -24458,7 +24493,8 @@
         {
           "pointId": "lung_left_upper_posterior",
           "category": "mixed",
-          "acousticFinding": "s3+wheezing"
+          "acousticFinding": "s3+wheezing",
+          "simulationNote": "posterior: akciğer bileşeni (KAUH gerçek kayıt)"
         }
       ],
       "primaryAcousticFinding": "s3+wheezing",
@@ -24733,7 +24769,8 @@
         {
           "pointId": "lung_left_middle_posterior",
           "category": "mixed",
-          "acousticFinding": "av_block+normal"
+          "acousticFinding": "av_block+normal",
+          "simulationNote": "posterior: akciğer bileşeni (KAUH gerçek kayıt)"
         }
       ],
       "primaryAcousticFinding": "av_block+normal",
@@ -25143,7 +25180,8 @@
         {
           "pointId": "lung_left_lower_posterior",
           "category": "mixed",
-          "acousticFinding": "tachycardia+normal"
+          "acousticFinding": "tachycardia+normal",
+          "simulationNote": "posterior: akciğer bileşeni (KAUH gerçek kayıt)"
         }
       ],
       "primaryAcousticFinding": "tachycardia+normal",
@@ -25418,7 +25456,8 @@
         {
           "pointId": "lung_right_middle_posterior",
           "category": "mixed",
-          "acousticFinding": "mid_systolic_murmur+normal"
+          "acousticFinding": "mid_systolic_murmur+normal",
+          "simulationNote": "posterior: akciğer bileşeni (KAUH gerçek kayıt)"
         }
       ],
       "primaryAcousticFinding": "mid_systolic_murmur+normal",
@@ -25558,7 +25597,8 @@
         {
           "pointId": "lung_right_lower_posterior",
           "category": "mixed",
-          "acousticFinding": "early_systolic_murmur+wheezing"
+          "acousticFinding": "early_systolic_murmur+wheezing",
+          "simulationNote": "posterior: akciğer bileşeni (KAUH gerçek kayıt)"
         }
       ],
       "primaryAcousticFinding": "early_systolic_murmur+wheezing",
@@ -25698,7 +25738,8 @@
         {
           "pointId": "lung_left_upper_posterior",
           "category": "mixed",
-          "acousticFinding": "av_block+normal"
+          "acousticFinding": "av_block+normal",
+          "simulationNote": "posterior: akciğer bileşeni (KAUH gerçek kayıt)"
         }
       ],
       "primaryAcousticFinding": "av_block+normal",

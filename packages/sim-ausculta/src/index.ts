@@ -40,12 +40,13 @@ export {
   libraryKeyForCase,
   nextActionForSubmit,
   otherViewHintText,
+  planLibraryViews,
   regionChipState,
   resampleActiveMode,
   tutorialProgress,
   weakDomainKeys,
 } from "./core/flow";
-export type { RegionChipVisualState, SubmitAction, TutorialEvent, TutorialProgress } from "./core/flow";
+export type { LibraryViewPlan, RegionChipVisualState, SubmitAction, TutorialEvent, TutorialProgress } from "./core/flow";
 export { SUSPEND_LIMIT_12, SUSPEND_LIMIT_2004, deserializeSuspend, serializeSuspend } from "./core/suspend";
 export { filterAssessmentPool, validateCase } from "./core/validation";
 export type { ValidationIssue } from "./core/validation";
@@ -165,6 +166,16 @@ export {
   stageViewConfig,
 } from "./ui/patient-stage/geometry";
 export type { BodyType, NormPoint, StageBox, StageCoordPoint, StageRect, StageViewConfig } from "./ui/patient-stage/geometry";
+export {
+  HEADSET_TO_CHESTPIECE,
+  tubeHeadsetHeight,
+  TUBE_CHESTPIECE_RADIUS,
+  TUBE_ATTACH_DIR,
+  tubeAnchor,
+  tubePath,
+  tubeTip,
+} from "./ui/patient-stage/tube";
+export type { TubePoint, TubeSize } from "./ui/patient-stage/tube";
 export {
   PatientStage,
   StageAudioProvider,

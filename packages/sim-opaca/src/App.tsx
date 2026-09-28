@@ -1,8 +1,10 @@
 import { useEffect, useRef, type JSX } from "react";
 import { EmbeddedProvider } from "./EmbeddedContext";
-import type { SimAudience, SimChrome, SimSessionSource } from "@egemed/sim-host";
+import type { SimAudience, SimChrome, SimLearnPort, SimSessionSource } from "@egemed/sim-host";
 import { audienceShowsGamification } from "@egemed/sim-host";
 import { useStore } from "./core/StoreProvider";
+import { LearnGateProvider, useLearnGate } from "./core/LearnGate";
+import { canStartMode } from "./core/learnLock";
 import type { Screen } from "./core/types";
 import { DevPanel } from "./DevPanel";
 import { useLearnGamiPort } from "./gamification/bindings";
@@ -51,6 +53,8 @@ export interface AppProps {
   readonly requestSignIn?: () => void;
   /** A2.3 (ADR-009): sunucu vaka oturumu kanalı; yoksa uygulama/değerlendirme açılmaz. */
   readonly sessions?: SimSessionSource;
+  /** T218: kabuğun öğrenme tamamlama kanalı (ziyaretçide verilmez). */
+  readonly learn?: SimLearnPort;
   /** ADR-010: düello bağlamı; verilirse değerlendirme oturumu düellodan açılır. */
   readonly challengeId?: string;
   readonly onChallengeFinished?: (challengeId: string) => void;
@@ -162,8 +166,17 @@ function ScreenBody({
   }
 }
 
-export function App({
-  embedded = true,
+export function App({ embedded = true, learn, ...props }: AppProps): JSX.Element {
+  return (
+    <LearnGateProvider {...(learn === undefined ? {} : { learn })}>
+      <Shell embedded={embedded} {...props} />
+    </LearnGateProvider>
+  );
+}
+
+/** Uygulama gövdesi (T218: öğrenme kilidi sağlayıcısının içinde; `learn` kanalı host'tan gelir). */
+function Shell({
+  embedded,
   chromeEnv = createNoopChromeEnv(),
   modalEnv = createNoopModalEnv(),
   startEnv = createNoopStartScreenEnv(),
@@ -179,20 +192,30 @@ export function App({
   sessions,
   challengeId,
   onChallengeFinished,
-}: AppProps): JSX.Element {
+}: AppProps & { embedded: boolean }): JSX.Element {
   const { dispatch } = useStore();
   const { syncError, clearSyncError } = useGamiContext();
+  const learnGate = useLearnGate();
   // T175: kitle sözleşmesi — oyunlaştırma yüzeyleri (rozet/XP/liderlik/aylık ödül) yalnız
   // öğrenciye çizilir; çağıran `gamiEnabled=true` verse bile öğretim üyesi/ziyaretçide gizlenir
   // (depo sahibi kararı, plan.md). Tek kaynak burada: alt bileşenler yalnız bunu sorgular.
   const effectiveGami = gamiEnabled && audienceShowsGamification(audience);
   // ADR-010: düello bağlamıyla açılınca mod seçimi atlanır; oturumu sürücü düello ucundan açar.
+  // T218: öğrenme tamamlanmadıysa düello başlatılmaz; kullanıcı öğrenme ekranına düşer
+  // (bilgi notu LearnScreen'de gösterilir). Sunucu da `learn_required` ile korur.
   const challengeStarted = useRef<string | null>(null);
   useEffect(() => {
     if (challengeId === undefined || challengeStarted.current === challengeId || sessions === undefined) return;
+    if (!canStartMode("assessment", learnGate.complete)) {
+      // Kilitliyken düello başlatılmaz; öğrenme ekranına düşülür. Etki, öğrenme
+      // tamamlanınca (complete değişince) yeniden çalışıp düelloyu açar.
+      dispatch({ type: "startMode", mode: "learn" });
+      dispatch({ type: "goto", screen: "learn" });
+      return;
+    }
     challengeStarted.current = challengeId;
     dispatch({ type: "startMode", mode: "assessment", challengeId });
-  }, [challengeId, dispatch, sessions]);
+  }, [challengeId, dispatch, learnGate.complete, sessions]);
   return (
     <EmbeddedProvider
       embedded={embedded}

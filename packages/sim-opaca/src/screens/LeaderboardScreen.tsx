@@ -1,6 +1,7 @@
 import { documentLike, windowLike, locationSearch } from '../platform-dom'
 import type { ModalEnv, ModalFocusable } from '../ui/modal-env'
 import { useEffect, useMemo, useState } from 'react'
+import { useStartMode } from '../core/LearnGate'
 import { useStore } from '../core/StoreProvider'
 import { Footer } from '../ui/chrome'
 import { ScreenHeading } from '../ui/ScreenHeading'
@@ -34,6 +35,7 @@ function LeaderboardBody({
   setCohort: (cohort: CohortFilter) => void
 }) {
   const { dispatch, now } = useStore()
+  const startMode = useStartMode()
   const { reportSyncError } = useGamiContext()
   const [version, setVersion] = useState(0)
   const demo = gamiDemoFrom(locationSearch(), devBuild)
@@ -73,9 +75,10 @@ function LeaderboardBody({
   const profile = view.state.profile
   const me = model.rows.find((r) => r.isMe)
 
+  // T218: öğrenme tamamlanmadan değerlendirme başlatılamaz; kilitliyse istek öğrenmeye düşer.
   const startAssessment = () => {
     // A2.3: örneklemi sunucu sürücüsü çeker (istemcide havuz yok).
-    dispatch({ type: 'startMode', mode: 'assessment' })
+    startMode('assessment')
   }
   const statusAction = (a: 'privacy' | 'assess') => {
     if (a === 'assess') return startAssessment()

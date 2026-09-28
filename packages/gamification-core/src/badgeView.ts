@@ -15,6 +15,7 @@ export const BADGE_CATEGORY_LABEL: Record<BadgeCategory, string> = {
   streak: "Seri",
   learn: "Öğrenme",
   milestone: "Kilometre taşı",
+  challenge: "Meydan Okuma",
 };
 
 export const BADGE_TIER_LABEL: Record<BadgeTier, string> = {

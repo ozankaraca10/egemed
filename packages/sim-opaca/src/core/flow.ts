@@ -107,3 +107,14 @@ export function stepBackTarget(index: number): "modes" | null {
 export function needsExitConfirm(screen: Screen): boolean {
   return screen === "simulation";
 }
+
+/** T218: öğrenme tamamlanmadan uygulama/değerlendirme hedefi öğrenmedir (kilit, öneri değil). */
+export function modePickTarget(mode: Mode, learnComplete: boolean, poolReady: boolean): Mode {
+  if (!learnComplete && poolReady && mode !== "learn") return "learn";
+  return mode;
+}
+
+/** T218: öğrenme kilidi — tamamlanmadıysa ve havuz hazırsa kart kilitlidir. */
+export function modeLearnLocked(learnComplete: boolean, poolReady: boolean): boolean {
+  return !learnComplete && poolReady;
+}

@@ -227,7 +227,7 @@ export function createApp(deps: AppDeps): Hono<AppEnv> {
     {
       gamification: deps.gamification,
       ...simSessionDeps,
-      onFinished: challengeFinishedHook({ challenges, sessions: simSessionDeps.sessions }),
+      onFinished: challengeFinishedHook({ challenges, sessions: simSessionDeps.sessions, gamification: deps.gamification }),
     },
     deps.now,
   );

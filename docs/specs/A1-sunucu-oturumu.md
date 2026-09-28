@@ -24,7 +24,7 @@ Bu alanların herhangi biri, sayfa kaynağını okuyan bir kişiye ya da yapay z
 | `patient`, `chiefComplaint`, `history`, `vitalSigns` | var | Klinik öykü, soru bağlamıdır. |
 | `tasks` | var | Genel yönergelerdir. |
 | `views`, `allowedHeads` | var | |
-| `points[]` | var | `{ pointId, audio: { bell?: token, diaphragm?: token } }`. Ses dosyası adı yerine oturuma bağlı opak jeton gider. |
+| `points[]` | var | `{ pointId, audio: { bell?: token, diaphragm?: token }, component?: "lung" }`. Ses dosyası adı yerine oturuma bağlı opak jeton gider; `component` yalnız karma vakada posterior noktada akciğer bileşeninin gerçek kaydı çalındığını bildirir (§14). |
 | `questions[]` | var | `{ id, type, domain, prompt, help?, options[] }`. Seçenek kimlikleri oturuma özel karıştırılır. `correct`, `feedback*` ve `hint` alanları yoktur. |
 | `technique` | kısmi | Yalnız `minPointsVisited` gider. `requiredPoints` gitmez, lokalizasyonu ele verir. |
 | `title`, `objectives`, `primaryAcousticFinding`, `clinicalDiagnosis`, `soundAssignments`, `feedback`, `references`, `libraryKey`, `mappingNote`, `scoringWeights` | yok | |

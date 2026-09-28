@@ -36,6 +36,7 @@ import {
   type StageCoordPoint,
   type StageRect,
 } from "./patient-stage/geometry";
+import { tubeAnchor, tubeHeadsetHeight, tubePath, tubeTip } from "./patient-stage/tube";
 
 export interface StagePoint extends StageCoordPoint {
   readonly label: string;
@@ -67,6 +68,30 @@ export function createNoopStageEnv(): StageEnv {
 }
 
 const NOOP_STAGE_ENV: StageEnv = createNoopStageEnv();
+
+/** Tarayıcı zamanlayıcıları. Boyut gözlemi no-op kalır: sahne ölçüsü CSS ile verilir (T206). */
+export function createBrowserStageEnv(): StageEnv {
+  const win = globalThis as unknown as {
+    setTimeout(handler: () => void, ms: number): number;
+    clearTimeout(handle: number): void;
+    setInterval(handler: () => void, ms: number): number;
+    clearInterval(handle: number): void;
+  };
+  return {
+    setTimeout: (handler, ms) => win.setTimeout(handler, ms),
+    clearTimeout: (handle) => win.clearTimeout(handle),
+    setInterval: (handler, ms) => win.setInterval(handler, ms),
+    clearInterval: (handle) => win.clearInterval(handle),
+    observeStage: () => () => undefined,
+  };
+}
+
+const StageEnvContext = createContext<StageEnv | null>(null);
+
+/** Modül bağlamı: `env` prop'u verilmeyen tüm sahneler bu zamanlayıcıları kullanır. */
+export function StageEnvProvider({ env, children }: { env: StageEnv; children?: ReactNode }) {
+  return <StageEnvContext.Provider value={env}>{children}</StageEnvContext.Provider>;
+}
 
 export interface StageAudioStatus {
   readonly pointId: string;
@@ -348,6 +373,10 @@ interface StethElement {
   style: { left: string; top: string };
 }
 
+interface PathElement {
+  setAttribute(name: string, value: string): void;
+}
+
 interface PointerTarget {
   setPointerCapture?(pointerId: number): void;
 }
@@ -357,6 +386,13 @@ function asSteth(value: unknown): StethElement | null {
   const node = value as Partial<StethElement>;
   if (!node.style) return null;
   return node as StethElement;
+}
+
+function asPath(value: unknown): PathElement | null {
+  if (!value || typeof value !== "object") return null;
+  const node = value as Partial<PathElement>;
+  if (typeof node.setAttribute !== "function") return null;
+  return node as PathElement;
 }
 
 function asMeasure(value: unknown): StageRect | null {
@@ -377,12 +413,15 @@ export const PatientStage = forwardRef<StageHandle, PatientStageProps>(function 
   const contextual = useContext(StageAudioContext);
   const engine = props.engine ?? contextual;
   if (!engine) throw new Error("Ausculta ses motoru yok");
-  const env = props.env ?? NOOP_STAGE_ENV;
+  const contextualEnv = useContext(StageEnvContext);
+  const env = props.env ?? contextualEnv ?? NOOP_STAGE_ENV;
   const bodyType = props.bodyType ?? "erkek";
   const strict = props.strict ?? false;
   const fitRef = useRef<unknown>(null);
   const wrapRef = useRef<unknown>(null);
   const stethRef = useRef<unknown>(null);
+  const tubeRef = useRef<unknown>(null);
+  const tubeShineRef = useRef<unknown>(null);
   const posRef = useRef<NormPoint>({ ...INITIAL_STAGE_POSITION });
   const [box, setBox] = useState<{ w: number; h: number }>({ w: 0, h: 0 });
   const [snapped, setSnapped] = useState<string | null>(null);
@@ -393,11 +432,22 @@ export const PatientStage = forwardRef<StageHandle, PatientStageProps>(function 
   const [audioStatus, setAudioStatus] = useState<StageAudioStatus | null>(null);
 
   const cfg = stageViewConfig(props.view, bodyType);
+  /** Göğüs parçası konumunu ve tüp yolunu aynı karede uygular (T228).
+   *  Tüp başlangıcı sabittir; ucu göğüs parçasının tüpe bakan kenarıdır. */
   const applyPos = (): void => {
     const el = asSteth(stethRef.current);
-    if (!el) return;
-    el.style.left = `${posRef.current.x * 100}%`;
-    el.style.top = `${posRef.current.y * 100}%`;
+    if (el) {
+      el.style.left = `${posRef.current.x * 100}%`;
+      el.style.top = `${posRef.current.y * 100}%`;
+    }
+    const path = asPath(tubeRef.current);
+    if (!path || box.w <= 0 || box.h <= 0) return;
+    const size = { w: box.w, h: box.h };
+    const anchor = tubeAnchor(size);
+    const tip = tubeTip({ x: posRef.current.x * size.w, y: posRef.current.y * size.h });
+    const d = tubePath(anchor, tip, size);
+    path.setAttribute("d", d);
+    asPath(tubeShineRef.current)?.setAttribute("d", d);
   };
   const slot = useRef<StageSessionBindings | null>(null);
   if (!slot.current) {
@@ -463,7 +513,7 @@ export const PatientStage = forwardRef<StageHandle, PatientStageProps>(function 
 
   useEffect(() => {
     applyPos();
-  }, [props.view]);
+  }, [props.view, box]);
 
   useEffect(() => {
     session.setVolume(props.volume);
@@ -576,6 +626,57 @@ export const PatientStage = forwardRef<StageHandle, PatientStageProps>(function 
               </div>
             );
           })}
+          {/* T228: ses iletim tüpü katmanı — gövde ve hotspot'ların üstünde,
+              göğüs parçasının altında. Sürükleme/dokunma/klavye davranışına
+              dokunmaz (pointer-events yok, erişilebilirlik ağacı dışı). */}
+          <svg
+            className="tube-layer"
+            viewBox={`0 0 ${box.w || 1} ${box.h || 1}`}
+            preserveAspectRatio="none"
+            aria-hidden="true"
+            focusable="false"
+          >
+            <path
+              ref={(node) => {
+                tubeRef.current = node;
+              }}
+              className="tube-line"
+              fill="none"
+              stroke="#1f2b38"
+              strokeWidth={7}
+              strokeLinecap="round"
+            />
+            <path
+              ref={(node) => {
+                tubeShineRef.current = node;
+              }}
+              className="tube-shine"
+              fill="none"
+              stroke="#8ba0b3"
+              strokeWidth={2.4}
+              strokeLinecap="round"
+              opacity={0.45}
+              transform="translate(-1.4 -1.4)"
+            />
+            {(() => {
+              const size = { w: box.w || 0, h: box.h || 0 };
+              const at = tubeAnchor(size);
+              const k = tubeHeadsetHeight(size) / 100;
+              return (
+                <g className="tube-fork" transform={`translate(${at.x.toFixed(1)} ${at.y.toFixed(1)}) scale(${k.toFixed(3)})`}>
+                  {/* Gerçek oranlı kulaklık (birim yükseklik 100): Y-parça lastik kolları,
+                      metal kulak boruları, yay köprüsü ve kulak uçları. */}
+                  <path d="M 0 0 L -12 -26 M 0 0 L 12 -26" fill="none" stroke="#1f2b38" strokeWidth={7} strokeLinecap="round" vectorEffect="non-scaling-stroke" />
+                  <path d="M -12 -26 C -20 -50 -34 -78 -26 -95 M 12 -26 C 20 -50 34 -78 26 -95" fill="none" stroke="#98a6b3" strokeWidth={4.5} strokeLinecap="round" vectorEffect="non-scaling-stroke" />
+                  <path d="M -12 -26 C -20 -50 -34 -78 -26 -95 M 12 -26 C 20 -50 34 -78 26 -95" fill="none" stroke="#eef1f4" strokeWidth={1.4} strokeLinecap="round" opacity={0.7} vectorEffect="non-scaling-stroke" />
+                  <path d="M -17 -40 Q 0 -44 17 -40" fill="none" stroke="#7d8b98" strokeWidth={3} strokeLinecap="round" vectorEffect="non-scaling-stroke" />
+                  <ellipse cx={-23} cy={-97} rx={6.5} ry={4.6} transform="rotate(-25 -23 -97)" fill="#2b3642" />
+                  <ellipse cx={23} cy={-97} rx={6.5} ry={4.6} transform="rotate(25 23 -97)" fill="#2b3642" />
+                  <rect x={-5} y={-6} width={10} height={12} rx={3} fill="#3d4854" />
+                </g>
+              );
+            })()}
+          </svg>
           <div
             ref={(node) => {
               stethRef.current = node;
@@ -592,7 +693,7 @@ export const PatientStage = forwardRef<StageHandle, PatientStageProps>(function 
             style={{ minWidth: 44, minHeight: 44 }}
           >
             <span className="contact-pulse" key={pulseKey} />
-            <Chestpiece onBody={!!snapped} />
+            <Chestpiece />
           </div>
           {!snapped && !playing && visiblePoints.length > 0 && (
             <div className="dwell-hint">Stetoskopu oskültasyon bölgesine sürükleyin</div>

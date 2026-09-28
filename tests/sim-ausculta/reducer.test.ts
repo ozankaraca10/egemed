@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { buildSuspend, deserializeSuspend, initialState, reducer, sampleSession, serializeSuspend } from "../../packages/sim-ausculta/src/index";
+import type { CaseDef } from "../../packages/sim-ausculta/src/index";
 import { ALL_CASES, poolFor } from "./bank-cases";
 
 /** Kaynak tests/core.test.ts:148-234 (7 test → 7 test). */
@@ -133,5 +134,19 @@ describe("reducer: yeni oturum ve devam ettirme", () => {
     expect(next.session.assessmentIds).toEqual(ids);
     expect(next.session.seed).toBe(seed);
     expect(next.session.practiceIds).toEqual([]);
+  });
+
+  it("T233: caseMount izinli ilk görünümü açar; izinli arka vaka arkaya geçer", () => {
+    const heart = caseNormalHeart();
+    const backOnly = { ...heart, id: "srv-1", views: ["back"] as CaseDef["views"] };
+    const mounted = reducer(initialState, { type: "caseMount", caseDef: backOnly });
+    expect(mounted.view).toBe("back");
+    // Açılış görünümü her vakada izinli ilk görünümdür; önceki görünüm taşınmaz.
+    const frontOnly = { ...heart, id: "srv-2", views: ["front"] as CaseDef["views"] };
+    expect(reducer(mounted, { type: "caseMount", caseDef: frontOnly }).view).toBe("front");
+    // Aynı vaka ve aynı görünüm: gereksiz durum üretilmez.
+    const stable = reducer(mounted, { type: "caseMount", caseDef: { ...backOnly } });
+    expect(stable).toBe(mounted);
+    expect(stable.view).toBe("back");
   });
 });

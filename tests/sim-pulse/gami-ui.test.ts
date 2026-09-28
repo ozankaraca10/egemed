@@ -15,6 +15,7 @@ import {
   leaderboardMarkup,
 } from "../../packages/sim-pulse/src/gamification/ui";
 import type { PulseAttemptRecord } from "../../packages/sim-pulse/src/gamification/attempt";
+import { PULSE_BADGES } from "../../packages/sim-pulse/src/gamification/catalog";
 
 const NOW = new Date("2026-09-24T10:00:00.000Z");
 
@@ -58,14 +59,14 @@ describe("Başarılarım görünümü", () => {
     expect(view.level.level).toBe(2);
     expect(view.streak.current).toBe(1);
     expect(view.earnedCount).toBe(1);
-    expect(view.badges).toHaveLength(20);
+    expect(view.badges).toHaveLength(PULSE_BADGES.length);
 
     const html = achievementsMarkup(view);
     expect(html).toContain("12 derivasyon okuru");
     expect(html).toContain("Düzey 2");
     expect(html).toContain("120 XP");
     expect(html).toContain("1 gün seri");
-    expect(html).toContain("1/20 rozet");
+    expect(html).toContain(`1/${PULSE_BADGES.length} rozet`);
     expect(html).toContain("değerlendirme oturumu");
     expect(html).toContain("progressbar");
     expect(html).toContain("Kazanıldı");

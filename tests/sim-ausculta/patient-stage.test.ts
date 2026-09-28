@@ -82,6 +82,12 @@ describe("PatientStage", () => {
     expect(html).toContain("min-width:44px");
     expect(html).toContain("min-height:44px");
     expect(html).toContain("Stetoskopu oskültasyon bölgesine sürükleyin");
+    // T228: tüp katmanı hotspot'ların üstünde, göğüs parçasının altında.
+    expect(html).toContain('class="tube-layer"');
+    expect(html).toContain('aria-hidden="true"');
+    expect(html).toContain('class="tube-line"');
+    expect(html).toContain('class="tube-fork"');
+    expect(html.indexOf('class="tube-layer"')).toBeLessThan(html.indexOf('class="steth'));
   });
 
   it("pediatrik gövdede fotoğraf yerine şema çizer", () => {

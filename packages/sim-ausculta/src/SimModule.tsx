@@ -3,7 +3,7 @@ import { createElement, type ReactNode } from "react";
 import { createRoot as reactCreateRoot } from "react-dom/client";
 import type { SimChrome, SimDispose, SimModule, SimMountContext, SimMountTarget } from "@egemed/sim-host";
 import { App, type AuscultaAudio } from "./App";
-import { createAudioEngine, type AudioBufferLike, type AudioContextLike, type AudioEngine, type AudioEngineDeps } from "./audio/engine";
+import { createAudioEngine, type AbortSignalLike, type AudioBufferLike, type AudioContextLike, type AudioEngine, type AudioEngineDeps } from "./audio/engine";
 import type { WindowLike } from "./core/lifecycle";
 import { initialState, type StoragePort } from "./core/reducer";
 import { createNoopRuntimeAdapter, type RuntimeAdapter } from "./core/runtime";
@@ -14,6 +14,7 @@ import type { ResultsScreenEnv } from "./screens/ResultsScreen";
 import type { SimulationScreenEnv } from "./screens/simulation/runtime";
 import type { ModalEnv } from "./ui/modal-env";
 import { createNoopFullscreenEnv, type FullscreenEnv } from "./ui/chrome";
+import { createBrowserStageEnv, StageEnvProvider, type StageEnv } from "./ui/PatientStage";
 
 /** Platform varlık tabanı. Göreli ses yolları bu önekle çözülür. */
 export const DEFAULT_AUSCULTA_ASSET_BASE = "/sims/ausculta/";
@@ -48,6 +49,7 @@ export interface AuscultaModuleDeps {
   readonly modalEnv?: ModalEnv;
   readonly resultsEnv?: ResultsScreenEnv;
   readonly fullscreenEnv?: FullscreenEnv;
+  readonly stageEnv?: StageEnv;
 }
 
 /** A1: sunucu oturum ses adresleri bu önekle işaretlenir; varlık tabanına eklenmeden aynen kullanılır. */
@@ -127,6 +129,15 @@ function browserStorage(): StoragePort {
   };
 }
 
+/** Motorun iptal sinyali tarayıcı `fetch`'inin kabul ettiği gerçek AbortSignal'a çevrilir. */
+function toFetchInit(init: Parameters<AudioEngineDeps["fetchImpl"]>[1]): Parameters<AudioEngineDeps["fetchImpl"]>[1] {
+  const Ctor = (globalThis as unknown as { AbortController?: new () => { signal: AbortSignalLike; abort(): void } }).AbortController;
+  if (!Ctor) return init;
+  const controller = new Ctor();
+  init.signal.addEventListener("abort", () => controller.abort());
+  return { cache: init.cache, signal: controller.signal };
+}
+
 function productionEngine(assetBase: string, now: () => number): AudioEngine {
   const host = globalThis as unknown as {
     AudioContext?: new () => AudioContextLike;
@@ -139,7 +150,7 @@ function productionEngine(assetBase: string, now: () => number): AudioEngine {
       if (!Ctor) throw new Error("AudioContext yok");
       return new Ctor();
     },
-    fetchImpl: (url, init) => host.fetch(resolveAuscultaAssetUrl(assetBase, url), init),
+    fetchImpl: (url, init) => host.fetch(resolveAuscultaAssetUrl(assetBase, url), toFetchInit(init)),
     decodeAudioData: (ctx, data, signal) => {
       if (signal.aborted) {
         const error = new Error("audio cancelled");
@@ -192,6 +203,7 @@ function defaultProductionDeps(): AuscultaModuleDeps {
     assetBase: DEFAULT_AUSCULTA_ASSET_BASE,
     scrollToTop: () => win.scrollTo?.(0, 0),
     fullscreenEnv: browserFullscreenEnv(),
+    stageEnv: createBrowserStageEnv(),
   };
 }
 
@@ -234,16 +246,15 @@ export function createAuscultaModule(deps?: AuscultaModuleDeps): SimModule {
         ...(context.onChallengeFinished === undefined ? {} : { onChallengeFinished: context.onChallengeFinished }),
       };
 
-      root.render(
-        createElement(StoreProvider, {
-          now: context.now,
-          storage,
-          runtime: resolved.runtime ?? createNoopRuntimeAdapter(),
-          env: resolved.env,
-          initialState: { ...initialState, screen: "modes" },
-          children: createElement(App, appProps),
-        }),
-      );
+      const store = createElement(StoreProvider, {
+        now: context.now,
+        storage,
+        runtime: resolved.runtime ?? createNoopRuntimeAdapter(),
+        env: resolved.env,
+        initialState: { ...initialState, screen: "modes" },
+        children: createElement(App, appProps),
+      });
+      root.render(resolved.stageEnv ? createElement(StageEnvProvider, { env: resolved.stageEnv }, store) : store);
 
       let disposed = false;
       return () => {

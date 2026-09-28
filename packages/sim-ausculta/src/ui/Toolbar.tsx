@@ -8,6 +8,7 @@ import type { SimEventDraft } from "../core/events";
 import type { Action } from "../core/reducer";
 import { useStore } from "../core/StoreProvider";
 import { IconBell, IconBodyBack, IconBodyFront, IconDiaphragm, IconLightbulb, IconVolume } from "./glyphs";
+import { IconLock } from "./icons";
 
 const HIT = { minWidth: 44, minHeight: 44 } as const;
 
@@ -102,8 +103,16 @@ export interface ToolbarProps {
   strict?: boolean;
   engine?: ToolbarAudio;
   env?: ToolbarEnv;
+  /** T233: izinli gövde görünümleri. Verilmezse `caseDef.views`, o da yoksa iki görünüm
+   *  açık kabul edilir; izinli olmayan görünüm düğmesi devre dışı çizilir. */
+  allowedViews?: readonly PatientView[];
   /** Statik render tohumu; tıklama sonrası yerel durum devralır. */
   initialHintOpen?: boolean;
+}
+
+/** İzinli olmayan görünümün kısa Türkçe açıklaması (renk dışı kilit imiyle birlikte). */
+export function viewLockReason(view: PatientView): string {
+  return view === "front" ? "Bu vakada dinlenecek ön bölge yok" : "Bu vakada dinlenecek arka bölge yok";
 }
 
 function rangeVolume(target: unknown): number {
@@ -129,6 +138,7 @@ export function Toolbar({
   strict = false,
   engine: engineProp,
   env = NOOP_ENV,
+  allowedViews: allowedViewsProp,
   initialHintOpen = false,
 }: ToolbarProps) {
   const { state, dispatch, bus } = useStore();
@@ -137,6 +147,10 @@ export function Toolbar({
   if (!engine) throw new Error("Ausculta ses motoru yok");
 
   const heads = caseDef?.allowedHeads ?? (["bell", "diaphragm"] as const);
+  const declaredViews = allowedViewsProp ?? caseDef?.views;
+  const allowedViews: readonly PatientView[] =
+    declaredViews !== undefined && declaredViews.length > 0 ? declaredViews : ["front", "back"];
+  const lockedViews = (["front", "back"] as const).filter((view) => !allowedViews.includes(view));
   const [hintOpen, setHintOpen] = useState(initialHintOpen);
   const showHint = showHintControl(strict, question?.hint, hintOpen, state.hintsUsed);
   const ports: ToolbarPorts = {
@@ -184,26 +198,35 @@ export function Toolbar({
         </div>
         <div className="tool-sep" />
         <div className="view-toggle" role="group" aria-label="Gövde görünümü">
-          <button
-            type="button"
-            className={state.view === "front" ? "active" : ""}
-            style={HIT}
-            aria-pressed={state.view === "front"}
-            onClick={() => performToolbar(ports, { kind: "view", view: "front" })}
-          >
-            <IconBodyFront /> Ön
-            <SelectedMark on={state.view === "front"} />
-          </button>
-          <button
-            type="button"
-            className={state.view === "back" ? "active" : ""}
-            style={HIT}
-            aria-pressed={state.view === "back"}
-            onClick={() => performToolbar(ports, { kind: "view", view: "back" })}
-          >
-            <IconBodyBack /> Arka
-            <SelectedMark on={state.view === "back"} />
-          </button>
+          {(["front", "back"] as const).map((view) => {
+            const selected = state.view === view;
+            const enabled = allowedViews.includes(view);
+            const label = view === "front" ? "Ön" : "Arka";
+            const reason = viewLockReason(view);
+            return (
+              <button
+                key={view}
+                type="button"
+                className={selected ? "active" : ""}
+                style={HIT}
+                aria-pressed={selected}
+                // Devre dışı görünüm klavye sırasına girmez; neden ikon + gizli metinle taşınır.
+                disabled={!enabled}
+                aria-disabled={!enabled}
+                title={enabled ? undefined : reason}
+                onClick={() => performToolbar(ports, { kind: "view", view })}
+              >
+                {view === "front" ? <IconBodyFront /> : <IconBodyBack />} {label}
+                <SelectedMark on={selected} />
+                {!enabled && (
+                  <span className="view-locked" aria-hidden="true">
+                    <IconLock width={13} height={13} />
+                  </span>
+                )}
+                {!enabled && <span className="sr-only"> — {reason}</span>}
+              </button>
+            );
+          })}
         </div>
         <div className="tool-sep" />
         <div className="vol-group">
@@ -252,6 +275,12 @@ export function Toolbar({
           </button>
         )}
       </div>
+      {lockedViews.length > 0 && (
+        <p className="view-note">
+          <IconLock width={13} height={13} aria-hidden="true" />{" "}
+          {lockedViews.map((view) => `${view === "front" ? "Ön" : "Arka"} görünüm kapalı: ${viewLockReason(view).toLocaleLowerCase("tr")}.`).join(" ")}
+        </p>
+      )}
     </>
   );
 }

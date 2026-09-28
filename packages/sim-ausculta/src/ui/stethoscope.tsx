@@ -1,5 +1,6 @@
-/** Sürüklenebilir stetoskop göğüs parçası (§11). Üretici logosu yok. */
-export function Chestpiece({ onBody }: { onBody?: boolean }) {
+/** Sürüklenebilir stetoskop göğüs parçası (§11). Üretici logosu yok.
+ *  Ses iletim tüpü artık bu parçanın içinde değil; sahne katmanında çizilir (T228). */
+export function Chestpiece() {
   return (
     <svg viewBox="0 0 100 100">
       {/* zil/diyafram kasası */}
@@ -26,17 +27,6 @@ export function Chestpiece({ onBody }: { onBody?: boolean }) {
         })}
       </g>
       <circle cx="50" cy="50" r="10" fill="#3d4854" />
-      {/* tüp */}
-      <path
-        d="M50 94c0-14 20-18 20-36"
-        fill="none"
-        stroke="#1f2b38"
-        strokeWidth="7"
-        strokeLinecap="round"
-        opacity={onBody ? 0.95 : 0}
-        transform="translate(0 2)"
-      />
-      <circle cx="50" cy="94" r="6" fill="#1f2b38" opacity={onBody ? 0.95 : 0} />
     </svg>
   )
 }
