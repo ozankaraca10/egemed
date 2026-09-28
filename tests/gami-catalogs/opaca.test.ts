@@ -181,6 +181,24 @@ describe("Opaca kodlu özet ve rozet istatistiği (ADR-008)", () => {
     }
   });
 
+  it("T235: gami_learn sayaçları istatistiğe girer; eski özet kodlarıyla en büyükle birleşir", () => {
+    const fromLearn = opacaStatsFromSummaries([], { topicsCount: 10, stacksCount: 1 });
+    expect(fromLearn.learnTopicsCount).toBe(10);
+    expect(fromLearn.ctStacksCompletedCount).toBe(1);
+    expect(evaluateBadges(OPACA_BADGES, fromLearn, [], { now: FIXED_NOW }).map((badge) => badge.id)).toContain("explorer");
+    // Geriye uyum: eski istemci denemelerindeki birikimli kodlar okunmaya devam eder.
+    const legacy = opacaStatsFromSummaries([{ "opaca.v": OPACA_SUMMARY_VERSION, "opaca.mode": 0, "opaca.learn": 12, "opaca.stacks": 3 }]);
+    expect(legacy.learnTopicsCount).toBe(12);
+    expect(legacy.ctStacksCompletedCount).toBe(3);
+    // Canlı sayaç daha büyükse kazanç geri alınmaz (en büyük değer).
+    const merged = opacaStatsFromSummaries([{ "opaca.v": OPACA_SUMMARY_VERSION, "opaca.mode": 0, "opaca.learn": 12 }], { topicsCount: 4, stacksCount: 2 });
+    expect(merged.learnTopicsCount).toBe(12);
+    expect(merged.ctStacksCompletedCount).toBe(2);
+    const live = opacaStatsFromSummaries([{ "opaca.v": OPACA_SUMMARY_VERSION, "opaca.mode": 0, "opaca.learn": 2 }], { topicsCount: 15, stacksCount: 4 });
+    expect(live.learnTopicsCount).toBe(15);
+    expect(live.ctStacksCompletedCount).toBe(4);
+  });
+
   it("bozuk, sürümsüz ya da sınır dışı kodlar istatistiği şişiremez", () => {
     const stats = opacaStatsFromSummaries([
       { "opaca.score": 999 },

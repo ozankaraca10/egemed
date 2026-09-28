@@ -416,9 +416,22 @@ export function encodeOpacaSummary(input: OpacaSummaryInput): Record<string, num
   return summary;
 }
 
-/** Kodlu özetlerden rozet istatistiği; bilinmeyen/bozuk kodlar yok sayılır. */
+/** Sunucunun `gami_learn` kayıtlarından türettiği öğrenme sayaçları (T235). */
+export interface OpacaLearnCounters {
+  /** Farklı `opaca:topic:*` sayısı. */
+  readonly topicsCount: number;
+  /** Farklı `opaca:stack:*` sayısı. */
+  readonly stacksCount: number;
+}
+
+/**
+ * Kodlu özetlerden rozet istatistiği; bilinmeyen/bozuk kodlar yok sayılır.
+ * `learn` verilirse sayaçlar `gami_learn`'ten gelir ve özet kodlarıyla en büyük
+ * değerle birleşir (geriye uyum: eski istemci özetleri okunmaya devam eder).
+ */
 export function opacaStatsFromSummaries(
   summaries: readonly Readonly<Record<string, number>>[],
+  learn?: OpacaLearnCounters,
 ): OpacaStats {
   let assessmentCount = 0;
   let practiceCaseTotal = 0;
@@ -464,6 +477,10 @@ export function opacaStatsFromSummaries(
     ctStacksCompletedCount = Math.max(ctStacksCompletedCount, clampInt(summary["opaca.stacks"] ?? 0, 0, 100_000));
     allTopicsTotal = Math.max(allTopicsTotal, clampInt(summary["opaca.lib"] ?? 0, 0, 100_000));
     allTopicsCoveredCount = Math.max(allTopicsCoveredCount, clampInt(summary["opaca.cov"] ?? 0, 0, 100_000));
+  }
+  if (learn !== undefined) {
+    learnTopicsCount = Math.max(learnTopicsCount, clampInt(learn.topicsCount, 0, 100_000));
+    ctStacksCompletedCount = Math.max(ctStacksCompletedCount, clampInt(learn.stacksCount, 0, 100_000));
   }
   const sortedDays = [...days].sort((a, b) => a - b);
   let streakLongest = 0;

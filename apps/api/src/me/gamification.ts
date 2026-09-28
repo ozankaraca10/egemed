@@ -11,7 +11,7 @@ import {
   type GamiPeriod,
   type SimId,
 } from "@egemed/contracts";
-import { SIM_BADGE_EVALUATORS } from "@egemed/gami-catalogs";
+import { SIM_BADGE_EVALUATORS, type SimLearnCounters } from "@egemed/gami-catalogs";
 import { DEFAULT_RULES, assessmentXp, practiceXp, type Period } from "@egemed/gamification-core";
 import {
   buildLeaderboardRows,
@@ -445,7 +445,11 @@ export function createPgGamificationRepo(db: GamiDb): GamificationRepo {
         ],
       );
       const insertedRow = inserted.rows[0] as GamiLearnRow | undefined;
-      if (insertedRow !== undefined) return { kind: "created", learn: toLearnRecord(insertedRow, insertedRow.xp) };
+      if (insertedRow !== undefined) {
+        // T235: öğrenme sayaçları rozet değerlendirmesine girer (yalnız Opaca okur).
+        await awardPgBadges(db, { userId: input.userId, simId: input.simId, at: input.at });
+        return { kind: "created", learn: toLearnRecord(insertedRow, insertedRow.xp) };
+      }
       const existing = await db.query(
         "select sim_id, topic, learned_at, xp from gami_learn where user_id = $1 and sim_id = $2 and topic = $3",
         [input.userId, input.simId, input.topic],
@@ -515,7 +519,7 @@ export function createPgGamificationRepo(db: GamiDb): GamificationRepo {
         );
         const row = inserted.rows[0] as GamiAttemptRow | undefined;
         if (row !== undefined) {
-          await awardPgBadges(db, input);
+          await awardPgBadges(db, { userId: input.userId, simId: input.simId, at: input.createdAt });
           return { kind: "created", attempt: toAttemptRecord(row) };
         }
       } catch (error) {
@@ -579,28 +583,44 @@ export function createPgGamificationRepo(db: GamiDb): GamificationRepo {
 }
 
 /**
- * ADR-008: yeni denemeden sonra kullanıcı×sim özetlerinden rozetler sunucuda
- * değerlendirilir. Yazım idempotenttir (`on conflict do nothing`); hata deneme
- * kaydını bozmaz, sonraki denemede eksik rozet tamamlanır.
+ * T235: Opaca rozetlerinin öğrenme sayaçları yalnız `gami_learn`'ten türetilir
+ * (`opaca:topic:*` / `opaca:stack:*`); denemede kod olarak saklanmaz.
  */
-async function awardPgBadges(db: GamiDb, input: GamiAttemptInput): Promise<void> {
-  const evaluator = SIM_BADGE_EVALUATORS[input.simId];
+function learnCountersFrom(topics: readonly string[]): SimLearnCounters {
+  const distinct = (prefix: string): number =>
+    new Set(topics.filter((topic) => topic.startsWith(prefix))).size;
+  return {
+    topicsCount: distinct("opaca:topic:"),
+    stacksCount: distinct("opaca:stack:"),
+  };
+}
+
+/**
+ * ADR-008: yeni denemeden (ya da öğrenme kaydından) sonra kullanıcı×sim
+ * özetlerinden rozetler sunucuda değerlendirilir. Yazım idempotenttir
+ * (`on conflict do nothing`); hata deneme kaydını bozmaz, sonraki yazımda eksik
+ * rozet tamamlanır.
+ */
+async function awardPgBadges(db: GamiDb, target: { readonly userId: string; readonly simId: SimId; readonly at: number }): Promise<void> {
+  const evaluator = SIM_BADGE_EVALUATORS[target.simId];
   if (evaluator === undefined) return;
   try {
-    const [summaryRows, badgeRows] = await Promise.all([
-      db.query("select summary from gami_attempts where user_id = $1 and sim_id = $2 order by finished_at asc", [input.userId, input.simId]),
-      db.query("select badge_key from gami_badges where user_id = $1 and sim_id = $2", [input.userId, input.simId]),
+    const [summaryRows, badgeRows, learnRows] = await Promise.all([
+      db.query("select summary from gami_attempts where user_id = $1 and sim_id = $2 order by finished_at asc", [target.userId, target.simId]),
+      db.query("select badge_key from gami_badges where user_id = $1 and sim_id = $2", [target.userId, target.simId]),
+      db.query("select topic from gami_learn where user_id = $1 and sim_id = $2", [target.userId, target.simId]),
     ]);
     const summaries = summaryRows.rows.map((row) => (row as { readonly summary: Readonly<Record<string, number>> }).summary);
     const earned = badgeRows.rows.map((row) => (row as { readonly badge_key: string }).badge_key);
-    const awarded = evaluator.newlyEarned(summaries, earned, new Date(input.createdAt));
+    const topics = learnRows.rows.map((row) => (row as { readonly topic: string }).topic);
+    const awarded = evaluator.newlyEarned(summaries, earned, new Date(target.at), learnCountersFrom(topics));
     if (awarded.length === 0) return;
     await db.query(
-      "insert into gami_badges (user_id, sim_id, badge_key, awarded_at) select $1, $2, key, $4 from unnest($3::text[]) as key on conflict (user_id, sim_id, badge_key) do nothing",
-      [input.userId, input.simId, awarded, new Date(input.createdAt)],
+      "insert into gami_badges (user_id, sim_id, badge_key, awarded_at) select $1, $2, key, $4 from unnest($3::text[]) as key where exists (select 1 from gami_profiles p where p.user_id = $1 and p.sim_id = $2) on conflict (user_id, sim_id, badge_key) do nothing",
+      [target.userId, target.simId, awarded, new Date(target.at)],
     );
   } catch {
-    // Rozet yazımı deneme kaydını geri almaz; bir sonraki denemede yeniden değerlendirilir.
+    // Rozet yazımı deneme kaydını geri almaz; bir sonraki yazımda yeniden değerlendirilir.
   }
 }
 
@@ -858,6 +878,22 @@ export function createMemoryGamificationRepo(
     return total;
   }
 
+  /** ADR-008: PG yoluyla aynı kural — özetler + `gami_learn` sayaçlarından rozet. */
+  function awardMemoryBadges(userId: string, simId: SimId, at: number): void {
+    const evaluator = SIM_BADGE_EVALUATORS[simId];
+    if (evaluator === undefined) return;
+    const own = [...attempts.values()]
+      .filter((candidate) => candidate.userId === userId && candidate.simId === simId)
+      .sort((a, b) => a.finishedAt - b.finishedAt);
+    const earned = badges.filter((badge) => badge.userId === userId && badge.simId === simId).map((badge) => badge.key);
+    const topics = [...learn.values()]
+      .filter((entry) => entry.userId === userId && entry.simId === simId)
+      .map((entry) => entry.topic);
+    for (const badgeKey of evaluator.newlyEarned(own.map((candidate) => candidate.summary), earned, new Date(at), learnCountersFrom(topics))) {
+      badges.push({ userId, simId, key: badgeKey, awardedAt: at });
+    }
+  }
+
   const repo: GamificationRepo = {
     async getSummary(query) {
       const profile = profiles.get(profileKey(query.userId, query.simId));
@@ -946,6 +982,8 @@ export function createMemoryGamificationRepo(
       profile.level = levelForXpClosedForm(profile.xp);
       profile.updatedAt = input.at;
       profiles.set(profileKey(input.userId, input.simId), profile);
+      // T235: öğrenme sayaçları rozet değerlendirmesine girer (yalnız Opaca okur).
+      awardMemoryBadges(input.userId, input.simId, input.at);
       return { kind: "created", learn: { simId: input.simId, topic: input.topic, learnedAt: input.at, xpGained: xp } };
     },
 
@@ -1015,16 +1053,7 @@ export function createMemoryGamificationRepo(
       profile.updatedAt = input.createdAt;
       profiles.set(key, profile);
       // ADR-008: rozetler PG yoluyla aynı kuralla özetlerden değerlendirilir.
-      const evaluator = SIM_BADGE_EVALUATORS[input.simId];
-      if (evaluator !== undefined) {
-        const own = [...attempts.values()]
-          .filter((candidate) => candidate.userId === input.userId && candidate.simId === input.simId)
-          .sort((a, b) => a.finishedAt - b.finishedAt);
-        const earned = badges.filter((badge) => badge.userId === input.userId && badge.simId === input.simId).map((badge) => badge.key);
-        for (const badgeKey of evaluator.newlyEarned(own.map((candidate) => candidate.summary), earned, new Date(input.createdAt))) {
-          badges.push({ userId: input.userId, simId: input.simId, key: badgeKey, awardedAt: input.createdAt });
-        }
-      }
+      awardMemoryBadges(input.userId, input.simId, input.createdAt);
       return { kind: "created", attempt };
     },
 

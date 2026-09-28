@@ -588,6 +588,48 @@ describe("sunucu rozet değerlendirmesi (ADR-008) — deneme sunucu yazımından
     expect(keys.filter((key) => key === "first-step")).toHaveLength(1);
   });
 
+  it("T235: gami_learn opaca konuları explorer rozetini kazandırır; başka sim etkilemez", async () => {
+    const testHarness = harness({ [ALI_ID]: ["pulse", "opaca"] });
+    const ali = await login(testHarness, "ali.veli");
+    const badgeKeys = async (simId: string) => {
+      const response = await testHarness.app.request(`/me/gamification/${simId}`, { headers: ali.headers });
+      expect(response.status).toBe(200);
+      return ((await response.json()) as { data: { badges: readonly { key: string }[] } }).data.badges.map((badge) => badge.key);
+    };
+    for (let index = 0; index < 9; index += 1) {
+      expect((await postWrite(testHarness, ali.headers, { topic: `opaca:topic:konu-${index}` }, "opaca")).status).toBe(201);
+    }
+    // Eşiğin (10 konu) altında rozet verilmez.
+    expect(await badgeKeys("opaca")).not.toContain("explorer");
+    expect((await postWrite(testHarness, ali.headers, { topic: "opaca:topic:konu-9" }, "opaca")).status).toBe(201);
+    expect(await badgeKeys("opaca")).toContain("explorer");
+    // Tek BT yığını ct-explorer rozetini kazandırır.
+    expect((await postWrite(testHarness, ali.headers, { topic: "opaca:stack:seri-1" }, "opaca")).status).toBe(201);
+    expect(await badgeKeys("opaca")).toContain("ct-explorer");
+    // Pulse öğrenme kaydı Opaca rozeti üretmez (sim başına ayrı katalog).
+    expect(await badgeKeys("pulse")).not.toContain("explorer");
+  });
+
+  it("T235: eski istemci özetlerindeki opaca.learn kodları okunmaya devam eder", async () => {
+    const testHarness = harness({ [ALI_ID]: ["pulse", "opaca"] });
+    const ali = await login(testHarness, "ali.veli");
+    const summary = encodeOpacaSummary({
+      mode: "assessment",
+      finishedAt: "2026-09-24T09:00:00.000Z",
+      score: 0,
+      caseCount: 1,
+      hintsUsed: 0,
+      extra: { localizationHits: 0, abcdeComplete: 0, qualityCorrect: 0, interpretationCorrect: 0, fastPerfect: false },
+      learn: { topicsCount: 10, stacksCount: 1, libraryTopicsTotal: 0, libraryTopicsCovered: 0 },
+    });
+    const input = serverAttemptInput({ simId: "opaca", summary });
+    expect((await testHarness.gamificationStore.repo.writeAttempt(input)).kind).toBe("created");
+    const response = await testHarness.app.request("/me/gamification/opaca", { headers: ali.headers });
+    const keys = ((await response.json()) as { data: { badges: readonly { key: string }[] } }).data.badges.map((badge) => badge.key);
+    expect(keys).toContain("explorer");
+    expect(keys).toContain("ct-explorer");
+  });
+
   it("Ausculta denemesinin kodlu özetinden rozetler sunucuda verilir; tekrar rozet çoğaltmaz", async () => {
     const testHarness = harness({ [ALI_ID]: ["pulse", "ausculta"] });
     const ali = await login(testHarness, "ali.veli");
