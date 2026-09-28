@@ -156,7 +156,6 @@ export class AudioEngine {
   private readonly pendingTimers = new Set<number>();
   private active: ActiveChannel | null = null;
   private volume = AUDIO_CONFIG.defaultVolume;
-  private muted = false;
   private epoch = 0;
   private disposed = false;
   lastListenMs = 0;
@@ -169,7 +168,7 @@ export class AudioEngine {
     if (!this.ctx) {
       const ctx = this.deps.createContext();
       const master = ctx.createGain();
-      master.gain.value = this.muted ? 0 : this.volume * AUDIO_CONFIG.clipGuardGain;
+      master.gain.value = this.volume * AUDIO_CONFIG.clipGuardGain;
       const lp = ctx.createBiquadFilter();
       lp.type = "lowpass";
       lp.frequency.value = AUDIO_CONFIG.masterLowpassHz;
@@ -203,15 +202,6 @@ export class AudioEngine {
   setVolume(v: number): void {
     this.volume = Math.min(1, Math.max(0, v));
     this.applyMasterGain();
-  }
-
-  setMuted(m: boolean): void {
-    this.muted = m;
-    this.applyMasterGain();
-  }
-
-  isMuted(): boolean {
-    return this.muted;
   }
 
   getActive(): ActiveChannel | null {
@@ -329,7 +319,7 @@ export class AudioEngine {
 
   private applyMasterGain(): void {
     if (!this.master || !this.ctx) return;
-    const level = this.muted ? 0 : this.volume * AUDIO_CONFIG.clipGuardGain;
+    const level = this.volume * AUDIO_CONFIG.clipGuardGain;
     this.master.gain.setTargetAtTime(level, this.ctx.currentTime, 0.03);
   }
 

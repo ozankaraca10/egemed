@@ -7,12 +7,11 @@ import type { CaseDef, PatientView, Question, StethHead } from "../core/types";
 import type { SimEventDraft } from "../core/events";
 import type { Action } from "../core/reducer";
 import { useStore } from "../core/StoreProvider";
-import { IconBell, IconBodyBack, IconBodyFront, IconDiaphragm, IconLightbulb, IconVolume, IconVolumeX } from "./glyphs";
+import { IconBell, IconBodyBack, IconBodyFront, IconDiaphragm, IconLightbulb, IconVolume } from "./glyphs";
 
 const HIT = { minWidth: 44, minHeight: 44 } as const;
 
 export interface ToolbarAudio {
-  setMuted(muted: boolean): void;
   setVolume(volume: number): void;
 }
 
@@ -48,7 +47,6 @@ export interface ToolbarPorts {
   engine: ToolbarAudio;
   env: ToolbarEnv;
   stage: ToolbarStageRef;
-  setMuted: (muted: boolean) => void;
   openHint: () => void;
   onHint?: (() => void) | undefined;
 }
@@ -56,7 +54,6 @@ export interface ToolbarPorts {
 export type ToolbarIntent =
   | { kind: "head"; head: StethHead }
   | { kind: "view"; view: PatientView }
-  | { kind: "mute"; muted: boolean }
   | { kind: "volume"; volume: number }
   | { kind: "replay"; activePoint: string | null }
   | { kind: "jump" }
@@ -71,10 +68,6 @@ export function performToolbar(ports: ToolbarPorts, intent: ToolbarIntent): void
     case "view":
       ports.dispatch({ type: "setView", view: intent.view });
       ports.emit({ type: "view_changed", view: intent.view });
-      return;
-    case "mute":
-      ports.setMuted(intent.muted);
-      ports.engine.setMuted(intent.muted);
       return;
     case "volume":
       ports.dispatch({ type: "setVolume", volume: intent.volume });
@@ -110,7 +103,6 @@ export interface ToolbarProps {
   engine?: ToolbarAudio;
   env?: ToolbarEnv;
   /** Statik render tohumu; tıklama sonrası yerel durum devralır. */
-  initialMuted?: boolean;
   initialHintOpen?: boolean;
 }
 
@@ -137,7 +129,6 @@ export function Toolbar({
   strict = false,
   engine: engineProp,
   env = NOOP_ENV,
-  initialMuted = false,
   initialHintOpen = false,
 }: ToolbarProps) {
   const { state, dispatch, bus } = useStore();
@@ -146,7 +137,6 @@ export function Toolbar({
   if (!engine) throw new Error("Ausculta ses motoru yok");
 
   const heads = caseDef?.allowedHeads ?? (["bell", "diaphragm"] as const);
-  const [muted, setMuted] = useState(initialMuted);
   const [hintOpen, setHintOpen] = useState(initialHintOpen);
   const showHint = showHintControl(strict, question?.hint, hintOpen, state.hintsUsed);
   const ports: ToolbarPorts = {
@@ -155,7 +145,6 @@ export function Toolbar({
     engine,
     env,
     stage: stageRef,
-    setMuted,
     openHint: () => setHintOpen(true),
     onHint,
   };
@@ -218,16 +207,6 @@ export function Toolbar({
         </div>
         <div className="tool-sep" />
         <div className="vol-group">
-          <button
-            type="button"
-            aria-label={muted ? "Sesi aç" : "Sesi kıs"}
-            aria-pressed={muted}
-            style={{ background: "none", border: 0, color: "inherit", display: "flex", padding: 2, minWidth: 44, minHeight: 44 }}
-            onClick={() => performToolbar(ports, { kind: "mute", muted: !muted })}
-          >
-            {muted ? <IconVolumeX /> : <IconVolume />}
-            <SelectedMark on={muted} />
-          </button>
           <input
             type="range"
             min={0}
