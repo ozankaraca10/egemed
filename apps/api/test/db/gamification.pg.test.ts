@@ -338,6 +338,24 @@ if (databaseUrl === "") {
           }
         }
       });
+
+      it("T235: Opaca öğrenme sayaçları gami_learn'ten okunur; explorer eşikte verilir", async () => {
+        const opacaBadges = async () => {
+          const result = await client.query(
+            "select badge_key from gami_badges where user_id = $1 and sim_id = 'opaca' order by badge_key",
+            [ALI_ID],
+          );
+          return (result.rows as readonly { readonly badge_key: string }[]).map((row) => row.badge_key);
+        };
+        for (let index = 0; index < 9; index += 1) {
+          await repo().recordLearn({ userId: ALI_ID, simId: "opaca", topic: `opaca:topic:konu-${index}`, at: FIXED_NOW, institutionId: INSTITUTION_ID });
+        }
+        expect(await opacaBadges()).not.toContain("explorer");
+        await repo().recordLearn({ userId: ALI_ID, simId: "opaca", topic: "opaca:topic:konu-9", at: FIXED_NOW, institutionId: INSTITUTION_ID });
+        expect(await opacaBadges()).toContain("explorer");
+        await repo().recordLearn({ userId: ALI_ID, simId: "opaca", topic: "opaca:stack:seri-1", at: FIXED_NOW, institutionId: INSTITUTION_ID });
+        expect(await opacaBadges()).toContain("ct-explorer");
+      });
     });
 
     describe("liderlik katılım tercihi (T100)", () => {

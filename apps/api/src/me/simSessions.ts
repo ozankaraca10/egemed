@@ -16,7 +16,7 @@ import {
   type SimTelemetry,
 } from "@egemed/contracts";
 import { ausculta, opaca, pulse } from "@egemed/assessment-bank";
-import { encodeAuscultaSummary } from "@egemed/gami-catalogs";
+import { encodeAuscultaSummary, encodeOpacaSummary } from "@egemed/gami-catalogs";
 import { jsonError, validationDetails, type AppEnv } from "../http";
 import { createLoginRateLimiter } from "../auth/rate-limit";
 import { toIstanbulIso } from "../admin/users";
@@ -336,6 +336,32 @@ function auscultaSummaryOf(counted: readonly { readonly item: SimCaseState; read
   );
 }
 
+/**
+ * T235: Opaca rozet özeti — vaka sonuçlarından sunucu kodlar (ADR-008); istemciden
+ * hiçbir sayı alınmaz. Yalnız uygulama/değerlendirme yazılır: düello oturumu
+ * istemci davranışıyla aynı şekilde istatistiğe girmez.
+ */
+function opacaSummaryOf(
+  counted: readonly { readonly item: SimCaseState; readonly result: SimCaseResult }[],
+  session: { readonly mode: "practice" | "assessment"; readonly total: number; readonly startedAt: number; readonly at: number },
+): Record<string, number> {
+  const stats = opaca.opacaSessionStats(
+    counted.flatMap(({ item, result }) => {
+      const caseDef = opaca.caseById(item.caseId);
+      return caseDef === undefined ? [] : [{ caseDef, result }];
+    }),
+    { mode: session.mode, score: session.total, durationMs: session.at - session.startedAt },
+  );
+  return encodeOpacaSummary({
+    mode: session.mode,
+    finishedAt: toIstanbulIso(session.at),
+    score: session.total,
+    caseCount: counted.length,
+    hintsUsed: counted.reduce((sum, entry) => sum + entry.result.hintsUsed, 0),
+    extra: stats,
+  });
+}
+
 /** A2.2: görüntü vekilinin içerik türü çalışma zamanı yolunun uzantısından belirlenir. */
 function imageContentType(runtimeUrl: string): string {
   const lower = runtimeUrl.toLowerCase();
@@ -555,9 +581,14 @@ export function registerSimSessionRoutes(app: Hono<AppEnv>, deps: SimSessionDeps
     let xpGained = 0;
     // Öğretim üyesi (T171) ve uzmanlık öğrencisi (T219) oyunlaştırmaya katılmaz: deneme yazılmaz.
     if (actor.gamified) {
-      // Rozet özeti sime özgüdür: Ausculta kodlu, Opaca/Pulse yalnız genel alanlarla yazılır.
+      // Rozet özeti sime özgüdür: Ausculta ve Opaca kodlu, Pulse yalnız genel alanlarla yazılır.
       // (Pulse rozet özeti istemci sayaçlarına dayanır — sunucu oturumunda üretilemez, T202 Opaca kararı.)
-      const summaryExtra = row.simId === "ausculta" ? auscultaSummaryOf(counted) : {};
+      const summaryExtra =
+        row.simId === "ausculta"
+          ? auscultaSummaryOf(counted)
+          : row.simId === "opaca" && row.mode !== "challenge"
+            ? opacaSummaryOf(counted, { mode: row.mode, total, startedAt: row.startedAt, at })
+            : {};
       const written = await deps.gamification.writeAttempt({
         id: deps.newId(),
         userId: actor.userId,

@@ -6,7 +6,12 @@ import { nearestFindingBoxCenter } from "../../packages/assessment-bank/src/opac
 import { getImage } from "../../packages/sim-opaca/src/core/images";
 import { encodeMark } from "../../packages/sim-opaca/src/core/geometry";
 import { scoreCase as simScoreCase } from "../../packages/sim-opaca/src/core/scoring";
+import type { CaseResult as ClientCaseResult } from "../../packages/sim-opaca/src/core/types";
 import { ZONES as SIM_ZONES } from "../../packages/sim-opaca/src/data/zones";
+import { buildAttemptRecord } from "../../packages/sim-opaca/src/gamification/attempt";
+import { TOPIC_BADGE_MATCH } from "../../packages/sim-opaca/src/gamification/stats";
+import { FINDINGS } from "../../packages/sim-opaca/src/data/terminology";
+import { OPACA_TOPIC_MATCH, opacaSessionStats } from "../../packages/assessment-bank/src/opaca/stats";
 import type { CaseDef, ImageRecord, Question } from "../../packages/assessment-bank/src/opaca/types";
 
 // A2.1 (ADR-009): anahtarsız Opaca projeksiyonu hiçbir vakada anahtar/tanı/görüntü
@@ -210,6 +215,100 @@ describe("sunucu notlandırması", () => {
     const bad = opaca.checkQuestion(caseDef, keys, question.id, [tokenFor(keys, question.id, wrongOption?.id ?? "")]);
     expect(bad?.correct).toBe(false);
     expect(opaca.checkQuestion(caseDef, keys, "yok", ["tok_0000000000"])).toBeNull();
+  });
+});
+
+describe("sunucu oturum istatistiği (T235)", () => {
+  const assessmentCases = allCases.filter((def) => def.modes.includes("assessment") && def.questions.length > 0);
+
+  /** Banka sonuçlarından sim istemcisinin deneme kaydını üretir (istemci kuralı referansı). */
+  function clientRecordOf(items: readonly { readonly caseDef: CaseDef; readonly result: ReturnType<typeof opaca.gradeCase> }[]) {
+    return buildAttemptRecord({
+      mode: "assessment",
+      results: items.map(({ caseDef, result }) => ({
+        caseId: caseDef.id,
+        total: result.total,
+        max: result.max,
+        mastery: result.mastery,
+        domains: result.domains as ClientCaseResult["domains"],
+        answers: result.questions.map((question) => ({ qid: question.questionId, correct: question.correct, given: [] })),
+        hintsUsed: result.hintsUsed,
+      })),
+      caseById: (id) => opaca.caseById(id),
+      sessionSeed: 1,
+      durationMs: 0,
+      finishedAt: new Date(OPENED_AT),
+    });
+  }
+
+  it("konu eşlemesi sim TOPIC_BADGE_MATCH ile birebir aynıdır", () => {
+    expect(Object.keys(OPACA_TOPIC_MATCH)).toEqual(Object.keys(TOPIC_BADGE_MATCH));
+    for (const findingId of Object.keys(FINDINGS)) {
+      for (const topic of Object.keys(TOPIC_BADGE_MATCH)) {
+        expect(OPACA_TOPIC_MATCH[topic]?.(findingId), `${topic}/${findingId}`).toBe(TOPIC_BADGE_MATCH[topic]?.(findingId));
+      }
+    }
+  });
+
+  it("istatistik sim buildAttemptRecord kuralıyla birebir aynıdır (diferansiyel)", () => {
+    let seed = 11;
+    const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
+    const items = assessmentCases.slice(0, 30).map((def) => {
+      const { keys } = opaca.buildPublicCase(def, { index: 1, mode: "assessment", openedAt: OPENED_AT, newToken, random: rnd });
+      const decoded = Object.fromEntries(def.questions.map((q) => [q.id, realAnswer(def, q)]));
+      const tokens = Object.fromEntries(
+        def.questions.map((q) => [
+          q.id,
+          (decoded[q.id] ?? []).flatMap((real) => {
+            const map = keys.options[q.id] ?? {};
+            const token = Object.keys(map).find((key) => map[key] === real);
+            return token === undefined ? [real] : [token];
+          }),
+        ]),
+      );
+      const visits = Object.fromEntries(def.technique.requiredZones.map((id, index) => [id, { dwellMs: 5000, listenMs: 0, visits: 1, firstOrder: index }]));
+      const order = [...def.technique.requiredZones];
+      const result = opaca.gradeCase(def, keys, {
+        index: 1,
+        mode: "assessment",
+        answers: tokens,
+        telemetry: { ...EMPTY_TELEMETRY, visits, order },
+        hintsUsed: 0,
+      });
+      return { caseDef: def, result };
+    });
+    const record = clientRecordOf(items);
+    if (record === null) throw new Error("deneme kaydı yok");
+    const stats = opacaSessionStats(items, { mode: "assessment", score: record.score, durationMs: 0 });
+    const expectedTopics: Record<string, number> = {};
+    for (const finding of record.extra.findings) {
+      if (!finding.correct) continue;
+      for (const [topic, match] of Object.entries(TOPIC_BADGE_MATCH)) {
+        if (match(finding.finding)) expectedTopics[topic] = (expectedTopics[topic] ?? 0) + 1;
+      }
+    }
+    expect(stats.topicCorrect).toEqual(expectedTopics);
+    expect(stats.localizationHits).toBe(record.extra.localizationHits);
+    expect(stats.qualityCorrect).toBe(record.extra.qualityCorrect);
+    expect(stats.interpretationCorrect).toBe(record.extra.interpretationCorrect);
+    expect(stats.abcdeComplete).toBe(record.extra.abcdeComplete);
+    expect(stats.fastPerfect).toBe(record.extra.fastPerfect);
+  });
+
+  it("uygulamada konu doğruluğu sayılmaz; hızlı-kusursuz rozeti yalnız değerlendirmede", () => {
+    const { keys } = opaca.buildPublicCase(assessmentCases[0] as CaseDef, { index: 1, mode: "practice", openedAt: OPENED_AT, newToken, random });
+    const def = assessmentCases[0] as CaseDef;
+    const answers = Object.fromEntries(def.questions.map((q) => [q.id, q.correct.map((optionId) => tokenFor(keys, q.id, optionId))]));
+    const result = opaca.gradeCase(def, keys, { index: 1, mode: "practice", answers, telemetry: EMPTY_TELEMETRY, hintsUsed: 0 });
+    const item = { caseDef: def, result };
+    const practice = opacaSessionStats([item], { mode: "practice", score: result.total, durationMs: 0 });
+    expect(practice.topicCorrect).toEqual({});
+    expect(practice.fastPerfect).toBe(false);
+    // Süre yarı sınırın üstüne çıkınca hızlı-kusursuz rozeti verilmez.
+    const slow = opacaSessionStats([item], { mode: "assessment", score: 100, durationMs: (def.timeLimitSec ?? 0) * 1000 });
+    expect(slow.fastPerfect).toBe(false);
+    const fast = opacaSessionStats([item], { mode: "assessment", score: 100, durationMs: ((def.timeLimitSec ?? 0) * 1000) / 2 });
+    expect(fast.fastPerfect).toBe(true);
   });
 });
 
