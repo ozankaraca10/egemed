@@ -196,8 +196,7 @@ Claude Code devir notu: `docs/agentic/CLAUDE-DEVIR.md`.
 - **Review:** yönetici ajan (şu an Claude Code) her diff'i kaynakla karşılaştırır (birebir port için normalize edilmiş karşılaştırma,
   motorlar için bağımsız diferansiyel test), UI'yi gerçek tarayıcıda 360/768/1440'ta görür, güvenliği dener; sonra `dev`'e
   `--no-ff` merge eder. Depo sahibi merge yetkisini yöneticiye vermiştir.
-- **İşçi modeller:** OpenCode DeepSeek V4.1 Flash (en fazla 2 eşzamanlı — fazlası yerel veritabanında kilitlenir), Cursor
-  Grok 4.7 xhigh ve Composer 2.5, Codex gpt-6-luna. Her işçiye farklı paket verilir.
+- **İşçi modeller:** OpenCode DeepSeek V4.1 Flash `max` (en fazla 2 eşzamanlı; ayrı worktree). Planlama, review ve merge Claude Code'da; ayrıntı `docs/agentic/CLAUDE-DEVIR.md`.
 - **Port disiplini:** davranış birebir; strict TypeScript için yalnız tip daraltma; kaynaktan her bilinçli sapma summary'de gerekçeli
   yazılır ("emekli" testler dahil). Kaynak depolara yazılmaz; büyük veri JSON'ları ve varlıklar ajan bağlamına topluca alınmaz.
 - **Gizlilik:** gerçek öğrenci verisi repoya girmez; test verisi sentetik ve tohumlu; sırlar yalnız `.env.local`.

@@ -42,16 +42,17 @@ Bu belge, başka bir Claude Code hesabının (ya da oturumunun) işi kaldığı 
 - **Öğrenme kilidi:** üç simde öğrenme bitmeden uygulama/değerlendirme kapalı ve o simde düello yok (T205 altyapı + sunucu kaydı `sim_learn_completions`; Ausculta T209, Pulse T208/T213; Opaca T218 sürüyor). "Bitti" tanımı: Pulse 23 paternin her biri ≥16 s izlendi; Ausculta kütüphanedeki her ses ≥1 dinlendi; Opaca kütüphanedeki her konu açıldı.
 - Ausculta/Opaca öğrenme ekranı dikey uzama düzeltildi (T206/T207); Ausculta zayıf konu odağı sunucudan (T214).
 
-## 5. Sürenler ve sıradakiler (öncelik sırasıyla)
+## 5. Sürenler ve sıradakiler (öncelik sırasıyla; 28 Eylül 2026 13:10)
 
-1. **T218** Opaca öğrenme kilidi (DeepSeek, çalışıyor) — bitince review + merge.
-2. **T219** Uzmanlık öğrencisi rolü (`uzmanlik_ogrencisi`, oyunlaştırmada öğretim üyesi gibi) + **admin/öğretim üyesi/uzmanlık öğrencisinde öğrenme kilidi yok** (DeepSeek, çalışıyor).
-3. **T220** Pulse: cevap anahtarını istemci müfredatından kaldır + üretim sızıntı testi (plan: `docs/agentic/claude-plans/T220-plan.md`; worktree hazır, kuyrukta). **Bitince kullanıcıya "Pulse denetime hazır" de.**
-4. Kullanıcı Pulse'ı **Astra** ile denetletecek → bulguları düzelt → **kardiyoloji öğretim üyesi için validasyon belgesi** üret (denetimden ÖNCE taslak hazırlama; kullanıcı talimatı).
-5. **T222** Ausculta'da "Sesi kıs/aç" (birleşik çubuk + araç çubuğu) kaldırılsın; ses kaydırıcısı kalsın (plan hazır; T220 başladıktan sonra kuyruğa koy).
+Tamamlanan (dev): T217 Pulse istemcisi sunucu oturumunda, **T219** uzmanlık öğrencisi rolü (`uzmanlik_ogrencisi`, migration 012; oyunlaştırmada öğretim üyesi gibi) + admin/öğretim üyesi/uzmanlık öğrencisinde öğrenme kilidi yok, **T220** Pulse cevap anahtarı istemciden kaldırıldı + üretim sızıntı testi. **Pulse Astra denetimine teslim edildi** (dev `3e3e1c9`).
+
+1. **Astra Pulse denetimi (kullanıcı yürütüyor).** Çıktılar depo dışına: `~/Documents/Codex/2026-09-23/egemed-tools/astra-pulse-denetim.md`, `astra-pulse-maddeler.csv` (600 madde: tut/düzelt/çıkar, rafine 200+200 sete dahil mi), `astra-pulse-ekranlar/`. Gelince: bulguları Z etiketiyle görevlere böl, tıbbi olanları kendin incele, 200+200 set kararını kullanıcıya sor, düzelt ve merge et. Denetim sürerken demo API'yi (5180/3100) yeniden başlatma.
+2. Düzeltmelerden SONRA **kardiyoloji öğretim üyesi için validasyon belgesi** (önceden taslak YOK).
+3. **T218** Opaca öğrenme kilidi — DeepSeek bitirdi, review + merge bekliyor (`.agtx/worktrees/T218-opaca-learn-lock`).
+4. **T222** Ausculta'da "Sesi kıs/aç" kaldırma — DeepSeek çalışıyor.
+5. **T221** Düello rozetleri + "Farklı rakipler" 3/10/25 + rozet ekranında "Meydan Okuma" kategori filtresi — DeepSeek çalışıyor (plan: `docs/agentic/claude-plans/T221-plan.md`).
 6. **Ausculta posterior ses kayıtları:** bugün tüm akciğer kayıtları anterior (HLS-CMDS v3); posterior 6 noktada yedek çalınıyor. Önerilen açık veri: **KAUH** (CC BY 4.0, bölge etiketli), gerekirse **HF_Lung** (CC BY 4.0). RespiratoryDatabase@TR CC BY-NC; ICBHI lisansı belirsiz. **Kullanıcı onayı bekliyor**; seçilen kayıtlar öğretim üyesi validasyonu ister.
-7. **T221** Düello rozetleri — ERTELENDİ (plan hazır: `docs/agentic/claude-plans/T221-plan.md`): ilk düello, ilk galibiyet, galibiyet 3/10/25, rövanş, farklı rakipler 3/10/25; rozet ekranında "Meydan Okuma" kategorisi ve filtresi.
-8. Takip: Pulse "ritim serisi" rozetleri sunucu oturumunda üretilmiyor (T217 notu) — sunucuda türetilmeli.
+7. Takip: Pulse "ritim serisi" rozetleri sunucu oturumunda üretilmiyor (T217 notu) — sunucuda türetilmeli; bilinen sınır: Pulse `ecg.mode` tarayıcıya gidiyor (tanı sorularında cevabı ele verebilir).
 
 ## 6. Bekleyen kullanıcı girdileri
 SMTP bilgileri; SSO protokolü; Ausculta posterior veri kümesi onayı.
