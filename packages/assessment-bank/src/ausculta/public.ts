@@ -42,8 +42,9 @@ function shuffled<T>(items: readonly T[], random: () => number): T[] {
 }
 
 export function buildPublicCase(caseDef: CaseDef, input: BuildCaseInput): { readonly publicCase: AuscultaPublicCase; readonly keys: AuscultaCaseKeys } {
-  const { sounds: records } = resolveCaseSoundsEx(caseDef.soundAssignments);
-  // Değerlendirmede bildirimsiz yedek (posterior→anterior) sunumu yapılmaz (O7).
+  const { sounds: records, components } = resolveCaseSoundsEx(caseDef.soundAssignments);
+  // Değerlendirmede bildirimsiz yedek (posterior→anterior) sunumu yapılmaz (O7); akciğer
+  // bileşeninin gerçek posterior kaydıyla çözülen noktalar gerçek kayıt sayılır.
   const pointIds =
     input.mode !== "practice" ? assessmentPointFilter(caseDef.soundAssignments) : caseDef.soundAssignments.map((a) => a.pointId);
   const audio: Record<string, { runtimeUrl: string; pointId: string }> = {};
@@ -55,7 +56,10 @@ export function buildPublicCase(caseDef: CaseDef, input: BuildCaseInput): { read
     // Tek kayıt; bell/diyafram süzgeci istemcide uygulanır — iki başlık aynı jetonu paylaşır.
     const heads: { bell?: string; diaphragm?: string } = {};
     for (const head of caseDef.allowedHeads) heads[head] = token;
-    return [{ pointId, audio: heads }];
+    // §14: karma atamada akciğer bileşeni kaydı çalınıyorsa istemci dürüstlük notunu gösterir.
+    // Yalnız uygulamada: değerlendirme/düelloda bu işaret vakanın karma olduğunu ele verir.
+    const showComponent = input.mode === "practice" && components[pointId] !== undefined;
+    return [{ pointId, audio: heads, ...(showComponent ? { component: "lung" as const } : {}) }];
   });
   const options: Record<string, Record<string, string>> = {};
   const questions = caseDef.questions.map((question: Question) => {

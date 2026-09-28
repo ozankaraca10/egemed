@@ -401,6 +401,15 @@ function CaseView({
                   hideUntilFocus={isAssessment}
                   otherViewHint={otherHint}
                 />
+                {/* §14 dürüstlük: uygulamada bileşen kaydı çalınırken açıkça bildirilir; değerlendirmede not yok. */}
+                {!isAssessment && activePoint !== null && serverCase.serverComponents[activePoint] !== undefined ? (
+                  <div className="note-strip" style={{ marginTop: 8 }}>
+                    <IconInfo width={17} height={17} />
+                    <span className="small">
+                      Sırtta kalp sesleri zayıf duyulur; bu noktada yalnız akciğer bileşeni (gerçek hasta kaydı) dinletilir.
+                    </span>
+                  </div>
+                ) : null}
               </div>
               <Toolbar
                 caseDef={caseDef}

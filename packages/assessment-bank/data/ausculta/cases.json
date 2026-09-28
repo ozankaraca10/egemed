@@ -963,37 +963,37 @@
           "pointId": "lung_right_upper_posterior",
           "category": "lung",
           "acousticFinding": "normal",
-          "simulationNote": "eğitim eşlemesi: kayıt anterior bölgeden alınmıştır"
+          "simulationNote": "KAUH v3 gerçek posterior kayıt (öğretim üyesi onayı bekliyor)"
         },
         {
           "pointId": "lung_left_upper_posterior",
           "category": "lung",
           "acousticFinding": "normal",
-          "simulationNote": "eğitim eşlemesi: kayıt anterior bölgeden alınmıştır"
+          "simulationNote": "KAUH v3 gerçek posterior kayıt (öğretim üyesi onayı bekliyor)"
         },
         {
           "pointId": "lung_right_middle_posterior",
           "category": "lung",
           "acousticFinding": "normal",
-          "simulationNote": "eğitim eşlemesi: kayıt anterior bölgeden alınmıştır"
+          "simulationNote": "KAUH v3 gerçek posterior kayıt (öğretim üyesi onayı bekliyor)"
         },
         {
           "pointId": "lung_left_middle_posterior",
           "category": "lung",
           "acousticFinding": "normal",
-          "simulationNote": "eğitim eşlemesi: kayıt anterior bölgeden alınmıştır"
+          "simulationNote": "KAUH v3 gerçek posterior kayıt (öğretim üyesi onayı bekliyor)"
         },
         {
           "pointId": "lung_right_lower_posterior",
           "category": "lung",
           "acousticFinding": "normal",
-          "simulationNote": "eğitim eşlemesi: kayıt anterior bölgeden alınmıştır"
+          "simulationNote": "KAUH v3 gerçek posterior kayıt (öğretim üyesi onayı bekliyor)"
         },
         {
           "pointId": "lung_left_lower_posterior",
           "category": "lung",
           "acousticFinding": "normal",
-          "simulationNote": "eğitim eşlemesi: kayıt anterior bölgeden alınmıştır"
+          "simulationNote": "KAUH v3 gerçek posterior kayıt (öğretim üyesi onayı bekliyor)"
         }
       ],
       "primaryAcousticFinding": "normal",
@@ -1197,37 +1197,37 @@
           "pointId": "lung_right_upper_posterior",
           "category": "lung",
           "acousticFinding": "wheezing",
-          "simulationNote": "eğitim eşlemesi: kayıt anterior bölgeden alınmıştır"
+          "simulationNote": "KAUH v3 gerçek posterior kayıt (öğretim üyesi onayı bekliyor)"
         },
         {
           "pointId": "lung_left_upper_posterior",
           "category": "lung",
           "acousticFinding": "wheezing",
-          "simulationNote": "eğitim eşlemesi: kayıt anterior bölgeden alınmıştır"
+          "simulationNote": "KAUH v3 gerçek posterior kayıt (öğretim üyesi onayı bekliyor)"
         },
         {
           "pointId": "lung_right_middle_posterior",
           "category": "lung",
           "acousticFinding": "wheezing",
-          "simulationNote": "eğitim eşlemesi: kayıt anterior bölgeden alınmıştır"
+          "simulationNote": "KAUH v3 gerçek posterior kayıt (öğretim üyesi onayı bekliyor)"
         },
         {
           "pointId": "lung_left_middle_posterior",
           "category": "lung",
           "acousticFinding": "wheezing",
-          "simulationNote": "eğitim eşlemesi: kayıt anterior bölgeden alınmıştır"
+          "simulationNote": "KAUH v3 gerçek posterior kayıt (öğretim üyesi onayı bekliyor)"
         },
         {
           "pointId": "lung_right_lower_posterior",
           "category": "lung",
           "acousticFinding": "wheezing",
-          "simulationNote": "eğitim eşlemesi: kayıt anterior bölgeden alınmıştır"
+          "simulationNote": "KAUH v3 gerçek posterior kayıt (öğretim üyesi onayı bekliyor)"
         },
         {
           "pointId": "lung_left_lower_posterior",
           "category": "lung",
           "acousticFinding": "wheezing",
-          "simulationNote": "eğitim eşlemesi: kayıt anterior bölgeden alınmıştır"
+          "simulationNote": "KAUH v3 gerçek posterior kayıt (öğretim üyesi onayı bekliyor)"
         }
       ],
       "primaryAcousticFinding": "wheezing",
@@ -1419,13 +1419,13 @@
           "pointId": "lung_right_lower_posterior",
           "category": "lung",
           "acousticFinding": "fine_crackles",
-          "simulationNote": "eğitim eşlemesi: kayıt anterior bölgeden alınmıştır"
+          "simulationNote": "KAUH v3 gerçek posterior kayıt (öğretim üyesi onayı bekliyor)"
         },
         {
           "pointId": "lung_right_upper_posterior",
           "category": "lung",
           "acousticFinding": "fine_crackles",
-          "simulationNote": "eğitim eşlemesi: kayıt anterior bölgeden alınmıştır"
+          "simulationNote": "KAUH v3 gerçek posterior kayıt (öğretim üyesi onayı bekliyor)"
         }
       ],
       "primaryAcousticFinding": "fine_crackles",
@@ -1610,7 +1610,7 @@
           "pointId": "lung_right_lower_posterior",
           "category": "lung",
           "acousticFinding": "coarse_crackles",
-          "simulationNote": "eğitim eşlemesi: kayıt anterior bölgeden alınmıştır"
+          "simulationNote": "KAUH v3 gerçek posterior kayıt (öğretim üyesi onayı bekliyor)"
         },
         {
           "pointId": "lung_left_lower_posterior",
@@ -2899,7 +2899,8 @@
         {
           "pointId": "lung_left_upper_posterior",
           "category": "mixed",
-          "acousticFinding": "mid_systolic_murmur+wheezing"
+          "acousticFinding": "mid_systolic_murmur+wheezing",
+          "simulationNote": "posterior: akciğer bileşeni (KAUH gerçek kayıt)"
         }
       ],
       "primaryAcousticFinding": "mid_systolic_murmur+wheezing",
@@ -3037,7 +3038,8 @@
         {
           "pointId": "lung_left_upper_posterior",
           "category": "mixed",
-          "acousticFinding": "early_systolic_murmur+coarse_crackles"
+          "acousticFinding": "early_systolic_murmur+coarse_crackles",
+          "simulationNote": "posterior: akciğer bileşeni (KAUH gerçek kayıt)"
         }
       ],
       "primaryAcousticFinding": "early_systolic_murmur+coarse_crackles",
@@ -3175,7 +3177,8 @@
         {
           "pointId": "lung_right_lower_posterior",
           "category": "mixed",
-          "acousticFinding": "s3+normal"
+          "acousticFinding": "s3+normal",
+          "simulationNote": "posterior: akciğer bileşeni (KAUH gerçek kayıt)"
         }
       ],
       "primaryAcousticFinding": "s3+normal",

@@ -59,6 +59,8 @@ export type ServerClientCase = CaseDef & {
   readonly serverIndex: number;
   /** nokta kimliği → oturum ses jetonu */
   readonly serverAudio: Readonly<Record<string, string>>;
+  /** §14 dürüstlük: karma vakada akciğer bileşeninin gerçek kaydı çalınan posterior noktalar. */
+  readonly serverComponents: Readonly<Record<string, "lung">>;
   readonly population?: string;
 };
 
@@ -85,9 +87,11 @@ export function toClientCase(publicCase: AuscultaPublicCase, mode: SimSessionMod
     ...(question.hintAvailable ? { hint: SERVER_HINT_PLACEHOLDER } : {}),
   }));
   const serverAudio: Record<string, string> = {};
+  const serverComponents: Record<string, "lung"> = {};
   for (const point of publicCase.points) {
     const token = point.audio.diaphragm ?? point.audio.bell;
     if (token !== undefined) serverAudio[point.pointId] = token;
+    if (point.component !== undefined) serverComponents[point.pointId] = point.component;
   }
   return {
     id: serverCaseId(publicCase.index),
@@ -111,6 +115,7 @@ export function toClientCase(publicCase: AuscultaPublicCase, mode: SimSessionMod
     references: [],
     serverIndex: publicCase.index,
     serverAudio,
+    serverComponents,
     ...(publicCase.population === "pediatrik" ? { population: "pediatrik" } : {}),
   };
 }

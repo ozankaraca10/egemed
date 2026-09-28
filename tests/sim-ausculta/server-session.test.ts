@@ -131,6 +131,17 @@ describe("uyarlayıcılar", () => {
     expect(JSON.stringify(clientCase)).not.toMatch(/\.wav|acousticFinding":"[a-z]/);
   });
 
+  it("karma posterior noktası bileşen bilgisini istemci vakasına taşır (T230)", () => {
+    const componentCase: AuscultaPublicCase = {
+      ...PUBLIC_CASE,
+      points: [{ pointId: "lung_right_lower_posterior", audio: { diaphragm: "tok_audio00003" }, component: "lung" }],
+    };
+    const clientCase = toClientCase(componentCase, "practice");
+    expect(clientCase.serverComponents).toEqual({ lung_right_lower_posterior: "lung" });
+    expect(serverPointIds(clientCase)).toEqual(["lung_right_lower_posterior"]);
+    expect(toClientCase(PUBLIC_CASE, "practice").serverComponents).toEqual({});
+  });
+
   it("sunucu ses kaydı oturum adresini işaretler; varlık tabanı eklenmez", () => {
     const record = serverSoundRecord("cardiac_aortic", "tok_audio00001", "/api/me/sims/ausculta/sessions/s/audio/tok_audio00001");
     expect(record.runtimeUrl.startsWith(SESSION_AUDIO_PREFIX)).toBe(true);
