@@ -16,3 +16,7 @@ Bu dosya, Opaca'nın bölge işaretlemelerinin yeniden yapılandırılma süreci
    - BT kesitleri: ABCDE bölgeleri gösterilmez.
    - Bölgesi hesaplanamayan görüntü şablona düşmez; işaretlenir.
    - Kalite kontrol: otomatik anatomik tutarlılık denetimi + görsel inceleme, ardından hekim onay sayfası.
+
+## 29 Eylül 2026
+
+6. **Lateral grafiler.** "Lateral" etiketli 7 görüntünün yalnız 3'ünün gerçek göğüs lateral grafisi olduğu görüldü; biri aslında frontal (PA) göğüs grafisiydi (yeniden sınıflandırıldı), ikisi boyun grafisiydi (göğüs okuma bölgeleri uygulanmaz), biri çok panelli dergi figürüydü (tek film değil; hekime sorulacak). Üç gerçek lateral grafiye lateral grafiye özgü 10 okuma bölgesi (trakea, retrosternal ve retrokardiyak boşluk, kalp, hilus, diyafram kubbeleri, arka kostofrenik sinüs, omurga, sternum, diyafram altı) filmin yönüne göre (ön yüz solda/sağda) tek tek yerleştirildi.
