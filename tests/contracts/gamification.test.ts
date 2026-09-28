@@ -81,6 +81,17 @@ describe("GET /me/gamification/:simId yanıtı", () => {
     expect(gamiSummaryResponseSchema.safeParse({ data: nulls }).success).toBe(true);
   });
 
+  it("eski özette alanı opsiyonel bırakır, tanımlı rozet ilerlemesini geçirir", () => {
+    expect(gamiSummaryResponseSchema.safeParse({ data: simSummary() }).success).toBe(true);
+    const parsed = gamiSummaryResponseSchema.parse({
+      data: { ...simSummary(), badgeProgress: { explorer: { value: 7, max: 10 } } },
+    });
+    expect(parsed.data.badgeProgress?.explorer).toEqual({ value: 7, max: 10 });
+    expect(gamiSummaryResponseSchema.safeParse({
+      data: { ...simSummary(), badgeProgress: { explorer: { value: -1, max: 10 } } },
+    }).success).toBe(false);
+  });
+
   it("ham yanıt alanlarını ve bilinmeyen simi reddeder", () => {
     expect(
       gamiSummaryResponseSchema.safeParse({ data: { ...simSummary(), rawAnswers: ["a", "b"] } }).success,

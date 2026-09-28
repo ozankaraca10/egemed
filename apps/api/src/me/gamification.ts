@@ -12,7 +12,8 @@ import {
   type SimId,
 } from "@egemed/contracts";
 import { opaca as assessmentBankOpaca } from "@egemed/assessment-bank";
-import { SIM_BADGE_EVALUATORS, type SimLearnCounters } from "@egemed/gami-catalogs";
+import { OPACA_BADGES, SIM_BADGE_EVALUATORS, opacaStatsFromSummaries, type SimLearnCounters } from "@egemed/gami-catalogs";
+import { badgeProgress as getBadgeProgress } from "@egemed/gamification-core";
 import { DEFAULT_RULES, assessmentXp, practiceXp, type Period } from "@egemed/gamification-core";
 import {
   buildLeaderboardRows,
@@ -154,6 +155,7 @@ export interface GamiSimSummaryRecord {
   readonly streak: GamiStreakRecord;
   readonly weeklyGoal: { readonly targetXp: number; readonly currentXp: number };
   readonly badges: readonly GamiBadgeRecord[];
+  readonly badgeProgress?: Readonly<Record<string, { readonly value: number; readonly max: number }>>;
   readonly leaderboard: { readonly rank: number; readonly total: number };
   readonly attempts: readonly GamiAttemptSummaryRecord[];
 }
@@ -366,7 +368,7 @@ export function createPgGamificationRepo(db: GamiDb): GamificationRepo {
          from board left join gami_profiles p on p.user_id = $1 and p.sim_id = $3`,
         [query.userId, query.institutionId, query.simId],
       );
-      const [badgeResult, attemptResult, weeklyResult] = await Promise.all([
+      const [badgeResult, attemptResult, weeklyResult, progressResult] = await Promise.all([
         db.query(
           "select badge_key, awarded_at from gami_badges where user_id = $1 and sim_id = $2 order by awarded_at desc, badge_key asc limit $3",
           [query.userId, query.simId, BADGE_LIMIT],
@@ -380,10 +382,25 @@ export function createPgGamificationRepo(db: GamiDb): GamificationRepo {
           "select coalesce(sum(a.xp), 0)::int as current_xp from gami_attempts a where a.user_id = $1 and a.sim_id = $2 and a.finished_at >= $3",
           [query.userId, query.simId, new Date(startOfWeekTr(query.at))],
         ),
+        query.simId === "opaca"
+          ? Promise.all([
+              db.query("select summary from gami_attempts where user_id = $1 and sim_id = $2", [query.userId, query.simId]),
+              db.query("select topic from gami_learn where user_id = $1 and sim_id = $2", [query.userId, query.simId]),
+            ])
+          : Promise.resolve(null),
       ]);
 
       const profile = profileResult.rows[0] as GamiProfileRow | undefined;
       const weeklyRow = weeklyResult.rows[0] as { readonly current_xp?: unknown } | undefined;
+      const badgeProgress = progressResult === null ? undefined : (() => {
+        const [summaryRows, learnRows] = progressResult;
+        const summaries = summaryRows.rows.map((row) => (row as { readonly summary: Readonly<Record<string, number>> }).summary);
+        const topics = learnRows.rows.map((row) => (row as { readonly topic: string }).topic);
+        const stats = opacaStatsFromSummaries(summaries, learnCountersFrom(topics, "opaca"));
+        return Object.fromEntries(
+          OPACA_BADGES.filter((badge) => badge.progress !== undefined).map((badge) => [badge.id, getBadgeProgress(badge, stats, { now: new Date(query.at) })]),
+        );
+      })();
       const total = profile?.total ?? 0;
       const rank = profile?.user_rank ?? total + 1;
       return {
@@ -403,6 +420,7 @@ export function createPgGamificationRepo(db: GamiDb): GamificationRepo {
           const badge = row as { readonly badge_key: string; readonly awarded_at: Date };
           return { key: badge.badge_key, awardedAt: badge.awarded_at.getTime() };
         }),
+        ...(badgeProgress === undefined ? {} : { badgeProgress }),
         leaderboard: { rank, total },
         attempts: attemptResult.rows.map((row) => toAttemptSummaryRecord(row as GamiAttemptSummaryRow)),
       };
@@ -930,6 +948,21 @@ export function createMemoryGamificationRepo(
           passed: attempt.passed,
         }));
 
+      const badgeProgress = query.simId === "opaca"
+        ? (() => {
+            const summaries = [...attempts.values()]
+              .filter((attempt) => attempt.userId === query.userId && attempt.simId === "opaca")
+              .map((attempt) => attempt.summary);
+            const topics = [...learn.values()]
+              .filter((entry) => entry.userId === query.userId && entry.simId === "opaca")
+              .map((entry) => entry.topic);
+            const stats = opacaStatsFromSummaries(summaries, learnCountersFrom(topics, "opaca"));
+            return Object.fromEntries(
+              OPACA_BADGES.filter((badge) => badge.progress !== undefined).map((badge) => [badge.id, getBadgeProgress(badge, stats, { now: new Date(query.at) })]),
+            );
+          })()
+        : undefined;
+
       return {
         simId: query.simId,
         xp: profile?.xp ?? 0,
@@ -942,6 +975,7 @@ export function createMemoryGamificationRepo(
           currentXp: weeklyXp(query.userId, query.simId, query.at),
         },
         badges: userBadges,
+        ...(badgeProgress === undefined ? {} : { badgeProgress }),
         leaderboard: { rank, total },
         attempts: userAttempts,
       };
@@ -1164,6 +1198,7 @@ function summaryBody(summary: GamiSimSummaryRecord) {
       key: badge.key,
       awardedAt: toIstanbulIso(badge.awardedAt),
     })),
+    ...(summary.badgeProgress === undefined ? {} : { badgeProgress: summary.badgeProgress }),
     leaderboard: { rank: summary.leaderboard.rank, total: summary.leaderboard.total },
     attempts: summary.attempts.map((attempt) => ({
       attemptNo: attempt.attemptNo,

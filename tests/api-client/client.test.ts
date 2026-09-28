@@ -64,6 +64,29 @@ function createFetchMock(plans: readonly Planned[]): {
 }
 
 describe("createApiClient", () => {
+  it("özette rozet ilerlemesini tipleyip yanıtla birlikte döndürür", async () => {
+    const mock = createFetchMock([{
+      status: 200,
+      json: {
+        data: {
+          simId: "opaca",
+          xp: 0,
+          level: 1,
+          streak: { current: 0, best: 0, lastDate: null },
+          weeklyGoal: { targetXp: 300, currentXp: 0 },
+          badges: [],
+          badgeProgress: { explorer: { value: 7, max: 10 } },
+          leaderboard: { rank: 1, total: 0 },
+          attempts: [],
+        },
+      },
+    }]);
+    const client = createApiClient({ baseUrl: "https://api.example.invalid", fetch: mock.fetch });
+
+    const summary = await client.gamification.getSummary("opaca");
+    expect(summary.data.badgeProgress?.explorer).toEqual({ value: 7, max: 10 });
+  });
+
   it("isteklerde credentials=include taşır ve mutasyonlarda CSRF başlığını ekler", async () => {
     const mock = createFetchMock([{ status: 204, text: "" }]);
     const client = createApiClient({

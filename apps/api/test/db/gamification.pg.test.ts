@@ -264,6 +264,37 @@ if (databaseUrl === "") {
         expect((await profileOf(ALI_ID, "opaca"))?.xp).toBe(DEFAULT_RULES.xp.learnTopicFirstView);
         expect((await profileOf(MERT_ID, "pulse"))?.xp).toBe(DEFAULT_RULES.xp.learnTopicFirstView);
       });
+
+      it("Opaca özetinde öğrenme ve deneme ilerlemesini döndürür; Ausculta alanı üretmez", async () => {
+        const before = await repo().getSummary({ userId: ALI_ID, institutionId: INSTITUTION_ID, simId: "opaca", at: FIXED_NOW });
+        for (let index = 0; index < 7; index += 1) {
+          await repo().recordLearn({ userId: ALI_ID, simId: "opaca", topic: `opaca:topic:badge-progress-${index}`, at: FIXED_NOW, institutionId: INSTITUTION_ID });
+        }
+        const learnSummary = await repo().getSummary({ userId: ALI_ID, institutionId: INSTITUTION_ID, simId: "opaca", at: FIXED_NOW });
+        expect(learnSummary.badgeProgress?.explorer).toEqual({ value: (before.badgeProgress?.explorer?.value ?? 0) + 7, max: 10 });
+
+        const summary = encodeOpacaSummary({
+          mode: "assessment",
+          finishedAt: new Date(FIXED_NOW).toISOString(),
+          score: 40,
+          caseCount: 10,
+          hintsUsed: 0,
+          extra: { localizationHits: 1, abcdeComplete: 0, qualityCorrect: 0, interpretationCorrect: 0 },
+        });
+        await repo().writeAttempt(attemptInput({
+          id: uuidLike(802),
+          userId: ALI_ID,
+          simId: "opaca",
+          summary,
+          finishedAt: FIXED_NOW,
+          startedAt: FIXED_NOW - HOUR,
+        }));
+        const attemptSummary = await repo().getSummary({ userId: ALI_ID, institutionId: INSTITUTION_ID, simId: "opaca", at: FIXED_NOW });
+        expect(attemptSummary.badgeProgress?.["first-step"]).toEqual({ value: 1, max: 1 });
+
+        const auscultaSummary = await repo().getSummary({ userId: ALI_ID, institutionId: INSTITUTION_ID, simId: "ausculta", at: FIXED_NOW });
+        expect(auscultaSummary).not.toHaveProperty("badgeProgress");
+      });
     });
 
     describe("rozet değerlendirmesi (ADR-008)", () => {

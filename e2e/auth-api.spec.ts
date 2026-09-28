@@ -495,14 +495,14 @@ test.describe("API oturumu (dev sağlayıcı)", () => {
     await signIn(page, "ogrenci");
     await expect(page).toHaveURL(/#\/$/);
     const before = await page.request.get("/api/me/gamification/opaca");
-    const xpBefore = ((await before.json()) as { data: { xp: number } }).data.xp;
+    const beforeData = ((await before.json()) as { data: { xp: number; badgeProgress?: Record<string, { value: number; max: number }>; badges: readonly { key: string }[] } }).data;
     // Öğrenme kaydı sayfa içi fetch ile yazılır (öğrenme ekranındaki desenin aynısı).
     const tag = randomUUID().slice(0, 8);
     const statuses = await page.evaluate(
       async ({ cookieName, prefix }) => {
         const csrf = decodeURIComponent(document.cookie.match(new RegExp(`(?:^|;\\s*)${cookieName}=([^;]+)`))?.[1] ?? "");
         const codes: number[] = [];
-        for (let index = 0; index < 10; index += 1) {
+        for (let index = 0; index < 7; index += 1) {
           const response = await fetch("/api/me/gamification/opaca/attempts", {
             method: "POST",
             credentials: "include",
@@ -516,10 +516,34 @@ test.describe("API oturumu (dev sağlayıcı)", () => {
       { cookieName: CSRF_COOKIE, prefix: `opaca:topic:t235-${tag}` },
     );
     for (const [index, code] of statuses.entries()) expect(code, `konu ${index}`).toBe(201);
+    const partial = ((await (await page.request.get("/api/me/gamification/opaca")).json()) as {
+      data: { xp: number; badgeProgress?: Record<string, { value: number; max: number }>; badges: readonly { key: string }[] };
+    }).data;
+    expect(partial.xp).toBeGreaterThan(beforeData.xp);
+    expect(partial.badgeProgress?.explorer?.value).toBe((beforeData.badgeProgress?.explorer?.value ?? 0) + 7);
+    expect(partial.badgeProgress?.explorer?.max).toBe(10);
+    if (!beforeData.badges.some((badge) => badge.key === "explorer")) {
+      expect(partial.badges.map((badge) => badge.key)).not.toContain("explorer");
+    }
+
+    await page.evaluate(
+      async ({ cookieName, prefix }) => {
+        const csrf = decodeURIComponent(document.cookie.match(new RegExp(`(?:^|;\\s*)${cookieName}=([^;]+)`))?.[1] ?? "");
+        for (let index = 7; index < 10; index += 1) {
+          const response = await fetch("/api/me/gamification/opaca/attempts", {
+            method: "POST",
+            credentials: "include",
+            headers: { "content-type": "application/json", "x-csrf-token": csrf },
+            body: JSON.stringify({ topic: `${prefix}:${index}` }),
+          });
+          if (response.status !== 201) throw new Error(`Konu ${index}: ${response.status}`);
+        }
+      },
+      { cookieName: CSRF_COOKIE, prefix: `opaca:topic:t235-${tag}` },
+    );
     const after = await page.request.get("/api/me/gamification/opaca");
-    const data = ((await after.json()) as { data: { xp: number; badges: readonly { key: string }[] } }).data;
-    // On farklı konu sunucu rozet istatistiğini eşiğe taşır: explorer kazanılır.
-    expect(data.xp).toBeGreaterThan(xpBefore);
+    const data = ((await after.json()) as { data: { badgeProgress?: Record<string, { value: number; max: number }>; badges: readonly { key: string }[] } }).data;
+    expect(data.badgeProgress?.explorer?.value).toBe((beforeData.badgeProgress?.explorer?.value ?? 0) + 10);
     expect(data.badges.map((badge) => badge.key)).toContain("explorer");
   });
 
