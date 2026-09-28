@@ -242,10 +242,9 @@ describe("T208 müfredat kaynak ve sınırlılık metni", () => {
     expect(leads["hyperk"]).toEqual(["II", "aVF", "V3"]);
   });
 
-  it("sınırlılık metni gerçek sayıyı ve 14–23 onay bekliyor cümlesini taşır", () => {
-    expect(curriculumApi.limitations).toContain("23 EKG sonucu");
-    expect(curriculumApi.limitations).toContain("ilk 13 EKG sonucunun");
-    expect(curriculumApi.limitations).toContain("Patern 14–23 (T204) sinyal ve içerikleri Kardiyoloji ABD onayı bekliyor.");
+  it("sınırlılık metni gerçek hasta kayıtları ve uzman doğrulamasını anlatır", () => {
+    expect(curriculumApi.limitations).toContain("gerçek hasta kayıtlarından");
+    expect(curriculumApi.limitations).toContain("Doç. Dr. Evrim Şimşek tarafından doğrulanmıştır.");
   });
 
   it("sources.json yeni DOI kayıtlarını içerir", () => {
