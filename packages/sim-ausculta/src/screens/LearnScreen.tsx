@@ -145,8 +145,11 @@ export function LearnScreen({
   }, [item]);
 
   const soundsForStage = (pointId: string): SoundRecord | null => stageSounds.resolve(pointId).record;
-  const activeFallback = activePoint ? stageSounds.resolve(activePoint).fallbackFrom : undefined;
+  const activeSound = activePoint ? stageSounds.resolve(activePoint) : undefined;
+  const activeFallback = activeSound?.fallbackFrom;
   const fallbackPoint = activeFallback ? POINTS.find((point) => point.id === activeFallback) : undefined;
+  // §14: karma bulguda posterior noktada yalnız akciğer bileşeninin gerçek kaydı çalınır.
+  const activeLungComponent = activeSound?.lungComponentOf !== undefined;
   const title = libraryTitle(item.key);
   const libSound = resolveLibrarySound(item.category, item.acousticFinding);
   const otherHint = otherViewHintText(
@@ -273,6 +276,14 @@ export function LearnScreen({
                     onSelect={(pointId) => stageRef.current?.placeAt(pointId)}
                     {...(otherHint ? { otherViewHint: otherHint } : {})}
                   />
+                  {activeLungComponent && (
+                    <div className="note-strip" style={{ marginTop: 8 }}>
+                      <IconInfo width={17} height={17} />
+                      <span className="small">
+                        Sırtta kalp sesleri zayıf duyulur; bu noktada yalnız akciğer bileşeni (gerçek hasta kaydı) dinletilir.
+                      </span>
+                    </div>
+                  )}
                   {activeFallback && fallbackPoint && (
                     <div className="note-strip" style={{ marginTop: 8 }}>
                       <IconInfo width={17} height={17} />

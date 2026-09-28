@@ -7,6 +7,7 @@ import {
   type AuscultaPublicCase,
 } from "../../packages/contracts/src/index";
 import { ausculta } from "../../packages/assessment-bank/src/index";
+import { resolveAssignmentEx } from "../../packages/assessment-bank/src/ausculta/resolver";
 import { ALI, ALI_ID, DEFAULT_USERS, createAdminHarness, login, type AdminHarness, type Login } from "./admin-harness";
 
 // A1.3 (ADR-009): sunucu vaka oturumu uçtan uca — anahtarsız vaka, sıralı açılış,
@@ -208,6 +209,39 @@ describe("sunucu vaka oturumu (A1.3)", () => {
     // Dinlenmemiş noktanın beyanı sıfırlanır: sunucu kaydı yalnız istenen jetonu bilir.
     const heard = h.simSessions.rows.get(session.sessionId)?.state.cases[0]?.heardTokens ?? [];
     expect(heard).toEqual([token]);
+  });
+
+  it("karma vakada posterior ses gerçek KAUH kaydıyla sunulur (T230)", async () => {
+    const h = harness();
+    const ali = await login(h, "ali.veli");
+    const session = await start(h, ali, "practice");
+    const stored = h.simSessions.rows.get(session.sessionId);
+    expect(stored).toBeDefined();
+    if (stored === undefined) return;
+    const firstItem = stored.state.cases[0];
+    expect(firstItem).toBeDefined();
+    if (firstItem === undefined) return;
+    stored.state.cases[0] = { ...firstItem, caseId: "case_mixed_s3_normal" };
+    const opened = await openCase(h, ali, session.sessionId, 1);
+    const point = opened.points.find((entry) => entry.pointId === "lung_right_lower_posterior");
+    expect(point, "posterior nokta sunulmalı").toBeDefined();
+    expect(point?.component).toBe("lung");
+    const token = point?.audio.diaphragm ?? point?.audio.bell;
+    expect(token).toBeDefined();
+    const caseDef = ausculta.caseById("case_mixed_s3_normal");
+    const assignment = caseDef?.soundAssignments.find((a) => a.pointId === "lung_right_lower_posterior");
+    expect(assignment).toBeDefined();
+    const resolved = resolveAssignmentEx(assignment!);
+    expect(resolved.fallbackFrom).toBeUndefined();
+    expect(resolved.record?.sourceDataset).toBe("kauh-v3");
+    const keys = h.simSessions.rows.get(session.sessionId)?.state.cases[0]?.keys;
+    if (keys === null || keys === undefined || !("audio" in keys)) throw new Error("Ausculta anahtarı bekleniyordu");
+    expect(keys.audio[token ?? ""]?.runtimeUrl).toBe(resolved.record?.runtimeUrl);
+    expect(keys.audio[token ?? ""]?.pointId).toBe("lung_right_lower_posterior");
+    // Ses vekili doğru (KAUH) dosyayı sunar.
+    const audio = await call(h, ali, "GET", `/me/sims/ausculta/sessions/${session.sessionId}/audio/${token}`);
+    expect(audio.status).toBe(200);
+    expect(audio.headers.get("content-type")).toBe("audio/wav");
   });
 
   it("öğretim üyesi oturum kullanır ama deneme yazılmaz (attemptId null, XP 0)", async () => {
