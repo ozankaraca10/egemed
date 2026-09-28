@@ -22,11 +22,68 @@ Her görev tek paket/uygulama ve yaklaşık en fazla 400 satır diff hedefler. A
 `sims/*/src/data/*.json`, `sims/*/public/assets/**`, `**/dist/**`, `**/*.lock`, `reports/**` topluca okunmaz. Gerekirse sadece hedefli `head` veya `jq`. Gerçek veri veya sır içeren dosyayı ajan bağlamına alma.
 
 ## Kodlama ilkeleri
-(Kaynak: forrestchang/andrej-karpathy-skills, projeye uyarlandı.) Önemsiz işlerde sağduyu kullan.
-- **Önce düşün:** Varsayımlarını açıkça yaz; birden çok yorum varsa sessizce seçme. Daha basit yol varsa söyle. Claude belirsizlikte kullanıcıya sorar; DeepSeek işçisi soramaz — varsayımını `summary.md`'ye yazar, riskli/geri dönüşsüz belirsizlikte o adımı yapmadan raporlar.
-- **Önce sadelik:** İsteneni çözen en az kod. İstenmemiş özellik, tek kullanımlık soyutlama, istenmemiş yapılandırılabilirlik, imkânsız durum için hata yönetimi yok. 200 satır 50 olabiliyorsa yeniden yaz.
-- **Cerrahi değişiklik:** Yalnız gerekeni değiştir; komşu kodu, yorumu, biçimi "iyileştirme"; bozuk olmayanı yeniden düzenleme; mevcut üsluba uy. İlgisiz ölü kodu silme, raporla. Kendi değişikliğinin kullanılmaz bıraktığı import/değişken/fonksiyonu kaldır. Her değişen satır doğrudan isteğe bağlanabilmeli.
-- **Hedefe göre yürüt:** İşi doğrulanabilir hedefe çevir ("hatayı düzelt" → önce hatayı yeniden üreten test, sonra geçir; "yeniden düzenle" → öncesi ve sonrası testler yeşil). Çok adımlı işte kısa plan: `adım → doğrulama`. Başarı ölçütü `pnpm turbo lint typecheck test` ve ilgili e2e'dir.
+Kaynak: [forrestchang/andrej-karpathy-skills](https://github.com/forrestchang/andrej-karpathy-skills) `CLAUDE.md` — yaygın LLM kodlama hatalarını azaltan davranış ilkeleri; projeye özgü kurallarla birlikte uygulanır.
+
+**Ödünleşim:** Bu ilkeler hızdan çok dikkati öne alır. Önemsiz işlerde sağduyu kullan.
+
+### 1. Kodlamadan önce düşün
+**Varsayma. Kafa karışıklığını saklama. Ödünleşimleri ortaya koy.**
+
+Uygulamadan önce:
+- Varsayımlarını açıkça yaz. Emin değilsen sor.
+- Birden çok yorum varsa hepsini sun — sessizce birini seçme.
+- Daha basit bir yol varsa söyle. Gerektiğinde itiraz et.
+- Bir şey belirsizse dur. Neyin kafa karıştırdığını adlandır. Sor.
+
+### 2. Önce sadelik
+**Sorunu çözen en az kod. Spekülatif hiçbir şey yok.**
+
+- İstenenin ötesinde özellik yok.
+- Tek kullanımlık kod için soyutlama yok.
+- İstenmemiş "esneklik" ya da "yapılandırılabilirlik" yok.
+- İmkânsız senaryolar için hata yönetimi yok.
+- 200 satır yazdıysan ve 50 olabiliyorsa, yeniden yaz.
+
+Kendine sor: "Kıdemli bir mühendis bunun gereğinden karmaşık olduğunu söyler mi?" Evetse sadeleştir.
+
+### 3. Cerrahi değişiklikler
+**Yalnız gerekene dokun. Yalnız kendi dağınıklığını temizle.**
+
+Mevcut kodu düzenlerken:
+- Komşu kodu, yorumları ya da biçimlendirmeyi "iyileştirme".
+- Bozuk olmayanı yeniden düzenleme.
+- Farklı yapacak olsan bile mevcut üsluba uy.
+- İlgisiz ölü kod görürsen belirt — silme.
+
+Değişikliklerin yetim bırakırsa:
+- SENİN değişikliğinin kullanılmaz bıraktığı import/değişken/fonksiyonları kaldır.
+- İstenmedikçe önceden var olan ölü kodu kaldırma.
+
+Test: Değişen her satır doğrudan kullanıcının isteğine bağlanabilmeli.
+
+### 4. Hedefe göre yürütme
+**Başarı ölçütünü tanımla. Doğrulanana dek döngüde kal.**
+
+İşleri doğrulanabilir hedeflere çevir:
+- "Doğrulama ekle" → "Geçersiz girdiler için testleri yaz, sonra geçir"
+- "Hatayı düzelt" → "Hatayı yeniden üreten bir test yaz, sonra geçir"
+- "X'i yeniden düzenle" → "Testlerin öncesinde ve sonrasında geçtiğinden emin ol"
+
+Çok adımlı işlerde kısa bir plan yaz:
+```
+1. [Adım] → doğrula: [kontrol]
+2. [Adım] → doğrula: [kontrol]
+3. [Adım] → doğrula: [kontrol]
+```
+
+Güçlü başarı ölçütleri bağımsız döngü kurmanı sağlar. Zayıf ölçütler ("çalışsın") sürekli açıklama ister.
+
+**Bu ilkeler işe yarıyorsa:** diff'lerde gereksiz değişiklik azalır, aşırı karmaşıklık yüzünden yeniden yazma azalır ve açıklayıcı sorular hatalardan sonra değil uygulamadan önce gelir.
+
+### EGEMED uyarlaması
+- **Soru sorma:** Claude belirsizlikte kullanıcıya sorar. DeepSeek işçisi etkileşimsiz çalışır ve soramaz — varsayımını ve birden çok yorumu `.egemed-run/summary.md`'ye yazar; riskli ya da geri dönüşsüz bir belirsizlikte o adımı yapmadan raporlar.
+- **Başarı ölçütü:** `pnpm turbo lint typecheck test` ve görevin ilgili e2e testleri (plan dosyasındaki Kabul bölümü).
+- **Cerrahi değişiklik ve kapsam:** Plan dosyasındaki kapsam dışına çıkılmaz; kapsam dışı fark edilen sorunlar summary'de raporlanır.
 
 ## Ajanlar ve iş akışı
 Claude Code planlar, işi dağıtır, gözden geçirir, test eder ve merge eder; uygulama işleri (Z1–Z4) OpenCode DeepSeek V4.1 Flash `max` ile ayrı worktree'lerde yürür, yalnız Z5 işleri Claude yazar. Merge yalnız `scripts/agtx/claude/merge-gated.sh` ile. Ayrıntılar ve süren işler: `docs/agentic/CLAUDE-DEVIR.md`. Codex Astra bağımsız denetim ve ikinci görüş verir; bulgularını raporlar, merge etmez.
