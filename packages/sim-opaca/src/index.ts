@@ -30,7 +30,6 @@ export {
   createBrowserModalEnv,
   createBrowserOpacaBindings,
   createBrowserResultsScreenEnv,
-  createBrowserSimulationPopoverEnv,
   createBrowserStartScreenEnv,
   createBrowserWindowLike,
   createLocalStoragePort,
@@ -76,6 +75,7 @@ export type { Point } from "./core/geometry";
 export {
   DEFAULT_ASSET_BASE,
   IMAGES,
+  SESSION_ASSET_PREFIX,
   datasetCounts,
   examplesFor,
   expertPositive,
@@ -290,7 +290,8 @@ export type {
   VitalSigns,
   ZoneVisit,
 } from "./core/types";
-export { ALL_CASES, AUTO_CASES, CORE_CASES, poolFor } from "./data/pool";
+export { CASE_INVENTORY } from "./data/inventory";
+export type { CaseInventory } from "./data/inventory";
 export { computeMetrics } from "./data/metrics";
 export type { InventoryMetrics } from "./data/metrics";
 export {
@@ -321,32 +322,43 @@ export type { TutorialScreenProps } from "./screens/TutorialScreen";
 export { LearnScreen, createNoopLearnScreenEnv } from "./screens/LearnScreen";
 export type { LearnGamiPort, LearnScreenEnv, LearnScreenProps } from "./screens/LearnScreen";
 export {
-  DEFAULT_CASE_TIME_SEC,
-  caseTimeLimitSec,
-  computeQuestionLatency,
   fmtSec,
   hasSimulationProgress,
   patientLine,
-  planK3SessionRegeneration,
-  planNewPracticeSample,
   planPrimaryAction,
-  resolveSimulationSession,
-  sessionSeedFromNow,
-  sourceNote,
 } from "./screens/simulation-core";
+export type { PrimaryActionPlan, SimulationDispatch } from "./screens/simulation-core";
+export { SimulationScreen } from "./screens/SimulationScreen";
+export type { SimulationScreenProps } from "./screens/SimulationScreen";
+export {
+  SERVER_CASE_PREFIX,
+  SERVER_HINT_PLACEHOLDER,
+  fromServerResult,
+  isServerCaseId,
+  pendingAssessmentResult,
+  reviewOf,
+  serverCaseId,
+  snapshotOf,
+  toClientCase,
+} from "./core/serverSession";
 export type {
-  PrimaryActionPlan,
-  ResolvedSimulationSession,
-  SessionRegenPlan,
-  SimulationDispatch,
-} from "./screens/simulation-core";
-export { SimulationScreen, createNoopSimulationPopoverEnv } from "./screens/SimulationScreen";
-export type {
-  SimulationGamiPort,
-  SimulationPopoverEnv,
-  SimulationPopoverEvent,
-  SimulationScreenProps,
-} from "./screens/SimulationScreen";
+  ServerCaseMeta,
+  ServerCaseSnapshot,
+  ServerClientCase,
+  ServerQuestionFeedback,
+  ServerReview,
+  ServerReviewQuestion,
+  ServerSessionState,
+} from "./core/serverSession";
+export {
+  checkServerQuestion,
+  finishServerSession,
+  loadServerCase,
+  requestServerHint,
+  serverErrorMessage,
+  startServerSession,
+  submitServerCase,
+} from "./core/serverDriver";
 export { ResultsScreen, createNoopResultsScreenEnv } from "./screens/ResultsScreen";
 export type { ResultsGamiPort, ResultsScreenEnv, ResultsScreenProps } from "./screens/ResultsScreen";
 export { SourcesScreen } from "./screens/SourcesScreen";

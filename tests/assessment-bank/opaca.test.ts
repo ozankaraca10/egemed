@@ -1,3 +1,4 @@
+import ts from "typescript";
 import { describe, expect, it } from "vitest";
 import { caseResultSchema, opacaPublicCaseSchema } from "../../packages/contracts/src/index";
 import { opaca } from "../../packages/assessment-bank/src/index";
@@ -297,5 +298,22 @@ describe("vaka seçimi ve envanter", () => {
     const covered = Object.values(inventory.coverage).reduce((sum, row) => ({ p: sum.p + row.p, a: sum.a + row.a }), { p: 0, a: 0 });
     expect(covered.p).toBe(inventory.totalCases);
     expect(covered.a).toBe(inventory.assessmentPoolSize);
+  });
+});
+
+describe("istemci envanteri (A2.3)", () => {
+  it("sim paketindeki case-inventory.json bankayla birebir aynı ve yalnız sayı taşır", () => {
+    const client = JSON.parse(ts.sys.readFile("packages/sim-opaca/src/data/case-inventory.json") ?? "{}") as unknown;
+    expect(client).toEqual(JSON.parse(JSON.stringify(opaca.caseInventory())));
+    const raw = ts.sys.readFile("packages/sim-opaca/src/data/case-inventory.json") ?? "";
+    expect(raw).not.toMatch(/auto_|feedbackCorrect|\.webp|"correct"|assets\//);
+  });
+
+  it("sim paketi istemci kaynağı anahtarlı vaka dosyalarını içe aktarmaz", () => {
+    const files = [...ts.sys.readDirectory("packages", [".ts", ".tsx"]).filter((f) => /packages\/sim-opaca\/src\//.test(f))].filter(
+      (f) => !f.includes("node_modules"),
+    );
+    const offenders = files.filter((f) => /cases(-auto)?\.json/.test(ts.sys.readFile(f) ?? ""));
+    expect(offenders).toEqual([]);
   });
 });

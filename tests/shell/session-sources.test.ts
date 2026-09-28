@@ -8,12 +8,13 @@ import {
   type OpacaPublicCase,
   type SimTelemetry,
 } from "../../packages/contracts/src/index";
+import type { SimSessionSource } from "../../packages/sim-host/src/index";
 import { createDevLocalSessionSource } from "../../apps/shell/src/sims/devLocalSessions";
 import { SERVER_SESSION_SIMS, createBrowserSessionSource } from "../../apps/shell/src/sims/sessionSources";
 
-// A2.3 (ADR-009): Opaca sunucu oturumu için ortak altyapı. DEV yerel kaynağı
-// bankanın (`@egemed/assessment-bank` `opaca`) anlamını taklit eder; üretim
-// listesi (`SERVER_SESSION_SIMS`) bu görevde DEĞİŞMEZ (kanal T212b'de açılır).
+// A2.3 (ADR-009): Opaca sunucu oturumu ortak altyapısı. DEV yerel kaynağı
+// bankanın (`@egemed/assessment-bank` `opaca`) anlamını taklit eder; T212b ile
+// üretim listesi (`SERVER_SESSION_SIMS`) Opaca kanalını da taşır.
 
 const NOW = 1_728_000_000_000;
 const SESSION_ID = "11111111-1111-4111-8111-111111111111";
@@ -30,28 +31,13 @@ const ALL_OPACA_CASES: readonly CaseDef[] = [
   ...new Map([...opaca.poolFor("practice"), ...opaca.poolFor("assessment")].map((caseDef) => [caseDef.id, caseDef])).values(),
 ];
 
-const labelsOf = (options: readonly { readonly label: string }[]): string => options.map((option) => option.label).sort().join("|");
-
-/** Açık vakayı içerikten (başlık/görüntü yolu sızmaz) anahtarlı banka vakasına eşler. */
-function caseOf(publicCase: OpacaPublicCase): CaseDef {
-  const match = ALL_OPACA_CASES.filter(
-    (caseDef) =>
-      caseDef.chiefComplaint === publicCase.chiefComplaint &&
-      caseDef.history === publicCase.history &&
-      caseDef.questions.length === publicCase.questions.length &&
-      caseDef.questions.every((question, position) => {
-        const publicQuestion = publicCase.questions[position];
-        return (
-          publicQuestion !== undefined &&
-          question.id === publicQuestion.id &&
-          question.prompt === publicQuestion.prompt &&
-          labelsOf(question.options) === labelsOf(publicQuestion.options)
-        );
-      }),
-  );
-  // Bankada içeriği birebir aynı vakalar olabilir (rastgele seçim); bu testlerde puanlama
-  // içerik ve boş yanıt üzerinden yapıldığı için eşdeğerdirler — ilki alınır.
-  expect(match.length).toBeGreaterThanOrEqual(1);
+/** Açık vakayı oturum jetonundan anahtarlı banka vakasına eşler (test ayrıcalığı:
+ *  jeton yalnız oturum kaynağında çözülür; içerik eşleşmesi bankada tek anlamlı
+ *  değildir çünkü kardeş vakalar aynı metinleri taşıyabilir). */
+function caseOf(source: SimSessionSource, sessionId: string, publicCase: OpacaPublicCase): CaseDef {
+  const resolved = source.imageUrl(sessionId, publicCase.image.token);
+  const match = ALL_OPACA_CASES.filter((caseDef) => resolved === `/sims/opaca/${imageById(caseDef.imageId)?.runtimeUrl ?? "\u0000"}`);
+  expect(match).toHaveLength(1);
   return match[0]!;
 }
 
@@ -90,8 +76,8 @@ function answersFor(publicCase: OpacaPublicCase, caseDef: CaseDef, keys: opaca.O
 }
 
 describe("SERVER_SESSION_SIMS (A2.3)", () => {
-  it("Opaca kanalı bu görevde kapalı kalır: liste yalnız Ausculta taşır", () => {
-    expect(SERVER_SESSION_SIMS).toEqual(["ausculta"]);
+  it("T212b: Opaca kanalı açıktır; liste Ausculta + Opaca taşır", () => {
+    expect(SERVER_SESSION_SIMS).toEqual(["ausculta", "opaca"]);
   });
 });
 
@@ -147,7 +133,7 @@ describe("createDevLocalSessionSource — Opaca (A2.3)", () => {
     const publicCase = opacaPublicCaseSchema.parse(await source.getCase(session.sessionId, 1));
     expect(publicCase.simId).toBe("opaca");
     expect(publicCase.label).toBe("Vaka 1");
-    const caseDef = caseOf(publicCase);
+    const caseDef = caseOf(source, session.sessionId, publicCase);
     const runtimeUrl = imageById(caseDef.imageId)?.runtimeUrl ?? "";
     const raw = JSON.stringify(publicCase);
     expect(raw).not.toContain(caseDef.title);
@@ -163,7 +149,7 @@ describe("createDevLocalSessionSource — Opaca (A2.3)", () => {
     const source = createDevLocalSessionSource("opaca", () => NOW);
     const session = await source.start("practice");
     const publicCase = opacaPublicCaseSchema.parse(await source.getCase(session.sessionId, 1));
-    const caseDef = caseOf(publicCase);
+    const caseDef = caseOf(source, session.sessionId, publicCase);
     const keys = keysFor(publicCase, caseDef);
     const answers = answersFor(publicCase, caseDef, keys);
     let hintsUsed = 0;
@@ -209,7 +195,7 @@ describe("createDevLocalSessionSource — Opaca (A2.3)", () => {
     await expect(source.hint(session.sessionId, 1, first.id)).rejects.toThrow("forbidden");
     const answered = await source.answer(session.sessionId, 1, { answers: {}, telemetry: TELEMETRY });
     expect(answered).toEqual({ mode: "assessment", accepted: true });
-    const caseDef = caseOf(publicCase);
+    const caseDef = caseOf(source, session.sessionId, publicCase);
     const expected = opaca.gradeCase(caseDef, keysFor(publicCase, caseDef), {
       index: 1,
       mode: "assessment",

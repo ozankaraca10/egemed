@@ -7,7 +7,6 @@ import type { ModalEnv, ModalFocusable, ModalKeyEvent } from "./ui/modal-env";
 import type { LearnScreenEnv } from "./screens/LearnScreen";
 import type { ResultsScreenEnv } from "./screens/ResultsScreen";
 import type { StartScreenEnv } from "./screens/StartScreen";
-import type { SimulationPopoverEnv, SimulationPopoverEvent } from "./screens/SimulationScreen";
 
 /** Tarayıcı `localStorage` yüzeyini `StoragePort`'a bağlar; erişim hatalarında sessiz kalır. */
 export function createLocalStoragePort(
@@ -180,25 +179,6 @@ export function createBrowserLearnScreenEnv(doc: { querySelector(selector: strin
   };
 }
 
-export function createBrowserSimulationPopoverEnv(doc: {
-  addEventListener(type: string, handler: (...args: never[]) => void): void;
-  removeEventListener(type: string, handler: (...args: never[]) => void): void;
-  contains?(node: unknown): boolean;
-}): SimulationPopoverEnv {
-  return {
-    addEventListener(type, handler) {
-      doc.addEventListener(type, (event) => handler(event as SimulationPopoverEvent));
-    },
-    removeEventListener(type, handler) {
-      doc.removeEventListener(type, (event) => handler(event as SimulationPopoverEvent));
-    },
-    containsNode(root, target) {
-      const node = root as { contains?(child: unknown): boolean };
-      return node.contains?.(target) ?? doc.contains?.(target) ?? false;
-    },
-  };
-}
-
 export function createBrowserResultsScreenEnv(win: { close(): void }): ResultsScreenEnv {
   return { lmsAttached: false, requestClose: () => win.close() };
 }
@@ -212,7 +192,6 @@ export interface BrowserOpacaBindings {
   readonly modalEnv: ModalEnv;
   readonly startEnv: StartScreenEnv;
   readonly learnEnv: LearnScreenEnv;
-  readonly popoverEnv: SimulationPopoverEnv;
   readonly resultsEnv: ResultsScreenEnv;
 }
 
@@ -252,7 +231,6 @@ export function createBrowserOpacaBindings(
     modalEnv: createBrowserModalEnv(doc as never),
     startEnv: createBrowserStartScreenEnv(chromeEnv, doc),
     learnEnv: createBrowserLearnScreenEnv(doc),
-    popoverEnv: createBrowserSimulationPopoverEnv(doc as never),
     resultsEnv: createBrowserResultsScreenEnv(win),
   };
 }

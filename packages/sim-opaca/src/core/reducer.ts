@@ -2,8 +2,8 @@ import type { CaseDef, CaseResult, Mode, Screen, SuspendPayload, Telemetry, View
 import type { SimEventDraft } from "./events";
 import { aggregateResults, practiceAdjusted, scoreCase, MASTERY_THRESHOLD } from "./scoring";
 import { getImage } from "./images";
-import { ALL_CASES } from "../data/pool";
 import { ZONES } from "../data/zones";
+import type { ServerCaseMeta, ServerCaseSnapshot, ServerClientCase, ServerQuestionFeedback, ServerSessionState } from "./serverSession";
 
 /** Opaca durum iskeleti ve saf reducer (kaynak: `core/store.tsx:1-255`).
  *  React/DOM importu yoktur; `Date.now()` kullanılmaz. Yamalar şu iki sınırla dışarı açılır:
@@ -45,6 +45,12 @@ export interface AppState {
    *  korunur" ifadesinin karşılığı; `StoragePort` ile okunur/yazılır, oturum/örneklem sıfırlansa
    *  da silinmez. SCORM suspend şemasına dahil değildir. */
   bestScore: { practice: number; assessment: number };
+  /** A2.3 (ADR-009): sunucu vaka oturumu; null ise oturum yok (öğrenme ya da henüz başlamadı). */
+  server: ServerSessionState | null;
+  /** Öğrenme ekranından "bu konuda uygulama yap": sonraki uygulama oturumunun odak bulgusu. */
+  serverFocus: string | null;
+  /** ADR-010: düello oturumu (değerlendirme arayüzüyle, `challenge` sunucu moduyla çalışır). */
+  serverChallengeId: string | null;
 }
 
 const emptyToolUse = (): Record<ViewerTool, number> => ({ zoom: 0, window: 0, invert: 0, overlay: 0, measure: 0 });
@@ -74,6 +80,9 @@ export const initialState: AppState = {
   learnFocusIdx: null,
   topicReturn: null,
   bestScore: { practice: 0, assessment: 0 },
+  server: null,
+  serverFocus: null,
+  serverChallengeId: null,
 };
 
 /* ---------------- en iyi puan deposu (E2 §7.2) ---------------- */
@@ -128,7 +137,7 @@ export function saveFsPromptDone(storage: StoragePort): void {
 
 export type Action =
   | { type: "goto"; screen: Screen }
-  | { type: "startMode"; mode: Mode }
+  | { type: "startMode"; mode: Mode; focusFinding?: string; challengeId?: string }
   | { type: "caseMount"; caseDef: CaseDef }
   | { type: "startSession"; practiceIds: string[]; assessmentIds: string[]; seed: number }
   | { type: "toggleZones"; show?: boolean }
@@ -148,8 +157,17 @@ export type Action =
   | { type: "resetCase" }
   | { type: "setResults"; results: CaseResult[] }
   | { type: "setLearnFocus"; key: string | null; idx?: number | null }
-  | { type: "startTopicPractice"; key: string; exampleIdx: number; title: string; practiceIds: string[]; seed: number }
-  | { type: "returnToTopic" };
+  | { type: "startTopicPractice"; key: string; exampleIdx: number; title: string; focusFinding: string | null }
+  | { type: "returnToTopic" }
+  | { type: "serverStarted"; sessionId: string; mode: "practice" | "assessment" | "challenge"; caseCount: number; perCaseLimitMs: number | null }
+  | { type: "serverCaseLoaded"; index: number; clientCase: ServerClientCase }
+  | { type: "serverChecked"; qid: string; feedback: ServerQuestionFeedback }
+  | { type: "serverHint"; qid: string; hint: string }
+  | { type: "serverSubmitting" }
+  | { type: "serverSnapshot"; caseId: string; snapshot: ServerCaseSnapshot }
+  | { type: "serverCaseResult"; result: CaseResult; meta: ServerCaseMeta | null }
+  | { type: "serverFinished"; results: CaseResult[]; metas: Record<string, ServerCaseMeta> }
+  | { type: "serverError"; message: string };
 
 /** Reducer'ın dış dünya sınırı: olay yayını. Verilmezse olaylar yutulur (saf hesap kullanımı);
  *  `StoreProvider` (S7) mount başına veri yolunu bağlar. */
@@ -159,7 +177,10 @@ export interface ReducerSeam {
 
 const noopSeam: ReducerSeam = { emit: () => undefined };
 
-const findCase = (id: string) => ALL_CASES.find((c) => c.id === id);
+/** Etkin vaka: yalnız sunucu oturumunda yüklü vaka (A2.3; istemcide yerel havuz yok). */
+function findCase(s: AppState, id: string): CaseDef | undefined {
+  return s.server?.currentCase?.id === id ? s.server.currentCase : undefined;
+}
 
 /** Vaka puanı (store dışı da kullanılır: testler, sonuç ekranı). */
 export function computeCaseResult(def: CaseDef, s: Pick<AppState, "answers" | "telemetry" | "hintsUsed" | "mode">): CaseResult {
@@ -185,19 +206,21 @@ export function reducer(s: AppState, a: Action, seam: ReducerSeam = noopSeam): A
         telemetry: initialTelemetry(), lastFeedback: null, pendingSummary: null,
         caseResults: [], assessmentTimer: 0, caseElapsed: 0, attempts: s.attempts + 1, currentCaseId: "",
         topicReturn: a.mode === "practice" ? s.topicReturn : null,
+        // A2.3: yeni mod yeni sunucu oturumu ister (sürücü başlatır).
+        server: null,
+        serverFocus: a.mode === "practice" ? (a.focusFinding ?? null) : null,
+        serverChallengeId: a.mode === "assessment" ? (a.challengeId ?? null) : null,
       };
     case "startSession":
       return { ...s, session: { practiceIds: a.practiceIds, assessmentIds: a.assessmentIds, seed: a.seed }, topicReturn: null };
     case "startTopicPractice": {
-      const withSession = reducer(s, { type: "startSession", practiceIds: a.practiceIds, assessmentIds: s.session.assessmentIds, seed: a.seed }, seam);
-      const started = reducer(withSession, { type: "startMode", mode: "practice" }, seam);
+      // A2.3: konu uygulaması da sunucudan açılır; odak bulgusu oturum isteğine girer.
+      const started = reducer(s, { type: "startMode", mode: "practice", ...(a.focusFinding === null ? {} : { focusFinding: a.focusFinding }) }, seam);
       return { ...started, topicReturn: { key: a.key, exampleIdx: a.exampleIdx, title: a.title } };
     }
     case "returnToTopic": {
       if (!s.topicReturn) return s;
-      // Konu uygulamasının 5 vakalık listesi normal uygulama örneklemi değildir; boşaltılır ki bir sonraki
-      // uygulama girişi (SimulationScreen K3 etkisi) yeni ve tam bir örneklem çeksin.
-      const learn = reducer({ ...s, session: { ...s.session, practiceIds: [] } }, { type: "startMode", mode: "learn" }, seam);
+      const learn = reducer(s, { type: "startMode", mode: "learn" }, seam);
       return { ...learn, screen: "learn", learnFocusKey: s.topicReturn.key, learnFocusIdx: s.topicReturn.exampleIdx, topicReturn: null };
     }
     case "toggleZones":
@@ -244,12 +267,12 @@ export function reducer(s: AppState, a: Action, seam: ReducerSeam = noopSeam): A
     case "timer":
       return { ...s, assessmentTimer: s.assessmentTimer + a.deltaMs, caseElapsed: s.caseElapsed + a.deltaMs };
     case "advance": {
-      const def = findCase(s.currentCaseId);
+      const def = findCase(s, s.currentCaseId);
       if (!def || def.questions[s.step + 1] == null) return s;
       return { ...s, step: s.step + 1, lastFeedback: null };
     }
     case "finishCase": {
-      const def = findCase(s.currentCaseId);
+      const def = findCase(s, s.currentCaseId);
       if (!def || s.pendingSummary) return s;
       const result = computeCaseResult(def, s);
       seam.emit({ type: "case_completed", caseId: def.id, mode: s.mode });
@@ -294,6 +317,89 @@ export function reducer(s: AppState, a: Action, seam: ReducerSeam = noopSeam): A
     }
     case "setLearnFocus":
       return { ...s, learnFocusKey: a.key, learnFocusIdx: a.idx ?? null };
+    case "serverStarted":
+      return {
+        ...s,
+        server: {
+          sessionId: a.sessionId,
+          mode: a.mode,
+          caseCount: a.caseCount,
+          perCaseLimitMs: a.perCaseLimitMs,
+          loadedIndex: 0,
+          currentCase: null,
+          cases: {},
+          feedback: {},
+          hints: {},
+          metas: {},
+          snapshots: {},
+          status: "loading",
+          error: null,
+        },
+      };
+    case "serverCaseLoaded":
+      if (!s.server) return s;
+      return {
+        ...s,
+        currentCaseId: a.clientCase.id,
+        server: {
+          ...s.server,
+          loadedIndex: a.index,
+          currentCase: a.clientCase,
+          cases: { ...s.server.cases, [a.clientCase.id]: a.clientCase },
+          feedback: {},
+          hints: {},
+          status: "ready",
+          error: null,
+        },
+      };
+    case "serverChecked":
+      if (!s.server) return s;
+      return { ...s, server: { ...s.server, feedback: { ...s.server.feedback, [a.qid]: a.feedback } } };
+    case "serverHint":
+      if (!s.server) return s;
+      return { ...s, server: { ...s.server, hints: { ...s.server.hints, [a.qid]: a.hint } } };
+    case "serverSnapshot":
+      if (!s.server) return s;
+      return { ...s, server: { ...s.server, snapshots: { ...s.server.snapshots, [a.caseId]: a.snapshot } } };
+    case "serverSubmitting":
+      if (!s.server) return s;
+      return { ...s, server: { ...s.server, status: "submitting" } };
+    case "serverCaseResult": {
+      // Yerel `finishCase` karşılığı; `case_completed` YAYINLANMAZ (denemeyi sunucu yazar).
+      if (!s.server) return s;
+      const metas = a.meta === null ? s.server.metas : { ...s.server.metas, [a.result.caseId]: a.meta };
+      const given = s.server.snapshots[a.result.caseId]?.given ?? {};
+      const result = { ...a.result, answers: a.result.answers.map((answer) => ({ ...answer, given: [...(given[answer.qid] ?? [])] })) };
+      return {
+        ...s,
+        caseResults: [...s.caseResults, result],
+        pendingSummary: result,
+        lastFeedback: null,
+        server: { ...s.server, metas, status: "ready" },
+      };
+    }
+    case "serverFinished": {
+      if (!s.server) return s;
+      const modeKey: "practice" | "assessment" = s.mode === "assessment" ? "assessment" : "practice";
+      const snapshots = s.server.snapshots;
+      const results = a.results.map((item) => ({
+        ...item,
+        answers: item.answers.map((answer) => ({ ...answer, given: [...(snapshots[item.caseId]?.given[answer.qid] ?? [])] })),
+      }));
+      const agg = aggregateResults(results);
+      const prevBest = s.bestScore[modeKey] ?? 0;
+      const bestScore = agg.total > prevBest ? { ...s.bestScore, [modeKey]: agg.total } : s.bestScore;
+      return {
+        ...s,
+        caseResults: results,
+        screen: "results",
+        bestScore,
+        server: { ...s.server, metas: { ...s.server.metas, ...a.metas }, status: "finished" },
+      };
+    }
+    case "serverError":
+      if (!s.server) return { ...s, server: null };
+      return { ...s, server: { ...s.server, status: "error", error: a.message } };
     default:
       return s;
   }

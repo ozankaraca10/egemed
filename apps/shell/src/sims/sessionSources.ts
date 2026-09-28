@@ -10,11 +10,10 @@ import { browserApiWindow, csrfTokenFromCookie } from "../apiAuth";
  */
 
 /**
- * T212b: Opaca istemcisi sunucu oturumuna hazır olunca `true` yapılır (liste
- * `"opaca"` ile genişler). T212a yalnız altyapıyı hazırlar; kullanıcı davranışı
- * değişmez (Opaca kanalı kapalı kalır).
+ * T212b: Opaca istemcisi sunucu oturumuyla çalışır (liste `"opaca"` ile genişler);
+ * uygulama/değerlendirme vakaları yalnız sunucu kanalından gelir (A2.3, ADR-009).
  */
-const OPACA_SERVER_SESSIONS = false;
+const OPACA_SERVER_SESSIONS = true;
 
 /** Sunucu oturumu olan simler (A2 Opaca, A3 Pulse ile genişler). */
 export const SERVER_SESSION_SIMS: readonly SimId[] = OPACA_SERVER_SESSIONS ? ["ausculta", "opaca"] : ["ausculta"];

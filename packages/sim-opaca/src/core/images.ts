@@ -11,6 +11,10 @@ const byId = new Map(IMAGES.map((r) => [r.id, r]));
 /** Platform varlık taban yolu (S19 SimHost bağlamı; varsayılan kabuk rotası). */
 export const DEFAULT_ASSET_BASE = "/sims/opaca/";
 
+/** A2.3: sunucu oturum görüntü adresleri bu önekle işaretlenir; varlık tabanına
+ *  eklenmeden aynen kullanılır (oturum jetonlu vekil adresi). */
+export const SESSION_ASSET_PREFIX = "egemed-session:";
+
 let assetBase = DEFAULT_ASSET_BASE;
 
 /** Mount başına varlık taban yolunu ayarlar; önceki değeri döndürür (dispose'ta geri alınır). */
@@ -24,9 +28,11 @@ export function resetAssetBase(base: string): void {
   assetBase = base;
 }
 
-/** Göreli veya mutlak `/assets` yollarını platform taban yoluna çözümler. */
+/** Göreli veya mutlak `/assets` yollarını platform taban yoluna çözümler.
+ *  Sunucu oturum adresleri (`egemed-session:`) işareti atılarak aynen kullanılır. */
 export function resolveAssetUrl(path: string | null | undefined): string | undefined {
   if (!path) return undefined;
+  if (path.startsWith(SESSION_ASSET_PREFIX)) return path.slice(SESSION_ASSET_PREFIX.length);
   if (/^https?:\/\//i.test(path)) return path;
   const normalized = path.startsWith("/") ? path.slice(1) : path;
   return `${assetBase}${normalized}`;

@@ -2,9 +2,6 @@ import { documentLike, windowLike, locationSearch } from '../platform-dom'
 import type { ModalEnv, ModalFocusable } from '../ui/modal-env'
 import { useEffect, useMemo, useState } from 'react'
 import { useStore } from '../core/StoreProvider'
-import { poolFor } from '../data/pool'
-import { sampleSession, SESSION_SIZE } from '../core/session'
-import { sessionSeedFromNow } from './simulation-core'
 import { Footer } from '../ui/chrome'
 import { ScreenHeading } from '../ui/ScreenHeading'
 import { buildLeaderboardModel, GamiLeaderboardView, GamiProgressPage, GamiServerFrame, gamiLoadingStatus, type GamiModalEnv, type ServerGamiData } from '@egemed/gami-ui'
@@ -77,8 +74,7 @@ function LeaderboardBody({
   const me = model.rows.find((r) => r.isMe)
 
   const startAssessment = () => {
-    const seed = sessionSeedFromNow(now())
-    dispatch({ type: 'startSession', practiceIds: sampleSession(poolFor('practice'), seed, SESSION_SIZE), assessmentIds: sampleSession(poolFor('assessment'), seed + 1, SESSION_SIZE), seed })
+    // A2.3: örneklemi sunucu sürücüsü çeker (istemcide havuz yok).
     dispatch({ type: 'startMode', mode: 'assessment' })
   }
   const statusAction = (a: 'privacy' | 'assess') => {
