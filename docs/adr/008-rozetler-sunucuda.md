@@ -54,3 +54,8 @@ ustalığı; Opaca/Ausculta: kendi alanları).
   48 saat/5 dk penceresi, `opaca.day` yeniden hesaplanır), özet kodlarını sime ve 64 anahtara sınırlar ve kullanıcı
   başına saatlik deneme sınırı uygular. Kalan risk: kötü niyetli bir öğrenci puanı/kodları uydurarak kendi rozet
   ve XP'sini şişirebilir (saatlik sınırla yavaşlar); bu biçimlendirici bir öğrenme ortamında kabul edilmiştir.
+
+Güncelleme (28 Eylül 2026, T226): İstemci puanlı deneme yolu kapandı; puanlı
+denemeyi yalnız sunucu oturumu yazar ve istemci skor/özet beyanı kabul edilmez
+(ADR-009 A4 ve güncellemesi). Yukarıdaki güven modeli notu artık yalnız kalan
+istemci beyanları (öğrenme kaydı konusu, oturum telemetrisi) için geçerlidir.
