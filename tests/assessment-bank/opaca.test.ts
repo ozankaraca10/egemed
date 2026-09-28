@@ -11,7 +11,7 @@ import { ZONES as SIM_ZONES } from "../../packages/sim-opaca/src/data/zones";
 import { buildAttemptRecord } from "../../packages/sim-opaca/src/gamification/attempt";
 import { TOPIC_BADGE_MATCH } from "../../packages/sim-opaca/src/gamification/stats";
 import { FINDINGS } from "../../packages/sim-opaca/src/data/terminology";
-import { OPACA_TOPIC_MATCH, opacaSessionStats } from "../../packages/assessment-bank/src/opaca/stats";
+import { OPACA_LIBRARY_ITEMS, OPACA_TOPIC_MATCH, opacaSessionStats } from "../../packages/assessment-bank/src/opaca/stats";
 import type { CaseDef, ImageRecord, Question } from "../../packages/assessment-bank/src/opaca/types";
 
 // A2.1 (ADR-009): anahtarsız Opaca projeksiyonu hiçbir vakada anahtar/tanı/görüntü
@@ -287,7 +287,15 @@ describe("sunucu oturum istatistiği (T235)", () => {
         if (match(finding.finding)) expectedTopics[topic] = (expectedTopics[topic] ?? 0) + 1;
       }
     }
+    const expectedLibraryTopics = new Set(
+      items.flatMap(({ caseDef, result }) => {
+        const identified = caseDef.questions.find((question) => question.type === "finding_identify");
+        if (identified === undefined || !result.questions.find((question) => question.questionId === identified.id)?.correct) return [];
+        return OPACA_LIBRARY_ITEMS.filter((item) => item.finding === caseDef.primaryFinding).map((item) => item.key);
+      }),
+    );
     expect(stats.topicCorrect).toEqual(expectedTopics);
+    expect(new Set(stats.libraryTopicsCorrect)).toEqual(expectedLibraryTopics);
     expect(stats.localizationHits).toBe(record.extra.localizationHits);
     expect(stats.qualityCorrect).toBe(record.extra.qualityCorrect);
     expect(stats.interpretationCorrect).toBe(record.extra.interpretationCorrect);
@@ -303,6 +311,8 @@ describe("sunucu oturum istatistiği (T235)", () => {
     const item = { caseDef: def, result };
     const practice = opacaSessionStats([item], { mode: "practice", score: result.total, durationMs: 0 });
     expect(practice.topicCorrect).toEqual({});
+    const practiceTopic = OPACA_LIBRARY_ITEMS.find((libraryItem) => libraryItem.finding === def.primaryFinding);
+    expect(practice.libraryTopicsCorrect).toEqual(practiceTopic === undefined ? [] : [practiceTopic.key]);
     expect(practice.fastPerfect).toBe(false);
     // Süre yarı sınırın üstüne çıkınca hızlı-kusursuz rozeti verilmez.
     const slow = opacaSessionStats([item], { mode: "assessment", score: 100, durationMs: (def.timeLimitSec ?? 0) * 1000 });

@@ -11,6 +11,7 @@ import {
   type GamiPeriod,
   type SimId,
 } from "@egemed/contracts";
+import { opaca as assessmentBankOpaca } from "@egemed/assessment-bank";
 import { SIM_BADGE_EVALUATORS, type SimLearnCounters } from "@egemed/gami-catalogs";
 import { DEFAULT_RULES, assessmentXp, practiceXp, type Period } from "@egemed/gamification-core";
 import {
@@ -586,12 +587,14 @@ export function createPgGamificationRepo(db: GamiDb): GamificationRepo {
  * T235: Opaca rozetlerinin öğrenme sayaçları yalnız `gami_learn`'ten türetilir
  * (`opaca:topic:*` / `opaca:stack:*`); denemede kod olarak saklanmaz.
  */
-function learnCountersFrom(topics: readonly string[]): SimLearnCounters {
+function learnCountersFrom(topics: readonly string[], simId: SimId): SimLearnCounters {
   const distinct = (prefix: string): number =>
     new Set(topics.filter((topic) => topic.startsWith(prefix))).size;
+  const library = simId === "opaca" ? assessmentBankOpaca.opacaLibraryLearnCoverage(topics) : undefined;
   return {
     topicsCount: distinct("opaca:topic:"),
     stacksCount: distinct("opaca:stack:"),
+    ...(library === undefined ? {} : { libraryTopicsTotal: library.total, libraryTopicsCovered: library.covered }),
   };
 }
 
@@ -613,7 +616,7 @@ async function awardPgBadges(db: GamiDb, target: { readonly userId: string; read
     const summaries = summaryRows.rows.map((row) => (row as { readonly summary: Readonly<Record<string, number>> }).summary);
     const earned = badgeRows.rows.map((row) => (row as { readonly badge_key: string }).badge_key);
     const topics = learnRows.rows.map((row) => (row as { readonly topic: string }).topic);
-    const awarded = evaluator.newlyEarned(summaries, earned, new Date(target.at), learnCountersFrom(topics));
+    const awarded = evaluator.newlyEarned(summaries, earned, new Date(target.at), learnCountersFrom(topics, target.simId));
     if (awarded.length === 0) return;
     await db.query(
       "insert into gami_badges (user_id, sim_id, badge_key, awarded_at) select $1, $2, key, $4 from unnest($3::text[]) as key where exists (select 1 from gami_profiles p where p.user_id = $1 and p.sim_id = $2) on conflict (user_id, sim_id, badge_key) do nothing",
@@ -889,7 +892,7 @@ export function createMemoryGamificationRepo(
     const topics = [...learn.values()]
       .filter((entry) => entry.userId === userId && entry.simId === simId)
       .map((entry) => entry.topic);
-    for (const badgeKey of evaluator.newlyEarned(own.map((candidate) => candidate.summary), earned, new Date(at), learnCountersFrom(topics))) {
+    for (const badgeKey of evaluator.newlyEarned(own.map((candidate) => candidate.summary), earned, new Date(at), learnCountersFrom(topics, simId))) {
       badges.push({ userId, simId, key: badgeKey, awardedAt: at });
     }
   }

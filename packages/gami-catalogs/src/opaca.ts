@@ -357,6 +357,8 @@ export interface OpacaSummaryInput {
     readonly fastPerfect: boolean;
     /** Bu denemedeki konu başına doğru bulgu sayısı (sim TOPIC_BADGE_MATCH ile hesaplar); kodlanamıyorsa kod yazılmaz. */
     readonly topicCorrect?: Partial<Record<OpacaTopic, number>>;
+    /** Sunucu oturumunda doğru tanımlanan kütüphane bulgu konu anahtarları. */
+    readonly libraryTopicsCorrect?: readonly string[];
   };
   /** Sim'in deneme anındaki birikimli öğrenme sayaçları (rozet istatistiğinin girdisi); kabuk raporunda yoksa kodlanmaz. */
   readonly learn?: {
@@ -371,8 +373,8 @@ export interface OpacaSummaryInput {
   };
 }
 
-/** Kod sözlüğü v1. Kod ekle/çıkar = sürüm değişikliği (`opaca.v`). */
-export const OPACA_SUMMARY_VERSION = 1;
+/** Kod sözlüğü v2. Kod ekle/çıkar = sürüm değişikliği (`opaca.v`). */
+export const OPACA_SUMMARY_VERSION = 2;
 
 const clampInt = (value: number, min: number, max: number): number =>
   Math.min(max, Math.max(min, Math.round(Number.isFinite(value) ? value : 0)));
@@ -413,6 +415,9 @@ export function encodeOpacaSummary(input: OpacaSummaryInput): Record<string, num
     const hits = clampInt(input.extra.topicCorrect?.[topic] ?? 0, 0, 1000);
     if (hits > 0) summary[`opaca.t.${topic}`] = hits;
   }
+  for (const libraryTopic of input.extra.libraryTopicsCorrect ?? []) {
+    summary[`opaca.library.${libraryTopic}`] = 1;
+  }
   return summary;
 }
 
@@ -422,6 +427,10 @@ export interface OpacaLearnCounters {
   readonly topicsCount: number;
   /** Farklı `opaca:stack:*` sayısı. */
   readonly stacksCount: number;
+  /** Kütüphanedeki statik konu sayısı. */
+  readonly libraryTopicsTotal?: number;
+  /** `gami_learn` ile kapsanan, bulguya bağlı olmayan kütüphane konusu sayısı. */
+  readonly libraryTopicsCovered?: number;
 }
 
 /**
@@ -447,10 +456,11 @@ export function opacaStatsFromSummaries(
   let ctStacksCompletedCount = 0;
   let allTopicsTotal = 0;
   let allTopicsCoveredCount = 0;
+  const coveredLibraryTopics = new Set<string>();
   const topicCorrect: Partial<Record<OpacaTopic, number>> = {};
   const days = new Set<number>();
   for (const summary of summaries) {
-    if (summary["opaca.v"] !== OPACA_SUMMARY_VERSION) continue;
+    if (summary["opaca.v"] !== 1 && summary["opaca.v"] !== OPACA_SUMMARY_VERSION) continue;
     const assessment = summary["opaca.mode"] === 1;
     if (assessment) {
       assessmentCount += 1;
@@ -477,10 +487,17 @@ export function opacaStatsFromSummaries(
     ctStacksCompletedCount = Math.max(ctStacksCompletedCount, clampInt(summary["opaca.stacks"] ?? 0, 0, 100_000));
     allTopicsTotal = Math.max(allTopicsTotal, clampInt(summary["opaca.lib"] ?? 0, 0, 100_000));
     allTopicsCoveredCount = Math.max(allTopicsCoveredCount, clampInt(summary["opaca.cov"] ?? 0, 0, 100_000));
+    for (const [key, value] of Object.entries(summary)) {
+      if (key.startsWith("opaca.library.") && value === 1) coveredLibraryTopics.add(key.slice("opaca.library.".length));
+    }
   }
+  allTopicsCoveredCount = Math.max(allTopicsCoveredCount, coveredLibraryTopics.size);
   if (learn !== undefined) {
     learnTopicsCount = Math.max(learnTopicsCount, clampInt(learn.topicsCount, 0, 100_000));
     ctStacksCompletedCount = Math.max(ctStacksCompletedCount, clampInt(learn.stacksCount, 0, 100_000));
+    allTopicsTotal = Math.max(allTopicsTotal, clampInt(learn.libraryTopicsTotal ?? 0, 0, 100_000));
+    const learnedLibraryTopics = clampInt(learn.libraryTopicsCovered ?? 0, 0, 100_000);
+    allTopicsCoveredCount = Math.max(allTopicsCoveredCount, coveredLibraryTopics.size + learnedLibraryTopics);
   }
   const sortedDays = [...days].sort((a, b) => a - b);
   let streakLongest = 0;

@@ -2,5 +2,11 @@ export { buildPublicCase, checkQuestion, gradeCase, hintFor, type BuildCaseInput
 export { FOCUS_CASE_COUNT, SESSION_CASE_COUNT, caseById, poolFor, selectCaseIds } from "./select";
 export { caseInventory, type OpacaCaseInventory } from "./inventory";
 export { aggregateResults, MASTERY_THRESHOLD } from "./scoring";
-export { opacaSessionStats, OPACA_TOPIC_MATCH, type OpacaSessionStats } from "./stats";
+export {
+  opacaSessionStats,
+  opacaLibraryLearnCoverage,
+  OPACA_LIBRARY_ITEMS,
+  OPACA_TOPIC_MATCH,
+  type OpacaSessionStats,
+} from "./stats";
 export type { CaseDef } from "./types";

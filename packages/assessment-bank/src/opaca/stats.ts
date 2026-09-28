@@ -1,5 +1,6 @@
 import type { SimCaseResult } from "@egemed/contracts";
 import findingsJson from "../../../sim-opaca/src/data/findings.json" with { type: "json" };
+import libraryJson from "../../../sim-opaca/src/data/library.json" with { type: "json" };
 import type { CaseDef, Mode } from "./types";
 
 /**
@@ -10,6 +11,29 @@ import type { CaseDef, Mode } from "./types";
  */
 
 const FINDINGS = (findingsJson as { readonly findings: Readonly<Record<string, { readonly group: string }>> }).findings;
+
+interface OpacaLibraryItem {
+  readonly key: string;
+  readonly finding: string | null;
+}
+
+const LIBRARY_GROUPS = (libraryJson as { readonly groups: readonly { readonly items: readonly OpacaLibraryItem[] }[] }).groups;
+
+/** Kütüphane başlıkları sunucu bankasının statik kapsamıdır (T239). */
+export const OPACA_LIBRARY_ITEMS: readonly OpacaLibraryItem[] = LIBRARY_GROUPS.flatMap((group) => group.items);
+
+/** Eski istemci gibi, bulguya bağlı olmayan başlıklar açıldığında kapsanır. */
+export function opacaLibraryLearnCoverage(learnTopics: readonly string[]): { readonly total: number; readonly covered: number } {
+  const learned = new Set(
+    learnTopics
+      .filter((topic) => topic.startsWith("opaca:topic:"))
+      .map((topic) => topic.slice("opaca:topic:".length)),
+  );
+  return {
+    total: OPACA_LIBRARY_ITEMS.length,
+    covered: OPACA_LIBRARY_ITEMS.filter((item) => item.finding === null && learned.has(item.key)).length,
+  };
+}
 
 /** Rozet konu eşlemesi — sim `TOPIC_BADGE_MATCH` ile birebir aynı (test eşitliği doğrular). */
 export const OPACA_TOPIC_MATCH: Record<string, (findingId: string) => boolean> = {
@@ -32,6 +56,8 @@ export interface OpacaSessionStats {
   fastPerfect: boolean;
   /** Konu başına doğru bulgu sayısı; yalnız değerlendirmede doldurulur. */
   topicCorrect: Record<string, number>;
+  /** Uygulama veya değerlendirmede doğru tanımlanan bulgu konu anahtarları. */
+  libraryTopicsCorrect: readonly string[];
 }
 
 /** Bir oturumun tamamlanan vakalarından istatistik; istemciden hiçbir sayı alınmaz. */
@@ -48,6 +74,7 @@ export function opacaSessionStats(
   let interpretationCorrect = 0;
   let limitMs = 0;
   const topicCorrect: Record<string, number> = {};
+  const libraryTopicsCorrect = new Set<string>();
   for (const { caseDef, result } of items) {
     const byQid = new Map(result.questions.map((question) => [question.questionId, question.correct]));
     const systematic = result.domains.systematic;
@@ -59,10 +86,14 @@ export function opacaSessionStats(
       if (question.type === "film_quality") qualityCorrect += 1;
       if (question.type === "interpretation") interpretationCorrect += 1;
     }
-    // Konu doğruluğu yalnız değerlendirmede sayılır (istemci `computeStats` kuralı).
-    if (session.mode !== "assessment") continue;
     const identified = caseDef.questions.find((question) => question.type === "finding_identify");
-    if (identified === undefined || byQid.get(identified.id) !== true) continue;
+    if (identified !== undefined && byQid.get(identified.id) === true) {
+      for (const item of OPACA_LIBRARY_ITEMS) {
+        if (item.finding === caseDef.primaryFinding) libraryTopicsCorrect.add(item.key);
+      }
+    }
+    // Eski konu rozetleri yalnız değerlendirme doğrularını saymaya devam eder.
+    if (session.mode !== "assessment" || identified === undefined || byQid.get(identified.id) !== true) continue;
     for (const [topicId, match] of Object.entries(OPACA_TOPIC_MATCH)) {
       if (match(caseDef.primaryFinding)) topicCorrect[topicId] = (topicCorrect[topicId] ?? 0) + 1;
     }
@@ -74,5 +105,6 @@ export function opacaSessionStats(
     interpretationCorrect,
     fastPerfect: session.mode === "assessment" && session.score >= 90 && limitMs > 0 && session.durationMs <= limitMs / 2,
     topicCorrect,
+    libraryTopicsCorrect: [...libraryTopicsCorrect],
   };
 }

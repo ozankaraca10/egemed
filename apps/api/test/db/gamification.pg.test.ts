@@ -1,6 +1,7 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import type { Client } from "pg";
-import { encodePulseSummary } from "@egemed/gami-catalogs";
+import { opaca as assessmentBankOpaca } from "@egemed/assessment-bank";
+import { encodeOpacaSummary, encodePulseSummary } from "@egemed/gami-catalogs";
 import { DEFAULT_RULES, levelForXp } from "@egemed/gamification-core";
 import {
   createPgGamificationRepo,
@@ -355,6 +356,70 @@ if (databaseUrl === "") {
         expect(await opacaBadges()).toContain("explorer");
         await repo().recordLearn({ userId: ALI_ID, simId: "opaca", topic: "opaca:stack:seri-1", at: FIXED_NOW, institutionId: INSTITUTION_ID });
         expect(await opacaBadges()).toContain("ct-explorer");
+      });
+
+      it("T239: PostgreSQL tüm kütüphane konuları kapsanınca all-topics verir; bir eksikken vermez", async () => {
+        const opacaBadges = async () => {
+          const result = await client.query(
+            "select badge_key from gami_badges where user_id = $1 and sim_id = 'opaca' order by badge_key",
+            [ALI_ID],
+          );
+          return (result.rows as readonly { readonly badge_key: string }[]).map((row) => row.badge_key);
+        };
+        const libraryItems = assessmentBankOpaca.OPACA_LIBRARY_ITEMS;
+        const findingTopics = libraryItems.filter((item) => item.finding !== null).map((item) => item.key);
+        const learnOnlyTopics = libraryItems.filter((item) => item.finding === null).map((item) => item.key);
+        for (const key of learnOnlyTopics) {
+          await repo().recordLearn({
+            userId: ALI_ID,
+            simId: "opaca",
+            topic: `opaca:topic:${key}`,
+            at: FIXED_NOW,
+            institutionId: INSTITUTION_ID,
+          });
+        }
+
+        let attemptNo = 1;
+        const writeCoveredTopics = async (libraryTopicsCorrect: readonly string[]) => {
+          const finishedAt = FIXED_NOW + attemptNo * 1_000;
+          const summary = encodeOpacaSummary({
+            mode: "assessment",
+            finishedAt: new Date(finishedAt).toISOString(),
+            score: 0,
+            caseCount: libraryTopicsCorrect.length,
+            hintsUsed: 0,
+            extra: {
+              localizationHits: 0,
+              abcdeComplete: 0,
+              qualityCorrect: 0,
+              interpretationCorrect: 0,
+              fastPerfect: false,
+              libraryTopicsCorrect,
+            },
+          });
+          const written = await repo().writeAttempt(
+            attemptInput({
+              id: uuidLike(600 + attemptNo),
+              userId: ALI_ID,
+              simId: "opaca",
+              attemptNo,
+              startedAt: finishedAt - HOUR,
+              finishedAt,
+              createdAt: finishedAt,
+              summary,
+            }),
+          );
+          expect(written.kind).toBe("created");
+          attemptNo += 1;
+        };
+
+        const coveredBeforeFinalTopic = findingTopics.slice(0, -1);
+        for (let offset = 0; offset < coveredBeforeFinalTopic.length; offset += 10) {
+          await writeCoveredTopics(coveredBeforeFinalTopic.slice(offset, offset + 10));
+        }
+        expect(await opacaBadges()).not.toContain("all-topics");
+        await writeCoveredTopics(findingTopics.slice(-1));
+        expect(await opacaBadges()).toContain("all-topics");
       });
     });
 

@@ -22,6 +22,10 @@ export interface SimLearnCounters {
   readonly topicsCount: number;
   /** Farklı `opaca:stack:*` sayısı. */
   readonly stacksCount: number;
+  /** Opaca kütüphanesinin statik konu toplamı. */
+  readonly libraryTopicsTotal?: number;
+  /** Opaca'da açılan, bulguya bağlı olmayan kütüphane konuları. */
+  readonly libraryTopicsCovered?: number;
 }
 
 export interface SimBadgeEvaluator {
