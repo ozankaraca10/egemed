@@ -227,6 +227,53 @@ describe("createOpacaModule (SimHost adaptörü)", () => {
     expect(sent.at(-1)).toBeNull();
   });
 
+  it("T218: learn kanalı App'e taşınır: host complete ise mod kartları açılır; kanal yoksa kilitli", async () => {
+    let tree: ReactNode = null;
+    const deps = createTestDeps({
+      createRoot: () => ({
+        render(next) {
+          tree = next;
+        },
+        unmount() {
+          tree = null;
+        },
+      }),
+    });
+    const calls: string[] = [];
+    const dispose = createOpacaModule(deps).mount(fakeTarget(), {
+      ...CONTEXT,
+      learn: {
+        complete: true,
+        async markComplete(version: string): Promise<void> {
+          calls.push(version);
+        },
+      },
+    });
+    await Promise.resolve();
+    const html = renderToStaticMarkup(tree);
+    expect(html).toContain('data-learn-locked="false"');
+    expect(html).toContain("Vakaları çöz");
+    expect(calls).toEqual([]);
+    dispose();
+
+    let lockedTree: ReactNode = null;
+    const lockedDeps = createTestDeps({
+      createRoot: () => ({
+        render(next) {
+          lockedTree = next;
+        },
+        unmount() {
+          lockedTree = null;
+        },
+      }),
+    });
+    createOpacaModule(lockedDeps).mount(fakeTarget(), CONTEXT);
+    await Promise.resolve();
+    const lockedHtml = renderToStaticMarkup(lockedTree);
+    expect(lockedHtml).toContain('data-learn-locked="true"');
+    expect(lockedHtml).toContain("Önce öğrenme modunu tamamlayın: 0/33 konu açıldı.");
+  });
+
   it("T175: audience='faculty' — App'e audience geçer, reportAttempt iletilmez (App gamiEnabled'ı kendi indirger)", () => {
     let tree: ReactNode = null;
     const reported: unknown[] = [];

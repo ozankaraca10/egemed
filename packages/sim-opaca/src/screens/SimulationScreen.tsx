@@ -3,6 +3,7 @@ import type { SimSessionSource } from '@egemed/sim-host'
 import type { CaseDef, CaseResult, Question, ScoringWeights } from '../core/types'
 import { ZONES } from '../data/zones'
 import { decodeMark, encodeMark } from '../core/geometry'
+import { useStartMode } from '../core/LearnGate'
 import { useStore } from '../core/StoreProvider'
 import { isTimedOut, remainingSec } from '../core/flow'
 import { FilmViewer, type FilmViewerHandle } from '../ui/FilmViewer'
@@ -60,6 +61,7 @@ function primaryLabel(isAssessment: boolean, last: boolean, lastCase: boolean, r
 
 export function SimulationScreen({ embedded = false, modalEnv = NOOP_MODAL_ENV }: SimulationScreenProps): JSX.Element {
   const { state, dispatch } = useStore()
+  const startMode = useStartMode()
   const sessions = useSessions()
   const serverMode = sessions !== undefined && state.mode !== 'learn'
   const server = state.server
@@ -114,7 +116,7 @@ export function SimulationScreen({ embedded = false, modalEnv = NOOP_MODAL_ENV }
                 <>
                   <h2>Vaka yüklenemedi</h2>
                   <p>{server.error}</p>
-                  <button type="button" className="btn primary" onClick={() => dispatch({ type: 'startMode', mode: state.mode })}>
+                  <button type="button" className="btn primary" onClick={() => startMode(state.mode)}>
                     Yeniden dene
                   </button>
                 </>
@@ -172,6 +174,7 @@ function CaseView({
   binding: ServerBinding
 }): JSX.Element {
   const { state, dispatch, bus } = useStore()
+  const startMode = useStartMode()
   const isAssessment = state.mode === 'assessment'
   const serverCase = caseDef as ServerClientCase
   const image = serverCase.serverImage
@@ -360,7 +363,7 @@ function CaseView({
                     <button
                       type="button"
                       className="btn outline small"
-                      onClick={() => (hasProgress ? setRestartOpen(true) : dispatch({ type: 'startMode', mode: 'practice' }))}
+                      onClick={() => (hasProgress ? setRestartOpen(true) : startMode('practice'))}
                     >
                       Oturumu yeniden başlat
                     </button>
@@ -448,7 +451,7 @@ function CaseView({
         cancelLabel="Vazgeç"
         onConfirm={() => {
           setRestartOpen(false)
-          dispatch({ type: 'startMode', mode: 'practice' })
+          startMode('practice')
         }}
         onCancel={() => setRestartOpen(false)}
         env={modalEnv}

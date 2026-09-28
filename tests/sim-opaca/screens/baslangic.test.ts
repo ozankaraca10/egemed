@@ -85,12 +85,13 @@ describe("ModeSelectScreen (statik render)", () => {
     expect(html).toContain("Önce öğrenme modunda okuma sırasını oturtmanız önerilir.");
   });
 
-  it("kilitli öneri kartı görünür ve tıklanabilir (gönderim kilidi değil)", () => {
+  it("T218: öğrenme tamamlanmadan uygulama/değerlendirme kartları kilitlidir (gönderim kilidi)", () => {
     const html = renderInStore(createElement(ModeSelectScreen), memoryStorage(), true);
-    expect(html).toContain('data-recommend-locked="true"');
+    expect(html).toContain('data-learn-locked="true"');
     expect(html).toContain("mode-lock-hint");
+    expect(html).toContain("Önce öğrenme modunu tamamlayın: 0/33 konu açıldı.");
     expect(html).toContain("Öğrenmeye git");
-    expect(html).not.toMatch(/disabled=""[^>]*>Öğrenmeye git/);
+    expect(html).toMatch(/disabled=""[^>]*>Öğrenmeye git/);
     expect(html).not.toContain("Bu ayın ödülü");
   });
 

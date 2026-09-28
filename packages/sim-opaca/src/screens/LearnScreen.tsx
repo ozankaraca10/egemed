@@ -1,14 +1,17 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type JSX } from 'react'
 import type { SimAudience } from '@egemed/sim-host'
 import { VISITOR_LOCK_TEXT } from '@egemed/sim-host'
-import { useSessions } from '../EmbeddedContext'
+import { useChallenge, useSessions } from '../EmbeddedContext'
+import { useLearnGate } from '../core/LearnGate'
+import { canStartMode, challengeLearnLockText } from '../core/learnLock'
+import { libraryExampleCount, libraryExamples } from '../core/examples'
 import { useStore } from '../core/StoreProvider'
-import { examplesFor, isExpertSource } from '../core/images'
-import type { ImageRecord } from '../core/types'
+import { isExpertSource } from '../core/images'
 import { ZONES } from '../data/zones'
 import { CASE_INVENTORY } from '../data/inventory'
+import { FIRST_LIBRARY_ITEM } from '../data/library'
 import { isVisitorUnlocked } from '../core/visitorAccess'
-import { LIBRARY_GROUPS, LIBRARY_ITEMS, LABEL_SOURCE_TEXT, findingShort, type LibraryItem } from '../data/terminology'
+import { LIBRARY_GROUPS, LIBRARY_ITEMS, LABEL_SOURCE_TEXT, findingShort } from '../data/terminology'
 import { FilmViewer, createNoopFilmEnv, type FilmViewerHandle } from '../ui/FilmViewer'
 import { FilmInfoPanel } from '../ui/FilmInfoPanel'
 import { ZoneChips } from '../ui/ZoneChips'
@@ -48,12 +51,6 @@ export function createNoopLearnScreenEnv(): LearnScreenEnv {
 
 const NOOP_LEARN_ENV: LearnScreenEnv = createNoopLearnScreenEnv()
 const NOOP_FILM_ENV = createNoopFilmEnv()
-/** Kaynakta `LIBRARY_ITEMS[0]`; strict indeks erişimi için modül yüklenirken doğrulanan ilk öğe (boş kütüphane veri hatasıdır). */
-const FIRST_LIBRARY_ITEM: LibraryItem = (() => {
-  const first = LIBRARY_ITEMS[0]
-  if (!first) throw new Error('LIBRARY_ITEMS boş olamaz')
-  return first
-})()
 
 /** Oyunlaştırma öğrenme kaydı (kaynak: `getGamiRepo().recordLearn`). */
 export interface LearnGamiPort {
@@ -82,6 +79,8 @@ export function LearnScreen({
 }: LearnScreenProps): JSX.Element {
   const { state, dispatch, now } = useStore()
   const isVisitor = audience === 'visitor'
+  const gate = useLearnGate()
+  const challenge = useChallenge()
   const [selectedKey, setSelectedKey] = useState<string>(() => state.learnFocusKey ?? FIRST_LIBRARY_ITEM.key)
   const [visitorNotice, setVisitorNotice] = useState<string | null>(null)
   const [tab, setTab] = useState<'desc' | 'film' | 'clin'>('desc')
@@ -103,22 +102,7 @@ export function LearnScreen({
     void gami.recordLearn({ topic: item.key }, new Date(now()))
   }, [gami, gamiEnabled, item.key, now])
 
-  const examples = useMemo(() => {
-    if (item.key === 'technique.projection') {
-      const pa = examplesFor(null, 'PA')
-      const ap = examplesFor(null, 'AP')
-      const out: ImageRecord[] = []
-      for (let i = 0; i < Math.max(pa.length, ap.length) && out.length < 12; i++) {
-        const p = pa[i]
-        const a = ap[i]
-        if (p) out.push(p)
-        if (a) out.push(a)
-      }
-      return out
-    }
-    if (item.key === 'technique.lateral') return examplesFor(null, 'LAT').slice(0, 24)
-    return topicExamples(item).slice(0, 24)
-  }, [item])
+  const examples = useMemo(() => libraryExamples(item), [item])
   const image = examples[exampleIdx] ?? examples[0]
 
   useEffect(() => {
@@ -133,9 +117,15 @@ export function LearnScreen({
   const coverage = item.finding ? CASE_INVENTORY.coverage[item.finding] ?? { p: 0, a: 0 } : { p: 0, a: 0 }
   const sessions = useSessions()
 
+  // T218: öğrenme tamamlanmadan odaklı uygulama da kilitlidir; koruma tek noktada
+  // (`canStartMode`), düğme ayrıca pasiftir ve kilit metni gösterilir.
+  const practiceLocked = !isVisitor && !gate.complete
+  const challengeLocked = challenge.challengeId !== undefined && !gate.complete
+
   const startPractice = () => {
     // A2.3: odaklı uygulama oturumu (bulgu başına ≤5 vaka) yalnız sunucudan açılır.
     if (sessions === undefined || !item.finding || coverage.p === 0) return
+    if (!canStartMode('practice', gate.complete)) return
     dispatch({
       type: 'startTopicPractice',
       key: item.key,
@@ -175,6 +165,16 @@ export function LearnScreen({
       <EcgDeco embedded={embedded} />
       <div className="screen" style={{ position: 'relative', zIndex: 1 }}>
         <div className="container tall screen-body no-scroll">
+          {/* T218: öğrenme tamamlanma göstergesi (kilidin ilerleme metni). */}
+          <p className="learn-progress" role="status">
+            {gate.progressText}
+          </p>
+          {challengeLocked ? (
+            <p className="lib-lock-notice challenge-lock-notice" role="status">
+              <IconLock width={14} height={14} aria-hidden="true" />{' '}
+              {challengeLearnLockText(gate.openedCount, gate.total)}
+            </p>
+          ) : null}
           <div className="learn-grid">
             <nav className="lib-col" aria-label="Öğrenme kütüphanesi">
               {/* T207: başlık panelde sabit kalır, yalnız liste (`.lib-scroll`) kayar. */}
@@ -190,15 +190,22 @@ export function LearnScreen({
               <div className="lib-scroll">
                 {LIBRARY_GROUPS.map((g) => (
                   <div className="lib-group" key={g.id}>
-                    <div className="g-title"><GroupIcon group={g.id} />{g.title}</div>
+                    <div className="g-title">
+                      <GroupIcon group={g.id} />
+                      {g.title}
+                      <span className="g-count">
+                        {g.items.filter((entry) => gate.opened.has(entry.key)).length}/{g.items.length}
+                      </span>
+                    </div>
                     <div className="lib-items">
                       {g.items.map((it) => {
                         const locked = isVisitor && !isVisitorUnlocked(it.key)
+                        const opened = gate.opened.has(it.key)
                         return (
                           <button
                             key={it.key}
                             type="button"
-                            className={`lib-item ${it.key === selectedKey ? 'active' : ''}${locked ? ' locked' : ''}`}
+                            className={`lib-item ${it.key === selectedKey ? 'active' : ''}${locked ? ' locked' : ''}${opened ? ' opened' : ''}`}
                             onClick={() => selectLibraryItem(it.key)}
                             aria-current={it.key === selectedKey ? 'true' : undefined}
                             aria-disabled={locked ? 'true' : undefined}
@@ -210,10 +217,13 @@ export function LearnScreen({
                               <span>{it.sub}</span>
                             </span>
                             <span className="lib-right">
+                              {opened ? (
+                                <span className="lib-done" aria-label="açıldı" title="açıldı">✓</span>
+                              ) : null}
                               {locked ? (
                                 <span className="lib-lock-badge" aria-hidden="true"><IconLock width={12} height={12} /></span>
                               ) : (
-                                <span className="lib-count" title="Örnek film sayısı">{countFor(it)}</span>
+                                <span className="lib-count" title="Örnek film sayısı">{libraryExampleCount(it)}</span>
                               )}
                             </span>
                           </button>
@@ -260,6 +270,9 @@ export function LearnScreen({
                     showInfoOverlay={tab === 'film'}
                     fitContent
                     {...(onStackEnd ? { onStackEnd } : {})}
+                    // T218: öğenin görüntüsü film görüntüleyicide gerçekten yüklenince
+                    // "açıldı" sayılır; yalnız listeden seçmek yetmez.
+                    onImageReady={() => gate.markOpened(item.key)}
                     env={NOOP_FILM_ENV}
                   />
                 ) : (
@@ -349,10 +362,15 @@ export function LearnScreen({
                           {coverage.a ? `, ${coverage.a} değerlendirme vakası` : ''}
                         </p>
                         {coverage.p > 0 && (
-                          <button type="button" className="btn outline small" onClick={startPractice} disabled={sessions === undefined}>
+                          <button type="button" className="btn outline small" onClick={startPractice} disabled={sessions === undefined || practiceLocked}>
                             Bu konuda uygulama yap <IconArrowRight width={14} height={14} />
                           </button>
                         )}
+                        {practiceLocked ? (
+                          <p className="lib-lock-notice" role="status">
+                            <IconLock width={14} height={14} aria-hidden="true" /> {gate.lockText}
+                          </p>
+                        ) : null}
                       </>
                     )}
                   </div>
@@ -365,32 +383,6 @@ export function LearnScreen({
       <Footer embedded={embedded} />
     </>
   )
-}
-
-function countFor(it: LibraryItem): number {
-  if (it.key === 'technique.projection') return examplesFor(null, 'PA').length + examplesFor(null, 'AP').length
-  if (it.key === 'technique.lateral') return examplesFor(null, 'LAT').length
-  return topicExamples(it).length
-}
-
-const ctRank = (r: ImageRecord) => (r.stack?.length ? (r.annotations.length ? 0 : 1) : 2)
-const byCtRank = (list: ImageRecord[]) => [...list].sort((a, b) => ctRank(a) - ctRank(b))
-
-function topicExamples(it: LibraryItem): ImageRecord[] {
-  if (it.group === 'ct') {
-    const ct = examplesFor(null, undefined, { modality: 'CT' })
-    const stacks = byCtRank(ct.filter((r) => r.stack?.length))
-    const pair = ['commons_ct_axial_lung_window', 'commons_ct_axial_mediastinal_window']
-      .map((id) => ct.find((r) => r.id === id))
-      .filter((r): r is ImageRecord => !!r)
-    return it.key === 'ct.windows' ? [...stacks, ...pair] : [...stacks, ...pair.slice(0, 1)]
-  }
-  const all = examplesFor(it.finding, undefined, { includePediatric: it.group === 'pediatric' })
-  if (it.finding === null) return all.filter((r) => r.sourceDataset !== 'wikimedia-commons')
-  const ct = byCtRank(examplesFor(it.finding, undefined, { modality: 'CT' }))
-  if (!ct.length) return all
-  const ctShown = all.length ? ct.slice(0, 2) : ct
-  return [...all.slice(0, 24 - ctShown.length), ...ctShown, ...all.slice(24 - ctShown.length)]
 }
 
 function GroupIcon({ group, size = 17 }: { group: string; size?: number }) {

@@ -587,6 +587,12 @@ flex-shrink: 0; color: var(--blue-600);
 .eg-sim-opaca .mode-card.audience-locked ul {
 opacity: .55;
 }
+/* T218: öğrenme kilidi — kart soluklaşır, kilit ikonu + ilerleme metni çizilir (öneri değil). */
+.eg-sim-opaca .mode-card.learn-locked .ic,
+.eg-sim-opaca .mode-card.learn-locked .desc,
+.eg-sim-opaca .mode-card.learn-locked ul {
+opacity: .6;
+}
 .eg-sim-opaca .visitor-banner {
 display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin: 0 0 var(--sp-4);
   padding: 10px var(--sp-4); border-radius: var(--r-lg);

@@ -1,6 +1,8 @@
 import type { JSX, ReactNode } from 'react'
 import type { SimAudience } from '@egemed/sim-host'
 import { audienceCanUseMode, VISITOR_LOCK_TEXT } from '@egemed/sim-host'
+import { useLearnGate, useStartMode } from '../core/LearnGate'
+import { modeLearnLocked, modePickTarget } from '../core/flow'
 import { useStore } from '../core/StoreProvider'
 import type { Mode } from '../core/types'
 import { CASE_INVENTORY } from '../data/inventory'
@@ -45,25 +47,25 @@ export function ModeSelectScreen({
   const unified = useSetChrome() !== undefined
   const practiceCount = CASE_INVENTORY.practicePoolSize
   const assessmentCount = CASE_INVENTORY.assessmentPoolSize
-  const recommendLearn = !state.tutorialSeen
   const isVisitor = audience === 'visitor'
   const isFaculty = audience === 'faculty'
+  const gate = useLearnGate()
+  const startMode = useStartMode()
   // Ziyaretçi kilidi gönderim kilidi değildir: kart pasifleşmez, düğme girişe yönlendirir.
   const canPractice = audienceCanUseMode(audience, 'practice')
   const canAssessment = audienceCanUseMode(audience, 'assessment')
   // A2.3: uygulama/değerlendirme vakaları yalnız sunucu oturumundan gelir; kanal yoksa kapalı.
   const serverReady = useSessions() !== undefined
+  // T218: öğrenme tamamlanmadan uygulama/değerlendirme KİLİTLİDİR (öneri değil);
+  // kart pasifleşir ve istek öğrenme ekranına düşer (tek koruma: `canStartMode`).
+  const practiceLocked = modeLearnLocked(gate.complete, practiceCount > 0)
+  const assessmentLocked = modeLearnLocked(gate.complete, assessmentCount > 0)
   const signIn = () => requestSignIn?.()
   const pick = (mode: Mode) => {
-    dispatch({ type: 'startMode', mode })
-    if (mode === 'learn') dispatch({ type: 'goto', screen: 'learn' })
-  }
-  const pickOrRecommendLearn = (mode: Mode, poolReady: boolean) => {
-    if (recommendLearn && poolReady && mode !== 'learn') {
-      pick('learn')
-      return
-    }
-    pick(mode)
+    const poolReady = mode === 'practice' ? practiceCount > 0 : mode === 'assessment' ? assessmentCount > 0 : true
+    const target = modePickTarget(mode, gate.complete, poolReady)
+    startMode(target)
+    if (target === 'learn') dispatch({ type: 'goto', screen: 'learn' })
   }
   return (
     <>
@@ -103,12 +105,13 @@ export function ModeSelectScreen({
               title="Uygulama Modu"
               text={practiceCount ? `${practiceCount} vakalık havuzdan her oturumda rastgele ${Math.min(SESSION_SIZE, practiceCount)} vaka; ipucu ve geri bildirimle.` : 'Uygulama havuzu boş: önce veri setini içe aktarın.'}
               items={['Görüntü üzerinde işaretleme', 'İpucu desteği', 'Yanıttan sonra uzman işaretlemesi']}
-              cta={!canPractice ? VISITOR_LOCK_TEXT.cta : recommendLearn && practiceCount ? 'Öğrenmeye git' : 'Vakaları çöz'}
-              disabled={canPractice && (!practiceCount || !serverReady)}
-              recommendLocked={canPractice && recommendLearn && !!practiceCount}
+              cta={!canPractice ? VISITOR_LOCK_TEXT.cta : practiceLocked ? 'Öğrenmeye git' : 'Vakaları çöz'}
+              disabled={canPractice && (practiceLocked || !practiceCount || !serverReady)}
+              learnLocked={canPractice && practiceLocked}
+              lockText={gate.lockText}
               locked={!canPractice}
               lockedText={VISITOR_LOCK_TEXT.modeLocked}
-              onPick={!canPractice ? signIn : () => pickOrRecommendLearn('practice', !!practiceCount)}
+              onPick={!canPractice ? signIn : () => pick('practice')}
               bestScore={state.bestScore.practice}
             />
             <ModeCard
@@ -118,12 +121,13 @@ export function ModeSelectScreen({
               text={assessmentCount ? `${assessmentCount} radyolog etiketli vakalık havuzdan rastgele ${Math.min(SESSION_SIZE, assessmentCount)} vaka.` : 'Değerlendirme havuzu boş: radyolog etiketli veri seti içe aktarılmalı.'}
               items={['Okuma bölgesi ve uzman katmanı yok', 'Vaka başına süre sınırı', embedded ? 'Puan kaydedilir' : 'SCORM puanı']}
               rules="İpucu yok · geri bildirim yalnız sonunda · puan kaydedilir"
-              cta={!canAssessment ? VISITOR_LOCK_TEXT.cta : recommendLearn && assessmentCount ? 'Öğrenmeye git' : 'Değerlendirmeye gir'}
-              disabled={canAssessment && (!assessmentCount || !serverReady)}
-              recommendLocked={canAssessment && recommendLearn && !!assessmentCount}
+              cta={!canAssessment ? VISITOR_LOCK_TEXT.cta : assessmentLocked ? 'Öğrenmeye git' : 'Değerlendirmeye gir'}
+              disabled={canAssessment && (assessmentLocked || !assessmentCount || !serverReady)}
+              learnLocked={canAssessment && assessmentLocked}
+              lockText={gate.lockText}
               locked={!canAssessment}
               lockedText={VISITOR_LOCK_TEXT.modeLocked}
-              onPick={!canAssessment ? signIn : () => pickOrRecommendLearn('assessment', !!assessmentCount)}
+              onPick={!canAssessment ? signIn : () => pick('assessment')}
               bestScore={state.bestScore.assessment}
               extra={gamiEnabled ? (
                 <p className="mode-rules">
@@ -165,11 +169,12 @@ export function ModeCard({
   onPick,
   rules,
   disabled,
-  recommendLocked,
   bestScore,
   extra,
   locked,
   lockedText,
+  learnLocked,
+  lockText,
 }: {
   kind: Mode
   icon: ReactNode
@@ -181,19 +186,22 @@ export function ModeCard({
   rules?: string
   /** Havuz boş: düğme devre dışı (veri eksikliği). */
   disabled?: boolean
-  /** kilit ≠ öneri: görünür kilit rozeti ve tıklanabilir öğrenme yönlendirmesi; gönderim kilidi değil. */
-  recommendLocked?: boolean
   extra?: ReactNode
   bestScore?: number
   /** T175: kitle kilidi (ör. ziyaretçi) — kart görünür kalır, soluk ve kilit ikonlu; düğme
    *  gönderime değil `onPick` verilen giriş yönlendirmesine gider (gönderim kilidi değil). */
   locked?: boolean
   lockedText?: string
+  /** T218: öğrenme tamamlanmadı — kart kilit ikonu ve ilerleme metniyle işaretlenir,
+   *  düğme gönderime kapalıdır (`disabled`); ziyaretçi kilidi önceliklidir. */
+  learnLocked?: boolean
+  /** Kilit metni: "Önce öğrenme modunu tamamlayın: X/Y konu açıldı." */
+  lockText?: string
 }): JSX.Element {
   return (
     <div
-      className={`mode-card ${kind}${recommendLocked ? ' recommend-locked' : ''}${locked ? ' audience-locked' : ''}`}
-      data-recommend-locked={recommendLocked ? 'true' : 'false'}
+      className={`mode-card ${kind}${learnLocked ? ' learn-locked' : ''}${locked ? ' audience-locked' : ''}`}
+      data-learn-locked={learnLocked ? 'true' : 'false'}
       data-audience-locked={locked ? 'true' : 'false'}
     >
       <div className="ic">{icon}</div>
@@ -201,9 +209,9 @@ export function ModeCard({
         <p className="mode-lock-hint" role="status">
           <IconLock width={14} height={14} aria-hidden="true" /> {lockedText}
         </p>
-      ) : recommendLocked ? (
+      ) : learnLocked ? (
         <p className="mode-lock-hint" role="status">
-          <IconLock width={14} height={14} aria-hidden="true" /> Önce öğrenme modunda okuma sırasını oturtmanız önerilir.
+          <IconLock width={14} height={14} aria-hidden="true" /> {lockText}
         </p>
       ) : null}
       <h3>{title}</h3>
