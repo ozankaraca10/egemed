@@ -68,6 +68,30 @@ export function createNoopStageEnv(): StageEnv {
 
 const NOOP_STAGE_ENV: StageEnv = createNoopStageEnv();
 
+/** Tarayıcı zamanlayıcıları. Boyut gözlemi no-op kalır: sahne ölçüsü CSS ile verilir (T206). */
+export function createBrowserStageEnv(): StageEnv {
+  const win = globalThis as unknown as {
+    setTimeout(handler: () => void, ms: number): number;
+    clearTimeout(handle: number): void;
+    setInterval(handler: () => void, ms: number): number;
+    clearInterval(handle: number): void;
+  };
+  return {
+    setTimeout: (handler, ms) => win.setTimeout(handler, ms),
+    clearTimeout: (handle) => win.clearTimeout(handle),
+    setInterval: (handler, ms) => win.setInterval(handler, ms),
+    clearInterval: (handle) => win.clearInterval(handle),
+    observeStage: () => () => undefined,
+  };
+}
+
+const StageEnvContext = createContext<StageEnv | null>(null);
+
+/** Modül bağlamı: `env` prop'u verilmeyen tüm sahneler bu zamanlayıcıları kullanır. */
+export function StageEnvProvider({ env, children }: { env: StageEnv; children?: ReactNode }) {
+  return <StageEnvContext.Provider value={env}>{children}</StageEnvContext.Provider>;
+}
+
 export interface StageAudioStatus {
   readonly pointId: string;
   readonly status: "loading" | "error";
@@ -377,7 +401,8 @@ export const PatientStage = forwardRef<StageHandle, PatientStageProps>(function 
   const contextual = useContext(StageAudioContext);
   const engine = props.engine ?? contextual;
   if (!engine) throw new Error("Ausculta ses motoru yok");
-  const env = props.env ?? NOOP_STAGE_ENV;
+  const contextualEnv = useContext(StageEnvContext);
+  const env = props.env ?? contextualEnv ?? NOOP_STAGE_ENV;
   const bodyType = props.bodyType ?? "erkek";
   const strict = props.strict ?? false;
   const fitRef = useRef<unknown>(null);
