@@ -8,7 +8,6 @@ import {
   pageMetaSchema,
   pageSizeSchema,
   simIdSchema,
-  uuidSchema,
 } from "./common";
 
 export const GAMI_PERIODS = ["today", "week", "month", "academic_year"] as const;
@@ -89,33 +88,34 @@ export const attemptSummarySchema = z
     message: "summary_too_many_keys",
   });
 
-/** POST /me/gamification/:simId/attempts gövdesi (E3 §d): `id` istemci üretir,
- *  yazma idempotenttir; bilinmeyen alanlar (serbest metin/ham yanıt) reddedilir. */
-export const attemptWriteRequestSchema = z
-  .strictObject({
-    id: uuidSchema,
-    attemptNo: z.number().int().min(1),
-    startedAt: isoDateTimeSchema,
-    finishedAt: isoDateTimeSchema,
-    score: z.number().int().min(0).nullable().optional(),
-    maxScore: z.number().int().min(0).nullable().optional(),
-    passed: z.boolean().optional(),
-    summary: attemptSummarySchema,
-    /** API-05: XP'yi sunucu bu alanlardan hesaplar; istemci XP'si yetkili değildir. */
-    mode: z.enum(["practice", "assessment"]).optional(),
-    caseCount: z.number().int().min(1).max(100).optional(),
-    hintsUsed: z.number().int().min(0).max(1000).optional(),
-  })
-  .refine((value) => value.score == null || value.maxScore == null || value.score <= value.maxScore, {
-    message: "score_exceeds_max",
-    path: ["score"],
-  })
-  .refine((value) => Date.parse(value.finishedAt) >= Date.parse(value.startedAt), {
-    message: "finished_before_started",
-    path: ["finishedAt"],
-  });
+/**
+ * A4 (ADR-009) — `POST /me/gamification/:simId/attempts` artık PUANLI deneme kabul
+ * etmez: uygulama/değerlendirme/düello denemesini sunucu oturumu yazar. Gövde yalnız
+ * puansız öğrenme kaydıdır (hangi içerik incelendi); skor, doğru sayısı, mod veya özet
+ * alanı yoktur ve XP sunucu kuralıyla sabit verilir (istemci beyanı hiç okunmaz).
+ */
+export const LEARN_TOPIC_PATTERN = /^[a-z0-9][a-z0-9:._-]{0,119}$/;
 
-export type AttemptWriteRequest = z.infer<typeof attemptWriteRequestSchema>;
+export const learnTopicSchema = z.string().regex(LEARN_TOPIC_PATTERN);
+
+/** Sim ad alanlı öğrenme anahtarı (ör. `pulse:mode:af`, `opaca:topic:finding.pleura`). */
+export const learnWriteRequestSchema = z.strictObject({
+  topic: learnTopicSchema,
+});
+
+export type LearnWriteRequest = z.infer<typeof learnWriteRequestSchema>;
+
+/** Öğrenme kaydı yanıtı: XP yalnız sunucu kuralından; ilk kayıtta > 0, idempotent tekrarda 0. */
+export const learnRecordResponseSchema = z.strictObject({
+  data: z.strictObject({
+    simId: simIdSchema,
+    topic: learnTopicSchema,
+    recordedAt: isoDateTimeSchema,
+    xpGained: z.number().int().min(0),
+  }),
+});
+
+export type LearnRecordResponse = z.infer<typeof learnRecordResponseSchema>;
 
 /** Yol parametresi: bilinmeyen sim 404 (E3 §d). */
 export const gamiSimIdParamSchema = simIdSchema;

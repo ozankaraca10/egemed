@@ -1,7 +1,6 @@
 import {
   ROLES,
   adminRewardListResponseSchema,
-  attemptWriteRequestSchema,
   authMeResponseSchema,
   authMethodSchema,
   bulkRequestSchema,
@@ -20,7 +19,9 @@ import {
   gamiSummaryResponseSchema,
   isoDateTimeSchema,
   learnCompleteRequestSchema,
+  learnRecordResponseSchema,
   learnStatusSchema,
+  learnWriteRequestSchema,
   meRewardResponseSchema,
   meRewardsOverviewResponseSchema,
   mePreferencesResponseSchema,
@@ -48,7 +49,6 @@ import {
   userStatusSchema,
   usernameSchema,
   uuidSchema,
-  type AttemptWriteRequest,
   type AuthMeResponse,
   type AuthMethod,
   type BulkRequest,
@@ -59,7 +59,9 @@ import {
   type GamiLeaderboardQuery,
   type GamiLeaderboardResponse,
   type GamiSummaryResponse,
+  type LearnRecordResponse,
   type LearnStatusResponse,
+  type LearnWriteRequest,
   type MePreferences,
   type RewardBody,
   type RewardUpsertRequest,
@@ -387,7 +389,11 @@ export interface ApiClient {
     getAll(): Promise<GamiAllResponse>;
     getSummary(simId: SimId): Promise<GamiSummaryResponse>;
     getLeaderboard(simId: SimId, query?: GamiLeaderboardQuery): Promise<GamiLeaderboardResponse>;
-    writeAttempt(simId: SimId, input: AttemptWriteRequest): Promise<void>;
+    /**
+     * A4 (ADR-009): puanlı deneme yazımı yoktur (sunucu oturumu yazar); uç yalnız
+     * puansız öğrenme kaydı kabul eder. Puanlı gövde gönderilirse 403 `server_scored`.
+     */
+    writeLearn(simId: SimId, input: LearnWriteRequest): Promise<LearnRecordResponse>;
   };
   readonly preferences: {
     getPreferences(): Promise<{ readonly data: MePreferences }>;
@@ -846,30 +852,20 @@ export function createApiClient(options: CreateApiClientOptions): ApiClient {
           parse: (value, context) => parseSchema(gamiLeaderboardResponseSchema, value, `${context} response`),
         });
       },
-      async writeAttempt(simId: SimId, input: AttemptWriteRequest): Promise<void> {
+      async writeLearn(simId: SimId, input: LearnWriteRequest): Promise<LearnRecordResponse> {
         const parsedSimId = parseSchema(gamiSimIdParamSchema, simId, "POST /me/gamification/:simId/attempts path");
         const parsedBody = parseSchema(
-          attemptWriteRequestSchema,
+          learnWriteRequestSchema,
           input,
           "POST /me/gamification/:simId/attempts request",
         );
-        const response = await performRequest({
+        return requestJson({
           method: "POST",
           path: `/me/gamification/${parsedSimId}/attempts`,
           contentType: "application/json",
           body: JSON.stringify(parsedBody),
+          parse: (value, context) => parseSchema(learnRecordResponseSchema, value, `${context} response`),
         });
-        if (response.status === 204) return;
-        const payload = await readJson(response, "POST /me/gamification/:simId/attempts");
-        const object = asObject(payload, "POST /me/gamification/:simId/attempts response");
-        if (!Object.hasOwn(object, "data")) {
-          throw new ApiSchemaError(
-            "Yanıtta data alanı bulunamadı.",
-            "POST /me/gamification/:simId/attempts response",
-            payload,
-            [],
-          );
-        }
       },
     },
     preferences: {
@@ -1658,6 +1654,6 @@ function toUsersSourceDetail(item: ApiAdminUserDetail): UsersSourceUserDetail {
 export {
   createApiGamiRepository,
   GamiRepositoryUnsupportedError,
+  learnTopicFor,
   type CreateApiGamiRepositoryOptions,
-  type EncodeAttemptInput,
 } from "./gamification-repo";

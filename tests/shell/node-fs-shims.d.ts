@@ -11,6 +11,9 @@
 declare module "node:fs" {
   export function statSync(path: string): { isFile(): boolean };
   export function readFileSync(path: string): Uint8Array;
+  export function readFileSync(path: string, encoding: "utf8"): string;
+  /** A4 denetimi: kaynak ağacı `recursive` ile listelenir (yol dizge dizisi). */
+  export function readdirSync(path: string, options: { recursive: true }): string[];
   export function cpSync(
     source: string,
     destination: string,

@@ -29,6 +29,26 @@ async function signIn(page: Page, username: string, password = "egemed"): Promis
   await page.click("button[type=submit]");
 }
 
+/**
+ * A4 (ADR-009): istemci deneme ucuna YALNIZ puansız öğrenme kaydı gönderebilir
+ * (`{ topic }`). Deneme, değerlendirme ve düello denemesini sunucu oturumu yazar;
+ * puanlı gövde (skor/özet/mod) gönderilirse test yakalar.
+ */
+function monitorClientWrites(page: Page, simId: string): { readonly scored: string[]; readonly learn: string[] } {
+  const scored: string[] = [];
+  const learn: string[] = [];
+  page.on("request", (request) => {
+    if (!request.url().includes(`/me/gamification/${simId}/attempts`)) return;
+    const body = request.postData() ?? "";
+    if (/"(score|maxScore|passed|summary|mode|attemptNo|startedAt|finishedAt|caseCount|hintsUsed)"/.test(body)) {
+      scored.push(body);
+      return;
+    }
+    learn.push(body);
+  });
+  return { scored, learn };
+}
+
 /** Üst bardaki hesap menüsü düğmesi (T152); erişilebilir adı sunucudan gelen görünen adı taşır. */
 function sessionRole(page: Page) {
   return page.getByRole("button", { name: /Hesap menüsü/ });
@@ -393,10 +413,7 @@ test.describe("API oturumu (dev sağlayıcı)", () => {
     await page.goto(STUDENT_ENTRY);
     await signIn(page, "ogrenci");
     await expect(page).toHaveURL(/#\/$/);
-    const clientAttempts: string[] = [];
-    page.on("request", (request) => {
-      if (request.url().includes("/me/gamification/pulse/attempts")) clientAttempts.push(request.url());
-    });
+    const clientWrites = monitorClientWrites(page, "pulse");
     const caseBodies: string[] = [];
     page.on("response", async (response) => {
       if (/\/me\/sims\/pulse\/sessions\/[^/]+\/cases\/\d+$/.test(response.url()) && response.request().method() === "GET") {
@@ -415,8 +432,9 @@ test.describe("API oturumu (dev sağlayıcı)", () => {
     expect(done.data.passed).toBe(true);
     expect(done.data.attemptId, "deneme sunucuda yazıldı").not.toBeNull();
     expect(done.data.xpGained).toBeGreaterThan(0);
-    // İstemci deneme yazmaz (çift kayıt yok); maddelerde cevap anahtarı yoktur.
-    expect(clientAttempts, "istemci deneme yazmaz (sunucu yazar)").toEqual([]);
+    // İstemci puanlı deneme yazmaz (çift kayıt yok); yalnız puansız öğrenme kaydı gönderir.
+    expect(clientWrites.scored, "istemci puanlı deneme yazmaz (sunucu yazar)").toEqual([]);
+    for (const body of clientWrites.learn) expect(Object.keys(JSON.parse(body) as object)).toEqual(["topic"]);
     expect(caseBodies.length).toBeGreaterThan(0);
     for (const body of caseBodies) expect(body).not.toMatch(/"correct"|feedback|explanations/);
 
@@ -446,10 +464,7 @@ test.describe("API oturumu (dev sağlayıcı)", () => {
         caseBodies.push(await response.text().catch(() => ""));
       }
     });
-    const clientAttempts: string[] = [];
-    page.on("request", (request) => {
-      if (request.url().includes("/me/gamification/opaca/attempts")) clientAttempts.push(request.url());
-    });
+    const clientWrites = monitorClientWrites(page, "opaca");
     const before = await page.request.get("/api/me/gamification/opaca");
     const xpBefore = ((await before.json()) as { data: { xp: number } }).data.xp;
     const imageOk = page.waitForResponse((response) => /\/me\/sims\/opaca\/sessions\/[^/]+\/image\//.test(response.url()) && response.status() === 200);
@@ -467,7 +482,8 @@ test.describe("API oturumu (dev sağlayıcı)", () => {
     expect((await finished).ok(), "sunucu oturumu kapanışı").toBe(true);
     expect(caseBodies.length, "sunucudan gelen vaka").toBeGreaterThan(0);
     for (const body of caseBodies) expect(body).not.toMatch(/"correct"|feedbackCorrect|targetFinding|\.webp|runtimeUrl|sourceFile|clinicalDiagnosis/);
-    expect(clientAttempts, "istemci deneme yazmaz (sunucu yazar)").toEqual([]);
+    expect(clientWrites.scored, "istemci puanlı deneme yazmaz (sunucu yazar)").toEqual([]);
+    for (const body of clientWrites.learn) expect(Object.keys(JSON.parse(body) as object)).toEqual(["topic"]);
     const after = await page.request.get("/api/me/gamification/opaca");
     expect(((await after.json()) as { data: { xp: number } }).data.xp).toBeGreaterThan(xpBefore);
   });
@@ -481,15 +497,12 @@ test.describe("API oturumu (dev sağlayıcı)", () => {
     // T209: öğrenme kilidi — uygulama akışından önce öğrenme kaydı sunucuya yazılır.
     await completeLearn(page, "ausculta");
     const caseBodies: string[] = [];
-    const clientAttempts: string[] = [];
+    const clientWrites = monitorClientWrites(page, "ausculta");
     page.on("response", async (response) => {
       const url = response.url();
       if (/\/me\/sims\/ausculta\/sessions\/[^/]+\/cases\/\d+$/.test(url) && response.request().method() === "GET") {
         caseBodies.push(await response.text().catch(() => ""));
       }
-    });
-    page.on("request", (request) => {
-      if (request.url().includes("/me/gamification/ausculta/attempts")) clientAttempts.push(request.url());
     });
     const before = await page.request.get("/api/me/gamification/ausculta");
     const xpBefore = ((await before.json()) as { data: { xp: number } }).data.xp;
@@ -502,7 +515,8 @@ test.describe("API oturumu (dev sağlayıcı)", () => {
     expect((await finished).ok(), "sunucu oturumu kapanışı").toBe(true);
     expect(caseBodies.length, "sunucudan gelen vaka").toBeGreaterThan(0);
     for (const body of caseBodies) expect(body).not.toMatch(/"correct"|feedbackCorrect|\.wav|acousticFinding/);
-    expect(clientAttempts, "istemci deneme yazmaz (sunucu yazar)").toEqual([]);
+    expect(clientWrites.scored, "istemci puanlı deneme yazmaz (sunucu yazar)").toEqual([]);
+    for (const body of clientWrites.learn) expect(Object.keys(JSON.parse(body) as object)).toEqual(["topic"]);
     const after = await page.request.get("/api/me/gamification/ausculta");
     expect(((await after.json()) as { data: { xp: number } }).data.xp).toBeGreaterThan(xpBefore);
   });

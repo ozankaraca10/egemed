@@ -1,11 +1,19 @@
-/** EGEMED — oyunlaştırma API deposu adaptörü (T56, E3 §d, ADR-007).
+/** EGEMED — oyunlaştırma API deposu adaptörü (T56, E3 §d, ADR-007; A4 daraltması).
  *  Sim PORT'u (`GamiRepository`) ile `@egemed/api-client` gamification uçlarını eşler.
- *  Ağ/şema hataları doğrudan fırlatılır; yerel kuyruk YOKTUR (ADR-004). */
+ *  A4 (ADR-009): puanlı deneme yazımı istemcide YOKTUR; uygulama/değerlendirme/düello
+ *  denemesini sunucu oturumu yazar, bu yüzden `recordAttempt` desteklenmez. Kalan tek
+ *  yazma yolu puansız öğrenme kaydıdır (`POST .../attempts` `{ topic }`). Ağ/şema
+ *  hataları doğrudan fırlatılır; yerel kuyruk YOKTUR (ADR-004). */
 
-import type { AttemptWriteRequest, GamiLeaderboardResponse, GamiSimSummary, SimId } from "@egemed/contracts";
+import type {
+  GamiLeaderboardResponse,
+  GamiSimSummary,
+  LearnRecordResponse,
+  LearnWriteRequest,
+  SimId,
+} from "@egemed/contracts";
 import {
   GamiRepositoryUnsupportedError,
-  TR_OFFSET_MS,
   type AttemptRecord,
   type CohortFilter,
   type GamiLeaderboardView,
@@ -23,48 +31,14 @@ interface GamificationApiClient {
     simId: SimId,
     query: { readonly period: Period; readonly cohort: CohortFilter; readonly page: number; readonly pageSize: number },
   ): Promise<GamiLeaderboardResponse>;
-  writeAttempt(simId: SimId, input: AttemptWriteRequest): Promise<void>;
+  writeLearn(simId: SimId, input: LearnWriteRequest): Promise<LearnRecordResponse>;
 }
 
 const ME_ID = "me";
 
-export interface EncodeAttemptInput<TAttempt extends AttemptRecord> {
-  readonly attempt: TAttempt;
-  readonly attemptNo: number;
-  readonly startedAt: string;
-}
-
-export interface CreateApiGamiRepositoryOptions<TAttempt extends AttemptRecord = AttemptRecord> {
+export interface CreateApiGamiRepositoryOptions {
   readonly client: GamificationApiClient;
   readonly simId: SimId;
-  /** Sim'e özgü kodlu özet üretimi — ham yanıt API'ye gönderilmez. */
-  readonly encodeAttempt: (input: EncodeAttemptInput<TAttempt>) => AttemptWriteRequest;
-}
-
-function toTrIso(epochMs: number): string {
-  const wall = new Date(epochMs + TR_OFFSET_MS);
-  const y = wall.getUTCFullYear();
-  const mo = String(wall.getUTCMonth() + 1).padStart(2, "0");
-  const d = String(wall.getUTCDate()).padStart(2, "0");
-  const h = String(wall.getUTCHours()).padStart(2, "0");
-  const mi = String(wall.getUTCMinutes()).padStart(2, "0");
-  const s = String(wall.getUTCSeconds()).padStart(2, "0");
-  const ms = String(wall.getUTCMilliseconds()).padStart(3, "0");
-  return `${y}-${mo}-${d}T${h}:${mi}:${s}.${ms}+03:00`;
-}
-
-function nextAttemptNo(summary: GamiSimSummary): number {
-  if (summary.attempts.length === 0) return 1;
-  return Math.max(...summary.attempts.map((attempt) => attempt.attemptNo)) + 1;
-}
-
-function startedAtForAttempt(attempt: AttemptRecord): string {
-  const finishedMs = Date.parse(attempt.finishedAt);
-  if (!Number.isFinite(finishedMs)) {
-    throw new Error("Deneme finishedAt geçerli ISO 8601 olmalıdır.");
-  }
-  const startedMs = Math.max(0, finishedMs - attempt.durationMs);
-  return toTrIso(startedMs);
 }
 
 function attemptFromSummary<TAttempt extends AttemptRecord>(
@@ -114,8 +88,21 @@ function unsupported(method: string): never {
   throw new GamiRepositoryUnsupportedError(method);
 }
 
+/**
+ * A4: puansız öğrenme anahtarı sim ad alanına çevrilir (`<sim>:topic:<key>` /
+ * `<sim>:stack:<key>`); serbest metin gönderilmez. Anahtar yoksa kayıt yapılmaz.
+ */
+export function learnTopicFor(simId: SimId, activity: GamiLearnActivityInput): string | null {
+  const isTopic = typeof activity.topic === "string" && activity.topic.trim().length > 0;
+  const isStack = typeof activity.ctStack === "string" && activity.ctStack.trim().length > 0;
+  if (!isTopic && !isStack) return null;
+  const kind = isTopic ? "topic" : "stack";
+  const key = (isTopic ? activity.topic : activity.ctStack)?.trim().toLowerCase() ?? "";
+  return `${simId}:${kind}:${key}`;
+}
+
 export function createApiGamiRepository<TAttempt extends AttemptRecord>(
-  options: CreateApiGamiRepositoryOptions<TAttempt>,
+  options: CreateApiGamiRepositoryOptions,
 ): GamiRepository<TAttempt> {
   let cachedSummary: GamiSimSummary | null = null;
 
@@ -124,10 +111,6 @@ export function createApiGamiRepository<TAttempt extends AttemptRecord>(
     const response = await options.client.getSummary(options.simId);
     cachedSummary = response.data;
     return cachedSummary;
-  }
-
-  function invalidateSummary(): void {
-    cachedSummary = null;
   }
 
   return {
@@ -146,28 +129,17 @@ export function createApiGamiRepository<TAttempt extends AttemptRecord>(
       unsupported("updateMe");
     },
 
+    /** A4 (ADR-009): puanlı denemeyi yalnız sunucu oturumu yazar; istemci göndermez. */
     async recordAttempt(attempt: TAttempt): Promise<void> {
-      const summary = await loadSummary();
-      const encoded = options.encodeAttempt({
-        attempt,
-        attemptNo: nextAttemptNo(summary),
-        startedAt: startedAtForAttempt(attempt),
-      });
-      // API-05: XP'yi sunucu hesaplar; ortak deneme alanları sözleşme sınırlarında gönderilir.
-      const body: AttemptWriteRequest = {
-        ...encoded,
-        ...(attempt.mode === "practice" || attempt.mode === "assessment" ? { mode: attempt.mode } : {}),
-        caseCount: Math.min(100, Math.max(1, Math.round(attempt.caseCount))),
-        hintsUsed: Math.min(1000, Math.max(0, Math.round(attempt.hintsUsed))),
-      };
-      await options.client.writeAttempt(options.simId, body);
-      invalidateSummary();
+      void attempt;
+      unsupported("recordAttempt");
     },
 
     async recordLearn(activity: GamiLearnActivityInput, now: Date): Promise<void> {
-      void activity;
       void now;
-      unsupported("recordLearn");
+      const topic = learnTopicFor(options.simId, activity);
+      if (topic === null) return;
+      await options.client.writeLearn(options.simId, { topic });
     },
 
     async listAttempts(): Promise<readonly TAttempt[]> {

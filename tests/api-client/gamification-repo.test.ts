@@ -8,10 +8,17 @@ import {
   createApiGamiRepository,
   GamiRepositoryUnsupportedError,
   isSessionMissingError,
+  learnTopicFor,
   type ApiFetch,
   type ApiFetchInit,
   type ApiResponse,
 } from "../../packages/api-client/src/index";
+
+/**
+ * A4 (ADR-009): istemci deposu puanlı deneme YAZMAZ (`recordAttempt` desteklenmez;
+ * denemeyi sunucu oturumu yazar). Kalan tek yazma yolu puansız öğrenme kaydıdır ve
+ * gövdesi yalnız `{ topic }` taşır.
+ */
 
 interface Call {
   readonly url: string;
@@ -25,9 +32,16 @@ interface Planned {
   readonly headers?: Readonly<Record<string, string>>;
 }
 
-const ATTEMPT_UUID = "00000000-0000-4000-8000-000000000030";
 const SIM_ID = "pulse" as const;
 const FIXED_FINISHED_AT = "2026-09-22T14:05:00.000+03:00";
+const LEARN_RESPONSE = {
+  data: {
+    simId: SIM_ID,
+    topic: "pulse:topic:ritim-serisi",
+    recordedAt: "2026-09-28T12:00:00.000+03:00",
+    xpGained: 2,
+  },
+};
 
 function createHeaders(values: Readonly<Record<string, string>> = {}): ApiResponse["headers"] {
   const lowered = new Map(Object.entries(values).map(([key, value]) => [key.toLowerCase(), value]));
@@ -127,7 +141,7 @@ function leaderboardPayload() {
 
 function sampleAttempt(overrides: Partial<AttemptRecord> = {}): AttemptRecord {
   return {
-    id: ATTEMPT_UUID,
+    id: "00000000-0000-4000-8000-000000000030",
     mode: "assessment",
     finishedAt: FIXED_FINISHED_AT,
     score: 80,
@@ -141,23 +155,6 @@ function sampleAttempt(overrides: Partial<AttemptRecord> = {}): AttemptRecord {
   };
 }
 
-function encodeAttempt(input: {
-  attempt: AttemptRecord;
-  attemptNo: number;
-  startedAt: string;
-}) {
-  return {
-    id: ATTEMPT_UUID,
-    attemptNo: input.attemptNo,
-    startedAt: input.startedAt,
-    finishedAt: input.attempt.finishedAt,
-    score: input.attempt.score,
-    maxScore: 100,
-    passed: input.attempt.mastery,
-    summary: { xp: 120, ritim: 80 },
-  };
-}
-
 function createRepo(mock: ReturnType<typeof createFetchMock>) {
   const client = createApiClient({
     baseUrl: "https://api.example.invalid",
@@ -166,9 +163,33 @@ function createRepo(mock: ReturnType<typeof createFetchMock>) {
   return createApiGamiRepository({
     client: client.gamification,
     simId: SIM_ID,
-    encodeAttempt,
   });
 }
+
+describe("learnTopicFor — puansız öğrenme anahtarı (A4)", () => {
+  it("konu ve BT yığını anahtarlarını sim ad alanına çevirir", () => {
+    expect(learnTopicFor("opaca", { topic: "finding.pleura" })).toBe("opaca:topic:finding.pleura");
+    expect(learnTopicFor("opaca", { ctStack: "commons_ct_axial_lung_window" })).toBe(
+      "opaca:stack:commons_ct_axial_lung_window",
+    );
+    expect(learnTopicFor("pulse", { topic: "af" })).toBe("pulse:topic:af");
+  });
+
+  it("boş etkinlikte anahtar üretmez", () => {
+    expect(learnTopicFor("opaca", {})).toBeNull();
+    expect(learnTopicFor("opaca", { topic: "  " })).toBeNull();
+  });
+});
+
+describe("createApiGamiRepository — puanlı deneme yazımı yok (A4)", () => {
+  it("recordAttempt GamiRepositoryUnsupportedError fırlatır; istek gönderilmez", async () => {
+    const mock = createFetchMock([]);
+    const repo = createRepo(mock);
+
+    await expect(repo.recordAttempt(sampleAttempt())).rejects.toBeInstanceOf(GamiRepositoryUnsupportedError);
+    expect(mock.calls).toHaveLength(0);
+  });
+});
 
 describe("createApiGamiRepository — başarısızlık yolları", () => {
   it("ağ hatasında ApiNetworkError fırlatır; ikinci deneme/kuyruk yok", async () => {
@@ -179,7 +200,6 @@ describe("createApiGamiRepository — başarısızlık yolları", () => {
     const repo = createApiGamiRepository({
       client: client.gamification,
       simId: SIM_ID,
-      encodeAttempt,
     });
 
     await expect(repo.getMe()).rejects.toBeInstanceOf(ApiNetworkError);
@@ -198,19 +218,16 @@ describe("createApiGamiRepository — başarısızlık yolları", () => {
     }
   });
 
-  it("409 conflict ApiError olarak iletilir; yerel kayıt tutulmaz", async () => {
-    const mock = createFetchMock([
-      { status: 200, json: summaryPayload([{ attemptNo: 1, finishedAt: FIXED_FINISHED_AT, score: 60, maxScore: 100, passed: false }]) },
-      { status: 409, json: { error: { code: "conflict" } } },
-    ]);
+  it("puanlı gövde 403 server_scored ApiError olarak iletilir; kuyruk yok", async () => {
+    const mock = createFetchMock([{ status: 403, json: { error: { code: "server_scored" } } }]);
     const repo = createRepo(mock);
 
-    await expect(repo.recordAttempt(sampleAttempt())).rejects.toMatchObject({
+    await expect(repo.recordLearn({ topic: "ritim-serisi" }, new Date("2026-09-24T10:00:00.000Z"))).rejects.toMatchObject({
       name: "ApiError",
-      code: "conflict",
-      status: 409,
+      code: "server_scored",
+      status: 403,
     });
-    expect(mock.calls).toHaveLength(2);
+    expect(mock.calls).toHaveLength(1);
   });
 
   it("sözleşmeye uymayan liderlik yanıtında ApiSchemaError fırlatır", async () => {
@@ -236,41 +253,16 @@ describe("createApiGamiRepository — başarısızlık yolları", () => {
     );
   });
 
-  it("encodeAttempt geçersiz gövde üretirse istek gönderilmeden ApiSchemaError", async () => {
-    const mock = createFetchMock([
-      { status: 200, json: summaryPayload() },
-    ]);
-    const client = createApiClient({
-      baseUrl: "https://api.example.invalid",
-      fetch: mock.fetch,
-    });
-    const repo = createApiGamiRepository({
-      client: client.gamification,
-      simId: SIM_ID,
-      encodeAttempt: () => ({
-        id: "gecersiz-id",
-        attemptNo: 1,
-        startedAt: FIXED_FINISHED_AT,
-        finishedAt: FIXED_FINISHED_AT,
-        summary: { xp: 120 },
-      }),
-    });
-
-    await expect(repo.recordAttempt(sampleAttempt())).rejects.toBeInstanceOf(ApiSchemaError);
-    expect(mock.calls).toHaveLength(1);
-  });
-
   it("API'de karşılığı olmayan PORT yöntemleri GamiRepositoryUnsupportedError fırlatır", async () => {
-    const mock = createFetchMock([{ status: 200, json: summaryPayload() }]);
+    const mock = createFetchMock([]);
     const repo = createRepo(mock);
     const now = new Date("2026-09-24T10:00:00.000Z");
 
     await expect(repo.updateMe({ public: false })).rejects.toBeInstanceOf(GamiRepositoryUnsupportedError);
-    await expect(repo.recordLearn({ topic: "finding.pneumothorax" }, now)).rejects.toBeInstanceOf(
-      GamiRepositoryUnsupportedError,
-    );
+    await expect(repo.recordAttempt(sampleAttempt())).rejects.toBeInstanceOf(GamiRepositoryUnsupportedError);
     await expect(repo.getMonthlyReward("2026-09")).rejects.toBeInstanceOf(GamiRepositoryUnsupportedError);
     await expect(repo.getRewardWinners(3, now)).rejects.toBeInstanceOf(GamiRepositoryUnsupportedError);
+    expect(mock.calls).toHaveLength(0);
   });
 });
 
@@ -328,43 +320,23 @@ describe("createApiGamiRepository — başarı yolları", () => {
     });
   });
 
-  it("recordAttempt kodlu özeti POST eder; başarı sonrası özet önbelleği yenilenir", async () => {
-    const mock = createFetchMock([
-      { status: 200, json: summaryPayload() },
-      { status: 204, text: "" },
-      {
-        status: 200,
-        json: summaryPayload([
-          { attemptNo: 3, finishedAt: FIXED_FINISHED_AT, score: 80, maxScore: 100, passed: true },
-        ]),
-      },
-    ]);
+  it("recordLearn puansız gövdeyi POST eder; skor/özet alanı göndermez", async () => {
+    const mock = createFetchMock([{ status: 201, json: LEARN_RESPONSE }]);
     const repo = createRepo(mock);
 
-    await repo.recordAttempt(sampleAttempt());
-    expect(mock.calls[1]?.url).toBe(`https://api.example.invalid/me/gamification/${SIM_ID}/attempts`);
-    expect(JSON.parse(mock.calls[1]?.init.body ?? "{}")).toMatchObject({
-      id: ATTEMPT_UUID,
-      attemptNo: 1,
-      summary: { xp: 120, ritim: 80 },
+    await repo.recordLearn({ topic: "ritim-serisi" }, new Date("2026-09-28T10:00:00.000Z"));
+    expect(mock.calls[0]?.url).toBe(`https://api.example.invalid/me/gamification/${SIM_ID}/attempts`);
+    expect(mock.calls[0]?.init.method).toBe("POST");
+    expect(JSON.parse(mock.calls[0]?.init.body ?? "{}")).toEqual({
+      topic: "pulse:topic:ritim-serisi",
     });
-
-    const attempts = await repo.listAttempts();
-    expect(attempts.map((attempt) => attempt.id)).toEqual(["pulse-3"]);
-    expect(mock.calls).toHaveLength(3);
   });
 
-  it("recordAttempt başarısız olunca önbellek korunur; kuyruk veya yeniden deneme yok", async () => {
-    const mock = createFetchMock([
-      { status: 200, json: summaryPayload() },
-      { status: 500, json: { error: { code: "internal_error" } } },
-    ]);
+  it("recordLearn kayıt alanı yoksa istek göndermez", async () => {
+    const mock = createFetchMock([]);
     const repo = createRepo(mock);
 
-    await expect(repo.recordAttempt(sampleAttempt())).rejects.toBeInstanceOf(ApiError);
-    expect(mock.calls).toHaveLength(2);
-
-    await repo.listAttempts();
-    expect(mock.calls).toHaveLength(2);
+    await repo.recordLearn({}, new Date("2026-09-28T10:00:00.000Z"));
+    expect(mock.calls).toHaveLength(0);
   });
 });

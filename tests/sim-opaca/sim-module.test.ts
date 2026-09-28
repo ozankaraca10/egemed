@@ -227,7 +227,7 @@ describe("createOpacaModule (SimHost adaptörü)", () => {
     expect(sent.at(-1)).toBeNull();
   });
 
-  it("T175: audience='faculty' — App'e audience geçer, reportAttempt iletilmez (App gamiEnabled'ı kendi indirger)", () => {
+  it("T175: audience='faculty' — App'e audience geçer, reportLearn iletilmez (App gamiEnabled'ı kendi indirger)", () => {
     let tree: ReactNode = null;
     const reported: unknown[] = [];
     const deps = createTestDeps({
@@ -243,17 +243,17 @@ describe("createOpacaModule (SimHost adaptörü)", () => {
     const dispose = createOpacaModule(deps).mount(fakeTarget(), {
       ...CONTEXT,
       audience: "faculty",
-      reportAttempt: (attempt) => reported.push(attempt),
+      reportLearn: (record) => reported.push(record),
     });
     const provider = tree as unknown as {
-      props: { reportAttempt?: unknown; children: { props: { children: { props: { audience: string } } } } };
+      props: { reportLearn?: unknown; children: { props: { children: { props: { audience: string } } } } };
     };
-    expect(provider.props.reportAttempt).toBeUndefined();
+    expect(provider.props.reportLearn).toBeUndefined();
     expect(provider.props.children.props.children.props.audience).toBe("faculty");
     dispose();
   });
 
-  it("T175: audience='visitor' — App'e audience + requestSignIn geçer, reportAttempt iletilmez", () => {
+  it("T175: audience='visitor' — App'e audience + requestSignIn geçer, reportLearn iletilmez", () => {
     let tree: ReactNode = null;
     const deps = createTestDeps({
       createRoot: () => ({
@@ -272,15 +272,15 @@ describe("createOpacaModule (SimHost adaptörü)", () => {
       requestSignIn,
     });
     const provider = tree as unknown as {
-      props: { reportAttempt?: unknown; children: { props: { children: { props: { audience: string; requestSignIn?: unknown } } } } };
+      props: { reportLearn?: unknown; children: { props: { children: { props: { audience: string; requestSignIn?: unknown } } } } };
     };
-    expect(provider.props.reportAttempt).toBeUndefined();
+    expect(provider.props.reportLearn).toBeUndefined();
     expect(provider.props.children.props.children.props.audience).toBe("visitor");
     expect(provider.props.children.props.children.props.requestSignIn).toBe(requestSignIn);
     dispose();
   });
 
-  it("T175: audience yok/'student' — davranış geriye uyumlu (reportAttempt iletilir)", () => {
+  it("T175: audience yok/'student' — davranış geriye uyumlu (reportLearn iletilir)", () => {
     let tree: ReactNode = null;
     const reported: unknown[] = [];
     const deps = createTestDeps({
@@ -295,12 +295,12 @@ describe("createOpacaModule (SimHost adaptörü)", () => {
     });
     const dispose = createOpacaModule(deps).mount(fakeTarget(), {
       ...CONTEXT,
-      reportAttempt: (attempt) => reported.push(attempt),
+      reportLearn: (record) => reported.push(record),
     });
     const provider = tree as unknown as {
-      props: { reportAttempt?: unknown; children: { props: { children: { props: { gamiEnabled: boolean; audience: string } } } } };
+      props: { reportLearn?: unknown; children: { props: { children: { props: { gamiEnabled: boolean; audience: string } } } } };
     };
-    expect(typeof provider.props.reportAttempt).toBe("function");
+    expect(typeof provider.props.reportLearn).toBe("function");
     expect(provider.props.children.props.children.props.gamiEnabled).toBe(true);
     expect(provider.props.children.props.children.props.audience).toBe("student");
     dispose();

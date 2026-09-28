@@ -20,6 +20,7 @@ import { gamiUiStyles } from "@egemed/gami-ui";
 import type { GamiServerSource } from "@egemed/gami-ui";
 import { mountPulseGains } from "./gains";
 import { mountPulseProgress } from "./progress";
+import type { SimLearnRecord } from "@egemed/sim-host";
 import type { Lead, Mode } from "../engine/shapes";
 import type { PulseRuntimeHandle } from "./host";
 
@@ -56,6 +57,15 @@ interface SourceScorm {
 /** Kaynakta bir mod "incelendi" sayılmak için gereken gözlem saniyesi (16 s akış kuralı). */
 const STUDY_SECONDS = 16;
 
+/**
+ * A4 (ADR-009): sunucuya giden puansız öğrenme anahtarı. Yerel anahtar
+ * (`pulse:mode:<mod>`) depolama sözleşmesidir; sunucu biçimi `<sim>:topic:<mod>`
+ * ile api-client kodlayıcısıyla aynıdır.
+ */
+function pulseServerLearnTopic(mode: Mode): string {
+  return `pulse:topic:${mode}`;
+}
+
 const GAMI_BUTTON_ID = "egemedGamiBtn";
 const GAMI_PROGRESS_ID = "egemedGamiProgress";
 const GAMI_GAINS_ID = "egemedGamiGains";
@@ -80,8 +90,11 @@ export interface PulseGamiBridgeOptions {
    * denemeyi sunucu yazar; çift kayıt olmaz, ADR-008/009). Açılışta varsayılan true.
    */
   readonly recordAttempts?: boolean;
-  /** Yerel yazım başarıyla bitince kabuğa iletilir; hata akışı bozmaz. */
-  readonly reportAttempt?: (attempt: PulseAttemptRecord) => void;
+  /**
+   * A4 (ADR-009): puanlı deneme raporu YOKTUR; kabuğa yalnız puansız öğrenme
+   * kaydı gider. Hata akışı bozmaz.
+   */
+  readonly reportLearn?: (record: SimLearnRecord) => void;
   readonly gamification?: GamiServerSource;
 }
 
@@ -193,12 +206,11 @@ export function attachPulseGamification(handle: PulseRuntimeHandle, options: Pul
     return started === undefined ? 0 : Math.max(0, options.now() - started);
   };
 
-  const reportRecord = (record: PulseAttemptRecord): void => {
-    const report = options.reportAttempt;
+  const reportLearn = (topic: string): void => {
+    const report = options.reportLearn;
     if (report === undefined) return;
     try {
-      const result = report(record) as void | Promise<void>;
-      if (result instanceof Promise) void result.catch(() => undefined);
+      report({ topic });
     } catch {
       // Rapor hatası öğrenme akışını bozmaz.
     }
@@ -216,6 +228,7 @@ export function attachPulseGamification(handle: PulseRuntimeHandle, options: Pul
         void repo.recordLearn(pulseLearnTopic(state.mode), nowDate()).then((result) => {
           if (!detached) gamiState = result.state;
         });
+        reportLearn(pulseServerLearnTopic(state.mode));
       }
       return;
     }
@@ -239,7 +252,6 @@ export function attachPulseGamification(handle: PulseRuntimeHandle, options: Pul
       if (record !== null) {
         void repo.recordAttempt(record, nowDate()).then((result) => {
           applyWrite(result, record, true);
-          reportRecord(record);
         });
       }
     }
@@ -267,7 +279,6 @@ export function attachPulseGamification(handle: PulseRuntimeHandle, options: Pul
       if (record !== null) {
         void repo.recordAttempt(record, nowDate()).then((result) => {
           applyWrite(result, record, false);
-          reportRecord(record);
         });
       }
     }
@@ -277,6 +288,7 @@ export function attachPulseGamification(handle: PulseRuntimeHandle, options: Pul
       void repo.recordLearn(pulseLearnTopic(state.mode), nowDate()).then((result) => {
         if (!detached) gamiState = result.state;
       });
+      reportLearn(pulseServerLearnTopic(state.mode));
     }
   };
 

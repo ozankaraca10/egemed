@@ -3,15 +3,15 @@ import { getCookie } from "hono/cookie";
 import {
   isGamificationEligible,
   SIM_IDS,
-  attemptWriteRequestSchema,
   gamiLeaderboardQuerySchema,
   gamiSimIdParamSchema,
+  learnWriteRequestSchema,
   mePreferencesSchema,
   type GamiCohortFilter,
   type GamiPeriod,
   type SimId,
 } from "@egemed/contracts";
-import { SIM_BADGE_EVALUATORS, opacaDayIndex } from "@egemed/gami-catalogs";
+import { SIM_BADGE_EVALUATORS } from "@egemed/gami-catalogs";
 import { DEFAULT_RULES, assessmentXp, practiceXp, type Period } from "@egemed/gamification-core";
 import {
   buildLeaderboardRows,
@@ -31,11 +31,16 @@ import { toIstanbulIso } from "../admin/users";
  * verisi. Kimlik yalnız sunucu tarafı oturumdan çözülür; yol, sorgu veya gövde
  * parametresiyle başkasının kimliği istenemez. `GET /me/gamification` üç simin
  * AYRI özetlerini döner (ADR-006/007: birleşik veya türetilmiş tek puan yok);
- * bilinmeyen sim 404'tür. `POST /me/gamification/:simId/attempts` gövdesi
- * `.strict()` kodlu özettir (ham yanıt/serbest metin reddedilir) ve istemcinin
- * ürettiği `id` ile idempotenttir: aynı gövde tekrarı yeni satır yazmaz, aynı
- * `id` farklı gövdeyle veya aynı `attemptNo` başka `id` ile gelirse 409
- * `conflict` döner. Tüm sorgular parametrelidir; `Date.now()` kullanılmaz.
+ * bilinmeyen sim 404'tür.
+ *
+ * A4 (ADR-009): `POST /me/gamification/:simId/attempts` puanlı deneme yazımına
+ * KAPALIDIR (403 `server_scored`). Uygulama/değerlendirme/düello denemesini
+ * sunucu oturumu yazar (`simSessions.ts` `finish`). Uçta kalan tek biçim puansız
+ * öğrenme kaydıdır: `{ topic }` — skor, doğru sayısı veya özet alanı yoktur;
+ * aynı kullanıcı×sim×konu tekrarında yeni satır ve yeni XP üretilmez. XP sabit
+ * sunucu kuralıdır (`DEFAULT_RULES.xp.learnTopicFirstView`), istemci miktar
+ * bildirmez. Öğrenme kaydı seri/deneme saymaz; rozet değerlendirmesi deneme
+ * özetlerinden yürür (ADR-008).
  *
  * Veri yolu notu: XP/seviye/seri/rozet değerleri `gami_*` tablolarından okunur
  * (kurallar `gamification-core` kararıdır; bu modül kural üretmez). Haftalık
@@ -217,6 +222,32 @@ export type GamiAttemptWriteResult =
   /** Şema `maxScore = 0` kabul eder ama `gami_attempts` check kısıtı pozitif ister. */
   | { readonly kind: "invalid" };
 
+/**
+ * A4: puansız öğrenme kaydı girdisi. Zaman istemciden gelmez; seriye ve deneme
+ * sayısına etkisi yoktur, yalnız (kullanıcı, sim, konu) başına bir kez XP verir.
+ */
+export interface GamiLearnInput {
+  readonly userId: string;
+  readonly simId: SimId;
+  readonly topic: string;
+  /** Sunucunun alım anı (`now`); istemci tarih bildirmez (T149 kuralı). */
+  readonly at: number;
+  readonly institutionId: string;
+}
+
+export interface GamiLearnRecord {
+  readonly simId: SimId;
+  readonly topic: string;
+  readonly learnedAt: number;
+  /** Yalnız ilk kayıtta verilen XP; idempotent tekrarda 0 (istemci beyanı okunmaz). */
+  readonly xpGained: number;
+}
+
+export type GamiLearnWriteResult =
+  | { readonly kind: "created"; readonly learn: GamiLearnRecord }
+  /** Aynı kullanıcı×sim×konu zaten kayıtlı: yeni satır/XP yok, kayıt idempotenttir. */
+  | { readonly kind: "existing"; readonly learn: GamiLearnRecord };
+
 export interface GamiPreferences {
   readonly leaderboardVisible: boolean;
 }
@@ -224,9 +255,12 @@ export interface GamiPreferences {
 export interface GamificationRepo {
   getSummary(query: GamiSummaryQuery): Promise<GamiSimSummaryRecord>;
   getLeaderboard(query: GamiLeaderboardQuery): Promise<GamiLeaderboardRecord>;
+  /** Yalnız sunucu oturumu (A1) denemeleri içindir; HTTP ucu puanlı deneme kabul etmez (A4). */
   writeAttempt(input: GamiAttemptInput): Promise<GamiAttemptWriteResult>;
   /** Sunucu oturumu (A1) denemeleri için kullanıcı×sim sıradaki deneme numarası. */
   nextAttemptNo(userId: string, simId: SimId): Promise<number>;
+  /** A4: puansız öğrenme kaydı; konu başına bir kez sabit XP. */
+  recordLearn(input: GamiLearnInput): Promise<GamiLearnWriteResult>;
   getPreferences(userId: string): Promise<GamiPreferences>;
   setPreferences(userId: string, preferences: GamiPreferences, at: number): Promise<GamiPreferences>;
 }
@@ -264,6 +298,22 @@ interface GamiAttemptSummaryRow {
   readonly score: number | null;
   readonly max_score: number | null;
   readonly passed: boolean | null;
+}
+
+interface GamiLearnRow {
+  readonly sim_id: string;
+  readonly topic: string;
+  readonly learned_at: Date;
+  readonly xp: number;
+}
+
+function toLearnRecord(row: GamiLearnRow, xpGained: number): GamiLearnRecord {
+  return {
+    simId: row.sim_id as SimId,
+    topic: row.topic,
+    learnedAt: row.learned_at.getTime(),
+    xpGained,
+  };
 }
 
 function toAttemptRecord(row: GamiAttemptRow): GamiAttemptRecord {
@@ -349,6 +399,49 @@ export function createPgGamificationRepo(db: GamiDb): GamificationRepo {
         [userId, simId],
       );
       return Number((result.rows[0] as { readonly next?: unknown } | undefined)?.next ?? 1);
+    },
+
+    async recordLearn(input) {
+      // A4: konu tekilliği XP'nin de anahtarıdır. İlk yazımda profil XP/düzey
+      // aynı ifadede güncellenir; tekrarda `ins` satır üretmez, dolayısıyla ne
+      // yeni kayıt ne yeni XP olur (idempotent).
+      const inserted = await db.query(
+        `with ins as (
+           insert into gami_learn (user_id, sim_id, topic, xp, learned_at, created_at)
+           values ($1, $2, $3, $4, $5, $5)
+           on conflict (user_id, sim_id, topic) do nothing
+           returning sim_id, topic, learned_at, xp
+         ), prof as (
+           insert into gami_profiles as p (user_id, sim_id, xp, level, streak_current, streak_best, streak_last_date, updated_at)
+           select $1, $2, ins.xp, greatest(1, floor((1 + sqrt(1 + 8.0 * ins.xp / $6)) / 2))::int, 0, 0, null, $5 from ins
+           on conflict (user_id, sim_id) do update set
+             xp = p.xp + excluded.xp,
+             level = greatest(1, floor((1 + sqrt(1 + 8.0 * (p.xp + excluded.xp) / $6)) / 2))::int,
+             updated_at = excluded.updated_at
+           returning 1
+         )
+         select ins.sim_id, ins.topic, ins.learned_at, ins.xp from ins`,
+        [
+          input.userId,
+          input.simId,
+          input.topic,
+          DEFAULT_RULES.xp.learnTopicFirstView,
+          new Date(input.at),
+          DEFAULT_RULES.level.unitXp,
+        ],
+      );
+      const insertedRow = inserted.rows[0] as GamiLearnRow | undefined;
+      if (insertedRow !== undefined) return { kind: "created", learn: toLearnRecord(insertedRow, insertedRow.xp) };
+      const existing = await db.query(
+        "select sim_id, topic, learned_at, xp from gami_learn where user_id = $1 and sim_id = $2 and topic = $3",
+        [input.userId, input.simId, input.topic],
+      );
+      const existingRow = existing.rows[0] as GamiLearnRow | undefined;
+      if (existingRow === undefined) {
+        // Çakışma satırı okunamadıysa kayıt zaten yok sayılır; XP yeniden verilmez.
+        return { kind: "existing", learn: { simId: input.simId, topic: input.topic, learnedAt: input.at, xpGained: 0 } };
+      }
+      return { kind: "existing", learn: toLearnRecord(existingRow, 0) };
     },
 
     async writeAttempt(input) {
@@ -653,11 +746,23 @@ export interface MemoryGamiAttemptState {
   readonly mode?: GamiAttemptMode;
 }
 
+/** A4: puansız öğrenme kaydı durumu; (kullanıcı, sim, konu) başına tek satır. */
+export interface MemoryGamiLearnState {
+  readonly userId: string;
+  readonly institutionId: string;
+  readonly simId: SimId;
+  readonly topic: string;
+  readonly learnedAt: number;
+  /** İlk kayıtta verilen sabit XP (`DEFAULT_RULES.xp.learnTopicFirstView`). */
+  readonly xp: number;
+}
+
 /** Testlerin durum okuduğu bellek deposu (DB gerekmez). */
 export interface MemoryGamificationStore {
   readonly repo: GamificationRepo;
   readonly profiles: Map<string, MemoryGamiProfileState>;
   readonly attempts: Map<string, MemoryGamiAttemptState>;
+  readonly learn: Map<string, MemoryGamiLearnState>;
   readonly badges: MemoryGamiBadgeState[];
 }
 
@@ -677,6 +782,7 @@ export function createMemoryGamificationRepo(
 ): MemoryGamificationStore {
   const profiles = new Map<string, MemoryGamiProfileState>();
   const attempts = new Map<string, MemoryGamiAttemptState>();
+  const learn = new Map<string, MemoryGamiLearnState>();
   const badges: MemoryGamiBadgeState[] = [];
   /** Liderlik tablosundan çıkan kullanıcılar (varsayılan: görünür). */
   const hiddenFromLeaderboard = new Set<string>(seed.hiddenFromLeaderboard ?? []);
@@ -780,6 +886,42 @@ export function createMemoryGamificationRepo(
     async nextAttemptNo(userId, simId) {
       const own = [...attempts.values()].filter((attempt) => attempt.userId === userId && attempt.simId === simId);
       return own.reduce((max, attempt) => Math.max(max, attempt.attemptNo), 0) + 1;
+    },
+
+    async recordLearn(input) {
+      const key = `${input.userId}:${input.simId}:${input.topic}`;
+      const existing = learn.get(key);
+      if (existing !== undefined) {
+        return { kind: "existing", learn: { simId: existing.simId, topic: existing.topic, learnedAt: existing.learnedAt, xpGained: 0 } };
+      }
+      // A4: XP sabit sunucu kuralıdır; istemci miktar bildirmez (PG yolu ile aynı).
+      const xp = DEFAULT_RULES.xp.learnTopicFirstView;
+      learn.set(key, {
+        userId: input.userId,
+        institutionId: input.institutionId,
+        simId: input.simId,
+        topic: input.topic,
+        learnedAt: input.at,
+        xp,
+      });
+      // Öğrenme kaydı seri üretmez; yalnız profil XP/düzey güncellenir.
+      const profile = profiles.get(profileKey(input.userId, input.simId)) ?? {
+        userId: input.userId,
+        institutionId: input.institutionId,
+        simId: input.simId,
+        xp: 0,
+        level: 1,
+        streak: { current: 0, best: 0, lastDate: null },
+        updatedAt: input.at,
+        displayName: "Örnek Öğrenci",
+        unitCode: null,
+        public: true,
+      };
+      profile.xp += xp;
+      profile.level = levelForXpClosedForm(profile.xp);
+      profile.updatedAt = input.at;
+      profiles.set(profileKey(input.userId, input.simId), profile);
+      return { kind: "created", learn: { simId: input.simId, topic: input.topic, learnedAt: input.at, xpGained: xp } };
     },
 
     async writeAttempt(input) {
@@ -923,7 +1065,7 @@ export function createMemoryGamificationRepo(
     },
   };
 
-  return { repo, profiles, attempts, badges };
+  return { repo, profiles, attempts, learn, badges };
 }
 
 export interface MeGamificationDeps {
@@ -965,17 +1107,12 @@ function summaryBody(summary: GamiSimSummaryRecord) {
   };
 }
 
-function attemptBody(attempt: GamiAttemptRecord) {
+function learnBody(learn: GamiLearnRecord) {
   return {
-    id: attempt.id,
-    simId: attempt.simId,
-    attemptNo: attempt.attemptNo,
-    startedAt: toIstanbulIso(attempt.startedAt),
-    finishedAt: toIstanbulIso(attempt.finishedAt),
-    score: attempt.score,
-    maxScore: attempt.maxScore,
-    passed: attempt.passed,
-    summary: attempt.summary,
+    simId: learn.simId,
+    topic: learn.topic,
+    recordedAt: toIstanbulIso(learn.learnedAt),
+    xpGained: learn.xpGained,
   };
 }
 
@@ -1001,31 +1138,33 @@ function leaderboardBody(record: GamiLeaderboardRecord) {
   };
 }
 
-function isScoreIssue(error: { readonly issues: readonly { readonly message: string }[] }): boolean {
-  return error.issues.some((issue) => issue.message === "score_exceeds_max");
-}
-
-/** T149: deneme `finishedAt` kabul penceresi (sunucu saatine göre). */
-export const ATTEMPT_CLOCK_SKEW_MS = 5 * 60 * 1000;
-export const ATTEMPT_MAX_AGE_MS = 48 * 60 * 60 * 1000;
-/** T149: kullanıcı başına saatlik deneme yazımı üst sınırı (XP şişirmesine karşı). */
+/** T149: kullanıcı başına saatlik yazım üst sınırı (XP şişirmesine karşı). */
 export const ATTEMPT_RATE_MAX = 60;
 export const ATTEMPT_RATE_WINDOW_MS = 60 * 60 * 1000;
-/** Kabuğun genel kodları (`codedAttemptSummary`); diğer kodlar yalnız `<simId>.` önekli olabilir. */
-const GENERIC_SUMMARY_KEYS: ReadonlySet<string> = new Set(["score", "correct", "total"]);
 
 /**
- * Gün kodu istemci beyanı değildir: `opaca.day` varsa deneme `finishedAt`'inden yeniden
- * hesaplanır (idempotent tekrarlarda aynı değer). Sahte gün koduyla seri rozeti üretilemez.
+ * A4: puanlı deneme gövdesinin alan imzaları. Eski istemci yolu kapandığında
+ * bu gövde 400 `invalid_request` yerine açık sinyal olarak 403 `server_scored`
+ * alır (uygulama/değerlendirme/düello denemesini sunucu oturumu yazar).
  */
-export function anchorSummaryDay(
-  simId: string,
-  summary: Readonly<Record<string, number>>,
-  finishedAt: number,
-): Record<string, number> {
-  const key = `${simId}.day`;
-  if (simId !== "opaca" || !(key in summary)) return { ...summary };
-  return { ...summary, [key]: opacaDayIndex(new Date(finishedAt)) };
+const SCORED_ATTEMPT_KEYS: readonly string[] = [
+  "mode",
+  "score",
+  "maxScore",
+  "passed",
+  "summary",
+  "attemptNo",
+  "startedAt",
+  "finishedAt",
+  "caseCount",
+  "hintsUsed",
+];
+
+/** Gövde puanlı deneme alanlarından birini taşıyorsa eski istemci yoludur. */
+export function isScoredAttemptBody(value: unknown): boolean {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) return false;
+  const record = value as Record<string, unknown>;
+  return SCORED_ATTEMPT_KEYS.some((key) => key in record);
 }
 
 export function registerMeGamificationRoutes(
@@ -1135,62 +1274,35 @@ export function registerMeGamificationRoutes(
     return c.json({ data: summaryBody(summary) });
   });
 
+  /**
+   * A4 (ADR-009): puanlı deneme yolu KAPALIDIR. Uygulama/değerlendirme/düello
+   * denemesini sunucu oturumu yazar (`simSessions.ts` `finish`); eski gövde 403
+   * `server_scored` alır. Kabul edilen tek biçim puansız öğrenme kaydıdır
+   * (`{ topic }`): skor alanı yoktur, XP sabit sunucu kuralından gelir, aynı
+   * konu tekrarı yeni XP üretmez.
+   */
   app.post("/me/gamification/:simId/attempts", async (c) => {
     const parsedSim = gamiSimIdParamSchema.safeParse(c.req.param("simId"));
     if (!parsedSim.success) return jsonError(c, "not_found");
     if (!canUseSim(c, parsedSim.data)) return jsonError(c, "forbidden");
-    // Öğretim üyesi ve uzmanlık öğrencisi deneme yazamaz: XP, rozet ve liderlik yalnız öğrencileri kapsar.
+    // Öğretim üyesi ve uzmanlık öğrencisi yazamaz: XP, rozet ve liderlik yalnız öğrencileri kapsar.
     if (!c.get("meActor").gamified) return jsonError(c, "role_not_permitted");
-    const parsed = attemptWriteRequestSchema.safeParse(await readJson(c));
-    if (!parsed.success) {
-      return isScoreIssue(parsed.error)
-        ? jsonError(c, "validation_failed", { issues: [{ code: "score_exceeds_max", path: ["score"] }] })
-        : jsonError(c, "invalid_request", validationDetails(parsed.error));
-    }
+    const raw = await readJson(c);
+    // Puanlı deneme gövdesi (eski istemci yolu): 400 yerine açık 403 sinyali.
+    if (isScoredAttemptBody(raw)) return jsonError(c, "server_scored");
+    const parsed = learnWriteRequestSchema.safeParse(raw);
+    if (!parsed.success) return jsonError(c, "invalid_request", validationDetails(parsed.error));
     const actor = c.get("meActor");
     const at = now();
-    // T149 (güvenlik denetimi): seri/gün tabanlı rozetler istemci saatine bağlanamaz.
-    // Gelecek tarihli deneme seriyi yıllarca dondururdu; geçmişe yayılan denemeler 30 günlük
-    // sahte seri üretiyordu. Kabul penceresi: son 48 saat, en fazla 5 dk saat kayması.
-    const finishedAt = new Date(parsed.data.finishedAt).getTime();
-    if (finishedAt > at + ATTEMPT_CLOCK_SKEW_MS) {
-      return jsonError(c, "validation_failed", { issues: [{ code: "finished_in_future", path: ["finishedAt"] }] });
-    }
-    if (finishedAt < at - ATTEMPT_MAX_AGE_MS) {
-      return jsonError(c, "validation_failed", { issues: [{ code: "finished_too_old", path: ["finishedAt"] }] });
-    }
-    const foreignKey = Object.keys(parsed.data.summary).find(
-      (key) => !GENERIC_SUMMARY_KEYS.has(key) && !key.startsWith(`${parsedSim.data}.`),
-    );
-    if (foreignKey !== undefined) {
-      return jsonError(c, "validation_failed", { issues: [{ code: "summary_key_not_allowed", path: ["summary", foreignKey] }] });
-    }
-    if (!attemptRate.consume(`attempt:${actor.userId}`, at)) return jsonError(c, "rate_limited");
-    const summary = anchorSummaryDay(parsedSim.data, parsed.data.summary, finishedAt);
-    const result = await deps.gamification.writeAttempt({
-      id: parsed.data.id,
+    if (!attemptRate.consume(`learn:${actor.userId}`, at)) return jsonError(c, "rate_limited");
+    const result = await deps.gamification.recordLearn({
       // Kimlik yalnız oturumdan gelir; gövdedeki hiçbir alan kullanıcıyı seçemez.
       userId: actor.userId,
       simId: parsedSim.data,
-      attemptNo: parsed.data.attemptNo,
-      startedAt: new Date(parsed.data.startedAt).getTime(),
-      finishedAt: new Date(parsed.data.finishedAt).getTime(),
-      score: parsed.data.score ?? null,
-      maxScore: parsed.data.maxScore ?? null,
-      passed: parsed.data.passed ?? null,
-      summary,
-      createdAt: at,
+      topic: parsed.data.topic,
+      at,
       institutionId: actor.institutionId,
-      mode: parsed.data.mode ?? "assessment",
-      caseCount: parsed.data.caseCount ?? 1,
-      hintsUsed: parsed.data.hintsUsed ?? 0,
     });
-    if (result.kind === "conflict") return jsonError(c, "conflict");
-    if (result.kind === "invalid") {
-      return jsonError(c, "validation_failed", {
-        issues: [{ code: "max_score_positive", path: ["maxScore"] }],
-      });
-    }
-    return c.json({ data: attemptBody(result.attempt) }, result.kind === "created" ? 201 : 200);
+    return c.json({ data: learnBody(result.learn) }, result.kind === "created" ? 201 : 200);
   });
 }

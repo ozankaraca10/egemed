@@ -19,6 +19,7 @@ export {
   type SimHostEvents,
   type SimHostOptions,
   type SimLearnPort,
+  type SimLearnRecord,
   type SimModule,
   type SimModuleLoader,
   type SimMountContext,
