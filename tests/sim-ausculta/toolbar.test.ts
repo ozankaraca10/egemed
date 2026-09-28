@@ -17,6 +17,7 @@ import type {
   AppState,
   AuscultationPoint,
   CaseDef,
+  PatientView,
   Question,
   StoragePort,
   ToolbarAudio,
@@ -118,6 +119,8 @@ function renderToolbar(
     initialHintOpen?: boolean;
     withCase?: boolean;
     withQuestion?: boolean;
+    allowedViews?: readonly PatientView[];
+    caseViews?: readonly PatientView[];
   } = {},
 ): string {
   const activePoint = extra.activePoint === undefined ? "aortic" : extra.activePoint;
@@ -133,9 +136,12 @@ function renderToolbar(
         activePoint,
         engine: engine(),
         ...(extra.withQuestion === false ? {} : { question }),
-        ...(extra.withCase === false ? {} : { caseDef: { allowedHeads: ["bell", "diaphragm"] } as CaseDef }),
+        ...(extra.withCase === false
+          ? {}
+          : { caseDef: { allowedHeads: ["bell", "diaphragm"], views: extra.caseViews ?? ["front", "back"] } as CaseDef }),
         ...(extra.strict ? { strict: true } : {}),
         ...(extra.initialHintOpen ? { initialHintOpen: true } : {}),
+        ...(extra.allowedViews ? { allowedViews: extra.allowedViews } : {}),
       }),
     }),
   );
@@ -147,6 +153,15 @@ function button(html: string, text: string): string {
   );
   if (!found) throw new Error(`düğme yok: ${text}`);
   return found[1] ?? "";
+}
+
+/** Düğmenin tam işaretlemesi (öznitelikler + içerik). */
+function buttonMarkup(html: string, text: string): string {
+  const found = [...html.matchAll(/<button\b([^>]*)>([\s\S]*?)<\/button>/g)].find((match) =>
+    (match[2] ?? "").replace(/<[^>]*>/g, "").includes(text),
+  );
+  if (!found) throw new Error(`düğme yok: ${text}`);
+  return found[0];
 }
 
 describe("araç çubuğu etkileri", () => {
@@ -270,6 +285,30 @@ describe("araç çubuğu (statik render)", () => {
         }),
       ),
     ).toThrow(/ses motoru yok/);
+  });
+
+  it("T233: izinli olmayan görünüm devre dışı, kilit imli ve açıklamalı çizilir", () => {
+    const lung = renderToolbar({}, { caseViews: ["back"] });
+    const front = buttonMarkup(lung, "Ön");
+    expect(front).toContain('disabled=""');
+    expect(front).toContain('aria-disabled="true"');
+    expect(front).toContain("view-locked");
+    expect(front).toContain("Bu vakada dinlenecek ön bölge yok");
+    expect(lung).toContain("Ön görünüm kapalı");
+    expect(buttonMarkup(lung, "Arka")).not.toContain('disabled=""');
+
+    const heart = renderToolbar({}, { allowedViews: ["front"], caseViews: ["front"] });
+    const back = buttonMarkup(heart, "Arka");
+    expect(back).toContain('disabled=""');
+    expect(back).toContain('aria-disabled="true"');
+    expect(back).toContain("Bu vakada dinlenecek arka bölge yok");
+    expect(buttonMarkup(heart, "Ön")).not.toContain('disabled=""');
+
+    // İki görünüm de izinliyse kilit yok.
+    const mixed = renderToolbar();
+    expect(buttonMarkup(mixed, "Ön")).not.toContain('disabled=""');
+    expect(buttonMarkup(mixed, "Arka")).not.toContain('disabled=""');
+    expect(mixed).not.toContain("view-note");
   });
 });
 

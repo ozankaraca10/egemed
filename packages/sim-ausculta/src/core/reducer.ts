@@ -190,8 +190,11 @@ export function reducer(s: AppState, a: Action, seam: ReducerSeam = noopSeam): A
       return { ...s, screen: a.screen };
     case "caseMount": {
       const def = a.caseDef;
-      if (def.id === s.currentCaseId) return s;
-      return { ...s, currentCaseId: def.id, bodySex: bodySexFor(def) };
+      // T233: vaka izinli görünümlerle gelir (`views`); açılış görünümü izinli ilk görünüm.
+      const views = def.views.length > 0 ? def.views : (["front", "back"] as PatientView[]);
+      const view = views[0] ?? s.view;
+      if (def.id === s.currentCaseId && view === s.view) return s;
+      return { ...s, currentCaseId: def.id, bodySex: bodySexFor(def), view };
     }
     case "startMode":
       // K4: yeni oturum eski sonuçları taşımaz — vaka sonuçları ve zamanlayıcı sıfırlanır.

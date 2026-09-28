@@ -139,7 +139,8 @@ export function TutorialScreen({
                 onDragStart={() => setEvents((prev) => (prev.includes("drag") ? prev : [...prev, "drag"]))}
               />
               <div className={progress.currentStep === 2 && !progress.allDone ? "tut-highlight" : ""}>
-                <Toolbar stageRef={stageRef} activePoint={null} engine={audio} />
+                {/* T233: öğe `heart.normal` — yalnız ön görünüm izinli (kural). */}
+                <Toolbar stageRef={stageRef} activePoint={null} engine={audio} allowedViews={["front"]} />
               </div>
             </div>
           </div>

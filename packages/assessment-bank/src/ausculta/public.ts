@@ -1,8 +1,9 @@
 import type { AuscultaPublicCase, SimCaseResult, SimSessionMode, SimTelemetry } from "@egemed/contracts";
 import { libraryKeyForCase } from "./library";
-import { assessmentPointFilter, resolveCaseSoundsEx } from "./resolver";
+import { resolveCaseSoundsEx } from "./resolver";
 import { practiceAdjusted, scoreCase } from "./scoring";
 import type { CaseDef, Question } from "./types";
+import { publicCaseViewPlan } from "./views";
 
 /**
  * A1 (ADR-009): anahtarlı vakadan istemciye giden anahtarsız görünüm ve sunucu
@@ -43,12 +44,14 @@ function shuffled<T>(items: readonly T[], random: () => number): T[] {
 
 export function buildPublicCase(caseDef: CaseDef, input: BuildCaseInput): { readonly publicCase: AuscultaPublicCase; readonly keys: AuscultaCaseKeys } {
   const { sounds: records, components } = resolveCaseSoundsEx(caseDef.soundAssignments);
-  // Değerlendirmede bildirimsiz yedek (posterior→anterior) sunumu yapılmaz (O7); akciğer
+  // T233: izinli görünümler (kalp→ön, akciğer→arka, karma→ikisi) mod bazlı sunulabilirlikle
+  // kesişir; izinli olmayan görünümün noktaları ve ses jetonları dışarıda kalır. Doğru cevabı
+  // gizli noktayı gösteren sorular izinliyi genişletir (güvenli geri düşüş), seçenekler süzülür.
+  // Değerlendirme/düelloda bildirimsiz yedek (posterior→anterior) sunumu yapılmaz (O7); akciğer
   // bileşeninin gerçek posterior kaydıyla çözülen noktalar gerçek kayıt sayılır.
-  const pointIds =
-    input.mode !== "practice" ? assessmentPointFilter(caseDef.soundAssignments) : caseDef.soundAssignments.map((a) => a.pointId);
+  const plan = publicCaseViewPlan(caseDef, input.mode);
   const audio: Record<string, { runtimeUrl: string; pointId: string }> = {};
-  const points = pointIds.flatMap((pointId) => {
+  const points = plan.pointIds.flatMap((pointId) => {
     const record = records[pointId];
     if (record === null || record === undefined) return [];
     const token = input.newToken();
@@ -62,7 +65,7 @@ export function buildPublicCase(caseDef: CaseDef, input: BuildCaseInput): { read
     return [{ pointId, audio: heads, ...(showComponent ? { component: "lung" as const } : {}) }];
   });
   const options: Record<string, Record<string, string>> = {};
-  const questions = caseDef.questions.map((question: Question) => {
+  const questions = plan.questions.map((question: Question) => {
     const tokens: Record<string, string> = {};
     const mapped = shuffled(question.options, input.random).map((option) => {
       const token = input.newToken();
@@ -91,7 +94,7 @@ export function buildPublicCase(caseDef: CaseDef, input: BuildCaseInput): { read
     history: caseDef.history,
     vitalSigns: { ...caseDef.vitalSigns },
     tasks: [...caseDef.tasks],
-    views: [...caseDef.views],
+    views: [...plan.allowed],
     allowedHeads: [...caseDef.allowedHeads],
     points,
     questions,
@@ -126,9 +129,12 @@ export interface GradeInput {
   readonly hintsUsed: number;
 }
 
-/** Sunucu notlandırması: `scoreCase` (anahtarlı) + soru başına geri bildirim (jetonlu doğru seçenekler). */
+/** Sunucu notlandırması: `scoreCase` (anahtarlı) + soru başına geri bildirim (jetonlu doğru seçenekler).
+ *  T233: teknik rubriği yalnız o modda gerçekten sunulan (public case'e giren) noktaları ölçer —
+ *  izinli görünüm dışında kalan nokta öğrenciden istenemez. */
 export function gradeCase(caseDef: CaseDef, keys: AuscultaCaseKeys, input: GradeInput): SimCaseResult {
-  const result = scoreCase(caseDef, decodeAnswers(keys, input.answers), input.telemetry, input.hintsUsed);
+  const presented = publicCaseViewPlan(caseDef, input.mode).pointIds;
+  const result = scoreCase(caseDef, decodeAnswers(keys, input.answers), input.telemetry, input.hintsUsed, presented);
   const total = input.mode === "practice" ? practiceAdjusted(result.total, input.hintsUsed) : result.total;
   return {
     index: input.index,

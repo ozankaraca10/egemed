@@ -129,4 +129,27 @@ describe("LearnScreen", () => {
     expect(html).toContain("lib-item locked");
     expect(html).toContain(esc("Tüm içerik yalnızca Ege Üniversitesi Tıp Fakültesi öğrencilerine açıktır."));
   });
+
+  it("T233: akciğer öğesinde sahne arkada ve Ön görünüm kapalı", () => {
+    const html = renderInStore(createElement(LearnScreen), "lung.normal");
+    expect(html).toContain('data-view="back"');
+    expect(html).toContain("Ön görünüm kapalı");
+    expect(html).toContain("Bu vakada dinlenecek ön bölge yok");
+    expect(html).toContain('aria-disabled="true"');
+    expect(html).toContain("view-locked");
+  });
+
+  it("T233: kalp öğesinde sahne önde ve Arka görünüm kapalı", () => {
+    const html = renderInStore(createElement(LearnScreen), "heart.s3");
+    expect(html).toContain('data-view="front"');
+    expect(html).toContain("Arka görünüm kapalı");
+    expect(html).toContain("Bu vakada dinlenecek arka bölge yok");
+  });
+
+  it("T233: karma öğede iki görünüm de açık", () => {
+    const html = renderInStore(createElement(LearnScreen), "mixed.msm_wheezing");
+    expect(html).toContain('data-view="front"');
+    expect(html).not.toContain("görünüm kapalı");
+    expect(html).not.toContain('aria-disabled="true"');
+  });
 });
