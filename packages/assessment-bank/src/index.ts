@@ -6,3 +6,4 @@
  */
 export * as ausculta from "./ausculta/index";
 export * as opaca from "./opaca/index";
+export * as pulse from "./pulse/index";

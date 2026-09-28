@@ -36,6 +36,7 @@ export {
 export {
   countUnlistenedInOtherView,
   firstWeakLibraryKey,
+  firstWeakLibraryKeyFromServer,
   libraryKeyForCase,
   nextActionForSubmit,
   otherViewHintText,
@@ -281,8 +282,8 @@ export { LearnAudioProvider, LearnScreen, createNoopLearnAudio, createNoopLearnS
 export type { LearnAudio, LearnScreenEnv, LearnScreenProps } from "./screens/LearnScreen";
 export { SimulationScreen, createNoopSimulationAudio } from "./screens/SimulationScreen";
 export type { SimulationAudio, SimulationScreenProps } from "./screens/SimulationScreen";
-export { ResultsScreen, createNoopResultsScreenEnv, exitResults } from "./screens/ResultsScreen";
-export type { ResultsExitPorts, ResultsScreenEnv, ResultsScreenProps } from "./screens/ResultsScreen";
+export { ResultsScreen, createNoopResultsScreenEnv, exitResults, studyLearnFromResults } from "./screens/ResultsScreen";
+export type { ResultsExitPorts, ResultsScreenEnv, ResultsScreenProps, StudyLearnPorts } from "./screens/ResultsScreen";
 export { SourcesScreen } from "./screens/SourcesScreen";
 export type { SourcesScreenProps } from "./screens/SourcesScreen";
 export {

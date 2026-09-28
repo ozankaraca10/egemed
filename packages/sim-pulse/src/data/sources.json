@@ -109,6 +109,14 @@
       "use": "LBBB ve RBBB örneklerinde geniş QRS ve derivasyona özgü morfoloji."
     },
     {
+      "id": "WPW2009",
+      "title": "AHA/ACCF/HRS EKG Standardizasyonu — İntraventriküler İleti ve Preeksitasyon (Surawicz 2009)",
+      "org": "AHA / ACCF / HRS",
+      "year": 2009,
+      "url": "https://doi.org/10.1161/CIRCULATIONAHA.108.191095",
+      "use": "Ventriküler preeksitasyon paterninde kısa PR, delta dalgası ve geniş QRS'in tanımı; geniş QRS ayırıcı tanısı ve patern ile sendrom ayrımı."
+    },
+    {
       "id": "BRADY2018",
       "title": "2018 ACC/AHA/HRS Bradikardi ve Kardiyak İletim Gecikmesi Kılavuzu",
       "org": "ACC / AHA / HRS",

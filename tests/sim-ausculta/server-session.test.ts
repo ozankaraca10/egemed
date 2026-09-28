@@ -67,6 +67,7 @@ const RESULT: SimCaseResult = {
   mastery: true,
   domains: { recognition: { earned: 25, max: 25 }, technique: { earned: 15, max: 20 } },
   hintsUsed: 0,
+  libraryKey: "heart.normal",
   questions: [{ questionId: "q1", correct: true, correctOptionIds: ["tok_optionaaaa"], feedback: "Doğru." }],
 };
 
@@ -142,7 +143,7 @@ describe("uyarlayıcılar", () => {
     expect(result).toMatchObject({ caseId: "srv-1", total: 90, mastery: true });
     expect(result.domains.recognition).toEqual({ earned: 25, max: 25 });
     expect(result.domains.diagnosis).toEqual({ earned: 0, max: 0 });
-    expect(meta).toMatchObject({ title: "Normal Kardiyak Oskültasyon", diagnosis: null, summary: "Özet" });
+    expect(meta).toMatchObject({ title: "Normal Kardiyak Oskültasyon", diagnosis: null, summary: "Özet", libraryKey: "heart.normal" });
     expect(meta.questions?.q1).toEqual({ correctOptionIds: ["tok_optionaaaa"], feedback: "Doğru." });
   });
 });
@@ -167,6 +168,8 @@ describe("sürücü + reducer", () => {
     await finishServerSession(source, run.dispatch, "s");
     expect(run.state.screen).toBe("results");
     expect(run.state.caseResults).toHaveLength(1);
+    // T214: kütüphane anahtarı meta ile sonuç ekranına taşınır (odağın kaynağı).
+    expect(run.state.server?.metas["srv-1"]?.libraryKey).toBe("heart.normal");
     expect(run.emitted).not.toContain("case_completed");
     expect(calls).toEqual(["start:practice:s3", "case:1", "check:q1:tok_optionbbbb", "hint:q1", "answer:1", "finish"]);
   });
