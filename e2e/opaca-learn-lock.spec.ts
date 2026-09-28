@@ -25,6 +25,13 @@ async function openTopicPracticeButton(root: Locator): Promise<Locator> {
 }
 
 test.describe("Opaca öğrenme kilidi", () => {
+  // Ortamdan bağımsızlık: XR çalışma zamanı görüntüleri git-dışıdır ve bazı makinelerde
+  // bulunur. Testler her zaman "XR dosyası yok" koşulunda koşar (Vite dev sunucusunun eksik dosyada döndürdüğü gibi HTML yanıt); depodaki BT
+  // görüntüleri etkilenmez. Aksi hâlde ilk konu kendiliğinden açılıp sayaç 1/33 olur.
+  test.beforeEach(async ({ page }) => {
+    await page.route("**/assets/xray/runtime/**", (route) => route.fulfill({ status: 200, contentType: "text/html", body: "<!doctype html>" }));
+  });
+
   test("kilitliyken uygulama/değerlendirme kartları pasif ve ilerleme metni görünür", async ({ page }, testInfo) => {
     const errors = trackErrors(page);
     await openRoute(page, "#/sims/opaca");
