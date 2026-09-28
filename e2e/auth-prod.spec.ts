@@ -43,13 +43,26 @@ test.describe("üretim önizlemesi güvenlik kontrolleri", () => {
     expect(ids.length).toBeGreaterThan(100);
     expect(ids.filter((id) => bundle.includes(`"${id}"`))).toEqual([]);
     expect(bundle).not.toContain("createDevLocalSessionSource");
-    // A3.3: DEV Pulse yerel bankası (600 madde) istemci müfredat aynasından (ilk
-    // 200'er madde) büyüktür; yalnız bankada olan maddeler pakete girmemelidir.
-    const bankOnly = (pulseItems as { items: { id: string }[] }).items
-      .filter((item) => Number(item.id.slice(1)) > 200)
-      .slice(0, 20)
-      .map((item) => item.id);
-    expect(bankOnly.length).toBeGreaterThan(0);
-    expect(bankOnly.filter((id) => bundle.includes(`"${id}"`))).toEqual([]);
+  });
+
+  test("T220: üretim paketi Pulse gerekçe/geri bildirim metnini ve madde kimliklerini taşımaz", () => {
+    const dir = "apps/shell/dist/assets";
+    const bundle = readdirSync(dir)
+      .filter((name) => name.endsWith(".js"))
+      .map((name) => readFileSync(`${dir}/${name}`, "utf8"))
+      .join("\n");
+    expect(bundle.length).toBeGreaterThan(0);
+    const items = (pulseItems as { items: { id: string; feedback: string; explanations: string[] }[] }).items;
+    expect(items).toHaveLength(600);
+    // Madde kimlikleri ("C001"/"Q001" biçimi) pakette geçmez.
+    const leakedIds = items.map((item) => item.id).filter((id) => bundle.includes(`"${id}"`) || bundle.includes(`'${id}'`));
+    expect(leakedIds).toEqual([]);
+    // Bankadaki hiçbir gerekçe/geri bildirim cümlesi pakette geçmez (her maddenin
+    // kendi gerekçeleri ve feedback'i aranır; metin JS dizesi kaçışıyla da denenir).
+    const escaped = (text: string): string => JSON.stringify(text).slice(1, -1);
+    const needles = [...new Set(items.flatMap((item) => [item.feedback, ...item.explanations]))];
+    expect(needles.length).toBeGreaterThan(100);
+    const leakedTexts = needles.filter((text) => bundle.includes(text) || bundle.includes(escaped(text)));
+    expect(leakedTexts).toEqual([]);
   });
 });

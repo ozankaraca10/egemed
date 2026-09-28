@@ -1,52 +1,29 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import { PULSE_ECG_MODES, caseResultSchema, pulsePublicCaseSchema, simSessionCaseResponseSchema } from "../../packages/contracts/src/index";
+import { PULSE_ECG_LEADS, PULSE_ECG_MODES, caseResultSchema, pulsePublicCaseSchema, simSessionCaseResponseSchema } from "../../packages/contracts/src/index";
 import type { PulseEcgLead, PulseEcgMode } from "../../packages/contracts/src/index";
 import { pulse } from "../../packages/assessment-bank/src/index";
 
-// T215 (A3.1, ADR-009): Pulse maddeleri çalışan runtime kaynağından (vendor/curriculum.js)
-// dışa aktarılır; anahtarsız projeksiyon doğru seçeneği, gerekçeleri ve geri bildirimi
-// sızdırmaz; sunucu notlandırması jetonlu yanıtı doğru puanlar.
+// T215/T220 (A3.1/A3.4, ADR-009): Pulse maddelerinin tek doğruluk kaynağı bu
+// dosyadır (`data/pulse/items.json`; dışa aktarma betiği kaldırıldı). Bütünlük
+// testi şemaya ve sayılara dayanır; anahtarsız projeksiyon doğru seçeneği,
+// gerekçeleri ve geri bildirimi sızdırmaz; sunucu notlandırması jetonlu yanıtı
+// doğru puanlar.
 
-const VENDOR = "packages/sim-pulse/src/runtime/vendor";
 const BANK_FILE = "packages/assessment-bank/data/pulse/items.json";
 const OPENED_AT = "2026-09-27T10:00:00.000+03:00";
 
-interface CurriculumVital {
+interface BankVital {
   readonly k: string;
   readonly v: string;
 }
-interface CurriculumEcg {
+interface BankEcg {
   readonly mode: PulseEcgMode;
   readonly options: Record<string, string | number | boolean>;
   readonly leads: readonly PulseEcgLead[];
   readonly start: number;
   readonly seconds: number;
 }
-interface CurriculumItem {
-  readonly id: string;
-  readonly mode: PulseEcgMode;
-  readonly stem: string;
-  readonly question: string;
-  readonly options: readonly string[];
-  readonly correct: number;
-  readonly explanations: readonly string[];
-  readonly feedback: string;
-  readonly objectiveIds: readonly string[];
-  readonly sourceIds: readonly string[];
-  readonly vitals: readonly CurriculumVital[];
-  readonly ecg: CurriculumEcg;
-}
-interface CurriculumApi {
-  readonly version: number;
-  readonly sessionSize: number;
-  readonly cases: readonly CurriculumItem[];
-  readonly questions: readonly CurriculumItem[];
-}
-interface ModelApi {
-  readonly ALL_MODES: readonly string[];
-}
-
 interface BankItem {
   readonly id: string;
   readonly section: "case" | "quiz";
@@ -59,8 +36,8 @@ interface BankItem {
   readonly feedback: string;
   readonly objectiveIds: readonly string[];
   readonly sourceIds: readonly string[];
-  readonly vitals: readonly CurriculumVital[];
-  readonly ecg: CurriculumEcg;
+  readonly vitals: readonly BankVital[];
+  readonly ecg: BankEcg;
 }
 interface BankFile {
   readonly version: number;
@@ -69,52 +46,6 @@ interface BankFile {
   readonly items: readonly BankItem[];
 }
 
-/** Vendor betiklerini `tests/sim-pulse/patterns-14-23.test.ts` ile aynı desende yükler. */
-function runVendorFunction(path: string): (env: Record<string, unknown>) => void {
-  const source = readFileSync(path, "utf8").replace("export default function run", "return function run");
-  return new Function("module", source)(undefined) as (env: Record<string, unknown>) => void;
-}
-
-const win: Record<string, unknown> = {};
-runVendorFunction(`${VENDOR}/model.js`)({ window: win });
-runVendorFunction(`${VENDOR}/curriculum.js`)({ window: win });
-const curriculum = win["PulseCurriculum"] as CurriculumApi;
-const model = win["CardAIModel"] as ModelApi;
-
-/** Dışa aktarma betiğinin (`tools/export-bank.mjs`) projeksiyonunun bağımsız kopyası. */
-function projectItem(item: CurriculumItem, section: "case" | "quiz"): BankItem {
-  return {
-    id: item.id,
-    section,
-    mode: item.mode,
-    stem: item.stem,
-    question: item.question,
-    options: [...item.options],
-    correct: item.correct,
-    explanations: [...item.explanations],
-    feedback: item.feedback,
-    objectiveIds: [...item.objectiveIds],
-    sourceIds: [...item.sourceIds],
-    vitals: item.vitals.map(({ k, v }) => ({ k, v })),
-    ecg: {
-      mode: item.ecg.mode,
-      options: { ...item.ecg.options },
-      leads: [...item.ecg.leads],
-      start: item.ecg.start,
-      seconds: item.ecg.seconds,
-    },
-  };
-}
-
-function projectBank(source: CurriculumApi): BankFile {
-  const items = [
-    ...source.cases.map((item) => projectItem(item, "case")),
-    ...source.questions.map((item) => projectItem(item, "quiz")),
-  ];
-  return { version: source.version, sessionSize: source.sessionSize, count: items.length, items };
-}
-
-const projected = projectBank(curriculum);
 const bankText = readFileSync(BANK_FILE, "utf8");
 const bankFile = JSON.parse(bankText) as BankFile;
 
@@ -123,7 +54,7 @@ const newToken = () => `tok_${(counter++).toString(36).padStart(10, "0")}`;
 const random = () => 0.42;
 
 function itemAt(index: number): BankItem {
-  const item = projected.items[index];
+  const item = bankFile.items[index];
   if (item === undefined) throw new Error(`madde yok: ${index}`);
   return item;
 }
@@ -140,41 +71,72 @@ function differentIndex(item: BankItem): number {
   return index;
 }
 
-describe("JSON senkronu (tek doğruluk kaynağı vendor/curriculum.js)", () => {
-  it("items.json çalışan müfredattan birebir üretilir (bayt düzeyinde determinist)", () => {
-    expect(bankFile).toEqual(projected);
-    expect(bankText).toBe(`${JSON.stringify(projected, null, 2)}\n`);
-  });
-
+describe("banka bütünlüğü (tek doğruluk kaynağı data/pulse/items.json)", () => {
   it("600 madde: 300 vaka + 300 değerlendirme; kimlikler benzersiz ve artan", () => {
     expect(bankFile.count).toBe(600);
-    expect(projected.items.filter((item) => item.section === "case")).toHaveLength(300);
-    expect(projected.items.filter((item) => item.section === "quiz")).toHaveLength(300);
-    const ids = projected.items.map((item) => item.id);
+    expect(bankFile.items).toHaveLength(600);
+    const cases = bankFile.items.filter((item) => item.section === "case");
+    const quiz = bankFile.items.filter((item) => item.section === "quiz");
+    expect(cases).toHaveLength(300);
+    expect(quiz).toHaveLength(300);
+    expect(cases.map((item) => item.id)).toEqual(
+      Array.from({ length: 300 }, (_, index) => `C${String(index + 1).padStart(3, "0")}`),
+    );
+    expect(quiz.map((item) => item.id)).toEqual(
+      Array.from({ length: 300 }, (_, index) => `Q${String(index + 1).padStart(3, "0")}`),
+    );
+    const ids = bankFile.items.map((item) => item.id);
     expect(new Set(ids).size).toBe(ids.length);
-    expect(ids.slice(0, 3)).toEqual(["C001", "C002", "C003"]);
     expect(pulse.caseById("C001")).toBeDefined();
     expect(pulse.caseById("Q300")).toBeDefined();
     expect(pulse.caseById("C999")).toBeUndefined();
   });
 
-  it("banka sürümü ve oturum boyutu müfredatla aynı", () => {
-    expect(pulse.BANK_VERSION).toBe(curriculum.version);
-    expect(pulse.SESSION_SIZE).toBe(curriculum.sessionSize);
-    expect(pulse.SESSION_CASE_COUNT).toBe(curriculum.sessionSize);
+  it("her madde zorunlu alanları, beş benzersiz seçeneği ve beş gerekçeyi taşır", () => {
+    for (const item of bankFile.items) {
+      const prefix = item.section === "case" ? "C" : "Q";
+      expect(item.id, item.id).toMatch(new RegExp(`^${prefix}\\d{3}$`));
+      expect(PULSE_ECG_MODES, item.id).toContain(item.mode);
+      for (const value of [item.stem, item.question, item.feedback]) {
+        expect(value.trim().length, item.id).toBeGreaterThan(0);
+      }
+      expect(item.options, item.id).toHaveLength(5);
+      expect(item.options.every((option) => option.trim().length > 0), item.id).toBe(true);
+      expect(new Set(item.options).size, item.id).toBe(5);
+      expect(item.explanations, item.id).toHaveLength(5);
+      expect(item.explanations.every((explanation) => explanation.trim().length > 0), item.id).toBe(true);
+      expect(new Set(item.explanations).size, item.id).toBeGreaterThan(1);
+      expect(Number.isInteger(item.correct) && item.correct >= 0 && item.correct < 5, item.id).toBe(true);
+      expect(item.objectiveIds.length > 0 && item.objectiveIds.every((id) => /^O[1-6]$/.test(id)), item.id).toBe(true);
+      expect(item.sourceIds.length > 0 && item.sourceIds.every((id) => id.trim().length > 0), item.id).toBe(true);
+      expect(item.vitals.length, item.id).toBeGreaterThan(0);
+      expect(item.vitals.every(({ k, v }) => k.trim().length > 0 && v.trim().length > 0), item.id).toBe(true);
+      expect(item.ecg.mode, item.id).toBe(item.mode);
+      expect(item.ecg.leads, item.id).toHaveLength(3);
+      expect(item.ecg.leads.every((lead) => (PULSE_ECG_LEADS as readonly string[]).includes(lead)), item.id).toBe(true);
+      expect(Number.isFinite(item.ecg.start) && item.ecg.start >= 0, item.id).toBe(true);
+      expect(Number.isFinite(item.ecg.seconds) && item.ecg.seconds > 0, item.id).toBe(true);
+    }
   });
 
-  it("sözleşmedeki EKG mod listesi motorun ALL_MODES'u ile birebir aynı", () => {
-    expect([...PULSE_ECG_MODES]).toEqual([...model.ALL_MODES]);
+  it("banka sürümü ve oturum boyutu dosyayla tutarlıdır", () => {
+    expect(pulse.BANK_VERSION).toBe(bankFile.version);
+    expect(pulse.SESSION_SIZE).toBe(bankFile.sessionSize);
+    expect(pulse.SESSION_CASE_COUNT).toBe(bankFile.sessionSize);
+    expect(bankFile.sessionSize).toBeGreaterThan(0);
+  });
+
+  it("sözleşmedeki EKG mod listesi bankadaki 23 paterni kapsar", () => {
     expect(PULSE_ECG_MODES).toHaveLength(23);
+    expect([...new Set(bankFile.items.map((item) => item.mode))].sort()).toEqual([...PULSE_ECG_MODES].sort());
   });
 });
 
 describe("anahtarsız projeksiyon — sızıntı taraması", () => {
   for (const mode of ["practice", "assessment"] as const) {
     it(`${mode}: 20 maddede sözleşmeye uyar ve anahtar sızdırmaz`, () => {
-      const stride = Math.max(1, Math.floor(projected.items.length / 20));
-      const sample = projected.items.filter((_, index) => index % stride === 0).slice(0, 20);
+      const stride = Math.max(1, Math.floor(bankFile.items.length / 20));
+      const sample = bankFile.items.filter((_, index) => index % stride === 0).slice(0, 20);
       expect(sample).toHaveLength(20);
       for (const item of sample) {
         const { publicCase, keys } = pulse.buildPublicCase(item, { index: 1, mode, openedAt: OPENED_AT, newToken, random });
@@ -316,5 +278,9 @@ describe("vaka seçimi ve envanter", () => {
     }
     expect(total).toBe(600);
     expect(JSON.stringify(inventory)).not.toMatch(/[CQ]\d{3}|correct|feedback/);
+  });
+
+  it("banka dosyası yalnız veriyi taşır; müfredat senkronuna bağlı değildir", () => {
+    expect(bankText).not.toMatch(/curriculum|export-bank/);
   });
 });
