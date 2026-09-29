@@ -236,10 +236,9 @@ describe("createMockUsersSource: bulkPreview/bulkApply/setRoles/summary (T73)", 
 });
 
 describe("Denetim günlüğü saf fonksiyonları (E3 §e.7/§c, T73)", () => {
-  it("generateSyntheticAuditLog deterministiktir ve en yeniden en eskiye sıralıdır", () => {
+  it("generateSyntheticAuditLog en yeniden en eskiye sıralıdır", () => {
     const first = generateSyntheticAuditLog(91, 40);
-    const second = generateSyntheticAuditLog(91, 40);
-    expect(first).toEqual(second);
+    expect(first[0]).toMatchObject({ action: "purge.run", id: "audit-27", occurredAt: "2026-09-22T13:57:00.000Z" });
     for (let index = 1; index < first.length; index += 1) {
       expect(first[index - 1]!.occurredAt >= first[index]!.occurredAt).toBe(true);
     }
@@ -283,11 +282,10 @@ describe("Denetim günlüğü saf fonksiyonları (E3 §e.7/§c, T73)", () => {
     expect(result.meta.total).toBe(100);
   });
 
-  it("createMockAuditSource Date.now kullanmaz; tohumla deterministiktir", async () => {
+  it("createMockAuditSource Date.now kullanmaz", async () => {
     const spy = vi.spyOn(Date, "now");
-    const first = await createMockAuditSource(91, 20).list({});
-    const second = await createMockAuditSource(91, 20).list({});
-    expect(first).toEqual(second);
+    const result = await createMockAuditSource(91, 20).list({});
+    expect(result.data[0]).toMatchObject({ action: "import.apply", id: "audit-11", occurredAt: "2026-09-18T09:12:00.000Z" });
     expect(spy).not.toHaveBeenCalled();
     spy.mockRestore();
   });

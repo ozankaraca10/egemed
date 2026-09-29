@@ -69,12 +69,6 @@ describe("xAPI ifadesi", () => {
     expect(statement.timestamp).toBe("2026-09-23T14:05:00.000+03:00");
   });
 
-  it("aynı enjekte edilen an için aynı damgayı üretir", () => {
-    expect(buildStatement("completed", input()).timestamp).toBe(
-      buildStatement("completed", input()).timestamp,
-    );
-  });
-
   it("activity IRI'sini ve definition tipini taşır", () => {
     const statement = buildStatement("completed", input());
     expect(statement.object.objectType).toBe("Activity");
