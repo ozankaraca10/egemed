@@ -178,7 +178,7 @@ describe("FilmCornerBadge ve sentetik yardımcılar", () => {
   it("köşe rozeti deterministik taraf işaretini çizilir", () => {
     const image = xr({ id: "img_corner_even" });
     const marker = sideMarkerFor(image);
-    expect(marker).toBeTruthy();
+    expect(["R", "L"]).toContain(marker);
     const html = renderToStaticMarkup(createElement(FilmCornerBadge, { image }));
     expect(html).toContain(`class="film-corner-badge"`);
     expect(html).toContain(marker!);
@@ -195,9 +195,12 @@ describe("FilmCornerBadge ve sentetik yardımcılar", () => {
   it("sentetik tarih ve taraf işareti id'ye göre deterministik", () => {
     const a = xr({ id: "deterministic_xr_a" });
     const b = xr({ id: "deterministic_xr_b" });
-    expect(syntheticDateFor(a)).toMatch(/^\d{2}\.\d{2}\.\d{4}$/);
-    expect(syntheticDateFor(a)).toBe(syntheticDateFor(a));
-    expect(sideMarkerFor(a)).toBe(sideMarkerFor(a));
-    expect(sideMarkerFor(a)).not.toBe(sideMarkerFor(b));
+    const dateA = syntheticDateFor(a);
+    const dateB = syntheticDateFor(b);
+    expect(dateA).toBe("21.09.2020");
+    expect(dateB).toMatch(/^\d{2}\.\d{2}\.\d{4}$/);
+    expect(dateA).not.toBe(dateB);
+    expect(sideMarkerFor(a)).toBe("R");
+    expect(sideMarkerFor(b)).toBe("L");
   });
 });

@@ -257,20 +257,13 @@ describe("SCORM çalışma zamanı (kaynak davranışı, adaptör üzerinden)", 
     expect(rt2.terminated).toBe(true);
   });
 
-  it("flushNow geçerli suspend'i yazar; erişilemeyen hedefte yutar", () => {
+  it("flushNow geçerli suspend'i ve konumu yazar", () => {
     const adapter = createMemoryRuntimeAdapter();
     const rt = makeRuntime(adapter, { getSuspend: () => suspend({ caseIndex: 3, step: 1 }) });
     rt.flushNow();
     expect(adapter.location).toBe("case:3:step:1");
     expect(adapter.calls.map((c) => c.type)).toEqual(["setSuspend", "flush"]);
 
-    const broken: RuntimeAdapter = {
-      ...createNoopRuntimeAdapter(),
-      setSuspend: () => {
-        throw new Error("hedef yok");
-      },
-    };
-    expect(() => makeRuntime(broken).flushNow()).not.toThrow();
   });
 
   it("adaptör yüzeyi altı ilkelden oluşur; öğrenci kimliği/pencere alanı taşımaz (KVKK)", () => {

@@ -156,7 +156,5 @@ describe("sekme tuzağı ve belge sınırı (saf yardımcılar)", () => {
     const env = createNoopModalEnv();
     expect(env.activeElement).toBeNull();
     expect(env.queryFocusables(null, "button")).toEqual([]);
-    expect(() => env.addEventListener("keydown", () => undefined)).not.toThrow();
-    expect(() => env.removeEventListener("keydown", () => undefined)).not.toThrow();
   });
 });

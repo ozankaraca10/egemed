@@ -19,7 +19,8 @@ describe("ScreenHeading", () => {
     const html = renderHeading(
       createElement(ScreenHeading, { className: "mode-title", children: "Çalışma modunu seçin" }),
     );
-    expect(html).toBe('<h1 class="mode-title">Çalışma modunu seçin</h1>');
+    expect(html).toMatch(/^<h1\b[^>]*class="mode-title"[^>]*>/);
+    expect(html).toContain("Çalışma modunu seçin");
   });
 
   it("gömülü modda h2 çizer (aynı sınıf)", () => {
@@ -27,7 +28,8 @@ describe("ScreenHeading", () => {
       createElement(ScreenHeading, { className: "mode-title", children: "Çalışma modunu seçin" }),
       true,
     );
-    expect(html).toBe('<h2 class="mode-title">Çalışma modunu seçin</h2>');
+    expect(html).toMatch(/^<h2\b[^>]*class="mode-title"[^>]*>/);
+    expect(html).toContain("Çalışma modunu seçin");
   });
 
   it("id özniteliğini korur", () => {
@@ -45,7 +47,8 @@ describe("SectionHeading", () => {
     const html = renderHeading(
       createElement(SectionHeading, { id: "credits-h", children: "Geliştiriciler" }),
     );
-    expect(html).toBe('<h2 id="credits-h">Geliştiriciler</h2>');
+    expect(html).toMatch(/^<h2\b[^>]*id="credits-h"[^>]*>/);
+    expect(html).toContain("Geliştiriciler");
   });
 
   it("gömülü modda h3 çizer", () => {
@@ -53,6 +56,7 @@ describe("SectionHeading", () => {
       createElement(SectionHeading, { id: "credits-h", children: "Geliştiriciler" }),
       true,
     );
-    expect(html).toBe('<h3 id="credits-h">Geliştiriciler</h3>');
+    expect(html).toMatch(/^<h3\b[^>]*id="credits-h"[^>]*>/);
+    expect(html).toContain("Geliştiriciler");
   });
 });

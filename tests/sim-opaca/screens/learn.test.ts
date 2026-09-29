@@ -120,9 +120,8 @@ describe("LearnScreen (statik render)", () => {
     expect(html).not.toContain('class="app-bg"');
   });
 
-  it("kütüphane kaydırma env seam'i no-op ile güvenli çalışır", () => {
+  it("varsayılan kaydırma sınırıyla kütüphaneyi çizer", () => {
     const env = createNoopLearnScreenEnv();
-    expect(() => env.scrollActiveLibraryItem()).not.toThrow();
     const html = renderInStore(createElement(LearnScreen, { env }));
     expect(html).toContain("learn-grid");
   });

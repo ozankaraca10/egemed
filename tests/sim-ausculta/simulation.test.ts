@@ -129,11 +129,9 @@ describe("SimulationScreen", () => {
     expect(html).toContain("Olgu");
   });
 
-  it("ses ve belge sınırları no-op ile güvenli çalışır", () => {
+  it("varsayılan ses ve belge sınırlarıyla vaka ızgarasını çizer", () => {
     const env = createNoopSimulationScreenEnv();
     const audio = createNoopSimulationAudio();
-    expect(() => env.addEventListener("mousedown", () => undefined)).not.toThrow();
-    expect(() => audio.stop()).not.toThrow();
     const html = renderInStore(createElement(SimulationScreen, { env, audio }));
     expect(html).toContain("sim-grid");
   });

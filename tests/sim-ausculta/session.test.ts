@@ -2,6 +2,7 @@ import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { EXTERNAL_RECORDS, RECORDS, SESSION_SIZE, resolveAssignment, resolveAssignmentEx, sampleSession, shuffledOptions, validateCase } from "../../packages/sim-ausculta/src/index";
 import { poolFor } from "./bank-cases";
+import type { CaseDef } from "../../packages/sim-ausculta/src/index";
 
 /** Kaynak tests/core.test.ts:417-506 (12 test → 12 test). */
 
@@ -21,7 +22,11 @@ describe("oturum örnekleme (rastgele 10 vaka)", () => {
     expect(sampleSession(assessment, 7).length).toBe(SESSION_SIZE);
   });
   it("aynı tohum aynı örneklemi üretir (deterministik / SCORM uyumlu)", () => {
-    expect(sampleSession(pool, 123)).toEqual(sampleSession(pool, 123));
+    const fixture = Array.from({ length: 12 }, (_, i) => ({
+      id: `a${i}`,
+      primaryAcousticFinding: ["normal", "s3", "wheezing"][i % 3],
+    })) as CaseDef[];
+    expect(sampleSession(fixture, 123)).toEqual(["a8", "a9", "a1", "a7", "a2", "a5", "a10", "a0", "a4", "a6"]);
   });
   it("farklı tohumlar farklı örneklem üretir (her oturum farklı)", () => {
     const a = sampleSession(pool, 1).join(",");
@@ -77,13 +82,8 @@ describe("soru seçenek karıştırma (K1)", () => {
   const poolAll = [...poolFor("practice"), ...poolFor("assessment")];
 
   it("aynı vaka+soru tohumu aynı sırayı üretir (deterministik)", () => {
-    const c = poolAll.find((x) => x.questions.length > 0);
-    if (!c) throw new Error("sorulu vaka yok");
-    const q = c.questions[0];
-    if (!q) throw new Error("soru yok");
-    const a = shuffledOptions(c.id, q.id, q.options).map((o) => o.id);
-    const b = shuffledOptions(c.id, q.id, q.options).map((o) => o.id);
-    expect(a).toEqual(b);
+    const options = ["a", "b", "c", "d"].map((id) => ({ id }));
+    expect(shuffledOptions("x", "q", options).map((option) => option.id)).toEqual(["a", "c", "d", "b"]);
   });
 
   it('doğru yanıt konumu havuz genelinde tek bir seçeneğe (ör. "a") yığılmaz', () => {

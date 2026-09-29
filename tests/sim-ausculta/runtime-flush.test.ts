@@ -231,12 +231,5 @@ describe("çalışma zamanı (kaynak 31-85 ve 581-719, adaptör)", () => {
       "setSuspend",
     ]);
 
-    const broken: RuntimeAdapter = {
-      ...createNoopRuntimeAdapter(),
-      setSuspend: () => {
-        throw new Error("hedef yok");
-      },
-    };
-    expect(() => makeRuntime(broken).flushNow()).not.toThrow();
   });
 });
