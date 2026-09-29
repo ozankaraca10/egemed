@@ -23,6 +23,7 @@ import {
   libraryExampleCount,
   libraryExamples,
   parseOpened,
+  zonesForImage,
 } from "../../../packages/sim-opaca/src/index";
 import type { StoragePort, WindowLike } from "../../../packages/sim-opaca/src/index";
 import { fakeSessions } from "../session-fixture";
@@ -153,6 +154,19 @@ describe("öğrenme tamamlanabilirliği", () => {
     const examples = libraryExamples(topic);
     expect(examples.map((image) => image.id)).toEqual(["commons_coin_lat", "commons_hiatal_lat", "commons_normal_lat"]);
     expect(libraryExampleCount(topic)).toBe(3);
+  });
+
+  it("Temel okuma konuları yalnız okuma bölgesi tanımlı görüntüleri gösterir ve sayar", () => {
+    const topics = LIBRARY_ITEMS.filter((item) => item.group === "technique");
+    expect(topics.length).toBeGreaterThan(0);
+    for (const topic of topics) {
+      const examples = libraryExamples(topic);
+      expect(examples.length, `${topic.key}: örnek`).toBeGreaterThan(0);
+      expect(examples.filter((image) => zonesForImage(image.id) === null).map((image) => image.id), topic.key).toEqual([]);
+    }
+    const projection = topics.find((item) => item.key === "technique.projection");
+    const projectionIds = projection ? libraryExamples(projection).map((image) => image.id) : [];
+    expect(projectionIds).not.toContain("commons_clavicle_fx");
   });
 });
 

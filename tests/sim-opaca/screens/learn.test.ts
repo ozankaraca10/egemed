@@ -95,10 +95,10 @@ describe("LearnScreen (statik render)", () => {
     }
   });
 
-  it("bölgesiz varsayılan görüntüde ABCDE rehberi yerine açıklama notunu çizer", () => {
+  it("Temel okuma varsayılan görüntüsü bölgelidir: not yerine ABCDE rehberini çizer", () => {
     const html = renderInStore(createElement(LearnScreen));
-    expect(html).not.toContain('aria-label="Sistematik okuma bölgeleri"');
-    expect(html).toContain("Bu görüntü için okuma bölgesi tanımlı değil.");
+    expect(html).toContain('aria-label="Sistematik okuma bölgeleri"');
+    expect(html).not.toContain("Bu görüntü için okuma bölgesi tanımlı değil.");
   });
 
   it("film paneli, örnek navigasyonu ve konu kartını çizer", () => {
