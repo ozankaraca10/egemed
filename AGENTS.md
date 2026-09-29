@@ -80,6 +80,15 @@ Güçlü başarı ölçütleri bağımsız döngü kurmanı sağlar. Zayıf öl�
 
 **Bu ilkeler işe yarıyorsa:** diff'lerde gereksiz değişiklik azalır, aşırı karmaşıklık yüzünden yeniden yazma azalır ve açıklayıcı sorular hatalardan sonra değil uygulamadan önce gelir.
 
+### 5. Test yazım kapısı
+Yeni bir test ancak şu dört soruyu yanıtlıyorsa eklenir (yanıtlar `summary.md`'de kısaca yazılır):
+1. Hangi gözlemlenebilir davranışı ya da sözleşmeyi koruyor?
+2. Hangi gerçekçi hata bu testi kırar?
+3. Mevcut testler bu hatayı neden yakalamıyor?
+4. Yalnız test için üretim koduna açıklık (export, bayrak, kanca) eklemeyi gerektiriyor mu? Gerektiriyorsa yazma.
+
+Çöp desenler (kapıdan geçmez): hiçbir şey doğrulamayan test; kendini kendisiyle karşılaştıran test; beklenen değeri fikstürden kopyalayan ya da test edilen davranışı sahtesinde yeniden yazan test; metni ya da kaynak kodunu birebir sabitleyen test; aynı senaryoyu her katmanda tekrar eden test. **İstisna — bilinçli tutulan testler:** güvenlik/sızıntı taramaları (üretim çıktısında cevap anahtarı, kaldırılmış istemci puan yolu), API yetki/rol testleri, sözleşme ve şema testleri, tıbbi veri doğrulama testleri (kayıt alanları, KVKK, eşleme), migration ve erişilebilirlik testleri; bunlar metin araması yapsa da korunur. Hata düzelten test, düzeltme öncesi kodda kırılmalı.
+
 ### EGEMED uyarlaması
 - **Soru sorma:** Claude belirsizlikte kullanıcıya sorar. DeepSeek, Luna ve Sonnet işçileri etkileşimsiz çalışır ve soramaz — varsayımını ve birden çok yorumu `.egemed-run/summary.md`'ye yazar; riskli ya da geri dönüşsüz bir belirsizlikte o adımı yapmadan raporlar.
 - **Başarı ölçütü:** `pnpm turbo lint typecheck test` ve görevin ilgili e2e testleri (plan dosyasındaki Kabul bölümü).
