@@ -59,8 +59,10 @@ export function scoreCase(
   domains.interpretation = fraction("interpretation", w.interpretation);
   domains.diagnosis = fraction("diagnosis", w.diagnosis);
 
-  // teknik: gerekli bölgelerde yeterli inceleme süresi
-  const { requiredZones, minDwellMs = 800 } = caseDef.technique;
+  // teknik: bu görüntüde tanımlı bölgelerde yeterli inceleme süresi. Bölge yoksa
+  // teknik+sistematik max=0 olur; toplam kalan alanların max'ına bölünerek 100'e normalize edilir.
+  const { minDwellMs = 800 } = caseDef.technique;
+  const requiredZones = zones.map((zone) => zone.id);
   const qualifies = (id: string) => (telemetry.visits[id]?.dwellMs ?? 0) >= minDwellMs;
   const qualifying = requiredZones.filter(qualifies);
   domains.technique =

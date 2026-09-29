@@ -8,9 +8,7 @@ import {
   LIBRARY_ITEMS,
   LearnGateProvider,
   LearnScreen,
-  STEP_TITLES,
   StoreProvider,
-  ZONES,
   createMemoryRuntimeAdapter,
   createNoopLearnScreenEnv,
 } from "../../../packages/sim-opaca/src/index";
@@ -97,16 +95,10 @@ describe("LearnScreen (statik render)", () => {
     }
   });
 
-  it("ABCDE sistematik okuma rehberi bölümlerini çizer", () => {
+  it("bölgesiz varsayılan görüntüde ABCDE rehberi yerine açıklama notunu çizer", () => {
     const html = renderInStore(createElement(LearnScreen));
-    expect(html).toContain('aria-label="Sistematik okuma bölgeleri"');
-    expect(html).toContain("zone-step");
-    for (const step of ["A", "B", "C", "D", "E"] as const) {
-      const zonesForStep = ZONES.filter((z) => z.step === step);
-      if (!zonesForStep.length) continue;
-      expect(html).toContain(`<b>${step}</b>`);
-      expect(html).toContain(STEP_TITLES[step]);
-    }
+    expect(html).not.toContain('aria-label="Sistematik okuma bölgeleri"');
+    expect(html).toContain("Bu görüntü için okuma bölgesi tanımlı değil.");
   });
 
   it("film paneli, örnek navigasyonu ve konu kartını çizer", () => {

@@ -7,7 +7,7 @@ import { canStartMode, challengeLearnLockText } from '../core/learnLock'
 import { libraryExampleCount, libraryExamples } from '../core/examples'
 import { useStore } from '../core/StoreProvider'
 import { isExpertSource } from '../core/images'
-import { ZONES } from '../data/zones'
+import { noZonesReasonForImage, zonesForImage } from '../data/zones'
 import { CASE_INVENTORY } from '../data/inventory'
 import { FIRST_LIBRARY_ITEM } from '../data/library'
 import { isVisitorUnlocked } from '../core/visitorAccess'
@@ -104,6 +104,10 @@ export function LearnScreen({
 
   const examples = useMemo(() => libraryExamples(item), [item])
   const image = examples[exampleIdx] ?? examples[0]
+  const readingZones = useMemo(() => image ? zonesForImage(image.id) : null, [image])
+  const noZonesReason = image ? noZonesReasonForImage(image.id) : null
+
+  useEffect(() => setActiveZones([]), [image?.id])
 
   useEffect(() => {
     if (lastKey.current !== selectedKey) {
@@ -258,8 +262,8 @@ export function LearnScreen({
                   <FilmViewer
                     ref={viewerRef}
                     image={image}
-                    zones={ZONES}
-                    showZones={state.showZones && image.modality !== 'CT'}
+                    zones={readingZones ?? []}
+                    showZones={state.showZones && readingZones !== null}
                     showAnnotations={showExpert && hasExpertBox}
                     annotationFinding={annotationFinding ?? null}
                     onZoneEnter={onZoneEnter}
@@ -282,16 +286,20 @@ export function LearnScreen({
                     <p className="small">Radyolog etiketli filmler için <code>npm run import:nih</code> ya da <code>npm run import:rsna</code> çalıştırın.</p>
                   </div>
                 )}
-                {image?.modality !== 'CT' && (
+                {readingZones ? (
                   <ZoneChips
-                    zones={ZONES}
+                    zones={readingZones}
                     visits={state.telemetry.visits}
                     activeZones={activeZones}
                     minDwellMs={LEARN_DWELL_MS}
                     highlight={item.bestZones}
                     onSelect={(id) => viewerRef.current?.focusZone(id)}
                   />
-                )}
+                ) : image ? (
+                  <p className="note-strip zone-empty-note" role="status">
+                    Bu görüntü için okuma bölgesi tanımlı değil.{noZonesReason ? ` ${noZonesReason}` : ''}
+                  </p>
+                ) : null}
               </div>
             </div>
 

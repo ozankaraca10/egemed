@@ -118,6 +118,22 @@ export const opacaPublicStackSchema = z.strictObject({
   frames: z.array(opaqueTokenSchema).min(1).max(400),
 });
 
+const opacaReadingRectSchema = z.strictObject({
+  x: z.number().min(0).max(1),
+  y: z.number().min(0).max(1),
+  w: z.number().positive().max(1),
+  h: z.number().positive().max(1),
+});
+
+const opacaReadingZoneSchema = z.strictObject({
+  id: z.string().min(1).max(40),
+  step: z.enum(["A", "B", "C", "D", "E"]),
+  label: z.string().min(1).max(80),
+  fullLabel: z.string().min(1).max(120),
+  detail: z.string().min(1).max(400),
+  rects: z.array(opacaReadingRectSchema).min(1).max(8),
+});
+
 /** Opaca görüntüsü: kaynak dosya, bulgu, kalite, çözümleme metni ve adres GİTMEZ. */
 export const opacaPublicImageSchema = z.strictObject({
   token: opaqueTokenSchema,
@@ -125,6 +141,9 @@ export const opacaPublicImageSchema = z.strictObject({
   height: z.number().int().min(1).max(10000),
   modality: z.enum(["XR", "CT"]),
   bodyPart: z.enum(["toraks", "boyun"]),
+  /** Görüntünün kendi ABCDE bölgeleri; bölgesiz görüntüde boş dizi. */
+  readingZones: z.array(opacaReadingZoneSchema).max(20),
+  noZonesReason: z.string().min(1).max(300).nullable(),
   stack: z.array(opacaPublicStackSchema).max(2).optional(),
 });
 

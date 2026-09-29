@@ -26,6 +26,15 @@ export function publicCase(index = 1, overrides: Partial<OpacaPublicCase> = {}):
       height: 1024,
       modality: "XR",
       bodyPart: "toraks",
+      readingZones: [{
+        id: "a_trachea",
+        step: "A",
+        label: "Trakea",
+        fullLabel: "Trakea ve karina",
+        detail: "Trakeayı değerlendirin.",
+        rects: [{ x: 0.45, y: 0.05, w: 0.1, h: 0.3 }],
+      }],
+      noZonesReason: null,
     },
     questions: [
       {
@@ -55,6 +64,8 @@ export function publicCaseWithStack(index = 2): OpacaPublicCase {
       height: 512,
       modality: "CT",
       bodyPart: "toraks",
+      readingZones: [],
+      noZonesReason: "BT kesitlerinde ABCDE bölge katmanı kullanılmaz.",
       stack: [
         { window: "lung", label: "Akciğer", frames: [`frame-a-${index}`, `frame-b-${index}`] },
         { window: "mediastinum", frames: [`frame-c-${index}`] },

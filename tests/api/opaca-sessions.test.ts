@@ -7,7 +7,7 @@ import {
   type SimTelemetry,
 } from "../../packages/contracts/src/index";
 import { opaca } from "../../packages/assessment-bank/src/index";
-import { imageById, ZONES } from "../../packages/assessment-bank/src/opaca/data";
+import { imageById, zonesForImage } from "../../packages/assessment-bank/src/opaca/data";
 import { encodeOpacaSummary } from "../../packages/gami-catalogs/src/index";
 import { ALI, ALI_ID, DEFAULT_USERS, FIXED_NOW, INSTITUTION_ID, createAdminHarness, login, type AdminHarness, type Login } from "./admin-harness";
 
@@ -248,8 +248,9 @@ describe("Opaca sunucu vaka oturumu (A2.2)", () => {
 
   /** ABCDE sırasında tüm zorunlu bölgeler yeterince incelenmiş telemetri. */
   function fullTelemetry(caseDef: opaca.CaseDef): SimTelemetry {
-    const step = new Map(ZONES.map((zone) => [zone.id, STEP_ORDER.indexOf(zone.step)]));
-    const order = [...caseDef.technique.requiredZones].sort((a, b) => (step.get(a) ?? 0) - (step.get(b) ?? 0));
+    const zones = zonesForImage(caseDef.imageId) ?? [];
+    const step = new Map(zones.map((zone) => [zone.id, STEP_ORDER.indexOf(zone.step)]));
+    const order = zones.map((zone) => zone.id).sort((a, b) => (step.get(a) ?? 0) - (step.get(b) ?? 0));
     return {
       visits: Object.fromEntries(order.map((id) => [id, { dwellMs: 1500, listenMs: 0, visits: 1, firstOrder: 0 }])),
       order,

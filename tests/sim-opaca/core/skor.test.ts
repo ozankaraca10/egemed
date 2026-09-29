@@ -5,6 +5,7 @@ import {
   encodeMark,
   practiceAdjusted,
   scoreCase,
+  zonesForImage,
 } from "../../../packages/sim-opaca/src/index";
 import type { CaseDef, ImageRecord, Question, ReadingZone, Telemetry, ZoneVisit } from "../../../packages/sim-opaca/src/index";
 
@@ -164,10 +165,22 @@ describe("skor (kaynak davranışı)", () => {
     expect(r.total).toBe(100);
   });
 
-  it("bölge şartı olmayan vakada teknik alanı devre dışı", () => {
-    const r = scoreCase(mkCase({ technique: { requiredZones: [], minDwellMs: 0 } }), allRight, initialTelemetry(), 0, img(), ZONES);
+  it("bölgesiz görüntüde teknik ve sistematik alanları puanlamaz; kalan ağırlıkları 100'e normalize eder", () => {
+    const r = scoreCase(mkCase(), allRight, initialTelemetry(), 0, img(), []);
     expect(r.domains.technique.max).toBe(0);
     expect(r.domains.systematic.max).toBe(0);
+    expect(Object.values(r.domains).reduce((sum, domain) => sum + domain.max, 0)).toBe(85);
+    expect(r.total).toBe(100);
+  });
+
+  it("lateral görüntünün kendi A–E bölgeleriyle sistematik puan verir", () => {
+    const lateral = zonesForImage("commons_normal_lat") ?? [];
+    const order = lateral.map((zone) => zone.id);
+    const r = scoreCase(c, allRight, tele(order), 0, img({ id: "commons_normal_lat", viewPosition: "LAT" }), lateral);
+    expect(new Set(lateral.map((zone) => zone.step))).toEqual(new Set(["A", "B", "C", "D", "E"]));
+    expect(lateral.some((zone) => zone.id === "b_retrosternal")).toBe(true);
+    expect(r.domains.technique.earned).toBe(10);
+    expect(r.domains.systematic.earned).toBe(5);
     expect(r.total).toBe(100);
   });
 

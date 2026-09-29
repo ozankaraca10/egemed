@@ -1,6 +1,7 @@
 import type { LibraryItem } from "../data/terminology";
 import { examplesFor } from "./images";
 import type { ImageRecord } from "./types";
+import { zoneSetForImage } from "../data/zones";
 
 /** Öğrenme kütüphanesi örnek film seçimi (T218: LearnScreen'den taşındı) — saf hesap:
  *  DOM/React yok. Kilit açılabilirliği bu fonksiyonun her öğe için en az bir örnek
@@ -42,13 +43,17 @@ export function libraryExamples(item: LibraryItem): ImageRecord[] {
     }
     return out;
   }
-  if (item.key === "technique.lateral") return examplesFor(null, "LAT").slice(0, 24);
+  if (item.key === "technique.lateral") {
+    return examplesFor(null, undefined, { includePediatric: true }).filter((image) => zoneSetForImage(image.id) === "lateral").slice(0, 24);
+  }
   return topicExamples(item).slice(0, 24);
 }
 
 /** Kütüphane listesindeki "Örnek film sayısı" rozeti (tam sayım, 24 ile sınırlanmaz). */
 export function libraryExampleCount(item: LibraryItem): number {
   if (item.key === "technique.projection") return examplesFor(null, "PA").length + examplesFor(null, "AP").length;
-  if (item.key === "technique.lateral") return examplesFor(null, "LAT").length;
+  if (item.key === "technique.lateral") {
+    return examplesFor(null, undefined, { includePediatric: true }).filter((image) => zoneSetForImage(image.id) === "lateral").length;
+  }
   return topicExamples(item).length;
 }

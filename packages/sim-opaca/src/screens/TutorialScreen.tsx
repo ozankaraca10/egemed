@@ -1,7 +1,7 @@
 import { useMemo, useState, type JSX } from 'react'
 import { useStore } from '../core/StoreProvider'
 import { IMAGES } from '../core/images'
-import { ZONES } from '../data/zones'
+import { zonesForImage } from '../data/zones'
 import { tutorialProgress, type TutorialEvent } from '../core/flow'
 import type { Point } from '../core/geometry'
 import { FilmViewer, createNoopFilmEnv } from '../ui/FilmViewer'
@@ -18,6 +18,7 @@ const STEP_TEXT = [
 ] as const
 
 const demoImage = IMAGES.find((r) => r.validationStatus === 'validated' && r.viewPosition === 'PA') ?? IMAGES[0]
+const demoZones = demoImage ? zonesForImage(demoImage.id) ?? [] : []
 
 export interface TutorialScreenProps {
   /** Platform kabuğu modu: dekorasyon ve footer çizilmez (§7.3). */
@@ -79,8 +80,8 @@ export function TutorialScreen({ embedded = false }: TutorialScreenProps): JSX.E
             <div className={`stage-card film-card tut-stage-col ${progress.allDone ? '' : 'tut-highlight'}`}>
               <FilmViewer
                 image={demoImage}
-                zones={ZONES}
-                showZones
+                zones={demoZones}
+                showZones={demoZones.length > 0}
                 showAnnotations={false}
                 markEnabled
                 mark={mark}
