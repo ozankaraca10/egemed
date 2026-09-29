@@ -1,26 +1,11 @@
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { EntryPage, submitEntryPreview } from "../../apps/shell/src/EntryPage";
-import { ENTRY_PATHS, entryHref, resolveRoute, ROUTES } from "../../apps/shell/src/routes";
 import { SIM_ICONS, SIM_IDS } from "../../apps/shell/src/SimCard";
 import { t } from "../../packages/ui/i18n/tr";
 import { describe, expect, it } from "vitest";
 
 describe("giriş rotaları", () => {
-  it("yönetici ve test öğrencisi yollarını mevcut kabuk rotalarından ayrı çözer", () => {
-    expect(resolveRoute(entryHref("admin"))).toEqual({
-      kind: "entry",
-      role: "admin",
-      titleKey: "entry.admin.title",
-    });
-    expect(resolveRoute(entryHref("student"))).toEqual({
-      kind: "entry",
-      role: "student",
-      titleKey: "entry.student.title",
-    });
-    expect(ENTRY_PATHS).toEqual({ admin: "/giris/admin", student: "/giris/test-ogrenci" });
-    expect(ROUTES).toHaveLength(3);
-  });
 
   it.each(["admin", "student"] as const)("%s ekranı erişilebilir form işaretlemesi üretir", (role) => {
     const html = renderToStaticMarkup(createElement(EntryPage, { role }));

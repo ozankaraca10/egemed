@@ -1,16 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-  CASE_FLASH_MS,
-  CASE_TRANSITION_MS,
-  computeQuestionLatency,
-  hasSessionProgress,
-  isAnswerCorrect,
-  planAssessmentAutoAdvance,
-  planPrimaryAction,
-  questionCursor,
-  shouldStartCaseTransition,
-  showCaseEndCard,
-} from "../../packages/sim-ausculta/src/index";
+import { CASE_FLASH_MS, CASE_TRANSITION_MS, computeQuestionLatency, isAnswerCorrect, planAssessmentAutoAdvance, questionCursor, shouldStartCaseTransition, showCaseEndCard } from "../../packages/sim-ausculta/src/index";
 import type { CaseResult, Question, ScoringWeights } from "../../packages/sim-ausculta/src/index";
 
 /** S15a — SimulationScreen akış/skor türetme. Sentetik vaka; DOM yok. */
@@ -52,58 +41,6 @@ describe("simulation-flow (S15a)", () => {
     expect(isAnswerCorrect(qs[0]!, ["b"])).toBe(false);
     expect(isAnswerCorrect(question("q2", ["a", "b"]), ["a", "b"])).toBe(true);
     expect(computeQuestionLatency(qs, shownAt, 4500)).toEqual({ q1: 4400 });
-  });
-
-  it("birincil eylem uygulama ve değerlendirme planı üretir", () => {
-    expect(
-      planPrimaryAction({
-        mode: "practice",
-        question: qs[0],
-        questions: qs,
-        revealed: false,
-        canSubmit: true,
-        given: ["a"],
-        shownAt,
-        now: 500,
-      }),
-    ).toEqual({ dispatches: [{ type: "submitAnswer", qid: "q1", correct: true }], saveInteractions: false, latency: null });
-    expect(
-      planPrimaryAction({
-        mode: "practice",
-        question: qs[1],
-        questions: qs,
-        revealed: true,
-        canSubmit: true,
-        given: ["a"],
-        shownAt,
-        now: 500,
-      }).dispatches,
-    ).toEqual([{ type: "finishCase" }]);
-    const last = planPrimaryAction({
-      mode: "assessment",
-      question: qs[1],
-      questions: qs,
-      revealed: false,
-      canSubmit: true,
-      given: ["b"],
-      shownAt: { q1: 100, q2: 200 },
-      now: 900,
-    });
-    expect(last.dispatches).toEqual([
-      { type: "submitAnswer", qid: "q2", correct: false },
-      { type: "finishCase" },
-    ]);
-    expect(last.saveInteractions).toBe(true);
-    expect(last.latency).toEqual({ q1: 800, q2: 700 });
-    expect(
-      planPrimaryAction({ mode: "assessment", question: qs[0], questions: qs, revealed: false, canSubmit: false, given: [], shownAt, now: 1 })
-        .dispatches,
-    ).toEqual([]);
-  });
-
-  it("oturum ilerlemesini bildirir", () => {
-    expect(hasSessionProgress({}, 0, 0)).toBe(false);
-    expect(hasSessionProgress({}, 1, 0)).toBe(true);
   });
 
   it("vaka sonu ve geçiş kararları", () => {

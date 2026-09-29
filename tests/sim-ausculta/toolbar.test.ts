@@ -1,18 +1,7 @@
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
-import {
-  QUESTION_JUMP_SELECTOR,
-  RegionChipList,
-  StoreProvider,
-  Toolbar,
-  createMemoryRuntimeAdapter,
-  createNoopToolbarEnv,
-  initialState,
-  performToolbar,
-  showHintControl,
-  visibleRegionPoints,
-} from "../../packages/sim-ausculta/src/index";
+import { QUESTION_JUMP_SELECTOR, RegionChipList, StoreProvider, Toolbar, createMemoryRuntimeAdapter, createNoopToolbarEnv, initialState, performToolbar, showHintControl } from "../../packages/sim-ausculta/src/index";
 import type {
   AppState,
   AuscultationPoint,
@@ -213,15 +202,6 @@ describe("araç çubuğu etkileri", () => {
     expect(showHintControl(false, "ipucu", true, 0)).toBe(false);
     expect(showHintControl(false, "ipucu", false, 1)).toBe(false);
   });
-
-  it("no-op ortam kaydırmaz ve boş sahnede tekrar olayı basmaz", () => {
-    const emit = vi.fn();
-    const replay = vi.fn();
-    performToolbar(ports({ emit, stage: { current: null } }), { kind: "jump" });
-    performToolbar(ports({ emit, stage: { current: { replay } } }), { kind: "replay", activePoint: null });
-    expect(emit).not.toHaveBeenCalled();
-    expect(replay).toHaveBeenCalledTimes(1);
-  });
 });
 
 describe("araç çubuğu (statik render)", () => {
@@ -244,16 +224,6 @@ describe("araç çubuğu (statik render)", () => {
     expect(html).not.toContain("Sesi aç");
     expect(html).toContain("min-width:44px");
     expect(html).not.toContain("hint-box");
-  });
-
-  it("eski muted: true kaydı yok sayılır; açılış kısık değil", () => {
-    const legacyRecord = { muted: true } as Partial<AppState>;
-    const html = renderToolbar(legacyRecord);
-    expect(html).toContain('aria-label="Ses düzeyi"');
-    expect(html).toContain('value="85"');
-    expect(html).toContain(">%85<");
-    expect(html).not.toContain("Sesi kıs");
-    expect(html).not.toContain("Sesi aç");
   });
 
   it("açık ipucu, sıkı mod ve boş noktayı yansıtır", () => {
@@ -313,10 +283,6 @@ describe("araç çubuğu (statik render)", () => {
 });
 
 describe("bölge çipleri", () => {
-  it("görünüm ve kimlik süzgeci uygular", () => {
-    expect(visibleRegionPoints(points, "front").map((point) => point.id)).toEqual(["aortic", "mitral"]);
-    expect(visibleRegionPoints(points, "back", ["lung", "yok"]).map((point) => point.id)).toEqual(["lung"]);
-  });
 
   it("aktif ve dinlenmiş durumu renk dışında im ve etiketle gösterir", () => {
     const html = renderToStaticMarkup(

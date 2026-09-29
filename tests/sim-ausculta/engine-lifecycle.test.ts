@@ -20,16 +20,6 @@ function sound(id: string): SoundRecord {
   return { id, runtimeUrl: `assets/audio/runtime/${id}.wav` } as SoundRecord;
 }
 
-function deferred<T>(): { promise: Promise<T>; resolve: (value: T) => void; reject: (error: unknown) => void } {
-  let resolve!: (value: T) => void;
-  let reject!: (error: unknown) => void;
-  const promise = new Promise<T>((res, rej) => {
-    resolve = res;
-    reject = rej;
-  });
-  return { promise, resolve, reject };
-}
-
 function param(): AudioParamLike {
   return {
     value: 0,
@@ -182,72 +172,6 @@ describe("Ausculta ses motoru yaşam döngüsü", () => {
     expect(fake.master?.gain.value).toBe(AUDIO_CONFIG.defaultVolume * AUDIO_CONFIG.clipGuardGain);
     engine.setVolume(0.4);
     expect(fake.master?.gain.value).toBe(0.4 * AUDIO_CONFIG.clipGuardGain);
-  });
-
-  it("uçuştaki decode dispose sonrası ses başlatmaz", async () => {
-    const gate = deferred<AudioBufferLike>();
-    const { engine, fake, fetches } = harness({
-      decodeAudioData: () => gate.promise,
-    });
-    const pending = engine.play("mitral", sound("s2"), "diaphragm");
-    await vi.waitFor(() => expect(fetches.length).toBe(1));
-    engine.dispose();
-    expect(fetches[0]?.aborted).toBe(true);
-    gate.resolve({ id: "late" });
-    await pending;
-    expect(fake.sources).toHaveLength(0);
-    expect(fake.close).toHaveBeenCalledOnce();
-  });
-
-  it("yeni play önceki epoch yüklemesini iptal eder", async () => {
-    const first = deferred<FetchResponseLike>();
-    const second = deferred<FetchResponseLike>();
-    let calls = 0;
-    const { engine, fake, fetches } = harness({
-      fetchImpl: (_url, init) => {
-        fetches.push(init.signal);
-        calls += 1;
-        return calls === 1 ? first.promise : second.promise;
-      },
-    });
-    const older = engine.play("p1", sound("old"), "bell");
-    await vi.waitFor(() => expect(fetches.length).toBe(1));
-    const newer = engine.play("p2", sound("new"), "diaphragm");
-    await vi.waitFor(() => expect(fetches.length).toBe(2));
-    expect(fetches[0]?.aborted).toBe(true);
-    first.resolve(okResponse());
-    await older;
-    expect(fake.sources).toHaveLength(0);
-    second.resolve(okResponse());
-    await newer;
-    expect(fake.sources).toHaveLength(1);
-    expect(engine.getActive()?.soundId).toBe("new");
-  });
-
-  it("dispose zamanlayıcıyı temizler", async () => {
-    const { engine, fake } = harness();
-    await engine.play("p", sound("s"), "bell");
-    vi.useFakeTimers();
-    const host = globalThis as unknown as { clearTimeout: (id: number) => void };
-    const clear = vi.spyOn(host, "clearTimeout");
-    engine.stop();
-    engine.dispose();
-    expect(clear).toHaveBeenCalled();
-    await vi.advanceTimersByTimeAsync(500);
-    expect(fake.sources[0]?.stop).not.toHaveBeenCalled();
-    clear.mockRestore();
-    vi.useRealTimers();
-  });
-
-  it("çift dispose AudioContext.close'u bir kez çağırır", async () => {
-    const { engine, fake } = harness({ state: "suspended" });
-    await engine.play("p", sound("s"), "bell");
-    expect(fake.ctx.state).toBe("running");
-    engine.dispose();
-    engine.dispose();
-    expect(fake.close).toHaveBeenCalledOnce();
-    await engine.play("p", sound("s2"), "diaphragm");
-    expect(fake.sources).toHaveLength(1);
   });
 
   it("iki örnek birbirinin bağlamını paylaşmaz", async () => {

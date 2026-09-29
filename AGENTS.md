@@ -84,9 +84,9 @@ Güçlü başarı ölçütleri bağımsız döngü kurmanı sağlar. Zayıf öl�
 Yeni test yazmadan ve test denetlemeden önce `docs/agentic/TEST-POLITIKASI.md`'yi uygula (4 soru, çöp desenler, bilinçli tutulan testler).
 
 ### EGEMED uyarlaması
-- **Soru sorma:** Claude belirsizlikte kullanıcıya sorar. DeepSeek, Luna ve Sonnet işçileri etkileşimsiz çalışır ve soramaz — varsayımını ve birden çok yorumu `.egemed-run/summary.md`'ye yazar; riskli ya da geri dönüşsüz bir belirsizlikte o adımı yapmadan raporlar.
+- **Soru sorma:** Claude belirsizlikte kullanıcıya sorar. DeepSeek ve Luna işçileri etkileşimsiz çalışır ve soramaz — varsayımını ve birden çok yorumu `.egemed-run/summary.md`'ye yazar; riskli ya da geri dönüşsüz bir belirsizlikte o adımı yapmadan raporlar.
 - **Başarı ölçütü:** `pnpm turbo lint typecheck test` ve görevin ilgili e2e testleri (plan dosyasındaki Kabul bölümü).
 - **Cerrahi değişiklik ve kapsam:** Plan dosyasındaki kapsam dışına çıkılmaz; kapsam dışı fark edilen sorunlar summary'de raporlanır.
 
 ## Ajanlar ve iş akışı
-Claude Code planlar, işi dağıtır, gözden geçirir, test eder ve merge eder; uygulama işleri (Z1–Z4) OpenCode DeepSeek V4.1 Flash `max` ve Codex Luna 6.0 (`gpt-6-luna`, `xhigh`) ile, gerektiğinde Sonnet 5.5 (`medium`) ile ayrı worktree'lerde yürür; hangi işin kime gideceğine Claude iş başında karar verir, yalnız Z5 işleri Claude yazar. Merge yalnız `scripts/agtx/claude/merge-gated.sh` ile. Ayrıntılar ve süren işler: `docs/agentic/CLAUDE-DEVIR.md`. Codex Astra bağımsız denetim ve ikinci görüş verir; bulgularını raporlar, merge etmez.
+Claude Code planlar, işi dağıtır, gözden geçirir, test eder ve merge eder; uygulama işleri (Z1–Z4) OpenCode DeepSeek V4.1 Flash `max` ve Codex Luna 6.0 (`gpt-6-luna`, `high`) ile ayrı worktree'lerde yürür; hangi işin kime gideceğine Claude iş başında karar verir, yalnız Z5 işleri Claude yazar. Merge yalnız `scripts/agtx/claude/merge-gated.sh` ile. Ayrıntılar ve süren işler: `docs/agentic/CLAUDE-DEVIR.md`. Codex Astra bağımsız denetim ve ikinci görüş verir; bulgularını raporlar, merge etmez.

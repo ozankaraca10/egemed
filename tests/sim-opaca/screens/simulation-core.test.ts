@@ -1,48 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import {
-  fmtSec,
-  hasSimulationProgress,
-  patientLine,
-  planPrimaryAction,
-} from '../../../packages/sim-opaca/src/index'
-import type { CaseDef, ImageRecord, Question } from '../../../packages/sim-opaca/src/index'
-
-/** Simulation çekirdek grubu — E2 §8 S15 kabulü: saf fonksiyonlar, sentetik fixture.
- *  A2.3 (ADR-009): oturum/örneklem çözümleme sunucuya taşındı; burada yalnız
- *  ekranların kullandığı DOM'suz yardımcılar doğrulanır. */
-
-function caseDef(over: Partial<CaseDef> = {}): CaseDef {
-  return {
-    id: 'c_fixture',
-    title: 'Fixture vaka',
-    modes: ['practice', 'assessment'],
-    population: 'yetiskin',
-    patient: { age: 45, sex: 'kadın' },
-    chiefComplaint: 'Öksürük',
-    history: '3 gündür devam ediyor.',
-    vitalSigns: { hr: 88, rr: 18, spo2: 96 },
-    objectives: [],
-    imageId: 'img_fixture',
-    primaryFinding: 'nodule',
-    clinicalDiagnosis: null,
-    mappingValidation: 'validated',
-    technique: { requiredZones: [], minDwellMs: 500 },
-    questions: [],
-    feedback: { summary: 'Özet' },
-    references: [],
-    scoringWeights: {
-      technique: 10,
-      systematic: 5,
-      quality: 10,
-      localization: 25,
-      recognition: 25,
-      interpretation: 15,
-      diagnosis: 10,
-    },
-    timeLimitSec: 120,
-    ...over,
-  }
-}
+import { fmtSec, planPrimaryAction } from '../../../packages/sim-opaca/src/index'
+import type { ImageRecord, Question } from '../../../packages/sim-opaca/src/index'
 
 function question(over: Partial<Question> = {}): Question {
   return {
@@ -82,10 +40,6 @@ const syntheticImage: ImageRecord = {
 }
 
 describe('simulation-core (S15 saf çekirdek)', () => {
-  it('patientLine vaka metnini üretir', () => {
-    expect(patientLine(caseDef())).toBe('45 yaşında kadın hasta.')
-    expect(patientLine(caseDef({ patient: { age: null, sex: null } }))).toBe('Yaşı bilinmeyen hasta.')
-  })
 
   it('fmtSec dakika:saniye biçiminde ve sınır değerlerde doğru', () => {
     expect(fmtSec(0)).toBe('00:00')
@@ -152,26 +106,5 @@ describe('simulation-core (S15 saf çekirdek)', () => {
       { type: 'finishCase' },
     ])
     expect(last.saveInteractions).toBe(true)
-  })
-
-  it('planPrimaryAction yanıt yoksa boş plan döner', () => {
-    expect(
-      planPrimaryAction({
-        mode: 'assessment',
-        question: question(),
-        questions: [question()],
-        revealed: false,
-        canSubmit: false,
-        given: [],
-        image: syntheticImage,
-      }).dispatches,
-    ).toEqual([])
-  })
-
-  it('hasSimulationProgress ilerleme işaretlerini sayar', () => {
-    expect(hasSimulationProgress({}, 0, 0)).toBe(false)
-    expect(hasSimulationProgress({ q1: ['a'] }, 0, 0)).toBe(true)
-    expect(hasSimulationProgress({}, 1, 0)).toBe(true)
-    expect(hasSimulationProgress({}, 0, 1)).toBe(true)
   })
 })

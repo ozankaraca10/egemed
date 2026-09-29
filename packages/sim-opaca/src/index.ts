@@ -334,7 +334,7 @@ export type {
   LibraryItem,
   UcepMapping,
 } from "./data/terminology";
-export { STEP_TITLES, ZONES, ZONE_IDS, zoneById } from "./data/zones";
+export { STEP_TITLES, ZONES, ZONE_IDS, noZonesReasonForImage, zoneById, zoneSetForImage, zonesForImage } from "./data/zones";
 export { StartScreen, createNoopStartScreenEnv } from "./screens/StartScreen";
 export type { StartScreenEnv, StartScreenProps } from "./screens/StartScreen";
 export { ModeCard, ModeSelectScreen, Stepper } from "./screens/ModeSelectScreen";

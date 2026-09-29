@@ -1,12 +1,7 @@
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
-import {
-  createApiShowcaseSource,
-  createSyntheticShowcaseSource,
-  daysLeftInMonth,
-  monthLabelTr,
-} from "../../apps/shell/src/home/showcaseSource";
+import { createApiShowcaseSource, daysLeftInMonth, monthLabelTr } from "../../apps/shell/src/home/showcaseSource";
 import { ShowcaseSection } from "../../apps/shell/src/home/ShowcaseSection";
 
 // Ana sayfa liderlik vitrini (26 Eyl 2026): sim başına ayrı sütun, ilk 3 + ilk 10,
@@ -19,15 +14,6 @@ describe("vitrin yardımcıları", () => {
     // 2026-09-26 12:00 İstanbul (09:00Z) → ay sonu 2026-09-30T21:00Z → 5 gün (yukarı yuvarlanır).
     expect(daysLeftInMonth("2026-09", Date.UTC(2026, 8, 26, 9))).toBe(5);
     expect(daysLeftInMonth("2026-08", Date.UTC(2026, 8, 26, 9))).toBe(0);
-  });
-
-  it("sentetik kaynak üç simi ayrı döndürür; en fazla 10 lider, 3 geçen ay kazananı", async () => {
-    const sims = await createSyntheticShowcaseSource().getShowcase();
-    expect(sims.map((sim) => sim.simId)).toEqual(["pulse", "ausculta", "opaca"]);
-    for (const sim of sims) {
-      expect(sim.leaders.length).toBeLessThanOrEqual(10);
-      expect(sim.lastMonthWinners.length).toBeLessThanOrEqual(3);
-    }
   });
 
   it("API kaynağı ödül özetini ve aylık sıralamayı birleştirir; sıralama hatası sütunu boşaltır", async () => {

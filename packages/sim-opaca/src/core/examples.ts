@@ -1,6 +1,7 @@
 import type { LibraryItem } from "../data/terminology";
 import { examplesFor } from "./images";
 import type { ImageRecord } from "./types";
+import { zoneSetForImage, zonesForImage } from "../data/zones";
 
 /** Öğrenme kütüphanesi örnek film seçimi (T218: LearnScreen'den taşındı) — saf hesap:
  *  DOM/React yok. Kilit açılabilirliği bu fonksiyonun her öğe için en az bir örnek
@@ -28,11 +29,15 @@ function topicExamples(it: LibraryItem): ImageRecord[] {
   return [...all.slice(0, 24 - ctShown.length), ...ctShown, ...all.slice(24 - ctShown.length)];
 }
 
+/** "Temel okuma" (technique grubu) konuları ABCDE okumayı öğretir; okuma bölgesi tanımlı olmayan görüntüler bu grupta gösterilmez. */
+const readable = (item: LibraryItem, list: ImageRecord[]): ImageRecord[] =>
+  item.group === "technique" ? list.filter((image) => zonesForImage(image.id) !== null) : list;
+
 /** Öğrenme ekranının örnek film listesi (en fazla 24); boşsa konu için görüntü yoktur. */
 export function libraryExamples(item: LibraryItem): ImageRecord[] {
   if (item.key === "technique.projection") {
-    const pa = examplesFor(null, "PA");
-    const ap = examplesFor(null, "AP");
+    const pa = readable(item, examplesFor(null, "PA"));
+    const ap = readable(item, examplesFor(null, "AP"));
     const out: ImageRecord[] = [];
     for (let i = 0; i < Math.max(pa.length, ap.length) && out.length < 12; i++) {
       const p = pa[i];
@@ -42,13 +47,17 @@ export function libraryExamples(item: LibraryItem): ImageRecord[] {
     }
     return out;
   }
-  if (item.key === "technique.lateral") return examplesFor(null, "LAT").slice(0, 24);
-  return topicExamples(item).slice(0, 24);
+  if (item.key === "technique.lateral") {
+    return examplesFor(null, undefined, { includePediatric: true }).filter((image) => zoneSetForImage(image.id) === "lateral").slice(0, 24);
+  }
+  return readable(item, topicExamples(item)).slice(0, 24);
 }
 
 /** Kütüphane listesindeki "Örnek film sayısı" rozeti (tam sayım, 24 ile sınırlanmaz). */
 export function libraryExampleCount(item: LibraryItem): number {
-  if (item.key === "technique.projection") return examplesFor(null, "PA").length + examplesFor(null, "AP").length;
-  if (item.key === "technique.lateral") return examplesFor(null, "LAT").length;
-  return topicExamples(item).length;
+  if (item.key === "technique.projection") return readable(item, [...examplesFor(null, "PA"), ...examplesFor(null, "AP")]).length;
+  if (item.key === "technique.lateral") {
+    return examplesFor(null, undefined, { includePediatric: true }).filter((image) => zoneSetForImage(image.id) === "lateral").length;
+  }
+  return readable(item, topicExamples(item)).length;
 }

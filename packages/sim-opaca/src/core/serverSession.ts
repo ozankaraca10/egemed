@@ -1,5 +1,5 @@
 import type { OpacaPublicCase, SimCaseResult, SimSessionMode } from "@egemed/contracts";
-import type { CaseDef, CaseResult, ImageRecord, Question, QuestionType } from "./types";
+import type { CaseDef, CaseResult, ImageRecord, Question, QuestionType, ReadingZone } from "./types";
 import { SESSION_ASSET_PREFIX } from "./images";
 
 /**
@@ -61,6 +61,8 @@ export type ServerClientCase = CaseDef & {
   readonly serverIndex: number;
   /** Görüntüleyicinin kullandığı oturum jetonlu görüntü kaydı (bulgu/işaret katmanı yok). */
   readonly serverImage: ImageRecord;
+  readonly readingZones: ReadingZone[];
+  readonly noZonesReason: string | null;
 };
 
 export function serverCaseId(index: number): string {
@@ -140,12 +142,14 @@ export function toClientCase(
     primaryFinding: "",
     clinicalDiagnosis: null,
     mappingValidation: "validated",
-    technique: { requiredZones: [], minDwellMs: 1, systematicOrder: publicCase.technique.systematicOrder },
+    technique: { requiredZones: publicCase.image.readingZones.map((zone) => zone.id), minDwellMs: 1, systematicOrder: publicCase.technique.systematicOrder },
     questions,
     feedback: { summary: "" },
     references: [],
     serverIndex: publicCase.index,
     serverImage,
+    readingZones: publicCase.image.readingZones.map((zone) => ({ ...zone, rects: zone.rects.map((rect) => ({ ...rect })) })),
+    noZonesReason: publicCase.image.noZonesReason,
   };
 }
 

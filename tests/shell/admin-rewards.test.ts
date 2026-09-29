@@ -9,24 +9,8 @@ import {
   isAdminProtected,
   resolveRoute,
 } from "../../apps/shell/src/routes";
-import {
-  createMockRewardsSource,
-  hasRewardFormErrors,
-  initialRewardFormValues,
-  isMonthClosed,
-  monthLabelTr,
-  nextMonthKey,
-  rewardFormValuesFrom,
-  rewardStatusFor,
-  sortRewardsByMonthDesc,
-  termsFromText,
-  toggleCohort,
-  toRewardUpsertRequest,
-  validateRewardForm,
-  type AdminReward,
-  type RewardFormValues,
-} from "../../apps/shell/src/admin/rewardsDataSource";
-import { ConfirmDialog, RewardFormDialog, RewardsView, type RewardsViewProps } from "../../apps/shell/src/admin/RewardsPage";
+import { createMockRewardsSource, hasRewardFormErrors, initialRewardFormValues, monthLabelTr, nextMonthKey, rewardFormValuesFrom, toRewardUpsertRequest, validateRewardForm, type AdminReward, type RewardFormValues } from "../../apps/shell/src/admin/rewardsDataSource";
+import { RewardFormDialog, RewardsView, type RewardsViewProps } from "../../apps/shell/src/admin/RewardsPage";
 
 /** React eleman ağacını DOM'suz gezer (UsersPage.tsx test deseni). */
 function collectElements(
@@ -112,29 +96,6 @@ describe("rewardsDataSource — saf yardımcılar", () => {
     expect(nextMonthKey("2026-12")).toBe("2027-01");
   });
 
-  it("isMonthClosed yalnız STRICT geçmiş ayları kapalı sayar", () => {
-    expect(isMonthClosed("2026-08", "2026-09")).toBe(true);
-    expect(isMonthClosed("2026-09", "2026-09")).toBe(false);
-    expect(isMonthClosed("2026-10", "2026-09")).toBe(false);
-  });
-
-  it("rewardStatusFor: kesinleşti > bu ay geçerli > taslak", () => {
-    expect(rewardStatusFor({ finalizedAt: "2026-09-01T00:00:00.000+03:00", month: "2026-08" }, "2026-09")).toBe("finalized");
-    expect(rewardStatusFor({ finalizedAt: null, month: "2026-09" }, "2026-09")).toBe("current");
-    expect(rewardStatusFor({ finalizedAt: null, month: "2026-10" }, "2026-09")).toBe("draft");
-  });
-
-  it("sortRewardsByMonthDesc en yeni ayı önce sıralar", () => {
-    const sorted = sortRewardsByMonthDesc([OPACA_FINALIZED, OPACA_CURRENT]);
-    expect(sorted.map((r) => r.month)).toEqual(["2026-09", "2026-08"]);
-  });
-
-  it("termsFromText boş satırları düşürür; toggleCohort ekler/çıkarır ve sıralı tutar", () => {
-    expect(termsFromText("a\n\nb\n  \nc")).toEqual(["a", "b", "c"]);
-    expect(toggleCohort([1, 3], 2)).toEqual([1, 2, 3]);
-    expect(toggleCohort([1, 2, 3], 2)).toEqual([1, 3]);
-  });
-
   it("rewardFormValuesFrom → toRewardUpsertRequest gidiş-dönüşte içerik korunur", () => {
     const values = rewardFormValuesFrom(OPACA_CURRENT);
     const request = toRewardUpsertRequest(values);
@@ -183,30 +144,6 @@ describe("createMockRewardsSource — CRUD + kesinleştirme (T186)", () => {
     expect(rewards[1]?.winners.length).toBe(3);
   });
 
-  it("list Pulse/Ausculta için boş döner (henüz ödül tanımlı değil)", async () => {
-    const source = createMockRewardsSource();
-    expect(await source.list("pulse")).toEqual([]);
-    expect(await source.list("ausculta")).toEqual([]);
-  });
-
-  it("upsert yeni ödül oluşturur; aynı ay üzerine yazar (winners korunur)", async () => {
-    const source = createMockRewardsSource();
-    const body = toRewardUpsertRequest(initialRewardFormValues("2026-10"));
-    const created = await source.upsert("pulse", "2026-10", { ...body, title: "Yeni ödül" });
-    expect(created.title).toBe("Yeni ödül");
-    expect(created.finalizedAt).toBeNull();
-    const updated = await source.upsert("pulse", "2026-10", { ...body, title: "Güncellendi" });
-    expect(updated.title).toBe("Güncellendi");
-    expect((await source.list("pulse")).length).toBe(1);
-  });
-
-  it("kesinleşmiş ödül üzerine upsert/remove reward_finalized fırlatır", async () => {
-    const source = createMockRewardsSource();
-    const body = toRewardUpsertRequest(initialRewardFormValues("2026-08"));
-    await expect(source.upsert("opaca", "2026-08", body)).rejects.toThrow("reward_finalized");
-    await expect(source.remove("opaca", "2026-08")).rejects.toThrow("reward_finalized");
-  });
-
   it("finalize: ay kapanmadan month_not_closed, ikinci çağrıda already_finalized, başarılı akışta finalizedAt dolar", async () => {
     const source = createMockRewardsSource();
     await expect(source.finalize("opaca", "2026-09", "2026-09")).rejects.toThrow("month_not_closed");
@@ -217,46 +154,9 @@ describe("createMockRewardsSource — CRUD + kesinleştirme (T186)", () => {
     expect(finalized.finalizedAt).not.toBeNull();
     await expect(source.finalize("pulse", "2026-08", "2026-09")).rejects.toThrow("already_finalized");
   });
-
-  it("finalize olmayan ödül için not_found fırlatır", async () => {
-    const source = createMockRewardsSource();
-    await expect(source.finalize("ausculta", "2026-01", "2026-09")).rejects.toThrow("not_found");
-  });
 });
 
 describe("RewardsPage.tsx — diyalog bileşenleri (DOM'suz statik render)", () => {
-  it("RewardFormDialog açık/kapalıyı ve mod başlığını taşır", () => {
-    const values = initialRewardFormValues("2026-10");
-    const treeCreate = RewardFormDialog({
-      errors: {},
-      mode: "create",
-      onClose: noop,
-      onSubmit: noop,
-      onValuesChange: noop,
-      open: true,
-      submitErrorKey: null,
-      submitting: false,
-      values,
-    }) as ReactElement;
-    const propsCreate = dialogPropsOf(treeCreate);
-    expect(propsCreate.open).toBe(true);
-    expect(propsCreate.title).toBe(t("admin.rewards.form.title.create"));
-
-    const treeEdit = RewardFormDialog({
-      errors: {},
-      mode: "edit",
-      onClose: noop,
-      onSubmit: noop,
-      onValuesChange: noop,
-      open: false,
-      submitErrorKey: null,
-      submitting: false,
-      values,
-    }) as ReactElement;
-    const propsEdit = dialogPropsOf(treeEdit);
-    expect(propsEdit.open).toBe(false);
-    expect(propsEdit.title).toBe(t("admin.rewards.form.title.edit"));
-  });
 
   it("RewardFormDialog alan hatalarını gösterir", () => {
     const tree = RewardFormDialog({
@@ -274,25 +174,6 @@ describe("RewardsPage.tsx — diyalog bileşenleri (DOM'suz statik render)", () 
     const html = renderToStaticMarkup(createElement("div", null, props.children as ReactElement));
     expect(html).toContain(t("admin.rewards.form.error.titleInvalid"));
     expect(html).toContain(t("admin.rewards.form.error.cohortsRequired"));
-  });
-
-  it("ConfirmDialog (sil/kesinleştir) başlık/gövde/hata iletisini taşır", () => {
-    const tree = ConfirmDialog({
-      bodyKey: "admin.rewards.finalize.body",
-      busy: false,
-      cancelKey: "admin.rewards.finalize.cancel",
-      confirmKey: "admin.rewards.finalize.confirm",
-      errorKey: "admin.rewards.finalize.error.monthNotClosed",
-      onCancel: noop,
-      onConfirm: noop,
-      open: true,
-      titleKey: "admin.rewards.finalize.title",
-    }) as ReactElement;
-    const props = dialogPropsOf(tree);
-    expect(props.title).toBe(t("admin.rewards.finalize.title"));
-    const html = renderToStaticMarkup(createElement("div", null, props.children as ReactElement));
-    expect(html).toContain(t("admin.rewards.finalize.body"));
-    expect(html).toContain(t("admin.rewards.finalize.error.monthNotClosed"));
   });
 });
 

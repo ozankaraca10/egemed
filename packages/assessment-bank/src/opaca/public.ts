@@ -1,5 +1,5 @@
 import type { OpacaPublicCase, SimCaseResult, SimSessionMode, SimTelemetry } from "@egemed/contracts";
-import { ZONES, imageById } from "./data";
+import { imageById, noZonesReasonForImage, zonesForImage } from "./data";
 import { isAnswerCorrect, practiceAdjusted, scoreCase } from "./scoring";
 import type { CaseDef, Question, Telemetry } from "./types";
 
@@ -47,6 +47,7 @@ function shuffled<T>(items: readonly T[], random: () => number): T[] {
 export function buildPublicCase(caseDef: CaseDef, input: BuildCaseInput): { readonly publicCase: OpacaPublicCase; readonly keys: OpacaCaseKeys } {
   const record = imageById(caseDef.imageId);
   if (record === undefined) throw new Error(`opaca görüntü kaydı yok: ${caseDef.imageId}`);
+  const readingZones = zonesForImage(caseDef.imageId) ?? [];
   const images: Record<string, string> = {};
   const imageToken = input.newToken();
   images[imageToken] = record.runtimeUrl;
@@ -94,10 +95,12 @@ export function buildPublicCase(caseDef: CaseDef, input: BuildCaseInput): { read
       height: record.height,
       modality: record.modality ?? "XR",
       bodyPart: record.bodyPart ?? "toraks",
+      readingZones,
+      noZonesReason: noZonesReasonForImage(caseDef.imageId),
       ...(stack === undefined || stack.length === 0 ? {} : { stack }),
     },
     questions,
-    technique: { requiredZoneCount: caseDef.technique.requiredZones.length, systematicOrder: caseDef.technique.systematicOrder === true },
+    technique: { requiredZoneCount: readingZones.length, systematicOrder: caseDef.technique.systematicOrder === true },
     openedAt: input.openedAt,
   };
   return { publicCase, keys: { caseId: caseDef.id, imageId: caseDef.imageId, options, images } };
@@ -145,7 +148,14 @@ export interface GradeInput {
 
 /** Sunucu notlandırması: `scoreCase` (anahtarlı) + soru başına geri bildirim (jetonlu doğru seçenekler). */
 export function gradeCase(caseDef: CaseDef, keys: OpacaCaseKeys, input: GradeInput): SimCaseResult {
-  const result = scoreCase(caseDef, decodeAnswers(keys, input.answers), toTelemetry(input.telemetry), input.hintsUsed, imageById(keys.imageId), [...ZONES]);
+  const result = scoreCase(
+    caseDef,
+    decodeAnswers(keys, input.answers),
+    toTelemetry(input.telemetry),
+    input.hintsUsed,
+    imageById(keys.imageId),
+    zonesForImage(keys.imageId) ?? [],
+  );
   const total = input.mode === "practice" ? practiceAdjusted(result.total, input.hintsUsed) : result.total;
   return {
     index: input.index,

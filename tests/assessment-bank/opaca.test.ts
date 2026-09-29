@@ -7,11 +7,13 @@ import { getImage } from "../../packages/sim-opaca/src/core/images";
 import { encodeMark } from "../../packages/sim-opaca/src/core/geometry";
 import { scoreCase as simScoreCase } from "../../packages/sim-opaca/src/core/scoring";
 import type { CaseResult as ClientCaseResult } from "../../packages/sim-opaca/src/core/types";
-import { ZONES as SIM_ZONES } from "../../packages/sim-opaca/src/data/zones";
+import { zonesForImage as simZonesForImage } from "../../packages/sim-opaca/src/data/zones";
 import { buildAttemptRecord } from "../../packages/sim-opaca/src/gamification/attempt";
 import { TOPIC_BADGE_MATCH } from "../../packages/sim-opaca/src/gamification/stats";
 import { FINDINGS } from "../../packages/sim-opaca/src/data/terminology";
 import { OPACA_LIBRARY_ITEMS, OPACA_TOPIC_MATCH, opacaSessionStats } from "../../packages/assessment-bank/src/opaca/stats";
+import { zonesForImage as bankZonesForImage } from "../../packages/assessment-bank/src/opaca/data";
+import { scoreCase as bankScoreCase } from "../../packages/assessment-bank/src/opaca/scoring";
 import type { CaseDef, ImageRecord, Question } from "../../packages/assessment-bank/src/opaca/types";
 
 // A2.1 (ADR-009): anahtarsız Opaca projeksiyonu hiçbir vakada anahtar/tanı/görüntü
@@ -130,10 +132,11 @@ describe("sunucu notlandırması", () => {
     // Anahtarlı gerçek yanıtlar; istemci jetonlarla gönderir (gradeCase çözer).
     const decoded = Object.fromEntries(caseDef.questions.map((q) => [q.id, [...q.correct]]));
     const tokens = Object.fromEntries(caseDef.questions.map((q) => [q.id, q.correct.map((optionId) => tokenFor(keys, q.id, optionId))]));
-    const visits = Object.fromEntries(caseDef.technique.requiredZones.map((id, index) => [id, { dwellMs: 5000, listenMs: 0, visits: 1, firstOrder: index }]));
-    const order = [...caseDef.technique.requiredZones];
+    const zones = simZonesForImage(caseDef.imageId) ?? [];
+    const order = zones.map((zone) => zone.id);
+    const visits = Object.fromEntries(order.map((id, index) => [id, { dwellMs: 5000, listenMs: 0, visits: 1, firstOrder: index }]));
     const bank = opaca.gradeCase(caseDef, keys, { index: 2, mode: "practice", answers: tokens, telemetry: { ...EMPTY_TELEMETRY, visits, order }, hintsUsed: 0 });
-    const sim = simScoreCase(caseDef, decoded, { visits, order, toolUse: TOOL_USE }, 0, imageFor(caseDef), [...SIM_ZONES]);
+    const sim = simScoreCase(caseDef, decoded, { visits, order, toolUse: TOOL_USE }, 0, imageFor(caseDef), zones);
     expect(bank.total).toBe(sim.total);
     expect(bank.max).toBe(sim.max);
     expect(bank.mastery).toBe(sim.mastery);
@@ -169,8 +172,9 @@ describe("sunucu notlandırması", () => {
           }),
         ]),
       );
-      const visits = Object.fromEntries(def.technique.requiredZones.map((id, index) => [id, { dwellMs: 5000, listenMs: 3000, visits: 1, firstOrder: index }]));
-      const order = [...def.technique.requiredZones];
+      const zones = simZonesForImage(def.imageId) ?? [];
+      const order = zones.map((zone) => zone.id);
+      const visits = Object.fromEntries(order.map((id, index) => [id, { dwellMs: 5000, listenMs: 3000, visits: 1, firstOrder: index }]));
       const bank = opaca.gradeCase(def, keys, {
         index: 1,
         mode: "assessment",
@@ -178,13 +182,39 @@ describe("sunucu notlandırması", () => {
         telemetry: { ...EMPTY_TELEMETRY, visits, order },
         hintsUsed: 0,
       });
-      const sim = simScoreCase(def, decoded, { visits, order, toolUse: TOOL_USE }, 0, imageFor(def), [...SIM_ZONES]);
+      const sim = simScoreCase(def, decoded, { visits, order, toolUse: TOOL_USE }, 0, imageFor(def), zones);
       expect(bank.total, def.id).toBe(sim.total);
       expect(bank.mastery, def.id).toBe(sim.mastery);
       for (const q of def.questions) {
         expect(bank.questions.find((x) => x.questionId === q.id)?.correct, `${def.id}/${q.id}`).toBe(sim.answers.find((x) => x.qid === q.id)?.correct);
       }
     }
+  });
+
+  it("banka lateral görüntünün kendi A–E setini puanlar", () => {
+    const lateral = allCases.find((def) => def.imageId === "commons_hiatal_lat");
+    expect(lateral).toBeDefined();
+    if (!lateral) return;
+    const zones = bankZonesForImage(lateral.imageId) ?? [];
+    const order = zones.map((zone) => zone.id);
+    const visits = Object.fromEntries(order.map((id, index) => [id, { dwellMs: 5000, visits: 1, firstOrder: index }]));
+    const answers = Object.fromEntries(lateral.questions.map((question) => [question.id, realAnswer(lateral, question)]));
+    const result = bankScoreCase(lateral, answers, { visits, order, toolUse: TOOL_USE }, 0, imageFor(lateral), zones);
+    expect(new Set(zones.map((zone) => zone.step))).toEqual(new Set(["A", "B", "C", "D", "E"]));
+    expect(zones.some((zone) => zone.id === "b_retrosternal")).toBe(true);
+    expect(result.domains.technique.earned).toBe(result.domains.technique.max);
+    expect(result.domains.systematic.earned).toBe(result.domains.systematic.max);
+  });
+
+  it("banka bölgesiz görüntüde teknik/sistematik max'ı sıfırlar ve kalan alanları 100'e normalize eder", () => {
+    const noZones = allCases.find((def) => def.imageId === "commons_clavicle_fx");
+    expect(noZones).toBeDefined();
+    if (!noZones) return;
+    const answers = Object.fromEntries(noZones.questions.map((question) => [question.id, realAnswer(noZones, question)]));
+    const result = bankScoreCase(noZones, answers, { visits: {}, order: [], toolUse: TOOL_USE }, 0, imageFor(noZones), []);
+    expect(result.domains.technique.max).toBe(0);
+    expect(result.domains.systematic.max).toBe(0);
+    expect(result.total).toBe(100);
   });
 
   it("yanlış yanıt puanı düşürür; tanınmayan jeton puan getirmez", () => {

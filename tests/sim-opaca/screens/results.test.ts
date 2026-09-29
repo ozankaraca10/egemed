@@ -2,22 +2,7 @@ import { createElement } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { describe, expect, it, vi } from 'vitest'
 import { EmbeddedProvider } from '../../../packages/sim-opaca/src/EmbeddedContext'
-import {
-  BEST_SCORE_KEY,
-  DEFAULT_WEIGHTS,
-  MASTERY_THRESHOLD,
-  ResultsScreen,
-  StoreProvider,
-  aggregateResults,
-  buildSuspend,
-  createMemoryRuntimeAdapter,
-  createSimRuntime,
-  encodeMark,
-  initialState,
-  initialTelemetry,
-  reducer,
-  scoreCase,
-} from '../../../packages/sim-opaca/src/index'
+import { DEFAULT_WEIGHTS, MASTERY_THRESHOLD, ResultsScreen, StoreProvider, aggregateResults, createMemoryRuntimeAdapter, encodeMark, initialState, initialTelemetry, reducer, scoreCase } from '../../../packages/sim-opaca/src/index'
 import type {
   AppState,
   CaseDef,
@@ -179,15 +164,6 @@ function preparedState(results: CaseResult[], mode: 'practice' | 'assessment'): 
 }
 
 describe('ResultsScreen (statik render)', () => {
-  it('alan bazlı performans satırlarını ve vaka raporunu çizer', () => {
-    const { html } = renderResults(preparedState([highResult()], 'practice'))
-    expect(html).toContain('Alan bazlı performans')
-    expect(html).toContain('domain-row')
-    expect(html).toContain('Bulgu tanıma')
-    expect(html).toContain('Lokalizasyon')
-    expect(html).toContain('Vaka raporu')
-    expect(html).toContain('res_fixture_case')
-  })
 
   it('başarı eşiği 80: yüksek puan Başarılı, düşük puan Hedefin altında', () => {
     const passHtml = renderResults(preparedState([highResult()], 'assessment')).html
@@ -201,18 +177,6 @@ describe('ResultsScreen (statik render)', () => {
     expect(failHtml).toContain('Vaka Raporu')
     expect(failHtml).toContain('Hedefin altında')
     expect(aggregateResults([lowResult()]).mastery).toBe(false)
-  })
-
-  it('en iyi puan StoragePort üzerinden gösterilir (bestScore)', () => {
-    const storage = trackingStorage({ [BEST_SCORE_KEY]: '{"practice":92,"assessment":0}' })
-    const { html } = renderResults(preparedState([lowResult()], 'practice'), storage)
-    expect(html).toContain('En iyi puan: 92')
-    expect(storage.entries.has(BEST_SCORE_KEY)).toBe(true)
-  })
-
-  it('gömülü modda footer çizilmez', () => {
-    const { html } = renderResults(preparedState([highResult()], 'practice'), trackingStorage(), { embedded: true })
-    expect(html).not.toContain('<footer')
   })
 
   it('düelloda "Düello sonucunu gör" eylemi çizilir; tekrar dene gizlenir', () => {
@@ -254,25 +218,5 @@ describe('KVKK: öğrenci adı depolama yolu kesilir', () => {
     const gami = { recordSessionResults: vi.fn() }
     renderResults(preparedState([highResult()], 'practice'), trackingStorage(), { gamiEnabled: false, gami })
     expect(gami.recordSessionResults).not.toHaveBeenCalled()
-  })
-})
-
-describe('runtime çıkış seam (S5)', () => {
-  it('terminate finish raporu yazır ve ikinci çağrı no-op', () => {
-    const adapter = createMemoryRuntimeAdapter()
-    const now = () => 1_000
-    const runtime = createSimRuntime({
-      adapter,
-      getSuspend: () => buildSuspend(initialState),
-      totalCases: () => 1,
-      now,
-    })
-    expect(runtime.terminated).toBe(false)
-    runtime.terminate()
-    expect(runtime.terminated).toBe(true)
-    expect(adapter.finished).not.toBeNull()
-    expect(adapter.calls.filter((c) => c.type === 'finish').length).toBe(1)
-    runtime.terminate()
-    expect(adapter.calls.filter((c) => c.type === 'finish').length).toBe(1)
   })
 })

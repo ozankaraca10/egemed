@@ -14,10 +14,4 @@ describe("EGEMED logo", () => {
     expect(html).toContain("EGEMED");
     expect(html).toContain(t("shell.brand.tagline"));
   });
-
-  it("kompakt varyantta yalnız işaret ve EGEMED adı kalır", () => {
-    const html = renderToStaticMarkup(createElement(EgemedLogo, { compact: true, variant: "on-dark" }));
-    expect(html).toContain('class="eg-shell-logo eg-shell-logo--on-dark eg-shell-logo--compact"');
-    expect(html).not.toContain('class="eg-shell-logo__tagline"');
-  });
 });

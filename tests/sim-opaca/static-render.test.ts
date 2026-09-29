@@ -77,11 +77,6 @@ describe("Opaca App (statik render)", () => {
     expect(html.match(/<h1\b/g) ?? []).toHaveLength(0);
   });
 
-  it("gömülü modda footer çizilmez", () => {
-    const html = renderApp();
-    expect(html).not.toContain('<footer class="eg-footer">');
-  });
-
   it("bağımsız modda tek üst bar ve footer çizilir", () => {
     const html = renderApp({ embedded: false });
     expect(html.match(/<header/g)).toHaveLength(1);

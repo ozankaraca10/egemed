@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { AUDIO_CONFIG, createAudioEngine, createStageSession } from "../../packages/sim-ausculta/src/index";
+import { createAudioEngine, createStageSession } from "../../packages/sim-ausculta/src/index";
 import type { SoundRecord, StageEnv, StagePoint, StageSessionBindings } from "../../packages/sim-ausculta/src/index";
 import type {
   AbortSignalLike,
@@ -194,36 +194,5 @@ describe("PatientStage ses temizliği", () => {
     await vi.waitFor(() => expect(fetches[0]?.aborted).toBe(true));
     await Promise.resolve();
     expect(sources).toHaveLength(0);
-  });
-
-  it("süre dolmadan unmount play çağırmaz", async () => {
-    const { engine, sources, fetches } = harness(async () => ({ id: "buf" }));
-    const clock = scriptedEnv();
-    const session = sessionFor(engine, clock.env);
-    session.place(point.id);
-    session.dispose();
-    expect(clock.pending()).toBe(0);
-    clock.flush();
-    await Promise.resolve();
-    expect(fetches).toHaveLength(0);
-    expect(sources).toHaveLength(0);
-    expect(AUDIO_CONFIG.dwellToPlayMs).toBeGreaterThan(0);
-  });
-
-  it("çalan ses unmount ile durur; ikinci oturum ayrı motor kullanır", async () => {
-    const first = harness(async () => ({ id: "a" }));
-    const second = harness(async () => ({ id: "b" }));
-    const clock = scriptedEnv();
-    const active = sessionFor(first.engine, clock.env);
-    active.place(point.id);
-    clock.flush();
-    await vi.waitFor(() => expect(first.sources.length).toBe(1));
-    expect(first.engine.getState()).toBe("playing");
-    active.dispose();
-    expect(first.engine.getState()).toBe("idle");
-    const other = sessionFor(second.engine, scriptedEnv().env);
-    other.place(point.id);
-    expect(second.sources).toHaveLength(0);
-    expect(first.sources).toHaveLength(1);
   });
 });

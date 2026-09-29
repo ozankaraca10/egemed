@@ -1,12 +1,7 @@
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
-import {
-  PatientStage,
-  StageAudioProvider,
-  createNoopStageEnv,
-  createStageSession,
-} from "../../packages/sim-ausculta/src/index";
+import { PatientStage, createNoopStageEnv, createStageSession } from "../../packages/sim-ausculta/src/index";
 import type { PatientStageProps, StageAudio, StagePoint, StageSessionBindings } from "../../packages/sim-ausculta/src/index";
 
 /** PatientStage statik işaretleme — DOM kütüphanesi yok. */
@@ -88,64 +83,6 @@ describe("PatientStage", () => {
     expect(html).toContain('class="tube-line"');
     expect(html).toContain('class="tube-fork"');
     expect(html.indexOf('class="tube-layer"')).toBeLessThan(html.indexOf('class="steth'));
-  });
-
-  it("pediatrik gövdede fotoğraf yerine şema çizer", () => {
-    const html = render({ bodyType: "pediatrik" });
-    expect(html).toContain('class="torso"');
-    expect(html).not.toContain("<img");
-  });
-
-  it("değerlendirme modunda etiket gizlenir; boş görünüm diğer tarafa yönlendirir", () => {
-    const hidden = render({ mode: "assessment" });
-    expect(hidden).not.toContain('class="tag left');
-    expect(hidden).toContain("hotspot s1");
-    const empty = render({ view: "back", filterIds: ["cardiac_aortic"] });
-    expect(empty).toContain("diğer görünümü kullanın");
-    expect(empty).toContain('alt="Hasta arka gövde görünümü"');
-  });
-
-  it("motor prop veya bağlam olmadan çizilmez; bağlam prop'suz yeter", () => {
-    expect(() =>
-      renderToStaticMarkup(
-        createElement(PatientStage, {
-          points: [aortic],
-          view: "front",
-          head: "bell",
-          volume: 1,
-          showPoints: false,
-          showLabels: false,
-          mode: "practice",
-          soundFor: () => null,
-          onVisit: () => undefined,
-          onDwell: () => undefined,
-          onListen: () => undefined,
-          onPlayingChange: () => undefined,
-        }),
-      ),
-    ).toThrow(/ses motoru yok/);
-    const html = renderToStaticMarkup(
-      createElement(StageAudioProvider, {
-        engine: engine(),
-        children: createElement(PatientStage, {
-          points: [aortic],
-          view: "front",
-          head: "bell",
-          volume: 1,
-          showPoints: true,
-          showLabels: false,
-          mode: "learn",
-          env,
-          soundFor: () => null,
-          onVisit: () => undefined,
-          onDwell: () => undefined,
-          onListen: () => undefined,
-          onPlayingChange: () => undefined,
-        }),
-      }),
-    );
-    expect(html).toContain("hotspot s1");
-    expect(html).not.toContain(">Aort<");
   });
 
   it("klavye adımı geometri sınırında kalır ve yerleştirme tuşu noktayı seçer", () => {

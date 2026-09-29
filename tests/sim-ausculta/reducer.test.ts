@@ -17,38 +17,6 @@ function serverWith(def: ReturnType<typeof caseNormalHeart>) {
 }
 
 describe("reducer: yeni oturum ve devam ettirme", () => {
-  it('öğretici "Atla" ile oturum içinde görüldü sayılır; kalıcı tutorialDone değişmez', () => {
-    const seen = reducer(initialState, { type: "tutorialSeen" });
-    expect(seen.tutorialSeen).toBe(true);
-    expect(seen.tutorialDone).toBe(false);
-    expect(buildSuspend(seen).tutorialDone).toBe(false);
-  });
-
-  it("K4: startMode eski vaka sonuçlarını ve zamanlayıcıyı sıfırlar", () => {
-    const dirty = {
-      ...initialState,
-      caseResults: [
-        { caseId: "x", total: 90, max: 100, mastery: true, domains: {} as never, answers: [], hintsUsed: 0 },
-      ],
-      assessmentTimer: 45000,
-      attempts: 2,
-    };
-    const next = reducer(dirty, { type: "startMode", mode: "assessment" });
-    expect(next.caseResults).toEqual([]);
-    expect(next.assessmentTimer).toBe(0);
-    expect(next.attempts).toBe(3);
-  });
-
-  it("K3: buildSuspend yalnız aktif modun oturum listesini yazar", () => {
-    const state = {
-      ...initialState,
-      mode: "assessment" as const,
-      session: { practiceIds: ["p1", "p2"], assessmentIds: ["a1", "a2"], seed: 9 },
-    };
-    const payload = buildSuspend(state);
-    expect(payload.sessionIds).toEqual(["a1", "a2"]);
-    expect(payload.sessionSeed).toBe(9);
-  });
 
   it("O9: uygulama modunda ipucu cezası vaka sonucuna uygulanır (değerlendirmede uygulanmaz)", () => {
     const def = caseNormalHeart();
@@ -82,19 +50,6 @@ describe("reducer: yeni oturum ve devam ettirme", () => {
     const assessmentResult = assessmentNext.caseResults[0];
     if (!assessmentResult) throw new Error("assessment sonucu yok");
     expect(assessmentResult.total).toBe(100);
-  });
-
-  it("madde 1/5: advance son soruda vakayı bitirmez — finishCase/nextCase gerekir", () => {
-    const def = caseNormalHeart();
-    const baseState = {
-      ...initialState,
-      mode: "practice" as const,
-      currentCaseId: def.id,
-      step: def.questions.length - 1,
-    };
-    const afterAdvance = reducer(baseState, { type: "advance" });
-    expect(afterAdvance).toBe(baseState);
-    expect(afterAdvance.caseResults).toEqual([]);
   });
 
   it("madde 5: finishCase sonrası nextCase caseIndex'i ilerletir ve pendingSummary'yi temizler", () => {

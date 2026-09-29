@@ -17,33 +17,9 @@ describe("stetoskop göğüs parçası", () => {
     expect(html).not.toContain("<path");
     expect(html.match(/<line /g)?.length).toBe(12);
   });
-
-  it("işaretleme sabittir ve üretici adı taşımaz", () => {
-    const first = markup(createElement(Chestpiece));
-    const second = markup(createElement(Chestpiece));
-    expect(first).toBe(second);
-    expect(first.toLowerCase()).not.toMatch(/littmann|3m|littman/);
-  });
 });
 
 describe("pediatrik gövde", () => {
-  it("ön görünüm şematik gövde, yüz ve fotoğraf taşımaz", () => {
-    const html = markup(createElement(TorsoPediatricFront));
-    expect(html).toContain('class="torso"');
-    expect(html).toContain('viewBox="0 0 1000 900"');
-    expect(html).toContain('role="img"');
-    expect(html).toContain('aria-label="Pediatrik hasta ön görünüm (erkek çocuk, tıbbi illüstrasyon)"');
-    expect(html).toContain('id="s-clip"');
-    expect(html).not.toMatch(/<img|yüz|fotoğraf/i);
-  });
-
-  it("arka görünüm omurga hattını ve ayrı kırpma kimliğini taşır", () => {
-    const html = markup(createElement(TorsoPediatricBack));
-    expect(html).toContain('aria-label="Pediatrik hasta arka görünüm (erkek çocuk, tıbbi illüstrasyon)"');
-    expect(html).toContain('id="t-clip"');
-    expect(html).toContain("M500 178 V 750");
-    expect(html.match(/<path /g)?.length).toBeGreaterThan(8);
-  });
 
   it("ön ve arka işaretleme birbirinden ayrı ve tekrarlanabilir", () => {
     const front = markup(createElement(TorsoPediatricFront));

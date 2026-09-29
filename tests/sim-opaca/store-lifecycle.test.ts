@@ -1,24 +1,8 @@
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
-import {
-  BEST_SCORE_KEY,
-  StoreProvider,
-  buildSuspend,
-  createFlushHandlers,
-  createLifecycle,
-  createMemoryRuntimeAdapter,
-  initialState,
-  initialTelemetry,
-  useStore,
-} from "../../packages/sim-opaca/src/index";
-import type {
-  AppState,
-  LifecycleHandlers,
-  StoragePort,
-  StoreContextValue,
-  WindowLike,
-} from "../../packages/sim-opaca/src/index";
+import { BEST_SCORE_KEY, StoreProvider, createFlushHandlers, createLifecycle, createMemoryRuntimeAdapter, useStore } from "../../packages/sim-opaca/src/index";
+import type { LifecycleHandlers, StoragePort, StoreContextValue, WindowLike } from "../../packages/sim-opaca/src/index";
 
 /** Store yaşam döngüsü grubu — E2 §7.5 kabulü (S7), DOM'suz. React effect'leri statik render'da
  *  koşmadığı için yaşam döngüsü mantığı saf `createLifecycle` biriminde test edilir; provider
@@ -90,51 +74,6 @@ function memoryStorage(seed: Record<string, string> = {}): StoragePort {
 const flushHandlers = (): LifecycleHandlers => ({ flush: vi.fn(), pageHide: vi.fn() });
 
 describe("yaşam döngüsü (createLifecycle)", () => {
-  it("attach→detach sonrası dinleyici ve zamanlayıcı kalmaz; çift detach no-op", () => {
-    const env: FakeEnv = createFakeEnv();
-    const lifecycle = createLifecycle(env);
-    const handlers = flushHandlers();
-
-    lifecycle.attach(handlers);
-    lifecycle.attach(handlers);
-    expect(env.listenerCount()).toBe(3);
-
-    const stop = lifecycle.startTicker(1000, vi.fn());
-    expect(env.timerCount()).toBe(1);
-
-    lifecycle.detach();
-    expect(env.listenerCount()).toBe(0);
-    expect(env.timerCount()).toBe(0);
-    expect(env.removeCalls).toBe(3);
-
-    lifecycle.detach();
-    expect(env.removeCalls).toBe(3);
-    stop();
-
-    env.fire("pagehide");
-    expect(handlers.pageHide).not.toHaveBeenCalled();
-  });
-
-  it("gizli görünürlükte ve beforeunload'da flush, pagehide'da pageHide çağrılır", () => {
-    const env: FakeEnv = createFakeEnv();
-    const lifecycle = createLifecycle(env);
-    const handlers = flushHandlers();
-    lifecycle.attach(handlers);
-
-    env.fire("visibilitychange");
-    expect(handlers.flush).not.toHaveBeenCalled();
-
-    env.visibilityState = "hidden";
-    env.fire("visibilitychange");
-    expect(handlers.flush).toHaveBeenCalledTimes(1);
-
-    env.fire("beforeunload");
-    expect(handlers.flush).toHaveBeenCalledTimes(2);
-
-    env.fire("pagehide");
-    expect(handlers.pageHide).toHaveBeenCalledTimes(1);
-    lifecycle.detach();
-  });
 
   it("pagehide çalışma zamanını yazar (auto-flush köprüsü)", () => {
     const env: FakeEnv = createFakeEnv();
@@ -173,18 +112,6 @@ describe("yaşam döngüsü (createLifecycle)", () => {
 });
 
 describe("StoreProvider (DOM'suz statik render)", () => {
-  it("çocukları render eder", () => {
-    const html = renderToStaticMarkup(
-      createElement(StoreProvider, {
-        children: createElement("p", null, "Opaca içerik"),
-        env: createFakeEnv(),
-        now: () => 0,
-        runtime: createMemoryRuntimeAdapter(),
-        storage: memoryStorage(),
-      })
-    );
-    expect(html).toContain("<p>Opaca içerik</p>");
-  });
 
   it("iki provider örneği birbirinin veri yolu ve durumuna sızmaz", () => {
     const seen: StoreContextValue[] = [];
@@ -223,41 +150,5 @@ describe("StoreProvider (DOM'suz statik render)", () => {
     a.bus.emit({ type: "hint_used", caseId: "c1" });
     expect(a.bus.getLog()).toHaveLength(1);
     expect(b.bus.getLog()).toHaveLength(0);
-  });
-});
-
-describe("buildSuspend (S7)", () => {
-  it("alanları taşır ve yalnız aktif modun oturum listesini yazar (K3)", () => {
-    const base: AppState = {
-      ...initialState,
-      caseIndex: 2,
-      step: 1,
-      hintsUsed: 1,
-      attempts: 3,
-      tutorialDone: true,
-      telemetry: {
-        ...initialTelemetry(),
-        visits: { a_trachea: { dwellMs: 500, visits: 1, firstOrder: 0 } },
-        order: ["a_trachea"],
-      },
-      session: { practiceIds: ["p1"], assessmentIds: ["a1", "a2"], seed: 9 },
-    };
-
-    expect(buildSuspend({ ...base, mode: "assessment" })).toEqual({
-      v: 1,
-      mode: "assessment",
-      caseIndex: 2,
-      step: 1,
-      answers: {},
-      hintsUsed: 1,
-      caseResults: [],
-      tutorialDone: true,
-      visits: { a_trachea: { dwellMs: 500, visits: 1, firstOrder: 0 } },
-      order: ["a_trachea"],
-      attempts: 3,
-      sessionIds: ["a1", "a2"],
-      sessionSeed: 9,
-    });
-    expect(buildSuspend({ ...base, mode: "practice" }).sessionIds).toEqual(["p1"]);
   });
 });

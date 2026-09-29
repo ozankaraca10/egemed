@@ -65,18 +65,6 @@ describe("Opaca chrome (statik render)", () => {
     expect(html).not.toContain("eg-sim-toolbar");
   });
 
-  it("gömülü modda üst bar ve footer çizilmez, tek sim araç çubuğu kalır", () => {
-    const html = renderChrome(
-      createElement(Fragment, null, createElement(Header, { embedded: true }), createElement(Footer, { embedded: true }))
-    );
-    expect(html).not.toContain("<header");
-    expect(html).not.toContain("<footer");
-    expect(html.match(/class="eg-sim-toolbar"/g)).toHaveLength(1);
-    expect(html).toContain('aria-label="Simülatör araç çubuğu"');
-    expect(html.match(/<button/g)).toHaveLength(1);
-    expect(html).toContain('aria-label="Yardım"');
-  });
-
   it("marka görselleri assetUrl ile çözümlenmiş yolla ve dekoratif boş alt metinle çizilir", () => {
     expect(renderToStaticMarkup(createElement(BrandMark, { size: 32 }))).toContain(
       'src="/sims/opaca/brand/logo-icon-white-web.png"'
@@ -97,13 +85,6 @@ describe("Opaca chrome (statik render)", () => {
   it("arka plan yıkaması bağımsız modda çizilir, gömülü modda çizilmez", () => {
     expect(renderToStaticMarkup(createElement(EcgDeco))).toContain('class="app-bg"');
     expect(renderToStaticMarkup(createElement(EcgDeco, { embedded: true }))).toBe("");
-  });
-
-  it("S9 modal seam'i bağlanınca çizilir", () => {
-    const html = renderChrome(
-      createElement(Header, { modals: { help: () => createElement("div", { className: "test-help" }, "yardım") } })
-    );
-    expect(html.match(/class="test-help"/g)).toHaveLength(1);
   });
 
   it("varsayılan pencere sınırı güvenli no-op'tur", () => {

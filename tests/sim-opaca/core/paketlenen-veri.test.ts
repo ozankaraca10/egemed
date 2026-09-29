@@ -7,8 +7,11 @@ import {
   ZONES,
   ZONE_IDS,
   getImage,
+  zonesForImage,
   validateCase,
 } from "../../../packages/sim-opaca/src/index";
+import imageZonesJson from "../../../packages/sim-opaca/src/data/image-zones.json";
+import type { ImageZonesData } from "../../../packages/sim-opaca/src/data/imageZoneModel";
 import { ALL_CASES, poolFor } from "../bank-cases";
 
 /** Paketlenen veri grubu — kaynak egemed-opaca tests/core.test.ts `describe('paketlenen veri')` portu.
@@ -16,6 +19,7 @@ import { ALL_CASES, poolFor } from "../bank-cases";
  *  (test-yalnız `bank-cases.ts`) okunur, saf doğrulayıcılar istemciden gelir. */
 
 const findingIds = new Set(Object.keys(FINDINGS));
+const imageZones = imageZonesJson as ImageZonesData;
 
 describe("paketlenen veri (kaynak davranışı)", () => {
   it("tüm vakalar hatasız", () => {
@@ -58,9 +62,43 @@ describe("paketlenen veri (kaynak davranışı)", () => {
     }
   });
 
-  it("bölge dikdörtgenleri 0–1 aralığında ve her ABCDE adımı temsil ediliyor", () => {
-    for (const z of ZONES) for (const r of z.rects) expect(r.x >= 0 && r.y >= 0 && r.x + r.w <= 1 && r.y + r.h <= 1).toBe(true);
+  it("her görüntü tam olarak bölgeli veya bölgesiz listede", () => {
+    expect(Object.keys(imageZones.images)).toHaveLength(575);
+    expect(Object.keys(imageZones.noZones)).toHaveLength(22);
+    for (const image of IMAGES) {
+      const memberships = Number(imageZones.images[image.id] !== undefined) + Number(imageZones.noZones[image.id] !== undefined);
+      expect(memberships, image.id).toBe(1);
+    }
+    expect(new Set([...Object.keys(imageZones.images), ...Object.keys(imageZones.noZones)]).size).toBe(IMAGES.length);
+  });
+
+  it("tüm görüntü bölgeleri kendi setinde tanımlı ve 0–1 aralığında", () => {
+    for (const [imageId, image] of Object.entries(imageZones.images)) {
+      const definitions = imageZones.zoneDefs[image.set];
+      for (const [zoneId, rects] of Object.entries(image.zones)) {
+        expect(definitions[zoneId], `${imageId}/${zoneId}`).toBeDefined();
+        for (const rect of rects) {
+          expect(rect.x, `${imageId}/${zoneId}/x`).toBeGreaterThanOrEqual(0);
+          expect(rect.y, `${imageId}/${zoneId}/y`).toBeGreaterThanOrEqual(0);
+          expect(rect.x + rect.w, `${imageId}/${zoneId}/x+w`).toBeLessThanOrEqual(1);
+          expect(rect.y + rect.h, `${imageId}/${zoneId}/y+h`).toBeLessThanOrEqual(1);
+        }
+      }
+      const resolved = zonesForImage(imageId);
+      expect(resolved).not.toBeNull();
+      expect(resolved?.every((zone) => definitions[zone.id] !== undefined)).toBe(true);
+    }
     expect(new Set(ZONES.map((z) => z.step))).toEqual(new Set(["A", "B", "C", "D", "E"]));
+  });
+
+  it("zonesForImage frontal, lateral ve bölgesiz görüntüyü ayırır", () => {
+    const frontal = zonesForImage("commons_coin_ap");
+    const lateral = zonesForImage("commons_normal_lat");
+    expect(frontal?.some((zone) => zone.id === "b_r_upper")).toBe(true);
+    expect(frontal?.some((zone) => zone.id === "b_retrosternal")).toBe(false);
+    expect(lateral?.some((zone) => zone.id === "b_retrosternal" && zone.label === "Retrosternal")).toBe(true);
+    expect(lateral?.some((zone) => zone.id === "b_r_upper")).toBe(false);
+    expect(zonesForImage("commons_clavicle_fx")).toBeNull();
   });
 
   it("görüntü kayıtlarında NLP kaynaklı kutu yok", () => {

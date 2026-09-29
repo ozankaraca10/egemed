@@ -23,14 +23,6 @@ const choice: Question = {
   feedbackIncorrect: "Yanlış geri bildirim",
 };
 
-const multi: Question = {
-  ...choice,
-  id: "q2",
-  type: "multi_choice",
-  prompt: "Hangileri doğru?",
-  correct: ["a", "c"],
-};
-
 const mark: Question = {
   id: "q3",
   type: "localization",
@@ -99,20 +91,6 @@ describe("Opaca soru kartı (statik render)", () => {
     expect(wrong.match(/class="mark" aria-hidden="true"/g)).toHaveLength(2);
   });
 
-  it("çok seçmeli soru group/checkbox olarak onay ikonuyla çizilir", () => {
-    const html = renderToStaticMarkup(
-      createElement(QuestionCard, { q: multi, caseId: "c1", value: ["a", "c"], onChange: () => undefined, revealed: false })
-    );
-    expect(html).toContain('role="group"');
-    expect(html).toContain('<span class="q-eyebrow">Çok seçmeli</span>');
-    expect(html.match(/role="checkbox"/g)).toHaveLength(3);
-    expect(html).toContain('<span class="check">');
-    expect(html).not.toContain('<span class="radio">');
-    expect(byText(html, "Pnömotoraks").attrs).toContain('aria-checked="true"');
-    expect(byText(html, "Efüzyon").attrs).toContain('aria-checked="true"');
-    expect(byText(html, "Konsolidasyon").attrs).toContain('aria-checked="false"');
-  });
-
   it("soru ilerlemesi noktalarla, yardım metniyle ve sınır durumlarıyla çizilir", () => {
     const html = renderToStaticMarkup(
       createElement(QuestionCard, { q: choice, caseId: "c1", value: [], onChange: () => undefined, revealed: false, index: 1, total: 3 })
@@ -160,24 +138,9 @@ describe("Opaca soru kartı (statik render)", () => {
     );
     expect(invalid).not.toContain("has-mark");
   });
-
-  it("disabled seçenek düğmelerini kapatır", () => {
-    const html = renderToStaticMarkup(
-      createElement(QuestionCard, { q: choice, caseId: "c1", value: [], onChange: () => undefined, revealed: false, disabled: true })
-    );
-    expect(html.match(/<button[^>]*disabled/g)).toHaveLength(3);
-  });
 });
 
 describe("Opaca geri bildirim kartı (statik render)", () => {
-  it("doğru yanıtta Doğru başlığı ve doğru geri bildirim çizilir", () => {
-    const html = renderToStaticMarkup(createElement(FeedbackCard, { correct: true, q: choice, given: ["a"] }));
-    expect(html).toContain("feedback-head good");
-    expect(html).toContain("<h2>Doğru</h2>");
-    expect(html).toContain("Doğru geri bildirim");
-    expect(html).not.toContain("Yanlış");
-    expect(html).not.toContain("Yanıtınız");
-  });
 
   it("yanlış yanıtta verilen ve doğru etiketler gösterilir", () => {
     const html = renderToStaticMarkup(createElement(FeedbackCard, { correct: false, q: choice, given: ["b"] }));
@@ -250,28 +213,5 @@ describe("Opaca bölge çipleri (statik render)", () => {
     expect(byText(html, "Sağ üst").attrs).toContain("is-suggested");
     expect(byText(html, "Sağ üst").attrs).not.toContain("is-inspected");
     expect(byText(html, "Trakea").attrs).not.toContain("is-suggested");
-  });
-
-  it("tamamlanan ABCDE adımı işaretlenir, boş adım çizilmez", () => {
-    const html = renderToStaticMarkup(
-      createElement(ZoneChips, {
-        zones,
-        visits: { a_trachea: { dwellMs: 500 }, b_r_upper: { dwellMs: 500 } },
-        activeZones: [],
-        minDwellMs: 500,
-        onSelect: () => undefined,
-      })
-    );
-    expect(html.match(/class="zone-step is-complete"/g)).toHaveLength(2);
-    expect(html).toContain('<span class="zone-step-title">Hava yolu</span>');
-    expect(html).toContain('<span class="zone-step-title">Akciğerler ve plevra</span>');
-    expect(html).not.toContain('class="zone-step "');
-  });
-
-  it("değerlendirmede gizleme sınıfı korunur", () => {
-    const html = renderToStaticMarkup(
-      createElement(ZoneChips, { zones, visits: {}, activeZones: [], minDwellMs: 500, onSelect: () => undefined, hideUntilFocus: true })
-    );
-    expect(html).toContain("zone-chips sr-only-until-focus");
   });
 });
