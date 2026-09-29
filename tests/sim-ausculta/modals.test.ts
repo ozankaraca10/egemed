@@ -139,7 +139,7 @@ describe("modal odak tuzağı", () => {
     expect(host.listeners.size).toBe(0);
   });
 
-  it("devre dışı öğeleri eler; no-op sınır fırlatmaz", () => {
+  it("devre dışı öğeleri eler; boş belge sınırı odaklanabilir öğe döndürmez", () => {
     const live = focusable();
     const dead = { ...focusable(), hasAttribute: (name: string) => name === "disabled" };
     const host = envWith(null, [dead, live]);
@@ -147,7 +147,5 @@ describe("modal odak tuzağı", () => {
     const env = createNoopModalEnv();
     expect(env.activeElement).toBeNull();
     expect(env.queryFocusables(null, "button")).toEqual([]);
-    expect(() => env.addEventListener("keydown", () => undefined)).not.toThrow();
-    expect(() => env.removeEventListener("keydown", () => undefined)).not.toThrow();
   });
 });

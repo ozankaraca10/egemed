@@ -6,7 +6,6 @@ import "./styles/components.css";
 import "@egemed/gami-ui/styles.css";
 
 import type { SimulatorId } from "@egemed/sim-host";
-import fixture from "./data/fixture.json";
 
 export const SIM_ID = "ausculta" satisfies SimulatorId;
 
@@ -22,8 +21,6 @@ export { auscultaModule as default } from "./SimModule";
 export type { AuscultaContainer, AuscultaEngineFactory, AuscultaModuleDeps, AuscultaRoot } from "./SimModule";
 export { EmbeddedProvider, ScreenHeading, useEmbedded } from "./ui/ScreenHeading";
 export type { ScreenHeadingProps } from "./ui/ScreenHeading";
-
-export const JSON_FIXTURE = fixture;
 
 export { DEFAULT_WEIGHTS } from "./core/types";
 export {

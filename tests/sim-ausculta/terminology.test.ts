@@ -15,7 +15,7 @@ describe("libraryShortTitle (madde 4, wave 2)", () => {
     expect(libraryShortTitle("lung.coarse_crackles")).toBe("Kaba Raller");
   });
   it("bilinmeyen anahtar için çökmeden yedek metin döner", () => {
-    expect(libraryShortTitle("mixed.msm_wheezing")).toBeTruthy();
-    expect(() => libraryShortTitle("bilinmeyen.key")).not.toThrow();
+    expect(libraryShortTitle("mixed.msm_wheezing")).toMatch(/wheezing/i);
+    expect(libraryShortTitle("bilinmeyen.key")).toMatch(/ses/i);
   });
 });

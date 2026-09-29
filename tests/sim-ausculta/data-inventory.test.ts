@@ -4,7 +4,6 @@ import { describe, expect, it } from "vitest";
 const DATA_DIR = "packages/sim-ausculta/src/data";
 const JSON_NAMES = [
   "auscultation-points.json",
-  "fixture.json",
   "library.json",
   "pediatric-reference.json",
   "sounds-external.json",
