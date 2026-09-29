@@ -63,3 +63,4 @@ Tamamlanan (dev): T218 Opaca öğrenme kilidi, T222 Ausculta ses kıs/aç kaldı
 SMTP bilgileri; SSO protokolü; Ausculta posterior veri kümesi onayı.
 
 - **Bekleyen (29 Eyl):** Opaca radyolog onayı — 597 görüntü, 188 vaka, 33 konu hiç onaylı değil (NLP etiketleri 375, yükleyen açıklaması 55, okuma bölgeleri 575, bölgesiz kararları 22, çok panelli figür 3, bulgu kutuları 226). Önerilen: platform içi "Uzman Onay" paneli (öğretim üyesi rolü; Ausculta/Pulse içinde kullanılabilir). Kullanıcı: sonra.
+- **Bekleyen (29 Eyl):** Pulse yeniden yazımı bitince `tests/sim-pulse` test denetimi + kampanyası (TEST-POLITIKASI.md; T247 deseni).
