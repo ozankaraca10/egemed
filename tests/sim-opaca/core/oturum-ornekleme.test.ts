@@ -84,7 +84,7 @@ describe("oturum örnekleme (kaynak davranışı)", () => {
 
   it("deterministik ve katmanlı", () => {
     const a = sampleSession(pool, 7, 10);
-    expect(a).toEqual(sampleSession(pool, 7, 10));
+    expect(a).toEqual(["c7", "c28", "c24", "c29", "c14", "c22", "c12", "c19", "c11", "c2"]);
     expect(new Set(a).size).toBe(10);
     const findingsIn = new Set(a.map((id) => pool.find((c) => c.id === id)!.primaryFinding));
     expect(findingsIn.size).toBe(3);
@@ -95,17 +95,17 @@ describe("oturum örnekleme (kaynak davranışı)", () => {
     expect(sampleSession([], 1, 10)).toEqual([]);
   });
 
-  it("seçenek karıştırma deterministik (K1)", () => {
+  it("seçenek karıştırma sabit tohum çıktısını ve seçenek kümesini korur (K1)", () => {
     const opts = ["a", "b", "c", "d"].map((id) => ({ id, label: id }));
-    expect(shuffledOptions("x", "q", opts)).toEqual(shuffledOptions("x", "q", opts));
-    expect(shuffledOptions("x", "q", opts).map((o) => o.id).sort()).toEqual(["a", "b", "c", "d"]);
+    const shuffled = shuffledOptions("x", "q", opts).map((o) => o.id);
+    expect(shuffled).toEqual(["a", "c", "d", "b"]);
+    expect([...shuffled].sort()).toEqual(["a", "b", "c", "d"]);
   });
 
   it("soru imzası: prompt/seçenek/doğru-yanıt aynıysa aynı imza, biri değişirse farklı", () => {
     const a = questionSignature(uniqueQuestions(1)[0]!);
-    const b = questionSignature(uniqueQuestions(1)[0]!);
     const c = questionSignature(uniqueQuestions(2)[0]!);
-    expect(a).toBe(b);
+    expect(a).toBe("finding_identify||Bulgu 1");
     expect(a).not.toBe(c);
     // seçenek id'leri (shuffledOptions ile) farklı olsa da etiketler aynıysa imza aynı kalır
     const swapped = { ...qChoice, options: [{ id: "z", label: "A" }, { id: "y", label: "B" }], correct: ["z"] };

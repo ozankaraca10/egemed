@@ -20,8 +20,13 @@ describe("oturum örnekleme (rastgele 10 vaka)", () => {
     expect(sampleSession(pool, 42).length).toBe(SESSION_SIZE);
     expect(sampleSession(assessment, 7).length).toBe(SESSION_SIZE);
   });
-  it("aynı tohum aynı örneklemi üretir (deterministik / SCORM uyumlu)", () => {
-    expect(sampleSession(pool, 123)).toEqual(sampleSession(pool, 123));
+  it("sabit tohum sabit örneklem üretir (deterministik / SCORM uyumlu)", () => {
+    const deterministicPool = pool.slice(0, 6).map((caseDef, index) => ({
+      ...caseDef,
+      id: `case-${index}`,
+      primaryAcousticFinding: `finding-${index % 3}`,
+    }));
+    expect(sampleSession(deterministicPool, 123, 4)).toEqual(["case-3", "case-4", "case-5", "case-0"]);
   });
   it("farklı tohumlar farklı örneklem üretir (her oturum farklı)", () => {
     const a = sampleSession(pool, 1).join(",");
@@ -76,14 +81,9 @@ describe("oturum örnekleme (rastgele 10 vaka)", () => {
 describe("soru seçenek karıştırma (K1)", () => {
   const poolAll = [...poolFor("practice"), ...poolFor("assessment")];
 
-  it("aynı vaka+soru tohumu aynı sırayı üretir (deterministik)", () => {
-    const c = poolAll.find((x) => x.questions.length > 0);
-    if (!c) throw new Error("sorulu vaka yok");
-    const q = c.questions[0];
-    if (!q) throw new Error("soru yok");
-    const a = shuffledOptions(c.id, q.id, q.options).map((o) => o.id);
-    const b = shuffledOptions(c.id, q.id, q.options).map((o) => o.id);
-    expect(a).toEqual(b);
+  it("sabit vaka+soru tohumu sabit seçenek sırası üretir", () => {
+    const options = ["a", "b", "c", "d"].map((id) => ({ id, label: id }));
+    expect(shuffledOptions("x", "q", options).map((option) => option.id)).toEqual(["a", "c", "d", "b"]);
   });
 
   it('doğru yanıt konumu havuz genelinde tek bir seçeneğe (ör. "a") yığılmaz', () => {

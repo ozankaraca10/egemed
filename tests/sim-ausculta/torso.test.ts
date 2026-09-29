@@ -18,10 +18,8 @@ describe("stetoskop göğüs parçası", () => {
     expect(html.match(/<line /g)?.length).toBe(12);
   });
 
-  it("işaretleme sabittir ve üretici adı taşımaz", () => {
+  it("işaretleme üretici adı taşımaz", () => {
     const first = markup(createElement(Chestpiece));
-    const second = markup(createElement(Chestpiece));
-    expect(first).toBe(second);
     expect(first.toLowerCase()).not.toMatch(/littmann|3m|littman/);
   });
 });

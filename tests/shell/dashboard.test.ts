@@ -59,6 +59,11 @@ describe("gamificationSource: sentetik kaynak (E3 §e.8)", () => {
     const summaries = await source.getSummaries();
     expect(summaries).toHaveLength(SIM_IDS.length);
     expect(new Set(summaries.map((summary) => summary.simId))).toEqual(new Set(SIM_IDS));
+    expect(summaries.map(({ simId, xp }) => ({ simId, xp }))).toEqual([
+      { simId: "pulse", xp: 1450 },
+      { simId: "ausculta", xp: 210 },
+      { simId: "opaca", xp: 320 },
+    ]);
     expect(summaries.find((summary) => summary.simId === "pulse")?.badges[0]?.key).toBe("rhythm-streak-3");
     expect(summaries.find((summary) => summary.simId === "opaca")?.badges[0]?.key).toBe("first-step");
     for (const summary of summaries) {
@@ -71,11 +76,8 @@ describe("gamificationSource: sentetik kaynak (E3 §e.8)", () => {
     await expect(source.getSummaries()).resolves.toEqual([]);
   });
 
-  it("deterministiktir: art arda çağrılar aynı sonucu verir; gerçek zamanı okumaz", async () => {
+  it("gerçek zamanı okumaz", async () => {
     const source = createSyntheticGamificationSource(true);
-    const first = await source.getSummaries();
-    const second = await source.getSummaries();
-    expect(first).toEqual(second);
     const spy = vi.spyOn(Date, "now");
     await source.getSummaries();
     expect(spy).not.toHaveBeenCalled();

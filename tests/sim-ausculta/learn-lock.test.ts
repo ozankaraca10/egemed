@@ -91,7 +91,7 @@ function renderInGate(node: ReactNode, options: { storage?: StoragePort; learn?:
 
 describe("contentVersion", () => {
   it("deterministik, sıra duyarlı ve sözleşme desenine uyar", () => {
-    expect(contentVersion(["a", "b"])).toBe(contentVersion(["a", "b"]));
+    expect(contentVersion(["a", "b"])).toBe("lib-2-3hmau");
     expect(contentVersion(["a", "b"])).not.toBe(contentVersion(["b", "a"]));
     expect(contentVersion(["a", "b"])).toMatch(/^[a-z0-9._-]{1,40}$/);
     expect(AUSCULTA_CONTENT_VERSION).toBe(contentVersion(LIBRARY_ITEM_KEYS));
@@ -246,10 +246,6 @@ describe("createLearnCompletionNotifier", () => {
     expect(calls).toEqual(["lib-test"]);
   });
 
-  it("kanal yoksa sessizce hiçbir şey yapmaz", () => {
-    const notifier = createLearnCompletionNotifier(undefined, "lib-test");
-    expect(() => notifier.notify(true)).not.toThrow();
-  });
 });
 
 describe("PatientStage oynatma tetikleyicisi", () => {

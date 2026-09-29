@@ -44,7 +44,6 @@ function clientStub(overrides: {
 describe("createMockShellDataSources", () => {
   it("sahte oturumda sentetik ilerlemeyi paylaşır ve sayfalar aynı kullanıcı kaynağını kullanır", async () => {
     const sources = createMockShellDataSources();
-    expect(sources.users).toBe(sources.users);
     const summaries = await sources.gamification(SESSION).getSummaries();
     expect(summaries.some((summary) => summary.xp === 1450)).toBe(true);
     await expect(sources.gamification(null).getSummaries()).resolves.toEqual([]);

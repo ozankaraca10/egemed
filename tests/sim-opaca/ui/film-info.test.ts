@@ -192,12 +192,10 @@ describe("FilmCornerBadge ve sentetik yardımcılar", () => {
     expect(syntheticDateFor(undefined)).toBe("—");
   });
 
-  it("sentetik tarih ve taraf işareti id'ye göre deterministik", () => {
+  it("sentetik tarih biçimini ve id'ye göre taraf ayrımını korur", () => {
     const a = xr({ id: "deterministic_xr_a" });
     const b = xr({ id: "deterministic_xr_b" });
     expect(syntheticDateFor(a)).toMatch(/^\d{2}\.\d{2}\.\d{4}$/);
-    expect(syntheticDateFor(a)).toBe(syntheticDateFor(a));
-    expect(sideMarkerFor(a)).toBe(sideMarkerFor(a));
     expect(sideMarkerFor(a)).not.toBe(sideMarkerFor(b));
   });
 });

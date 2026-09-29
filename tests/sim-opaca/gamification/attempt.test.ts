@@ -54,8 +54,8 @@ describe("oturum → AttemptRecord", () => {
       findings: [{ finding: "pneumothorax", correct: true }, { finding: "cardiomegaly", correct: false }],
     });
   });
-  it("kimlik kararlı (aynı oturum → aynı id), farklı tohum → farklı id", () => {
-    expect(attemptId("assessment", 42, ["c1", "c2"])).toBe(attemptId("assessment", 42, ["c1", "c2"]));
+  it("kimlik sabit girdide kararlı; farklı tohum veya modda farklıdır", () => {
+    expect(attemptId("assessment", 42, ["c1", "c2"])).toBe("assessment-42-v4eqoi");
     expect(attemptId("assessment", 43, ["c1", "c2"])).not.toBe(attemptId("assessment", 42, ["c1", "c2"]));
     expect(attemptId("practice", 42, ["c1", "c2"])).not.toBe(attemptId("assessment", 42, ["c1", "c2"]));
   });

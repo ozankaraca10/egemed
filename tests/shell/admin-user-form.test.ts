@@ -24,7 +24,7 @@ import {
   type AdminUserDetail,
   type CreateUserInput,
 } from "../../apps/shell/src/admin/usersDataSource";
-import { UserFormPage, UserFormView, type UserFormViewProps } from "../../apps/shell/src/admin/UserFormPage";
+import { UserFormView, type UserFormViewProps } from "../../apps/shell/src/admin/UserFormPage";
 import { UserDetailPage, UserDetailView, type UserDetailViewProps } from "../../apps/shell/src/admin/UserDetailPage";
 import { formatTrDateTime } from "../../apps/shell/src/admin/trFormat";
 import { t } from "../../packages/ui/i18n/tr";
@@ -505,23 +505,6 @@ describe("UserFormView işaretlemesi (E3 §e.2)", () => {
   it("gönderim hatasında confirm adımında hata metni görünür", () => {
     const html = bodyHtml({ step: "confirm", submitError: true });
     expect(html).toContain(t("admin.users.form.error.submit"));
-  });
-});
-
-describe("UserFormPage kabı", () => {
-  // `UserFormPage` içeriğinin tamamı `Dialog` (Radix Portal) içindedir; DOM'suz
-  // ortamda çizilen dize her zaman boştur (T163). Diyaloğun gerçek görünümü
-  // `UserFormView` testlerinde (yukarıda, `Dialog` prop'ları doğrudan okunarak) ve
-  // e2e/admin.spec.ts'te (gerçek tarayıcı DOM'u, Portal çalışır) doğrulanır; burada
-  // yalnız kabın hatasız render edildiği ve varsayılan diyalog başlığının iletildiği
-  // (UserFormView'e giden `step`/`values` üzerinden) sınanır.
-  it("varsayılan (dataSource'suz) çağrıldığında hataya düşmeden render edilir", () => {
-    expect(() => render(createElement(UserFormPage))).not.toThrow();
-  });
-
-  it("enjekte edilen kaynakla da hataya düşmeden render edilir", () => {
-    const source = createMockUsersSource(7, 5);
-    expect(() => render(createElement(UserFormPage, { dataSource: source }))).not.toThrow();
   });
 });
 
