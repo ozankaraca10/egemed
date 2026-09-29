@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it } from "vitest";
 import { computeStreak } from "../../../packages/gamification-core/src/streak";
 import { formatLmsName, initials, LocalRepo, resetGamiRepo } from "../../../packages/sim-opaca/src/gamification/repo";
 import { emptyState, loadState, saveState, STORAGE_KEY } from "../../../packages/sim-opaca/src/gamification/storage";
-import { DEMO_PEERS } from "../../../packages/sim-opaca/src/gamification/mock";
+import { demoPeriodRow, DEMO_PEERS } from "../../../packages/sim-opaca/src/gamification/mock";
 import { demoStateFor } from "../../../packages/sim-opaca/src/gamification/demo";
 import { computeStats } from "../../../packages/sim-opaca/src/gamification/stats";
 import { attempt, installMemoryStorage } from "./helpers";
@@ -101,8 +101,9 @@ describe("LocalRepo", () => {
 });
 
 describe("demo akranlar ve demo durumları", () => {
-  it("akran kohortları 1–6 aralığındadır", () => {
+  it("akranlar deterministik: aynı dönem+now → aynı sonuç; kohortlar 1–6 aralığında", () => {
     for (const p of DEMO_PEERS) {
+      expect(demoPeriodRow(p, "month", now)).toEqual(demoPeriodRow(p, "month", now));
       expect(p.cohort).toBeGreaterThanOrEqual(1);
       expect(p.cohort).toBeLessThanOrEqual(6);
     }

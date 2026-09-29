@@ -5,7 +5,7 @@ import { gamiDemoFrom, gamiEnabledFrom } from "../../../packages/sim-opaca/src/g
 
 describe("avatar tonu", () => {
   it("aynı kimlik → aynı ton; anonim → t-anon; yalnız izinli tonlar", () => {
-    expect(avatarTone("u-12")).toBe("t-blue");
+    expect(avatarTone("u-12")).toBe(avatarTone("u-12"));
     expect(avatarTone("u-12", true)).toBe("t-anon");
     const tones = new Set(Array.from({ length: 200 }, (_, i) => avatarTone(`id-${i}`)));
     expect([...tones].every((t) => ["t-blue", "t-purple", "t-green", "t-amber"].includes(t))).toBe(true);

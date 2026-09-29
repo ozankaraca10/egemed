@@ -63,9 +63,12 @@ function byText(html: string, text: string): ButtonView {
 }
 
 describe("Opaca soru kartı (statik render)", () => {
-  it("seçmeli soru radiogroup olarak tür etiketi ve seçeneklerle çizilir", () => {
+  it("seçmeli soru radiogroup olarak ve tür etiketiyle çizilir; seçenek sırası deterministiktir", () => {
     const props = { q: choice, caseId: "c1", value: [], onChange: () => undefined, revealed: false };
     const html = renderToStaticMarkup(createElement(QuestionCard, props));
+    const again = renderToStaticMarkup(createElement(QuestionCard, props));
+
+    expect(html).toBe(again);
     expect(html).toContain('role="radiogroup"');
     expect(html).toContain('aria-label="Hangi bulgu izleniyor?"');
     expect(html).toContain('<span class="q-eyebrow">Soru</span>');

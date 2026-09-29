@@ -61,9 +61,11 @@ describe("seçenek yardımcıları", () => {
 });
 
 describe("soru kartı (statik render)", () => {
-  it("radiogroup, tür etiketi ve seçenekleri çizer", () => {
+  it("radiogroup, tür etiketi ve deterministik sıra çizer", () => {
     const props = { q: choice, caseId: "c1", value: [], onChange: () => undefined, revealed: false };
     const html = renderToStaticMarkup(createElement(QuestionCard, props));
+    const again = renderToStaticMarkup(createElement(QuestionCard, props));
+    expect(html).toBe(again);
     expect(html).toContain('role="radiogroup"');
     expect(html).toContain('aria-label="Hangi ses duyuluyor?"');
     expect(html).toContain('<span class="q-eyebrow">Soru</span>');
