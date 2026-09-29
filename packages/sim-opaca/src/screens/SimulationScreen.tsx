@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useRef, useState, type JSX } from 'react'
 import type { SimSessionSource } from '@egemed/sim-host'
 import type { CaseDef, CaseResult, Question, ScoringWeights } from '../core/types'
-import { ZONES } from '../data/zones'
 import { decodeMark, encodeMark } from '../core/geometry'
 import { useStartMode } from '../core/LearnGate'
 import { useStore } from '../core/StoreProvider'
@@ -178,6 +177,7 @@ function CaseView({
   const isAssessment = state.mode === 'assessment'
   const serverCase = caseDef as ServerClientCase
   const image = serverCase.serverImage
+  const readingZones = serverCase.readingZones
   const q: Question | undefined = caseDef.questions[state.step]
   const given = q ? state.answers[q.id] ?? [] : []
   const revealed = q ? !!state.revealed[q.id] : false
@@ -296,8 +296,8 @@ function CaseView({
                 <FilmViewer
                   ref={viewerRef}
                   image={image}
-                  zones={ZONES}
-                  showZones={!isAssessment && state.showZones && image.modality !== 'CT' && q?.type !== 'localization'}
+                  zones={readingZones}
+                  showZones={!isAssessment && state.showZones && readingZones.length > 0 && q?.type !== 'localization'}
                   showAnnotations={false}
                   annotationFinding={null}
                   strict={isAssessment}
@@ -315,14 +315,20 @@ function CaseView({
                   {...(isAssessment ? {} : { onToggleZones: () => dispatch({ type: 'toggleZones' }) })}
                   inert={summaryOpen}
                 />
-                <ZoneChips
-                  zones={ZONES}
-                  visits={state.telemetry.visits}
-                  activeZones={activeZones}
-                  minDwellMs={caseDef.technique.minDwellMs}
-                  onSelect={(id) => viewerRef.current?.focusZone(id)}
-                  hideUntilFocus={isAssessment}
-                />
+                {readingZones.length > 0 ? (
+                  <ZoneChips
+                    zones={readingZones}
+                    visits={state.telemetry.visits}
+                    activeZones={activeZones}
+                    minDwellMs={caseDef.technique.minDwellMs}
+                    onSelect={(id) => viewerRef.current?.focusZone(id)}
+                    hideUntilFocus={isAssessment}
+                  />
+                ) : (
+                  <p className="note-strip zone-empty-note" role="status">
+                    Bu görüntü için okuma bölgesi tanımlı değil.{serverCase.noZonesReason ? ` ${serverCase.noZonesReason}` : ''}
+                  </p>
+                )}
               </div>
             </div>
 

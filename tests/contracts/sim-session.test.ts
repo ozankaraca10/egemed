@@ -84,7 +84,22 @@ const OPACA_BASE = {
   history: "Öykü",
   vitalSigns: { hr: 90 },
   tasks: ["Grafiyi sistematik (ABCDE) okuyun.", "Soruları yanıtlayın."],
-  image: { token: "tok_Abc12345", width: 1024, height: 1024, modality: "XR" as const, bodyPart: "toraks" as const },
+  image: {
+    token: "tok_Abc12345",
+    width: 1024,
+    height: 1024,
+    modality: "XR" as const,
+    bodyPart: "toraks" as const,
+    readingZones: [{
+      id: "a_trachea",
+      step: "A" as const,
+      label: "Trakea",
+      fullLabel: "Trakea ve karina",
+      detail: "Trakeayı değerlendirin.",
+      rects: [{ x: 0.45, y: 0.05, w: 0.1, h: 0.3 }],
+    }],
+    noZonesReason: null,
+  },
   questions: [
     {
       id: "q1",

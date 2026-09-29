@@ -246,6 +246,9 @@ export const FilmViewer = forwardRef<FilmViewerHandle, FilmViewerProps>(function
   useEffect(() => {
     setLoaded(false)
     setFailed(false)
+    pointerZones.current = []
+    pointerInside.current = false
+    setActiveZoneLabel(null)
     setMeasures([])
     setPending(null)
     setTool('pan')
@@ -742,7 +745,7 @@ export const FilmViewer = forwardRef<FilmViewerHandle, FilmViewerProps>(function
         >
           Negatif
         </button>
-        {!strict && onToggleZones && !ctStack && (
+        {!strict && onToggleZones && !ctStack && zones.length > 0 && (
           <button
             type="button"
             className={`tool-btn ${showZones ? 'active' : ''}`}

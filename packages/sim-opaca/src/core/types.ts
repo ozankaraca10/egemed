@@ -118,7 +118,7 @@ export interface ImagesManifest {
   records: ImageRecord[];
 }
 
-/** reading-zones.json — ABCDE sistematik okuma bölgeleri (şematik; PA film üzerinde yaklaşık) */
+/** image-zones.json — görüntüye özgü ABCDE sistematik okuma bölgesi */
 export type AbcdeStep = "A" | "B" | "C" | "D" | "E";
 export interface ReadingZone {
   id: string;

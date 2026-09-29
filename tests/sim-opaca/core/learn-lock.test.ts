@@ -145,6 +145,15 @@ describe("öğrenme tamamlanabilirliği", () => {
       expect(libraryExampleCount(item), `${item.key}: sayaç`).toBeGreaterThan(0);
     }
   });
+
+  it("Lateral grafi konusu yalnız image-zones lateral setindeki üç grafiyi gösterir", () => {
+    const topic = LIBRARY_ITEMS.find((item) => item.key === "technique.lateral");
+    expect(topic).toBeDefined();
+    if (!topic) return;
+    const examples = libraryExamples(topic);
+    expect(examples.map((image) => image.id)).toEqual(["commons_coin_lat", "commons_hiatal_lat", "commons_normal_lat"]);
+    expect(libraryExampleCount(topic)).toBe(3);
+  });
 });
 
 describe("createLearnTracker", () => {

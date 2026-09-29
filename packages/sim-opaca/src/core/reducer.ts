@@ -2,7 +2,7 @@ import type { CaseDef, CaseResult, Mode, Screen, SuspendPayload, Telemetry, View
 import type { SimEventDraft } from "./events";
 import { aggregateResults, practiceAdjusted, scoreCase, MASTERY_THRESHOLD } from "./scoring";
 import { getImage } from "./images";
-import { ZONES } from "../data/zones";
+import { zonesForImage } from "../data/zones";
 import type { ServerCaseMeta, ServerCaseSnapshot, ServerClientCase, ServerQuestionFeedback, ServerSessionState } from "./serverSession";
 
 /** Opaca durum iskeleti ve saf reducer (kaynak: `core/store.tsx:1-255`).
@@ -184,7 +184,7 @@ function findCase(s: AppState, id: string): CaseDef | undefined {
 
 /** Vaka puanı (store dışı da kullanılır: testler, sonuç ekranı). */
 export function computeCaseResult(def: CaseDef, s: Pick<AppState, "answers" | "telemetry" | "hintsUsed" | "mode">): CaseResult {
-  let result = scoreCase(def, s.answers, s.telemetry, s.hintsUsed, getImage(def.imageId), ZONES);
+  let result = scoreCase(def, s.answers, s.telemetry, s.hintsUsed, getImage(def.imageId), zonesForImage(def.imageId) ?? []);
   if (s.mode === "practice" && s.hintsUsed > 0) {
     const adjusted = practiceAdjusted(result.total, s.hintsUsed);
     result = { ...result, total: adjusted, mastery: adjusted >= (def.masteryThreshold ?? MASTERY_THRESHOLD) };
