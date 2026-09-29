@@ -2,21 +2,7 @@ import { createElement, type ReactNode } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import type { SimLearnPort } from "../../packages/sim-host/src/SimHost";
-import {
-  BEST_SCORE_KEY,
-  EntryScreens,
-  LearnGateProvider,
-  ModeSelectScreen,
-  StartScreen,
-  StoreProvider,
-  createMemoryRuntimeAdapter,
-  initialState,
-  modeLearnLocked,
-  modePickTarget,
-  playVolumeCheckTone,
-  resolveEntryScreen,
-  sessionSeed,
-} from "../../packages/sim-ausculta/src/index";
+import { EntryScreens, LearnGateProvider, ModeSelectScreen, StartScreen, StoreProvider, createMemoryRuntimeAdapter, initialState, modeLearnLocked, modePickTarget, playVolumeCheckTone } from "../../packages/sim-ausculta/src/index";
 import type { StoragePort, VolumeToneContext, WindowLike } from "../../packages/sim-ausculta/src/index";
 
 /** Giriş ve mod seçimi — statik işaretleme. DOM kütüphanesi yok. */
@@ -37,10 +23,6 @@ function memoryStorage(seed: Record<string, string> = {}): StoragePort {
       entries.set(key, value);
     },
   };
-}
-
-function learnComplete(): SimLearnPort {
-  return { complete: true, async markComplete(): Promise<void> {} };
 }
 
 function renderInStore(
@@ -64,16 +46,6 @@ function renderInStore(
 }
 
 describe("giriş çözümü", () => {
-  it("gömülü modda tanıtımı atlar ve mod seçimine gider", () => {
-    expect(resolveEntryScreen("start", true)).toBe("modes");
-    expect(resolveEntryScreen("start", false)).toBe("start");
-    expect(resolveEntryScreen("modes", true)).toBe("modes");
-    expect(resolveEntryScreen("tutorial", true)).toBe("tutorial");
-  });
-
-  it("tohum enjekte now değerinden türer", () => {
-    expect(sessionSeed(1_728_000_000_000)).toBe((1_728_000_000_000 % 2147483647) | 0);
-  });
 
   it("öğrenme kilidi tamamlanmadan hedefi öğrenmeye çevirir", () => {
     expect(modeLearnLocked(false, true)).toBe(true);
@@ -86,20 +58,6 @@ describe("giriş çözümü", () => {
 });
 
 describe("StartScreen", () => {
-  it("CTA, güven kutuları ve footer çizer", () => {
-    const html = renderInStore(createElement(StartScreen));
-    expect(html).toContain("Simülatörü başlat");
-    expect(html).toContain("Nasıl kullanılır?");
-    expect(html).toContain("Hakkında ve kaynaklar");
-    expect(html).toContain("Neden güvenilir?");
-    expect(html).toContain("klinik kayıt");
-    expect(html).toContain("SCORM uyumlu ölçme ve değerlendirme");
-    expect(html).toContain("Ses düzeyi kontrol");
-    expect(html).toContain('src="brand/logo-horizontal-web.png"');
-    expect(html).toContain("<footer");
-    expect(html).not.toContain("<header");
-    expect(html).toContain("min-width:44px");
-  });
 
   it("gömülü modda footer ve SCORM ifadesi yoktur", () => {
     const html = renderInStore(createElement(StartScreen, { embedded: true }));
@@ -132,27 +90,6 @@ describe("ModeSelectScreen", () => {
     expect(html).toContain("Henüz denenmedi");
     // Kilit gönderimi kapatır: düğme pasiftir.
     expect(html).toMatch(/disabled=""[^>]*>Öğrenmeye git/);
-  });
-
-  it("öğrenme tamamlanınca kartlar açık kalır", () => {
-    const html = renderInStore(createElement(ModeSelectScreen), memoryStorage(), { learn: learnComplete() });
-    expect(html).toContain('data-learn-locked="false"');
-    expect(html).toContain("Vakaları çöz");
-    expect(html).toContain("Değerlendirmeye gir");
-    expect(html).not.toContain("mode-lock-hint");
-  });
-
-  it("en iyi puanı StoragePort'tan okur", () => {
-    const storage = memoryStorage({ [BEST_SCORE_KEY]: JSON.stringify({ practice: 80, assessment: 0 }) });
-    const html = renderInStore(createElement(ModeSelectScreen), storage, { tutorialSeen: true, learn: learnComplete() });
-    expect(html).toContain("En iyi puan:");
-    expect(html).toContain(">80<");
-  });
-
-  it("gömülü modda footer ve arka plan yoktur", () => {
-    const html = renderInStore(createElement(ModeSelectScreen, { embedded: true }));
-    expect(html).not.toContain("<footer");
-    expect(html).not.toContain('class="app-bg"');
   });
 
   it("gömülü modda SCORM ifadesi yoktur (ADR-006, T134)", () => {

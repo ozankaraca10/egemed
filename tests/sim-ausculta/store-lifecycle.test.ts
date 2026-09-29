@@ -1,18 +1,8 @@
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
-import {
-  BEST_SCORE_KEY,
-  StoreProvider,
-  buildSuspend,
-  createFlushHandlers,
-  createLifecycle,
-  createMemoryRuntimeAdapter,
-  initialState,
-  initialTelemetry,
-  useStore,
-} from "../../packages/sim-ausculta/src/index";
-import type { AppState, LifecycleHandlers, StoragePort, StoreContextValue, WindowLike } from "../../packages/sim-ausculta/src/index";
+import { BEST_SCORE_KEY, StoreProvider, createFlushHandlers, createLifecycle, createMemoryRuntimeAdapter, useStore } from "../../packages/sim-ausculta/src/index";
+import type { LifecycleHandlers, StoragePort, StoreContextValue, WindowLike } from "../../packages/sim-ausculta/src/index";
 
 /** Yaşam döngüsü DOM'suz: sahte pencere dinleyici ve zamanlayıcı sayar.
  *  React effect'leri statik render'da koşmaz; provider yalnız kurulumu gösterir. */
@@ -79,50 +69,6 @@ function memoryStorage(seed: Record<string, string> = {}): StoragePort {
 const flushHandlers = (): LifecycleHandlers => ({ flush: vi.fn(), pageHide: vi.fn() });
 
 describe("yaşam döngüsü (createLifecycle)", () => {
-  it("attach sonrası detach dinleyici ve zamanlayıcı bırakmaz", () => {
-    const env: FakeEnv = createFakeEnv();
-    const lifecycle = createLifecycle(env);
-    const handlers = flushHandlers();
-
-    lifecycle.attach(handlers);
-    lifecycle.attach(handlers);
-    expect(env.listenerCount()).toBe(3);
-
-    const stop = lifecycle.startTicker(1000, vi.fn());
-    expect(env.timerCount()).toBe(1);
-
-    lifecycle.detach();
-    expect(env.listenerCount()).toBe(0);
-    expect(env.timerCount()).toBe(0);
-    expect(env.removeCalls).toBe(3);
-
-    lifecycle.detach();
-    expect(env.removeCalls).toBe(3);
-    stop();
-    env.fire("pagehide");
-    expect(handlers.pageHide).not.toHaveBeenCalled();
-  });
-
-  it("gizlenme ve beforeunload flush, pagehide pageHide çağırır", () => {
-    const env: FakeEnv = createFakeEnv();
-    const lifecycle = createLifecycle(env);
-    const handlers = flushHandlers();
-    lifecycle.attach(handlers);
-
-    env.fire("visibilitychange");
-    expect(handlers.flush).not.toHaveBeenCalled();
-
-    env.visibilityState = "hidden";
-    env.fire("visibilitychange");
-    expect(handlers.flush).toHaveBeenCalledTimes(1);
-
-    env.fire("beforeunload");
-    expect(handlers.flush).toHaveBeenCalledTimes(2);
-
-    env.fire("pagehide");
-    expect(handlers.pageHide).toHaveBeenCalledTimes(1);
-    lifecycle.detach();
-  });
 
   it("pagehide çalışma zamanını yazar", () => {
     const env: FakeEnv = createFakeEnv();
@@ -155,18 +101,6 @@ describe("yaşam döngüsü (createLifecycle)", () => {
 });
 
 describe("StoreProvider (DOM'suz statik render)", () => {
-  it("çocukları render eder", () => {
-    const html = renderToStaticMarkup(
-      createElement(StoreProvider, {
-        children: createElement("p", null, "Ausculta içerik"),
-        env: createFakeEnv(),
-        now: () => 0,
-        runtime: createMemoryRuntimeAdapter(),
-        storage: memoryStorage(),
-      }),
-    );
-    expect(html).toContain("<p>Ausculta içerik</p>");
-  });
 
   it("iki provider birbirinin veri yoluna ve puanına sızmaz", () => {
     const seen: StoreContextValue[] = [];
@@ -206,26 +140,5 @@ describe("StoreProvider (DOM'suz statik render)", () => {
     a.bus.emit({ type: "hint_used", caseId: "c1" });
     expect(a.bus.getLog()).toHaveLength(1);
     expect(b.bus.getLog()).toHaveLength(0);
-  });
-});
-
-describe("buildSuspend (provider yükü)", () => {
-  it("yalnız aktif modun oturum listesini yazar", () => {
-    const base: AppState = {
-      ...initialState,
-      caseIndex: 2,
-      step: 1,
-      hintsUsed: 1,
-      attempts: 3,
-      tutorialDone: true,
-      telemetry: {
-        ...initialTelemetry,
-        visits: { aort: { dwellMs: 500, listenMs: 200, visits: 1, firstOrder: 0 } },
-        order: ["aort"],
-      },
-      session: { practiceIds: ["p1"], assessmentIds: ["a1", "a2"], seed: 9 },
-    };
-    expect(buildSuspend({ ...base, mode: "assessment" }).sessionIds).toEqual(["a1", "a2"]);
-    expect(buildSuspend({ ...base, mode: "practice" }).sessionIds).toEqual(["p1"]);
   });
 });

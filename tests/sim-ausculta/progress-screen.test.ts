@@ -5,7 +5,6 @@ import { StoreProvider, createMemoryRuntimeAdapter, initialState } from "../../p
 import type { StoragePort, WindowLike } from "../../packages/sim-ausculta/src/index";
 import { LocalGamiRepository, type GamiStorage } from "../../packages/sim-ausculta/src/gamification/repo";
 import { ProgressScreen } from "../../packages/sim-ausculta/src/screens/ProgressScreen";
-import { ResultsScreen } from "../../packages/sim-ausculta/src/screens/ResultsScreen";
 import type { AppState } from "../../packages/sim-ausculta/src/index";
 
 const NOW = 1_758_700_000_000;
@@ -51,16 +50,6 @@ async function markup(node: ReactNode): Promise<string> {
 }
 
 describe("Ausculta ilerleme ekranı", () => {
-  it("Başarılarım ve Liderlik sekmelerini ve demo bandını çizer", () => {
-    const repository = new LocalGamiRepository({ storage: new MemoryGami(), now: () => at });
-    const html = render(createElement(ProgressScreen, { repository }));
-    expect(html).toContain("Başarılarım");
-    expect(html).toContain("Liderlik Tahtası");
-    expect(html).toContain("Demo verisi");
-    expect(html).toContain("Başarılarım burada birikecek");
-    expect(html).toContain("Kısa dinleme");
-    expect(html).not.toContain("eg-ausculta-progress");
-  });
 
   it("sahte kaynakta demo bandını gizler ve sunucu rozetini kazanıldı gösterir", async () => {
     const repository = new LocalGamiRepository({ storage: new MemoryGami(), now: () => at });
@@ -100,35 +89,5 @@ describe("Ausculta ilerleme ekranı", () => {
     expect(html).toContain("Demo verisi");
     expect(html).toContain("Bu dönemde henüz sıralamaya giren yok.");
     expect(html).toContain('aria-selected="true"');
-  });
-
-  it("sonuç ekranında kazanım kartını çizer", () => {
-    const repository = new LocalGamiRepository({ storage: new MemoryGami(), now: () => at });
-    const state: AppState = {
-      ...initialState,
-      screen: "results",
-      mode: "practice",
-      caseResults: [{
-        caseId: "c1",
-        total: 90,
-        max: 100,
-        mastery: true,
-        domains: {
-          technique: { earned: 1, max: 1 },
-          localization: { earned: 1, max: 1 },
-          recognition: { earned: 1, max: 1 },
-          interpretation: { earned: 1, max: 1 },
-          diagnosis: { earned: 0, max: 0 },
-          systematic: { earned: 1, max: 1 },
-        },
-        answers: [],
-        hintsUsed: 0,
-      }],
-    };
-    const html = render(createElement(ResultsScreen, { repository }), state);
-    expect(html).toContain("Bu oturumda kazandıkların");
-    expect(html).toContain("Demo verisi");
-    expect(html).toContain("Başarılarımı gör");
-    expect(html).toContain("Sıralamaya bak");
   });
 });

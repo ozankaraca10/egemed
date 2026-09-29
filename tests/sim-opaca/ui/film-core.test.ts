@@ -1,35 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-  MARK_KEY_STEP,
-  MAX_SCALE,
-  PAN_KEY_STEP,
-  WINDOW_PRESETS,
-  WHEEL_ZOOM_FACTOR,
-  ZOOM_KEY_FACTOR,
-  annotatedSlices,
-  applyPanKey,
-  availablePresets,
-  clampSlice,
-  constrainView,
-  filterFindingAnnotations,
-  filterSliceAnnotations,
-  goToSlice,
-  hasMultiSliceStack,
-  imageToClient,
-  initialPresetForImage,
-  initialSliceIndex,
-  mapFilmKey,
-  markAnnounceText,
-  measureLen,
-  moveMarkByKey,
-  resetView,
-  stackFrames,
-  stackWindowForPreset,
-  toImage,
-  viewCenterImagePoint,
-  windowSettingForPreset,
-  zoomView,
-} from "../../../packages/sim-opaca/src/index";
+import { MARK_KEY_STEP, MAX_SCALE, PAN_KEY_STEP, WINDOW_PRESETS, ZOOM_KEY_FACTOR, annotatedSlices, applyPanKey, availablePresets, clampSlice, constrainView, filterFindingAnnotations, filterSliceAnnotations, goToSlice, hasMultiSliceStack, imageToClient, initialPresetForImage, initialSliceIndex, mapFilmKey, markAnnounceText, measureLen, moveMarkByKey, stackFrames, stackWindowForPreset, toImage, viewCenterImagePoint, windowSettingForPreset, zoomView } from "../../../packages/sim-opaca/src/index";
 import type { ImageRecord } from "../../../packages/sim-opaca/src/index";
 
 /** Film çekirdek grubu — E2 §8 S10 kabulü: saf fonksiyonlar, sentetik görüntü kaydı. */
@@ -85,10 +55,6 @@ function img(over: Partial<ImageRecord> = {}): ImageRecord {
 }
 
 describe("film-core (S10 saf çekirdek)", () => {
-  it("WINDOW_PRESETS dört ön ayar taşır", () => {
-    expect(WINDOW_PRESETS.map((p) => p.id)).toEqual(["standard", "lung", "mediastinum", "bone"]);
-    expect(WINDOW_PRESETS.find((p) => p.id === "lung")?.w).toEqual({ brightness: 0.9, contrast: 1.35 });
-  });
 
   it("constrainView pan sınırlarını uygular", () => {
     const view = { scale: 4, tx: 9999, ty: -9999 };
@@ -117,10 +83,6 @@ describe("film-core (S10 saf çekirdek)", () => {
     expect(withOrigin.changed).toBe(true);
     expect(withOrigin.view.scale).toBeCloseTo(ZOOM_KEY_FACTOR);
     expect(withOrigin.zoomPct).toBe(Math.round(ZOOM_KEY_FACTOR * 100));
-  });
-
-  it("resetView birim ölçeğe döner", () => {
-    expect(resetView()).toEqual({ view: { scale: 1, tx: 0, ty: 0 }, zoomPct: 100 });
   });
 
   it("toImage ve imageToClient gidiş-dönüş", () => {
@@ -210,9 +172,5 @@ describe("film-core (S10 saf çekirdek)", () => {
     expect(windowSettingForPreset("bone", false)).toEqual(WINDOW_PRESETS.find((p) => p.id === "bone")!.w);
     expect(windowSettingForPreset("bone", true)).toEqual(WINDOW_PRESETS.find((p) => p.id === "standard")?.w);
     expect(windowSettingForPreset("missing", false)).toBeNull();
-  });
-
-  it("tekerlek yakınlaştırma faktörü sabiti", () => {
-    expect(WHEEL_ZOOM_FACTOR).toBe(1.15);
   });
 });

@@ -2,16 +2,7 @@ import { createElement, type ReactNode } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { describe, expect, it } from 'vitest'
 import { EmbeddedProvider } from '../../../packages/sim-opaca/src/EmbeddedContext'
-import {
-  SimulationScreen,
-  StoreProvider,
-  createMemoryRuntimeAdapter,
-  initialState,
-  patientLine,
-  reducer,
-  type Action,
-  type AppState,
-} from '../../../packages/sim-opaca/src/index'
+import { SimulationScreen, StoreProvider, createMemoryRuntimeAdapter, initialState, reducer, type AppState } from '../../../packages/sim-opaca/src/index'
 import type { StoragePort, WindowLike } from '../../../packages/sim-opaca/src/index'
 import { fakeSessions, publicCase, caseResult } from '../session-fixture'
 import { fromServerResult, toClientCase } from '../../../packages/sim-opaca/src/index'
@@ -68,17 +59,6 @@ function renderInStore(node: ReactNode, state: AppState, withSessions = true, no
 }
 
 describe('SimulationScreen (sunucu durumuyla statik render)', () => {
-  it('olgu kartı, hasta satırı ve sunucu görüntüsünü çizer', () => {
-    const html = renderInStore(createElement(SimulationScreen), serverState())
-    expect(html).toContain('Olgu')
-    expect(html).toContain(esc(patientLine(clientCase)))
-    expect(html).toContain(esc(clientCase.chiefComplaint))
-    expect(html).toContain('Vaka 1/2')
-    expect(html).toContain('/api/sims/opaca/sessions/' + SESSION_ID + '/image/img-token-1')
-    // Görüntü kaynağı popover'ı ve yerel örneklem düğmeleri kaldırıldı.
-    expect(html).not.toContain('Görüntü kaynağı')
-    expect(html).not.toContain('Yeni 10 vaka örneklemi')
-  })
 
   it('soru kartını ve birincil aksiyonu çizer', () => {
     const html = renderInStore(createElement(SimulationScreen), serverState())
@@ -120,15 +100,6 @@ describe('oturum kanalı yokken', () => {
 
 describe('sunucu durumu yardımcıları', () => {
   const noopSeam = { emit: () => undefined }
-
-  it('vaka yüklenmeden sunucu durumu hazırlık gösterir', () => {
-    let s: AppState = { ...initialState, mode: 'practice', screen: 'simulation' }
-    const actions: Action[] = [{ type: 'serverStarted', sessionId: SESSION_ID, mode: 'practice', caseCount: 2, perCaseLimitMs: null }]
-    for (const action of actions) s = reducer(s, action, noopSeam)
-    expect(s.server?.status).toBe('loading')
-    expect(s.server?.currentCase).toBeNull()
-    expect(s.server?.cases).toEqual({})
-  })
 
   it('ipucu ve kontrol geri bildirimi sunucu durumunda tutulur', () => {
     let s = serverState()

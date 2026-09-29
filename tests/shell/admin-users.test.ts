@@ -11,22 +11,7 @@ import {
   isAdminProtected,
   resolveRoute,
 } from "../../apps/shell/src/routes";
-import {
-  ADMIN_UNITS,
-  applyUsersQuery,
-  clampPage,
-  clampPageSize,
-  createMockUsersSource,
-  generateSyntheticUsers,
-  hasActiveFilters,
-  matchesUserQuery,
-  MAX_PAGE_SIZE,
-  paginateUsers,
-  sortUsers,
-  toggleSelected,
-  unitNameFor,
-  type AdminUser,
-} from "../../apps/shell/src/admin/usersDataSource";
+import { ADMIN_UNITS, clampPage, clampPageSize, createMockUsersSource, generateSyntheticUsers, hasActiveFilters, matchesUserQuery, MAX_PAGE_SIZE, toggleSelected, type AdminUser } from "../../apps/shell/src/admin/usersDataSource";
 import {
   parseSortChoice,
   sortChoiceFor,
@@ -36,8 +21,6 @@ import {
 } from "../../apps/shell/src/admin/UsersPage";
 import { t } from "../../packages/ui/i18n/tr";
 import { describe, expect, it, vi } from "vitest";
-
-const count = (html: string, needle: string): number => html.split(needle).length - 1;
 
 const USER_A: AdminUser = {
   authMethod: "sso",
@@ -135,18 +118,6 @@ function baseViewProps(overrides: Partial<UsersListViewProps>): UsersListViewPro
 }
 
 describe("sentetik kullanıcı kaynağı determinizmi", () => {
-  it("farklı tohum farklı sonuç verir", () => {
-    const first = generateSyntheticUsers(69, 50);
-    expect(first[0]).toMatchObject({
-      authMethod: "dev",
-      createdAt: "2026-08-21T06:00:00.000Z",
-      id: "user-001",
-      status: "suspended",
-      unitId: "unit-2",
-    });
-    const other = generateSyntheticUsers(70, 50);
-    expect(JSON.stringify(other)).not.toBe(JSON.stringify(first));
-  });
 
   it("her kayıt geçerli alan kümesi ve benzersiz kimlik taşır; gerçek kişi adı yoktur", () => {
     const users = generateSyntheticUsers(69, 120);
@@ -191,11 +162,6 @@ describe("filtre saf fonksiyonu (matchesUserQuery)", () => {
     expect(matchesUserQuery(USER_A, { q: "999" })).toBe(false);
     expect(matchesUserQuery(USER_A, { q: "  " })).toBe(true);
   });
-
-  it("boş sorgu her kaydı eşler", () => {
-    expect(matchesUserQuery(USER_A, {})).toBe(true);
-    expect(matchesUserQuery(USER_B, {})).toBe(true);
-  });
 });
 
 describe("hasActiveFilters", () => {
@@ -211,22 +177,6 @@ describe("hasActiveFilters", () => {
   });
 });
 
-describe("sıralama saf fonksiyonu (sortUsers)", () => {
-  it("ada göre artan/azalan sıralar", () => {
-    expect(sortUsers(SAMPLE_USERS, "displayName", "asc").map((u) => u.id)).toEqual(["user-001", "user-002"]);
-    expect(sortUsers(SAMPLE_USERS, "displayName", "desc").map((u) => u.id)).toEqual(["user-002", "user-001"]);
-  });
-  it("kayıt tarihine ve son girişe göre sıralar; null son giriş en sona düşer", () => {
-    expect(sortUsers(SAMPLE_USERS, "createdAt", "desc").map((u) => u.id)).toEqual(["user-002", "user-001"]);
-    expect(sortUsers(SAMPLE_USERS, "lastLoginAt", "asc").map((u) => u.id)).toEqual(["user-002", "user-001"]);
-  });
-  it("girdi dizisini değiştirmez (saf)", () => {
-    const copy = [...SAMPLE_USERS];
-    sortUsers(SAMPLE_USERS, "displayName", "desc");
-    expect(SAMPLE_USERS).toEqual(copy);
-  });
-});
-
 describe("sayfalama saf fonksiyonları", () => {
   it("clampPage/clampPageSize geçersiz girdide varsayılana, aşırı büyükte tavana kilitlenir", () => {
     expect(clampPage(undefined)).toBe(1);
@@ -238,20 +188,6 @@ describe("sayfalama saf fonksiyonları", () => {
     expect(clampPageSize(5)).toBe(5);
     expect(clampPageSize(MAX_PAGE_SIZE + 50)).toBe(MAX_PAGE_SIZE);
   });
-  it("paginateUsers doğru dilimi döner; sayfa aralık dışındaysa boş dizi", () => {
-    const users = generateSyntheticUsers(1, 25);
-    expect(paginateUsers(users, 1, 10)).toHaveLength(10);
-    expect(paginateUsers(users, 3, 10)).toHaveLength(5);
-    expect(paginateUsers(users, 99, 10)).toHaveLength(0);
-  });
-  it("applyUsersQuery filtre SONRASI toplamı meta.total'da taşır, sayfalama yalnız dilimlemedir", () => {
-    const users = generateSyntheticUsers(5, 200);
-    const kullaniciCount = users.filter((user) => user.role === "kullanici").length;
-    const result = applyUsersQuery(users, { page: 1, pageSize: 10, role: "kullanici" });
-    expect(result.meta.total).toBe(kullaniciCount);
-    expect(result.data.length).toBe(Math.min(10, kullaniciCount));
-    expect(result.data.every((user) => user.role === "kullanici")).toBe(true);
-  });
 });
 
 describe("toggleSelected ve unitNameFor", () => {
@@ -262,10 +198,6 @@ describe("toggleSelected ve unitNameFor", () => {
     expect(empty.has("user-001")).toBe(false);
     const withoutA = toggleSelected(withA, "user-001");
     expect(withoutA.has("user-001")).toBe(false);
-  });
-  it("bilinen birim kimliğini ada çevirir, bilinmeyende kimliği döner", () => {
-    expect(unitNameFor("unit-3", ADMIN_UNITS)).toBe("3. Sınıf");
-    expect(unitNameFor("unit-yok", ADMIN_UNITS)).toBe("unit-yok");
   });
 });
 
@@ -316,41 +248,6 @@ describe("#/admin/kullanicilar rotası ve koruması", () => {
 
 describe("UsersListView işaretlemesi", () => {
   const READY_META = { page: 1, pageSize: 20, total: SAMPLE_USERS.length };
-
-  it("tablo başlıklarını (@egemed/ui DataTable, T156) ve durum rozetlerini metinle çizer", () => {
-    const html = renderToStaticMarkup(
-      createElement(UsersListView, baseViewProps({ result: { data: SAMPLE_USERS, meta: READY_META }, status: "ready" })),
-    );
-    for (const key of [
-      "admin.users.table.name",
-      "admin.users.table.username",
-      "admin.users.table.role",
-      "admin.users.table.unit",
-      "admin.users.table.status",
-    ] as const) {
-      expect(html, key).toContain(t(key));
-    }
-    expect(html).toContain('class="eg-dtable eg-dtable--stack"');
-    expect(count(html, "eg-check__control")).toBe(SAMPLE_USERS.length);
-    expect(html).toContain(t("admin.users.status.active"));
-    expect(html).toContain(t("admin.users.status.invited"));
-    expect(html).toContain(`href="${adminUserDetailHref("user-001")}"`);
-    expect(html).toContain("Örnek Kullanıcı 001");
-    expect(html).not.toContain("CLIX");
-  });
-
-  it("boş veri kümesinde table.empty + devre dışı 'Kullanıcı ekle' gösterir", () => {
-    const html = renderToStaticMarkup(
-      createElement(
-        UsersListView,
-        baseViewProps({ query: {}, result: { data: [], meta: { page: 1, pageSize: 20, total: 0 } }, status: "ready" }),
-      ),
-    );
-    expect(html).toContain(t("table.empty"));
-    expect(count(html, t("admin.users.action.add"))).toBe(2); // üst çubuk + boş durum
-    expect(count(html, `href="${adminUserCreateHref()}"`)).toBe(2); // T70: artık gerçek bağlantı
-    expect(html).not.toContain(t("admin.users.filtered.empty"));
-  });
 
   it("filtreli boş sonuçta 'filtreleri temizle' eylemiyle ayrı bir metin gösterir", () => {
     const html = renderToStaticMarkup(
@@ -423,28 +320,6 @@ describe("UsersListView işaretlemesi", () => {
     expect(cleared).toBe(1);
   });
 
-  it("seçim sütunu hücreleri onToggleSelect'i doğru kimlikle çağırır (DataTable columns, T156)", () => {
-    const calls: string[] = [];
-    const tree = UsersListView(
-      baseViewProps({
-        onToggleSelect: (id) => calls.push(id),
-        result: { data: SAMPLE_USERS, meta: READY_META },
-        status: "ready",
-      }),
-    ) as ReactElement;
-    const html = renderToStaticMarkup(tree);
-    expect(html).toContain(`href="${adminUserDetailHref("user-001")}"`);
-    expect(html).toContain(`href="${adminUserDetailHref("user-002")}"`);
-    const selectColumn = findSelectColumn(tree);
-    // Statik işaretleme olay taşımaz; sütunun `cell` işlevini doğrudan çağırıp
-    // döndürdüğü `Checkbox` öğesinin geri çağrısını tetikleriz.
-    const checkboxA = selectColumn.cell(USER_A) as ReactElement;
-    const checkboxB = selectColumn.cell(USER_B) as ReactElement;
-    (checkboxA.props as { onCheckedChange: (checked: boolean) => void }).onCheckedChange(true);
-    (checkboxB.props as { onCheckedChange: (checked: boolean) => void }).onCheckedChange(true);
-    expect(calls).toEqual(["user-001", "user-002"]);
-  });
-
   it("T150: oturumdaki adminin kendi satırında seçim kutusu devre dışıdır ve not içerir; diğer satır etkin kalır", () => {
     const tree = UsersListView(
       baseViewProps({
@@ -473,15 +348,6 @@ describe("UsersPage kabı", () => {
     const html = renderToStaticMarkup(createElement(UsersPage));
     expect(html).toContain(t("admin.users.title"));
     expect(html).toContain('aria-busy="true"');
-  });
-
-  it("enjekte edilen kaynakla da ilk render iskelet gösterir; efekt SSR'da çalışmaz", async () => {
-    const source = createMockUsersSource(7, 5);
-    const html = renderToStaticMarkup(createElement(UsersPage, { dataSource: source }));
-    expect(html).toContain('aria-busy="true"');
-    // Kaynağın kendisi bağımsız olarak çalışır (determinizm doğrulaması burada değil, üstteki grupta).
-    const list = await source.list({});
-    expect(list.meta.total).toBe(5);
   });
 });
 

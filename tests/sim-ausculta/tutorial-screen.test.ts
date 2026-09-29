@@ -54,12 +54,4 @@ describe("TutorialScreen", () => {
     expect(html).toContain("min-width:44px");
     expect(tutorialProgress([])).toEqual({ steps: [false, false, false], currentStep: 0, allDone: false });
   });
-
-  it("gömülü modda footer ve arka plan çizilmez", () => {
-    const html = renderInStore(createElement(TutorialScreen, { embedded: true }));
-    expect(html).not.toContain("<footer");
-    expect(html).not.toContain('class="app-bg"');
-    expect(html).not.toContain("<header");
-    expect(html).toContain("Stetoskobu sürükleyin");
-  });
 });

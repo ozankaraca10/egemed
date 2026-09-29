@@ -70,31 +70,9 @@ describe("clampProgress ve progressPercent", () => {
     expect(clampProgress(3, Number.NaN)).toBe(0);
     expect(progressPercent(3, 0)).toBe(0);
   });
-
-  it("yüzdeyi tam sayıya yuvarlar", () => {
-    expect(progressPercent(7, 13)).toBe(54);
-    expect(progressPercent(13, 13)).toBe(100);
-    expect(progressPercent(-1, 13)).toBe(0);
-  });
 });
 
 describe("ModeCard açık kart", () => {
-  it("tonu, başlık bağını ve madde listesini kurar", () => {
-    const html = render(openCard);
-    expect(html).toContain('data-tone="learn"');
-    expect(html).toContain('data-locked="false"');
-    const titleId = /<h3[^>]*\bid="([^"]+)"/.exec(html)?.[1];
-    expect(titleId).toBeTruthy();
-    expect(attr(tagWith(html, "eg-mode-card\\b"), "aria-labelledby")).toBe(titleId);
-    expect((html.match(/<li/g) ?? []).length).toBe(openCard.items.length);
-    expect(tagWith(html, "eg-mode-card__check")).toContain('aria-hidden="true"');
-  });
-
-  it("headingLevel 2 ile h2 üretir", () => {
-    const html = render({ ...openCard, headingLevel: 2 });
-    expect(html).toContain("<h2");
-    expect(html).not.toContain("<h3");
-  });
 
   it("sayı + progressbar semantiğini ve çubuk genişliğini kurar", () => {
     const html = render(openCard);

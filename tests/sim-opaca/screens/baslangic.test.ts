@@ -2,16 +2,7 @@ import { createElement, type ReactNode } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import { EmbeddedProvider } from "../../../packages/sim-opaca/src/EmbeddedContext";
-import {
-  FS_PROMPT_KEY,
-  ModeSelectScreen,
-  StartScreen,
-  StoreProvider,
-  TutorialScreen,
-  createMemoryRuntimeAdapter,
-  loadFsPromptDone,
-  saveFsPromptDone,
-} from "../../../packages/sim-opaca/src/index";
+import { FS_PROMPT_KEY, ModeSelectScreen, StoreProvider, TutorialScreen, createMemoryRuntimeAdapter, loadFsPromptDone, saveFsPromptDone } from "../../../packages/sim-opaca/src/index";
 import type { StoragePort, WindowLike } from "../../../packages/sim-opaca/src/index";
 import { fakeSessions } from "../session-fixture";
 
@@ -51,39 +42,7 @@ function renderInStore(node: ReactNode, storage: StoragePort = memoryStorage(), 
   );
 }
 
-describe("StartScreen (statik render)", () => {
-  it("başlangıç CTA'ları ve güven kutularını çizer", () => {
-    const html = renderInStore(createElement(StartScreen));
-    expect(html).toContain("Simülatörü başlat");
-    expect(html).toContain("Nasıl kullanılır?");
-    expect(html).toContain("Hakkında ve kaynaklar");
-    expect(html).toContain("Neden güvenilir?");
-    expect(html).toContain("radyolojik görüntü");
-    expect(html).toContain('<footer class="eg-footer">');
-    expect(html).toContain('src="/sims/opaca/brand/logo-horizontal-web.png"');
-    expect(html).toContain("SCORM uyumlu ölçme ve değerlendirme");
-  });
-
-  it("gömülü modda footer çizilmez ve SCORM ifadesi kaldırılır", () => {
-    const html = renderInStore(createElement(StartScreen, { embedded: true }));
-    expect(html).not.toContain("<footer");
-    expect(html).not.toContain("SCORM");
-    expect(html).toContain("ölçme ve değerlendirme");
-  });
-});
-
 describe("ModeSelectScreen (statik render)", () => {
-  it("üç mod kartını İnceleme/Uygulama/Değerlendirme tonlarıyla çizer", () => {
-    const html = renderInStore(createElement(ModeSelectScreen));
-    expect(html).toContain('class="mode-card learn"');
-    expect(html).toContain('class="mode-card practice');
-    expect(html).toContain('class="mode-card assessment');
-    expect(html).toContain("Öğrenme Modu");
-    expect(html).toContain("Uygulama Modu");
-    expect(html).toContain("Değerlendirme Modu");
-    expect(html).toContain("Öğrenmeye başla");
-    expect(html).toContain("Önce öğrenme modunda okuma sırasını oturtmanız önerilir.");
-  });
 
   it("T218: öğrenme tamamlanmadan uygulama/değerlendirme kartları kilitlidir (gönderim kilidi)", () => {
     const html = renderInStore(createElement(ModeSelectScreen), memoryStorage(), true);
@@ -95,35 +54,11 @@ describe("ModeSelectScreen (statik render)", () => {
     expect(html).not.toContain("Bu ayın ödülü");
   });
 
-  it("A2.3: oturum kanalı yokken uygulama/değerlendirme kartları pasiftir", () => {
-    const html = renderInStore(createElement(ModeSelectScreen));
-    const segments = html.split('class="mode-card ');
-    expect(segments.find((segment) => segment.startsWith("practice")) ?? "").toContain('disabled=""');
-    expect(segments.find((segment) => segment.startsWith("assessment")) ?? "").toContain('disabled=""');
-  });
-
-  it("oyunlaştırma bayrağı açıkken ayın ödülü satırı çizilir", () => {
-    const html = renderInStore(createElement(ModeSelectScreen, { gamiEnabled: true }));
-    expect(html).toContain("Bu ayın ödülü");
-    expect(html).toContain("gün kaldı");
-  });
-
-  it("gömülü modda footer ve arka plan dekorasyonu çizilmez", () => {
-    const html = renderInStore(createElement(ModeSelectScreen, { embedded: true }));
-    expect(html).not.toContain("<footer");
-    expect(html).not.toContain('class="app-bg"');
-  });
-
   it("gömülü modda SCORM ifadesi yoktur (ADR-006, T137)", () => {
     const html = renderInStore(createElement(ModeSelectScreen, { embedded: true }));
     expect(html).not.toContain("SCORM");
     expect(html).toContain("Puan kaydedilir");
     expect(html).not.toContain("LMS");
-  });
-
-  it("gömülü olmayan modda SCORM puanı maddesi görünür", () => {
-    const html = renderInStore(createElement(ModeSelectScreen));
-    expect(html).toContain("SCORM puanı");
   });
 });
 

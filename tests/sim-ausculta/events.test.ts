@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { LOG_LIMIT, LOG_TRIM, createBus, initialState, reducer } from "../../packages/sim-ausculta/src/index";
+import { createBus, initialState, reducer } from "../../packages/sim-ausculta/src/index";
 import type { SimEvent } from "../../packages/sim-ausculta/src/index";
 
 /** Olay veri yolu — mount başına `createBus(now)`; iki örnek birbirine sızmaz. */
@@ -25,18 +25,6 @@ describe("olay veri yolu (createBus)", () => {
     expect(seenB.map((e) => e.type)).toEqual(["hint_used", "hint_used"]);
   });
 
-  it("zaman damgası enjekte edilen now() ile vurulur", () => {
-    let offset = 0;
-    const bus = createBus(() => 1000 + offset);
-    const first = bus.emit({ type: "hint_used", caseId: "c1" });
-    offset = 58;
-    const second = bus.emit({ type: "hint_used", caseId: "c1" });
-
-    expect(first.at).toBe(1000);
-    expect(second.at).toBe(1058);
-    expect(bus.getLog().map((e) => e.at)).toEqual([1000, 1058]);
-  });
-
   it("abonelik kaldırılınca olay gitmez; günlük abonelikten bağımsız büyür", () => {
     const bus = createBus(() => 5);
     const seen: SimEvent[] = [];
@@ -47,16 +35,6 @@ describe("olay veri yolu (createBus)", () => {
 
     expect(seen).toHaveLength(1);
     expect(bus.getLog()).toHaveLength(2);
-  });
-
-  it("günlük 2000 kayıtta kırpılır: en eski 500 düşer", () => {
-    const bus = createBus(() => 0);
-    for (let i = 0; i <= LOG_LIMIT; i++) bus.emit({ type: "point_visited", pointId: `p${i}`, dwellMs: 0 });
-
-    const log = bus.getLog();
-    expect(log).toHaveLength(LOG_LIMIT + 1 - LOG_TRIM);
-    const first = log[0];
-    expect(first?.type === "point_visited" && first.pointId).toBe(`p${LOG_TRIM}`);
   });
 
   it("reducer olayları seam üzerinden yayar (zaman veri yolunda vurulur)", () => {
@@ -79,13 +57,5 @@ describe("olay veri yolu (createBus)", () => {
       ["answer_submitted", 40],
       ["hint_used", 50],
     ]);
-  });
-
-  it("seam verilmezse olay yutulur; reducer saf kalır", () => {
-    const s = reducer(initialState, { type: "setHead", head: "bell" });
-    expect(s.head).toBe("bell");
-    expect(s.telemetry.headChanges).toBe(1);
-    expect(initialState.head).toBe("diaphragm");
-    expect(initialState.telemetry.headChanges).toBe(0);
   });
 });

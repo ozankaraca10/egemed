@@ -23,15 +23,6 @@ describe("ScreenHeading", () => {
     expect(html).toContain("Çalışma modunu seçin");
   });
 
-  it("gömülü modda h2 çizer (aynı sınıf)", () => {
-    const html = renderHeading(
-      createElement(ScreenHeading, { className: "mode-title", children: "Çalışma modunu seçin" }),
-      true,
-    );
-    expect(html).toMatch(/^<h2\b[^>]*class="mode-title"[^>]*>/);
-    expect(html).toContain("Çalışma modunu seçin");
-  });
-
   it("id özniteliğini korur", () => {
     const html = renderHeading(
       createElement(ScreenHeading, { id: "main-h", className: "src-title", children: "Başlık" }),

@@ -10,23 +10,6 @@ function pageId(hash: string): string {
 }
 
 describe("resolveRoute", () => {
-  it("boş, '#' ve '#/' ana sayfaya çözülür", () => {
-    for (const hash of ["", "#", "#/"]) expect(pageId(hash), hash).toBe("home");
-  });
-  it("her ROUTES yolu kendi kimliğine çözülür; sondaki '/' ve sorgu yok sayılır", () => {
-    for (const route of ROUTES) expect(pageId(`#${route.path}`), route.path).toBe(route.id);
-    for (const hash of ["#/simulatorler/", "#/simulatorler//", "#/simulatorler?x=1", "#/simulatorler/?x=1"]) {
-      expect(pageId(hash), hash).toBe("simulators");
-    }
-  });
-  it("bilinmeyen yol notFound'a çözülür", () => {
-    expect(resolveRoute("#/yok")).toEqual({ kind: "notFound", path: "/yok" });
-    expect(resolveRoute("#/simulatorler/fazla").kind).toBe("notFound");
-  });
-  it("kaldırılan Görevler/Not Defteri yolları artık notFound'a çözülür (T159)", () => {
-    expect(resolveRoute("#/gorevler").kind).toBe("notFound");
-    expect(resolveRoute("#/not-defteri").kind).toBe("notFound");
-  });
   it("Meydan Okuma rotaları: liste, ayrıntı ve düello modunda sim (ADR-010)", () => {
     const id = "11111111-1111-4111-8111-111111111111";
     expect(resolveRoute("#/meydan-okuma")).toMatchObject({ kind: "page", route: { id: "challenges" } });

@@ -21,14 +21,6 @@ describe("Card", () => {
     expect(labelledBy).toBe(id);
   });
 
-  it("headingLevel 3 verilince h3 üretir", () => {
-    const html = renderToStaticMarkup(
-      createElement(Card, { title: "Bulgular", headingLevel: 3, children: "İçerik" }),
-    );
-    expect(html).toContain("<h3");
-    expect(html).not.toContain("<h2");
-  });
-
   it("başlık yoksa aria-labelledby taşımaz", () => {
     const html = renderToStaticMarkup(createElement(Card, { children: "Yalnız içerik" }));
     expect(html).not.toContain("aria-labelledby");

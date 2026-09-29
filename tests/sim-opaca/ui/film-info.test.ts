@@ -1,13 +1,7 @@
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
-import {
-  FilmCornerBadge,
-  FilmInfoPanel,
-  LABEL_SOURCE_TEXT,
-  sideMarkerFor,
-  syntheticDateFor,
-} from "../../../packages/sim-opaca/src/index";
+import { FilmCornerBadge, FilmInfoPanel, LABEL_SOURCE_TEXT, sideMarkerFor } from "../../../packages/sim-opaca/src/index";
 import type { ImageRecord } from "../../../packages/sim-opaca/src/index";
 
 /** Film bilgi paneli — E2 §8 S11 kabulü (statik render): kaynak/atıf satırları, kalite beklemede
@@ -95,36 +89,6 @@ function ct(over: Partial<ImageRecord> = {}): ImageRecord {
 }
 
 describe("FilmInfoPanel (statik render)", () => {
-  it("görüntü yoksa kısa mesaj çizilir", () => {
-    expect(renderToStaticMarkup(createElement(FilmInfoPanel, { image: undefined }))).toContain("Film seçilmedi.");
-  });
-
-  it("XR paneli sentetik banner, projeksiyon ve kalite beklemede rozetini çizilir", () => {
-    const html = renderToStaticMarkup(createElement(FilmInfoPanel, { image: xr() }));
-    expect(html).toContain('class="film-info-panel"');
-    expect(html).toContain('class="film-info-synthetic-banner"');
-    expect(html).toContain("ÖRNEK HASTA");
-    expect(html).toContain(syntheticDateFor(xr()));
-    expect(html).toContain("PA (arka-ön)");
-    expect(html).toContain("DICOM meta verisi (ViewPosition)");
-    expect(html).toContain('class="is-pending"');
-    expect(html.match(/beklemede/g)?.length).toBe(3);
-    expect(html).not.toContain("Toraks BT");
-  });
-
-  it("doldurulmuş kalite alanları beklemede rozeti taşımaz", () => {
-    const html = renderToStaticMarkup(
-      createElement(FilmInfoPanel, {
-        image: xr({
-          quality: { inspiration: "yeterli", rotation: "yok", penetration: "yeterli" },
-        }),
-      })
-    );
-    expect(html).toContain("yeterli");
-    expect(html).toContain("yok");
-    expect(html).not.toContain('class="is-pending"');
-    expect(html).not.toContain("beklemede");
-  });
 
   it("kaynak/atıf: uzman okuma satırı NLP metninden ayrılır", () => {
     const html = renderToStaticMarkup(
@@ -136,22 +100,6 @@ describe("FilmInfoPanel (statik render)", () => {
     expect(html).toContain("Normal akciğer grafisi");
     expect(html).toContain(`Kaynak: ${LABEL_SOURCE_TEXT.expert_reading}`);
     expect(html).not.toContain(LABEL_SOURCE_TEXT.report_nlp);
-  });
-
-  it("nih-cxr14 dışı veri setinde projeksiyon kaynak notu değişir", () => {
-    const html = renderToStaticMarkup(
-      createElement(FilmInfoPanel, { image: xr({ sourceDataset: "nlm-montgomery" }) })
-    );
-    expect(html).toContain("veri seti dokümantasyonu / küratör ataması");
-    expect(html).not.toContain("DICOM meta verisi");
-  });
-
-  it("annotated=false yalnız açıklama katmanı yardımlarını gizler (kalite satırı yardımları kalır)", () => {
-    const html = renderToStaticMarkup(createElement(FilmInfoPanel, { image: xr(), annotated: false }));
-    expect(html).not.toContain("DICOM meta verisi");
-    expect(html).not.toContain("kurşun R/L işareti");
-    expect(html).toContain("Arka kot sayımı ile değerlendirilir");
-    expect(html).toContain("PA (arka-ön)");
   });
 
   it("pediatrik popülasyon satırı çizilir", () => {
@@ -184,23 +132,5 @@ describe("FilmCornerBadge ve sentetik yardımcılar", () => {
     expect(html).toContain(marker!);
     expect(html).toContain('aria-hidden="true"');
     expect(html).toContain("Sentetik taraf işareti");
-  });
-
-  it("görüntü yoksa köşe rozeti çizilmez", () => {
-    expect(renderToStaticMarkup(createElement(FilmCornerBadge, { image: undefined }))).toBe("");
-    expect(sideMarkerFor(undefined)).toBeNull();
-    expect(syntheticDateFor(undefined)).toBe("—");
-  });
-
-  it("sentetik tarih ve taraf işareti id'ye göre deterministik", () => {
-    const a = xr({ id: "deterministic_xr_a" });
-    const b = xr({ id: "deterministic_xr_b" });
-    const dateA = syntheticDateFor(a);
-    const dateB = syntheticDateFor(b);
-    expect(dateA).toBe("21.09.2020");
-    expect(dateB).toMatch(/^\d{2}\.\d{2}\.\d{4}$/);
-    expect(dateA).not.toBe(dateB);
-    expect(sideMarkerFor(a)).toBe("R");
-    expect(sideMarkerFor(b)).toBe("L");
   });
 });

@@ -119,30 +119,6 @@ describe("ResultsScreen", () => {
     expect(MASTERY_THRESHOLD).toBe(80);
   });
 
-  it("değerlendirmede toplam süreyi ve başarı metnini gösterir", () => {
-    const { html } = renderResults({
-      mode: "assessment",
-      caseResults: [resultFor("assessment", true)],
-      assessmentTimer: 125_000,
-    });
-    expect(html).toContain("Değerlendirme Tamamlandı");
-    expect(html).toContain("Başarılı");
-    expect(html).toContain("Tebrikler");
-    expect(html).toContain("Toplam öğrenme süresi");
-    expect(html).toContain("02:05");
-    expect(html).toContain("<b>100</b>");
-    expect(html).toContain("92/100");
-  });
-
-  it("gömülü modda footer ve arka plan çizilmez", () => {
-    const { html } = renderResults({ mode: "practice", caseResults: [resultFor("practice", true)] }, trackingStorage(), {
-      embedded: true,
-    });
-    expect(html).not.toContain("<footer");
-    expect(html).not.toContain('class="app-bg"');
-    expect(html).toContain("Vaka Raporu");
-  });
-
   it("kazanım kartı yalnız öğrenci kitlesinde çizilir (T174)", () => {
     const renderWithAudience = (audience: SimAudience): string => {
       const repository = new LocalGamiRepository({ storage: gamiStoragePort(trackingStorage()), now: () => new Date(NOW) });

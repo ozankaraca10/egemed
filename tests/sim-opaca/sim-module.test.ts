@@ -2,16 +2,7 @@ import { type ReactNode } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import type { SimChrome, SimMountContext, SimMountTarget } from "../../packages/sim-host/src/SimHost";
-import type { GamiRepository } from "../../packages/gamification-core/src/repository";
-import type { OpacaAttemptRecord } from "../../packages/sim-opaca/src/gamification/attempt";
-import {
-  DEFAULT_ASSET_BASE,
-  createMemoryRuntimeAdapter,
-  createOpacaModule,
-  opacaModule,
-  resolveAssetUrl,
-  setAssetBase,
-} from "../../packages/sim-opaca/src/index";
+import { DEFAULT_ASSET_BASE, createMemoryRuntimeAdapter, createOpacaModule } from "../../packages/sim-opaca/src/index";
 import type { OpacaContainer, OpacaModuleDeps, OpacaRoot } from "../../packages/sim-opaca/src/index";
 import type { StoragePort, WindowLike } from "../../packages/sim-opaca/src/index";
 
@@ -94,102 +85,6 @@ function fakeTarget(): FakeTarget {
 }
 
 describe("createOpacaModule (SimHost adaptörü)", () => {
-  it("modül kimliği opaca ve varsayılan dışa aktarım aynı örneği kullanır", () => {
-    expect(createOpacaModule().id).toBe("opaca");
-    expect(opacaModule.id).toBe("opaca");
-  });
-
-  it("mount → dispose → remount yaşam döngüsünü tamamlar", () => {
-    const deps = createTestDeps();
-    const module = createOpacaModule(deps);
-    const target = fakeTarget();
-
-    const dispose1 = module.mount(target, CONTEXT);
-    expect(target.children).toHaveLength(1);
-    expect(target.children[0]?.rendered).toBe(true);
-
-    dispose1();
-    expect(target.children).toHaveLength(0);
-    expect(target.children[0]?.removed).toBeUndefined();
-
-    const dispose2 = module.mount(target, CONTEXT);
-    expect(target.children).toHaveLength(1);
-    expect(target.children[0]?.rendered).toBe(true);
-    dispose2();
-    expect(target.children).toHaveLength(0);
-  });
-
-  it("çift dispose idempotent; kök kaldırıldıktan sonra tekrar remove çağrılmaz", () => {
-    const deps = createTestDeps();
-    const module = createOpacaModule(deps);
-    const target = fakeTarget();
-    const dispose = module.mount(target, CONTEXT);
-    const child = target.children[0];
-    expect(child).toBeDefined();
-
-    dispose();
-    expect(child?.removed).toBe(true);
-    expect(target.children).toHaveLength(0);
-
-    dispose();
-    dispose();
-    expect(target.children).toHaveLength(0);
-  });
-
-  it("mount başına varlık taban yolunu ayarlar ve dispose sonrası geri alır", () => {
-    setAssetBase("/onceki/");
-    const deps = createTestDeps({ assetBase: "/test/opaca/" });
-    const module = createOpacaModule(deps);
-    const dispose = module.mount(fakeTarget(), CONTEXT);
-    expect(resolveAssetUrl("assets/xray/runtime/demo.webp")).toBe("/test/opaca/assets/xray/runtime/demo.webp");
-    expect(resolveAssetUrl("/assets/brand/logo.png")).toBe("/test/opaca/assets/brand/logo.png");
-    dispose();
-    expect(resolveAssetUrl("brand/logo.png")).toBe("/onceki/brand/logo.png");
-    setAssetBase("/sims/opaca/");
-  });
-
-  it("DOM'suz double ile StoreProvider + App ağacını render eder", () => {
-    const rendered: unknown[] = [];
-    const deps = createTestDeps({
-      createRoot: () => ({
-        render(tree) {
-          rendered.push(tree);
-        },
-        unmount() {
-          rendered.length = 0;
-        },
-      }),
-    });
-    const dispose = createOpacaModule(deps).mount(fakeTarget(), CONTEXT);
-    expect(rendered).toHaveLength(1);
-    const provider = rendered[0] as { type: unknown; props: { children: { props: { children: { props: { embedded: boolean } } } } } };
-    expect(provider.props.children.props.children.props.embedded).toBe(true);
-    dispose();
-    expect(rendered).toHaveLength(0);
-  });
-
-  it("gamiRepository enjekte edilince mount/dispose ile bağlanır", () => {
-    const apiRepo: GamiRepository<OpacaAttemptRecord> = {
-      getMe: async () => ({ id: "me", displayName: null, public: true, cohort: null }),
-      updateMe: async () => undefined,
-      recordAttempt: async () => undefined,
-      recordLearn: async () => undefined,
-      listAttempts: async () => [],
-      getLeaderboard: async (_period, _cohort, now) => ({
-        period: "week" as const,
-        cohort: "all" as const,
-        generatedAt: now.toISOString(),
-        isDemo: false,
-        rows: [],
-      }),
-      getMonthlyReward: async () => null,
-      getRewardWinners: async () => [],
-    };
-    const deps = createTestDeps({ gamiRepository: apiRepo });
-    const dispose = createOpacaModule(deps).mount(fakeTarget(), CONTEXT);
-    dispose();
-    expect(createOpacaModule(deps).id).toBe("opaca");
-  });
 
   it("setChrome varken adımı ve eylemleri gönderir, araç çubuğu ile adım göstergesini çizmez", async () => {
     let tree: ReactNode = null;

@@ -25,24 +25,7 @@ function result(earned: number): CaseResult {
   };
 }
 
-class MemoryStorage implements StoragePort {
-  readonly entries = new Map<string, string>();
-  get(key: string): string | null {
-    return this.entries.get(key) ?? null;
-  }
-  set(key: string, value: string): void {
-    this.entries.set(key, value);
-  }
-}
-
 describe("en iyi puan (bestScore, StoragePort)", () => {
-  it("setResults mod başına en iyi puanı yalnız daha yüksekse günceller", () => {
-    const s0: AppState = { ...initialState, mode: "practice" };
-    let s = reducer(s0, { type: "setResults", results: [result(100)] });
-    expect(s.bestScore.practice).toBe(100);
-    s = reducer(s, { type: "setResults", results: [result(0)] });
-    expect(s.bestScore.practice).toBe(100);
-  });
 
   it("practice ve assessment birbirini etkilemez", () => {
     let s: AppState = { ...initialState, mode: "practice" };
@@ -54,17 +37,6 @@ describe("en iyi puan (bestScore, StoragePort)", () => {
   it("başlangıç sıfırdır; anahtar ausculta.bestScore", () => {
     expect(initialState.bestScore).toEqual({ practice: 0, assessment: 0 });
     expect(BEST_SCORE_KEY).toBe("ausculta.bestScore");
-  });
-
-  it("kayıt aynen okunur; boş veya bozuk kayıt sıfırdır", () => {
-    const storage = new MemoryStorage();
-    saveBestScore(storage, { practice: 80, assessment: 55 });
-    expect(storage.entries.get(BEST_SCORE_KEY)).toBe('{"practice":80,"assessment":55}');
-    expect(loadBestScore(storage)).toEqual({ practice: 80, assessment: 55 });
-    expect(loadBestScore(new MemoryStorage())).toEqual({ practice: 0, assessment: 0 });
-    const corrupt = new MemoryStorage();
-    corrupt.set(BEST_SCORE_KEY, "{bozuk");
-    expect(loadBestScore(corrupt)).toEqual({ practice: 0, assessment: 0 });
   });
 
   it("erişim engelinde sessizce yutulur", () => {

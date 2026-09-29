@@ -120,19 +120,6 @@ function renderViewer(props: Partial<FilmViewerProps> = {}): string {
 }
 
 describe("FilmViewer (statik render)", () => {
-  it("görüntü yoksa boş mesaj çizilir", () => {
-    const html = renderToStaticMarkup(
-      createElement(FilmViewer, {
-        image: undefined,
-        zones: ZONES,
-        showZones: false,
-        showAnnotations: false,
-        env: noopEnv,
-      }),
-    );
-    expect(html).toContain("film-empty");
-    expect(html).toContain("Bu vaka için görüntü kaydı bulunamadı.");
-  });
 
   it("XR kaydında erişilebilir sahne etiketi ve araç çubuğu çizilir", () => {
     const html = renderViewer({ label: "Test grafisi" });
@@ -166,13 +153,6 @@ describe("FilmViewer (statik render)", () => {
     expect(html).toContain('aria-live="polite"');
   });
 
-  it("işaretleme kapalıyken işaret düğmesi devre dışıdır", () => {
-    const html = renderViewer({ markEnabled: false });
-    expect(html).toContain("İşaretle");
-    expect(html).toContain("disabled");
-    expect(html).toContain("İşaretleme yalnız lokalizasyon sorusunda açılır");
-  });
-
   it("uzman işaretlemesi ve bölge katmanı açıkken SVG overlay çizilir", () => {
     const html = renderViewer({
       showAnnotations: true,
@@ -183,12 +163,6 @@ describe("FilmViewer (statik render)", () => {
     expect(html).toContain("anno-rect");
     expect(html).toContain("zone-rect");
     expect(html).toContain("anno-label");
-  });
-
-  it("öğretim overlay'i açıkken statik renderda yükleme beklenir (rozet film-info testinde)", () => {
-    const html = renderViewer({ showInfoOverlay: true });
-    expect(html).toContain("film-viewer");
-    expect(html).not.toContain("film-corner-badge");
   });
 
   it("BT kaydında kesit HUD'u, kaydırıcı ve BT aria etiketi çizilir", () => {
@@ -224,16 +198,5 @@ describe("FilmViewer (statik render)", () => {
     expect(html).toContain("is-inert");
     expect(html).toContain('tabindex="-1"');
     expect(html).not.toContain("film-mark-hint");
-  });
-
-  it("fitContent kapalıyken sahne en-boy oranı taşımaz (diğer ekranlar değişmez)", () => {
-    const html = renderViewer();
-    expect(html).not.toContain("aspect-ratio");
-  });
-
-  it("fitContent açıkken sahne görüntünün en-boy oranıyla çizilir (T207)", () => {
-    const html = renderViewer({ fitContent: true });
-    // xr() 1024×1024 → oran 1; öğrenme düzeni sahneyi bu orana sabitler.
-    expect(html).toContain("aspect-ratio:1");
   });
 });

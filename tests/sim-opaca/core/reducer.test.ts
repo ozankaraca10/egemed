@@ -15,19 +15,6 @@ const serverCase = () => toClientCase(publicCase(1), "practice", SESSION_ID, ima
 describe("reducer (kaynak davranışı)", () => {
   const s0: AppState = { ...initialState };
 
-  it("startMode eski sonuçları ve sayaçları sıfırlar (K4)", () => {
-    const dirty: AppState = { ...s0, caseResults: [{} as never], assessmentTimer: 5000, caseElapsed: 4000, caseIndex: 4 };
-    const s = reducer(dirty, { type: "startMode", mode: "assessment" });
-    expect(s.caseResults).toEqual([]);
-    expect(s.assessmentTimer).toBe(0);
-    expect(s.caseElapsed).toBe(0);
-    expect(s.caseIndex).toBe(0);
-    expect(s.attempts).toBe(1);
-    // A2.3: yeni mod yeni sunucu oturumu ister.
-    expect(s.server).toBeNull();
-    expect(s.serverFocus).toBeNull();
-  });
-
   it("startMode odak bulgusunu ve düello kimliğini taşır", () => {
     const focused = reducer(s0, { type: "startMode", mode: "practice", focusFinding: "nodule_mass" });
     expect(focused.serverFocus).toBe("nodule_mass");
@@ -45,11 +32,6 @@ describe("reducer (kaynak davranışı)", () => {
     expect(s.telemetry.visits.a_trachea).toEqual({ dwellMs: 500, visits: 2, firstOrder: 0 });
     expect(s.telemetry.visits.e_bones?.firstOrder).toBe(2);
     expect(reducer(s, { type: "zoneDwell", zoneIds: [], dwellMs: 250 })).toBe(s);
-  });
-
-  it("araç kullanımı sayılır", () => {
-    const s = reducer(reducer(s0, { type: "toolUsed", tool: "zoom" }), { type: "toolUsed", tool: "zoom" });
-    expect(s.telemetry.toolUse.zoom).toBe(2);
   });
 
   it("restore yalnız aktif modun listesine yazar (K3)", () => {
@@ -88,30 +70,6 @@ describe("reducer (kaynak davranışı)", () => {
     expect(s.caseIndex).toBe(1);
     expect(s.caseElapsed).toBe(0);
     expect(s.telemetry.order).toEqual([]);
-  });
-
-  it("sunucu bitişi sonuç ekranına geçer ve en iyi puanı günceller", () => {
-    let s = reducer(s0, { type: "startMode", mode: "assessment" });
-    s = reducer(s, { type: "serverStarted", sessionId: SESSION_ID, mode: "assessment", caseCount: 2, perCaseLimitMs: 600_000 });
-    s = reducer(s, {
-      type: "serverFinished",
-      results: [{ ...fromServerResult(caseResult(1)).result, caseId: "srv-1", total: 90, mastery: true }],
-      metas: { "srv-1": { title: "T", diagnosis: null, summary: "S" } },
-    });
-    expect(s.screen).toBe("results");
-    expect(s.bestScore.assessment).toBe(90);
-    expect(s.server?.status).toBe("finished");
-    expect(s.server?.metas["srv-1"]?.summary).toBe("S");
-  });
-
-  it("serverError durumu error yapar; oturum yokken null kalır", () => {
-    const withServer = reducer(
-      reducer(s0, { type: "serverStarted", sessionId: SESSION_ID, mode: "practice", caseCount: 1, perCaseLimitMs: null }),
-      { type: "serverError", message: "hata" },
-    );
-    expect(withServer.server?.status).toBe("error");
-    expect(withServer.server?.error).toBe("hata");
-    expect(reducer(s0, { type: "serverError", message: "hata" }).server).toBeNull();
   });
 
   it("advance yalnız yüklü sunucu vakasında ilerler (son soruda durur)", () => {

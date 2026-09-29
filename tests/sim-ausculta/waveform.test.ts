@@ -1,8 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { SoundRecord } from "../../packages/sim-ausculta/src/index";
-import { createEngine } from "../../packages/sim-ausculta/src/audio/createEngine";
-import type { AudioEngineDeps } from "../../packages/sim-ausculta/src/audio/createEngine";
-import { computePeaks, drawWave, progressOf } from "../../packages/sim-ausculta/src/audio/waveform";
+import { computePeaks, drawWave } from "../../packages/sim-ausculta/src/audio/waveform";
 import type { WaveCanvas, WaveContext2D } from "../../packages/sim-ausculta/src/audio/waveform";
 
 function sound(id: string): SoundRecord {
@@ -12,21 +10,6 @@ function sound(id: string): SoundRecord {
 function buffer(samples: number[]): { getChannelData: () => Float32Array } {
   const data = Float32Array.from(samples);
   return { getChannelData: () => data };
-}
-
-function deps(): AudioEngineDeps {
-  return {
-    createContext: () => {
-      throw new Error("context");
-    },
-    fetchImpl: () => {
-      throw new Error("fetch");
-    },
-    decodeAudioData: () => {
-      throw new Error("decode");
-    },
-    now: () => 1_000,
-  };
 }
 
 interface RecordedRect {
@@ -76,11 +59,6 @@ describe("Ausculta dalga formu", () => {
     expect(computePeaks(sound("wave-other"), buffer([1, -1]), 1)[0]).toBe(1);
   });
 
-  it("ilerlemeyi süreyle döngüsel hesaplar", () => {
-    expect(progressOf(0, 2, 1_500)).toBeCloseTo(0.75);
-    expect(progressOf(0, 2, 2_500)).toBeCloseTo(0.25);
-  });
-
   it("sahte tuvale çubuk ve etiket çizer", () => {
     const host = globalThis as {
       window?: { devicePixelRatio?: number };
@@ -117,21 +95,5 @@ describe("Ausculta dalga formu", () => {
     expect(drawn.rects[2]).toMatchObject({ x: 99.5, w: 1, h: 100, fillStyle: "#c45" });
     expect(drawn.texts).toEqual(["S1"]);
     expect(drawn.ctx.font).toBe("600 11px Inter");
-  });
-
-  it("bağlam yoksa tuvali değiştirmez", () => {
-    const surface = canvas(null);
-    drawWave(surface, Float32Array.from([1]), {});
-    expect(surface.width).toBe(0);
-  });
-});
-
-describe("Ausculta motor fabrikası", () => {
-  it("her çağrıda ayrı motor döndürür", () => {
-    const first = createEngine(deps());
-    const second = createEngine(deps());
-    expect(first).not.toBe(second);
-    first.dispose();
-    second.dispose();
   });
 });

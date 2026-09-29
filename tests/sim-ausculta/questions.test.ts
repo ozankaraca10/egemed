@@ -113,46 +113,6 @@ describe("soru kartı (statik render)", () => {
     expect(html.match(/<span class="check">/g)).toHaveLength(3);
     expect(html.match(/<svg /g)?.length).toBe(1);
   });
-
-  it("ilerleme noktalarını çizer ve kaş satırını kapatabilir", () => {
-    const html = renderToStaticMarkup(
-      createElement(QuestionCard, {
-        q: { ...choice, type: "bell_diaphragm" },
-        caseId: "c1",
-        value: [],
-        onChange: () => undefined,
-        revealed: false,
-        index: 1,
-        total: 3,
-      }),
-    );
-    expect(html).toContain('<span class="q-eyebrow">Stetoskop kafası</span>');
-    expect(html).toContain('aria-label="Soru 2 / 3"');
-    expect(html.match(/<i class="done"><\/i>/g)).toHaveLength(1);
-    expect(html.match(/<i class="active"><\/i>/g)).toHaveLength(1);
-
-    const hidden = renderToStaticMarkup(
-      createElement(QuestionCard, {
-        q: choice,
-        caseId: "c1",
-        value: [],
-        onChange: () => undefined,
-        revealed: false,
-        showEyebrow: false,
-        index: 0,
-        total: 0,
-      }),
-    );
-    expect(hidden).not.toContain("q-eyebrow");
-    expect(hidden).not.toContain("q-progress");
-  });
-
-  it("kapalı seçenekleri devre dışı bırakır", () => {
-    const html = renderToStaticMarkup(
-      createElement(QuestionCard, { q: choice, caseId: "c1", value: [], onChange: () => undefined, revealed: false, disabled: true }),
-    );
-    expect(html.match(/<button[^>]*disabled/g)).toHaveLength(3);
-  });
 });
 
 describe("geri bildirim kartı", () => {

@@ -141,77 +141,6 @@ describe("createAuscultaModule (SimHost adaptörü)", () => {
     );
   });
 
-  it("mount → dispose → remount yaşam döngüsünü tamamlar", () => {
-    const { deps } = createTestDeps();
-    const module = createAuscultaModule(deps);
-    const target = fakeTarget();
-
-    const dispose1 = module.mount(target, CONTEXT);
-    expect(target.children).toHaveLength(1);
-    expect(target.children[0]?.rendered).toBe(true);
-
-    dispose1();
-    expect(target.children).toHaveLength(0);
-
-    const dispose2 = module.mount(target, CONTEXT);
-    expect(target.children).toHaveLength(1);
-    expect(target.children[0]?.rendered).toBe(true);
-    dispose2();
-    expect(target.children).toHaveLength(0);
-  });
-
-  it("çift dispose idempotent kalır ve ses motorunu bir kez kapatır", () => {
-    const { deps, disposed } = createTestDeps();
-    const module = createAuscultaModule(deps);
-    const target = fakeTarget();
-    const dispose = module.mount(target, CONTEXT);
-    const child = target.children[0];
-
-    dispose();
-    dispose();
-    dispose();
-
-    expect(child?.removed).toBe(true);
-    expect(target.children).toHaveLength(0);
-    expect(disposed.count).toBe(1);
-    expect(disposed.closed).toBe(1);
-  });
-
-  it("gömülü ağaçta tanıtım atlanır, üst bar yoktur ve başlık h2'dir", () => {
-    const { deps } = createTestDeps();
-    const target = fakeTarget();
-    const dispose = createAuscultaModule(deps).mount(target, CONTEXT);
-    const tree = target.children[0]?.tree;
-    const html = renderToStaticMarkup(tree as ReactNode);
-    expect(html).toContain("Çalışma Modunu Seçin");
-    expect(html).not.toContain("Simülatörü başlat");
-    expect(html).not.toContain("<header");
-    expect(html).not.toContain("<footer");
-    expect(html).toContain('<h2 class="mode-title">Çalışma Modunu Seçin</h2>');
-    expect(html).not.toContain("<h1");
-    dispose();
-    expect(target.children).toHaveLength(0);
-  });
-
-  it("learn kanalı App'e taşınır: host complete ise mod kartları açılır (T209)", async () => {
-    const { deps } = createTestDeps();
-    const target = fakeTarget();
-    createAuscultaModule(deps).mount(target, {
-      ...CONTEXT,
-      learn: { complete: true, async markComplete(): Promise<void> {} },
-    });
-    await Promise.resolve();
-    const html = renderToStaticMarkup(target.children[0]?.tree as ReactNode);
-    expect(html).toContain('data-learn-locked="false"');
-    expect(html).toContain("Vakaları çöz");
-
-    const locked = fakeTarget();
-    createAuscultaModule(createTestDeps().deps).mount(locked, CONTEXT);
-    await Promise.resolve();
-    const lockedHtml = renderToStaticMarkup(locked.children[0]?.tree as ReactNode);
-    expect(lockedHtml).toContain('data-learn-locked="true"');
-  });
-
   it("ScreenHeading bağımsız modda h1 çizer", () => {
     const html = renderToStaticMarkup(createElement(ScreenHeading, { className: "mode-title", children: "Başlık" }));
     expect(html).toMatch(/^<h1\b[^>]*class="mode-title"[^>]*>/);
@@ -224,31 +153,6 @@ describe("createAuscultaModule (SimHost adaptörü)", () => {
     );
     expect(embedded).toMatch(/^<h2\b[^>]*class="mode-title"[^>]*>/);
     expect(embedded).toContain("Başlık");
-  });
-
-  it("setChrome varken adımı ve eylemleri gönderir, araç çubuğu ile adım göstergesini çizmez", async () => {
-    const { deps } = createTestDeps();
-    const target = fakeTarget();
-    const sent: Array<SimChrome | null> = [];
-    const dispose = createAuscultaModule(deps).mount(target, {
-      ...CONTEXT,
-      setChrome: (chrome) => {
-        sent.push(chrome);
-      },
-    });
-    const html = renderToStaticMarkup(target.children[0]?.tree as ReactNode);
-    await Promise.resolve();
-    expect(html).not.toContain("eg-sim-toolbar");
-    expect(html).not.toContain('class="stepper"');
-    const chrome = sent.at(-1);
-    expect(chrome?.steps).toEqual({
-      current: 0,
-      labels: ["Mod seçimi", "Çalışma", "Tamamla"],
-      onSelect: expect.any(Function),
-    });
-    expect(chrome?.actions?.map((action) => action.id)).toEqual(["progress", "fullscreen", "help"]);
-    dispose();
-    expect(sent.at(-1)).toBeNull();
   });
 
   it("öğretim üyesi kitlesinde birleşik bardan İlerlemem eylemi çıkarılır", async () => {

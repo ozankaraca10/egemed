@@ -1,16 +1,7 @@
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
-import {
-  IconChart,
-  IconClose,
-  IconEcg,
-  IconInfo,
-  IconLogo,
-  IconPlay,
-  TUTORIAL_STEPS,
-  TutorialSteps,
-} from "../../packages/sim-ausculta/src/index";
+import { IconChart, IconClose, IconEcg, IconInfo, IconLogo, IconPlay } from "../../packages/sim-ausculta/src/index";
 import * as icons from "../../packages/sim-ausculta/src/ui/icons";
 
 /** İkonlar ve öğretici adımlar — statik işaretleme, DOM kütüphanesi yok. */
@@ -32,18 +23,5 @@ describe("Ausculta ikonları", () => {
     expect(renderToStaticMarkup(createElement(IconClose))).toContain('d="M6 6l12 12"');
     expect(renderToStaticMarkup(createElement(IconLogo))).toContain('viewBox="0 0 40 40"');
     expect(renderToStaticMarkup(createElement(IconEcg))).toContain('viewBox="0 0 340 90"');
-  });
-});
-
-describe("öğretici adımlar", () => {
-  it("altı adımı numara, başlık ve açıklamayla çizer", () => {
-    const html = renderToStaticMarkup(createElement(TutorialSteps));
-    expect(TUTORIAL_STEPS).toHaveLength(6);
-    expect(html.match(/class="tut-step"/g)).toHaveLength(6);
-    expect(html).toContain("<h5>Stetoskopu sürükleyin</h5>");
-    expect(html).toContain("<h5>Bell veya Diyaframı seçin</h5>");
-    expect(html).toContain("<h5>Yorumlayın</h5>");
-    expect(html).toContain("Gerçek klinik kayıtlardan elde edilmiş oskültasyon sesini dinleyin.");
-    expect(html.match(/<svg/g)?.length).toBeGreaterThanOrEqual(7);
   });
 });

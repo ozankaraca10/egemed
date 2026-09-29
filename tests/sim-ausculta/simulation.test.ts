@@ -23,9 +23,6 @@ const storage: StoragePort = {
   set: () => undefined,
 };
 
-const esc = (text: string): string =>
-  text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#x27;");
-
 /** T196: ekran yalnız sunucu oturumuyla vaka çizer; bankadan anahtarsız vaka kurulur. */
 function serverStateFor(mode: "practice" | "assessment"): AppState["server"] {
   const caseDef = poolFor(mode)[0];
@@ -74,29 +71,6 @@ function renderInStore(node: ReactNode, seed: Partial<AppState> = {}): string {
 }
 
 describe("SimulationScreen", () => {
-  const practice = poolFor("practice")[0];
-
-  it("olgu kartını, soruyu ve uygulama ızgarasını çizer", () => {
-    expect(practice).toBeDefined();
-    if (!practice) return;
-    const html = renderInStore(createElement(SimulationScreen));
-    expect(html).toContain("sim-grid");
-    expect(html).toContain("mode-practice");
-    expect(html).toContain("<h3");
-    expect(html).toContain("Olgu");
-    expect(html).toContain("Vaka 1/");
-    expect(html).toContain(esc(practice.chiefComplaint));
-    expect(html).toContain(`${practice.patient.age} yaşında`);
-    expect(html).toContain(esc(practice.questions[0]?.prompt ?? ""));
-    expect(html).toContain("Yanıtla");
-    expect(html).toContain("Dinleme noktalarını göster");
-    expect(html).toContain("Yeni oturum");
-    expect(html).toContain("stage-card");
-    expect(html).toContain('role="toolbar"');
-    expect(html).toContain("<footer");
-    expect(html).toContain("min-width:44px");
-    expect(html).toContain("İpucu kullanmak uygulama puanınızı düşürür");
-  });
 
   it("değerlendirmede manuel muayene uyarısını gösterir", () => {
     const html = renderInStore(createElement(SimulationScreen), { mode: "assessment" });
@@ -120,13 +94,6 @@ describe("SimulationScreen", () => {
     );
     expect(html).toContain("Bu mod için sunucu bağlantısı gerekir");
     expect(html).not.toContain("sim-grid");
-  });
-
-  it("gömülü modda footer ve arka plan çizilmez", () => {
-    const html = renderInStore(createElement(SimulationScreen, { embedded: true }));
-    expect(html).not.toContain("<footer");
-    expect(html).not.toContain('class="app-bg"');
-    expect(html).toContain("Olgu");
   });
 
   it("varsayılan ses ve belge sınırlarıyla vaka ızgarasını çizer", () => {

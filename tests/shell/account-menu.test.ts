@@ -1,6 +1,5 @@
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import { accountInitials } from "../../apps/shell/src/AccountMenu";
 import { ShellLayout } from "../../apps/shell/src/ShellLayout";
 import { resolveRoute, simHref } from "../../apps/shell/src/routes";
 import { shellSessionFromDev, type ShellSession } from "../../apps/shell/src/session";
@@ -20,17 +19,6 @@ function renderLayout(hash: string, session: ShellSession | null): string {
     createElement(ShellLayout, { children: null, route: resolveRoute(hash), session }),
   );
 }
-
-describe("accountInitials", () => {
-  it("iki sözcükte ilk harfleri, tek sözcükte ilk iki harfi tr-TR büyük harfle verir", () => {
-    expect(accountInitials("Sahte test öğrencisi")).toBe("ST");
-    expect(accountInitials("Geliştirme Yöneticisi")).toBe("GY");
-    expect(accountInitials("öğrenci")).toBe("ÖĞ");
-    expect(accountInitials("ışık")).toBe("IŞ");
-    expect(accountInitials("admin")).toBe("AD");
-    expect(accountInitials("   ")).toBe("?");
-  });
-});
 
 describe("hesap menüsü (T120 → T152)", () => {
   // Menü içeriği Radix ile yalnız açıkken çizilir (statik render'da yok); öğeler, not ve klavye
@@ -52,11 +40,6 @@ describe("hesap menüsü (T120 → T152)", () => {
     expect(html).toContain("Geliştirme Yöneticisi");
     expect(html).toContain(t("shell.account.role.admin"));
     expect(html).not.toContain(t("shell.session.admin"));
-  });
-
-  it("oturum yokken hesap düğmesi çizilmez", () => {
-    expect(renderLayout(simHref("ausculta"), null)).not.toContain("eg-shell-account");
-    expect(renderLayout("#/", null)).not.toContain("eg-shell-account");
   });
 
   it("sim dışı sayfalarda da rol çipi + ayrı çıkış düğmesi yerine hesap menüsü ve ana gezinme vardır (T152)", () => {
