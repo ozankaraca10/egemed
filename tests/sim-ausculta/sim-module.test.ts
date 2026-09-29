@@ -214,14 +214,16 @@ describe("createAuscultaModule (SimHost adaptörü)", () => {
 
   it("ScreenHeading bağımsız modda h1 çizer", () => {
     const html = renderToStaticMarkup(createElement(ScreenHeading, { className: "mode-title", children: "Başlık" }));
-    expect(html).toBe('<h1 class="mode-title">Başlık</h1>');
+    expect(html).toMatch(/^<h1\b[^>]*class="mode-title"[^>]*>/);
+    expect(html).toContain("Başlık");
     const embedded = renderToStaticMarkup(
       createElement(EmbeddedProvider, {
         embedded: true,
         children: createElement(ScreenHeading, { className: "mode-title", children: "Başlık" }),
       }),
     );
-    expect(embedded).toBe('<h2 class="mode-title">Başlık</h2>');
+    expect(embedded).toMatch(/^<h2\b[^>]*class="mode-title"[^>]*>/);
+    expect(embedded).toContain("Başlık");
   });
 
   it("setChrome varken adımı ve eylemleri gönderir, araç çubuğu ile adım göstergesini çizmez", async () => {

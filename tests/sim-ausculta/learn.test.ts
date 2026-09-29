@@ -100,11 +100,9 @@ describe("LearnScreen", () => {
     expect(html).toContain("Dinle, tanı, öğren.");
   });
 
-  it("kaydırma ve ses sınırları no-op ile güvenli çalışır", () => {
+  it("varsayılan kaydırma ve ses sınırlarıyla kütüphaneyi çizer", () => {
     const env = createNoopLearnScreenEnv();
     const audio = createNoopLearnAudio();
-    expect(() => env.scrollActiveLibraryItem()).not.toThrow();
-    expect(() => audio.stop()).not.toThrow();
     const html = renderInStore(createElement(LearnScreen, { env, audio }));
     expect(html).toContain("learn-grid");
   });

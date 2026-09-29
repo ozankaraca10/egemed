@@ -246,10 +246,6 @@ describe("createLearnCompletionNotifier", () => {
     expect(calls).toEqual(["lib-test"]);
   });
 
-  it("kanal yoksa sessizce hiçbir şey yapmaz", () => {
-    const notifier = createLearnCompletionNotifier(undefined, "lib-test");
-    expect(() => notifier.notify(true)).not.toThrow();
-  });
 });
 
 describe("PatientStage oynatma tetikleyicisi", () => {

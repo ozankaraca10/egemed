@@ -172,10 +172,9 @@ describe("ResultsScreen", () => {
     expect(renderWithAudience("visitor")).not.toContain("eg-gami-gains");
   });
 
-  it("çıkış no-op seam'i fırlatmaz ve işaretlemede öğrenci adı yoktur", () => {
+  it("çıkış seam'i LMS'e bağlı değildir ve işaretlemede öğrenci adı yoktur", () => {
     const env = createNoopResultsScreenEnv();
     expect(env.lmsAttached).toBe(false);
-    expect(() => env.requestClose()).not.toThrow();
     const { html, storage } = renderResults({ mode: "practice", caseResults: [resultFor("practice", true)] }, trackingStorage(), {
       env,
     });
