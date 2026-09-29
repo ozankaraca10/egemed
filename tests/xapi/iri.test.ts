@@ -1,20 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { activityIri, type ActivityPath } from "../../packages/xapi-profile/src/iri";
+import { activityIri } from "../../packages/xapi-profile/src/iri";
 
 const BASE = "https://egemed.ege.edu.tr/xapi/";
 
 describe("activityIri", () => {
-  it("aynı girdi için aynı IRI üretir (determinizm)", () => {
-    const paths: ActivityPath[] = [
-      { simulator: "pulse" },
-      { simulator: "ausculta", screen: "ekg" },
-      { simulator: "opaca", screen: "vaka-01", object: "nesne-01" },
-    ];
-    for (const path of paths) {
-      expect(activityIri(BASE, path), JSON.stringify(path)).toBe(activityIri(BASE, path));
-    }
-  });
-
   it("segmentleri simulator/screen/object sırasıyla birleştirir", () => {
     expect(activityIri(BASE, { simulator: "pulse" })).toBe(`${BASE}pulse`);
     expect(activityIri(BASE, { simulator: "pulse", screen: "ekg" })).toBe(`${BASE}pulse/ekg`);

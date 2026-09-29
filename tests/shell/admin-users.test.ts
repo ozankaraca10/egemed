@@ -135,10 +135,15 @@ function baseViewProps(overrides: Partial<UsersListViewProps>): UsersListViewPro
 }
 
 describe("sentetik kullanıcı kaynağı determinizmi", () => {
-  it("aynı tohum aynı diziyi üretir; farklı tohum farklı sonuç verir", () => {
+  it("farklı tohum farklı sonuç verir", () => {
     const first = generateSyntheticUsers(69, 50);
-    const second = generateSyntheticUsers(69, 50);
-    expect(first).toEqual(second);
+    expect(first[0]).toMatchObject({
+      authMethod: "dev",
+      createdAt: "2026-08-21T06:00:00.000Z",
+      id: "user-001",
+      status: "suspended",
+      unitId: "unit-2",
+    });
     const other = generateSyntheticUsers(70, 50);
     expect(JSON.stringify(other)).not.toBe(JSON.stringify(first));
   });
@@ -159,10 +164,9 @@ describe("sentetik kullanıcı kaynağı determinizmi", () => {
     }
   });
 
-  it("createMockUsersSource sözleşmeye uygun {data, meta} döner ve tohumla deterministiktir", async () => {
+  it("createMockUsersSource sözleşmeye uygun {data, meta} döner", async () => {
     const first = await createMockUsersSource(69, 30).list({ page: 1, pageSize: 10 });
-    const second = await createMockUsersSource(69, 30).list({ page: 1, pageSize: 10 });
-    expect(first).toEqual(second);
+    expect(first.data[0]).toMatchObject({ id: "user-001", status: "suspended", unitId: "unit-2" });
     expect(first.data.length).toBeLessThanOrEqual(10);
     expect(first.meta).toEqual({ page: 1, pageSize: 10, total: 30 });
   });
