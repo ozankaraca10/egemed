@@ -47,16 +47,10 @@ html, body { margin: 0; }
   box-sizing: border-box; min-height: var(--eg-shell-touch-min);
   color: var(--card); text-decoration: none;
 }
-.eg-shell-logo { display: inline-flex; align-items: center; gap: var(--sp-2); min-width: 0; }
-.eg-shell-logo__mark { display: block; flex: 0 0 auto; width: 2.75rem; height: 2.75rem; }
-.eg-shell-logo__tile { fill: var(--navy-800); }
-.eg-shell-logo__line { stroke: var(--card); }
-.eg-shell-logo__copy { display: flex; flex-direction: column; min-width: 0; line-height: 1.15; }
-.eg-shell-logo__name { font-size: var(--fs-xl); font-weight: 800; letter-spacing: .04em; }
+.eg-shell-logo { display: inline-flex; flex-direction: column; align-items: flex-start; gap: 2px; min-width: 0; }
+.eg-shell-logo__mark { display: block; flex: 0 0 auto; width: auto; height: 2.5rem; }
+.eg-shell-logo--compact .eg-shell-logo__mark { height: 2.25rem; }
 .eg-shell-logo__tagline { display: none; color: var(--blue-100); font-size: var(--fs-xs); font-weight: 500; white-space: nowrap; }
-.eg-shell-logo--on-light .eg-shell-logo__tile { fill: var(--navy-800); }
-.eg-shell-logo--on-light .eg-shell-logo__line { stroke: var(--card); }
-.eg-shell-logo--on-light .eg-shell-logo__name { color: var(--navy-900); }
 .eg-shell-logo--on-light .eg-shell-logo__tagline { color: var(--muted); }
 .eg-shell-header__side { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-2); }
 .eg-shell-session-banner {
@@ -553,11 +547,9 @@ html, body { margin: 0; }
   opacity: .10;
 }
 .eg-shell-entry__logo { width: clamp(5rem, 12vw, 9rem); height: auto; }
-.eg-shell-entry__brand > .eg-shell-logo { margin: var(--sp-4) 0 var(--sp-2); flex-direction: column; gap: var(--sp-3); }
-.eg-shell-entry__brand .eg-shell-logo__mark { width: clamp(5rem, 12vw, 9rem); height: auto; }
-.eg-shell-entry__brand .eg-shell-logo__copy { align-items: center; gap: var(--sp-1); }
-.eg-shell-entry__brand .eg-shell-logo__name { font-size: var(--fs-3xl); }
-.eg-shell-entry__brand .eg-shell-logo__tagline { max-width: 28rem; white-space: normal; font-size: var(--fs-xl); }
+.eg-shell-entry__brand > .eg-shell-logo { margin: var(--sp-4) 0 var(--sp-2); align-items: center; gap: var(--sp-3); }
+.eg-shell-entry__brand .eg-shell-logo__mark { height: clamp(4rem, 9vw, 6.5rem); }
+.eg-shell-entry__brand .eg-shell-logo__tagline { display: block; max-width: 28rem; white-space: normal; text-align: center; font-size: var(--fs-xl); }
 /* Beyaz sim ikon sırası: dekoratif (alt=""), adlar altta görünür metinle. */
 .eg-shell-entry__sims { display: grid; gap: var(--sp-2); justify-items: center; margin-top: var(--sp-5); }
 .eg-shell-entry__simrow { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: var(--sp-4); }
@@ -619,8 +611,7 @@ html, body { margin: 0; }
   .eg-shell-entry__brand { min-height: 13rem; padding: var(--sp-4); }
   .eg-shell-entry__brand { background-image: url("/brand/entry-bg-760.jpg"); }
   .eg-shell-entry__brand > .eg-shell-logo { margin: var(--sp-2) 0; gap: var(--sp-1); }
-  .eg-shell-entry__brand .eg-shell-logo__mark { width: 4.5rem; }
-  .eg-shell-entry__brand .eg-shell-logo__name { font-size: var(--fs-2xl); }
+  .eg-shell-entry__brand .eg-shell-logo__mark { height: 3.5rem; }
   .eg-shell-entry__brand .eg-shell-logo__tagline { font-size: var(--fs-md); }
   .eg-shell-entry__main { align-items: center; justify-content: flex-start; padding: var(--sp-4) var(--sp-3) calc(var(--sp-5) + env(safe-area-inset-bottom)); }
   .eg-shell-entry__panel { padding: var(--sp-4); }
@@ -639,7 +630,6 @@ html, body { margin: 0; }
   }
 }
 @media (min-width: 768px) {
-  .eg-shell-brand .eg-shell-logo__tagline { display: inline; }
   /* Alt sekme çubuğu üst bar gezinmesine dönüşür: beyaz zemin yerine lacivert. */
   .eg-shell-nav { position: static; gap: var(--sp-2); padding: 0; background: none; border-top: 0; }
   .eg-shell-nav__link {
@@ -669,8 +659,7 @@ html, body { margin: 0; }
   gap: var(--sp-2); padding: var(--sp-1) var(--sp-3);
 }
 .eg-shell-header--sim .eg-shell-brand { flex: 0 0 auto; justify-content: center; min-width: var(--eg-shell-touch-min); }
-.eg-shell-header--sim .eg-shell-logo__mark { width: 2.25rem; height: 2.25rem; }
-.eg-shell-header--sim .eg-shell-logo__copy { display: none; }
+.eg-shell-header--sim .eg-shell-logo__mark { width: 2.25rem; height: 2.25rem; object-fit: contain; }
 .eg-shell-main--sim { max-width: none; margin: 0; padding: 0; }
 .eg-shell-simbar { display: flex; flex: 1 1 auto; align-items: center; gap: var(--sp-2); min-width: 0; }
 .eg-shell-simbar__title { flex: 0 1 auto; min-width: 0; margin: 0; font-size: var(--fs-lg); }

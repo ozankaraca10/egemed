@@ -6,30 +6,24 @@ export interface EgemedLogoProps {
   readonly compact?: boolean;
 }
 
-/** EGEMED marka kilidi: tek erişilebilir ad, dekoratif işaret ve yazı. */
+/** Kurumsal EGEMED logo dosyaları (`public/brand`); boyutlar dosyaların gerçek piksel boyutudur. */
+const LOGO_FILES = {
+  "on-dark": { full: { src: "/brand/egemed-horizontal-white.png", width: 335, height: 112 }, compact: { src: "/brand/egemed-icon-white.png", width: 256, height: 256 } },
+  "on-light": { full: { src: "/brand/egemed-horizontal.png", width: 320, height: 112 }, compact: { src: "/brand/egemed-icon.png", width: 256, height: 256 } },
+} as const;
+
+/** EGEMED marka kilidi: tek erişilebilir ad, dekoratif logo görseli ve alt yazı. */
 export function EgemedLogo({ variant, compact = false }: EgemedLogoProps): JSX.Element {
   const className = `eg-shell-logo eg-shell-logo--${variant}${compact ? " eg-shell-logo--compact" : ""}`;
+  const file = LOGO_FILES[variant][compact ? "compact" : "full"];
   return (
     <span aria-label={t("shell.brand.full")} className={className} role="img">
-      <svg
-        aria-hidden="true"
-        className="eg-shell-logo__mark"
-        fill="none"
-        viewBox="0 0 48 48"
-      >
-        <rect className="eg-shell-logo__tile" height="46" rx="13" width="46" x="1" y="1" />
-        <path
-          className="eg-shell-logo__line"
-          d="M7 25h8l4-10 6 19 5-14 3 5h4a4 4 0 1 0-4-4"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth="2.6"
-        />
-      </svg>
-      <span aria-hidden="true" className="eg-shell-logo__copy">
-        <strong className="eg-shell-logo__name">{t("shell.brand.name")}</strong>
-        {!compact && <span className="eg-shell-logo__tagline">{t("shell.brand.tagline")}</span>}
-      </span>
+      <img alt="" aria-hidden="true" className="eg-shell-logo__mark" height={file.height} src={file.src} width={file.width} />
+      {!compact && (
+        <span aria-hidden="true" className="eg-shell-logo__tagline">
+          {t("shell.brand.tagline")}
+        </span>
+      )}
     </span>
   );
 }
