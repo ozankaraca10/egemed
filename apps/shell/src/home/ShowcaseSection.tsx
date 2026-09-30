@@ -50,7 +50,7 @@ function SimColumn({ sim, now }: { readonly sim: ShowcaseSim; readonly now: numb
   return (
     <article aria-labelledby={`eg-showcase-${sim.simId}`} className={`eg-shell-showcase__col eg-shell-showcase__col--${sim.simId}`}>
       <header className="eg-shell-showcase__colHead">
-        <img alt="" className="eg-shell-showcase__logo" height={28} src={`/brand/sims/${sim.simId}-icon-white.png`} width={28} />
+        <img alt="" className="eg-shell-showcase__logo" height={40} src={`/brand/sims/${sim.simId}-icon.png`} width={40} />
         <h3 className="eg-shell-showcase__simName" id={`eg-showcase-${sim.simId}`}>{name}</h3>
         <span className="eg-shell-showcase__tagline">{t(`sims.${sim.simId}.tagline`)}</span>
       </header>

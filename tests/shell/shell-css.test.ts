@@ -43,8 +43,8 @@ describe("shell.css token sözleşmesi", () => {
     expect(shellCss).toMatch(/position:\s*fixed/);
     expect(shellCss).toContain("env(safe-area-inset-bottom)");
   });
-  it("giriş ekranını iki eşit masaüstü paneline böler ve mobilde tek sütuna indirir", () => {
-    expect(shellCss).toMatch(/grid-template-columns:\s*repeat\(2,\s*minmax\(0,\s*1fr\)\)/);
+  it("giriş ekranını masaüstünde %60 / %40 böler ve mobilde tek sütuna indirir", () => {
+    expect(shellCss).toMatch(/\.eg-shell-entry\s*\{[^}]*grid-template-columns:\s*minmax\(0,\s*3fr\)\s*minmax\(0,\s*2fr\)/);
     expect(shellCss).toContain("@media (max-width: 768px)");
     expect(shellCss).toMatch(/\.eg-shell-entry__input[\s\S]*?min-height:\s*48px/);
     expect(shellCss).toContain("prefers-reduced-motion: reduce");
@@ -74,7 +74,7 @@ describe("shell.css token sözleşmesi", () => {
     expect(shellCss).toMatch(/\.eg-shell-how__step--practice\s*\{[^}]*var\(--blue-600\)/);
     expect(shellCss).toMatch(/\.eg-shell-how__step--assess\s*\{[^}]*var\(--purple-600\)/);
     expect(shellCss).toMatch(/\.eg-shell-how__num\s*\{[^}]*width:\s*2rem/);
-    expect(shellCss).toMatch(/\.eg-shell-entry__simicon\s*\{[^}]*height:\s*2rem/);
+    expect(shellCss).toMatch(/\.eg-shell-entry__simicon\s*\{[^}]*height:\s*3\.25rem/);
     expect(shellCss).not.toMatch(/\.eg-shell-entry__simicon[^{]*\{[^}]*filter:/);
   });
 });
