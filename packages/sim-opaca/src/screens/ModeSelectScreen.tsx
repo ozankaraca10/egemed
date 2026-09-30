@@ -4,6 +4,7 @@ import { audienceCanUseMode, VISITOR_LOCK_TEXT } from '@egemed/sim-host'
 import { useLearnGate, useStartMode } from '../core/LearnGate'
 import { modeLearnLocked, modePickTarget } from '../core/flow'
 import { useStore } from '../core/StoreProvider'
+import { useGamiContext } from '../gamification/GamiContext'
 import type { Mode } from '../core/types'
 import { CASE_INVENTORY } from '../data/inventory'
 import { LIBRARY_ITEMS } from '../data/terminology'
@@ -51,6 +52,9 @@ export function ModeSelectScreen({
   const isFaculty = audience === 'faculty'
   const gate = useLearnGate()
   const startMode = useStartMode()
+  // T253a: "ayın ödülü" satırı yalnız kabuk kanalında geçerli ödül varsa çizilir.
+  const { rewardsSnapshot } = useGamiContext()
+  const monthlyReward = rewardsSnapshot?.current ?? null
   // Ziyaretçi kilidi gönderim kilidi değildir: kart pasifleşmez, düğme girişe yönlendirir.
   const canPractice = audienceCanUseMode(audience, 'practice')
   const canAssessment = audienceCanUseMode(audience, 'assessment')
@@ -129,9 +133,9 @@ export function ModeSelectScreen({
               lockedText={VISITOR_LOCK_TEXT.modeLocked}
               onPick={!canAssessment ? signIn : () => pick('assessment')}
               bestScore={state.bestScore.assessment}
-              extra={gamiEnabled ? (
+              extra={gamiEnabled && monthlyReward ? (
                 <p className="mode-rules">
-                  <button type="button" className="gami-link" style={{ color: 'var(--amber-700)' }} onClick={() => dispatch({ type: 'goto', screen: 'leaderboard' })}>
+                  <button type="button" className="gami-link" style={{ color: 'var(--amber-700)', minHeight: 44, display: 'inline-flex', alignItems: 'center', gap: 4, background: 'none', border: 0, padding: 0, font: 'inherit', fontWeight: 700, cursor: 'pointer' }} onClick={() => dispatch({ type: 'goto', screen: 'leaderboard' })}>
                     <IconGift width={14} height={14} /> Bu ayın ödülü · {daysLeftInMonth(now())} gün kaldı
                   </button>
                 </p>

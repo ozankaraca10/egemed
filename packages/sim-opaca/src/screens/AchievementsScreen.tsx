@@ -8,11 +8,10 @@ import { OPACA_RULES } from '../gamification/rules'
 import { Footer } from '../ui/chrome'
 import { ScreenHeading } from '../ui/ScreenHeading'
 import { buildAchievementsModel, earnedFromServer, GamiAchievementsView, GamiProgressPage, GamiServerFrame, gamiLoadingStatus, levelFromServer, serverHasActivity, streakFromServer, type GamiModalEnv, type ServerGamiData } from '@egemed/gami-ui'
-import { monthKeyTr, type AchievementsPeriod } from '@egemed/gamification-core'
+import type { AchievementsPeriod } from '@egemed/gamification-core'
 import { useGami, useLeaderboard } from '../gamification/useGami'
 import { useGamiContext } from '../gamification/GamiContext'
 import { gamiDemoFrom } from '../gamification/flag'
-import { monthlyRewardFor } from '../gamification/rewards'
 import { DOMAIN_META, WEAK_DOMAIN_PCT } from '../ui/gami/domainMeta'
 import { opacaAvatarOf, opacaGamiIcons } from '../ui/opacaGami'
 import type { WeeklyGoal } from '@egemed/gamification-core'
@@ -48,17 +47,18 @@ function AchievementsBody({ embedded = false, devBuild = false, modalEnv, server
   const startMode = useStartMode()
   const demo = gamiDemoFrom(locationSearch(), devBuild)
   const view = useGami(0, demo)
+  const { rewardsSnapshot } = useGamiContext()
   const [period, setPeriod] = useState<AchievementsPeriod>('last30')
   const week = useLeaderboard('week', 'all', view.now, view.repo)
 
+  // T253a: ödül başlığı yalnız kabuk kanalından gelir; kanal yoksa tebrik kartı çizilmez.
   const congrats = useMemo(() => {
     if (demo !== 'winner') return null
-    const prev = new Date(view.now.getTime() - 31 * 86_400_000)
-    const r = monthlyRewardFor(monthKeyTr(prev)) ?? monthlyRewardFor(monthKeyTr(view.now))
+    const r = rewardsSnapshot?.current
     if (!r) return null
     const MONTHS = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık']
     return { monthName: `${MONTHS[Number(r.month.slice(5, 7)) - 1]} ${r.month.slice(0, 4)}`, title: r.title, sponsor: r.sponsor }
-  }, [demo, view.now])
+  }, [demo, rewardsSnapshot])
   const earned = server ? earnedFromServer(OPACA_BADGES, server.summary.badges) : view.state.earned
   const model = useMemo(() => buildAchievementsModel({
     now: view.now,
