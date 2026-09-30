@@ -18,7 +18,7 @@ describe("rozet görünüm modeli", () => {
     expect(Object.values(STUDY_KEY).every((k) => keys.has(k))).toBe(true);
     expect(views.every((v) => v.state === "locked")).toBe(true);
   });
-  it("kazanılmış / devam eden / kilitli; Podyum ilerlemeli görünmez", () => {
+  it("kazanılmış / devam eden / kilitli", () => {
     const stats = computeStats([attempt({ localizationHits: 7 })], { topics: [], items: {} }, [], now);
     const v = Object.fromEntries(
       badgeViews(OPACA_BADGES, stats, [{ id: "first-step", at: "2026-09-20T10:00:00Z" }], ctx).map((x) => [
@@ -29,7 +29,7 @@ describe("rozet görünüm modeli", () => {
     expect(v["first-step"]?.state).toBe("earned");
     expect(v["sharp-eye-1"]).toMatchObject({ state: "progress", value: 7, max: 10 });
     expect(v["perfect"]?.state).toBe("locked");
-    expect(v["podium"]?.state).toBe("locked");
+    expect(v["assessments-25"]).toMatchObject({ state: "progress", max: 25 });
   });
   it("sıralama: en yeni kazanılan önce, sonra ilerleme oranı yüksek olan", () => {
     const stats = computeStats([attempt({ localizationHits: 20 })], { topics: [], items: {} }, [], now);

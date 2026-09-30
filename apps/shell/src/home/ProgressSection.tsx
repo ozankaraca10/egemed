@@ -41,6 +41,7 @@ function recentBadges(simId: SimId, summary: GamiSimSummary): GamiBadgeModel[] {
     if (def === undefined) continue;
     views.push({
       assessmentOnly: false,
+      capstone: def.capstone === true,
       category: def.category,
       categoryLabel: "Rozet",
       description: def.description,

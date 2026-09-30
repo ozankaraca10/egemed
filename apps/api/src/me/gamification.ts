@@ -13,7 +13,7 @@ import {
 } from "@egemed/contracts";
 import { opaca as assessmentBankOpaca } from "@egemed/assessment-bank";
 import { OPACA_BADGES, SIM_BADGE_EVALUATORS, opacaStatsFromSummaries, type SimLearnCounters } from "@egemed/gami-catalogs";
-import { badgeProgress as getBadgeProgress } from "@egemed/gamification-core";
+import { badgeProgress as getBadgeProgress, capstoneRequiredBadges } from "@egemed/gamification-core";
 import { DEFAULT_RULES, assessmentXp, practiceXp, type Period } from "@egemed/gamification-core";
 import {
   buildLeaderboardRows,
@@ -397,9 +397,14 @@ export function createPgGamificationRepo(db: GamiDb): GamificationRepo {
         const summaries = summaryRows.rows.map((row) => (row as { readonly summary: Readonly<Record<string, number>> }).summary);
         const topics = learnRows.rows.map((row) => (row as { readonly topic: string }).topic);
         const stats = opacaStatsFromSummaries(summaries, learnCountersFrom(topics, "opaca"));
-        return Object.fromEntries(
+        const progress: Record<string, { readonly value: number; readonly max: number }> = Object.fromEntries(
           OPACA_BADGES.filter((badge) => badge.progress !== undefined).map((badge) => [badge.id, getBadgeProgress(badge, stats, { now: new Date(query.at) })]),
         );
+        const capstone = OPACA_BADGES.find((badge) => badge.capstone === true);
+        if (capstone !== undefined) {
+          progress[capstone.id] = capstoneProgress(badgeResult.rows.map((row) => (row as { readonly badge_key: string }).badge_key));
+        }
+        return progress;
       })();
       const total = profile?.total ?? 0;
       const rank = profile?.user_rank ?? total + 1;
@@ -599,6 +604,13 @@ export function createPgGamificationRepo(db: GamiDb): GamificationRepo {
       );
     },
   };
+}
+
+/** T277: capstone ilerlemesi — kazanılan kazanılabilir capstone-dışı rozet sayısı. */
+function capstoneProgress(earnedKeys: readonly string[]): { value: number; max: number } {
+  const earned = new Set(earnedKeys);
+  const required = capstoneRequiredBadges(OPACA_BADGES);
+  return { value: required.filter((badge) => earned.has(badge.id)).length, max: required.length };
 }
 
 /**
@@ -957,9 +969,16 @@ export function createMemoryGamificationRepo(
               .filter((entry) => entry.userId === query.userId && entry.simId === "opaca")
               .map((entry) => entry.topic);
             const stats = opacaStatsFromSummaries(summaries, learnCountersFrom(topics, "opaca"));
-            return Object.fromEntries(
+            const progress: Record<string, { readonly value: number; readonly max: number }> = Object.fromEntries(
               OPACA_BADGES.filter((badge) => badge.progress !== undefined).map((badge) => [badge.id, getBadgeProgress(badge, stats, { now: new Date(query.at) })]),
             );
+            const capstone = OPACA_BADGES.find((badge) => badge.capstone === true);
+            if (capstone !== undefined) {
+              progress[capstone.id] = capstoneProgress(
+                badges.filter((badge) => badge.userId === query.userId && badge.simId === "opaca").map((badge) => badge.key),
+              );
+            }
+            return progress;
           })()
         : undefined;
 

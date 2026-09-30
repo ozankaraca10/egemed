@@ -118,3 +118,24 @@ describe("sortBadgesByDifficulty — kolaydan zora rozet sıralaması", () => {
     expect(views.map((v) => v.def.id)).toEqual(original);
   });
 });
+
+describe("capstone görünümü", () => {
+  const normal1 = badge("normal-1", { progress: (s) => ({ value: s.hits, max: 3 }) });
+  const normal2 = badge("normal-2", { progress: (s) => ({ value: s.hits, max: 10 }) });
+  const never = badge("never", { category: "milestone" });
+  const capstone = badge("capstone", { category: "milestone", tier: "gold", rule: "2 rozetin tümü", capstone: true });
+  const CATALOG: BadgeDef<TestState, TestCtx>[] = [normal1, normal2, never, capstone];
+  const at = (id: string) => ({ id, at: "2026-09-20T00:00:00.000Z" });
+
+  it("ilerleme capstone-dışı kazanılabilir rozetlerden sayılır; kazanılamayan rozet sayılmaz", () => {
+    const partial = badgeViews(CATALOG, { hits: 10, done: false }, [at("normal-1")], ctx).at(-1);
+    expect(partial).toMatchObject({ state: "progress", value: 1, max: 2 });
+    const earned = badgeViews(CATALOG, { hits: 10, done: false }, [at("normal-1"), at("normal-2"), at("capstone")], ctx).at(-1);
+    expect(earned).toMatchObject({ state: "earned", value: 2, max: 2, earnedAt: "2026-09-20T00:00:00.000Z" });
+  });
+
+  it("kolaydan zora sıralamada capstone her zaman en sonda", () => {
+    const sorted = sortBadgesByDifficulty(badgeViews(CATALOG, { hits: 10, done: false }, [], ctx));
+    expect(sorted.map((v) => v.def.id).at(-1)).toBe("capstone");
+  });
+});

@@ -6,7 +6,7 @@
  *  Not: kaynaktaki belirli bir kimliğe özel "ilerleme gösterme" kilidi, jenerik karşılığında
  *  asla kazanılamayan tanımın ilerlemesinin 0 dönmesiyle sağlanır (kaynak katalogda da böyledir). */
 
-import { badgeProgress, type BadgeCategory, type BadgeContext, type BadgeDef, type BadgeTier } from "./badges";
+import { badgeProgress, capstoneRequiredBadges, type BadgeCategory, type BadgeContext, type BadgeDef, type BadgeTier } from "./badges";
 import type { EarnedBadge } from "./types";
 
 export const BADGE_CATEGORY_LABEL: Record<BadgeCategory, string> = {
@@ -43,9 +43,16 @@ export function badgeViews<TState, TContext extends BadgeContext>(
   ctx: TContext,
 ): BadgeView<TState, TContext>[] {
   const earnedAtById = new Map(earned.map((e) => [e.id, e.at]));
+  const requiredIds = capstoneRequiredBadges(catalog).map((def) => def.id);
+  const earnedRequiredCount = requiredIds.filter((id) => earnedAtById.has(id)).length;
   return catalog.map((def) => {
-    const { value, max } = badgeProgress(def, state, ctx);
     const earnedAt = earnedAtById.get(def.id) ?? null;
+    if (def.capstone) {
+      const value = Math.min(earnedRequiredCount, requiredIds.length);
+      const capstoneState: BadgeState = earnedAt ? "earned" : value > 0 ? "progress" : "locked";
+      return { def, state: capstoneState, value, max: requiredIds.length, earnedAt, rule: def.rule ?? "", studyKey: def.studyKey ?? null };
+    }
+    const { value, max } = badgeProgress(def, state, ctx);
     const badgeState: BadgeState = earnedAt ? "earned" : value > 0 ? "progress" : "locked";
     return {
       def,
@@ -78,11 +85,13 @@ const BADGE_TIER_RANK: Record<BadgeTier, number> = { bronze: 0, silver: 1, gold:
 
 /** Kolaydan zora: önce kademe (bronz < gümüş < altın; kademesiz rozetler bronz sayılır),
  *  sonra eşik değeri (max) artan; eşitlikte
- *  katalog sırası (stabil sıralama — girdi zaten katalog sırasındadır). Durumdan (kazanılmış/
- *  ilerleyen/kilitli) bağımsızdır; rozet koleksiyonu ızgarasının sabit sıralaması içindir. */
+ *  katalog sırası (stabil sıralama — girdi zaten katalog sırasındadır); capstone her zaman en sonda.
+ *  Durumdan (kazanılmış/ilerleyen/kilitli) bağımsızdır; rozet koleksiyonu
+ *  ızgarasının sabit sıralaması içindir. */
 export function sortBadgesByDifficulty<TState, TContext extends BadgeContext>(
   views: readonly BadgeView<TState, TContext>[],
 ): BadgeView<TState, TContext>[] {
   const stage = (v: BadgeView<TState, TContext>): number => (v.def.tier ? BADGE_TIER_RANK[v.def.tier] : 0);
-  return [...views].sort((a, b) => stage(a) - stage(b) || a.max - b.max);
+  const capstoneRank = (v: BadgeView<TState, TContext>): number => (v.def.capstone ? 1 : 0);
+  return [...views].sort((a, b) => capstoneRank(a) - capstoneRank(b) || stage(a) - stage(b) || a.max - b.max);
 }

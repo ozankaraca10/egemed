@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useEffect, useId, useRef, useState, type ReactNode } from "react";
 import type { BadgeCategory } from "@egemed/gamification-core";
 import { GamiSeg } from "./GamiSeg";
 import { badgeCategoryOptions, filterBadgesByCategory, GAMI_BADGE_CATEGORY_ALL, type GamiBadgeCategoryFilter } from "./model";
@@ -8,6 +8,32 @@ import type { GamiBadgeModel, GamiIcons } from "./types";
 const badgeName = (v: GamiBadgeModel) => (v.tierLabel ? `${v.name} · ${v.tierLabel}` : v.name);
 const stateText = (v: GamiBadgeModel) =>
   v.state === "earned" ? `kazanıldı ${v.earnedLabel ?? ""}` : v.state === "progress" ? `ilerleme ${v.value}/${v.max}` : `kilitli, koşul: ${v.rule}`;
+
+/** Capstone kartındaki ayırt edici etiket. */
+export const GAMI_CAPSTONE_LABEL = "Gerçek Rozet";
+/** 40. rozetin bilgi düğmesinde açılan metin (depo sahibi kararı, 30 Eyl 2026). */
+export const GAMI_CAPSTONE_INFO =
+  "Bu rozeti kazanan öğrencilere Ege Üniversitesi Tıp Fakültesi Dekanlığı tarafından gerçek (fiziksel) bir rozet verilecektir.";
+
+/** 44 px bilgi düğmesi: Dekanlık metnini açar/kapatır (klavye ve ekran okuyucu uyumlu). */
+export function GamiCapstoneInfo({ id, icons }: { id: string; icons: Pick<GamiIcons, "info"> }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <>
+      <button
+        className="eg-gami-badge-info"
+        type="button"
+        aria-label="Gerçek Rozet hakkında"
+        aria-expanded={open}
+        aria-controls={id}
+        onClick={() => setOpen((value) => !value)}
+      >
+        {icons.info({ width: 20, height: 20 })}
+      </button>
+      <p className="eg-gami-badge-info-text" hidden={!open} id={id}>{GAMI_CAPSTONE_INFO}</p>
+    </>
+  );
+}
 
 export function GamiBadgeIc({ v, icons, size = "md" }: { v: GamiBadgeModel; icons: Pick<GamiIcons, "badge" | "lock">; size?: "sm" | "md" | "lg" }) {
   const tier = v.state === "earned" && v.tier ? ` tier-${v.tier}` : "";
@@ -20,18 +46,19 @@ export function GamiBadgeIc({ v, icons, size = "md" }: { v: GamiBadgeModel; icon
   );
 }
 
-export function GamiBadgeCard({ v, icons, onOpen }: { v: GamiBadgeModel; icons: Pick<GamiIcons, "badge" | "lock" | "check">; onOpen: (v: GamiBadgeModel, el: GamiFocusable) => void }) {
+export function GamiBadgeCard({ v, icons, onOpen }: { v: GamiBadgeModel; icons: Pick<GamiIcons, "badge" | "lock" | "check" | "info">; onOpen: (v: GamiBadgeModel, el: GamiFocusable) => void }) {
   const state = v.state === "earned" ? "is-earned" : v.state === "progress" ? "is-progress" : "is-locked";
-  return (
+  const infoId = useId();
+  const card = (
     <button
-      className={`eg-gami-badge eg-gami-cat-${v.category} ${state}`}
+      className={`eg-gami-badge eg-gami-cat-${v.category} ${state}${v.capstone ? " capstone" : ""}`}
       type="button"
       aria-label={`${badgeName(v)} (${v.categoryLabel}) — ${stateText(v)}`}
       onClick={(e) => onOpen(v, e.currentTarget as GamiFocusable)}
     >
       <GamiBadgeIc v={v} icons={icons} />
-      <span className="cat">{v.categoryLabel}</span>
-      <span className="nm">{badgeName(v)}</span>
+      <span className="cat">{v.capstone ? GAMI_CAPSTONE_LABEL : v.categoryLabel}</span>
+      {!v.capstone && <span className="nm">{badgeName(v)}</span>}
       <span className="ds">{v.description}</span>
       <span className="ft">
         {v.state === "earned" && <>{icons.check({ width: 13, height: 13 })} {v.earnedLabel}</>}
@@ -39,6 +66,13 @@ export function GamiBadgeCard({ v, icons, onOpen }: { v: GamiBadgeModel; icons: 
         {v.state === "locked" && <>{icons.lock({ width: 13, height: 13 })} {v.rule}</>}
       </span>
     </button>
+  );
+  if (!v.capstone) return card;
+  return (
+    <div className="eg-gami-badge-wrap">
+      {card}
+      <GamiCapstoneInfo id={infoId} icons={icons} />
+    </div>
   );
 }
 
@@ -53,7 +87,7 @@ export function GamiBadgeGrid({ views, categories, onStudy, id, env = NOOP_GAMI_
   onStudy: (key: string) => void;
   id?: string;
   env?: GamiModalEnv;
-  icons: Pick<GamiIcons, "badge" | "lock" | "check" | "close" | "book">;
+  icons: Pick<GamiIcons, "badge" | "lock" | "check" | "close" | "book" | "info">;
 }) {
   const [filter, setFilter] = useState<Filter>("all");
   const [category, setCategory] = useState<GamiBadgeCategoryFilter>(GAMI_BADGE_CATEGORY_ALL);
@@ -90,7 +124,7 @@ export function GamiRecentBadges({ views, onAll, onStudy, env = NOOP_GAMI_MODAL_
   onAll: () => void;
   onStudy: (key: string) => void;
   env?: GamiModalEnv;
-  icons: Pick<GamiIcons, "badge" | "lock" | "check" | "close" | "book" | "chevronRight">;
+  icons: Pick<GamiIcons, "badge" | "lock" | "check" | "close" | "book" | "chevronRight" | "info">;
   emptyNote?: ReactNode;
 }) {
   const [open, setOpen] = useState<{ v: GamiBadgeModel; from: GamiFocusable } | null>(null);
@@ -116,10 +150,11 @@ export function GamiBadgeDetail({ v, returnTo, onClose, onStudy, env = NOOP_GAMI
   onClose: () => void;
   onStudy: (key: string) => void;
   env?: GamiModalEnv;
-  icons: Pick<GamiIcons, "badge" | "lock" | "close" | "book">;
+  icons: Pick<GamiIcons, "badge" | "lock" | "close" | "book" | "info">;
 }) {
   const cardRef = useRef<unknown>(null);
   const closeRef = useRef<GamiFocusable | null>(null);
+  const infoId = useId();
   useEffect(() => {
     closeRef.current?.focus();
     const onKey = (e: GamiKeyEvent) => {
@@ -165,6 +200,7 @@ export function GamiBadgeDetail({ v, returnTo, onClose, onStudy, env = NOOP_GAMI
                 {icons.book({ width: 16, height: 16 })} Bu konuyu öğrenme modunda çalış
               </button>
             )}
+            {v.capstone && <GamiCapstoneInfo id={infoId} icons={icons} />}
           </div>
         </div>
       </div>

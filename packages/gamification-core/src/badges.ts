@@ -36,8 +36,18 @@ export interface BadgeDef<TState, TContext extends BadgeContext = BadgeContext> 
   rule?: string;
   /** Sim'in kendi anahtar uzayında "bu rozeti çalış" hedefi (ör. kütüphane maddesi anahtarı). */
   studyKey?: string | null;
+  /** 40. rozet: katalogdaki kazanılabilir capstone-dışı rozetlerin TAMAMI kazanılınca verilir. */
+  capstone?: true;
   predicate?: BadgePredicate<TState, TContext>;
   progress?: BadgeProgressFn<TState, TContext>;
+}
+
+/** Capstone'un gerektirdiği rozetler: capstone olmayan ve kazanılabilir (predicate ya da progress)
+ *  tanımlar. Hiç kazanılamayan rozetler (ör. yalnız demo akranlarla gösterilen) capstone'u kilitlemez. */
+export function capstoneRequiredBadges<TState, TContext extends BadgeContext>(
+  catalog: readonly BadgeDef<TState, TContext>[],
+): BadgeDef<TState, TContext>[] {
+  return catalog.filter((def) => !def.capstone && (def.predicate !== undefined || def.progress !== undefined));
 }
 
 /** Rozet kazanılmış mı — `predicate` önceliklidir, yoksa `progress` tamamlanması sayılır. */
@@ -66,19 +76,32 @@ export function badgeProgress<TState, TContext extends BadgeContext>(
 
 /** Yalnız YENİ kazanılan rozetleri döner; `prevEarned` içindekiler yeniden değerlendirilmez
  *  (rozet geri alınmaz ve yeniden verilmez). `at` damgası `ctx.now`'dur. Çağıran taraf
- *  `[...prevEarned, ...yeniler]` birleştirerek kalıcı hâle getirir. */
+ *  `[...prevEarned, ...yeniler]` birleştirerek kalıcı hâle getirir. Capstone en son değerlendirilir:
+ *  aynı çağrıda son normal rozetle birlikte kazanılabilir. */
 export function evaluateBadges<TState, TContext extends BadgeContext>(
   catalog: readonly BadgeDef<TState, TContext>[],
   state: TState,
   prevEarned: readonly EarnedBadge[],
   ctx: TContext,
 ): EarnedBadge[] {
-  const prevIds = new Set(prevEarned.map((e) => e.id));
   const at = ctx.now.toISOString();
+  const earnedIds = new Set(prevEarned.map((e) => e.id));
   const newlyEarned: EarnedBadge[] = [];
   for (const def of catalog) {
-    if (prevIds.has(def.id)) continue;
-    if (isBadgeEarned(def, state, ctx)) newlyEarned.push({ id: def.id, at });
+    if (def.capstone || earnedIds.has(def.id)) continue;
+    if (isBadgeEarned(def, state, ctx)) {
+      newlyEarned.push({ id: def.id, at });
+      earnedIds.add(def.id);
+    }
+  }
+  const required = capstoneRequiredBadges(catalog);
+  if (required.length === 0) return newlyEarned;
+  for (const def of catalog) {
+    if (!def.capstone || earnedIds.has(def.id)) continue;
+    if (required.every((item) => earnedIds.has(item.id))) {
+      newlyEarned.push({ id: def.id, at });
+      earnedIds.add(def.id);
+    }
   }
   return newlyEarned;
 }
