@@ -4,18 +4,6 @@
 .eg-sim-ausculta .screen-body.no-scroll { overflow: hidden; }
 .eg-sim-ausculta .container { max-width: 1520px; width: 100%; margin: 0 auto; padding: 0 var(--sp-5); }
 .eg-sim-ausculta .container.tall { display: flex; flex-direction: column; min-height: 0; flex: 1; }
-/* T166: mod seçimi ekranı — kabuk sim kökü `.app-shell{height:100dvh}` üzerinden
-   görünümün tüm yüksekliğini varsayıyor (apps/shell dışına taşınamaz). İçerik bu
-   yüksekliği doldurmayınca (1440'ta ~840px'e karşı ~600px içerik) kartlar üstte
-   sabit kalıp altta ~130px boş alan bırakıyordu. Sadece mode-cards içeren ekranı
-   hedefler ve içeriği düşey ortalar; taşma olursa (dar ekranlarda) `safe center`
-   üstten kırpma yapmadan başa döner — diğer ekranların `flex:1`/`tall` davranışı
-   değişmez. */
-.eg-sim-ausculta .screen-body:has(> .mode-cards) {
-  display: flex;
-  flex-direction: column;
-  justify-content: safe center;
-}
 .eg-sim-ausculta .eg-header { position: relative; z-index: 30; height: var(--head-h); flex-shrink: 0; padding-top: env(safe-area-inset-top, 0px); background: linear-gradient(90deg, var(--navy-900) 0%, var(--navy-700) 100%); color: var(--card); display: flex; align-items: center; padding: 0 var(--sp-4); gap: 14px; box-shadow: 0 2px 10px rgba(6,30,68,.35); }
 .eg-sim-ausculta .eg-brand { display: flex; align-items: center; gap: 10px; color: var(--card); background: none; border: 0; padding: 4px 4px 4px 0; }
 .eg-sim-ausculta .brand-mark { display: block; }
@@ -128,7 +116,6 @@
 .eg-sim-ausculta .headphone-banner { display: flex; align-items: center; gap: 14px; background: rgba(255,255,255,.85); border: 1px solid var(--border); border-radius: var(--r-lg); padding: 12px 16px; color: var(--ink-700); font-size: var(--fs-sm); line-height: 1.45; }
 .eg-sim-ausculta .headphone-banner svg { width: 26px; height: 26px; color: var(--blue-600); flex-shrink: 0; }
 .eg-sim-ausculta .headphone-banner .vsep { width: 1px; align-self: stretch; background: var(--border-strong); }
-.eg-sim-ausculta .mode-note .headphone-banner { max-width: 620px; margin: 0 auto; }
 .eg-sim-ausculta .hero-audio-check { color: var(--blue-700); font-weight: 700; text-decoration: underline; text-underline-offset: 3px; margin-left: 2px; }
 .eg-sim-ausculta .footer-left { display: flex; align-items: center; gap: 8px; min-width: 0; }
 .eg-sim-ausculta .footer-mid { display: flex; align-items: center; gap: 10px; min-width: 0; flex: 1 1 auto; justify-content: center; }
@@ -146,46 +133,10 @@
 .eg-sim-ausculta .step .line { position: absolute; top: 10px; left: -50%; width: 100%; height: 2px; background: var(--border-strong); z-index: 0; }
 .eg-sim-ausculta .step:first-child .line { display: none; }
 .eg-sim-ausculta .step.done .dot { background: var(--blue-600); border-color: var(--blue-600); color: var(--card); }
-.eg-sim-ausculta .mode-title { text-align: center; font-size: clamp(28px, 3.4vw, 42px); font-weight: 800; color: var(--navy-800); margin: 8px 0 4px; letter-spacing: -.5px; }
 .eg-sim-ausculta .mode-sub { text-align: center; color: var(--ink-600); font-size: var(--fs-lg); margin-bottom: var(--sp-5); }
-.eg-sim-ausculta .mode-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; max-width: 960px; margin: 0 auto 20px; }
-.eg-sim-ausculta .mode-card { background: rgba(255,255,255,.92); border: 1px solid var(--border); border-radius: var(--r-xl); padding: var(--sp-5) var(--sp-5) var(--sp-4); text-align: center; box-shadow: var(--shadow-card); display: flex; flex-direction: column; gap: 10px; }
-.eg-sim-ausculta .mode-card .ic { width: 60px; height: 60px; border-radius: 50%; margin: 0 auto; display: flex; align-items: center; justify-content: center; }
-.eg-sim-ausculta .mode-card .ic svg { width: 30px; height: 30px; }
-.eg-sim-ausculta .mode-card.learn .ic { background: var(--green-50); color: var(--green-600); }
-.eg-sim-ausculta .mode-card.practice .ic { background: var(--blue-50); color: var(--blue-600); }
-.eg-sim-ausculta .mode-card.assessment .ic { background: var(--purple-50); color: var(--purple-600); }
-.eg-sim-ausculta .mode-card h3 { font-size: var(--fs-xl); margin: 0; }
-.eg-sim-ausculta .mode-card.learn h3 { color: var(--green-600); }
-.eg-sim-ausculta .mode-card.practice h3 { color: var(--blue-700); }
-.eg-sim-ausculta .mode-card.assessment h3 { color: var(--purple-600); }
-.eg-sim-ausculta .mode-card .desc { color: var(--ink-600); font-size: var(--fs-md); min-height: 40px; margin: 0; }
-.eg-sim-ausculta .mode-card ul { list-style: none; margin: 2px 0 8px; padding: 9px 4px 0; border-top: 1px solid var(--border); display: flex; flex-direction: column; gap: 8px; text-align: left; }
-.eg-sim-ausculta .mode-card ul li { display: flex; gap: 10px; align-items: center; font-size: var(--fs-md); color: var(--ink-700); }
-.eg-sim-ausculta .mode-card ul li .ck { width: 19px; height: 19px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
-.eg-sim-ausculta .mode-card ul li .ck svg { width: 12px; height: 12px; }
-.eg-sim-ausculta .mode-card.learn li .ck { background: var(--green-100); color: var(--green-600); }
-.eg-sim-ausculta .mode-card.practice li .ck { background: var(--blue-100); color: var(--blue-600); }
-.eg-sim-ausculta .mode-card.assessment li .ck { background: var(--purple-100); color: var(--purple-600); }
-.eg-sim-ausculta .mode-card .btn { margin-top: auto; width: 100%; }
-.eg-sim-ausculta .mode-card.visitor-locked { opacity: .7; }
-/* T209: öğrenme kilidi — kart soluklaşır, kilit ikonu + ilerleme metni çizilir. */
-.eg-sim-ausculta .mode-card.learn-locked { opacity: .78; }
-.eg-sim-ausculta .mode-lock-hint { display: flex; align-items: center; justify-content: center; gap: 6px; margin: 0; color: var(--ink-600); font-size: var(--fs-xs); font-weight: 600; }
-.eg-sim-ausculta .mode-lock-hint svg { color: var(--ink-400); flex-shrink: 0; }
 .eg-sim-ausculta .visitor-strip { margin-bottom: var(--sp-3); }
 .eg-sim-ausculta .visitor-strip .visitor-signin { display: inline-flex; padding: 0 2px; }
 .eg-sim-ausculta .faculty-note { color: var(--ink-600); font-style: italic; }
-.eg-sim-ausculta .mode-rules { margin: 2px 0 0; font-size: var(--fs-xs); color: var(--ink-600); text-align: center; }
-.eg-sim-ausculta .mode-best-score { margin: 6px 0 0; font-size: var(--fs-xs); color: var(--ink-500, var(--ink-600)); text-align: center; }
-.eg-sim-ausculta .mode-best-score b { color: var(--blue-700); font-variant-numeric: tabular-nums; }
-.eg-sim-ausculta .mode-note { display: flex; justify-content: center; margin: 4px 0 var(--sp-4); }
-.eg-sim-ausculta .mode-note .headphone-banner { max-width: 720px; margin: 0 auto; }
-.eg-sim-ausculta .mode-progress-status { margin-top: auto; font-size: var(--fs-xs); color: var(--ink-600); text-align: left; }
-.eg-sim-ausculta .mode-progress { height: 6px; margin-top: 6px; overflow: hidden; border-radius: var(--r-pill); background: var(--green-100); }
-.eg-sim-ausculta .mode-progress span { display: block; height: 100%; background: var(--green-600); }
-.eg-sim-ausculta .mode-reward { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; border: 0; background: none; color: var(--amber-700); font: inherit; font-size: var(--fs-xs); font-weight: 700; cursor: pointer; }
-.eg-sim-ausculta .mode-card .btn { margin-top: auto; }
 .eg-sim-ausculta .headphone-banner.thin { padding: 8px 16px; gap: 10px; }
 .eg-sim-ausculta .headphone-banner.thin svg { width: 20px; height: 20px; }
 .eg-sim-ausculta .tutorial-wrap { display: grid; grid-template-columns: minmax(340px, 1.1fr) minmax(340px, 1fr); gap: 34px; align-items: center; min-height: 100%; padding: 16px 0; }
@@ -702,7 +653,6 @@
 }
 @media (max-height: 860px) {
   .eg-sim-ausculta { --head-h: 56px; --foot-h: 44px; }
-  .eg-sim-ausculta .mode-card { padding: var(--sp-4) var(--sp-4) 14px; }
   .eg-sim-ausculta .learn-grid { grid-template-columns: 20fr 45fr 35fr; }
 }
 @media (max-width: 1280px) {
@@ -745,7 +695,6 @@
   .eg-sim-ausculta .eg-mode-chip { padding: 6px 10px; font-size: var(--fs-xs); }
   .eg-sim-ausculta .eg-timer { font-size: var(--fs-xs); gap: 4px; }
   .eg-sim-ausculta .eg-header-context { gap: 6px; }
-  .eg-sim-ausculta .mode-cards { grid-template-columns: 1fr; max-width: 420px; }
   .eg-sim-ausculta .btn.large { padding: var(--sp-3) var(--sp-5); font-size: var(--fs-lg); width: 100%; }
   .eg-sim-ausculta .stage { min-height: 48vh; }
   .eg-sim-ausculta .toolbar { gap: 8px; padding: 8px 10px; }
@@ -761,7 +710,6 @@
   .eg-sim-ausculta .btn.small { padding: 8px 12px; }
   .eg-sim-ausculta .tool-sep { display: none; }
   .eg-sim-ausculta .lib-item { min-width: 200px; }
-  .eg-sim-ausculta .mode-title { font-size: var(--fs-2xl); }
   .eg-sim-ausculta .step .dot { width: 22px; height: 22px; font-size: var(--fs-xs); }
   .eg-sim-ausculta .step .lbl { font-size: var(--fs-xs); }
   .eg-sim-ausculta .results-title { font-size: var(--fs-2xl); }

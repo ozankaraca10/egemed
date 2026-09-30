@@ -20,8 +20,11 @@ import type { SimAudience, SimMountContext } from "@egemed/sim-host";
 import { isVisitorUnlockedItem } from "../access/visitorAccess";
 import type { PulseRuntimeHandle } from "./host";
 
-type ModeCardKind = "learn" | "practice" | "assessment";
-const MODE_CARD_KINDS: readonly ModeCardKind[] = ["learn", "practice", "assessment"];
+type ModeCardKind = "learn" | "practice" | "assessment" | "challenge";
+const MODE_CARD_KINDS: readonly ModeCardKind[] = ["learn", "practice", "assessment", "challenge"];
+
+/** Ziyaretçi yalnız öğrenmeyi kullanır; Meydan Okuma (T289, 4. mod) da kapalıdır. */
+const visitorCanUse = (kind: ModeCardKind): boolean => kind !== "challenge" && audienceCanUseMode("visitor", kind);
 
 const FACULTY_NOTE = "Öğretim üyesi görünümü — rozet ve sıralama yalnız öğrenciler içindir.";
 
@@ -100,8 +103,9 @@ function lockModeCards(shadow: ShadowRoot, requestSignIn: (() => void) | undefin
   const applyLocks = (): void => {
     for (const card of Array.from(box.querySelectorAll(".mode-card"))) {
       const kind = modeCardKind(card);
-      if (kind === null || audienceCanUseMode("visitor", kind)) continue;
-      card.classList.add("eg-locked");
+      if (kind === null || visitorCanUse(kind)) continue;
+      card.classList.add("eg-locked", "audience-locked", "locked");
+      card.setAttribute("data-audience-locked", "true");
       card.setAttribute("aria-disabled", "true");
       const button = card.querySelector("button[data-view]");
       if (button !== null && button.getAttribute("data-eg-locked") !== "1") {
@@ -112,10 +116,15 @@ function lockModeCards(shadow: ShadowRoot, requestSignIn: (() => void) | undefin
         button.innerHTML = `${LOCK_ICON}<span>${escapeHtml(VISITOR_LOCK_TEXT.cta)}</span>`;
       }
       if (card.querySelector(".eg-lock-note") === null) {
+        // T289: ziyaretçi kilidi öğrenme kilidinden önceliklidir; mühürde tek metin kalır.
+        card.querySelector(".mode-lock-hint")?.remove();
         const note = doc.createElement("p");
-        note.className = "eg-lock-note";
+        note.className = "eg-gami-mode-seal eg-lock-note";
+        note.setAttribute("role", "status");
         note.innerHTML = `${LOCK_ICON}<span>${escapeHtml(VISITOR_LOCK_TEXT.modeLocked)}</span>`;
-        (card.querySelector(".desc") ?? card).insertAdjacentElement("afterend", note);
+        const status = card.querySelector(".mode-status");
+        if (status !== null) status.prepend(note);
+        else (card.querySelector(".desc") ?? card).insertAdjacentElement("afterend", note);
       }
     }
   };
@@ -126,7 +135,7 @@ function lockModeCards(shadow: ShadowRoot, requestSignIn: (() => void) | undefin
     if (button === null || !box.contains(button)) return;
     const card = button.closest(".mode-card");
     const kind = card === null ? null : modeCardKind(card);
-    if (kind === null || audienceCanUseMode("visitor", kind)) return;
+    if (kind === null || visitorCanUse(kind)) return;
     event.preventDefault();
     event.stopPropagation();
     requestSignIn?.();

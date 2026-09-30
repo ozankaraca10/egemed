@@ -20,10 +20,16 @@ export interface GamiModeCard {
   readonly status?: string;
   /** Öğrenme kartındaki ilerleme (0–1); diğer kartlarda verilmez. */
   readonly progress?: number;
-  readonly locked: boolean;
-  /** Kilitliyken mühürdeki açılma koşulu. */
+  /** Öğrenme kilidi: kart soluk, mühürde koşul, düğme pasif. */
+  readonly learnLocked?: boolean;
+  /** Kitle kilidi (ziyaretçi): kart soluk, düğme girişe yönlendirir (pasif değil). */
+  readonly audienceLocked?: boolean;
+  /** Kilitliyken mühürdeki metin. */
   readonly lockText?: string;
+  /** Düğme etiketi; sim kilit durumuna göre verir. */
   readonly cta: string;
+  /** Veri eksikliği ya da öğrenme kilidi: düğme pasif. */
+  readonly disabled?: boolean;
   readonly onSelect: () => void;
   /** Değerlendirme kartının üst şeridi (ör. "Bu ayın ödülü · ilk 3 kişiye"). */
   readonly ribbon?: string | null;
@@ -39,6 +45,8 @@ export interface GamiModeJourneyProps {
   readonly learnTotal: number;
   readonly learnUnit: string;
   readonly note?: string | null;
+  /** Başlık ile kartlar arasına ek içerik (ör. ziyaretçi bandı, öğretim üyesi notu). */
+  readonly banner?: ReactNode;
   readonly cards: readonly GamiModeCard[];
   readonly showFairPlay: boolean;
   readonly icons: Pick<GamiIcons, "book" | "target" | "chart" | "award" | "lock" | "gift" | "info" | "arrowRight" | "check">;
@@ -63,7 +71,7 @@ export function GamiFairPlay({ icon }: { readonly icon: ReactNode }) {
   );
 }
 
-export function GamiModeJourney({ simLabel, title = "Çalışma Modunu Seçin", learnDone, learnTotal, learnUnit, note, cards, showFairPlay, icons }: GamiModeJourneyProps) {
+export function GamiModeJourney({ simLabel, title = "Çalışma Modunu Seçin", learnDone, learnTotal, learnUnit, note, banner, cards, showFairPlay, icons }: GamiModeJourneyProps) {
   const pct = learnTotal > 0 ? Math.round((learnDone / learnTotal) * 100) : 0;
   const complete = learnTotal > 0 && learnDone >= learnTotal;
   const iconFor = (key: GamiModeKey) => {
@@ -72,9 +80,9 @@ export function GamiModeJourney({ simLabel, title = "Çalışma Modunu Seçin", 
   };
   return (
     <div className="eg-gami-journey-wrap">
-      <header className="eg-gami-journey-head">
+      <div className="eg-gami-journey-head">
         <span className="eg-gami-journey-eyebrow">{simLabel}</span>
-        <h1 className="eg-gami-journey-title mode-title" tabIndex={-1}>{title}</h1>
+        <h2 className="mode-title eg-gami-journey-title" tabIndex={-1}>{title}</h2>
         <div className="eg-gami-journey-strip">
           <span className={`eg-gami-journey-ring${complete ? " done" : ""}`} style={{ ["--p" as string]: String(pct) }} aria-hidden="true">
             <span>{complete ? "✓" : `${pct}%`}</span>
@@ -84,16 +92,24 @@ export function GamiModeJourney({ simLabel, title = "Çalışma Modunu Seçin", 
           </span>
         </div>
         {note ? <p className="eg-gami-journey-note">{icons.info({ width: 14, height: 14 })} {note}</p> : null}
-      </header>
-      <ol className="eg-gami-journey" aria-label="Çalışma modları">
-        {cards.map((card) => (
-          <li key={card.key} className={`eg-gami-mode m-${card.key}${card.locked ? " locked" : ""}`}>
+        {banner}
+      </div>
+      <ol className="eg-gami-journey mode-cards" aria-label="Çalışma modları">
+        {cards.map((card) => {
+          const locked = card.learnLocked === true || card.audienceLocked === true;
+          return (
+          <li
+            key={card.key}
+            className={`mode-card ${card.key}${card.learnLocked ? " learn-locked" : ""}${card.audienceLocked ? " audience-locked" : ""} eg-gami-mode m-${card.key}${locked ? " locked" : ""}`}
+            data-learn-locked={card.learnLocked ? "true" : "false"}
+            data-audience-locked={card.audienceLocked ? "true" : "false"}
+          >
             {card.ribbon ? <span className="eg-gami-mode-ribbon">{icons.gift({ width: 14, height: 14 })} {card.ribbon}</span> : null}
             <div className="eg-gami-mode-top">
               <span className="eg-gami-mode-medal" aria-hidden="true">{iconFor(card.key)}</span>
               <span className="eg-gami-mode-step">{STEP_LABEL[card.key]}</span>
             </div>
-            <h2 className="eg-gami-mode-title">{card.title}</h2>
+            <h3 className="eg-gami-mode-title">{card.title}</h3>
             {card.key === "challenge" ? (
               <span className="eg-gami-mode-vs" aria-hidden="true"><i className="a">SEN</i><em>VS</em><i className="b">?</i></span>
             ) : null}
@@ -103,8 +119,8 @@ export function GamiModeJourney({ simLabel, title = "Çalışma Modunu Seçin", 
             </ul>
             {card.extra}
             <div className="eg-gami-mode-status">
-              {card.locked && card.lockText ? (
-                <p className="eg-gami-mode-seal"><span className="lk" aria-hidden="true">{icons.lock({ width: 14, height: 14 })}</span>{card.lockText}</p>
+              {locked && card.lockText ? (
+                <p className="eg-gami-mode-seal mode-lock-hint" role="status"><span className="lk" aria-hidden="true">{icons.lock({ width: 14, height: 14 })}</span>{card.lockText}</p>
               ) : null}
               {card.progress !== undefined ? (
                 <>
@@ -113,11 +129,14 @@ export function GamiModeJourney({ simLabel, title = "Çalışma Modunu Seçin", 
                 </>
               ) : card.status ? <span>{card.status}</span> : null}
             </div>
-            <button className="eg-gami-mode-cta" type="button" disabled={card.locked} onClick={card.onSelect}>
-              {card.locked ? <>{icons.lock({ width: 16, height: 16 })} Önce öğrenme modunu tamamlayın</> : <>{card.cta} {icons.arrowRight({ width: 16, height: 16 })}</>}
+            <button className="eg-gami-mode-cta" type="button" disabled={card.disabled === true} onClick={card.onSelect}>
+              {locked ? icons.lock({ width: 16, height: 16 }) : null}
+              {card.cta}
+              {locked ? null : icons.arrowRight({ width: 16, height: 16 })}
             </button>
           </li>
-        ))}
+          );
+        })}
       </ol>
       {showFairPlay ? <GamiFairPlay icon={icons.check({ width: 14, height: 14 })} /> : null}
     </div>

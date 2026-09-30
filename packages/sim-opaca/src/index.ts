@@ -337,7 +337,7 @@ export type {
 export { STEP_TITLES, ZONES, ZONE_IDS, noZonesReasonForImage, zoneById, zoneSetForImage, zonesForImage } from "./data/zones";
 export { StartScreen, createNoopStartScreenEnv } from "./screens/StartScreen";
 export type { StartScreenEnv, StartScreenProps } from "./screens/StartScreen";
-export { ModeCard, ModeSelectScreen, Stepper } from "./screens/ModeSelectScreen";
+export { ModeSelectScreen, Stepper } from "./screens/ModeSelectScreen";
 export type { ModeSelectScreenProps } from "./screens/ModeSelectScreen";
 export { TutorialScreen } from "./screens/TutorialScreen";
 export type { TutorialScreenProps } from "./screens/TutorialScreen";

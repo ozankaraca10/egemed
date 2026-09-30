@@ -79,7 +79,7 @@ describe("StartScreen", () => {
 describe("ModeSelectScreen", () => {
   it("üç mod kartını çizer; öğrenme tamamlanmadan uygulama/değerlendirme kilitlidir (T209)", () => {
     const html = renderInStore(createElement(ModeSelectScreen));
-    expect(html).toContain('class="mode-card learn"');
+    expect(html).toContain('class="mode-card learn eg-gami-mode m-learn"');
     expect(html).toContain("mode-card practice learn-locked");
     expect(html).toContain("mode-card assessment learn-locked");
     expect(html).toContain('data-learn-locked="true"');
@@ -89,13 +89,14 @@ describe("ModeSelectScreen", () => {
     expect(html).toContain("Önce öğrenme modunu tamamlayın: 0/20 ses dinlendi.");
     expect(html).toContain("Henüz denenmedi");
     // Kilit gönderimi kapatır: düğme pasiftir.
-    expect(html).toMatch(/disabled=""[^>]*>Önce öğrenme modunu tamamlayın/);
+    // T289: kilitli düğmede metnin önünde kilit simgesi (svg) bulunur.
+    expect(html).toMatch(/disabled=""[^>]*>(?:<svg[\s\S]*?<\/svg>)?Önce öğrenme modunu tamamlayın/);
   });
 
   it("gömülü modda SCORM ifadesi yoktur (ADR-006, T134)", () => {
     const html = renderInStore(createElement(ModeSelectScreen, { embedded: true }));
     expect(html).not.toContain("SCORM");
-    expect(html).toContain("puan kaydedilir");
+    expect(html).toContain("Puan kaydedilir");
   });
 });
 

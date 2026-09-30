@@ -14,6 +14,7 @@
  *   dinleyiciler dispose'da temizlenir; öncesinde kaynak kendi `pagehide`
  *   yoluyla durumu kaydeder.
  */
+import { gamiUiStyles } from "@egemed/gami-ui";
 import type { PulseScriptEnv } from "./env";
 import runApp from "./vendor/app.js";
 import runCurriculum from "./vendor/curriculum.js";
@@ -151,7 +152,7 @@ export function mountPulseRuntime(target: HTMLElement, options: PulseRuntimeOpti
   host.style.position = "relative";
   const shadow = host.attachShadow({ mode: "open" });
   const style = realDocument.createElement("style");
-  style.textContent = `${styles}\n${EMBED_CSS}`;
+  style.textContent = `${styles}\n${gamiUiStyles}\n${EMBED_CSS}`;
   const htmlEl = realDocument.createElement("div");
   htmlEl.className = "pulse-html";
   const bodyEl = realDocument.createElement("div");
@@ -488,15 +489,8 @@ const EMBED_CSS = `
 .app:has(#modesView:not([hidden])){min-height:0}
 .app:has(#modesView:not([hidden])) main{min-height:0;overflow:auto}
 @media(min-width:721px){.app:has(#modesView:not([hidden])){display:flex;flex-direction:column}.app:has(#modesView:not([hidden])) main{flex:1}}
-.modes-view{display:flex;flex-direction:column;justify-content:safe center;width:100%;min-height:100%;padding:12px 0}
-.mode-card .ic svg{fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-.mode-card.learn-locked{opacity:.78}
-.mode-lock-hint{display:flex;align-items:center;justify-content:center;gap:6px;margin:0 0 6px;padding:5px 10px;font-size:var(--fs-xs);color:var(--blue-700);background:var(--blue-50);border-radius:var(--r-pill);line-height:1.3}
-.mode-lock-hint .lock-ic{flex-shrink:0}
-.mode-card .mode-status{margin-top:auto}
-.mode-card.learn-locked .btn{background:var(--blue-100);color:var(--ink-500);box-shadow:none}
-.mode-reward{display:inline-flex;align-items:center;justify-content:center;min-height:44px;border:0;background:none;color:var(--amber-700);font-size:var(--fs-xs);font-weight:700}
-@media(min-width:721px) and (max-width:1024px){.mode-cards{grid-template-columns:repeat(3,minmax(0,1fr))}.modes-view{max-width:1020px}}
+/* T289: mod seçimi ortak dört modlu yolculuktur (@egemed/gami-ui); kaynak kart stilleri kaldırıldı. */
+.modes-view{display:flex;flex-direction:column;justify-content:safe center;width:100%;max-width:none;min-height:100%;padding:0}
 @media(max-width:720px){:host(.pulse-unified) .app:has(#modesView:not([hidden])){height:auto;min-height:calc(var(--pulse-vh,100dvh) - 2.5625rem)}}
 /* T139 (kullanıcı kararı, 25 Eylül 2026): tam ekran yalnız birleşik bardaki ikondan; oynatma
    çubuğundaki ikinci "↗ Tam ekran" düğmesi çizilmez (panel büyütme ↗ düğmeleri tam ekran değildir, kalır). */

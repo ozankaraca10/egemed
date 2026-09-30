@@ -50,7 +50,8 @@ describe("ModeSelectScreen (statik render)", () => {
     expect(html).toContain("mode-lock-hint");
     expect(html).toContain("Önce öğrenme modunu tamamlayın: 0/33 konu incelendi.");
     expect(html).toContain("Önce öğrenme modunu tamamlayın");
-    expect(html).toMatch(/disabled=""[^>]*>Önce öğrenme modunu tamamlayın/);
+    // T289: kilitli düğmede metnin önünde kilit simgesi (svg) bulunur.
+    expect(html).toMatch(/disabled=""[^>]*>(?:<svg[\s\S]*?<\/svg>)?Önce öğrenme modunu tamamlayın/);
     expect(html).not.toContain("Bu ayın ödülü");
   });
 

@@ -179,7 +179,7 @@ describe("createAuscultaModule (SimHost adaptörü)", () => {
     const html = renderToStaticMarkup(target.children[0]?.tree as ReactNode);
     expect(html).toContain("Ziyaretçi modu");
     expect(html).toContain("Öğrenci girişi");
-    expect(html).toContain("data-visitor-locked=\"true\"");
+    expect(html).toContain("data-audience-locked=\"true\"");
     expect(html).toContain("Bu mod yalnızca Ege Üniversitesi Tıp Fakültesi öğrencilerine açıktır.");
   });
 });

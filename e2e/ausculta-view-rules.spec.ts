@@ -21,7 +21,7 @@ async function openLearn(page: Page): Promise<Locator> {
   await signInAsStudent(page);
   await openRoute(page, "#/sims/ausculta");
   const root = page.locator(".eg-sim-ausculta").first();
-  await root.locator(".mode-card.learn button.btn").first().click();
+  await root.locator(".mode-card.learn button.eg-gami-mode-cta").first().click();
   await expect(root.locator(".tabbar.info-tabs")).toBeVisible();
   return root;
 }
