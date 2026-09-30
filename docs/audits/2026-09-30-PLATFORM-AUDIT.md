@@ -26,7 +26,7 @@ Yöntem: tam e2e (3 genişlik), çalışan demo API'ye kimliksiz sondalar, üret
 |---|---|---|---|---|---|
 | A1 | UX | Sim içi ekranlar URL'e yansımıyor. Geri tuşu simden tamamen çıkar (mobil/Android'de ilerleme kaybı hissi); yenileme sim başına döner; `#/sims/<id>/<ekran>` bağlantıları "Sayfa bulunamadı". | Üç simde ölçüldü: tıklama sonrası URL `/sims/<id>` kalıyor, `goBack` → `/simulatorler` | sim-host sözleşmesine ekran değişimi + gezinme; kabuk hash alt rotası ve history yönetimi; rota adları tek sözlük | T271a (sözleşme+kabuk), T271b (simler) |
 | A2 | Güvenlik / AI koruma | Lisanslı görüntü ve ses dosyaları (`/sims/`) kimliksiz ve hız sınırsız indirilebilir. nginx'te `limit_req` yok. `robots.txt` ve AI tarayıcı engeli yok. `server_tokens`, `Permissions-Policy` yok. | `infra/prod/nginx-egemed.conf` | nginx hız bölgeleri (`/api/`, `/api/auth/`, `/sims/`), AI UA engeli (GPTBot, ClaudeBot, anthropic-ai, CCBot, Google-Extended, PerplexityBot, Bytespider, Applebot-Extended, Meta-ExternalAgent), `robots.txt` Disallow, `X-Robots-Tag: noindex, nofollow, noai, noimageai`. 2. aşama: medya için oturum çerezi kontrolü (`auth_request`) | T269 |
-| A3 | İçerik doğruluğu | Pulse mod ekranı "Tüm sinyaller sentetik öğretim şemalarıdır; gerçek hasta kaydı değildir" diyor. Pulse'a gerçek PhysioNet EKG'leri eklendi; ifade yanlış ve yasal/etik bir beyan. | Pulse mod seçimi ekran görüntüsü | Hangi içeriğin gerçek, hangisinin şema olduğu netleştirilip beyan düzeltilir (tıbbi içerik) | Claude (Z5) |
+| A3 | İçerik doğruluğu | Pulse iki çelişkili beyan taşıyor. Mod ekranı: "Tüm sinyaller sentetik öğretim şemalarıdır" (bugün **doğru**, gerçek EKG verisi henüz Pulse'a girmedi). Hakkında/sınırlılık metni: "EKG'ler gerçek hasta kayıtlarından seçilmiş ve Doç. Dr. Evrim Şimşek tarafından doğrulanmıştır" (commit 24983f0; bugün **yanlış**, adı geçen öğretim üyesine atfedilmiş bir doğrulama iddiası). | `git grep` sim-pulse: PhysioNet verisi yok | Gerçek EKG yeniden yazımı yayına girene dek Hakkında metni "gerçek EKG geçişi sürüyor" biçimine çekilmeli; geçiş tamamlanınca mod ekranı beyanı güncellenir | **Depo sahibi kararı bekliyor** |
 | A4 | Güvenlik / işletim | Üretim CSP `connect-src` alanında yer tutucu `https://lrs.ornek-kurum.edu.tr` var; gerçek LRS çağrıları üretimde engellenir. | `nginx-egemed.conf:89` | LRS kökünü env'den şablonla (`envsubst`) | T269 |
 
 ### Orta
@@ -59,11 +59,35 @@ Yöntem: tam e2e (3 genişlik), çalışan demo API'ye kimliksiz sondalar, üret
 - Değerlendirme soruları ve doğru cevaplar istemci paketinde yok (örnek soru metinleriyle arandı).
 - Kaynak haritası (`.map`) üretim çıktısında yok.
 
+## Dalga sırasında ortaya çıkan ek bulgular
+
+| # | Bulgu | Sonuç |
+|---|---|---|
+| D1 | **e2e soğuk derleme yarışı:** Paralel tam e2e'de Vite, tembel yüklenen sim parçasını (Opaca ≈ 1,25 MB + veri) ilk istekte derliyordu; yük altında 5 sn beklemeyi aşıp "sim kökü bulunamadı" hatası veriyordu. `opaca-isolation` dev'de de 2 koşudan 1'inde düştü. Merge kapısında rastgele kırmızılar üretip T271a'yı (ve büyük olasılıkla T253a'yı) haksız yere geri aldırdı. | **Düzeltildi** (T271a: `server.warmup` ile sim girişleri açılışta önceden derleniyor; tam e2e 0 kırmızı) |
+| D2 | **Ajan okuma sınırı desenleri işlemiyordu:** `.ignore`, `.cursorignore`, `.claude/settings.json` gerçek veri dosyalarını (`packages/sim-*/src/data`) değil, boş eski `sims/*` yolunu engelliyordu. | **Düzeltildi** (T270) |
+| D3 | **Hız sınırı kampüs NAT'ını kesecekti:** İlk nginx taslağında `/api/auth/` (her rota değişiminde çağrılan `/auth/me` dahil) IP başına 10 istek/dk'ya sınırlanmıştı. | **Düzeltildi** (T269 incelemesi: auth yalnız giriş başlatan uçlarda; api/media oturum çerezine göre sayılıyor) |
+| D4 | **Ausculta öğrenme örneğinde yanıltıcı etiket:** Ronküs örneklerinden biri SPRSound "Kontrol grubu (hastalık yok)" etiketliydi. | **Düzeltildi** (T259 incelemesi: anormal bulgu konularında kontrol grubu elenir; ronküs 4 gerçek + 1 manken) |
+| D5 | KAUH ral kayıtlarında ince/kaba ayrımı kaynakta yok (`Crep`/`C`); araç tanıya göre sınıflıyor (kalp yetersizliği/fibrozis → ince; pnömoni/bronşit → kaba). | T261 hasta kartında belirtilecek; hekim onayına sunulacak |
+
 ## Kapsam dışı / sınırlar
 - API modlu 11 e2e testi demo veritabanını değiştireceği için koşulmadı.
 - Gerçek cihaz, ekran okuyucu ile elle test, yük testi ve gerçek IdP ile SSO akışı yapılmadı.
 
-## Dağıtım (bu dalga)
+## Dağıtım ve durum (30 Eyl akşamı)
+
+| Görev | İşçi | Durum |
+|---|---|---|
+| T268 | Claude | ✅ dev (rapor + C6) |
+| T269 | DeepSeek | ✅ dev (A2, A4, B6; D3 düzeltmesiyle) |
+| T270 | DeepSeek | ✅ dev (B5 görseller, C2; D2) |
+| T271a | Luna | ✅ dev (A1 sözleşme + kabuk; D1) |
+| T272 | Luna | kapıda (B1, C1) |
+| T273 | Luna | çalışıyor (B5 kod bölme, B7) |
+| T259 | DeepSeek | ✅ dev (D4 düzeltmesiyle) |
+| T260 | DeepSeek | çalışıyor (CirCor kalp sesleri) |
+| Sıradaki | — | T271b (simler gezinme sözleşmesine bağlanır), B2 ortak Hakkında/Yardım, B3 rozet sınıflaması, B4 Pulse SCORM katmanı, C4 sim CSS renk literalleri, T253a yeniden kapı |
+
+## İlk dağıtım planı
 
 | Görev | İşçi | Kapsam |
 |---|---|---|
