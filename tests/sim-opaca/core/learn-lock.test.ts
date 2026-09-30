@@ -119,9 +119,9 @@ describe("parseOpened", () => {
 
 describe("learnLock metinleri", () => {
   it("ilerleme, kilit ve düello metinleri ilerlemeyi taşır", () => {
-    expect(learnProgressText(3, 33)).toBe("Öğrenme: 3/33 konu açıldı");
+    expect(learnProgressText(3, 33)).toBe("Öğrenme: 3/33 konu incelendi");
     expect(learnLockText(3, 33)).toBe("Önce öğrenme modunu tamamlayın: 3/33 konu incelendi.");
-    expect(challengeLearnLockText(0, 33)).toBe("Meydan okuma için önce öğrenme modunu tamamlayın: 0/33 konu açıldı.");
+    expect(challengeLearnLockText(0, 33)).toBe("Meydan okuma için önce öğrenme modunu tamamlayın: 0/33 konu incelendi.");
   });
 });
 

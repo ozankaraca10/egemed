@@ -49,7 +49,7 @@ test.describe("Opaca öğrenme kilidi", () => {
 
     // Öğrenme her zaman açıktır; ilerleme satırı ve kilitli odaklı uygulama düğmesi.
     await root.locator(".mode-card.learn button.btn").click();
-    await expect(root.getByText("Öğrenme: 0/33 konu açıldı")).toBeVisible();
+    await expect(root.getByText("Öğrenme: 0/33 konu incelendi")).toBeVisible();
     const startButton = await openTopicPracticeButton(root);
     await expect(startButton).toBeDisabled();
     await expect(root.getByText("Önce öğrenme modunu tamamlayın: 0/33 konu incelendi.").last()).toBeVisible();
@@ -67,7 +67,7 @@ test.describe("Opaca öğrenme kilidi", () => {
     // Gerçek dosyası olan BT konusu seçilir; görüntü yüklenince öğe "açıldı" işareti alır
     // (yalnız seçmek yetmez, E2E'de XR görüntüleri git-dışıdır; BT dosyaları depodadır).
     await root.locator(".lib-item", { hasText: "Aksiyel anatomi" }).click();
-    await expect(root.getByText("Öğrenme: 1/33 konu açıldı")).toBeVisible();
+    await expect(root.getByText("Öğrenme: 1/33 konu incelendi")).toBeVisible();
     await expect(root.locator('.lib-item .lib-done[aria-label="açıldı"]')).toHaveCount(1);
     await expect(root.locator(".lib-group", { hasText: "Toraks BT" }).locator(".g-count")).toHaveText("1/2");
 
@@ -75,7 +75,7 @@ test.describe("Opaca öğrenme kilidi", () => {
     // görüntü yüklenemez, kayıt büyümez ve işaret çizilmez.
     await root.locator(".lib-item", { hasText: "Pnömotoraks" }).click();
     await expect(root.locator(".film-empty", { hasText: "Görüntü dosyası yüklenemedi" })).toBeVisible();
-    await expect(root.getByText("Öğrenme: 1/33 konu açıldı")).toBeVisible();
+    await expect(root.getByText("Öğrenme: 1/33 konu incelendi")).toBeVisible();
     await expect(root.locator('.lib-item .lib-done[aria-label="açıldı"]')).toHaveCount(1);
     expect(errors, "konsol/sayfa hatası").toEqual([]);
   });
@@ -102,7 +102,7 @@ test.describe("Opaca öğrenme kilidi", () => {
     await expect(root).toBeVisible({ timeout: 20_000 });
     await expect(root.locator(".lib-col .lib-item").first()).toBeVisible();
     await expect(
-      root.getByText("Meydan okuma için önce öğrenme modunu tamamlayın: 0/33 konu açıldı."),
+      root.getByText("Meydan okuma için önce öğrenme modunu tamamlayın: 0/33 konu incelendi."),
     ).toBeVisible();
     expect(errors, "konsol/sayfa hatası").toEqual([]);
   });

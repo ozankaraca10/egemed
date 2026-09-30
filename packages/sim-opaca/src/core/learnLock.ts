@@ -55,9 +55,9 @@ export function saveOpened(storage: StoragePort, opened: ReadonlySet<string>): v
   }
 }
 
-/** Öğrenme ekranı ilerleme satırı: "Öğrenme: X/Y konu açıldı". */
+/** Öğrenme ekranı ilerleme satırı: "Öğrenme: X/Y konu incelendi". */
 export function learnProgressText(opened: number, total: number): string {
-  return `Öğrenme: ${opened}/${total} konu açıldı`;
+  return `Öğrenme: ${opened}/${total} konu incelendi`;
 }
 
 /** Mod seçimi kilidi metni: "Önce öğrenme modunu tamamlayın: X/Y konu incelendi." */
@@ -67,7 +67,7 @@ export function learnLockText(opened: number, total: number): string {
 
 /** Düello bağlamıyla gelip kilitli kalan kullanıcıya öğrenme ekranında gösterilir. */
 export function challengeLearnLockText(opened: number, total: number): string {
-  return `Meydan okuma için önce öğrenme modunu tamamlayın: ${opened}/${total} konu açıldı.`;
+  return `Meydan okuma için önce öğrenme modunu tamamlayın: ${opened}/${total} konu incelendi.`;
 }
 
 /** Öğrenme her zaman açıktır; uygulama/değerlendirme yalnız tamamlanınca. */
