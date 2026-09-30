@@ -227,6 +227,7 @@ export function buildAchievementsModel<TStats, TContext extends BadgeContext, TD
     rule: v.rule,
     studyKey: v.studyKey,
     iconName: v.def.icon ?? "Star",
+    capstone: v.def.capstone === true,
     lockedNote: input.lockedNote?.(v.def.id) ?? null,
     assessmentOnly: assessmentOnly(v.def.category),
   }));

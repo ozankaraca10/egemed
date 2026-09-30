@@ -15,15 +15,17 @@ const ids = (xs: { id: string }[]) => xs.map((x) => x.id);
 const ctx = { now };
 
 describe("rozetler", () => {
-  it("37 rozet, benzersiz kimlik, 6 kategori; düello rozetleri T221'dedir", () => {
-    expect(OPACA_BADGES).toHaveLength(37);
-    expect(new Set(ids(OPACA_BADGES)).size).toBe(37);
+  it("40 rozet (39 + capstone), benzersiz kimlik, 6 kategori; düello rozetleri T221'dedir", () => {
+    expect(OPACA_BADGES).toHaveLength(40);
+    expect(new Set(ids(OPACA_BADGES)).size).toBe(40);
     expect(new Set(OPACA_BADGES.map((b) => b.category))).toEqual(
       new Set(["topic", "skill", "streak", "learn", "milestone", "challenge"]),
     );
-    expect(OPACA_BADGES.filter((badge) => badge.category === "challenge").map((badge) => badge.id)).toEqual(
-      DUEL_BADGES.map((badge) => badge.id),
+    // T277: düello rozetleri zorluk sırasına karıştığı için kimlikler küme olarak karşılaştırılır.
+    expect([...OPACA_BADGES.filter((badge) => badge.category === "challenge").map((badge) => badge.id)].sort()).toEqual(
+      [...DUEL_BADGES.map((badge) => badge.id)].sort(),
     );
+    expect(OPACA_BADGES.at(-1)).toMatchObject({ id: "gercek-rozet", capstone: true, category: "milestone", tier: "gold" });
   });
   it("ilk değerlendirme → İlk Adım; eşik tam 80 → Eşik Aşıldı, 79 değil", () => {
     expect(ids(evaluateBadges(OPACA_BADGES, statsOf([attempt({ score: 79 })]), [], ctx))).toContain("first-step");

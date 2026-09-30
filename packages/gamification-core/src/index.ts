@@ -1,4 +1,4 @@
-export { badgeProgress, evaluateBadges, isBadgeEarned } from "./badges";
+export { badgeProgress, capstoneRequiredBadges, evaluateBadges, isBadgeEarned } from "./badges";
 export type {
   BadgeCategory,
   BadgeContext,

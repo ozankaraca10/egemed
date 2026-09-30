@@ -12,18 +12,22 @@ const ids = (earned: readonly EarnedBadge[]) => earned.map((badge) => badge.id);
 const now = new Date("2026-09-24T10:00:00.000Z");
 
 describe("Pulse oyunlaştırması", () => {
-  it("en az 16 Türkçe rozeti benzersiz kimlik ve kategori/tier bilgisiyle tanımlar", () => {
-    expect(PULSE_BADGES.length).toBeGreaterThanOrEqual(16);
-    expect(new Set(PULSE_BADGES.map((badge) => badge.id)).size).toBe(PULSE_BADGES.length);
-    expect(new Set(PULSE_BADGES.map((badge) => badge.category))).toEqual(new Set(["skill", "streak", "topic", "challenge"]));
-    // T221: düello rozetleri her simin kataloğunda ayrı listelenir (kazanım sunucuda).
-    expect(PULSE_BADGES.filter((badge) => badge.category === "challenge").map((badge) => badge.id)).toEqual(
-      DUEL_BADGES.map((badge) => badge.id),
+  it("40 rozeti benzersiz kimlik ve kategori/tier bilgisiyle tanımlar (39 + capstone)", () => {
+    expect(PULSE_BADGES).toHaveLength(40);
+    expect(new Set(PULSE_BADGES.map((badge) => badge.id)).size).toBe(40);
+    expect(new Set(PULSE_BADGES.map((badge) => badge.category))).toEqual(
+      new Set(["skill", "streak", "topic", "challenge", "milestone"]),
+    );
+    // T221/T277: düello rozetleri her simin kataloğunda ayrı listelenir (kazanım sunucuda);
+    // zorluk sırasına karıştıkları için kimlikler küme olarak karşılaştırılır.
+    expect([...PULSE_BADGES.filter((badge) => badge.category === "challenge").map((badge) => badge.id)].sort()).toEqual(
+      [...DUEL_BADGES.map((badge) => badge.id)].sort(),
     );
     expect(PULSE_BADGES.some((badge) => badge.tier === "bronze")).toBe(true);
     expect(PULSE_BADGES.every((badge) => /[A-Za-z]/.test(badge.name) && badge.description.length > 0)).toBe(true);
     expect(Object.keys(PULSE_MODE_LABELS)).toEqual([...MODES]);
-    expect(PULSE_BADGES.filter((badge) => badge.id.startsWith("mode-"))).toHaveLength(13);
+    expect(PULSE_BADGES.filter((badge) => badge.id.startsWith("mode-") && badge.id !== "mode-all")).toHaveLength(13);
+    expect(PULSE_BADGES.at(-1)).toMatchObject({ id: "gercek-rozet", capstone: true, category: "milestone", tier: "gold" });
   });
 
   it("ritim serisi, 12 derivasyon, kaliper ve 13 mod ustalığı eşiklerini değerlendirir", () => {

@@ -222,6 +222,24 @@ test.describe("Opaca ilerleme sayfası", () => {
     await clickSimBarAction(page, "İlerlemem");
     await expect(page.getByRole("tab", { name: "Başarılarım" })).toBeVisible();
     await expect(page.getByRole("heading", { name: "Başarılarım", exact: true })).toBeVisible();
+    // T277: 40. "Gerçek Rozet" kartındaki bilgi düğmesi Dekanlık metnini açar.
+    const capstoneInfo = page.getByRole("button", { name: "Gerçek Rozet hakkında" });
+    await capstoneInfo.scrollIntoViewIfNeeded();
+    await expect(capstoneInfo).toBeVisible();
+    await expect(capstoneInfo).toHaveAttribute("aria-expanded", "false");
+    await capstoneInfo.click();
+    await expect(capstoneInfo).toHaveAttribute("aria-expanded", "true");
+    await expect(page.getByText("Ege Üniversitesi Tıp Fakültesi Dekanlığı")).toBeVisible();
+    // Ayrıntı penceresinde de aynı bilgi düğmesi çalışır.
+    await page.getByRole("button", { name: /Gerçek Rozet · Altın/ }).click();
+    const detail = page.getByRole("dialog");
+    await expect(detail).toBeVisible();
+    const detailInfo = detail.getByRole("button", { name: "Gerçek Rozet hakkında" });
+    await detailInfo.click();
+    await expect(detailInfo).toHaveAttribute("aria-expanded", "true");
+    await expect(detail.getByText("Ege Üniversitesi Tıp Fakültesi Dekanlığı")).toBeVisible();
+    await page.keyboard.press("Escape");
+    await expect(detail).toBeHidden();
     await captureRouteScreenshot(page, testInfo.project.name, "#/sims/opaca basarilarim");
     await page.getByRole("tab", { name: "Liderlik Tahtası" }).click();
     await expect(page.getByRole("heading", { name: "Liderlik Tahtası" })).toBeVisible();
