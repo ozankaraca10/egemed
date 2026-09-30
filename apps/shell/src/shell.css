@@ -378,11 +378,11 @@ html, body { margin: 0; }
 .eg-shell-sim__head { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-2); }
 /* T162: sabit logo çerçevesi — farklı en-boy oranlı logolar aynı hizada ortalanır. */
 .eg-shell-sim__logoFrame {
-  display: grid; place-items: center; box-sizing: border-box; height: 7rem; padding: var(--sp-3);
+  display: flex; align-items: center; justify-content: center; box-sizing: border-box; height: 7rem; padding: var(--sp-3);
   background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--r-md);
 }
 .eg-shell-sim--large .eg-shell-sim__logoFrame { height: 9rem; }
-.eg-shell-sim__logo { width: 100%; height: 100%; object-fit: contain; object-position: center; }
+.eg-shell-sim__logo { width: 100%; height: 100%; min-width: 0; min-height: 0; object-fit: contain; object-position: center; }
 .eg-shell-sim__tagline { margin: 0; color: var(--navy-800); font-weight: 600; }
 .eg-shell-sim__body { margin: 0; color: var(--muted); }
 .eg-shell-sim__noaccess { margin: 0; color: var(--red-600); font-size: var(--fs-sm); font-weight: 700; }
@@ -820,7 +820,7 @@ button.eg-shell-simbar__chip:hover { background: var(--navy-600); }
 .eg-shell-showcase {
   --eg-shell-medal-1: var(--orange-500);
   --eg-shell-medal-2: var(--ink-300);
-  --eg-shell-medal-3: var(--amber-700);
+  --eg-shell-medal-3: var(--bronze-400);
   display: grid; gap: var(--sp-5); margin-block: var(--sp-5); padding: var(--sp-5) var(--sp-4);
   background: linear-gradient(150deg, var(--navy-900), var(--navy-700) 60%, var(--blue-700));
   border-radius: var(--r-xl); box-shadow: var(--elev-3); color: var(--card);
@@ -842,10 +842,10 @@ button.eg-shell-simbar__chip:hover { background: var(--navy-600); }
 .eg-shell-showcase__tagline { color: var(--blue-100); font-size: var(--fs-xs); }
 .eg-shell-showcase__reward {
   display: flex; gap: var(--sp-2); align-items: flex-start; margin: 0; padding: var(--sp-2) var(--sp-3);
-  background: var(--orange-100); border: 1px solid var(--orange-500); border-radius: var(--r-md); color: var(--ink-800);
+  background: var(--blue-50); border: 1px solid var(--blue-100); border-left: 4px solid var(--eg-shell-medal-1); border-radius: var(--r-md); color: var(--ink-800);
 }
-.eg-shell-showcase__rewardIcon { flex: none; width: 1.25rem; height: 1.25rem; margin-top: 2px; color: var(--amber-700); }
-.eg-shell-showcase__rewardLabel { display: block; color: var(--amber-700); font-size: var(--fs-xs); font-weight: 800; letter-spacing: .02em; }
+.eg-shell-showcase__rewardIcon { flex: none; width: 1.25rem; height: 1.25rem; margin-top: 2px; color: var(--navy-700); }
+.eg-shell-showcase__rewardLabel { display: block; color: var(--blue-700); font-size: var(--fs-xs); font-weight: 800; letter-spacing: .02em; }
 .eg-shell-showcase__rewardTitle { display: block; font-size: var(--fs-sm); font-weight: 700; line-height: 1.4; }
 .eg-shell-showcase__rewardSponsor { display: block; color: var(--ink-600); font-size: var(--fs-xs); }
 .eg-shell-podium { display: flex; align-items: flex-end; justify-content: center; gap: var(--sp-2); margin: var(--sp-2) 0 0; padding: 0; list-style: none; }
@@ -866,7 +866,9 @@ button.eg-shell-simbar__chip:hover { background: var(--navy-600); }
   display: grid; place-items: center; width: 100%; height: 44px; margin-top: 4px;
   background: linear-gradient(180deg, var(--blue-100), var(--blue-50)); border-radius: var(--r-sm) var(--r-sm) 0 0;
 }
-.eg-shell-podium__place--1 .eg-shell-podium__step { height: 64px; background: linear-gradient(180deg, var(--orange-100), var(--blue-50)); }
+.eg-shell-podium__place--1 .eg-shell-podium__step { height: 64px; background: linear-gradient(180deg, var(--blue-200), var(--blue-50)); box-shadow: inset 0 3px 0 var(--eg-shell-medal-1); }
+.eg-shell-podium__place--2 .eg-shell-podium__step { box-shadow: inset 0 3px 0 var(--eg-shell-medal-2); }
+.eg-shell-podium__place--3 .eg-shell-podium__step { box-shadow: inset 0 3px 0 var(--eg-shell-medal-3); }
 .eg-shell-podium__place--3 .eg-shell-podium__step { height: 32px; }
 .eg-shell-podium__rank { color: var(--navy-800); font-size: var(--fs-lg); font-weight: 800; }
 .eg-shell-showcase__more { border-top: 1px solid var(--blue-100); padding-top: var(--sp-2); }
@@ -895,7 +897,7 @@ button.eg-shell-simbar__chip:hover { background: var(--navy-600); }
 .eg-shell-hall__winner { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: var(--sp-2); color: var(--card); font-size: var(--fs-sm); }
 .eg-shell-hall__medal { display: inline-grid; place-items: center; width: 24px; height: 24px; border-radius: var(--r-pill); background: var(--eg-shell-medal-2); color: var(--navy-900); font-size: var(--fs-xs); font-weight: 800; }
 .eg-shell-hall__winner--1 .eg-shell-hall__medal { background: var(--eg-shell-medal-1); }
-.eg-shell-hall__winner--3 .eg-shell-hall__medal { background: var(--eg-shell-medal-3); color: var(--card); }
+.eg-shell-hall__winner--3 .eg-shell-hall__medal { background: var(--eg-shell-medal-3); }
 .eg-shell-hall__name { overflow: hidden; font-weight: 700; text-overflow: ellipsis; white-space: nowrap; }
 .eg-shell-hall__score { color: var(--blue-100); font-variant-numeric: tabular-nums; }
 @media (min-width: 768px) {
