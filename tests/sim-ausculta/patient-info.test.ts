@@ -1,8 +1,12 @@
 import { describe, expect, it } from "vitest";
 import {
   ageYearsOf,
+  circorAgeGroup,
+  circorPatientInfo,
+  circorSite,
   diagnosisToTurkish,
   parsePatientSummaryCsv,
+  sexOfCircor,
   sexOfKauh,
   sexOfSprsound,
   siteToTurkish,
@@ -82,6 +86,63 @@ describe("dinleme yeri, yaş ve cinsiyet normalizasyonu", () => {
     expect(sexOfSprsound("0")).toBe("M");
     expect(sexOfSprsound("1")).toBe("F");
     expect(sexOfSprsound("2")).toBeNull();
+  });
+});
+
+describe("CirCor hasta alanı (T260)", () => {
+  it("yaş grubu, cinsiyet ve dinleme yerini plan tablosuyla Türkçeleştirir", () => {
+    expect(circorAgeGroup("Neonate")).toBe("Yenidoğan");
+    expect(circorAgeGroup("Infant")).toBe("Süt çocuğu");
+    expect(circorAgeGroup("Child")).toBe("Çocuk");
+    expect(circorAgeGroup("Adolescent")).toBe("Ergen");
+    expect(circorAgeGroup("nan")).toBeNull();
+    expect(sexOfCircor("Female")).toBe("F");
+    expect(sexOfCircor("male")).toBe("M");
+    expect(sexOfCircor("x")).toBeNull();
+    expect(circorSite("AV")).toBe("Aort odağı");
+    expect(circorSite("PV")).toBe("Pulmoner odak");
+    expect(circorSite("TV")).toBe("Triküspit odağı");
+    expect(circorSite("MV")).toBe("Mitral odağı");
+    expect(circorSite("RC")).toBeNull();
+  });
+
+  it("üfürümde ham ses tipini zamanlama + derece olarak üretir; tanı ve sayısal yaş yoktur", () => {
+    const patient = circorPatientInfo({
+      age: "Adolescent",
+      sex: "Female",
+      pregnancy: "True",
+      murmur: "Present",
+      timing: "Mid-systolic",
+      grading: "III/VI",
+      location: "PV",
+    });
+    expect(patient).toEqual({
+      origin: "real",
+      ageYears: null,
+      ageGroup: "Ergen",
+      sex: "F",
+      pregnant: true,
+      diagnosis: null,
+      diagnosisSource: "CirCor (tanı bilgisi yok)",
+      soundTypeRaw: "Mid-systolic III/VI",
+      site: "Pulmoner odak",
+    });
+  });
+
+  it("normalde 'Üfürüm yok' yazar; gebe alanı her hastada boolean kalır", () => {
+    const normal = circorPatientInfo({
+      age: "Child",
+      sex: "Male",
+      pregnancy: "False",
+      murmur: "Absent",
+      timing: "",
+      grading: "",
+      location: "AV",
+    });
+    expect(normal.soundTypeRaw).toBe("Üfürüm yok");
+    expect(normal.pregnant).toBe(false);
+    expect(normal.ageGroup).toBe("Çocuk");
+    expect(normal.site).toBe("Aort odağı");
   });
 });
 

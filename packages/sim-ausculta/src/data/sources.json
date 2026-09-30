@@ -93,7 +93,7 @@
       "license": "ODC-BY 1.0 (Open Data Commons Attribution)",
       "licenseUrl": "https://physionet.org/content/circor-heart-sound/view-license/1.0.3/",
       "attributionText": "Oliveira, J., et al. (2022). The CirCor DigiScope Phonocardiogram Dataset (v1.0.3). PhysioNet. https://doi.org/10.13026/cy60-yn18 — ODC-BY 1.0",
-      "note": "Pediatrik gerçek hasta kayıtları (4 örnek vaka havuzunda kullanılıyor)."
+      "note": "Pediatrik gerçek hasta kayıtları; öğrenme modunda kalp normal ve sistolik üfürüm konularını doldurur (konu başına en fazla 5 gerçek hasta, kalan yerler manken). Yeni üfürüm kayıtlarının eşlemesi öğretim üyesi onayı bekler."
     },
     {
       "id": "kauh-v3",
@@ -221,7 +221,7 @@
       "accessUrl": "https://physionet.org/content/circor-heart-sound/1.0.3/",
       "downloadSizeMb": 449,
       "importScript": "node scripts/import-circor.mjs <dizin>",
-      "notes": "Gerçek hastalardan (pediatrik) üfürüm kayıtları — manikin kayıtlarını tamamlar. 4 örnek kayıt envantere aktarılmıştır (paket dışı, ayrı manifest). Erken/Orta/Geç sistolik eşlemeleri doğrulanmış; holosistolik eğitim eşlemesidir.",
+      "notes": "Gerçek hastalardan (pediatrik) üfürüm kayıtları — manikin kayıtlarını tamamlar. 16 örnek kayıt envantere aktarılmıştır (paket dışı, ayrı manifest). T259 kayıtları korunur; yeni erken/orta/geç sistolik eşlemeleri öğretim üyesi onayı bekler; holosistolik eğitim eşlemesi (değerlendirme dışı) korunur.",
       "attributionText": "Oliveira, J., et al. (2022). The CirCor DigiScope Phonocardiogram Dataset (v1.0.3). PhysioNet. https://doi.org/10.13026/cy60-yn18 — ODC-BY 1.0",
       "labelTypes": [
         "üfürüm zamanlaması",

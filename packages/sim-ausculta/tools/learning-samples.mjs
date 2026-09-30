@@ -20,6 +20,8 @@ export function patientKeyOf(record) {
 /** Anormal bulgu konusunda "kontrol grubu" etiketli gerçek hasta öğretici değildir
  *  (ör. ronküs duyulan kayıtta "hastalık yok" yazması öğrenciyi yanıltır). */
 function teachable(topic, record) {
+  // Yaklaşık eşlenmiş kayıt (ör. pansistolik → orta sistolik) konunun örneği olarak gösterilmez.
+  if (record.mappingStatus === "educational_mapping") return false;
   return topic.acousticFinding === "normal" || !/^Kontrol grubu/.test(record.patient?.diagnosis ?? "");
 }
 

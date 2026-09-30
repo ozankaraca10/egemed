@@ -3,10 +3,10 @@
   "topics": {
     "heart.normal": [
       "circor_normal_cardiac_aortic_001",
-      "heart_normal_apex_001",
-      "heart_normal_lc_001",
-      "heart_normal_llsb_001",
-      "heart_normal_lusb_001"
+      "circor_normal_cardiac_aortic_002",
+      "circor_normal_cardiac_aortic_003",
+      "circor_normal_cardiac_aortic_004",
+      "circor_normal_cardiac_aortic_005"
     ],
     "heart.s3": [
       "heart_s3_apex_001",
@@ -21,17 +21,17 @@
     ],
     "heart.murmur.early_systolic": [
       "circor_early_systolic_murmur_cardiac_aortic_001",
-      "heart_early_systolic_murmur_llsb_001",
-      "heart_early_systolic_murmur_lusb_001",
-      "heart_early_systolic_murmur_rusb_001",
-      "heart_early_systolic_murmur_apex_001"
+      "circor_early_systolic_murmur_cardiac_aortic_002",
+      "circor_early_systolic_murmur_cardiac_mitral_001",
+      "circor_early_systolic_murmur_cardiac_pulmonary_001",
+      "circor_early_systolic_murmur_cardiac_pulmonary_002"
     ],
     "heart.murmur.mid_systolic": [
-      "circor_mid_systolic_murmur_cardiac_aortic_001",
-      "heart_mid_systolic_murmur_apex_002",
-      "heart_mid_systolic_murmur_llsb_001",
-      "heart_mid_systolic_murmur_lusb_002",
-      "heart_mid_systolic_murmur_apex_001"
+      "circor_mid_systolic_murmur_cardiac_mitral_001",
+      "circor_mid_systolic_murmur_cardiac_pulmonary_001",
+      "circor_mid_systolic_murmur_cardiac_pulmonary_002",
+      "circor_mid_systolic_murmur_cardiac_tricuspid_001",
+      "heart_mid_systolic_murmur_apex_002"
     ],
     "heart.murmur.late_systolic": [
       "circor_late_systolic_murmur_cardiac_aortic_001",
