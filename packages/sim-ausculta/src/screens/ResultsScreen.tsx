@@ -1,7 +1,9 @@
 import { useChallenge } from "../ui/ScreenHeading";
 import { endOfMonthTr } from "@egemed/gamification-core";
 import { defaultGamiIcons, GamiGainsView } from "@egemed/gami-ui";
-import { Fragment, useMemo, useState, type JSX, type ReactNode } from "react";
+import { Fragment, useEffect, useMemo, useState, type JSX, type ReactNode } from "react";
+import type { GamiServerSource } from "@egemed/gami-ui";
+import type { SimRewardsSnapshot } from "@egemed/sim-host";
 import { firstWeakLibraryKeyFromServer, weakDomainKeys } from "../core/flow";
 import { useStartMode } from "../core/LearnGate";
 import { aggregateResults } from "../core/scoring";
@@ -91,9 +93,11 @@ export interface ResultsScreenProps {
   readonly onLeaderboard?: () => void;
   /** API oturumunda veri sunucudan: kazanım kartında “Demo verisi” etiketi yok. */
   readonly serverData?: boolean;
+  readonly rewards?: SimRewardsSnapshot | null;
+  readonly gamification?: GamiServerSource;
 }
 
-export function ResultsScreen({ embedded = false, env = NOOP_RESULTS_ENV, repository, onAchievements, onLeaderboard, serverData = false }: ResultsScreenProps): JSX.Element {
+export function ResultsScreen({ embedded = false, env = NOOP_RESULTS_ENV, repository, onAchievements, onLeaderboard, serverData = false, rewards = null, gamification }: ResultsScreenProps): JSX.Element {
   const { state, dispatch, runtime, now } = useStore();
   const audience = useAudience();
   const startMode = useStartMode();
@@ -156,12 +160,28 @@ export function ResultsScreen({ embedded = false, env = NOOP_RESULTS_ENV, reposi
   };
   const weakKeys = weakDomainKeys(domains, 60);
   const at = new Date(now());
+  const [serverMonthRank, setServerMonthRank] = useState<{ rank: number | null; of: number } | null>(null);
+  useEffect(() => {
+    if (!rewards?.current || !gamification || state.mode !== "assessment") {
+      setServerMonthRank(null);
+      return;
+    }
+    let alive = true;
+    void gamification.leaderboard("month", "all").then(({ rows }) => {
+      if (!alive) return;
+      const me = rows.find((row) => row.isMe);
+      setServerMonthRank({ rank: me?.rank ?? null, of: rows.filter((row) => row.rank !== null).length });
+    }).catch(() => {
+      if (alive) setServerMonthRank(null);
+    });
+    return () => { alive = false; };
+  }, [gamification, rewards?.current, state.mode]);
   const gains = useMemo(() => {
     // Oyunlaştırma yalnız öğrenci kitlesi içindir (26 Eyl 2026 sözleşmesi):
     // öğretim üyesi/ziyaretçi için XP/rozet kazanımı ve rozet bildirimi gösterilmez.
     if (audience !== "student" || !repository || state.mode === "learn" || state.caseResults.length === 0) return null;
     const daysLeft = Math.ceil((endOfMonthTr(at).getTime() + 1 - at.getTime()) / 86_400_000);
-    const period = daysLeft < 7 ? "month" : "week";
+    const period = rewards?.current || daysLeft < 7 ? "month" : "week";
     const ranked = state.mode === "assessment"
       ? localLeaderboardRows(repository.snapshot().attempts, AUSCULTA_RULES, at, period, "all", { public: false, displayName: null, cohort: null })
       : null;
@@ -175,9 +195,9 @@ export function ResultsScreen({ embedded = false, env = NOOP_RESULTS_ENV, reposi
       caseCount: state.caseResults.length,
       hintsUsed: state.caseResults.reduce((sum, item) => sum + item.hintsUsed, 0),
       durationMs: state.assessmentTimer,
-      rank: ranked ? { period, rank: me?.rank ?? null, of: ranked.filter((row) => row.rank !== null).length } : null,
+      rank: ranked ? { period, ...(rewards?.current && serverMonthRank ? serverMonthRank : { rank: me?.rank ?? null, of: ranked.filter((row) => row.rank !== null).length }) } : null,
     });
-  }, [at, audience, passed, repository, state.assessmentTimer, state.caseResults, state.mode, total]);
+  }, [at, audience, passed, repository, rewards?.current, serverMonthRank, state.assessmentTimer, state.caseResults, state.mode, total]);
 
   const fmtTime = (ms: number) => {
     const seconds = Math.floor(ms / 1000);

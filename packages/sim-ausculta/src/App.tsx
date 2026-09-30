@@ -1,6 +1,6 @@
 import type { GamiServerSource } from "@egemed/gami-ui";
 import type { GamiPageTab } from "@egemed/gami-ui";
-import type { SimAudience, SimChrome, SimLearnPort, SimSessionSource } from "@egemed/sim-host";
+import type { SimAudience, SimChrome, SimLearnPort, SimRewardsSnapshot, SimRewardsSource, SimSessionSource } from "@egemed/sim-host";
 import { useEffect, useRef, useState, type JSX } from "react";
 import { LearnGateProvider, useLearnGate } from "./core/LearnGate";
 import { canStartMode } from "./core/learnLock";
@@ -55,6 +55,7 @@ export interface AppProps {
   readonly sessions?: SimSessionSource;
   /** T209: kabuğun öğrenme tamamlama kanalı (ziyaretçide verilmez). */
   readonly learn?: SimLearnPort;
+  readonly rewards?: SimRewardsSource;
   readonly challengeId?: string;
   readonly onChallengeFinished?: (challengeId: string) => void;
 }
@@ -73,6 +74,7 @@ function Shell({
   audience = "student",
   requestSignIn,
   sessions,
+  rewards: rewardsSource,
   challengeId,
   onChallengeFinished,
 }: AppProps & { embedded: boolean }): JSX.Element {
@@ -83,6 +85,15 @@ function Shell({
     gamiRef.current = new LocalGamiRepository({ storage: gamiStoragePort(storage), now: () => new Date(now()) });
   }
   const gami = gamiRef.current;
+  const [rewards, setRewards] = useState<SimRewardsSnapshot | null>(() => rewardsSource?.snapshot() ?? null);
+  useEffect(() => {
+    if (rewardsSource === undefined) {
+      setRewards(null);
+      return;
+    }
+    setRewards(rewardsSource.snapshot());
+    return rewardsSource.subscribe(setRewards);
+  }, [rewardsSource]);
   const [progressTab, setProgressTab] = useState<GamiPageTab>("achievements");
   const openProgress = (tab: GamiPageTab) => {
     setProgressTab(tab);
@@ -178,11 +189,13 @@ function Shell({
               onAchievements={() => openProgress("achievements")}
               onLeaderboard={() => openProgress("leaderboard")}
               serverData={gamification !== undefined}
+              rewards={rewards}
+              {...(gamification === undefined ? {} : { gamification })}
               {...(resultsEnv ? { env: resultsEnv } : {})}
             />
           ) : null}
           {screen === "progress" ? (
-            <ProgressScreen embedded={embedded} repository={gami} tab={progressTab} onTab={setProgressTab} {...(modalEnv ? { modalEnv } : {})} {...(gamification === undefined ? {} : { gamification })} />
+            <ProgressScreen embedded={embedded} repository={gami} rewards={rewards} tab={progressTab} onTab={setProgressTab} {...(modalEnv ? { modalEnv } : {})} {...(gamification === undefined ? {} : { gamification })} />
           ) : null}
           {screen === "sources" ? <SourcesScreen embedded={embedded} /> : null}
         </main>

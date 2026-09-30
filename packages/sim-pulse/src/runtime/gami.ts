@@ -20,7 +20,7 @@ import { gamiUiStyles } from "@egemed/gami-ui";
 import type { GamiServerSource } from "@egemed/gami-ui";
 import { mountPulseGains } from "./gains";
 import { mountPulseProgress } from "./progress";
-import type { SimLearnRecord } from "@egemed/sim-host";
+import type { SimLearnRecord, SimRewardsSource } from "@egemed/sim-host";
 import type { Lead, Mode } from "../engine/shapes";
 import type { PulseRuntimeHandle } from "./host";
 
@@ -96,6 +96,7 @@ export interface PulseGamiBridgeOptions {
    */
   readonly reportLearn?: (record: SimLearnRecord) => void;
   readonly gamification?: GamiServerSource;
+  readonly rewards?: SimRewardsSource;
 }
 
 /** Köprüyü kurar; dönen işlev izlemeyi bırakır ve eklenen öğeleri kaldırır. */
@@ -195,8 +196,17 @@ export function attachPulseGamification(handle: PulseRuntimeHandle, options: Pul
     if (detached) return;
     gamiState = result.state;
     if (showGains) {
-      gainsView.update(pulseSessionGains({ attempt: record, earnedIds: result.earnedIds, now: nowDate(), state: result.state }));
+      const rewardActive = options.rewards?.snapshot()?.current != null;
+      const model = pulseSessionGains({ attempt: record, earnedIds: result.earnedIds, now: nowDate(), rewardActive, state: result.state });
+      gainsView.update(model);
       gains.hidden = false;
+      if (rewardActive && options.gamification) {
+        void options.gamification.leaderboard("month", "all").then(({ rows }) => {
+          if (detached) return;
+          const me = rows.find((row) => row.isMe);
+          gainsView.update({ ...model, rank: { period: "month", rank: me?.rank ?? null, of: rows.filter((row) => row.rank !== null).length, delta: null } });
+        }).catch(() => undefined);
+      }
     }
     if (!progressHost.hidden) renderProgress();
   };

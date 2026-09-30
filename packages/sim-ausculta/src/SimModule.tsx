@@ -242,6 +242,7 @@ export function createAuscultaModule(deps?: AuscultaModuleDeps): SimModule {
         ...(context.requestSignIn === undefined ? {} : { requestSignIn: context.requestSignIn }),
         ...(context.sessions === undefined ? {} : { sessions: context.sessions }),
         ...(context.learn === undefined ? {} : { learn: context.learn }),
+        ...(context.rewards === undefined ? {} : { rewards: context.rewards }),
         ...(context.challengeId === undefined ? {} : { challengeId: context.challengeId }),
         ...(context.onChallengeFinished === undefined ? {} : { onChallengeFinished: context.onChallengeFinished }),
       };
