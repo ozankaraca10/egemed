@@ -40,7 +40,7 @@ test.describe("Opaca öğrenme kilidi", () => {
     const practice = root.locator(".mode-card.practice");
     await expect(practice).toHaveClass(/learn-locked/);
     await expect(practice.locator("button.btn")).toBeDisabled();
-    await expect(practice.getByText("Önce öğrenme modunu tamamlayın: 0/33 konu açıldı.")).toBeVisible();
+    await expect(practice.getByText("Önce öğrenme modunu tamamlayın: 0/33 konu incelendi.")).toBeVisible();
 
     const assessment = root.locator(".mode-card.assessment");
     await expect(assessment).toHaveClass(/learn-locked/);
@@ -52,7 +52,7 @@ test.describe("Opaca öğrenme kilidi", () => {
     await expect(root.getByText("Öğrenme: 0/33 konu açıldı")).toBeVisible();
     const startButton = await openTopicPracticeButton(root);
     await expect(startButton).toBeDisabled();
-    await expect(root.getByText("Önce öğrenme modunu tamamlayın: 0/33 konu açıldı.").last()).toBeVisible();
+    await expect(root.getByText("Önce öğrenme modunu tamamlayın: 0/33 konu incelendi.").last()).toBeVisible();
     await captureRouteScreenshot(page, testInfo.project.name, "#/sims/opaca ogrenme kilidi");
 
     expect(errors, "konsol/sayfa hatası").toEqual([]);

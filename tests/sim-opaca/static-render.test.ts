@@ -65,7 +65,7 @@ describe("Opaca App (statik render)", () => {
     expect(html).not.toContain('<header class="eg-header">');
     expect(html).not.toContain("<iframe");
     expect(html).not.toContain("Simülatörü başlat");
-    expect(html).toContain("Çalışma modunu seçin");
+    expect(html).toContain("Çalışma Modunu Seçin");
     expect(html).toContain('<h2 class="mode-title">');
     expect(html).not.toContain('<h1 class="mode-title">');
     expect(html).toContain('class="mode-card learn"');

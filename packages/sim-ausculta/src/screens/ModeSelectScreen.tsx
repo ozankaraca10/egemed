@@ -94,7 +94,7 @@ export function ModeSelectScreen({ embedded = false }: ModeSelectScreenProps): J
                   : "Uygulama havuzu boş."
               }
               items={["Rastgele 10 vaka", "İpucu desteği", "Detaylı geri bildirim"]}
-              cta={practiceVisitorLocked ? VISITOR_LOCK_TEXT.cta : practiceLocked ? "Öğrenmeye git" : "Vakaları çöz"}
+              cta={practiceVisitorLocked ? VISITOR_LOCK_TEXT.cta : practiceLocked ? "Önce öğrenme modunu tamamlayın" : "Vakaları çöz"}
               disabled={!practiceVisitorLocked && (practiceLocked || practiceCases.length === 0 || !serverReady)}
               learnLocked={!practiceVisitorLocked && practiceLocked}
               lockText={gate.lockText}
@@ -113,7 +113,7 @@ export function ModeSelectScreen({ embedded = false }: ModeSelectScreenProps): J
               }
               items={["Rastgele 10 vaka", "İpuçsuz + tek dinleme", embedded ? "Puan kaydedilir" : "SCORM puanı"]}
               rules={embedded ? "İpucu yok · tek dinleme · puan kaydedilir" : "İpucu yok · tek dinleme · SCORM'a puan yazılır"}
-              cta={assessmentVisitorLocked ? VISITOR_LOCK_TEXT.cta : assessmentLocked ? "Öğrenmeye git" : "Değerlendirmeye gir"}
+              cta={assessmentVisitorLocked ? VISITOR_LOCK_TEXT.cta : assessmentLocked ? "Önce öğrenme modunu tamamlayın" : "Değerlendirmeye gir"}
               disabled={!assessmentVisitorLocked && (assessmentLocked || assessmentCases.length === 0 || !serverReady)}
               learnLocked={!assessmentVisitorLocked && assessmentLocked}
               lockText={gate.lockText}

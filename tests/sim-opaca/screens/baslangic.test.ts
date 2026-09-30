@@ -7,7 +7,7 @@ import type { StoragePort, WindowLike } from "../../../packages/sim-opaca/src/in
 import { fakeSessions } from "../session-fixture";
 
 /** Başlangıç ekranları — E2 §8 S13 kabulü (statik render): başlangıç CTA'ları, üç mod kartı
- *  (İnceleme/Öğrenme · Uygulama · Değerlendirme tonları), kilitli öneri kartı, öğretici adımları,
+ *  (Öğrenme · Uygulama · Değerlendirme tonları), kilitli öneri kartı, öğretici adımları,
  *  fsPromptDone depo davranışı (bellek StoragePort). */
 
 const inertWindow: WindowLike = {
@@ -48,9 +48,9 @@ describe("ModeSelectScreen (statik render)", () => {
     const html = renderInStore(createElement(ModeSelectScreen), memoryStorage(), true);
     expect(html).toContain('data-learn-locked="true"');
     expect(html).toContain("mode-lock-hint");
-    expect(html).toContain("Önce öğrenme modunu tamamlayın: 0/33 konu açıldı.");
-    expect(html).toContain("Öğrenmeye git");
-    expect(html).toMatch(/disabled=""[^>]*>Öğrenmeye git/);
+    expect(html).toContain("Önce öğrenme modunu tamamlayın: 0/33 konu incelendi.");
+    expect(html).toContain("Önce öğrenme modunu tamamlayın");
+    expect(html).toMatch(/disabled=""[^>]*>Önce öğrenme modunu tamamlayın/);
     expect(html).not.toContain("Bu ayın ödülü");
   });
 

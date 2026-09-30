@@ -120,7 +120,7 @@ describe("parseOpened", () => {
 describe("learnLock metinleri", () => {
   it("ilerleme, kilit ve düello metinleri ilerlemeyi taşır", () => {
     expect(learnProgressText(3, 33)).toBe("Öğrenme: 3/33 konu açıldı");
-    expect(learnLockText(3, 33)).toBe("Önce öğrenme modunu tamamlayın: 3/33 konu açıldı.");
+    expect(learnLockText(3, 33)).toBe("Önce öğrenme modunu tamamlayın: 3/33 konu incelendi.");
     expect(challengeLearnLockText(0, 33)).toBe("Meydan okuma için önce öğrenme modunu tamamlayın: 0/33 konu açıldı.");
   });
 });
@@ -260,8 +260,8 @@ describe("ModeSelectScreen öğrenme kilidi", () => {
     expect(html).toContain("mode-card practice learn-locked");
     expect(html).toContain("mode-card assessment learn-locked");
     expect(html).toContain('data-learn-locked="true"');
-    expect(html).toContain("Önce öğrenme modunu tamamlayın: 0/33 konu açıldı.");
-    expect(html).toMatch(/disabled=""[^>]*>Öğrenmeye git/);
+    expect(html).toContain("Önce öğrenme modunu tamamlayın: 0/33 konu incelendi.");
+    expect(html).toMatch(/disabled=""[^>]*>Önce öğrenme modunu tamamlayın/);
   });
 
   it("host complete ise yerel küme boşken de kartlar açıktır", () => {

@@ -323,8 +323,8 @@ test.describe("Pulse kaynak runtime", () => {
     const assessment = root.locator("#modeCards .mode-card.assessment");
     await expect(practice.locator('button[data-view="case"]')).toBeDisabled();
     await expect(assessment.locator('button[data-view="quiz"]')).toBeDisabled();
-    await expect(practice).toContainText("Önce öğrenme modunu tamamlayın: 0/23 patern izlendi.");
-    await expect(assessment).toContainText("Önce öğrenme modunu tamamlayın: 0/23 patern izlendi.");
+    await expect(practice).toContainText("Önce öğrenme modunu tamamlayın: 0/23 EKG sonucu incelendi.");
+    await expect(assessment).toContainText("Önce öğrenme modunu tamamlayın: 0/23 EKG sonucu incelendi.");
     // Kilitliyken tıklama görünüm değiştirmez (buton pasif).
     await practice.locator('button[data-view="case"]').click({ force: true });
     await expect(root.locator("#caseView")).toBeHidden();

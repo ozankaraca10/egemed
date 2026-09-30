@@ -60,9 +60,9 @@ export function learnProgressText(opened: number, total: number): string {
   return `Öğrenme: ${opened}/${total} konu açıldı`;
 }
 
-/** Mod seçimi kilidi metni: "Önce öğrenme modunu tamamlayın: X/Y konu açıldı." */
+/** Mod seçimi kilidi metni: "Önce öğrenme modunu tamamlayın: X/Y konu incelendi." */
 export function learnLockText(opened: number, total: number): string {
-  return `Önce öğrenme modunu tamamlayın: ${opened}/${total} konu açıldı.`;
+  return `Önce öğrenme modunu tamamlayın: ${opened}/${total} konu incelendi.`;
 }
 
 /** Düello bağlamıyla gelip kilitli kalan kullanıcıya öğrenme ekranında gösterilir. */
