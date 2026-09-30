@@ -219,6 +219,7 @@ describe("Opaca sunucu vaka oturumu (A2.2)", () => {
         heardTokens: [],
         timedOut: false,
         result: null,
+        integritySignals: [],
       })),
     );
   }
