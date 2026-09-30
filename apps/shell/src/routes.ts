@@ -2,7 +2,7 @@ import { isSimScreenKey, isSimulatorId, type SimScreenKey, type SimulatorId } fr
 import type { TrKey } from "@egemed/ui/i18n";
 
 /** Kabukta tanımlı sayfa kimlikleri. */
-export type RouteId = "home" | "simulators" | "challenges";
+export type RouteId = "home" | "simulators";
 export type EntryRole = "admin" | "student";
 
 /** Tek sayfa rotası: hash yolu, gezinme etiketi ve sayfa başlığı anahtarı. */
@@ -25,8 +25,19 @@ export type ResolvedRoute =
   | { kind: "adminRoles"; titleKey: TrKey }
   | { kind: "adminAudit"; titleKey: TrKey }
   | { kind: "adminRewards"; titleKey: TrKey }
-  | { kind: "sim"; simId: SimulatorId; titleKey: TrKey; challengeId?: string; screenKey?: SimScreenKey }
+  | {
+      kind: "sim";
+      simId: SimulatorId;
+      titleKey: TrKey;
+      challengeId?: string;
+      screenKey?: SimScreenKey;
+      /** T281a: sim içi düello merkezi ayrıntısı (`/sims/<id>/meydan-okuma/<uuid>`). */
+      challengeDetailId?: string;
+    }
+  /** Eski adreslerin (`/meydan-okuma/<uuid>`) kaynak çözdükten sonra yönlendirdiği ara sayfa. */
   | { kind: "challengeDetail"; challengeId: string; titleKey: TrKey }
+  /** T281a: kaldırılan adreslerin hedefe yönlendirilmesi. */
+  | { kind: "redirect"; href: `#${string}`; titleKey: TrKey }
   | { kind: "notFound"; path: string };
 
 export const ENTRY_PATHS: Record<EntryRole, `/giris/${string}`> = {
@@ -58,15 +69,24 @@ export const ADMIN_REWARDS_PATH = "/admin/oduller" as const;
 export const ROUTES: readonly RouteDef[] = [
   { id: "home", path: "/", labelKey: "shell.nav.home", titleKey: "shell.home.title" },
   { id: "simulators", path: "/simulatorler", labelKey: "shell.nav.simulators", titleKey: "shell.simulators.title" },
-  { id: "challenges", path: "/meydan-okuma", labelKey: "shell.nav.challenges", titleKey: "challenges.title" },
 ];
 
-/** ADR-010: düello ayrıntısı ve düello modunda sim açılışı. */
+/**
+ * ADR-010: düello ayrıntısı ve düello modunda sim açılışı. T281a ile Meydan
+ * Okuma ana gezinmeden çıktı; bu yol yalnız eski bağlantıların tanınması ve
+ * yönlendirilmesi için korunur.
+ */
 export const CHALLENGES_PATH = "/meydan-okuma" as const;
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-export function challengeHref(challengeId: string): `#${string}` {
-  return `#${CHALLENGES_PATH}/${challengeId}`;
+/** Sim içi ekran bağlantısı (ör. `#/sims/opaca/modlar`, `#/sims/opaca/meydan-okuma`). */
+export function simScreenHref(simId: SimulatorId, screen: SimScreenKey): `#${string}` {
+  return `#/sims/${simId}/${screen}`;
+}
+
+/** T281a: düello ayrıntısı simin içindeki merkezde açılır. */
+export function challengeHref(simId: SimulatorId, challengeId: string): `#${string}` {
+  return `${simScreenHref(simId, "meydan-okuma")}/${challengeId}`;
 }
 
 export function challengePlayHref(simId: SimulatorId, challengeId: string): `#${string}` {
@@ -129,6 +149,10 @@ export function resolveRoute(hash: string): ResolvedRoute {
   if (path === ADMIN_PATH) return { kind: "admin", titleKey: "admin.title" };
   if (path === ENTRY_PATHS.admin) return { kind: "entry", role: "admin", titleKey: "entry.admin.title" };
   if (path === ENTRY_PATHS.student) return { kind: "entry", role: "student", titleKey: "entry.student.title" };
+  // T281a: Meydan Okuma ana gezinmeden çıktı; eski liste adresi Simülatörler'e döner.
+  if (path === CHALLENGES_PATH) {
+    return { kind: "redirect", href: routeHref("simulators"), titleKey: "shell.simulators.title" };
+  }
   if (path.startsWith(`${CHALLENGES_PATH}/`)) {
     const challengeId = path.slice(CHALLENGES_PATH.length + 1);
     if (UUID_PATTERN.test(challengeId)) return { kind: "challengeDetail", challengeId, titleKey: "challenges.detail.title" };
@@ -136,6 +160,17 @@ export function resolveRoute(hash: string): ResolvedRoute {
   const duel = /^\/sims\/([a-z]+)\/duello\/([0-9a-f-]{36})$/i.exec(path);
   if (duel !== null && isSimulatorId(duel[1]) && UUID_PATTERN.test(duel[2] ?? "")) {
     return { kind: "sim", simId: duel[1], titleKey: simTitleKey(duel[1]), challengeId: duel[2] ?? "" };
+  }
+  // Sim içi düello merkezi ayrıntısı; genel ekran kalıbından önce gelir (iki alt segment).
+  const simChallenge = /^\/sims\/([a-z]+)\/meydan-okuma\/([0-9a-f-]{36})$/i.exec(path);
+  if (simChallenge !== null && isSimulatorId(simChallenge[1]) && UUID_PATTERN.test(simChallenge[2] ?? "")) {
+    return {
+      kind: "sim",
+      simId: simChallenge[1],
+      titleKey: simTitleKey(simChallenge[1]),
+      screenKey: "meydan-okuma",
+      challengeDetailId: simChallenge[2] ?? "",
+    };
   }
   const simScreen = /^\/sims\/([a-z]+)\/([^/]+)$/.exec(path);
   if (simScreen !== null && isSimulatorId(simScreen[1]) && isSimScreenKey(simScreen[2])) {

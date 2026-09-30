@@ -49,6 +49,9 @@ const streakBadge = (id: string, name: string, tier: "bronze" | "silver" | "gold
   progress: (s) => progress(s.rhythmRecognitionStreak, max),
 });
 
+/** Ustalık kazanılmış ritim örüntüsü sayısı ("tümü" rozeti için). */
+const masteredModes = (s: PulseStats): number => PULSE_MODES.filter((mode) => (s.modeMastery[mode] ?? 0) > 0).length;
+
 const modeBadges: BadgeDef<PulseStats>[] = (Object.keys(modeLabels) as PulseMode[]).map((mode) => ({
   id: `mode-${mode}`,
   category: "topic",
@@ -59,19 +62,22 @@ const modeBadges: BadgeDef<PulseStats>[] = (Object.keys(modeLabels) as PulseMode
   progress: (s) => progress(s.modeMastery[mode] ?? 0, 1),
 }));
 
+const duel = duelBadges<PulseStats>(() => EMPTY_DUEL_STATS);
+const duelBronze = duel.filter((badge) => badge.tier === "bronze");
+const duelSilver = duel.filter((badge) => badge.tier === "silver");
+const duelGold = duel.filter((badge) => badge.tier === "gold");
+
+/**
+ * T277 — katalog 40'a tamamlandı, eski kimlikler korundu. Şu rozetler GEÇİCİdir
+ * (mevcut eşik zincirlerinin uzantısı; rozet seti simülatörler bitince baştan tasarlanacak):
+ * rhythm-streak-5/15/40, leads-3/6/9, caliper-5/15/40, mode-all.
+ * "gercek-rozet" 40. rozettir (capstone) ve kalıcıdır. Sıra kolaydan zora: kademe bandı içinde
+ * eşik artan; düello rozetleri kendi kademelerine karışır.
+ */
 export const PULSE_BADGES: BadgeDef<PulseStats>[] = [
+  // Bronz: tek oturum / en düşük eşikler.
+  ...modeBadges,
   streakBadge("rhythm-streak-3", "Ritim izleyicisi", "bronze", 3),
-  streakBadge("rhythm-streak-10", "Ritim yorumcusu", "silver", 10),
-  streakBadge("rhythm-streak-25", "Ritim ustası", "gold", 25),
-  {
-    id: "twelve-leads",
-    category: "skill",
-    icon: "Activity",
-    name: "12 derivasyon okuru",
-    description: "Standart 12 derivasyonun tamamında doğru değerlendirme yap.",
-    rule: "12 doğru derivasyon",
-    progress: (s) => progress(s.correctlyReadLeads, 12),
-  },
   {
     id: "caliper-1",
     category: "skill",
@@ -83,6 +89,39 @@ export const PULSE_BADGES: BadgeDef<PulseStats>[] = [
     progress: (s) => progress(s.accurateCaliperCount, 3),
   },
   {
+    id: "leads-3",
+    category: "skill",
+    tier: "bronze",
+    icon: "Activity",
+    name: "Üç derivasyon okuru",
+    description: "EKG'de 3 derivasyonda doğru değerlendirme yap.",
+    rule: "3 doğru derivasyon",
+    progress: (s) => progress(s.correctlyReadLeads, 3),
+  },
+  streakBadge("rhythm-streak-5", "Ritim gözlemcisi", "bronze", 5),
+  {
+    id: "caliper-5",
+    category: "skill",
+    tier: "bronze",
+    icon: "Ruler",
+    name: "Kaliper alışkanlığı",
+    description: "Kaliperle 5 ölçümü 20 ms içinde doğru yap.",
+    rule: "5 doğru ölçüm",
+    progress: (s) => progress(s.accurateCaliperCount, 5),
+  },
+  ...duelBronze,
+  // Gümüş: orta eşikler.
+  {
+    id: "leads-6",
+    category: "skill",
+    tier: "silver",
+    icon: "Activity",
+    name: "Altı derivasyon okuru",
+    description: "EKG'de 6 derivasyonda doğru değerlendirme yap.",
+    rule: "6 doğru derivasyon",
+    progress: (s) => progress(s.correctlyReadLeads, 6),
+  },
+  {
     id: "caliper-2",
     category: "skill",
     tier: "silver",
@@ -91,6 +130,39 @@ export const PULSE_BADGES: BadgeDef<PulseStats>[] = [
     description: "Kaliperle on ölçümü 20 ms içinde doğru yap.",
     rule: "10 doğru ölçüm",
     progress: (s) => progress(s.accurateCaliperCount, 10),
+  },
+  streakBadge("rhythm-streak-10", "Ritim yorumcusu", "silver", 10),
+  streakBadge("rhythm-streak-15", "Ritim çözümleyicisi", "silver", 15),
+  {
+    id: "caliper-15",
+    category: "skill",
+    tier: "silver",
+    icon: "Ruler",
+    name: "Kaliper düzeni",
+    description: "Kaliperle 15 ölçümü 20 ms içinde doğru yap.",
+    rule: "15 doğru ölçüm",
+    progress: (s) => progress(s.accurateCaliperCount, 15),
+  },
+  ...duelSilver,
+  // Altın: yüksek eşikler ve "tümü" türü.
+  {
+    id: "leads-9",
+    category: "skill",
+    tier: "gold",
+    icon: "Activity",
+    name: "Dokuz derivasyon okuru",
+    description: "EKG'de 9 derivasyonda doğru değerlendirme yap.",
+    rule: "9 doğru derivasyon",
+    progress: (s) => progress(s.correctlyReadLeads, 9),
+  },
+  {
+    id: "twelve-leads",
+    category: "skill",
+    icon: "Activity",
+    name: "12 derivasyon okuru",
+    description: "Standart 12 derivasyonun tamamında doğru değerlendirme yap.",
+    rule: "12 doğru derivasyon",
+    progress: (s) => progress(s.correctlyReadLeads, 12),
   },
   {
     id: "caliper-3",
@@ -102,10 +174,39 @@ export const PULSE_BADGES: BadgeDef<PulseStats>[] = [
     rule: "25 doğru ölçüm",
     progress: (s) => progress(s.accurateCaliperCount, 25),
   },
-  ...modeBadges,
-  // Düello rozetleri (ADR-010): kazanım sunucuda `challenges` sonuçlarından
-  // değerlendirilir; sim görünümünde erişim boştur, kazanılan `earnedFromServer` ile işaretlenir.
-  ...duelBadges<PulseStats>(() => EMPTY_DUEL_STATS),
+  {
+    id: "caliper-40",
+    category: "skill",
+    tier: "gold",
+    icon: "Ruler",
+    name: "Kaliper virtüözü",
+    description: "Kaliperle 40 ölçümü 20 ms içinde doğru yap.",
+    rule: "40 doğru ölçüm",
+    progress: (s) => progress(s.accurateCaliperCount, 40),
+  },
+  streakBadge("rhythm-streak-25", "Ritim ustası", "gold", 25),
+  streakBadge("rhythm-streak-40", "Ritim şampiyonu", "gold", 40),
+  ...duelGold,
+  {
+    id: "mode-all",
+    category: "topic",
+    tier: "gold",
+    icon: "Trophy",
+    name: "Tüm ritim örüntüleri",
+    description: "On üç EKG örüntüsünün tamamında en az %80 başarıya ulaş.",
+    rule: "13 mod ustalığı",
+    progress: (s) => progress(masteredModes(s), PULSE_MODES.length),
+  },
+  {
+    id: "gercek-rozet",
+    category: "milestone",
+    tier: "gold",
+    icon: "Medal",
+    name: "Gerçek Rozet",
+    description: "Bu simülatördeki 39 rozetin tamamını topla.",
+    rule: "39 rozetin tümü",
+    capstone: true,
+  },
 ];
 
 export { modeLabels as PULSE_MODE_LABELS };

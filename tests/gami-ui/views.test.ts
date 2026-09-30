@@ -4,9 +4,13 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import {
   GamiAchievementsView,
+  GamiBadgeDetail,
+  GamiBadgeGrid,
   GamiGainsView,
   GamiLeaderboardView,
   GamiProgressPage,
+  GAMI_CAPSTONE_INFO,
+  GAMI_CAPSTONE_LABEL,
   gamiUiStyles,
   type GamiBadgeModel,
   type GamiIcons,
@@ -203,5 +207,49 @@ describe("gami-ui görünüm sözleşmesi", () => {
     expect(html).toContain("+40 XP");
     expect(html).toContain("Seviye 2");
     expect(html).toContain("Başarılarımı gör");
+  });
+
+  it("capstone kartı 'Gerçek Rozet' etiketi ve 44 px bilgi düğmesini çizer; metin kapalıyken gizlidir", () => {
+    const capstone: GamiBadgeModel = {
+      id: "gercek-rozet",
+      name: "Gerçek Rozet",
+      tier: "gold",
+      tierLabel: "Altın",
+      description: "Bu simülatördeki 39 rozetin tamamını topla.",
+      category: "milestone",
+      categoryLabel: "Kilometre taşı",
+      state: "locked",
+      value: 0,
+      max: 39,
+      earnedLabel: null,
+      rule: "39 rozetin tümü",
+      studyKey: null,
+      iconName: "Medal",
+      capstone: true,
+      lockedNote: null,
+      assessmentOnly: false,
+    };
+    const gridHtml = renderToStaticMarkup(createElement(GamiBadgeGrid, {
+      views: [capstone],
+      categories: [{ id: "milestone", label: "Kilometre taşı" }],
+      onStudy: () => undefined,
+      icons,
+    }));
+    expect(gridHtml).toContain("eg-gami-badge eg-gami-cat-milestone is-locked capstone");
+    expect(gridHtml).toContain(GAMI_CAPSTONE_LABEL);
+    expect(gridHtml).toContain('aria-label="Gerçek Rozet hakkında"');
+    expect(gridHtml).toContain('aria-expanded="false"');
+    expect(gridHtml).toContain(GAMI_CAPSTONE_INFO);
+    expect(gridHtml).toContain('hidden=""');
+    // Ayrıntı penceresi de bilgi düğmesini taşır.
+    const detailHtml = renderToStaticMarkup(createElement(GamiBadgeDetail, {
+      v: capstone,
+      returnTo: { focus: () => undefined, hasAttribute: () => false },
+      onClose: () => undefined,
+      onStudy: () => undefined,
+      icons,
+    }));
+    expect(detailHtml).toContain('aria-label="Gerçek Rozet hakkında"');
+    expect(detailHtml).toContain(GAMI_CAPSTONE_INFO);
   });
 });

@@ -129,8 +129,10 @@ describe("düello rozetleri (katmanlı galibiyet seti)", () => {
   it("düello rozetleri üç simin kataloğunda aynı kimlik ve katmanla listelenir", () => {
     for (const catalog of [PULSE_BADGES, AUSCULTA_BADGES, OPACA_BADGES]) {
       const duel = catalog.filter((badge) => badge.category === "challenge");
-      expect(duel.map((badge) => badge.id)).toEqual(DUEL_BADGES.map((badge) => badge.id));
-      expect(duel.map((badge) => badge.tier)).toEqual(DUEL_BADGES.map((badge) => badge.tier));
+      // T277: düello rozetleri zorluk sırasına karıştığı için kimlikler küme olarak karşılaştırılır.
+      expect([...duel.map((badge) => badge.id)].sort()).toEqual([...DUEL_BADGES.map((badge) => badge.id)].sort());
+      const tierOf = Object.fromEntries(duel.map((badge) => [badge.id, badge.tier]));
+      expect(tierOf).toEqual(Object.fromEntries(DUEL_BADGES.map((badge) => [badge.id, badge.tier])));
     }
   });
 });

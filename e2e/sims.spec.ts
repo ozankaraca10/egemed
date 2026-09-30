@@ -110,6 +110,36 @@ test.describe("sim rotaları yaşam döngüsü", () => {
 });
 
 /**
+ * T281a — Meydan Okuma simin 4. modudur: sim içi merkez aynı birleşik barın
+ * altında açılır, sim modülü mount edilmez ve ana gezinmede yer almaz. Eski
+ * liste adresi (`#/meydan-okuma`) Simülatörler sayfasına yönlenir.
+ */
+test.describe("sim içi meydan okuma merkezi (T281a)", () => {
+  test("meydan okuma merkezi sim barıyla açılır, sim modülü mount edilmez; eski adres Simülatörler'e döner", async ({
+    page,
+  }, testInfo) => {
+    const errors = trackErrors(page);
+    await openRoute(page, "#/sims/opaca/meydan-okuma");
+    await expect(page.locator(".eg-shell-simbar")).toBeVisible();
+    await expect(page.locator(".eg-shell-simbar__simName")).toHaveText("Opaca");
+    await expect(page.getByRole("heading", { name: "Meydan Okuma" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Sayfa bulunamadı" })).toHaveCount(0);
+    // Sim modülü çizilmez; sim rotasında olduğu gibi ana gezinme de yoktur.
+    await expect(page.locator(".eg-sim-opaca")).toHaveCount(0);
+    await expect(page.getByRole("navigation", { name: "Ana gezinme" })).toHaveCount(0);
+
+    const overflow = await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth + 1);
+    expect(overflow, "yatay kaydırma").toBe(false);
+
+    await captureRouteScreenshot(page, testInfo.project.name, "#/sims/opaca/meydan-okuma");
+    expect(errors, "konsol/sayfa hatası").toEqual([]);
+
+    await page.goto("/#/meydan-okuma");
+    await expect(page).toHaveURL(/#\/simulatorler$/);
+  });
+});
+
+/**
  * Opaca gerçek modüle bağlandı (T14c): kart artık yer tutucu değil, gerçek
  * @egemed/sim-opaca ağacını mount eder. Bu blok yer tutucu sözleşmesi yerine
  * gerçek modülün başlangıç ekranını, tek üst bar kuralını (embedded — kendi
@@ -192,6 +222,24 @@ test.describe("Opaca ilerleme sayfası", () => {
     await clickSimBarAction(page, "İlerlemem");
     await expect(page.getByRole("tab", { name: "Başarılarım" })).toBeVisible();
     await expect(page.getByRole("heading", { name: "Başarılarım", exact: true })).toBeVisible();
+    // T277: 40. "Gerçek Rozet" kartındaki bilgi düğmesi Dekanlık metnini açar.
+    const capstoneInfo = page.getByRole("button", { name: "Gerçek Rozet hakkında" });
+    await capstoneInfo.scrollIntoViewIfNeeded();
+    await expect(capstoneInfo).toBeVisible();
+    await expect(capstoneInfo).toHaveAttribute("aria-expanded", "false");
+    await capstoneInfo.click();
+    await expect(capstoneInfo).toHaveAttribute("aria-expanded", "true");
+    await expect(page.getByText("Ege Üniversitesi Tıp Fakültesi Dekanlığı")).toBeVisible();
+    // Ayrıntı penceresinde de aynı bilgi düğmesi çalışır.
+    await page.getByRole("button", { name: /Gerçek Rozet · Altın/ }).click();
+    const detail = page.getByRole("dialog");
+    await expect(detail).toBeVisible();
+    const detailInfo = detail.getByRole("button", { name: "Gerçek Rozet hakkında" });
+    await detailInfo.click();
+    await expect(detailInfo).toHaveAttribute("aria-expanded", "true");
+    await expect(detail.getByText("Ege Üniversitesi Tıp Fakültesi Dekanlığı")).toBeVisible();
+    await page.keyboard.press("Escape");
+    await expect(detail).toBeHidden();
     await captureRouteScreenshot(page, testInfo.project.name, "#/sims/opaca basarilarim");
     await page.getByRole("tab", { name: "Liderlik Tahtası" }).click();
     await expect(page.getByRole("heading", { name: "Liderlik Tahtası" })).toBeVisible();

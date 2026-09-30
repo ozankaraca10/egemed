@@ -181,6 +181,11 @@
 .eg-sim-ausculta .mode-best-score b { color: var(--blue-700); font-variant-numeric: tabular-nums; }
 .eg-sim-ausculta .mode-note { display: flex; justify-content: center; margin: 4px 0 var(--sp-4); }
 .eg-sim-ausculta .mode-note .headphone-banner { max-width: 720px; margin: 0 auto; }
+.eg-sim-ausculta .mode-progress-status { margin-top: auto; font-size: var(--fs-xs); color: var(--ink-600); text-align: left; }
+.eg-sim-ausculta .mode-progress { height: 6px; margin-top: 6px; overflow: hidden; border-radius: var(--r-pill); background: var(--green-100); }
+.eg-sim-ausculta .mode-progress span { display: block; height: 100%; background: var(--green-600); }
+.eg-sim-ausculta .mode-reward { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; border: 0; background: none; color: var(--amber-700); font: inherit; font-size: var(--fs-xs); font-weight: 700; cursor: pointer; }
+.eg-sim-ausculta .mode-card .btn { margin-top: auto; }
 .eg-sim-ausculta .headphone-banner.thin { padding: 8px 16px; gap: 10px; }
 .eg-sim-ausculta .headphone-banner.thin svg { width: 20px; height: 20px; }
 .eg-sim-ausculta .tutorial-wrap { display: grid; grid-template-columns: minmax(340px, 1.1fr) minmax(340px, 1fr); gap: 34px; align-items: center; min-height: 100%; padding: 16px 0; }

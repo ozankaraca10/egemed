@@ -26,8 +26,7 @@ import {
   type MonthlyReward,
   type Period,
   type StreakInfo,
-  type WeeklyGoalsResult,
-} from "@egemed/gamification-core";
+  type WeeklyGoalsResult, type EligibilityReason } from "@egemed/gamification-core";
 import type { GamiBadgeModel, GamiCongrats, GamiDomainItem, GamiMeStatus, GamiProfileModel, GamiTableItem } from "./types";
 
 export const GAMI_ACHIEVEMENT_PERIODS: { id: AchievementsPeriod; label: string; short: string }[] = [
@@ -228,6 +227,7 @@ export function buildAchievementsModel<TStats, TContext extends BadgeContext, TD
     rule: v.rule,
     studyKey: v.studyKey,
     iconName: v.def.icon ?? "Star",
+    capstone: v.def.capstone === true,
     lockedNote: input.lockedNote?.(v.def.id) ?? null,
     assessmentOnly: assessmentOnly(v.def.category),
   }));
@@ -281,12 +281,40 @@ export interface LeaderboardModel {
   periodLabel: string;
   countdown: string;
   status: GamiMeStatus | null;
-  candidates: Set<string> | null;
+  candidates: GamiRewardMarks | null;
   items: GamiTableItem[];
   meDelta: number | null;
   qualify: { left: number } | null;
   rankedEmpty: boolean;
   rows: readonly GamiLeaderboardRow[];
+}
+
+/** Ödül işaretleri: uygun ilk `winnersCount` kişi aday; puanıyla aday sınırına giren ama
+ *  koşulu sağlamayanlar sebebiyle "Ödül dışı" gösterilir (aksi hâlde 4. ve 5.'nin neden aday
+ *  olduğu anlaşılmıyordu). */
+export interface GamiRewardMarks {
+  readonly candidates: ReadonlySet<string>;
+  readonly excluded: ReadonlyMap<string, string>;
+  readonly winnersCount: number;
+}
+
+const EXCLUDED_REASON: Readonly<Record<Exclude<EligibilityReason, "eligible">, string>> = {
+  min_assessments: "Ödül dışı · değerlendirme sayısı yetersiz",
+  cohort: "Ödül dışı · dönemi ödüle dahil değil",
+  private_profile: "Ödül dışı · anonim görünüyor",
+};
+
+function rewardMarks(
+  rows: readonly { id: string; candidate: boolean; reason: EligibilityReason; periodScore: number | null }[],
+  cutoff: number,
+  winnersCount: number,
+): GamiRewardMarks {
+  const excluded = new Map<string, string>();
+  for (const r of rows) {
+    if (r.candidate || r.reason === "eligible" || r.periodScore === null || r.periodScore < cutoff) continue;
+    excluded.set(r.id, EXCLUDED_REASON[r.reason]);
+  }
+  return { candidates: new Set(rows.filter((r) => r.candidate).map((r) => r.id)), excluded, winnersCount };
 }
 
 export function buildLeaderboardModel(input: LeaderboardModelInput): LeaderboardModel {
@@ -295,8 +323,8 @@ export function buildLeaderboardModel(input: LeaderboardModelInput): Leaderboard
       id: r.id, cohort: r.cohort, public: r.isPublic, periodScore: r.periodScore, attemptsCount: r.attemptsCount, reachedAt: r.reachedAt,
     })), input.reward)
     : null;
-  const candidates = input.period === "month" && input.cohort === "all" && standings
-    ? new Set(standings.rows.filter((r) => r.candidate).map((r) => r.id))
+  const candidates = input.period === "month" && input.cohort === "all" && standings && input.reward
+    ? rewardMarks(standings.rows, standings.cutoff, input.reward.winnersCount)
     : null;
   const ranked = input.rows.filter((r) => r.rank !== null);
   const me = input.rows.find((r) => r.isMe);

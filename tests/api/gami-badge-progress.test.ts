@@ -32,6 +32,8 @@ describe("bellek gamification özeti", () => {
     });
     const afterAttempt = await store.repo.getSummary({ userId, institutionId, simId: "opaca", at });
     expect(afterAttempt.badgeProgress?.["first-step"]).toEqual({ value: 1, max: 1 });
+    // T277: capstone ilerlemesi de sunucudan gelir; payda 39 (kazanılamayan rozet yok).
+    expect(afterAttempt.badgeProgress?.["gercek-rozet"]).toEqual({ value: 1, max: 39 });
 
     const ausculta = await store.repo.getSummary({ userId, institutionId, simId: "ausculta", at });
     expect(ausculta).not.toHaveProperty("badgeProgress");

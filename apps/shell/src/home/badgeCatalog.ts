@@ -16,6 +16,8 @@ export interface BadgeCatalogEntry {
   readonly name: string;
   readonly description: string;
   readonly category: BadgeCategory;
+  /** 40. "Gerçek Rozet" (capstone): kart bilgi düğmesiyle çizilir. */
+  readonly capstone?: boolean;
 }
 
 const CATALOGS: Readonly<Record<SimId, readonly BadgeCatalogEntry[]>> = {

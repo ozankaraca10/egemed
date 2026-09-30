@@ -152,3 +152,55 @@ describe("rozet motoru (jenerik katalog)", () => {
     expect(badgeProgress(first, state(), ctx(nowIso))).toEqual({ value: 0, max: 1 });
   });
 });
+
+describe("capstone (40. rozet)", () => {
+  const CAPSTONE_SIZE = 39;
+  const step = (index: number): BadgeDef<TestState, TestCtx> => ({
+    id: `step-${index}`,
+    category: "skill",
+    name: `Adım ${index}`,
+    description: "Sentetik adım.",
+    progress: (s) => ({ value: s.hits, max: index }),
+  });
+  const capstone: BadgeDef<TestState, TestCtx> = {
+    id: "capstone",
+    category: "milestone",
+    name: "Gerçek Rozet",
+    description: "Bütün adımları topla.",
+    rule: "39 adımın tümü",
+    capstone: true,
+  };
+  const REQUIRED_CATALOG: BadgeDef<TestState, TestCtx>[] = [
+    ...Array.from({ length: CAPSTONE_SIZE }, (_, index) => step(index + 1)),
+    capstone,
+  ];
+  const earnedUpTo = (last: number): { id: string; at: string }[] =>
+    Array.from({ length: last }, (_, index) => ({ id: `step-${index + 1}`, at: nowIso }));
+
+  it("38/39 kazanılmışken verilmez; 39. ile aynı çağrıda verilir ve tekrar verilmez", () => {
+    const nearly = ids(evaluateBadges(REQUIRED_CATALOG, state({ hits: 38 }), earnedUpTo(38), ctx(nowIso)));
+    expect(nearly).not.toContain("capstone");
+
+    const last = ids(evaluateBadges(REQUIRED_CATALOG, state({ hits: 39 }), earnedUpTo(38), ctx(nowIso)));
+    expect(last).toEqual(["step-39", "capstone"]);
+
+    const again = ids(evaluateBadges(REQUIRED_CATALOG, state({ hits: 39 }), [...earnedUpTo(39), { id: "capstone", at: nowIso }], ctx(nowIso)));
+    expect(again).toEqual([]);
+  });
+
+  it("kazanılamayan rozet capstone'u kilitlemez (podyum gibi)", () => {
+    const never: BadgeDef<TestState, TestCtx> = {
+      id: "never",
+      category: "milestone",
+      name: "Kazanılamaz",
+      description: "Podyum benzeri.",
+    };
+    const catalog = [step(1), never, capstone];
+    const got = ids(evaluateBadges(catalog, state({ hits: 1 }), [], ctx(nowIso)));
+    expect(got).toContain("capstone");
+  });
+
+  it("katalogda capstone-dışı rozet yoksa capstone verilmez", () => {
+    expect(ids(evaluateBadges([capstone], state({ hits: 9 }), [], ctx(nowIso)))).toEqual([]);
+  });
+});

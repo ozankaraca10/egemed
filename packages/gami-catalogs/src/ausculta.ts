@@ -84,13 +84,34 @@ const tiered = (
 ): BadgeDef<AuscultaStats> =>
   countBadge(id, name, description, `${max} vaka`, "skill", tier === "gold" ? "Clock" : "Stethoscope", read, max, tier);
 
+/** En az bir doğru ayırt edilmiş konu sayısı ("tüm konular" rozetleri için). */
+const coveredTopics = (record: Record<string, number>): number =>
+  Object.values(record).filter((hits) => (hits ?? 0) > 0).length;
+
+const duel = duelBadges<AuscultaStats>(() => EMPTY_DUEL_STATS);
+const duelBronze = duel.filter((badge) => badge.tier === "bronze");
+const duelSilver = duel.filter((badge) => badge.tier === "silver");
+const duelGold = duel.filter((badge) => badge.tier === "gold");
+
+/**
+ * T277 — katalog 40'a tamamlandı, eski kimlikler korundu. Şu rozetler GEÇİCİdir
+ * (mevcut eşik zincirlerinin uzantısı; rozet seti simülatörler bitince baştan tasarlanacak):
+ * listen-30, systematic-25, diagnosis-5/10, murmur-timing-10, lung-crackles-10,
+ * posterior-lung-10, head-choice-10, heart-topics, lung-topics.
+ * "gercek-rozet" 40. rozettir (capstone) ve kalıcıdır. Sıra kolaydan zora: kademe bandı içinde
+ * eşik artan; düello rozetleri kendi kademelerine karışır.
+ */
 export const AUSCULTA_BADGES: BadgeDef<AuscultaStats>[] = [
-  tiered("listen-3", "Kısa dinleme", "bronze", "Üç vakada zorunlu noktaların her birini vakanın asgari dinleme süresi kadar dinle.", b.listenDiscipline[0], (s) => s.listenDisciplineCases),
-  tiered("listen-8", "Süreli dinleme", "silver", "Sekiz vakada zorunlu noktaların her birini asgari dinleme süresi kadar dinle.", b.listenDiscipline[1], (s) => s.listenDisciplineCases),
-  tiered("listen-20", "Dinleme disiplini", "gold", "Yirmi vakada zorunlu noktaların her birini asgari dinleme süresi kadar dinle.", b.listenDiscipline[2], (s) => s.listenDisciplineCases),
+  // Bronz: tek adım / en düşük eşikler.
   tiered("systematic-1", "Sıralı muayene", "bronze", "Bir vakada tanımlı odak sırasını eksiksiz tamamla.", b.systematic[0], (s) => s.systematicExams),
-  tiered("systematic-5", "Sistematik oskültasyon", "silver", "Beş vakada tanımlı odak sırasını eksiksiz tamamla.", b.systematic[1], (s) => s.systematicExams),
-  tiered("systematic-15", "Düzenli odak sırası", "gold", "On beş vakada tanımlı odak sırasını eksiksiz tamamla.", b.systematic[2], (s) => s.systematicExams),
+  countBadge("heart-normal", "S1 ve S2", "Normal kalp seslerini (S1–S2) doğru ayırt et. Kapak tanısı sayılmaz.", "3 vaka", "topic", "Heart", (s) => s.heartCorrect.normal, b.heartNormal),
+  countBadge("heart-extra", "Ek kalp sesleri", "S3 veya S4 sesini doğru ayırt et. Kalp yetersizliği tanısı sayılmaz.", "3 vaka", "topic", "Heart", (s) => s.heartCorrect.extraSounds, b.extraHeartSounds),
+  countBadge("rhythm-findings", "Ritim ile uyumlu sesler", "Atriyal fibrilasyon, taşikardi veya AV blok ile uyumlu sesi doğru ayırt et.", "3 vaka", "topic", "Activity", (s) => s.heartCorrect.rhythm, b.rhythmFindings),
+  countBadge("lung-vesicular", "Veziküler solunum", "Normal veziküler solunum sesini doğru ayırt et.", "3 vaka", "topic", "Lungs", (s) => s.lungCorrect.vesicular, b.vesicular),
+  countBadge("pleural-rub", "Plevral frotman", "Plevral frotmanı diğer akciğer seslerinden ayırt et.", "3 vaka", "topic", "Lungs", (s) => s.lungCorrect.pleuralRub, b.pleuralRub),
+  countBadge("mixed-sounds", "Kalp ve akciğer birlikte", "Aynı vakada hem kalp hem akciğer ses sınıfını doğru ayırt et.", "3 vaka", "topic", "Stethoscope", (s) => s.mixedCorrect, b.mixed),
+  tiered("listen-3", "Kısa dinleme", "bronze", "Üç vakada zorunlu noktaların her birini vakanın asgari dinleme süresi kadar dinle.", b.listenDiscipline[0], (s) => s.listenDisciplineCases),
+  countBadge("diagnosis-3", "Tanı eşleştirmesi", "Tanı sorularında üç doğru yanıt ver.", "3 doğru tanı", "skill", "Check", (s) => s.correctDiagnosisCount ?? 0, 3),
   countBadge(
     "cardiac-foci",
     "Dört kapak odağı",
@@ -111,21 +132,41 @@ export const AUSCULTA_BADGES: BadgeDef<AuscultaStats>[] = [
     (s) => s.posteriorLungExams,
     b.posteriorLung,
   ),
-  countBadge("heart-normal", "S1 ve S2", "Normal kalp seslerini (S1–S2) doğru ayırt et. Kapak tanısı sayılmaz.", "3 vaka", "topic", "Heart", (s) => s.heartCorrect.normal, b.heartNormal),
-  countBadge("heart-extra", "Ek kalp sesleri", "S3 veya S4 sesini doğru ayırt et. Kalp yetersizliği tanısı sayılmaz.", "3 vaka", "topic", "Heart", (s) => s.heartCorrect.extraSounds, b.extraHeartSounds),
   countBadge("murmur-timing", "Üfürüm zamanı", "Sistolik veya diyastolik üfürümün zamanlamasını doğru ayırt et. Kapak lezyonu tanısı sayılmaz.", "5 vaka", "topic", "Heart", (s) => s.heartCorrect.murmurTiming, b.murmurTiming),
-  countBadge("rhythm-findings", "Ritim ile uyumlu sesler", "Atriyal fibrilasyon, taşikardi veya AV blok ile uyumlu sesi doğru ayırt et.", "3 vaka", "topic", "Activity", (s) => s.heartCorrect.rhythm, b.rhythmFindings),
-  countBadge("lung-vesicular", "Veziküler solunum", "Normal veziküler solunum sesini doğru ayırt et.", "3 vaka", "topic", "Lungs", (s) => s.lungCorrect.vesicular, b.vesicular),
   countBadge("lung-continuous", "Sürekli ek sesler", "Wheezing (hışıltı) veya ronküsü doğru ayırt et. Hava yolu tanısı sayılmaz.", "5 vaka", "topic", "Lungs", (s) => s.lungCorrect.continuous, b.continuousAdventitious),
   countBadge("lung-crackles", "Kesintili raller", "İnce veya kaba rali doğru ayırt et. Pnömoni tanısı sayılmaz.", "5 vaka", "topic", "Lungs", (s) => s.lungCorrect.crackles, b.crackles),
-  countBadge("pleural-rub", "Plevral frotman", "Plevral frotmanı diğer akciğer seslerinden ayırt et.", "3 vaka", "topic", "Lungs", (s) => s.lungCorrect.pleuralRub, b.pleuralRub),
   countBadge("pediatric", "Pediatrik vakalar", "Pediatrik işaretli beş vakada akustik bulguyu doğru tanı.", "5 vaka", "topic", "User", (s) => s.pediatricCorrect, b.pediatric),
-  countBadge("mixed-sounds", "Kalp ve akciğer birlikte", "Aynı vakada hem kalp hem akciğer ses sınıfını doğru ayırt et.", "3 vaka", "topic", "Stethoscope", (s) => s.mixedCorrect, b.mixed),
   countBadge("head-choice", "Bell ve diyafram", "Düşük ve yüksek frekans için bell veya diyafram seçimini doğru yap.", "5 doğru", "skill", "Stethoscope", (s) => s.headChoiceCorrect, b.headChoice),
-  countBadge("diagnosis-3", "Tanı eşleştirmesi", "Tanı sorularında üç doğru yanıt ver.", "3 doğru tanı", "skill", "Check", (s) => s.correctDiagnosisCount ?? 0, 3),
-  // Düello rozetleri (ADR-010): kazanım sunucuda `challenges` sonuçlarından
-  // değerlendirilir; sim görünümünde erişim boştur, kazanılan `earnedFromServer` ile işaretlenir.
-  ...duelBadges<AuscultaStats>(() => EMPTY_DUEL_STATS),
+  ...duelBronze,
+  // Gümüş: orta eşikler.
+  tiered("systematic-5", "Sistematik oskültasyon", "silver", "Beş vakada tanımlı odak sırasını eksiksiz tamamla.", b.systematic[1], (s) => s.systematicExams),
+  tiered("listen-8", "Süreli dinleme", "silver", "Sekiz vakada zorunlu noktaların her birini vakanın asgari dinleme süresi kadar dinle.", b.listenDiscipline[1], (s) => s.listenDisciplineCases),
+  countBadge("diagnosis-5", "Tanı deneyimi", "Tanı sorularında beş doğru yanıt ver.", "5 doğru tanı", "skill", "Check", (s) => s.correctDiagnosisCount ?? 0, 5, "silver"),
+  ...duelSilver,
+  // Altın: yüksek eşikler.
+  tiered("systematic-15", "Düzenli odak sırası", "gold", "On beş vakada tanımlı odak sırasını eksiksiz tamamla.", b.systematic[2], (s) => s.systematicExams),
+  tiered("listen-20", "Dinleme disiplini", "gold", "Yirmi vakada zorunlu noktaların her birini vakanın asgari dinleme süresi kadar dinle.", b.listenDiscipline[2], (s) => s.listenDisciplineCases),
+  tiered("listen-30", "Dinleme ustası", "gold", "Otuz vakada zorunlu noktaların her birini vakanın asgari dinleme süresi kadar dinle.", 30, (s) => s.listenDisciplineCases),
+  tiered("systematic-25", "Sistematik ustalık", "gold", "Yirmi beş vakada tanımlı odak sırasını eksiksiz tamamla.", 25, (s) => s.systematicExams),
+  countBadge("murmur-timing-10", "Üfürüm ustalığı", "Sistolik veya diyastolik üfürümün zamanlamasını on vakada doğru ayırt et. Kapak lezyonu tanısı sayılmaz.", "10 vaka", "topic", "Heart", (s) => s.heartCorrect.murmurTiming, 10, "gold"),
+  countBadge("lung-crackles-10", "Rali ustalığı", "İnce veya kaba raliyi on vakada doğru ayırt et. Pnömoni tanısı sayılmaz.", "10 vaka", "topic", "Lungs", (s) => s.lungCorrect.crackles, 10, "gold"),
+  countBadge("posterior-lung-10", "Arka alan ustalığı", "Arka yüzdeki altı noktayı da asgari süre dinlenen on muayene.", "10 muayene", "skill", "Lungs", (s) => s.posteriorLungExams, 10, "gold"),
+  countBadge("head-choice-10", "Bell ve diyafram ustalığı", "Düşük ve yüksek frekans için bell veya diyafram seçimini on kez doğru yap.", "10 doğru", "skill", "Stethoscope", (s) => s.headChoiceCorrect, 10, "gold"),
+  countBadge("diagnosis-10", "Tanı uzmanı", "Tanı sorularında on doğru yanıt ver.", "10 doğru tanı", "skill", "Check", (s) => s.correctDiagnosisCount ?? 0, 10, "gold"),
+  ...duelGold,
+  // "Tümü" türü: her konuda en az bir doğru.
+  countBadge("heart-topics", "Tüm kalp konuları", "Dört kalp sesi konusunun her birinde en az bir doğru ayırt et.", "4 konu", "topic", "Heart", (s) => coveredTopics(s.heartCorrect), AUSCULTA_HEART_TOPICS.length, "gold"),
+  countBadge("lung-topics", "Tüm akciğer konuları", "Dört akciğer sesi konusunun her birinde en az bir doğru ayırt et.", "4 konu", "topic", "Lungs", (s) => coveredTopics(s.lungCorrect), AUSCULTA_LUNG_TOPICS.length, "gold"),
+  {
+    id: "gercek-rozet",
+    category: "milestone",
+    tier: "gold",
+    icon: "Medal",
+    name: "Gerçek Rozet",
+    description: "Bu simülatördeki 39 rozetin tamamını topla.",
+    rule: "39 rozetin tümü",
+    capstone: true,
+  },
 ];
 
 /** Kod sözlüğü v1. Kod ekle/çıkar = sürüm değişikliği (`ausculta.v`). */
