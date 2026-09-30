@@ -1,5 +1,5 @@
-sims/*/src/data/*.json
-sims/*/public/assets/**
+packages/sim-*/src/data/*.json
+packages/assessment-bank/data/**
 **/dist/**
 **/*.lock
 reports/**

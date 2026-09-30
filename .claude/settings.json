@@ -1,1 +1,1 @@
-{"model":"opus","permissions":{"deny":["Read(sims/*/src/data/*.json)","Read(sims/*/public/assets/**)","Read(**/dist/**)","Read(**/*.lock)","Read(reports/**)"]}}
+{"model":"opus","permissions":{"deny":["Read(packages/sim-*/src/data/*.json)","Read(packages/assessment-bank/data/**)","Read(**/dist/**)","Read(**/*.lock)","Read(reports/**)"]}}
