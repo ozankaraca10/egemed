@@ -18,6 +18,11 @@ Gerçek öğrenci verisi repoya girmez. Mock veri deterministik tohumludur. Sır
 ## Faz ve kapsam
 Her görev tek paket/uygulama ve yaklaşık en fazla 400 satır diff hedefler. Aynı pakette paralel Running görev açma. Sözleşme değişikliği tüketicilerinden önce birleştirilir. Artefaktlar git dışı `.egemed-run/research.md`, `plan.md`, `summary.md`, `review.md` dosyalarında tutulur. İnsan onayı ve merge yalnız depo sahibindedir.
 
+## Şemalar (`docs/sema/`)
+Veritabanı (ER), ürün (rol → yüzey → mod), mimari (paketler, sim-host sözleşmesi, dağıtım) ve akış (sıra diyagramları) şemaları platformun başvuru kaynağıdır.
+- **Test yazarken ve denetlerken** ilgili şemaya danış; beklenen davranışı şemadan doğrula, şema ile kod çelişiyorsa bunu summary'de bildir.
+- **Şemayı etkileyen her değişiklik** (migration, rota, sim-host sözleşmesi, rol/erişim kuralı, oturum/karşılaşma/ödül/öğrenme akışı) aynı görevde ilgili şemaya işlenir. `tests/config/schema-docs.test.ts` tablo/sütun ve sözleşme alanı kopukluğunu kapıda yakalar; akış ve ürün diyagramları elle güncellenir.
+
 ## Okuma sınırı
 `packages/sim-*/src/data/*.json`, `packages/sim-*/public/**`, `packages/assessment-bank/data/**`, `**/dist/**`, `**/*.lock`, `reports/**` topluca okunmaz. Gerekirse sadece hedefli `head` veya `jq`. Gerçek veri veya sır içeren dosyayı ajan bağlamına alma.
 
