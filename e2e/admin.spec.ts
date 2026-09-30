@@ -498,8 +498,13 @@ test.describe("denetim günlüğü (E3 §e.7)", () => {
   });
 });
 
+/** Ödül tohumu Eylül–Kasım 2026'yı kapsar; "Bu ay geçerli" bekleyen testler tarayıcı
+ *  saatini tohum içindeki bir güne sabitler (test tarihinden bağımsız, T291). */
+const REWARD_SEED_NOW = new Date("2026-09-15T10:00:00+03:00");
+
 test.describe("aylık ödüller (T186)", () => {
   test("Opaca örnek verisi + oluştur → listede görünür → düzenle → sil", async ({ page }) => {
+    await page.clock.install({ time: REWARD_SEED_NOW });
     await signInAsAdmin(page);
     await openAdmin(page, REWARDS);
     await expect(page.getByRole("heading", { name: "Ödüller" })).toBeVisible();
@@ -720,6 +725,7 @@ test.describe("admin ekranları: axe 0, yatay taşma yok, artefaktlar", () => {
 
   test("her admin ekranı axe 0 ve taşmasız; ekran görüntüsü + axe raporu üretilir", async ({ page }, testInfo) => {
     test.setTimeout(90_000);
+    await page.clock.install({ time: REWARD_SEED_NOW });
     const errors = trackErrors(page);
     await signInAsAdmin(page);
     for (const state of states) {
