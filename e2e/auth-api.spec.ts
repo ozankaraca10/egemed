@@ -603,8 +603,8 @@ test.describe("API oturumu (dev sağlayıcı)", () => {
     await expect(page).toHaveURL(/#\/$/);
     await completeLearn(page, "ausculta");
     await page.goto("/#/sims/ausculta/meydan-okuma");
-    await page.getByRole("button", { name: "Kod oluştur" }).click();
-    const code = (await page.locator(".eg-shell-duel__codeValue").first().innerText()).trim();
+    await page.getByRole("button", { name: "Karşılaşma oluştur" }).click();
+    const code = ((await page.locator(".eg-shell-arena__code").first().getAttribute("aria-label")) ?? "").replace(/\D/g, "");
     expect(code).toMatch(/^[0-9]{6}$/);
     await captureRouteScreenshot(page, testInfo.project.name, "#/sims/ausculta/meydan-okuma kod");
 
@@ -636,7 +636,7 @@ test.describe("API oturumu (dev sağlayıcı)", () => {
 
     /** Düello oturumunu (10 vaka, değerlendirme arayüzü) sonuna kadar oynar. */
     async function playDuel(target: Page, correctFirst: boolean): Promise<void> {
-      await target.getByRole("button", { name: "Şimdi oyna" }).click();
+      await target.getByRole("button", { name: "Karşılaşmaya başla" }).click();
       const root = target.locator(".eg-sim-ausculta").first();
       await expect(root.getByText("Meydan Okuma.", { exact: false }).first()).toBeVisible({ timeout: 20_000 });
       const report = target.getByRole("heading", { name: "Değerlendirme Tamamlandı" });
@@ -657,20 +657,20 @@ test.describe("API oturumu (dev sağlayıcı)", () => {
     // 4) A oynar → rakibi bekler; puanlar gizli.
     await rival.close();
     await page.goto(`/#/sims/ausculta/meydan-okuma`);
-    await page.locator(".eg-shell-duel__rowLink").first().click();
+    await page.locator("a.eg-shell-arena__row").first().click();
     await playDuel(page, true);
     await expect(page.getByText("Rakibin bitirmesi bekleniyor", { exact: false })).toBeVisible();
 
     // 5) B oynar → iki tarafta sonuç ve kazanan şeridi.
     const rivalAgain = await rivalContext.newPage();
     await rivalAgain.goto("/#/sims/ausculta/meydan-okuma");
-    await rivalAgain.locator(".eg-shell-duel__rowLink").first().click();
+    await rivalAgain.locator("a.eg-shell-arena__row").first().click();
     await playDuel(rivalAgain, false);
-    await expect(rivalAgain.locator(".eg-shell-duel__banner")).toBeVisible();
+    await expect(rivalAgain.locator(".eg-shell-arena__banner")).toBeVisible();
     await page.getByRole("button", { name: "Yenile" }).click();
-    await expect(page.locator(".eg-shell-duel__banner")).toBeVisible();
+    await expect(page.locator(".eg-shell-arena__banner")).toBeVisible();
     await captureRouteScreenshot(page, testInfo.project.name, "#/sims/ausculta/meydan-okuma/sonuc");
-    const scores = await page.locator(".eg-shell-duel__stats dd").allInnerTexts();
+    const scores = await page.locator(".eg-shell-arena__boardVal").allInnerTexts();
     expect(scores.filter((value) => value !== "—").length).toBeGreaterThanOrEqual(2);
     await rivalContext.close();
   });

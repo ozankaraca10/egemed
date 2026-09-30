@@ -77,8 +77,8 @@ describe("meydan okuma öğrenme kilidi", () => {
   it("tamamlanmamış simde 'Kod oluştur' ve 'Katıl' pasiftir, açıklama metni çizilir", () => {
     const html = renderToStaticMarkup(createElement(ChallengeWorkspace, { learn: INCOMPLETE, simId: "ausculta", source: SOURCE }));
     expect(html).toContain(t("challenges.create.learnHint"));
-    expect(html).toMatch(new RegExp(`<button[^>]*disabled[^>]*>\\s*<span class="eg-btn__label">${t("challenges.create.action")}</span>`));
-    expect(html).toMatch(new RegExp(`<button[^>]*disabled[^>]*>\\s*<span class="eg-btn__label">${t("challenges.join.action")}</span>`));
+    expect(html).toMatch(new RegExp(`<button[^>]*disabled=""[^>]*>(?:<svg[\\s\\S]*?</svg>)?${t("challenges.arena.invite.action")}`));
+    expect(html).toMatch(new RegExp(`<button[^>]*disabled=""[^>]*>${t("challenges.join.action")}`));
   });
 
   it("tamamlanmış simde oluşturma ve katılma düğmeleri açıktır, ipucu çizilmez", () => {
@@ -90,15 +90,15 @@ describe("meydan okuma öğrenme kilidi", () => {
       }),
     );
     expect(html).not.toContain(t("challenges.create.learnHint"));
-    expect(html).not.toMatch(new RegExp(`<button[^>]*disabled[^>]*>\\s*<span class="eg-btn__label">${t("challenges.create.action")}</span>`));
-    expect(html).not.toMatch(new RegExp(`<button[^>]*disabled[^>]*>\\s*<span class="eg-btn__label">${t("challenges.join.action")}</span>`));
+    expect(html).not.toMatch(new RegExp(`<button[^>]*disabled=""[^>]*>(?:<svg[\\s\\S]*?</svg>)?${t("challenges.arena.invite.action")}`));
+    expect(html).not.toMatch(new RegExp(`<button[^>]*disabled=""[^>]*>${t("challenges.join.action")}`));
   });
 
   it("durum henüz okunmadıysa düğmeler açık kalır; kapı sunucudadır", () => {
     const html = renderToStaticMarkup(createElement(ChallengeWorkspace, { learn: null, simId: "ausculta", source: SOURCE }));
     expect(html).not.toContain(t("challenges.create.learnHint"));
-    expect(html).not.toMatch(new RegExp(`<button[^>]*disabled[^>]*>\\s*<span class="eg-btn__label">${t("challenges.create.action")}</span>`));
-    expect(html).not.toMatch(new RegExp(`<button[^>]*disabled[^>]*>\\s*<span class="eg-btn__label">${t("challenges.join.action")}</span>`));
+    expect(html).not.toMatch(new RegExp(`<button[^>]*disabled=""[^>]*>(?:<svg[\\s\\S]*?</svg>)?${t("challenges.arena.invite.action")}`));
+    expect(html).not.toMatch(new RegExp(`<button[^>]*disabled=""[^>]*>${t("challenges.join.action")}`));
   });
 
   it("learn_required hatası öğrenme kilidi iletisine çevrilir", () => {

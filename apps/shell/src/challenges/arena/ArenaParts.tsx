@@ -152,7 +152,7 @@ export function DuelRow({ challenge, href }: { readonly challenge: ChallengeBody
       <a className="eg-shell-arena__row" href={href}>
         <span aria-hidden="true" className="eg-shell-arena__pair">
           <i className="eg-shell-arena__mini eg-shell-arena__mini--me">{initialsOf(me?.displayName ?? "")}</i>
-          <em className="eg-shell-arena__miniVs">vs</em>
+          <em className="eg-shell-arena__miniVs">{t("challenges.arena.vs")}</em>
           <i className={`eg-shell-arena__mini ${rival === undefined ? "eg-shell-arena__mini--empty" : "eg-shell-arena__mini--rival"}`}>{rival === undefined ? "?" : initialsOf(rival.displayName)}</i>
         </span>
         <span className="eg-shell-arena__rowMain">
