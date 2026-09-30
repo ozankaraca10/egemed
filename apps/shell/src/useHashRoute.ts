@@ -7,7 +7,11 @@ export function useHashRoute(): ResolvedRoute {
   useEffect(() => {
     const onChange = (): void => setHash(window.location.hash);
     window.addEventListener("hashchange", onChange);
-    return () => window.removeEventListener("hashchange", onChange);
+    window.addEventListener("popstate", onChange);
+    return () => {
+      window.removeEventListener("hashchange", onChange);
+      window.removeEventListener("popstate", onChange);
+    };
   }, []);
   return resolveRoute(hash);
 }

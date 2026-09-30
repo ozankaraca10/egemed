@@ -463,7 +463,7 @@ const SIMS: readonly SimConfig[] = [
   {
     id: "opaca",
     rootSelector: ROOT_BY_SIM.opaca,
-    entryHeading: "Çalışma modunu seçin",
+    entryHeading: "Çalışma Modunu Seçin",
     allowlist: OPACA_ALLOWLIST,
     screens: OPACA_SCREENS,
   },

@@ -19,6 +19,13 @@ describe("resolveRoute", () => {
     expect(resolveRoute(`#/sims/kalp/duello/${id}`).kind).toBe("notFound");
   });
 
+  it("sim içi ekran yollarını çözer ve düello yolunun önceliğini korur", () => {
+    const id = "11111111-1111-4111-8111-111111111111";
+    expect(resolveRoute("#/sims/opaca/ogrenme")).toMatchObject({ kind: "sim", simId: "opaca", screenKey: "ogrenme" });
+    expect(resolveRoute("#/sims/opaca/Kötü").kind).toBe("notFound");
+    expect(resolveRoute(`#/sims/opaca/duello/${id}`)).toMatchObject({ kind: "sim", simId: "opaca", challengeId: id });
+  });
+
   it("gidiş-dönüş, benzersizlik ve sözlük anahtarları korunur", () => {
     const keys = new Set(Object.keys(tr));
     expect(ROUTES.length).toBe(3);

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { createSimHost, isSimulatorId, SIMULATOR_IDS } from "../../packages/sim-host/src/SimHost";
+import { createSimHost, isSimScreenKey, isSimulatorId, SIM_SCREEN_KEYS, SIMULATOR_IDS } from "../../packages/sim-host/src/SimHost";
 import type { SimHostEvents, SimModule, SimMountContext, SimMountTarget, SimulatorId } from "../../packages/sim-host/src/SimHost";
 
 const NOW = 1_760_000_000_000;
@@ -66,6 +66,14 @@ describe("sim kimliği", () => {
     await flush();
     expect(() => host.mount(target, "kalp" as unknown as SimulatorId)).toThrow(/Bilinmeyen/);
     expect([host.active, log.errors]).toEqual(["pulse", []]);
+  });
+});
+
+describe("sim ekran anahtarı", () => {
+  it("genel sözlük anahtarlarını ve bilinmeyen biçime uygun anahtarları kabul eder", () => {
+    expect(SIM_SCREEN_KEYS).toEqual(["modlar", "ogrenme", "uygulama", "degerlendirme", "sonuc", "ilerlemem", "yardim", "hakkinda"]);
+    for (const key of [...SIM_SCREEN_KEYS, "yeni-ekran", "x".repeat(40)]) expect(isSimScreenKey(key)).toBe(true);
+    for (const value of ["", "x".repeat(41), "Kötü", "../", null, 42]) expect(isSimScreenKey(value)).toBe(false);
   });
 });
 
@@ -246,6 +254,18 @@ describe("SimHost release ve aktör bağlamı", () => {
     await flush();
     expect(pulse.contexts[0]?.actorId).toBe("dev-student-0001");
     expect(pulse.contexts[1] !== undefined && "actorId" in pulse.contexts[1]).toBe(false);
+  });
+
+  it("navigation bağlama taşınır; verilmezse alan hiç yoktur", async () => {
+    const pulse = fake("pulse");
+    const navigation = { initial: "ogrenme", report: () => undefined, subscribe: () => () => undefined } as const;
+    const { host, target } = harness(() => Promise.resolve(pulse.module));
+    host.mount(target, "pulse", { navigation });
+    await flush();
+    host.mount(target, "pulse");
+    await flush();
+    expect(pulse.contexts[0]?.navigation).toBe(navigation);
+    expect(pulse.contexts[1] !== undefined && "navigation" in pulse.contexts[1]).toBe(false);
   });
 
   it("kitle ve requestSignIn bağlama taşınır; verilmezse alanlar yoktur (T180)", async () => {

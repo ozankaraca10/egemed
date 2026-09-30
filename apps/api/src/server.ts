@@ -1,3 +1,4 @@
+import { Buffer } from "node:buffer";
 import { serve } from "@hono/node-server";
 import { randomUUID } from "node:crypto";
 import process from "node:process";
@@ -40,6 +41,21 @@ function serverNow(): number {
 
 const env = loadEnv(process.env);
 const db = createDb(env.DATABASE_URL);
+const lrsEndpoint = process.env.LRS_ENDPOINT;
+const lrsApiKey = process.env.LRS_API_KEY;
+const lrsApiSecret = process.env.LRS_API_SECRET;
+const lrsProbe = lrsEndpoint === undefined || lrsEndpoint.trim() === "" ? undefined : async () => {
+  try {
+    const endpoint = new URL(`${lrsEndpoint.replace(/\/$/, "")}/about`);
+    const headers = lrsApiKey !== undefined && lrsApiSecret !== undefined
+      ? { authorization: `Basic ${Buffer.from(`${lrsApiKey}:${lrsApiSecret}`).toString("base64")}` }
+      : undefined;
+    const response = await fetch(endpoint, { signal: AbortSignal.timeout(2000), ...(headers === undefined ? {} : { headers }) });
+    return response.ok;
+  } catch {
+    return false;
+  }
+};
 const auth = {
   ...createPgAuthRepos(db),
   nodeEnv: env.NODE_ENV,
@@ -59,6 +75,7 @@ const app = createApp({
   auth,
   gamification: createPgGamificationRepo(db),
   overview: createPgAdminOverviewRepo(db),
+  ...(lrsProbe === undefined ? {} : { lrsProbe }),
   rewards: createPgRewardsRepo(db),
   challenges: createPgChallengeRepo(db),
   learn: createPgLearnRepo(db),

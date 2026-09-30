@@ -2,10 +2,6 @@ import { t, tr, type TrKey } from "../../packages/ui/i18n/tr";
 import { describe, expect, it } from "vitest";
 
 const devAuthKeys: TrKey[] = [
-  "entry.dev.title",
-  "entry.dev.admin",
-  "entry.dev.student",
-  "entry.dev.note",
   "entry.error.invalid",
   "shell.session.admin",
   "shell.session.student",
@@ -354,7 +350,7 @@ describe("i18n/tr sözlüğü", () => {
       expect(t(key).trim().length, key).toBeGreaterThan(0);
     }
     expect(t("home.how.title")).toBe("Nasıl çalışır?");
-    expect(t("home.how.learn.title")).toBe("İnceleme");
+    expect(t("home.how.learn.title")).toBe("Öğrenme");
     expect(t("home.how.learn.body")).toBe(
       "Konuyu sistematik okuma rehberiyle, gerçek örnekler üzerinde keşfedin.",
     );

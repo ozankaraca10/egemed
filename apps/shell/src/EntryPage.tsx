@@ -9,6 +9,20 @@ import { entryHref, entryRedirectHref, type EntryRole } from "./routes";
 import type { ShellSession } from "./session";
 import { SIM_ICONS, SIM_IDS } from "./SimCard";
 import { EgemedLogo } from "./brand/EgemedLogo";
+import { DEV_ENTRY_STRINGS } from "./devStrings";
+
+/** Sol paneldeki tanıtım: dört çalışma modu ve oyunlaştırma öğeleri (dekoratif ikonlar). */
+const ENTRY_MODES = [
+  { key: "learn", Icon: icons.BookOpen },
+  { key: "practice", Icon: icons.Target },
+  { key: "assessment", Icon: icons.ClipboardList },
+  { key: "challenge", Icon: icons.Swords },
+] as const;
+const ENTRY_PERKS = [
+  { key: "badges", Icon: icons.Award },
+  { key: "leaderboard", Icon: icons.Trophy },
+  { key: "rewards", Icon: icons.Gift },
+] as const;
 
 /** Kök tsconfig DOM lib'i taşımadığı için form alanı erişimi en dar arayüzle yapılır. */
 interface FieldLike { value: string }
@@ -146,22 +160,38 @@ export function EntryPage({ role, devEnabled = false, apiBaseUrl = null, onApiSi
       <section aria-label={t("entry.brand")} className="eg-shell-entry__brand">
         <img alt="" className="eg-shell-entry__logo" src="/brand/ege-tip-logo.png" />
         <EgemedLogo variant="on-dark" />
-        <div className="eg-shell-entry__sims">
-          <div className="eg-shell-entry__simrow">
-            {SIM_IDS.map((id) => (
+        <ul aria-label={t("entry.sims")} className="eg-shell-entry__sims">
+          {SIM_IDS.map((id) => (
+            <li className="eg-shell-entry__sim" key={id}>
               <img
                 alt=""
                 className="eg-shell-entry__simicon"
                 height={SIM_ICONS[id].height}
-                key={id}
                 src={SIM_ICONS[id].src}
                 width={SIM_ICONS[id].width}
               />
+              <span className="eg-shell-entry__simname">{t(`sims.${id}.name`)}</span>
+            </li>
+          ))}
+        </ul>
+        <div aria-label={t("entry.features")} className="eg-shell-entry__features" role="group">
+          <p className="eg-shell-entry__featTitle">{t("entry.features.modes")}</p>
+          <ul className="eg-shell-entry__modes">
+            {ENTRY_MODES.map(({ key, Icon }) => (
+              <li className="eg-shell-entry__mode" key={key}>
+                <Icon aria-hidden="true" className="eg-shell-entry__featIcon" />
+                {t(`entry.features.mode.${key}`)}
+              </li>
             ))}
-          </div>
-          <p className="eg-shell-entry__sims-label">
-            {SIM_IDS.map((id) => t(`sims.${id}.name`)).join(" · ")}
-          </p>
+          </ul>
+          <ul className="eg-shell-entry__perks">
+            {ENTRY_PERKS.map(({ key, Icon }) => (
+              <li className="eg-shell-entry__perk" key={key}>
+                <span aria-hidden="true" className="eg-shell-entry__perkIcon"><Icon /></span>
+                {t(`entry.features.${key}`)}
+              </li>
+            ))}
+          </ul>
         </div>
       </section>
       <main className="eg-shell-entry__main" id="icerik" tabIndex={-1}>
@@ -177,13 +207,13 @@ export function EntryPage({ role, devEnabled = false, apiBaseUrl = null, onApiSi
           <h1 className="eg-shell-entry__title">{title}</h1>
           <p className="eg-shell-entry__help">{t("entry.help")}</p>
           {!isAdmin && <p className="eg-shell-entry__notice">{t("entry.session.synthetic")}</p>}
-          {devEnabled ? (
+          {import.meta.env.DEV && devEnabled ? (
             <div className="eg-shell-entry__dev">
-              <p className="eg-shell-entry__dev-title">{t("entry.dev.title")}</p>
+              <p className="eg-shell-entry__dev-title">{DEV_ENTRY_STRINGS.title}</p>
               <p className="eg-shell-entry__dev-account">
-                {t(isAdmin ? "entry.dev.admin" : "entry.dev.student")}
+                {isAdmin ? DEV_ENTRY_STRINGS.admin : DEV_ENTRY_STRINGS.student}
               </p>
-              <p className="eg-shell-entry__dev-note">{t("entry.dev.note")}</p>
+              <p className="eg-shell-entry__dev-note">{DEV_ENTRY_STRINGS.note}</p>
             </div>
           ) : (
             <p className="eg-shell-entry__status">{t("entry.auth.pending")}</p>

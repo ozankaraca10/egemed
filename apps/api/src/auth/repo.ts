@@ -105,6 +105,8 @@ export interface AuditListRow {
   readonly summaryBefore: Readonly<Record<string, string>> | null;
   readonly summaryAfter: Readonly<Record<string, string>> | null;
   readonly requestId: string | null;
+  readonly actorName?: string | null;
+  readonly targetName?: string | null;
 }
 
 export interface AuditRepo {
@@ -159,6 +161,8 @@ interface AuditRow {
   readonly summary_before: unknown;
   readonly summary_after: unknown;
   readonly request_id: string | null;
+  readonly actor_name?: string | null;
+  readonly target_name?: string | null;
 }
 
 /** jsonb özetleri yalnız nesne olarak kabul edilir; diğer değerler null'a indirgenir. */
@@ -179,6 +183,8 @@ function toAuditListRow(row: AuditRow): AuditListRow {
     summaryBefore: toSummary(row.summary_before),
     summaryAfter: toSummary(row.summary_after),
     requestId: row.request_id,
+    actorName: row.actor_name ?? null,
+    targetName: row.target_name ?? null,
   };
 }
 
@@ -384,7 +390,20 @@ export function createPgAuthRepos(db: AuthDb): PgAuthRepos {
       );
       const totalRow = totalResult.rows[0] as { readonly total?: unknown } | undefined;
       const rowsResult = await db.query(
-        `select id::text as id, occurred_at, actor_user_id, actor_role, action, target_type, target_id, summary_before, summary_after, request_id from audit_log where ${filter.where} order by occurred_at desc, id desc limit $${filter.params.length + 1} offset $${filter.params.length + 2}`,
+        `select a.id::text as id, a.occurred_at, a.actor_user_id, a.actor_role, a.action, a.target_type, a.target_id, a.summary_before, a.summary_after, a.request_id, actor.display_name as actor_name,
+          case
+            when a.target_type = 'user' then target_user.display_name
+            when a.target_type = 'import_batch' then batch.file_name
+            when a.target_type = 'monthly_reward' then case reward.sim_id when 'pulse' then 'Pulse' when 'ausculta' then 'Ausculta' when 'opaca' then 'Opaca' end || ' · ' || reward.month
+            else null
+          end as target_name
+        from audit_log a
+        left join users actor on actor.id = a.actor_user_id and actor.institution_id = a.institution_id
+        left join users target_user on a.target_type = 'user' and target_user.id::text = a.target_id and target_user.institution_id = a.institution_id
+        left join import_batches batch on a.target_type = 'import_batch' and batch.id::text = a.target_id
+        left join monthly_rewards reward on a.target_type = 'monthly_reward' and (reward.sim_id || ':' || reward.month) = a.target_id and reward.institution_id = a.institution_id
+        where ${filter.where.replace(/\binstitution_id\b/g, 'a.institution_id').replace(/\bactor_user_id\b/g, 'a.actor_user_id').replace(/\baction\b/g, 'a.action').replace(/\btarget_type\b/g, 'a.target_type').replace(/\btarget_id\b/g, 'a.target_id').replace(/\boccurred_at\b/g, 'a.occurred_at')}
+        order by a.occurred_at desc, a.id desc limit $${filter.params.length + 1} offset $${filter.params.length + 2}`,
         [...filter.params, query.pageSize, (query.page - 1) * query.pageSize],
       );
       return {
@@ -579,6 +598,8 @@ export function createMemoryAuthStore(
           summaryBefore: entry.summaryBefore ?? null,
           summaryAfter: entry.summaryAfter,
           requestId: entry.requestId,
+          actorName: entry.actorUserId === null ? null : userRecords.get(entry.actorUserId)?.displayName ?? null,
+          targetName: entry.targetType === "user" && entry.targetId !== null ? userRecords.get(entry.targetId)?.displayName ?? null : null,
         }));
       const start = (query.page - 1) * query.pageSize;
       return { rows: matches.slice(start, start + query.pageSize), total: matches.length };

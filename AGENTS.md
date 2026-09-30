@@ -19,7 +19,7 @@ Gerçek öğrenci verisi repoya girmez. Mock veri deterministik tohumludur. Sır
 Her görev tek paket/uygulama ve yaklaşık en fazla 400 satır diff hedefler. Aynı pakette paralel Running görev açma. Sözleşme değişikliği tüketicilerinden önce birleştirilir. Artefaktlar git dışı `.egemed-run/research.md`, `plan.md`, `summary.md`, `review.md` dosyalarında tutulur. İnsan onayı ve merge yalnız depo sahibindedir.
 
 ## Okuma sınırı
-`sims/*/src/data/*.json`, `sims/*/public/assets/**`, `**/dist/**`, `**/*.lock`, `reports/**` topluca okunmaz. Gerekirse sadece hedefli `head` veya `jq`. Gerçek veri veya sır içeren dosyayı ajan bağlamına alma.
+`packages/sim-*/src/data/*.json`, `packages/sim-*/public/**`, `packages/assessment-bank/data/**`, `**/dist/**`, `**/*.lock`, `reports/**` topluca okunmaz. Gerekirse sadece hedefli `head` veya `jq`. Gerçek veri veya sır içeren dosyayı ajan bağlamına alma.
 
 ## Kodlama ilkeleri
 Kaynak: [forrestchang/andrej-karpathy-skills](https://github.com/forrestchang/andrej-karpathy-skills) `CLAUDE.md` — yaygın LLM kodlama hatalarını azaltan davranış ilkeleri; projeye özgü kurallarla birlikte uygulanır.

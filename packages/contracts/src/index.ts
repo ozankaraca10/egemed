@@ -198,6 +198,14 @@ export {
 } from "./schemas/rewards";
 export type { RewardBody, RewardUpsertRequest, RewardWinnerBody } from "./schemas/rewards";
 export {
+  adminAuditListResponseSchema,
+  adminAuditRowSchema,
+  adminGamiSummaryResponseSchema,
+  adminHealthResponseSchema,
+  adminOverviewResponseSchema,
+} from "./schemas/admin";
+export type { AdminAuditListResponse, AdminHealthResponse, AdminOverviewResponse, AdminGamiSummaryResponse } from "./schemas/admin";
+export {
   MARK_ANSWER_PATTERN,
   OPAQUE_TOKEN_PATTERN,
   SIM_SESSION_MODES,

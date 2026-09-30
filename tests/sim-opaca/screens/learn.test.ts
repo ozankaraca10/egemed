@@ -83,6 +83,6 @@ describe("LearnScreen (statik render)", () => {
         storage: memoryStorage(),
       }),
     );
-    expect(html).toContain("Meydan okuma için önce öğrenme modunu tamamlayın: 0/33 konu açıldı.");
+    expect(html).toContain("Meydan okuma için önce öğrenme modunu tamamlayın: 0/33 konu incelendi.");
   });
 });

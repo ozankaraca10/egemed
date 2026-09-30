@@ -1,0 +1,129 @@
+{
+  "version": 1,
+  "topics": {
+    "heart.normal": [
+      "circor_normal_cardiac_aortic_001",
+      "circor_normal_cardiac_aortic_002",
+      "circor_normal_cardiac_aortic_003",
+      "circor_normal_cardiac_aortic_004",
+      "circor_normal_cardiac_aortic_005"
+    ],
+    "heart.s3": [
+      "heart_s3_apex_001",
+      "heart_s3_lc_001",
+      "heart_s3_llsb_001",
+      "heart_s3_llsb_002",
+      "heart_s3_lusb_001"
+    ],
+    "heart.s4": [
+      "heart_s4_rc_001",
+      "heart_s4_lusb_001"
+    ],
+    "heart.murmur.early_systolic": [
+      "circor_early_systolic_murmur_cardiac_aortic_001",
+      "circor_early_systolic_murmur_cardiac_aortic_002",
+      "circor_early_systolic_murmur_cardiac_mitral_001",
+      "circor_early_systolic_murmur_cardiac_pulmonary_001",
+      "circor_early_systolic_murmur_cardiac_pulmonary_002"
+    ],
+    "heart.murmur.mid_systolic": [
+      "circor_mid_systolic_murmur_cardiac_mitral_001",
+      "circor_mid_systolic_murmur_cardiac_pulmonary_001",
+      "circor_mid_systolic_murmur_cardiac_pulmonary_002",
+      "circor_mid_systolic_murmur_cardiac_tricuspid_001",
+      "heart_mid_systolic_murmur_apex_002"
+    ],
+    "heart.murmur.late_systolic": [
+      "circor_late_systolic_murmur_cardiac_aortic_001",
+      "heart_late_systolic_murmur_apex_001",
+      "heart_late_systolic_murmur_llsb_001",
+      "heart_late_systolic_murmur_lusb_001",
+      "heart_late_systolic_murmur_lusb_002"
+    ],
+    "heart.murmur.late_diastolic": [
+      "heart_late_diastolic_murmur_apex_001",
+      "heart_late_diastolic_murmur_llsb_002",
+      "heart_late_diastolic_murmur_lusb_002",
+      "heart_late_diastolic_murmur_lc_001",
+      "heart_late_diastolic_murmur_llsb_001"
+    ],
+    "heart.atrial_fibrillation": [
+      "heart_atrial_fibrillation_apex_001",
+      "heart_atrial_fibrillation_lusb_001",
+      "heart_atrial_fibrillation_lc_001",
+      "heart_atrial_fibrillation_rusb_001"
+    ],
+    "heart.tachycardia": [
+      "heart_tachycardia_apex_001",
+      "heart_tachycardia_lc_001",
+      "heart_tachycardia_lusb_001"
+    ],
+    "heart.av_block": [
+      "heart_av_block_apex_001",
+      "heart_av_block_llsb_001",
+      "heart_av_block_rc_001"
+    ],
+    "lung.normal": [
+      "kauh_normal_lung_left_lower_posterior_001",
+      "kauh_normal_lung_left_lower_posterior_002",
+      "kauh_normal_lung_left_lower_posterior_003",
+      "kauh_normal_lung_left_lower_posterior_004",
+      "kauh_normal_lung_left_lower_posterior_005"
+    ],
+    "lung.wheezing": [
+      "kauh_wheezing_lung_left_lower_posterior_001",
+      "sprsound_wheezing_lung_left_lower_posterior_001",
+      "kauh_wheezing_lung_left_lower_posterior_002",
+      "sprsound_wheezing_lung_left_lower_posterior_002",
+      "kauh_wheezing_lung_left_lower_posterior_003"
+    ],
+    "lung.rhonchi": [
+      "sprsound_rhonchi_lung_left_lower_posterior_001",
+      "sprsound_rhonchi_lung_left_upper_posterior_001",
+      "sprsound_rhonchi_lung_right_lower_posterior_002",
+      "sprsound_rhonchi_lung_right_upper_posterior_001",
+      "lung_rhonchi_lma_002"
+    ],
+    "lung.fine_crackles": [
+      "kauh_fine_crackles_lung_left_lower_posterior_001",
+      "kauh_fine_crackles_lung_left_lower_posterior_002",
+      "kauh_fine_crackles_lung_left_lower_posterior_003",
+      "kauh_fine_crackles_lung_left_lower_posterior_004",
+      "kauh_fine_crackles_lung_left_lower_posterior_005"
+    ],
+    "lung.coarse_crackles": [
+      "kauh_coarse_crackles_lung_left_upper_posterior_001",
+      "kauh_coarse_crackles_lung_right_lower_posterior_001",
+      "kauh_coarse_crackles_lung_right_middle_posterior_001",
+      "kauh_coarse_crackles_lung_right_middle_posterior_002",
+      "kauh_coarse_crackles_lung_right_upper_posterior_001"
+    ],
+    "lung.pleural_rub": [
+      "lung_pleural_rub_lla_002",
+      "lung_pleural_rub_lma_002",
+      "lung_pleural_rub_lua_002",
+      "lung_pleural_rub_lla_001",
+      "lung_pleural_rub_lma_001"
+    ],
+    "mixed.msm_wheezing": [
+      "mixed_mid_systolic_murmur+wheezing_lua_001",
+      "mixed_mid_systolic_murmur+wheezing_lma_001",
+      "mixed_mid_systolic_murmur+wheezing_lc_001"
+    ],
+    "mixed.esm_coarse": [
+      "mixed_early_systolic_murmur+coarse_crackles_lua_001",
+      "mixed_early_systolic_murmur+coarse_crackles_rc_001"
+    ],
+    "mixed.s3_normal": [
+      "mixed_s3+normal_rla_001",
+      "mixed_s3+normal_lua_001",
+      "mixed_s3+normal_llsb_001"
+    ],
+    "mixed.af_rhonchi": [
+      "mixed_atrial_fibrillation+rhonchi_rla_001",
+      "mixed_atrial_fibrillation+rhonchi_rma_001",
+      "mixed_atrial_fibrillation+rhonchi_rua_001",
+      "mixed_atrial_fibrillation+rhonchi_rusb_001"
+    ]
+  }
+}

@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest";
 const DATA_DIR = "packages/sim-ausculta/src/data";
 const JSON_NAMES = [
   "auscultation-points.json",
+  "learning-samples.json",
   "library.json",
   "pediatric-reference.json",
   "sounds-external.json",
@@ -27,6 +28,7 @@ function recordsOf(value: unknown): readonly { id?: unknown; runtimeUrl?: unknow
 
 const sounds = load("sounds.json") as { count?: unknown; records?: unknown };
 const external = load("sounds-external.json") as { count?: unknown; records?: unknown };
+const samples = load("learning-samples.json") as { version?: unknown; topics?: Record<string, unknown> };
 const cases = load("cases.json") as { cases?: unknown };
 const casesAuto = load("cases-auto.json") as { count?: unknown; cases?: unknown };
 const points = load("auscultation-points.json") as { points?: unknown };
@@ -38,8 +40,21 @@ const soundRecords = recordsOf(sounds);
 const externalRecords = recordsOf(external);
 const libraryItems = (library.groups ?? []).flatMap((group) => group.items ?? []);
 
+interface PatientShape {
+  origin: string;
+  ageYears?: number | null;
+  ageGroup?: string | null;
+  sex?: string | null;
+  pregnant?: boolean;
+  diagnosis?: string | null;
+  diagnosisSource?: string;
+  soundTypeRaw?: string | null;
+  site?: string | null;
+}
+
 interface ExternalRecordShape {
   id: string;
+  category: string;
   sourceDataset: string;
   acousticFinding: string;
   mappingStatus: string;
@@ -50,9 +65,29 @@ interface ExternalRecordShape {
   gender: string;
   sourceFile: string;
   internalSourceId: string;
+  internalPatientId?: string;
   population: string;
   sampleRate: number;
   channels: number;
+  durationSec: number;
+  runtimeUrl: string;
+  patient: PatientShape;
+}
+
+/** T259: gösterilen hasta alanı KVKK'ya uygun mu (yaş/cinsiyet/tanı/yer; kimlik yok). */
+function expectShownPatient(record: ExternalRecordShape): void {
+  expect(record.patient.origin).toBe("real");
+  expect(typeof record.patient.ageYears).toBe("number");
+  expect(record.patient.ageYears).toBeGreaterThanOrEqual(0);
+  expect(record.patient.ageYears).toBeLessThanOrEqual(120);
+  expect(["F", "M"]).toContain(record.patient.sex);
+  expect(record.patient.diagnosis).toBeTruthy();
+  expect(record.patient.diagnosisSource).toBeTruthy();
+  expect(record.patient.soundTypeRaw).toBeTruthy();
+  expect(record.patient.site).toBeTruthy();
+  const shown = JSON.stringify(record.patient);
+  expect(shown).not.toMatch(/kauh\/|sprsound\/|\bDP\d+/i);
+  expect(shown).not.toMatch(/[0-9]{5,}/u);
 }
 
 const kauhRecords = ((external.records ?? []) as ExternalRecordShape[]).filter(
@@ -62,6 +97,20 @@ const kauhRecords = ((external.records ?? []) as ExternalRecordShape[]).filter(
 const sprsoundRecords = ((external.records ?? []) as ExternalRecordShape[]).filter(
   (record) => record.sourceDataset === "sprsound",
 );
+
+/** T260 — T259'dan korunan CirCor kimlikleri; değerlendirme bankası bunlara bağlı. */
+const CIRCOR_LEGACY_IDS = [
+  "circor_normal_cardiac_aortic_001",
+  "circor_early_systolic_murmur_cardiac_aortic_001",
+  "circor_mid_systolic_murmur_cardiac_aortic_001",
+  "circor_late_systolic_murmur_cardiac_aortic_001",
+];
+const CIRCOR_RECORDED_TO_SIMULATION: Record<string, string> = {
+  AV: "cardiac_aortic",
+  PV: "cardiac_pulmonary",
+  TV: "cardiac_tricuspid",
+  MV: "cardiac_mitral",
+};
 
 describe("Ausculta veri envanteri", () => {
   it("kopyalanan JSON dosyaları okunur", () => {
@@ -73,8 +122,8 @@ describe("Ausculta veri envanteri", () => {
   it("kayıt sayıları kaynak kopyasıyla aynıdır", () => {
     expect(sounds.count).toBe(245);
     expect(soundRecords).toHaveLength(245);
-    expect(external.count).toBe(102);
-    expect(externalRecords).toHaveLength(102);
+    expect(external.count).toBe(114);
+    expect(externalRecords).toHaveLength(114);
     expect(cases.cases).toHaveLength(24);
     expect(casesAuto.count).toBe(176);
     expect(casesAuto.cases).toHaveLength(176);
@@ -84,6 +133,8 @@ describe("Ausculta veri envanteri", () => {
     expect(pediatric.rows).toHaveLength(6);
     expect(sources.datasets).toHaveLength(4);
     expect(sources.inventory).toHaveLength(2);
+    expect(samples.version).toBe(1);
+    expect(Object.keys(samples.topics ?? {})).toHaveLength(libraryItems.length);
   });
 
   it("KAUH posterior kayıtları KVKK'ya uygun, nokta eşlemeli ve onay bekler (T227)", () => {
@@ -99,10 +150,15 @@ describe("Ausculta veri envanteri", () => {
       expect(["F", "M"]).toContain(record.gender);
       expect(record.sampleRate).toBe(4000);
       expect(record.channels).toBe(1);
-      // Yaş/ad kaydı yok: özgün dosya adı yerine redakte biçim kullanılır.
+      // Ad ve hasta numarası gösterilen alanlara girmez: özgün dosya adı yerine redakte
+      // biçim; yaş yalnız T259 hasta alanında (patient.ageYears).
       expect(record.sourceFile).toMatch(/^kauh\/DP\d+$/);
       expect(record).not.toHaveProperty("age");
-      expect(JSON.stringify(record)).not.toMatch(/"(age|patientAge|patientName)"/i);
+      expect(JSON.stringify(record)).not.toMatch(/"(age|patientAge|patientName|patientNo)"/i);
+      expectShownPatient(record);
+      expect(record.patient.diagnosisSource).toBe("KAUH tablosu");
+      expect(record.patient.site).toBeTruthy();
+      expect(record.patient.site).toContain("posterior");
     }
   });
 
@@ -119,14 +175,97 @@ describe("Ausculta veri envanteri", () => {
       expect(record.nativeFilter).toBe("unspecified");
       expect(record.sampleRate).toBe(8000);
       expect(record.channels).toBe(1);
-      // Hasta numarası, yaş ve cinsiyet kayda geçmez: yalnız kayıt numarası redakte biçimde.
+      // Hasta numarası gösterilen alanlara girmez: yalnız kayıt numarası redakte biçimde;
+      // hasta no iç hasta anahtarında (internalPatientId, seçim için; KVKK: gösterilmez).
       expect(record.sourceFile).toMatch(/^sprsound\/\d+$/);
       expect(record.internalSourceId).toMatch(/^sprsound-\d+$/);
+      expect(record.internalPatientId).toMatch(/^sprsound-patient-\d+$/);
       expect(record).not.toHaveProperty("age");
       expect(record).not.toHaveProperty("gender");
       expect(JSON.stringify(record)).not.toMatch(/"(age|patientAge|patientName|patientNo|gender)"/i);
       expect(["rhonchi", "wheezing"]).toContain(record.acousticFinding);
       expect(record.id).toMatch(new RegExp(`^sprsound_${record.acousticFinding}_${record.simulationLocation}_\\d{3}$`));
+      expectShownPatient(record);
+      expect(record.patient.diagnosisSource).toBe("SPRSound hasta özeti");
+      expect(record.patient.soundTypeRaw).toBe(record.acousticFinding === "rhonchi" ? "Rhonchi" : "Wheeze");
+      expect(["Sol bölge (posterior)", "Sağ bölge (posterior)"]).toContain(record.patient.site);
+    }
+  });
+
+  it("CirCor: T259 kayıtları aynen korunur", () => {
+    const circor = (externalRecords as ExternalRecordShape[]).filter(
+      (record) => record.sourceDataset === "physionet-circor",
+    );
+    const legacy = circor.filter((record) => CIRCOR_LEGACY_IDS.includes(record.id));
+    expect(legacy.map((record) => record.id).sort()).toEqual([...CIRCOR_LEGACY_IDS].sort());
+    expect(legacy.map((record) => record.internalSourceId)).toEqual([
+      "circor-patient-2530",
+      "circor-patient-9979",
+      "circor-patient-14241",
+      "circor-patient-85132",
+    ]);
+    for (const record of legacy) {
+      expect(record.patient.origin).toBe("real");
+      expect(record.patient.diagnosis).toBeNull();
+      expect(record.patient.ageYears).toBeNull();
+      expect(record.patient.sex).toBeNull();
+      expect(record.patient.diagnosisSource).toContain("CirCor");
+    }
+  });
+
+  it("CirCor yeni kayıtları hasta alanı ve odak eşlemesiyle gelir (T260)", () => {
+    const circor = (externalRecords as ExternalRecordShape[]).filter(
+      (record) => record.sourceDataset === "physionet-circor",
+    );
+    expect(circor).toHaveLength(16);
+    const imported = circor.filter((record) => !CIRCOR_LEGACY_IDS.includes(record.id));
+    expect(imported).toHaveLength(12);
+    const findings = imported.map((record) => record.acousticFinding);
+    expect(findings.filter((finding) => finding === "normal")).toHaveLength(4);
+    expect(findings.filter((finding) => finding === "early_systolic_murmur")).toHaveLength(4);
+    expect(findings.filter((finding) => finding === "mid_systolic_murmur")).toHaveLength(4);
+    for (const record of imported) {
+      expect(record.category).toBe("heart");
+      expect(record.mappingStatus).toBe("pending_faculty");
+      expect(record.mappingNote.length).toBeGreaterThan(10);
+      expect(record.nativeFilter).toBe("unspecified");
+      expect(record.sampleRate).toBe(4000);
+      expect(record.channels).toBe(1);
+      expect(record.durationSec).toBeLessThanOrEqual(30);
+      expect(record.recordedLocation).toMatch(/^(AV|PV|TV|MV)$/);
+      expect(record.simulationLocation).toBe(CIRCOR_RECORDED_TO_SIMULATION[record.recordedLocation]);
+      expect(record.runtimeUrl).toBe(`assets/audio/runtime/external/circor/${record.id}.wav`);
+      expect(record.internalPatientId).toMatch(/^circor-patient-\d+$/);
+      // KVKK: hasta numarası yalnız iç kimlikte; gösterilen alanlara girmez.
+      const patientNo = String(record.internalPatientId).replace("circor-patient-", "");
+      expect(record.sourceFile).toMatch(/^circor\/[a-z0-9_]+$/);
+      expect(`${record.sourceFile} ${JSON.stringify(record.patient)}`).not.toContain(patientNo);
+      expect(record.patient.origin).toBe("real");
+      expect(record.patient.ageYears).toBeNull();
+      expect([null, "Yenidoğan", "Süt çocuğu", "Çocuk", "Ergen"]).toContain(record.patient.ageGroup);
+      expect(["F", "M"]).toContain(record.patient.sex);
+      expect(typeof record.patient.pregnant).toBe("boolean");
+      expect(record.patient.diagnosis).toBeNull();
+      expect(record.patient.diagnosisSource).toBe("CirCor (tanı bilgisi yok)");
+      expect(record.patient.soundTypeRaw).toBeTruthy();
+      if (record.acousticFinding === "normal") {
+        expect(record.patient.soundTypeRaw).toBe("Üfürüm yok");
+      } else {
+        expect(record.patient.soundTypeRaw).toMatch(/^(Early|Mid|Late)-systolic (III|II|I)\/VI$/);
+      }
+      expect(["Aort odağı", "Pulmoner odak", "Triküspit odağı", "Mitral odağı"]).toContain(record.patient.site);
+      expect(JSON.stringify(record.patient)).not.toMatch(/[0-9]{5,}/u);
+    }
+  });
+
+  it("manken kayıtlarında hasta alanı origin manikin (T259)", () => {
+    const manikin = soundRecords as { gender?: string; patient: PatientShape }[];
+    expect(manikin).toHaveLength(245);
+    for (const record of manikin) {
+      expect(record.patient).toBeDefined();
+      expect(record.patient.origin).toBe("manikin");
+      expect(["F", "M", null]).toContain(record.patient.sex);
+      if (record.gender === "F" || record.gender === "M") expect(record.patient.sex).toBe(record.gender);
     }
   });
 

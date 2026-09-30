@@ -93,7 +93,7 @@ const runtimeSuiteName =
 describe("Ausculta JSON varlık yolları", () => {
   it("görsel ve ses yolu sayıları kopya bütünlüğünü tutar", () => {
     expect(imagePaths).toHaveLength(4);
-    expect(audioPaths).toHaveLength(347);
+    expect(audioPaths).toHaveLength(359);
     expect(BRAND_REFERENCES).toHaveLength(13);
   });
 

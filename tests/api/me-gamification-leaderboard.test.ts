@@ -83,7 +83,7 @@ describe("GET /me/gamification/:simId/leaderboard", () => {
     expect(response.status).toBe(401);
   });
 
-  it("baş harf gösterir; tam ad ve e-posta yanıtta yoktur", async () => {
+  it("tam ad gösterir; e-posta yanıtta yoktur", async () => {
     const harness = createAdminHarness({ gamification: LEADERBOARD_SEED });
     const ali = await login(harness, "ali.veli");
     const response = await harness.app.request("/me/gamification/pulse/leaderboard?period=month&cohort=all", {
@@ -94,9 +94,9 @@ describe("GET /me/gamification/:simId/leaderboard", () => {
     const parsed = gamiLeaderboardResponseSchema.safeParse(body);
     if (!parsed.success) expect.unreachable(JSON.stringify(parsed.error.issues));
     const text = JSON.stringify(body);
-    expect(text).not.toMatch(/ali\.veli@|mert@|Ali Veli|Mert İkinci/i);
+    expect(text).not.toMatch(/ali\.veli@|mert@/i);
     const me = parsed.data.data.rows.find((row) => row.isMe);
-    expect(me?.displayName).toBe("AV");
+    expect(me?.displayName).toBe("Ali Veli");
     expect(me?.id).toBe("me");
     expect(parsed.data.meta.total).toBe(2);
   });

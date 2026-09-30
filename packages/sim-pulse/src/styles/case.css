@@ -87,7 +87,7 @@
 @media(max-width:480px){.eg-sim-pulse .eg-brand-copy small{display:none}
 .eg-sim-pulse .mode-chip{font-size:0;gap:0}
 .eg-sim-pulse .mode-chip:before{margin-right:0}
-.eg-sim-pulse .mode-chip.learn:after{content:'İnceleme';font-size:var(--fs-xs)}
+.eg-sim-pulse .mode-chip.learn:after{content:'Öğrenme';font-size:var(--fs-xs)}
 .eg-sim-pulse .mode-chip.practice:after{content:'Uygulama';font-size:var(--fs-xs)}
 .eg-sim-pulse .mode-chip.assessment:after{content:'Değerlendirme';font-size:var(--fs-xs)}
 .eg-sim-pulse .eg-brand-copy strong{font-size:18px}}

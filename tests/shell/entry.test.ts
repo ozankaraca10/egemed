@@ -40,7 +40,7 @@ describe("giriş rotaları", () => {
 
   it("sol panelde üç beyaz sim ikonunu dekoratif olarak, adlarını görünür metinle gösterir", () => {
     const html = renderToStaticMarkup(createElement(EntryPage, { role: "student" }));
-    expect(html).toContain('class="eg-shell-entry__simrow"');
+    expect(html).toContain('class="eg-shell-entry__sims"');
     for (const id of SIM_IDS) {
       const icon = SIM_ICONS[id];
       const tag = html.match(new RegExp(`<img[^>]*src="${icon.src}"[^>]*>`))?.[0] ?? "";
@@ -48,7 +48,7 @@ describe("giriş rotaları", () => {
       expect(tag, id).toContain(`width="${icon.width}"`);
       expect(tag, id).toContain(`height="${icon.height}"`);
     }
-    expect(html).toContain(SIM_IDS.map((id) => t(`sims.${id}.name`)).join(" · "));
+    for (const id of SIM_IDS) expect(html).toContain(`<span class="eg-shell-entry__simname">${t(`sims.${id}.name`)}</span>`);
   });
 
   it("önizleme gönderimini iptal eder ve yalnız bekleyen durum bildiricisini tetikler", () => {

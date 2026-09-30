@@ -2,6 +2,7 @@ import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { decodePcm16Wav, encodePcm16Wav, MAX_PEAK, MAX_SECONDS, normalizePcm16, TARGET_RMS, truncatePcm16 } from "./import-kauh.mjs";
+import { normalizePatientNo, parsePatientSummaryCsv, sprsoundPatientInfo } from "./patient-info.mjs";
 
 const { console, process } = globalThis;
 
@@ -16,8 +17,11 @@ const { console, process } = globalThis;
  * eşitlikte dosya adı. Kaynakta seviye (üst/alt) yok; p1 → sol ALT (1. seçim)
  * ve sol ÜST (2. seçim), p3 → sağ ALT ve sağ ÜST noktalarına dönüşümlü atanır.
  *
- * KVKK ve kaynak kimliği gereği hasta numarası, yaş ve cinsiyet KAYDA GEÇMEZ;
- * dosya adı çözümlenirken okunur ama yalnız konum ve kayıt numarası saklanır.
+ * T259 hasta alanı: yaş ve cinsiyet dosya adından, tanı `Patient Summary/*.csv`
+ * özetlerinden (sıra: SPRSound → Grand Challenge'23 → '24) gelir; özet bulunamazsa
+ * tanı null kalır. KVKK: özgün dosya adı ve hasta numarası gösterilen alanlara
+ * girmez; hasta numarası karşılaştırma için yalnız iç kimlikte
+ * (`internalPatientId`) tutulur, yaş/cinsiyet/tanı/yer `patient` alanındadır.
  * Aynı kayıt birden çok klasörde kopya olabilir; dosya adına göre tekilleştirilir.
  * Kayıtlar RMS hedefi ≈0.0333'e normalize edilir; tepe ≤ 0.9, 30 sn üzeri kırpılır,
  * 8 kHz örnekleme korunur. Yeni bağımlılık yok; WAV kodeği import-kauh.mjs'ten gelir.
@@ -149,8 +153,9 @@ export function selectSprsoundRecords(entries) {
   return { selected, skipped };
 }
 
-/** Kayıt alanları KAUH ile aynı; hasta numarası/yaş/cinsiyet YOK (KVKK). */
-function buildRecord({ id, selected, wav, normalized }) {
+/** Kayıt alanları KAUH ile aynı; gösterilen hasta alanı yalnız yaş/cinsiyet/tanı/yer
+ *  taşır (KVKK). Hasta numarası iç kimlikte (`internalPatientId`) kalır. */
+function buildRecord({ id, selected, wav, normalized, patient }) {
   return {
     id,
     category: "lung",
@@ -160,6 +165,7 @@ function buildRecord({ id, selected, wav, normalized }) {
     sourceDataset: DATASET_ID,
     sourceFile: `sprsound/${selected.recordNo}`,
     internalSourceId: `sprsound-${selected.recordNo}`,
+    internalPatientId: `sprsound-patient-${normalizePatientNo(selected.patientNo)}`,
     durationSec: Number((wav.samples.length / wav.channels / wav.sampleRate).toFixed(2)),
     sampleRate: wav.sampleRate,
     channels: wav.channels,
@@ -173,7 +179,26 @@ function buildRecord({ id, selected, wav, normalized }) {
     runtimeUrl: `assets/audio/runtime/external/sprsound/${id}.wav`,
     validationStatus: "validated",
     issues: [],
+    patient,
   };
+}
+
+/** Hasta özeti dosyaları öncelik sırası: özgün SPRSound özeti önce, sonra yarışma yılları. */
+const SUMMARY_FILES = ["SPRSound_patient_summary.csv", "Grand_Challenge'23_patient_summary.csv", "Grand_Challenge'24_patient_summary.csv"];
+
+/** `Patient Summary/*.csv` → Map(hastaNo → { disease, source }); ilk dosya kazanır. */
+function readPatientSummaries(dir) {
+  const summaries = new Map();
+  const used = [];
+  for (const name of SUMMARY_FILES) {
+    const path = join(dir, name);
+    if (!existsSync(path)) continue;
+    used.push(name);
+    for (const [patientNo, disease] of parsePatientSummaryCsv(readFileSync(path, "utf8"))) {
+      if (!summaries.has(patientNo)) summaries.set(patientNo, { disease, source: name });
+    }
+  }
+  return { summaries, used };
 }
 
 function writeManifest(records) {
@@ -226,6 +251,9 @@ function main() {
   }
 
   const stats = { wav: 0, unique: 0, candidate: 0, unreadable: 0, badName: 0, lateral: 0 };
+  const summaryDir = join(sourceDir, "Patient Summary");
+  const { summaries, used } = existsSync(summaryDir) ? readPatientSummaries(summaryDir) : { summaries: new Map(), used: [] };
+  if (used.length === 0) console.warn(`Hasta özeti bulunamadı: ${summaryDir} — tanılar boş kalacak.`);
   const { wavs, jsons } = walk(sourceDir);
   stats.wav = wavs.length;
   const jsonByName = new Map();
@@ -283,6 +311,9 @@ function main() {
     entries.push({
       fileName,
       recordNo: parsed.recordNo,
+      patientNo: parsed.patientNo,
+      age: parsed.age,
+      gender: parsed.gender,
       location: parsed.location,
       annotation,
       durationSec: wav.samples.length / wav.channels / wav.sampleRate,
@@ -306,7 +337,9 @@ function main() {
     const normalized = normalizePcm16(truncated);
     writeFileSync(join(OUTPUT_DIR, `${id}.wav`), encodePcm16Wav(normalized.samples, wav.sampleRate, wav.channels));
     keepIds.add(id);
-    records.push(buildRecord({ id, selected: entry, wav, normalized }));
+    const summary = summaries.get(normalizePatientNo(entry.patientNo)) ?? null;
+    const patient = sprsoundPatientInfo(entry, entry.finding, summary);
+    records.push(buildRecord({ id, selected: entry, wav, normalized, patient }));
   }
 
   const removed = cleanupOutput(keepIds);
@@ -319,6 +352,8 @@ function main() {
       `yan bölge ${stats.lateral}, ad çözümlenemedi ${stats.badName}, okunamadı ${stats.unreadable}`,
   );
   console.log(`Alınan kayıt: ${records.length} (manifest toplam ${manifest.total}, korunan ${manifest.kept})`);
+  const withDiagnosis = records.filter((record) => record.patient.diagnosis !== null).length;
+  console.log(`Hasta alanı: ${withDiagnosis}/${records.length} tanılı (hasta özeti: ${used.join(", ") || "yok"})`);
   console.log(`Çıktı: ${OUTPUT_DIR}${removed > 0 ? ` (${removed} eski dosya silindi)` : ""}`);
   for (const [reason, count] of [...skipped.entries()].sort((a, b) => b[1] - a[1])) {
     console.log(`  atlandı — ${reason}: ${count}`);

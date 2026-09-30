@@ -12,9 +12,9 @@ export type SimId = (typeof SIM_IDS)[number];
  * görseli sabit yüksekliğe `object-fit: contain` ile oturur, CLS oluşmaz.
  */
 export const SIM_LOGOS: Record<SimId, { src: string; width: number; height: number }> = {
-  ausculta: { height: 169, src: "/brand/sims/ausculta-horizontal.png", width: 640 },
-  opaca: { height: 300, src: "/brand/sims/opaca-horizontal.png", width: 849 },
-  pulse: { height: 266, src: "/brand/sims/pulse-horizontal.png", width: 800 },
+  ausculta: { height: 300, src: "/brand/sims/ausculta-horizontal.png", width: 757 },
+  opaca: { height: 300, src: "/brand/sims/opaca-horizontal.png", width: 757 },
+  pulse: { height: 300, src: "/brand/sims/pulse-horizontal.png", width: 757 },
 };
 
 /**
@@ -23,7 +23,7 @@ export const SIM_LOGOS: Record<SimId, { src: string; width: number; height: numb
  * gerekmez. `width`/`height` doğal piksel oranıdır.
  */
 export const SIM_ICONS: Record<SimId, { src: string; width: number; height: number }> = {
-  ausculta: { height: 128, src: "/brand/sims/ausculta-icon-white.png", width: 118 },
+  ausculta: { height: 256, src: "/brand/sims/ausculta-icon-white.png", width: 256 },
   opaca: { height: 256, src: "/brand/sims/opaca-icon-white.png", width: 256 },
   pulse: { height: 1024, src: "/brand/sims/pulse-icon-white.png", width: 1024 },
 };

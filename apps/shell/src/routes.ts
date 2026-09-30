@@ -1,4 +1,4 @@
-import { isSimulatorId, type SimulatorId } from "@egemed/sim-host";
+import { isSimScreenKey, isSimulatorId, type SimScreenKey, type SimulatorId } from "@egemed/sim-host";
 import type { TrKey } from "@egemed/ui/i18n";
 
 /** Kabukta tanımlı sayfa kimlikleri. */
@@ -25,7 +25,7 @@ export type ResolvedRoute =
   | { kind: "adminRoles"; titleKey: TrKey }
   | { kind: "adminAudit"; titleKey: TrKey }
   | { kind: "adminRewards"; titleKey: TrKey }
-  | { kind: "sim"; simId: SimulatorId; titleKey: TrKey; challengeId?: string }
+  | { kind: "sim"; simId: SimulatorId; titleKey: TrKey; challengeId?: string; screenKey?: SimScreenKey }
   | { kind: "challengeDetail"; challengeId: string; titleKey: TrKey }
   | { kind: "notFound"; path: string };
 
@@ -136,6 +136,10 @@ export function resolveRoute(hash: string): ResolvedRoute {
   const duel = /^\/sims\/([a-z]+)\/duello\/([0-9a-f-]{36})$/i.exec(path);
   if (duel !== null && isSimulatorId(duel[1]) && UUID_PATTERN.test(duel[2] ?? "")) {
     return { kind: "sim", simId: duel[1], titleKey: simTitleKey(duel[1]), challengeId: duel[2] ?? "" };
+  }
+  const simScreen = /^\/sims\/([a-z]+)\/([^/]+)$/.exec(path);
+  if (simScreen !== null && isSimulatorId(simScreen[1]) && isSimScreenKey(simScreen[2])) {
+    return { kind: "sim", simId: simScreen[1], titleKey: simTitleKey(simScreen[1]), screenKey: simScreen[2] };
   }
   const simId = simIdForPath(path);
   if (simId !== null) return { kind: "sim", simId, titleKey: simTitleKey(simId) };
