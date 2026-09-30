@@ -1,6 +1,6 @@
 # T276-about-align
 
-- Tarih: 2026-10-01 01:14
+- Tarih: 2026-10-01 01:49
 - Commit: T276a: üç simin mod seçimi hizalandı ve ortalandı; 1440/768'de footer kaydırmasız (Luna; review: Claude)
 - Dal: task/T276-about-align
 
