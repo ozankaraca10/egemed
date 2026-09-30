@@ -45,6 +45,7 @@ export interface AppDeps {
   readonly gamification: GamificationRepo;
   /** T58 — `/admin/overview` sayımları; kurum kapsamlı, bireysel veri yok. */
   readonly overview: AdminOverviewRepo;
+  readonly lrsProbe?: () => Promise<boolean>;
   /** Aylık ödüller (26 Eyl 2026); verilmezse bellek deposu (yalnız test/DB'siz geliştirme). */
   readonly rewards?: RewardsRepo;
   /** A1 sunucu vaka oturumu (ADR-009); verilmezse bellek deposu ve ses yok (yalnız test/DB'siz geliştirme). */
@@ -201,6 +202,7 @@ export function createApp(deps: AppDeps): Hono<AppEnv> {
       gamification: deps.gamification,
       overview: deps.overview,
       db: deps.db,
+      ...(deps.lrsProbe === undefined ? {} : { lrsProbe: deps.lrsProbe }),
     },
     deps.now,
   );

@@ -1,11 +1,12 @@
 import type { Hono } from "hono";
-import { z } from "zod";
+import { monthKeyTr } from "@egemed/gamification-core";
 import {
   ROLES,
   SIM_IDS,
   USER_STATUSES,
-  gamiStreakSchema,
-  simIdSchema,
+  adminGamiSummaryResponseSchema as contractGamiSchema,
+  adminHealthResponseSchema as contractHealthSchema,
+  adminOverviewResponseSchema as contractOverviewSchema,
   uuidSchema,
   type Role,
   type UserStatus,
@@ -53,6 +54,16 @@ export interface AdminOverviewCounts {
   readonly loginsLast7Days: number;
   /** Henüz uygulanmamış batch'ler: `uploaded` + `validated` (E3 §d). */
   readonly pendingImports: number;
+  readonly sims: Readonly<Record<"pulse" | "ausculta" | "opaca", AdminOverviewSim>>;
+}
+
+export interface AdminOverviewSim {
+  readonly accessUsers: number;
+  readonly activeUsers30d: number;
+  readonly attemptsThisMonth: { readonly practice: number; readonly assessment: number };
+  readonly learnCompleted: number;
+  readonly openChallenges: number;
+  readonly currentReward: { readonly month: string; readonly title: string } | null;
 }
 
 export interface AdminOverviewRepo {
@@ -67,6 +78,20 @@ export interface AdminHealthDb {
 /** Havuzun overview deposuna görünen dar yüzeyi. */
 export interface AdminOverviewDb {
   query(text: string, params: readonly unknown[]): Promise<{ readonly rows: readonly unknown[] }>;
+}
+
+const EMPTY_SIM: AdminOverviewSim = {
+  accessUsers: 0,
+  activeUsers30d: 0,
+  attemptsThisMonth: { practice: 0, assessment: 0 },
+  learnCompleted: 0,
+  openChallenges: 0,
+  currentReward: null,
+};
+
+function trMonthStart(at: number): Date {
+  const wall = new Date(at + 3 * 60 * 60 * 1000);
+  return new Date(Date.UTC(wall.getUTCFullYear(), wall.getUTCMonth(), 1) - 3 * 60 * 60 * 1000);
 }
 
 function emptyCounts(): {
@@ -96,7 +121,7 @@ function isRole(value: unknown): value is Role {
 export function createPgAdminOverviewRepo(db: AdminOverviewDb): AdminOverviewRepo {
   return {
     async overview(institutionId, at) {
-      const [statusResult, roleResult, loginResult, importResult] = await Promise.all([
+      const [statusResult, roleResult, loginResult, importResult, simsResult] = await Promise.all([
         db.query(
           "select status, count(*)::int as count from users where institution_id = $1 and deleted_at is null group by status",
           [institutionId],
@@ -113,6 +138,18 @@ export function createPgAdminOverviewRepo(db: AdminOverviewDb): AdminOverviewRep
           "select count(*)::int as count from import_batches where institution_id = $1 and status in ('uploaded', 'validated')",
           [institutionId],
         ),
+        db.query(
+          `select s.sim_id,
+            (select count(*)::int from sim_access sa join users u on u.id = sa.user_id where sa.sim_id = s.sim_id and u.institution_id = $1 and u.status = 'active' and u.deleted_at is null) as access_users,
+            (select count(distinct a.user_id)::int from gami_attempts a join users u on u.id = a.user_id where a.sim_id = s.sim_id and a.finished_at >= $2 and a.finished_at <= $3 and u.institution_id = $1 and u.deleted_at is null and a.mode in ('practice', 'assessment')) as active_users_30d,
+            (select count(*)::int from gami_attempts a join users u on u.id = a.user_id where a.sim_id = s.sim_id and a.finished_at >= $4 and a.finished_at <= $3 and u.institution_id = $1 and a.mode = 'practice') as practice_attempts,
+            (select count(*)::int from gami_attempts a join users u on u.id = a.user_id where a.sim_id = s.sim_id and a.finished_at >= $4 and a.finished_at <= $3 and u.institution_id = $1 and a.mode = 'assessment') as assessment_attempts,
+            (select count(*)::int from sim_learn_completions lc join users u on u.id = lc.user_id where lc.sim_id = s.sim_id and u.institution_id = $1 and u.deleted_at is null) as learn_completed,
+            (select count(*)::int from challenges c where c.sim_id = s.sim_id and c.institution_id = $1 and c.status = 'open' and c.expires_at >= $3) as open_challenges,
+            (select r.month from monthly_rewards r where r.institution_id = $1 and r.sim_id = s.sim_id and r.month <= $5 order by r.month desc limit 1) as reward_month,
+            (select r.title from monthly_rewards r where r.institution_id = $1 and r.sim_id = s.sim_id and r.month <= $5 order by r.month desc limit 1) as reward_title` ,
+          [institutionId, new Date(at - 30 * 24 * 60 * 60 * 1000), new Date(at), trMonthStart(at), monthKeyTr(new Date(at))],
+        ),
       ]);
       const counts = emptyCounts();
       for (const row of statusResult.rows) {
@@ -123,6 +160,19 @@ export function createPgAdminOverviewRepo(db: AdminOverviewDb): AdminOverviewRep
         const role = (row as { readonly role?: unknown }).role;
         if (isRole(role)) counts.byRole[role] += countOf(row);
       }
+      const sims = Object.fromEntries(SIM_IDS.map((simId) => [simId, { ...EMPTY_SIM }])) as Record<"pulse" | "ausculta" | "opaca", AdminOverviewSim>;
+      for (const row of simsResult.rows) {
+        const value = row as { sim_id?: unknown; access_users?: unknown; active_users_30d?: unknown; practice_attempts?: unknown; assessment_attempts?: unknown; learn_completed?: unknown; open_challenges?: unknown; reward_month?: unknown; reward_title?: unknown };
+        if (typeof value.sim_id !== "string" || !(SIM_IDS as readonly string[]).includes(value.sim_id)) continue;
+        sims[value.sim_id as keyof typeof sims] = {
+          accessUsers: countOf({ count: value.access_users }),
+          activeUsers30d: countOf({ count: value.active_users_30d }),
+          attemptsThisMonth: { practice: countOf({ count: value.practice_attempts }), assessment: countOf({ count: value.assessment_attempts }) },
+          learnCompleted: countOf({ count: value.learn_completed }),
+          openChallenges: countOf({ count: value.open_challenges }),
+          currentReward: typeof value.reward_month === "string" && typeof value.reward_title === "string" ? { month: value.reward_month, title: value.reward_title } : null,
+        };
+      }
       return {
         users: {
           total: Object.values(counts.byStatus).reduce((sum, value) => sum + value, 0),
@@ -131,15 +181,24 @@ export function createPgAdminOverviewRepo(db: AdminOverviewDb): AdminOverviewRep
         },
         loginsLast7Days: countOf(loginResult.rows[0]),
         pendingImports: countOf(importResult.rows[0]),
+        sims,
       };
     },
   };
 }
 
 /** Bellek deposu: testler DB olmadan sayımları doğrular. */
+export interface AdminOverviewMemoryData {
+  readonly attempts?: readonly { readonly userId: string; readonly simId: (typeof SIM_IDS)[number]; readonly mode?: "practice" | "assessment" | "challenge"; readonly finishedAt: number }[];
+  readonly completions?: readonly { readonly userId: string; readonly simId: (typeof SIM_IDS)[number] }[];
+  readonly challenges?: readonly { readonly institutionId: string; readonly simId: (typeof SIM_IDS)[number]; readonly status: string; readonly expiresAt: number }[];
+  readonly rewards?: readonly { readonly institutionId: string; readonly simId: (typeof SIM_IDS)[number]; readonly month: string; readonly title: string }[];
+}
+
 export function createMemoryAdminOverviewRepo(
   admin: Pick<MemoryAdminStore, "records">,
   imports: Pick<MemoryAdminImportStore, "batches">,
+  simData: AdminOverviewMemoryData = {},
 ): AdminOverviewRepo {
   return {
     async overview(institutionId, at) {
@@ -159,6 +218,24 @@ export function createMemoryAdminOverviewRepo(
         if (batch.institutionId !== institutionId) continue;
         if (batch.status === "uploaded" || batch.status === "validated") pendingImports += 1;
       }
+      const month = monthKeyTr(new Date(at));
+      const monthStart = trMonthStart(at).getTime();
+      const activeStart = at - 30 * 24 * 60 * 60 * 1000;
+      const sims = Object.fromEntries(SIM_IDS.map((simId) => {
+        const accessUsers = [...admin.records.values()].filter((record) => record.institutionId === institutionId && record.deletedAt === null && record.status === "active" && record.simAccess.includes(simId)).length;
+        const attempts = (simData.attempts ?? []).filter((attempt) => attempt.simId === simId && attempt.mode !== "challenge" && [...admin.records.values()].some((record) => record.id === attempt.userId && record.institutionId === institutionId));
+        const activeUsers30d = new Set(attempts.filter((attempt) => attempt.finishedAt >= activeStart && attempt.finishedAt <= at && [...admin.records.values()].some((record) => record.id === attempt.userId && record.institutionId === institutionId && record.deletedAt === null)).map((attempt) => attempt.userId)).size;
+        const monthAttempts = attempts.filter((attempt) => attempt.finishedAt >= monthStart && attempt.finishedAt <= at);
+        const rewards = (simData.rewards ?? []).filter((reward) => reward.institutionId === institutionId && reward.simId === simId && reward.month <= month).sort((a, b) => b.month.localeCompare(a.month));
+        return [simId, {
+          accessUsers,
+          activeUsers30d,
+          attemptsThisMonth: { practice: monthAttempts.filter((attempt) => attempt.mode === "practice").length, assessment: monthAttempts.filter((attempt) => attempt.mode === "assessment" || attempt.mode === undefined).length },
+          learnCompleted: (simData.completions ?? []).filter((completion) => completion.simId === simId && [...admin.records.values()].some((record) => record.id === completion.userId && record.institutionId === institutionId && record.deletedAt === null)).length,
+          openChallenges: (simData.challenges ?? []).filter((challenge) => challenge.institutionId === institutionId && challenge.simId === simId && challenge.status === "open" && challenge.expiresAt >= at).length,
+          currentReward: rewards[0] === undefined ? null : { month: rewards[0].month, title: rewards[0].title },
+        }];
+      })) as Record<"pulse" | "ausculta" | "opaca", AdminOverviewSim>;
       return {
         users: {
           total: Object.values(counts.byStatus).reduce((sum, value) => sum + value, 0),
@@ -167,6 +244,7 @@ export function createMemoryAdminOverviewRepo(
         },
         loginsLast7Days,
         pendingImports,
+        sims,
       };
     },
   };
@@ -176,55 +254,10 @@ export function createMemoryAdminOverviewRepo(
 // Yanıt şemaları (dar alan kümesi; sızıntı testleri bunlarla doğrular)
 // ---------------------------------------------------------------------------
 
-const countSchema = z.number().int().min(0);
-
-/** Kullanıcı ayrıntısındaki sim özeti: XP, seviye, seri; deneme satırı yoktur. */
-export const adminGamiSimSummarySchema = z.strictObject({
-  simId: simIdSchema,
-  xp: countSchema,
-  level: z.number().int().min(1),
-  streak: gamiStreakSchema,
-});
-
-/** Üç simin ayrı özeti; birleşik/türetilmiş tek puan yok (ADR-006/007). */
-export const adminGamiSummaryResponseSchema = z.strictObject({
-  data: z.strictObject({
-    sims: z
-      .array(adminGamiSimSummarySchema)
-      .max(SIM_IDS.length)
-      .refine((sims) => new Set(sims.map((sim) => sim.simId)).size === sims.length, {
-        message: "duplicate_sim_id",
-      }),
-  }),
-});
-
-export const adminOverviewResponseSchema = z.strictObject({
-  data: z.strictObject({
-    users: z.strictObject({
-      total: countSchema,
-      byStatus: z.strictObject({
-        invited: countSchema,
-        active: countSchema,
-        suspended: countSchema,
-      }),
-      byRole: z.strictObject({
-        admin: countSchema,
-        kullanici: countSchema,
-        ogretim_uyesi: countSchema,
-        uzmanlik_ogrencisi: countSchema,
-      }),
-    }),
-    loginsLast7Days: countSchema,
-    pendingImports: countSchema,
-  }),
-});
-
-/** Sağlık yanıtı: durum kodları ve sürüm; hata ayrıntısı ve sır yoktur. */
-export const adminHealthSchema = z.strictObject({
-  status: z.enum(["ok", "degraded"]),
-  db: z.enum(["ok", "down"]),
-  version: z.string().min(1),
-});
+/** Yanıt şemaları sözleşme paketinden gelir. */
+export const adminGamiSummaryResponseSchema = contractGamiSchema;
+export const adminOverviewResponseSchema = contractOverviewSchema;
+export const adminHealthSchema = contractHealthSchema;
 
 // ---------------------------------------------------------------------------
 // Rotalar
@@ -236,6 +269,7 @@ export interface AdminExtrasDeps {
   readonly gamification: GamificationRepo;
   readonly overview: AdminOverviewRepo;
   readonly db: AdminHealthDb;
+  readonly lrsProbe?: () => Promise<boolean>;
 }
 
 /** Özet gövdesi: yalnız XP/seviye/seri; rozet, liderlik ve denemeler dışarıda. */
@@ -268,10 +302,11 @@ export function registerAdminExtrasRoutes(
   now: () => number,
 ): void {
   app.get("/admin/health", async (c) => {
-    const db = await dbStatus(deps.db);
-    const status = db === "ok" ? 200 : 503;
+    const [db, lrsOk] = await Promise.all([dbStatus(deps.db), deps.lrsProbe?.().catch(() => false)]);
+    const lrs = deps.lrsProbe === undefined ? "not_configured" : lrsOk ? "ok" : "down";
+    const status = db === "ok" && lrs !== "down" ? 200 : 503;
     return c.json(
-      { status: db === "ok" ? ("ok" as const) : ("degraded" as const), db, version: API_VERSION },
+      { status: status === 200 ? ("ok" as const) : ("degraded" as const), db, lrs, version: API_VERSION },
       status,
     );
   });

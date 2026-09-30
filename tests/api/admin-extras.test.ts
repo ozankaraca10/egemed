@@ -127,7 +127,7 @@ describe("yetki (E3 §b, §d)", () => {
   it("kullanici rolü üç uçta da 403 forbidden alır", async () => {
     const harness = gamificationHarness();
     const ali = await login(harness, "ali.veli");
-    for (const path of ["/admin/overview", "/admin/health", `/admin/users/${MERT_ID}/gamification`]) {
+    for (const path of ["/admin/overview", "/admin/health", "/admin/audit", `/admin/users/${MERT_ID}/gamification`]) {
       const { status, body } = await getJson(harness, path, ali.headers);
       expect(status, path).toBe(403);
       expect(body, path).toMatchObject({ error: { code: "forbidden" } });
@@ -220,7 +220,7 @@ describe("GET /admin/overview (E2 admin Özet)", () => {
       roles: ["admin", "kullanici"],
       lastLoginAt: FIXED_NOW - 8 * DAY,
     }),
-    user({ id: ALI_ID, username: "ali.veli", lastLoginAt: FIXED_NOW - LOGIN_WINDOW_MS }),
+    user({ id: ALI_ID, username: "ali.veli", simAccess: ["pulse"], lastLoginAt: FIXED_NOW - LOGIN_WINDOW_MS }),
     user({ id: BORA_ID, username: "bora.kaya", status: "suspended", lastLoginAt: FIXED_NOW - LOGIN_WINDOW_MS - 1 }),
     user({ id: CEREN_ID, username: "ceren.demir", status: "invited", lastLoginAt: null }),
     user({ id: EGE_ID, username: "ege.olgun", roles: [], lastLoginAt: FIXED_NOW - DAY }),
@@ -259,12 +259,49 @@ describe("GET /admin/overview (E2 admin Özet)", () => {
       // ADMIN ve EGE pencere içinde, ALI tam sınırda; MERT/BORA dışında, CEREN hiç girmemiş.
       loginsLast7Days: 3,
       pendingImports: 0,
+      sims: {
+        pulse: { accessUsers: 1, activeUsers30d: 0, attemptsThisMonth: { practice: 0, assessment: 0 }, learnCompleted: 0, openChallenges: 0, currentReward: null },
+        ausculta: { accessUsers: 0, activeUsers30d: 0, attemptsThisMonth: { practice: 0, assessment: 0 }, learnCompleted: 0, openChallenges: 0, currentReward: null },
+        opaca: { accessUsers: 0, activeUsers30d: 0, attemptsThisMonth: { practice: 0, assessment: 0 }, learnCompleted: 0, openChallenges: 0, currentReward: null },
+      },
     });
     // Bireysel kimlik ve puan taşımaz: yalnız sayılar döner.
     const text = JSON.stringify(data);
     for (const needle of [ALI_ID, "ali.veli", "example.invalid", "xp"]) {
       expect(text).not.toContain(needle);
     }
+  });
+
+  it("sim bloklarını kurum, aktif kullanıcı, Istanbul ayı ve önceki ödül seçimiyle sayar", async () => {
+    const monthStart = Date.UTC(2023, 10, 1) - 3 * HOUR;
+    const harness = createAdminHarness({
+      users: OVERVIEW_USERS,
+      overviewSimData: {
+        attempts: [
+          { userId: ALI_ID, simId: "pulse", mode: "practice", finishedAt: monthStart },
+          { userId: ALI_ID, simId: "pulse", mode: "assessment", finishedAt: monthStart - 1 },
+          { userId: DERYA_ID, simId: "pulse", mode: "assessment", finishedAt: FIXED_NOW },
+        ],
+        completions: [{ userId: ALI_ID, simId: "pulse" }, { userId: DERYA_ID, simId: "pulse" }],
+        challenges: [{ institutionId: INSTITUTION_ID, simId: "pulse", status: "open", expiresAt: FIXED_NOW + DAY }],
+        rewards: [
+          { institutionId: INSTITUTION_ID, simId: "pulse", month: "2023-10", title: "Önceki ödül" },
+          { institutionId: OTHER_INSTITUTION_ID, simId: "pulse", month: "2023-11", title: "Diğer kurum" },
+        ],
+      },
+    });
+    const admin = await login(harness, "ornek.yonetici");
+    const data = await overviewBody(harness, admin);
+    expect(data.sims).toMatchObject({
+      pulse: {
+        accessUsers: 1,
+        activeUsers30d: 1,
+        attemptsThisMonth: { practice: 1, assessment: 0 },
+        learnCompleted: 1,
+        openChallenges: 1,
+        currentReward: { month: "2023-10", title: "Önceki ödül" },
+      },
+    });
   });
 
   it("silinen kullanıcı sayılmaz; bekleyen import sayısı yaşam döngüsünü izler", async () => {
@@ -308,13 +345,44 @@ describe("GET /admin/overview (E2 admin Özet)", () => {
   });
 });
 
+
+describe("GET /admin/audit isimleri", () => {
+  it("aktör ve hedef kullanıcı adını getirir, sistem ve bilinmeyen hedeflerde null döner", async () => {
+    const harness = createAdminHarness();
+    const admin = await login(harness, "ornek.yonetici");
+    for (const [at, actorUserId, targetId] of [
+      [FIXED_NOW, ADMIN_ID, ALI_ID],
+      [FIXED_NOW + 1, null, "00000000-0000-4000-8000-0000000000ff"],
+    ] as const) {
+      await harness.authStore.repos.audit.insert({
+        occurredAt: at,
+        actorUserId,
+        actorRole: actorUserId === null ? null : "admin",
+        institutionId: INSTITUTION_ID,
+        action: "user.update",
+        targetType: "user",
+        targetId,
+        summaryAfter: {},
+        requestId: null,
+      });
+    }
+    const response = await harness.app.request("/admin/audit", { headers: admin.headers });
+    expect(response.status).toBe(200);
+    const body = await response.json() as { data: readonly { actorName: string | null; targetName: string | null }[] };
+    expect(body.data).toMatchObject([
+      { actorName: null, targetName: null },
+      { actorName: "Deniz Yönetici", targetName: "Ali Veli" },
+    ]);
+  });
+});
+
 describe("GET /admin/health", () => {
   it("db sağlıklıysa sürümle birlikte ok döner", async () => {
     const harness = createAdminHarness();
     const admin = await login(harness, "ornek.yonetici");
     const { status, body } = await getJson(harness, "/admin/health", admin.headers);
     expect(status).toBe(200);
-    expect(body).toEqual({ status: "ok", db: "ok", version: API_VERSION });
+    expect(body).toEqual({ status: "ok", db: "ok", lrs: "not_configured", version: API_VERSION });
     expect(adminHealthSchema.safeParse(body).success).toBe(true);
   });
 
@@ -330,8 +398,23 @@ describe("GET /admin/health", () => {
     const response = await harness.app.request("/admin/health", { headers: admin.headers });
     expect(response.status).toBe(503);
     const text = await response.text();
-    expect(JSON.parse(text)).toEqual({ status: "degraded", db: "down", version: API_VERSION });
+    expect(JSON.parse(text)).toEqual({ status: "degraded", db: "down", lrs: "not_configured", version: API_VERSION });
     expect(text).not.toContain("gizli-parola");
     expect(text).not.toContain("postgres");
+  });
+
+  it("yoklanan LRS için başarı ve hata durumlarını gizli uç bilgisi olmadan verir", async () => {
+    for (const [probe, expected, status] of [
+      [() => Promise.resolve(true), "ok", 200],
+      [() => Promise.reject(new Error("https://private.example.invalid/key")), "down", 503],
+    ] as const) {
+      const harness = createAdminHarness({ lrsProbe: probe });
+      const signedIn = await login(harness, "ornek.yonetici");
+      const response = await harness.app.request("/admin/health", { headers: signedIn.headers });
+      expect(response.status).toBe(status);
+      const text = await response.text();
+      expect(JSON.parse(text)).toMatchObject({ lrs: expected });
+      expect(text).not.toContain("private.example.invalid");
+    }
   });
 });

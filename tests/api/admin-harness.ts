@@ -4,7 +4,7 @@ import { createMemorySimSessionRepo } from "../../apps/api/src/me/simSessions";
 import { createMemoryChallengeRepo } from "../../apps/api/src/me/challenges";
 import { createMemoryLearnRepo } from "../../apps/api/src/me/learn";
 import { createMemoryAdminBulkRepo, type AdminBulkRepo } from "../../apps/api/src/admin/bulk";
-import { createMemoryAdminOverviewRepo } from "../../apps/api/src/admin/extras";
+import { createMemoryAdminOverviewRepo, type AdminOverviewMemoryData } from "../../apps/api/src/admin/extras";
 import {
   createMemoryAdminImportRepo,
   type MemoryAdminImportStore,
@@ -190,6 +190,8 @@ export function createAdminHarness(
     readonly gamification?: MemoryGamificationSeed;
     /** T58 — `/admin/health` için havuz yoklaması; varsayılan her zaman sağlıklıdır. */
     readonly db?: { query(text: string, params: readonly unknown[]): Promise<unknown> };
+    readonly lrsProbe?: () => Promise<boolean>;
+    readonly overviewSimData?: AdminOverviewMemoryData;
     /** T87 — PostgreSQL satır şeklini taklit eden toplu işlem deposu. */
     readonly bulk?: AdminBulkRepo;
     /** A1.3 — sunucu vaka oturumu; ses okuyucu ve deterministik jeton/rastgele. */
@@ -233,7 +235,8 @@ export function createAdminHarness(
     now: () => clock,
     auth,
     gamification: gamificationStore.repo,
-    overview: createMemoryAdminOverviewRepo(adminStore, importStore),
+    overview: createMemoryAdminOverviewRepo(adminStore, importStore, options.overviewSimData),
+    ...(options.lrsProbe === undefined ? {} : { lrsProbe: options.lrsProbe }),
     rewards,
     challenges,
     learn,

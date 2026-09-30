@@ -232,6 +232,7 @@ describe("sayfalama ve biçim", () => {
     expect(row.institutionId).toBeUndefined();
     expect(Object.keys(row).sort()).toEqual([
       "action",
+      "actorName",
       "actorRole",
       "actorUserId",
       "id",
@@ -240,6 +241,7 @@ describe("sayfalama ve biçim", () => {
       "summaryAfter",
       "summaryBefore",
       "targetId",
+      "targetName",
       "targetType",
     ]);
   });

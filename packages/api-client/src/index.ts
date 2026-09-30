@@ -1,6 +1,10 @@
 import {
   ROLES,
   adminRewardListResponseSchema,
+  adminAuditListResponseSchema,
+  adminGamiSummaryResponseSchema,
+  adminHealthResponseSchema,
+  adminOverviewResponseSchema,
   authMeResponseSchema,
   authMethodSchema,
   bulkRequestSchema,
@@ -49,6 +53,10 @@ import {
   userStatusSchema,
   usernameSchema,
   uuidSchema,
+  type AdminAuditListResponse,
+  type AdminHealthResponse,
+  type AdminOverviewResponse,
+  type AdminGamiSummaryResponse,
   type AuthMeResponse,
   type AuthMethod,
   type BulkRequest,
@@ -279,12 +287,8 @@ export interface ApiImportApplyResponse {
   };
 }
 
-export type ApiAuditEntry = Readonly<Record<string, unknown>>;
-
-export interface ApiAuditListResponse {
-  readonly data: readonly ApiAuditEntry[];
-  readonly meta: PageMeta | null;
-}
+export type ApiAuditEntry = AdminAuditListResponse["data"][number];
+export type ApiAuditListResponse = AdminAuditListResponse;
 
 export type ApiAdminReward = RewardBody & { readonly winners: readonly RewardWinnerBody[] };
 
@@ -376,6 +380,9 @@ export interface ApiClient {
       apply(id: string): Promise<ApiImportApplyResponse>;
     };
     listAudit(query?: QueryMap): Promise<ApiAuditListResponse>;
+    getOverview(): Promise<AdminOverviewResponse>;
+    getHealth(): Promise<AdminHealthResponse>;
+    getUserGamification(id: string): Promise<AdminGamiSummaryResponse>;
   };
   readonly rewards: {
     listAdminRewards(simId?: SimId): Promise<ApiAdminRewardListResponse>;
@@ -750,6 +757,16 @@ export function createApiClient(options: CreateApiClientOptions): ApiClient {
         });
       },
       imports: adminImports,
+      async getOverview(): Promise<AdminOverviewResponse> {
+        return requestJson({ method: "GET", path: "/admin/overview", parse: (value, context) => parseSchema(adminOverviewResponseSchema, value, `${context} response`) });
+      },
+      async getHealth(): Promise<AdminHealthResponse> {
+        return requestJson({ method: "GET", path: "/admin/health", parse: (value, context) => parseSchema(adminHealthResponseSchema, value, `${context} response`) });
+      },
+      async getUserGamification(id: string): Promise<AdminGamiSummaryResponse> {
+        const parsedId = parseSchema(uuidSchema, id, "GET /admin/users/:id/gamification path");
+        return requestJson({ method: "GET", path: `/admin/users/${parsedId}/gamification`, parse: (value, context) => parseSchema(adminGamiSummaryResponseSchema, value, `${context} response`) });
+      },
       async listAudit(query: QueryMap = {}): Promise<ApiAuditListResponse> {
         return requestJson({
           method: "GET",
@@ -1408,21 +1425,7 @@ function parseImportApplyResponse(value: unknown, context: string): ApiImportApp
 }
 
 function parseAuditListResponse(value: unknown, context: string): ApiAuditListResponse {
-  const object = asObject(value, context);
-  const rows = asArray(object.data, `${context}.data`).map((entry, index) => {
-    const row = asObject(entry, `${context}.data[${index}]`);
-    if (Object.hasOwn(row, "id")) {
-      parseSchema(uuidSchema, row.id, `${context}.data[${index}].id`);
-    }
-    if (Object.hasOwn(row, "occurredAt")) {
-      parseSchema(isoDateTimeSchema, row.occurredAt, `${context}.data[${index}].occurredAt`);
-    }
-    return row;
-  });
-  const meta = Object.hasOwn(object, "meta")
-    ? parsePageMeta(object.meta, `${context}.meta`)
-    : null;
-  return { data: rows, meta };
+  return parseSchema(adminAuditListResponseSchema, value, `${context} response`);
 }
 
 function parseBoolean(value: unknown, context: string): boolean {
