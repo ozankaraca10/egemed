@@ -3,7 +3,7 @@
  * AYRI sütun — bu ayın ilk 3'ü (kürsü) + "ilk 10" açılımı, geçen ayın ilk 3'ü ve
  * simin içindeki gibi "Bu ayın ödülü" şeridi. Simler arası birleşik puan veya
  * sıralama üretilmez (ADR-006); adlar sunucunun liderlik kuralıyla gelir (adla
- * görünmeyi seçmeyen öğrenci baş harfle). Kaynak enjekte edilir; geliştirmede
+ * tablodan çekilmeyen öğrenci tam adıyla, çekilen anonim). Kaynak enjekte edilir; geliştirmede
  * deterministik sentetik veri kullanılır (gerçek kişi yok).
  */
 
@@ -53,7 +53,8 @@ export function daysLeftInMonth(month: string, now: number): number {
   return Math.max(0, Math.ceil((end - now) / 86_400_000));
 }
 
-const SYNTH_NAMES = ["E. Y.", "M. K.", "D. A.", "Z. Ö.", "B. T.", "S. Ç.", "C. D.", "İ. Ş.", "A. B.", "K. E."];
+/** Kurgusal adlar (gerçek kişi değildir). */
+const SYNTH_NAMES = ["Elif Yıldız", "Mert Kaya", "Deniz Aydın", "Zeynep Öztürk", "Berk Tan", "Selin Çelik", "Can Demir", "İrem Şahin", "Ali Bulut", "Kerem Erdem"];
 
 /** Deterministik sentetik vitrin; gerçek öğrenci verisi taşımaz. */
 export function createSyntheticShowcaseSource(month: string | (() => string) = "2026-09", rewards?: RewardsDataSource, subscribe?: (listener: () => void) => () => void): ShowcaseSource {
