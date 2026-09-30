@@ -18,7 +18,7 @@
   color-scheme:light;
 
   /* --- Marka / kimlik renkleri --- */
-  --navy-900:#0a2a5e; --navy-800:#0d346f; --navy-700:#10457e; --navy-600:#155396;
+  --navy-950:#061e44; --navy-900:#0a2a5e; --navy-800:#0d346f; --navy-700:#10457e; --navy-600:#155396;
   --blue-700:#0f62d8; --blue-600:#1673e6; --blue-500:#2e8df7; --blue-400:#5aa5f9;
   --blue-300:#8ec1fb; --blue-200:#c3ddf8; --blue-100:#dbeafe; --blue-50:#eff6ff;
   --ink-900:#0b2559; --ink-800:#142f60; --ink-700:#1e3a6e; --ink-600:#46618c;
@@ -32,6 +32,8 @@
   --orange-500:#f59e0b; --orange-100:#fdeecd; --amber-700:#92400e; --bronze-400:#c98a4b;
   /* Koyu görsel üstü cam yüzeyler (giriş tanıtım paneli). */
   --glass-deep:rgba(6,30,68,.62); --glass-chip:rgba(255,255,255,.10); --glass-line:rgba(255,255,255,.22); --gold-tint:rgba(245,158,11,.18);
+  /* Meydan Okuma arenası: taraf ışımaları ve ızgara (T287). */
+  --duel-me-glow:rgba(46,141,247,.30); --duel-rival-glow:rgba(225,29,72,.26); --duel-grid:rgba(255,255,255,.05); --duel-shade:rgba(0,0,0,.26); --gold-glow:rgba(245,158,11,.55); --clear:rgba(255,255,255,0);
   --red-600:#b91c1c; --red-500:#e11d48; --red-100:#fde5ea;
 
   /* --- Zemin, kart, kenar, gölge --- */

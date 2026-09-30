@@ -151,6 +151,7 @@ export function createOpacaModule(deps?: OpacaModuleDeps): SimModule {
         ...(context.learn === undefined ? {} : { learn: context.learn }),
         ...(context.challengeId === undefined ? {} : { challengeId: context.challengeId }),
         ...(context.onChallengeFinished === undefined ? {} : { onChallengeFinished: context.onChallengeFinished }),
+        ...(context.openChallenges === undefined ? {} : { openChallenges: context.openChallenges }),
       };
 
       root.render(

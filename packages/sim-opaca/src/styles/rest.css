@@ -271,8 +271,6 @@
 
 
 @media (max-height: 860px) {
-  
-      .eg-sim-opaca .mode-card{ padding: var(--sp-4) var(--sp-4) 14px; }
   .eg-sim-opaca .learn-grid{ grid-template-columns: 20fr 45fr 35fr; }
 }
 
@@ -337,7 +335,6 @@
   
   .eg-sim-opaca .eg-timer{ font-size: var(--fs-xs); gap: 4px; }
   .eg-sim-opaca .eg-header-context{ gap: 6px; }
-  .eg-sim-opaca .mode-cards{ grid-template-columns: 1fr; max-width: 420px; }
       .eg-sim-opaca .btn.large{ padding: var(--sp-3) var(--sp-5); font-size: var(--fs-lg); width: 100%; }
   .eg-sim-opaca .start-links-sep{ display: none; }
   .eg-sim-opaca .toolbar{ gap: 8px; padding: 8px 10px; }
@@ -350,7 +347,6 @@
   .eg-sim-opaca .btn.small{ padding: 8px 12px; }
   .eg-sim-opaca .tool-sep{ display: none; }
   .eg-sim-opaca .lib-item{ min-width: 200px; }
-      .eg-sim-opaca .mode-title{ font-size: var(--fs-2xl); }
   .eg-sim-opaca .step .dot{ width: 22px; height: 22px; font-size: var(--fs-xs); }
   .eg-sim-opaca .step .lbl{ font-size: var(--fs-xs); }
   .eg-sim-opaca .results-title{ font-size: var(--fs-2xl); }

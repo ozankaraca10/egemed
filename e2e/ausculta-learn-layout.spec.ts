@@ -17,7 +17,7 @@ test.describe("Ausculta öğrenme düzeni (T206)", () => {
     test.skip(testInfo.project.name !== "desktop-1440", "ölçüm yalnız 1440×900 projesinde");
 
     await openRoute(page, "#/sims/ausculta");
-    await page.locator(".mode-card.learn button.btn").first().click();
+    await page.locator(".mode-card.learn button.eg-gami-mode-cta").first().click();
 
     const stage = page.locator(".learn-grid .stage-card .stage");
     await expect(stage).toBeVisible();

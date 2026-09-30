@@ -444,10 +444,14 @@ export function attachPulseServerRequired(runtimeHandle: PulseRuntimeHandle): ()
         button.innerHTML = `${LOCK_ICON}<span>${PULSE_SERVER_REQUIRED_TEXT}</span>`;
       }
       if (card.querySelector(".eg-lock-note") === null) {
+        // T289: öğrenme kilidi mührünün yerine tek neden (sunucu bağlantısı) yazılır.
+        card.querySelector(".mode-lock-hint")?.remove();
         const note = doc.createElement("p");
-        note.className = "eg-lock-note";
+        note.className = "eg-gami-mode-seal eg-lock-note";
         note.textContent = PULSE_SERVER_REQUIRED_TEXT;
-        (card.querySelector(".desc") ?? card).insertAdjacentElement("afterend", note);
+        const status = card.querySelector(".mode-status");
+        if (status !== null) status.prepend(note);
+        else (card.querySelector(".desc") ?? card).insertAdjacentElement("afterend", note);
       }
     }
   };

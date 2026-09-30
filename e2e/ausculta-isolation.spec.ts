@@ -61,7 +61,7 @@ test.describe("Ausculta kayıt izolasyonu", () => {
 
     await openAusculta(page);
     const practiceCard = page.locator(".mode-card.practice");
-    await expect(practiceCard.locator(".mode-best-score")).toContainText("En iyi puan: 91");
+    await expect(practiceCard.locator(".eg-gami-mode-status")).toContainText("En iyi puan: 91");
     // Bir işlem yap: öğrenme modunu aç (T209: öğrenme bitmeden uygulama kartı
     // pasiftir) ve ekran değişsin.
     await page.locator(".mode-card.learn button").click();
@@ -91,7 +91,7 @@ test.describe("Ausculta kayıt izolasyonu", () => {
     await expect(page.getByRole("button", { name: "Hesap menüsü: Sahte test öğrencisi" })).toBeVisible();
     await page.keyboard.press("Escape");
     await expect(page.getByRole("heading", { name: "Çalışma Modunu Seçin" })).toBeVisible();
-    await expect(practiceCard.locator(".mode-best-score")).toContainText("Henüz denenmedi");
+    await expect(practiceCard.locator(".eg-gami-mode-status")).toContainText("Henüz denenmedi");
     await expect
       .poll(() => readLocal(page, `${namespaceOf(STUDENT.actorId)}${BEST_SCORE_KEY}`), {
         message: "öğrenci ad alanı sıfırlarla başlar",

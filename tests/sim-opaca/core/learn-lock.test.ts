@@ -261,7 +261,8 @@ describe("ModeSelectScreen öğrenme kilidi", () => {
     expect(html).toContain("mode-card assessment learn-locked");
     expect(html).toContain('data-learn-locked="true"');
     expect(html).toContain("Önce öğrenme modunu tamamlayın: 0/33 konu incelendi.");
-    expect(html).toMatch(/disabled=""[^>]*>Önce öğrenme modunu tamamlayın/);
+    // T289: kilitli düğmede metnin önünde kilit simgesi (svg) bulunur.
+    expect(html).toMatch(/disabled=""[^>]*>(?:<svg[\s\S]*?<\/svg>)?Önce öğrenme modunu tamamlayın/);
   });
 
   it("host complete ise yerel küme boşken de kartlar açıktır", () => {

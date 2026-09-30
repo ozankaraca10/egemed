@@ -55,13 +55,6 @@ flex: 1; display: flex; flex-direction: column; min-height: 0;
 .eg-sim-opaca .screen-body {
 flex: 1; min-height: 0; overflow: auto;
 }
-/* T167: mod seçim ekranı kısa içerikte kabuğun tüm yüksekliğini varsaymamalı —
-   kartlar altında büyüyen boş alan bırakmak yerine dikeyde ortalanır. Yalnız
-   `.mode-cards` içeren gövdeyi hedefler; çalışma ekranlarının (öğrenme/film/
-   değerlendirme) doldur+kaydır davranışı `.screen-body` temel kuralıyla değişmez. */
-.eg-sim-opaca .screen-body:has(.mode-cards) {
-display: flex; flex-direction: column; justify-content: safe center;
-}
 .eg-sim-opaca .screen-body.no-scroll {
 overflow: hidden;
 }
@@ -503,93 +496,22 @@ display: none;
 .eg-sim-opaca .step.done .dot {
 background: var(--blue-600); border-color: var(--blue-600); color: var(--card);
 }
-.eg-sim-opaca .mode-title {
-text-align: center; font-size: clamp(28px, 3.4vw, 42px); font-weight: 800; color: var(--navy-800); margin: 8px 0 4px; letter-spacing: -.5px;
-}
 .eg-sim-opaca .mode-sub {
 text-align: center; color: var(--ink-600); font-size: var(--fs-lg); margin-bottom: var(--sp-5);
-}
-.eg-sim-opaca .mode-cards {
-display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; max-width: 960px; margin: 0 auto 20px;
-}
-.eg-sim-opaca .mode-card {
-background: rgba(255,255,255,.92); border: 1px solid var(--border); border-radius: var(--r-xl); padding: var(--sp-5) var(--sp-5) var(--sp-4); text-align: center; box-shadow: var(--shadow-card); display: flex; flex-direction: column; gap: 10px;
-}
-.eg-sim-opaca .mode-card .ic {
-width: 60px; height: 60px; border-radius: 50%; margin: 0 auto; display: flex; align-items: center; justify-content: center;
-}
-.eg-sim-opaca .mode-card .ic svg {
-width: 30px; height: 30px;
-}
-.eg-sim-opaca .mode-card.learn .ic {
-background: var(--green-50); color: var(--green-600);
-}
-.eg-sim-opaca .mode-card.practice .ic {
-background: var(--blue-50); color: var(--blue-600);
-}
-.eg-sim-opaca .mode-card.assessment .ic {
-background: var(--purple-50); color: var(--purple-600);
-}
-.eg-sim-opaca .mode-card h3 {
-font-size: var(--fs-xl); margin: 0;
-}
-.eg-sim-opaca .mode-card.learn h3 {
-color: var(--green-600);
-}
-.eg-sim-opaca .mode-card.practice h3 {
-color: var(--blue-700);
-}
-.eg-sim-opaca .mode-card.assessment h3 {
-color: var(--purple-600);
-}
-.eg-sim-opaca .mode-card .desc {
-color: var(--ink-600); font-size: var(--fs-md); min-height: 40px; margin: 0;
-}
-.eg-sim-opaca .mode-card ul {
-list-style: none; margin: 2px 0 8px; padding: 9px 4px 0; border-top: 1px solid var(--border); display: flex; flex-direction: column; gap: 8px; text-align: left;
-}
-.eg-sim-opaca .mode-card ul li {
-display: flex; gap: 10px; align-items: center; font-size: var(--fs-md); color: var(--ink-700);
-}
-.eg-sim-opaca .mode-card ul li .ck {
-width: 19px; height: 19px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center;
-}
-.eg-sim-opaca .mode-card ul li .ck svg {
-width: 12px; height: 12px;
-}
-.eg-sim-opaca .mode-card.learn li .ck {
-background: var(--green-100); color: var(--green-600);
-}
-.eg-sim-opaca .mode-card.practice li .ck {
-background: var(--blue-100); color: var(--blue-600);
-}
-.eg-sim-opaca .mode-card.assessment li .ck {
-background: var(--purple-100); color: var(--purple-600);
-}
-.eg-sim-opaca .mode-card .btn {
-margin-top: auto; width: 100%;
 }
 /* T167: kilit≠öneri ipucu — kart genelinde tek CSS kuralı yoktu, tarayıcı
    varsayılan <p> boşluğu (1em üst/alt) kartı gereksiz uzatıp grid satırının
    diğer kartları eşitlemek için gerdiği boşluğu büyütüyordu (dikey uzama). */
-.eg-sim-opaca .mode-lock-hint {
+.eg-sim-opaca .mode-lock-hint:not(.eg-gami-mode-seal) {
 display: flex; align-items: center; justify-content: center; gap: 6px;
   margin: 0 0 6px; padding: 5px 10px;
   font-size: var(--fs-xs); color: var(--blue-700); background: var(--blue-50);
   border-radius: var(--r-pill); line-height: 1.3;
 }
-.eg-sim-opaca .mode-lock-hint svg {
+.eg-sim-opaca .mode-lock-hint:not(.eg-gami-mode-seal) svg {
 flex-shrink: 0; color: var(--blue-600);
 }
-/* T175: kitle kilidi — kart görünür kalır, soluk + kilit ikonuyla işaretli (renk dışında). */
-.eg-sim-opaca .mode-card.audience-locked .ic,
-.eg-sim-opaca .mode-card.audience-locked .desc,
-.eg-sim-opaca .mode-card.audience-locked ul {
-opacity: .55;
-}
-/* T218: öğrenme kilidi — kart soluklaşır, kilit ikonu + ilerleme metni çizilir (öneri değil). */
-.eg-sim-opaca .mode-card.learn-locked { opacity: .78; }
-.eg-sim-opaca .mode-card.learn-locked .mode-lock-hint { color: var(--ink-900); }
+/* T175/T218 kitle ve öğrenme kilidi görünümü T289'dan beri ortak mod yolculuğunda (@egemed/gami-ui). */
 .eg-sim-opaca .visitor-banner {
 display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin: 0 0 var(--sp-4);
   padding: 10px var(--sp-4); border-radius: var(--r-lg);
@@ -601,9 +523,6 @@ color: var(--blue-600); flex-shrink: 0;
 .eg-sim-opaca .visitor-banner .btn {
 margin-left: auto;
 }
-.eg-sim-opaca .mode-rules {
-margin: 2px 0 0; font-size: var(--fs-xs); color: var(--ink-600); text-align: center;
-}
 .eg-sim-opaca .mode-note {
 display: flex; justify-content: center; margin: 4px 0 var(--sp-4);
 }
@@ -611,9 +530,6 @@ display: flex; justify-content: center; margin: 4px 0 var(--sp-4);
 max-width: 720px; margin: 0 auto;
 }
 .eg-sim-opaca .mode-advice { max-width: 720px; margin-inline: auto; padding: 8px 16px; border: 1px solid var(--border); border-radius: var(--r-lg); background: var(--card); color: var(--ink-700); font-size: var(--fs-sm); text-align: center; }
-.eg-sim-opaca .mode-progress-status { margin-top: auto; font-size: var(--fs-xs); color: var(--ink-600); text-align: left; }
-.eg-sim-opaca .mode-progress { height: 6px; margin-top: 6px; overflow: hidden; border-radius: var(--r-pill); background: var(--green-100); }
-.eg-sim-opaca .mode-progress span { display: block; height: 100%; background: var(--green-600); }
 .eg-sim-opaca .headphone-banner.thin {
 padding: 8px 16px; gap: 10px;
 }
@@ -769,9 +685,6 @@ font-size: var(--fs-xs); gap: 4px;
 .eg-sim-opaca .eg-header-context {
 gap: 6px;
 }
-.eg-sim-opaca .mode-cards {
-grid-template-columns: 1fr; max-width: 420px;
-}
 .eg-sim-opaca .btn.large {
 padding: var(--sp-3) var(--sp-5); font-size: var(--fs-lg); width: 100%;
 }
@@ -789,9 +702,6 @@ padding: 11px var(--sp-4); font-size: var(--fs-md);
 }
 .eg-sim-opaca .btn.small {
 padding: 8px 12px;
-}
-.eg-sim-opaca .mode-title {
-font-size: var(--fs-2xl);
 }
 .eg-sim-opaca .step .dot {
 width: 22px; height: 22px; font-size: var(--fs-xs);

@@ -10,7 +10,7 @@ const PIXEL = Buffer.from(
 async function openLearn(page: import("@playwright/test").Page) {
   await openRoute(page, "#/sims/opaca");
   const root = page.locator(".eg-sim-opaca").first();
-  await root.locator(".mode-card.learn button.btn").click();
+  await root.locator(".mode-card.learn button.eg-gami-mode-cta").click();
   await expect(root.locator(".lib-col")).toBeVisible();
   return root;
 }

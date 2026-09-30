@@ -280,7 +280,7 @@ export type { StepSelectOutcome } from "./ui/chrome";
 export { EntryScreens } from "./screens/EntryScreens";
 export type { EntryScreensProps } from "./screens/EntryScreens";
 export { modeLearnLocked, modePickTarget, resolveEntryScreen, sessionSeed } from "./screens/entry";
-export { ModeCard, ModeSelectScreen, Stepper } from "./screens/ModeSelectScreen";
+export { ModeSelectScreen, Stepper } from "./screens/ModeSelectScreen";
 export type { ModeSelectScreenProps } from "./screens/ModeSelectScreen";
 export { StartScreen } from "./screens/StartScreen";
 export type { StartScreenProps } from "./screens/StartScreen";

@@ -27,7 +27,7 @@ test.describe("Ausculta öğrenme kilidi", () => {
     await captureRouteScreenshot(page, testInfo.project.name, "#/sims/ausculta kilitli mod seçimi");
 
     // Öğrenme her zaman açıktır; ilerleme satırı ve kilitli odaklı uygulama düğmesi.
-    await root.locator(".mode-card.learn button.btn").click();
+    await root.locator(".mode-card.learn button.eg-gami-mode-cta").click();
     await expect(root.getByText("Öğrenme: 0/20 ses dinlendi")).toBeVisible();
     await root.locator(".tabbar.info-tabs button").nth(2).click();
     await expect(root.getByRole("button", { name: /uygulama yap/ })).toBeDisabled();
@@ -44,8 +44,8 @@ test.describe("Ausculta öğrenme kilidi", () => {
     const root = page.locator(".eg-sim-ausculta").first();
 
     await expect(root.locator(".mode-card.practice")).toHaveAttribute("data-learn-locked", "false");
-    await expect(root.locator(".mode-card.practice button.btn")).toBeEnabled();
-    await expect(root.locator(".mode-card.assessment button.btn")).toBeEnabled();
+    await expect(root.locator(".mode-card.practice button.eg-gami-mode-cta")).toBeEnabled();
+    await expect(root.locator(".mode-card.assessment button.eg-gami-mode-cta")).toBeEnabled();
     await expect(root.getByText("Vakaları çöz")).toBeVisible();
     await captureRouteScreenshot(page, testInfo.project.name, "#/sims/ausculta acik mod secimi");
 

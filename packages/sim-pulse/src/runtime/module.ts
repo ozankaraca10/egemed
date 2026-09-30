@@ -4,6 +4,7 @@ import type { SimDispose, SimModule, SimMountContext, SimMountTarget } from "@eg
 import { createStorageGamiRepo } from "../gamification/repo";
 import type { PulseGamiRepo } from "../gamification/repo";
 import { attachPulseAudience } from "./audience";
+import { attachPulseChallengeCard } from "./challengeCard";
 import { attachPulseChrome } from "./chrome";
 import { attachPulseGamification } from "./gami";
 import { mountPulseRuntime } from "./host";
@@ -185,7 +186,9 @@ export function createPulseRuntimeModule(deps: PulseRuntimeModuleDeps = {}): Sim
         unsubscribeNavigation = context.navigation.subscribe((key) => applyRoute(key));
       }
       const detachAudience = attachPulseAudience(handle, context);
+      const detachChallenge = attachPulseChallengeCard(handle, context, detachGami !== null);
       return () => {
+        detachChallenge();
         detachAudience();
         unsubscribeNavigation?.();
         detachChrome?.();
