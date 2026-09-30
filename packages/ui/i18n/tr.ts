@@ -41,10 +41,6 @@ export const tr = {
   "entry.session.synthetic":
     "Bu sentetik test oturumu yalnız geliştirme ortamı içindir; gerçek öğrenci verisi kullanılmaz.",
   "entry.auth.pending": "Kimlik doğrulama henüz bağlı değil; bu ekran yalnız önizlemedir.",
-  "entry.dev.title": "Geliştirme hesabı",
-  "entry.dev.admin": "Kullanıcı adı: admin · Parola: egemed",
-  "entry.dev.student": "Kullanıcı adı: ogrenci · Parola: egemed",
-  "entry.dev.note": "Yalnız yerel geliştirmede çalışır; üretimde bu giriş kapalıdır.",
   "entry.sims": "Simülatörler",
   "entry.features": "Platform özellikleri",
   "entry.features.modes": "Dört çalışma modu",

@@ -1,16 +1,7 @@
 import { ChallengeDetailPage } from "./challenges/ChallengeDetailPage";
 import { ToastProvider } from "@egemed/ui";
-import { AdminFrame } from "./admin/AdminFrame";
-import { useEffect, useMemo, useRef, useState, type JSX, type ReactNode } from "react";
+import { lazy, Suspense, useEffect, useMemo, useRef, useState, type JSX, type ReactNode } from "react";
 import { t, type TrKey } from "@egemed/ui/i18n";
-import { AdminPage } from "./AdminPage";
-import { AuditPage } from "./admin/AuditPage";
-import { ImportWizardPage } from "./admin/ImportWizardPage";
-import { RewardsPage } from "./admin/RewardsPage";
-import { RolesPage } from "./admin/RolesPage";
-import { UserDetailPage } from "./admin/UserDetailPage";
-import { UserFormPage } from "./admin/UserFormPage";
-import { UsersPage } from "./admin/UsersPage";
 import { apiSessionBaseUrl } from "./apiMode";
 import {
   createMockShellDataSources,
@@ -28,6 +19,18 @@ import type { SimChrome } from "@egemed/sim-host";
 import { useHashRoute } from "./useHashRoute";
 import { audienceFor, endVisitor, readVisitor, startVisitor, type VisitorStorage } from "./visitor";
 import type { SimAudience } from "@egemed/sim-host";
+
+/** Yönetim sayfaları ayrı parçada; öğrencilerin çoğu bunları hiç açmaz (audit B5). */
+const AdminFrame = lazy(() => import("./admin/AdminFrame").then((module) => ({ default: module.AdminFrame })));
+const AdminPage = lazy(() => import("./AdminPage").then((module) => ({ default: module.AdminPage })));
+const AuditPage = lazy(() => import("./admin/AuditPage").then((module) => ({ default: module.AuditPage })));
+const ImportWizardPage = lazy(() => import("./admin/ImportWizardPage").then((module) => ({ default: module.ImportWizardPage })));
+const RewardsPage = lazy(() => import("./admin/RewardsPage").then((module) => ({ default: module.RewardsPage })));
+const RolesPage = lazy(() => import("./admin/RolesPage").then((module) => ({ default: module.RolesPage })));
+const UserDetailPage = lazy(() => import("./admin/UserDetailPage").then((module) => ({ default: module.UserDetailPage })));
+const UserFormPage = lazy(() => import("./admin/UserFormPage").then((module) => ({ default: module.UserFormPage })));
+const UsersPage = lazy(() => import("./admin/UsersPage").then((module) => ({ default: module.UsersPage })));
+
 
 /** Sekme deposu (ziyaretçi işareti); erişim engelliyse null. */
 function tabStorage(): VisitorStorage | null {
@@ -284,7 +287,9 @@ export function App(): JSX.Element | null {
       simChrome={route.kind === "sim" ? simChrome : null}
       visitor={audience === "visitor"}
     >
-      {contentFor(route, session, apiEnabled && session !== null ? apiBaseUrl : null, setSimChrome, audience, requestSignIn)}
+      <Suspense fallback={<section aria-busy="true" className="eg-shell-page"><div aria-hidden="true" className="eg-shell-users__skeleton"><span className="eg-shell-users__skeleton-row" /><span className="eg-shell-users__skeleton-row" /></div></section>}>
+        {contentFor(route, session, apiEnabled && session !== null ? apiBaseUrl : null, setSimChrome, audience, requestSignIn)}
+      </Suspense>
     </ShellLayout>,
   );
 }
