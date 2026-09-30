@@ -7,7 +7,7 @@
  * rozet, XP ve liderlik sunucudan okunur ve "Demo verisi" bandı gizlenir.
  */
 import type { JSX, ReactNode } from "react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import {
   attemptXp,
@@ -25,6 +25,7 @@ import {
   type Period,
   type WeeklyGoal,
 } from "@egemed/gamification-core";
+import type { SimRewardsSnapshot, SimRewardsSource } from "@egemed/sim-host";
 import {
   buildAchievementsModel,
   buildLeaderboardModel,
@@ -111,6 +112,7 @@ function PulseProgressBody({
   now,
   actions,
   server,
+  rewards,
   tab,
   setTab,
   period,
@@ -126,6 +128,7 @@ function PulseProgressBody({
   now: Date;
   actions: PulseProgressActions;
   server: ServerGamiData | null;
+  rewards: SimRewardsSnapshot | null;
   tab: GamiPageTab;
   setTab: (tab: GamiPageTab) => void;
   period: AchievementsPeriod;
@@ -173,6 +176,11 @@ function PulseProgressBody({
   );
   const localBoard = useMemo(() => localRows(state.attempts, now, boardPeriod, cohort, privacy), [boardPeriod, cohort, now, privacy, state.attempts]);
   const rows = server && tab === "leaderboard" ? server.rows : localBoard;
+  const monthRows = boardPeriod === "month" && server && tab === "leaderboard"
+    ? rows
+    : server && tab === "leaderboard"
+      ? null
+      : localRows(state.attempts, now, "month", "all", privacy);
   const prevRows = useMemo(() => {
     const prev = new Date(periodRangeTr(boardPeriod, now).start.getTime() - 1);
     return localRows(state.attempts, prev, boardPeriod, cohort, privacy);
@@ -183,14 +191,14 @@ function PulseProgressBody({
         boardReady: true,
         clock: now,
         cohort,
-        monthRows: null,
+        monthRows,
         now,
         period: boardPeriod,
         prevRows: server && tab === "leaderboard" ? null : prevRows,
-        reward: null,
+        reward: rewards?.current ?? null,
         rows,
       }),
-    [boardPeriod, cohort, now, prevRows, rows, server, tab],
+    [boardPeriod, cohort, monthRows, now, prevRows, rewards, rows, server, tab],
   );
 
   return (
@@ -260,13 +268,13 @@ function PulseProgressBody({
             privacy={{ cohort: privacy.cohort, isPublic: privacy.public, name: privacy.displayName }}
             qualify={leaderboard.qualify}
             rankedEmpty={leaderboard.rankedEmpty}
-            reward={null}
+            reward={rewards?.current ?? null}
             rows={leaderboard.rows}
             status={leaderboard.status}
             subtitle="Değerlendirme modundaki en iyi 3 denemenin ortalamasıyla sıralanır (en az 2 deneme)."
             terms={false}
             title={<h2 className="results-title-v2">Liderlik Tahtası</h2>}
-            winners={[]}
+            winners={[...(rewards?.winners ?? [])]}
           />
         )}
       </GamiProgressPage>
@@ -279,11 +287,13 @@ export function PulseProgressPage({
   now,
   actions,
   gamification,
+  rewards = null,
 }: {
   state: PulseGamiState;
   now: Date;
   actions: PulseProgressActions;
   gamification?: GamiServerSource;
+  rewards?: SimRewardsSnapshot | null;
 }): JSX.Element {
   const [tab, setTab] = useState<GamiPageTab>("achievements");
   const [period, setPeriod] = useState<AchievementsPeriod>("last30");
@@ -299,6 +309,7 @@ export function PulseProgressPage({
       period={period}
       privacy={privacy}
       server={server}
+      rewards={rewards}
       setBoardPeriod={setBoardPeriod}
       setCohort={setCohort}
       setPeriod={setPeriod}
@@ -329,21 +340,48 @@ export interface PulseProgressHandle {
   dispose(): void;
 }
 
+function PulseProgressConnected({
+  state,
+  now,
+  actions,
+  gamification,
+  rewards,
+}: {
+  state: PulseGamiState;
+  now: Date;
+  actions: PulseProgressActions;
+  gamification?: GamiServerSource;
+  rewards?: SimRewardsSource;
+}): JSX.Element {
+  const [snapshot, setSnapshot] = useState<SimRewardsSnapshot | null>(() => rewards?.snapshot() ?? null);
+  useEffect(() => {
+    if (rewards === undefined) {
+      setSnapshot(null);
+      return;
+    }
+    setSnapshot(rewards.snapshot());
+    return rewards.subscribe(setSnapshot);
+  }, [rewards]);
+  return <PulseProgressPage actions={actions} now={now} rewards={snapshot} state={state} {...(gamification === undefined ? {} : { gamification })} />;
+}
+
 /** Gölge kök içindeki `container`a React kökü kurar; durum değiştikçe `update`. */
 export function mountPulseProgress(
   container: HTMLElement,
   actions: PulseProgressActions,
   gamification?: GamiServerSource,
+  rewards?: SimRewardsSource,
 ): PulseProgressHandle {
   const root: Root = createRoot(container);
   return {
     dispose: () => root.unmount(),
     update: (state, now) => root.render(
-      <PulseProgressPage
+      <PulseProgressConnected
         actions={actions}
         now={now}
         state={state}
         {...(gamification === undefined ? {} : { gamification })}
+        {...(rewards === undefined ? {} : { rewards })}
       />,
     ),
   };

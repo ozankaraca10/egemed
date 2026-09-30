@@ -20,6 +20,7 @@ import {
   type RewardWinnerBody,
   type SimId,
 } from "@egemed/contracts";
+import { REWARD_SEED } from "@egemed/gami-catalogs";
 
 export type { SimId };
 export { REWARD_COHORTS };
@@ -212,55 +213,15 @@ export interface RewardsDataSource {
   finalize(simId: SimId, month: string, currentMonthKey: string): Promise<AdminReward>;
 }
 
-const NOW_ISO = "2026-09-27T09:00:00.000+03:00" as const;
-
-/** Opaca Eylül 2026 örneği: `packages/sim-opaca/src/gamification/rewards.ts` SEPTEMBER_2026'dan
- *  sadece okunarak örneklendi (içerik birebir, dosya değiştirilmedi/içe aktarılmadı). */
-function seedOpacaCurrent(): AdminReward {
-  return {
-    description:
-      "Ayın ilk 3'ü, Radyoloji AD öğretim üyesi eşliğinde bir girişimsel işlemi gözlemleme fırsatı kazanır.",
-    eligibility: { cohorts: [1, 2, 3, 4, 5, 6], minAssessments: 4, requirePublicName: true },
-    finalizedAt: null,
-    month: "2026-09",
-    simId: "opaca",
-    sponsor: "Radyoloji Anabilim Dalı",
-    terms: [
-      "Uygun kohortlar: Dönem 1–6 öğrencileri.",
-      "Ay içinde en az 4 değerlendirme oturumu tamamlanmalıdır.",
-      "Puan: ay içindeki en iyi 3 değerlendirmenin ortalaması.",
-      "Eşitlikte bu puana önce ulaşan öne geçer.",
-      "Sıralamada adla görünmek (anonim olmamak) zorunludur.",
-      "Kazananlarla fakülte e-postası üzerinden iletişim kurulur.",
-      "Ödül devredilemez; hasta onamı ve klinik uygunluğa bağlıdır, tarih Radyoloji AD ile planlanır.",
-      "Kopya veya kural ihlalinde hak kaybedilir.",
-    ],
-    title: "Girişimsel Radyolojide bir girişime gözlemci olarak katılım",
-    updatedAt: NOW_ISO,
-    winners: [],
-    winnersCount: 3,
-  };
-}
-
-/** Opaca Ağustos 2026: kesinleşmiş geçmiş ay örneği (kazanan listesi göstermek için, aynı dosyadaki
- *  `REWARD_WINNERS_HISTORY`den sadece okunarak örneklendi). */
-function seedOpacaFinalized(): AdminReward {
-  return {
-    ...seedOpacaCurrent(),
-    finalizedAt: "2026-09-01T06:00:00.000+03:00",
-    month: "2026-08",
-    winners: [
-      { displayName: "Mert Tunç", isMe: false, month: "2026-08", rank: 1, score: 92.7 },
-      { displayName: "Deniz Kaya", isMe: false, month: "2026-08", rank: 2, score: 90.1 },
-      { displayName: "Burak Demir", isMe: false, month: "2026-08", rank: 3, score: 88.4 },
-    ],
-  };
-}
+const NOW_ISO = "2026-09-30T09:00:00.000+03:00" as const;
 
 /** Sentetik, tohumlu `RewardsDataSource`; API bağlanana dek `RewardsPage` bunu kullanır. */
 export function createMockRewardsSource(): RewardsDataSource {
   const store = new Map<string, AdminReward>();
-  for (const reward of [seedOpacaCurrent(), seedOpacaFinalized()]) store.set(`${reward.simId}:${reward.month}`, reward);
+  for (const { simId, reward } of REWARD_SEED) {
+    const seeded: AdminReward = { ...reward, finalizedAt: null, simId, updatedAt: NOW_ISO, winners: [] };
+    store.set(`${simId}:${reward.month}`, seeded);
+  }
 
   function key(simId: SimId, month: string): string {
     return `${simId}:${month}`;

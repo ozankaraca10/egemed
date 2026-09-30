@@ -504,17 +504,29 @@ test.describe("aylık ödüller (T186)", () => {
     await openAdmin(page, REWARDS);
     await expect(page.getByRole("heading", { name: "Ödüller" })).toBeVisible();
 
-    // Opaca: tohumlu örnek — bu ay geçerli (Eylül) + kesinleşmiş geçmiş ay (Ağustos, kazananlarla).
+    // Opaca: REWARD_SEED'den Eylül–Kasım arası üç yönetilebilir ödül.
     await selectRadixOption(page.locator("body"), "Simülatör", "Opaca");
+    await expect(listRows(page)).toHaveCount(3);
     await expect(listRows(page).filter({ hasText: "Eylül 2026" })).toContainText("Bu ay geçerli");
-    const augustRow = listRows(page).filter({ hasText: "Ağustos 2026" });
-    await expect(augustRow).toContainText("Kesinleşti");
-    await expect(augustRow).toContainText("1. Mert Tunç, 2. Deniz Kaya, 3. Burak Demir");
-    await expect(augustRow.getByRole("button", { name: "Sil" })).toHaveCount(0);
 
-    // Pulse: henüz ödül tanımlı değil → boş durum.
+    // Pulse ödülleri de aynı tohumdan yönetilir.
     await selectRadixOption(page.locator("body"), "Simülatör", "Pulse");
-    await expect(page.getByText("Bu simülatör için ödül tanımlı değil.")).toBeVisible();
+    await expect(listRows(page)).toHaveCount(3);
+    await expect(listRows(page).filter({ hasText: "Eylül 2026" })).toContainText("Bu ay geçerli");
+
+    // Yönetimdeki güncelleme ana sayfa ödül bandına anında yansır.
+    await selectRadixOption(page.locator("body"), "Simülatör", "Opaca");
+    const septemberRow = listRows(page).filter({ hasText: "Eylül 2026" });
+    await septemberRow.getByRole("button", { name: "Düzenle" }).click();
+    const seededEdit = page.getByRole("dialog");
+    const showcaseTitle = "T252 vitrin ödülü";
+    await seededEdit.getByLabel("Başlık").fill(showcaseTitle);
+    await seededEdit.getByRole("button", { name: "Kaydet" }).click();
+    await expect(page.getByRole("dialog")).toHaveCount(0);
+    await page.goto("/#/");
+    await expect(page.getByText(showcaseTitle, { exact: true })).toBeVisible();
+    await openAdmin(page, REWARDS);
+    await selectRadixOption(page.locator("body"), "Simülatör", "Pulse");
 
     await page.getByRole("button", { name: "Yeni ödül" }).click();
     const createDialog = page.getByRole("dialog");
@@ -545,7 +557,7 @@ test.describe("aylık ödüller (T186)", () => {
     await deleteDialog.getByRole("button", { name: "Sil" }).click();
     await expect(page.getByRole("dialog")).toHaveCount(0);
     await expect(listRows(page).filter({ hasText: "T75 güncellendi" })).toHaveCount(0);
-    await expect(page.getByText("Bu simülatör için ödül tanımlı değil.")).toBeVisible();
+    await expect(listRows(page)).toHaveCount(3);
   });
 });
 
@@ -667,7 +679,7 @@ test.describe("admin ekranları: axe 0, yatay taşma yok, artefaktlar", () => {
       setup: async (page) => {
         await openAdmin(page, REWARDS);
         await selectRadixOption(page.locator("body"), "Simülatör", "Opaca");
-        await expect(listRows(page).filter({ hasText: "Ağustos 2026" })).toContainText("Kesinleşti");
+        await expect(listRows(page).filter({ hasText: "Eylül 2026" })).toContainText("Bu ay geçerli");
       },
     },
     {

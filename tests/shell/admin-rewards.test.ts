@@ -135,13 +135,10 @@ describe("rewardsDataSource — validateRewardForm (sözleşme sınırları)", (
 });
 
 describe("createMockRewardsSource — CRUD + kesinleştirme (T186)", () => {
-  it("list Opaca için tohumlu Eylül (bu ay) + Ağustos (kesinleşmiş) döner, en yeni ay önce", async () => {
+  it("list tohumlu ayları en yeni önce döner", async () => {
     const source = createMockRewardsSource();
     const rewards = await source.list("opaca");
-    expect(rewards.map((r) => r.month)).toEqual(["2026-09", "2026-08"]);
-    expect(rewards[0]?.finalizedAt).toBeNull();
-    expect(rewards[1]?.finalizedAt).not.toBeNull();
-    expect(rewards[1]?.winners.length).toBe(3);
+    expect(rewards.map((r) => r.month)).toEqual(["2026-11", "2026-10", "2026-09"]);
   });
 
   it("finalize: ay kapanmadan month_not_closed, ikinci çağrıda already_finalized, başarılı akışta finalizedAt dolar", async () => {

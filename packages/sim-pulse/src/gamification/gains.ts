@@ -8,6 +8,8 @@ import {
   attemptXp,
   badgeViews,
   levelForXp,
+  periodRangeTr,
+  periodScore,
   sortBadgeViews,
   totalXpFor,
   trDate,
@@ -49,6 +51,7 @@ export interface PulseSessionGainsInput {
   readonly earnedIds: readonly string[];
   readonly attempt: PulseAttemptRecord;
   readonly now: Date;
+  readonly rewardActive?: boolean;
 }
 
 /** Sonuç kartı: bu oturumun XP'si, yeni veya sıradaki rozet ve düzey ilerlemesi. */
@@ -62,6 +65,7 @@ export function pulseSessionGains(input: PulseSessionGainsInput): GamiGainsModel
   const bonus = input.attempt.mode === "assessment" && input.attempt.score >= PULSE_RULES.xp.assessmentBonusThreshold
     ? PULSE_RULES.xp.assessmentBonus
     : 0;
+  const rank = input.rewardActive && input.attempt.mode === "assessment" ? monthlyRank(input.state, input.now) : null;
   return {
     badge: picked ? toGamiBadge(picked) : null,
     badgeFresh: fresh.length > 0,
@@ -71,7 +75,15 @@ export function pulseSessionGains(input: PulseSessionGainsInput): GamiGainsModel
     xpInto: level.xpIntoLevel,
     xpSpan: level.levelEndXp - level.levelStartXp,
     xpToNext: level.xpToNext,
-    rank: null,
+    rank,
     confetti: fresh.length > 0 && input.attempt.mastery,
   };
+}
+
+function monthlyRank(state: PulseGamiState, now: Date): NonNullable<GamiGainsModel["rank"]> {
+  const { start, end } = periodRangeTr("month", now);
+  const attempts = state.attempts.filter((item) => item.mode === "assessment" && item.finishedAt >= start.toISOString() && item.finishedAt <= end.toISOString());
+  const scored = periodScore(attempts, PULSE_RULES);
+  const rank = scored.attemptsCount >= 2 ? 1 : null;
+  return { period: "month", rank, of: rank === null ? 0 : 1, delta: null };
 }

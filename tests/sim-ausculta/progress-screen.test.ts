@@ -50,6 +50,23 @@ async function markup(node: ReactNode): Promise<string> {
 }
 
 describe("Ausculta ilerleme ekranı", () => {
+  it("kanal anlık görüntüsündeki ödülü ve geçmiş kazananı liderlikte gösterir", () => {
+    const repository = new LocalGamiRepository({ storage: new MemoryGami(), now: () => at });
+    const html = render(createElement(ProgressScreen, {
+      repository,
+      rewards: {
+        current: {
+          month: "2026-09", title: "Eylül ödülü", description: "Aylık ödül", sponsor: "EGEMED",
+          winnersCount: 1, eligibility: { cohorts: [], minAssessments: 2, requirePublicName: false }, terms: [],
+        },
+        winners: [{ month: "2026-08", rank: 1, displayName: "Önceki kazanan", score: 88, isMe: false }],
+      },
+      tab: "leaderboard",
+    }));
+    expect(html).toContain("Eylül ödülü");
+    expect(html).toContain("Önceki kazanan");
+  });
+
 
   it("sahte kaynakta demo bandını gizler ve sunucu rozetini kazanıldı gösterir", async () => {
     const repository = new LocalGamiRepository({ storage: new MemoryGami(), now: () => at });

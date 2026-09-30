@@ -1,6 +1,7 @@
 import type { JSX, ReactNode } from "react";
 import { useMemo, useState } from "react";
 import type { AchievementsPeriod, Cohort, CohortFilter, Period, WeeklyGoal } from "@egemed/gamification-core";
+import type { SimRewardsSnapshot } from "@egemed/sim-host";
 import { periodRangeTr } from "@egemed/gamification-core";
 import { buildAchievementsModel, buildLeaderboardModel, defaultGamiIcons, earnedFromServer, GamiAchievementsView, GamiLeaderboardView, GamiProgressPage, GamiServerFrame, gamiLoadingStatus, levelFromServer, serverHasActivity, streakFromServer, type GamiModalEnv, type GamiPageTab, type GamiServerSource, type ServerGamiData } from "@egemed/gami-ui";
 import { useLearnGate, useStartMode } from "../core/LearnGate";
@@ -50,6 +51,7 @@ function ProgressBody({
   tab,
   onTab,
   server,
+  rewards,
   period,
   setPeriod,
   boardPeriod,
@@ -65,6 +67,7 @@ function ProgressBody({
   tab?: GamiPageTab;
   onTab?: (tab: GamiPageTab) => void;
   server: ServerGamiData | null;
+  rewards: SimRewardsSnapshot | null;
   period: AchievementsPeriod;
   setPeriod: (period: AchievementsPeriod) => void;
   boardPeriod: Period;
@@ -114,6 +117,11 @@ function ProgressBody({
     [at, boardPeriod, cohort, privacy, progress.state.attempts],
   );
   const rows = server && activeTab === "leaderboard" ? server.rows : localBoard;
+  const monthRows = boardPeriod === "month" && server && activeTab === "leaderboard"
+    ? rows
+    : server && activeTab === "leaderboard"
+      ? null
+      : localLeaderboardRows(progress.state.attempts, AUSCULTA_RULES, at, "month", "all", privacy);
   const prevRows = useMemo(() => {
     const prev = new Date(periodRangeTr(boardPeriod, at).start.getTime() - 1);
     return localLeaderboardRows(progress.state.attempts, AUSCULTA_RULES, prev, boardPeriod, cohort, privacy);
@@ -125,10 +133,10 @@ function ProgressBody({
     cohort,
     rows,
     prevRows: server && activeTab === "leaderboard" ? null : prevRows,
-    monthRows: null,
-    reward: null,
+    monthRows,
+    reward: rewards?.current ?? null,
     boardReady: true,
-  }), [activeTab, at, boardPeriod, cohort, prevRows, rows, server]);
+  }), [activeTab, at, boardPeriod, cohort, monthRows, prevRows, rewards, rows, server]);
 
   // T209: öğrenme tamamlanmadan değerlendirme başlatılamaz; kilitliyse istek öğrenmeye düşer.
   const startAssessment = () => {
@@ -177,7 +185,7 @@ function ProgressBody({
             <GamiLeaderboardView
               title={<ScreenHeading className="results-title-v2">Liderlik Tahtası</ScreenHeading>}
               subtitle="Değerlendirme modundaki en iyi 3 denemenin ortalamasıyla sıralanır (en az 2 deneme)."
-              reward={null}
+              reward={rewards?.current ?? null}
               period={boardPeriod}
               periods={leaderboard.periods}
               onPeriod={setBoardPeriod}
@@ -204,7 +212,7 @@ function ProgressBody({
                 displayName: current.displayName,
                 cohort: patch.cohort === undefined ? current.cohort : patch.cohort,
               }))}
-              winners={[]}
+              winners={[...(rewards?.winners ?? [])]}
               terms={false}
               onCloseTerms={() => undefined}
               {...(modalEnv ? { modalEnv: modalEnv as GamiModalEnv } : {})}
@@ -226,6 +234,7 @@ export function ProgressScreen({
   tab,
   onTab,
   gamification,
+  rewards = null,
 }: {
   embedded?: boolean;
   repository: LocalGamiRepository;
@@ -233,6 +242,7 @@ export function ProgressScreen({
   tab?: GamiPageTab;
   onTab?: (tab: GamiPageTab) => void;
   gamification?: GamiServerSource;
+  rewards?: SimRewardsSnapshot | null;
 }): JSX.Element {
   const [period, setPeriod] = useState<AchievementsPeriod>("last30");
   const [boardPeriod, setBoardPeriod] = useState<Period>("week");
@@ -252,6 +262,7 @@ export function ProgressScreen({
       privacy={privacy}
       repository={repository}
       server={server}
+      rewards={rewards}
       setBoardPeriod={setBoardPeriod}
       setCohort={setCohort}
       setPeriod={setPeriod}
