@@ -113,6 +113,7 @@ export function createPulseRuntimeModule(deps: PulseRuntimeModuleDeps = {}): Sim
             recordAttempts: server === null,
             ...(reportLearn === undefined ? {} : { reportLearn }),
             ...(gamification === undefined ? {} : { gamification }),
+            ...(context.rewards === undefined ? {} : { rewards: context.rewards }),
           });
         } catch {
           // Oyunlaştırma kurulamasa da simülatör çalışmaya devam eder.
