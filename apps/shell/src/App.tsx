@@ -1,4 +1,5 @@
 import { ChallengeDetailPage } from "./challenges/ChallengeDetailPage";
+import { ChallengesPage } from "./challenges/ChallengesPage";
 import { ToastProvider } from "@egemed/ui";
 import { lazy, Suspense, useEffect, useMemo, useRef, useState, type JSX, type ReactNode } from "react";
 import { t, type TrKey } from "@egemed/ui/i18n";
@@ -81,6 +82,15 @@ function contentFor(
   if (route.kind === "adminAudit") return <AdminFrame active="audit"><AuditPage /></AdminFrame>;
   if (route.kind === "challengeDetail") return <ChallengeDetailPage challengeId={route.challengeId} session={session} />;
   if (route.kind === "sim") {
+    // T281a: Meydan Okuma simin 4. modu; sim modülü mount edilmez, merkez aynı
+    // birleşik barın altında sabit sime çizilir (bar h1 taşır, sayfa h2).
+    if (route.screenKey === "meydan-okuma") {
+      return route.challengeDetailId === undefined ? (
+        <ChallengesPage headingLevel={2} session={session} simId={route.simId} />
+      ) : (
+        <ChallengeDetailPage challengeId={route.challengeDetailId} headingLevel={2} session={session} simId={route.simId} />
+      );
+    }
     return (
       <SimRoute
         {...(route.challengeId === undefined ? {} : { challengeId: route.challengeId })}
@@ -135,6 +145,8 @@ export function App(): JSX.Element | null {
   apiSessionRef.current = apiSession;
   const routeKey = route.kind === "sim" ? `sim:${route.simId}` : route.kind === "page" ? route.route.id : route.kind;
   const guardHref = !apiPending && isAdminProtected(route) ? adminGuardHref(session) : null;
+  // T281a: kaldırılan liste adresi (`#/meydan-okuma`) hedefe yönlendirilir.
+  const redirectHref = route.kind === "redirect" ? route.href : null;
 
   useEffect(() => {
     // API kaynakları yalnız geliştirme dalında yüklenir; üretim paketine girmez.
@@ -207,6 +219,11 @@ export function App(): JSX.Element | null {
   }, [guardHref]);
 
   useEffect(() => {
+    // Eski Meydan Okuma adresi geçmişte iz bırakmadan hedefine geçer.
+    if (redirectHref !== null) window.location.replace(redirectHref);
+  }, [redirectHref]);
+
+  useEffect(() => {
     // Giriş yapıldığında ziyaretçi işareti temizlenir.
     if (session !== null) endVisitor(tabStorage());
   }, [session]);
@@ -277,6 +294,8 @@ export function App(): JSX.Element | null {
   }
   // API oturumunda demo kaynak çizilmeden önce gerçek istemci ve `/auth/me` beklenir.
   if (apiEnabled && (sources === null || !apiReady)) return null;
+  // Yönlendirme efekti tamamlanana dek boş kalır (eski adres → yeni adres).
+  if (redirectHref !== null) return null;
   if (isAdminProtected(route) && (apiPending || guardHref !== null)) return null;
   return frame(
     <ShellLayout

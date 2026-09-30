@@ -602,11 +602,11 @@ test.describe("API oturumu (dev sağlayıcı)", () => {
     await signIn(page, "ogrenci");
     await expect(page).toHaveURL(/#\/$/);
     await completeLearn(page, "ausculta");
-    await page.goto("/#/meydan-okuma");
+    await page.goto("/#/sims/ausculta/meydan-okuma");
     await page.getByRole("button", { name: "Kod oluştur" }).click();
     const code = (await page.locator(".eg-shell-duel__codeValue").first().innerText()).trim();
     expect(code).toMatch(/^[0-9]{6}$/);
-    await captureRouteScreenshot(page, testInfo.project.name, "#/meydan-okuma kod");
+    await captureRouteScreenshot(page, testInfo.project.name, "#/sims/ausculta/meydan-okuma kod");
 
     // 3) Öğrenci B kodla katılır.
     const rivalContext = await browser.newContext(baseURL === undefined ? {} : { baseURL });
@@ -624,13 +624,14 @@ test.describe("API oturumu (dev sağlayıcı)", () => {
       return response.status;
     }, username);
     expect(login, "ikinci öğrenci girişi").toBe(200);
-    // Kabuk oturumu açılışta `/auth/me` ile geri yükler; hash değişimi yeniden yüklemez.
-    await rival.goto("/#/meydan-okuma");
-    await rival.reload();
+    // Katılma kilidi (T281a): öğrenme kaydı, sayfa öğrenme durumunu okumadan önce yazılır.
     await completeLearn(rival, "ausculta");
+    // Kabuk oturumu açılışta `/auth/me` ile geri yükler; hash değişimi yeniden yüklemez.
+    await rival.goto("/#/sims/ausculta/meydan-okuma");
+    await rival.reload();
     await rival.getByLabel("6 haneli kod").fill(code);
     await rival.getByRole("button", { name: "Katıl" }).click();
-    await expect(rival).toHaveURL(/#\/meydan-okuma\/[0-9a-f-]{36}$/);
+    await expect(rival).toHaveURL(/#\/sims\/ausculta\/meydan-okuma\/[0-9a-f-]{36}$/);
     await expect(rival.getByText("Devam ediyor")).toBeVisible();
 
     /** Düello oturumunu (10 vaka, değerlendirme arayüzü) sonuna kadar oynar. */
@@ -650,25 +651,25 @@ test.describe("API oturumu (dev sağlayıcı)", () => {
       }
       await expect(report).toBeVisible({ timeout: 20_000 });
       await target.getByRole("button", { name: "Düello sonucunu gör" }).click();
-      await expect(target).toHaveURL(/#\/meydan-okuma\/[0-9a-f-]{36}$/);
+      await expect(target).toHaveURL(/#\/sims\/ausculta\/meydan-okuma\/[0-9a-f-]{36}$/);
     }
 
     // 4) A oynar → rakibi bekler; puanlar gizli.
     await rival.close();
-    await page.goto(`/#/meydan-okuma`);
+    await page.goto(`/#/sims/ausculta/meydan-okuma`);
     await page.locator(".eg-shell-duel__rowLink").first().click();
     await playDuel(page, true);
     await expect(page.getByText("Rakibin bitirmesi bekleniyor", { exact: false })).toBeVisible();
 
     // 5) B oynar → iki tarafta sonuç ve kazanan şeridi.
     const rivalAgain = await rivalContext.newPage();
-    await rivalAgain.goto("/#/meydan-okuma");
+    await rivalAgain.goto("/#/sims/ausculta/meydan-okuma");
     await rivalAgain.locator(".eg-shell-duel__rowLink").first().click();
     await playDuel(rivalAgain, false);
     await expect(rivalAgain.locator(".eg-shell-duel__banner")).toBeVisible();
     await page.getByRole("button", { name: "Yenile" }).click();
     await expect(page.locator(".eg-shell-duel__banner")).toBeVisible();
-    await captureRouteScreenshot(page, testInfo.project.name, "#/meydan-okuma/sonuc");
+    await captureRouteScreenshot(page, testInfo.project.name, "#/sims/ausculta/meydan-okuma/sonuc");
     const scores = await page.locator(".eg-shell-duel__stats dd").allInnerTexts();
     expect(scores.filter((value) => value !== "—").length).toBeGreaterThanOrEqual(2);
     await rivalContext.close();
