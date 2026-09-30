@@ -13,7 +13,8 @@
     "mail:preview": "node --import ./ts-register.mjs src/mail/preview.ts",
     "test:db": "vitest run --config vitest.db.config.ts",
     "typecheck": "tsc --noEmit",
-    "seed:rewards": "node --import ./ts-register.mjs src/seed/rewards.ts"
+    "seed:rewards": "node --import ./ts-register.mjs src/seed/rewards.ts",
+    "seed:demo": "node --import ./ts-register.mjs src/seed/demoMain.ts"
   },
   "dependencies": {
     "@egemed/assessment-bank": "workspace:*",
