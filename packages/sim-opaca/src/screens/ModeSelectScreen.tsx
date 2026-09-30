@@ -135,7 +135,7 @@ export function ModeSelectScreen({
               bestScore={state.bestScore.assessment}
               extra={gamiEnabled && monthlyReward ? (
                 <p className="mode-rules">
-                  <button type="button" className="gami-link" style={{ color: 'var(--amber-700)' }} onClick={() => dispatch({ type: 'goto', screen: 'leaderboard' })}>
+                  <button type="button" className="gami-link" style={{ color: 'var(--amber-700)', minHeight: 44, display: 'inline-flex', alignItems: 'center', gap: 4, background: 'none', border: 0, padding: 0, font: 'inherit', fontWeight: 700, cursor: 'pointer' }} onClick={() => dispatch({ type: 'goto', screen: 'leaderboard' })}>
                     <IconGift width={14} height={14} /> Bu ayın ödülü · {daysLeftInMonth(now())} gün kaldı
                   </button>
                 </p>
