@@ -1,4 +1,3 @@
-import { ChallengesPage } from "./challenges/ChallengesPage";
 import { useMemo, type JSX, type ReactNode } from "react";
 import { icons } from "@egemed/ui";
 import { t, type TrKey } from "@egemed/ui/i18n";
@@ -177,6 +176,5 @@ export function SimulatorsPage({ session = null }: { readonly session?: ShellSes
 
 export function pageFor(id: RouteId, session: ShellSession | null = null): JSX.Element {
   if (id === "home") return <HomePage session={session} />;
-  if (id === "challenges") return <ChallengesPage session={session} />;
   return <SimulatorsPage session={session} />;
 }

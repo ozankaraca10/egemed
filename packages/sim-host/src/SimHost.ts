@@ -26,7 +26,7 @@ export type SimulatorId = "pulse" | "ausculta" | "opaca";
 
 /** Kabuğa bildirilen sim ekran anahtarı; hash alt yoluna yazılır. */
 export type SimScreenKey = string;
-export const SIM_SCREEN_KEYS = ["modlar", "ogrenme", "uygulama", "degerlendirme", "sonuc", "ilerlemem", "yardim", "hakkinda"] as const;
+export const SIM_SCREEN_KEYS = ["modlar", "ogrenme", "uygulama", "degerlendirme", "sonuc", "ilerlemem", "yardim", "hakkinda", "meydan-okuma"] as const;
 
 /** Bilinmeyen anahtarlar da geçerlidir; biçim platform genelinde sabittir. */
 export function isSimScreenKey(value: unknown): value is SimScreenKey {
@@ -272,6 +272,12 @@ export interface SimMountContext {
   readonly onChallengeFinished?: (challengeId: string) => void;
   /** Aylık ödül kanalı (30 Eyl 2026); ziyaretçide verilmez. */
   readonly rewards?: SimRewardsSource;
+  /**
+   * T281a: verilirse sim 4. mod kartı ("Meydan Okuma") tıklanınca bu simin
+   * düello merkezini açmak için çağırır. Ziyaretçide ve düello modunda
+   * (`challengeId` varken) verilmez.
+   */
+  readonly openChallenges?: () => void;
 }
 
 /** Modül `mount` dönüşünde zorunlu cleanup verir; idempotent olmalıdır. */
@@ -315,6 +321,7 @@ export interface SimMountOptions {
   readonly challengeId?: string;
   readonly onChallengeFinished?: (challengeId: string) => void;
   readonly rewards?: SimRewardsSource;
+  readonly openChallenges?: () => void;
 }
 
 /** Bir `mount` çağrısının kimliği; yalnız o çağrının oturumunu bırakmak için. */
@@ -357,6 +364,7 @@ function mountContext(simId: SimulatorId, now: () => number, mountOptions: SimMo
   const challengeId = mountOptions?.challengeId;
   const onChallengeFinished = mountOptions?.onChallengeFinished;
   const rewards = mountOptions?.rewards;
+  const openChallenges = mountOptions?.openChallenges;
   const navigation = mountOptions?.navigation;
   return {
     now,
@@ -374,6 +382,7 @@ function mountContext(simId: SimulatorId, now: () => number, mountOptions: SimMo
     ...(challengeId === undefined ? {} : { challengeId }),
     ...(onChallengeFinished === undefined ? {} : { onChallengeFinished }),
     ...(rewards === undefined ? {} : { rewards }),
+    ...(openChallenges === undefined ? {} : { openChallenges }),
   };
 }
 

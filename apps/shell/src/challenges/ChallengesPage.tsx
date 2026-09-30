@@ -1,40 +1,23 @@
 import { useCallback, useEffect, useMemo, useState, type JSX } from "react";
-import { Button, EmptyState, Field, Select, TextInput, icons, useToast, type SelectOption } from "@egemed/ui";
+import { Button, EmptyState, Field, TextInput, icons, useToast } from "@egemed/ui";
 import { t, type TrKey } from "@egemed/ui/i18n";
 import type { ChallengeBody, LearnStatus, SimId } from "@egemed/contracts";
 import { useShellDataSources } from "../dataSources";
-import { challengeHref, challengePlayHref } from "../routes";
+import { challengeHref, challengePlayHref, simScreenHref } from "../routes";
 import { isFacultyLike, type ShellSession } from "../session";
 import { challengeErrorKey, outcomeFor, type ChallengeSource } from "./challengeSource";
 
 /**
- * Meydan Okuma sayfası (ADR-010): yeni düello (kod), kodla katılma ve düellolarım.
- * Kullanıcı arama/liste yoktur; rakip yalnız kodu paylaşarak davet edilir (KVKK).
- * Öğrenme kilidi (27 Eyl 2026): öğrenmesi tamamlanmamış sim seçilemez ve düello
- * oluşturulamaz; sunucu da aynı kuralı uygular (`learn_required`).
+ * Meydan Okuma sayfası (ADR-010; T281a): sim içi merkez. Oluşturma, kodla
+ * katılma ve düellolarım; kullanıcı arama/liste yoktur (KVKK). Sayfa sabit bir
+ * simle çizilir: sim seçici yoktur, liste yalnız o simin düellolarını gösterir.
+ * Öğrenme kilidi (27 Eyl 2026): öğrenmesi tamamlanmamış simde oluşturma ve
+ * katılma pasiftir; sunucu da aynı kuralı uygular (`learn_required`).
  */
 
-const SIM_OPTIONS: readonly { readonly value: SimId; readonly enabled: boolean }[] = [
-  { value: "ausculta", enabled: true },
-  { value: "opaca", enabled: false },
-  { value: "pulse", enabled: false },
-];
-
-/**
- * Sim seçici seçenekleri: düello desteklemeyen sim "yakında"; destekleyen simin
- * öğrenmesi tamamlanmadıysa pasif ve öğrenme ipucu etiketiyle çizilir. Durum
- * henüz okunmadıysa (`null`) seçenek açık kalır: kapıyı sunucu kesin uygular
- * (`learn_required`), geçici bir okuma hatası kullanıcıyı kilitlemez.
- */
-export function challengeSimOptions(learn: LearnStatus | null): readonly SelectOption[] {
-  return SIM_OPTIONS.map((option) => {
-    const name = t(`sims.${option.value}.name`);
-    if (!option.enabled) return { value: option.value, label: `${name} · ${t("challenges.create.soon")}`, disabled: true };
-    if (learn !== null && learn[option.value].complete !== true) {
-      return { value: option.value, label: `${name} · ${t("challenges.create.learnHint")}`, disabled: true };
-    }
-    return { value: option.value, label: name, disabled: false };
-  });
+/** Sim içi merkez: kaynak tüm düellolarımı verir; liste sabit sime daraltılır. */
+export function challengesForSim(simId: SimId, list: readonly ChallengeBody[]): readonly ChallengeBody[] {
+  return list.filter((challenge) => challenge.simId === simId);
 }
 
 function navigate(href: `#${string}`): void {
@@ -104,13 +87,15 @@ function CodeCard({ challenge }: { readonly challenge: ChallengeBody }): JSX.Ele
 export function ChallengeWorkspace({
   source,
   learn = null,
+  simId,
 }: {
   readonly source: ChallengeSource;
   /** Öğrenme tamamlama durumu; null iken durum henüz okunmamıştır (kapı sunucuda). */
   readonly learn?: LearnStatus | null;
+  /** Merkezin sabit simi; oluşturma bu sim için yapılır ve liste buna göre süzülür. */
+  readonly simId: SimId;
 }): JSX.Element {
   const toast = useToast();
-  const [simId, setSimId] = useState<SimId>("ausculta");
   const [created, setCreated] = useState<ChallengeBody | null>(null);
   const [creating, setCreating] = useState(false);
   const [code, setCode] = useState("");
@@ -121,9 +106,9 @@ export function ChallengeWorkspace({
   const refresh = useCallback(() => {
     void source
       .list()
-      .then(setList)
+      .then((items) => setList(challengesForSim(simId, items)))
       .catch(() => setList([]));
-  }, [source]);
+  }, [source, simId]);
   useEffect(() => refresh(), [refresh]);
 
   const create = async () => {
@@ -149,7 +134,7 @@ export function ChallengeWorkspace({
     setJoining(true);
     try {
       const challenge = await source.join(code);
-      navigate(challengeHref(challenge.challengeId));
+      navigate(challengeHref(challenge.simId, challenge.challengeId));
     } catch (error) {
       setCodeError(t(challengeErrorKey(error)));
     } finally {
@@ -157,9 +142,9 @@ export function ChallengeWorkspace({
     }
   };
 
-  const simOptions = useMemo(() => challengeSimOptions(learn), [learn]);
-  // Öğrenme kilidi: seçili simin tamamlanma kaydı yoksa oluşturulamaz; durum
-  // henüz okunmadıysa düğme açık kalır ve kapıyı sunucu uygular.
+  // Öğrenme kilidi: sabit simin tamamlanma kaydı yoksa oluşturma ve katılma
+  // pasiftir; durum henüz okunmadıysa (`null`) düğmeler açık kalır ve kapıyı
+  // sunucu uygular.
   const canCreate = learn === null || learn[simId].complete === true;
 
   return (
@@ -170,9 +155,6 @@ export function ChallengeWorkspace({
             <icons.Target aria-hidden="true" className="eg-shell-duel__cardIcon" />
             {t("challenges.create.title")}
           </h2>
-          <Field label={t("challenges.create.sim")}>
-            {(control) => <Select {...control} onValueChange={(value) => setSimId(value as SimId)} options={simOptions} value={simId} />}
-          </Field>
           <Button disabled={!canCreate} fullWidth loading={creating} onClick={() => void create()}>
             {t("challenges.create.action")}
           </Button>
@@ -208,10 +190,15 @@ export function ChallengeWorkspace({
                 />
               )}
             </Field>
-            <Button fullWidth loading={joining} type="submit" variant="secondary">
+            <Button disabled={!canCreate} fullWidth loading={joining} type="submit" variant="secondary">
               {t("challenges.join.action")}
             </Button>
           </form>
+          {learn !== null && !canCreate ? (
+            <p className="eg-shell-duel__lockNote" role="note">
+              {t("challenges.create.learnHint")}
+            </p>
+          ) : null}
         </section>
       </div>
       <section aria-labelledby="eg-duel-list" className="eg-shell-duel__listSection">
@@ -229,7 +216,7 @@ export function ChallengeWorkspace({
                   <span className="eg-shell-duel__rowSim">{t(`sims.${challenge.simId}.name`)}</span>
                   <span className="eg-shell-duel__rowName">{opponent?.displayName ?? t("challenges.opponent.none")}</span>
                   <ChallengeStatusBadge challenge={challenge} />
-                  <a className="eg-shell-duel__rowLink" href={challengeHref(challenge.challengeId)}>
+                  <a className="eg-shell-duel__rowLink" href={challengeHref(challenge.simId, challenge.challengeId)}>
                     {t("challenges.list.open")}
                     <icons.ArrowRight aria-hidden="true" className="eg-shell-cta__icon" />
                   </a>
@@ -243,7 +230,18 @@ export function ChallengeWorkspace({
   );
 }
 
-export function ChallengesPage({ session = null }: { readonly session?: ShellSession | null }): JSX.Element {
+export interface ChallengesPageProps {
+  readonly session?: ShellSession | null;
+  /** Merkezin sabit simi (`#/sims/<id>/meydan-okuma`); seçici yoktur. */
+  readonly simId: SimId;
+  /**
+   * Sim içi yerleşimde birleşik bar h1 taşır; sayfa başlığı h2'ye iner ki
+   * sayfada tek h1 kalsın (SimRoute ile aynı kural).
+   */
+  readonly headingLevel?: 1 | 2;
+}
+
+export function ChallengesPage({ session = null, simId, headingLevel = 1 }: ChallengesPageProps): JSX.Element {
   const sources = useShellDataSources();
   const source = useMemo(() => (sources === null ? null : sources.challenges(session)), [sources, session]);
   const learnSource = useMemo(() => (sources === null ? null : sources.learn(session)), [sources, session]);
@@ -263,10 +261,15 @@ export function ChallengesPage({ session = null }: { readonly session?: ShellSes
     };
   }, [learnSource]);
 
+  const Heading = headingLevel === 2 ? "h2" : "h1";
   return (
     <section className="eg-shell-page eg-shell-duel">
+      <a className="eg-shell-duel__back" href={simScreenHref(simId, "modlar")}>
+        <icons.ChevronLeft aria-hidden="true" className="eg-shell-cta__icon" />
+        {t("challenges.backToModes")}
+      </a>
       <header className="eg-shell-duel__hero">
-        <h1 className="eg-shell-page__title">{t("challenges.title")}</h1>
+        <Heading className="eg-shell-page__title">{t("challenges.title")}</Heading>
         <p className="eg-shell-duel__lead">{t("challenges.lead")}</p>
         <p className="eg-shell-duel__rules">{t("challenges.rules")}</p>
       </header>
@@ -275,7 +278,7 @@ export function ChallengesPage({ session = null }: { readonly session?: ShellSes
       ) : source === null ? (
         <EmptyState description={t("challenges.unavailable.body")} icon={<icons.Users />} title={t("challenges.unavailable.title")} />
       ) : (
-        <ChallengeWorkspace learn={learn} source={source} />
+        <ChallengeWorkspace learn={learn} simId={simId} source={source} />
       )}
     </section>
   );

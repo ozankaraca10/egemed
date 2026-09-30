@@ -698,6 +698,9 @@ html, body { margin: 0; }
 .eg-shell-header--sim .eg-shell-brand { flex: 0 0 auto; justify-content: center; min-width: var(--eg-shell-touch-min); }
 .eg-shell-header--sim .eg-shell-logo__mark { width: 2.25rem; height: 2.25rem; object-fit: contain; }
 .eg-shell-main--sim { max-width: none; margin: 0; padding: 0; }
+/* T281a: sim içi Meydan Okuma merkezi sim barının altında normal sayfa
+   dolgusu/genişliğiyle çizilir (sim sahnesi değil, içerik sayfasıdır). */
+.eg-shell-main--sim > .eg-shell-duel { max-width: 72rem; margin: 0 auto; padding: var(--sp-4); }
 .eg-shell-simbar { display: flex; flex: 1 1 auto; align-items: center; gap: var(--sp-2); min-width: 0; }
 .eg-shell-simbar__title { flex: 0 1 auto; min-width: 0; margin: 0; font-size: var(--fs-lg); }
 /* 26 Eyl 2026: geri düğmesi yerine sim değiştirici — logo + ad + aşağı ok, tek tıklanabilir öğe. */
