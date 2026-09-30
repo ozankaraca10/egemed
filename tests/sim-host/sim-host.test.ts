@@ -71,7 +71,7 @@ describe("sim kimliği", () => {
 
 describe("sim ekran anahtarı", () => {
   it("genel sözlük anahtarlarını ve bilinmeyen biçime uygun anahtarları kabul eder", () => {
-    expect(SIM_SCREEN_KEYS).toEqual(["modlar", "ogrenme", "uygulama", "degerlendirme", "sonuc", "ilerlemem", "yardim", "hakkinda"]);
+    expect(SIM_SCREEN_KEYS).toEqual(["modlar", "ogrenme", "uygulama", "degerlendirme", "sonuc", "ilerlemem", "yardim", "hakkinda", "meydan-okuma"]);
     for (const key of [...SIM_SCREEN_KEYS, "yeni-ekran", "x".repeat(40)]) expect(isSimScreenKey(key)).toBe(true);
     for (const value of ["", "x".repeat(41), "Kötü", "../", null, 42]) expect(isSimScreenKey(value)).toBe(false);
   });
@@ -294,6 +294,19 @@ describe("SimHost release ve aktör bağlamı", () => {
     await flush();
     expect(opaca.contexts[0]?.rewards?.snapshot()).toBe(snap);
     expect(opaca.contexts[1] !== undefined && "rewards" in opaca.contexts[1]).toBe(false);
+  });
+
+  it("openChallenges (T281a) kanalı bağlama taşınır; verilmezse alan yoktur", async () => {
+    const opaca = fake("opaca");
+    const { host, target } = harness(() => Promise.resolve(opaca.module));
+    let opened = 0;
+    host.mount(target, "opaca", { openChallenges: () => (opened += 1) });
+    await flush();
+    host.mount(target, "opaca");
+    await flush();
+    opaca.contexts[0]?.openChallenges?.();
+    expect(opened).toBe(1);
+    expect(opaca.contexts[1] !== undefined && "openChallenges" in opaca.contexts[1]).toBe(false);
   });
 
   it("sessions (A1 sunucu oturumu) kanalı bağlama taşınır; verilmezse alan yoktur", async () => {
