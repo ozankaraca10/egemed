@@ -8,6 +8,7 @@ import { loadSimModule } from "./sims/loaders";
 import { SERVER_SESSION_SIMS, createBrowserSessionSource } from "./sims/sessionSources";
 import { createBrowserLearnSource, createLearnPort, createUnlockedLearnPort } from "./learn/learnSource";
 import type { SimLearnPort, SimSessionSource } from "@egemed/sim-host";
+import { useShellDataSources } from "./dataSources";
 
 /**
  * A1.4 (ADR-009): uygulama/değerlendirme vakaları sunucu oturumundan gelir. Ziyaretçide
@@ -194,6 +195,7 @@ export function SimRoute({ actorId, allowed = true, apiBaseUrl = null, audience,
 }
 
 function SimRouteHost({ actorId, apiBaseUrl = null, audience = "student", challengeId, learnUnlocked, onChrome, onRequestSignIn, simId }: Omit<SimRouteProps, "allowed">): JSX.Element {
+  const shellSources = useShellDataSources();
   // Kanal ref'te tutulur: üst bileşen yeniden çizilince sim yeniden mount edilmez.
   const chromeRef = useRef(onChrome);
   chromeRef.current = onChrome;
@@ -246,6 +248,7 @@ function SimRouteHost({ actorId, apiBaseUrl = null, audience = "student", challe
         requestSignIn: () => signInRef.current?.(),
         ...(sessions === null ? {} : { sessions }),
         ...(learn === null ? {} : { learn }),
+        ...(audience === "visitor" || shellSources === null ? {} : { rewards: shellSources.rewardStore.forSim(simId) }),
         ...(challengeId === undefined || sessions === null
           ? {}
           : {

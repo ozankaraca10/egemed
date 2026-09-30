@@ -56,6 +56,8 @@ import type { ShellDataSources } from "./dataSources";
 import { createApiShowcaseSource } from "./home/showcaseSource";
 import { createApiChallengeSource } from "./challenges/challengeSource";
 import { createApiLearnSource } from "./learn/learnSource";
+import { createRewardStore } from "./rewards/rewardStore";
+import { shellNow } from "./now";
 import type { ShellSession } from "./session";
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -256,9 +258,11 @@ function istanbulBound(day: string, end: boolean): string | undefined {
 }
 
 export function createApiShellDataSources(client: ApiClient): ShellDataSources {
+  const rewards = createApiRewardsSource(client);
+  const rewardStore = createRewardStore({ client, now: shellNow, rewards });
   const emptyProgress = createSyntheticGamificationSource(false);
   const apiProgress = createApiGamificationSource(client);
-  const apiShowcase = createApiShowcaseSource(client);
+  const apiShowcase = createApiShowcaseSource(client, rewardStore.subscribe);
   const apiChallenges = createApiChallengeSource(client);
   const apiLearn = createApiLearnSource(client);
   const uploaded = new Map<string, { readonly headers: readonly string[]; readonly dataRows: readonly (readonly string[])[] }>();
@@ -466,7 +470,8 @@ export function createApiShellDataSources(client: ApiClient): ShellDataSources {
       return session === null ? null : apiLearn;
     },
     imports,
-    rewards: createApiRewardsSource(client),
+    rewards,
+    rewardStore,
     users,
   };
 }
@@ -540,6 +545,8 @@ export function createBrowserShellDataSources(baseUrl: string): ShellDataSources
   if (win === null) {
     const empty = createSyntheticGamificationSource(false);
     const fail = (): Promise<never> => Promise.reject(new Error("api_unavailable"));
+    const rewards: RewardsDataSource = { finalize: fail, list: fail, remove: fail, upsert: fail };
+    const rewardStore = createRewardStore({ now: shellNow, rewards });
     const users = {
       bulkApply: fail,
       bulkPreview: fail,
@@ -558,7 +565,8 @@ export function createBrowserShellDataSources(baseUrl: string): ShellDataSources
       challenges: () => null,
       learn: () => null,
       imports: { apply: fail, template: fail, upload: fail, validate: fail },
-      rewards: { finalize: fail, list: fail, remove: fail, upsert: fail },
+      rewards,
+      rewardStore,
       users,
     };
   }
