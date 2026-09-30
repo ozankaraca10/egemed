@@ -81,6 +81,7 @@ function contentFor(
     return (
       <SimRoute
         {...(route.challengeId === undefined ? {} : { challengeId: route.challengeId })}
+        {...(route.screenKey === undefined ? {} : { screenKey: route.screenKey })}
         actorId={session?.actorId}
         allowed={sessionAllowsSim(session, route.simId)}
         apiBaseUrl={apiBaseUrl}
