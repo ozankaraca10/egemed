@@ -19,6 +19,7 @@ export interface KauhFileFields {
   readonly diagnosis: string;
   readonly sound: string;
   readonly region: string;
+  readonly age: string;
   readonly sex: string;
 }
 

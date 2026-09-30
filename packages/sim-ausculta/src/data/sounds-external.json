@@ -45,7 +45,16 @@
       "nativeFilter": "unspecified",
       "runtimeUrl": "assets/audio/runtime/external/circor/circor_normal_cardiac_aortic_001.wav",
       "validationStatus": "validated",
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "real",
+        "ageYears": null,
+        "sex": null,
+        "diagnosis": null,
+        "diagnosisSource": "CirCor veri kümesi (hasta alanı yok)",
+        "soundTypeRaw": null,
+        "site": null
+      }
     },
     {
       "id": "circor_mid_systolic_murmur_cardiac_aortic_001",
@@ -65,7 +74,16 @@
       "nativeFilter": "unspecified",
       "runtimeUrl": "assets/audio/runtime/external/circor/circor_mid_systolic_murmur_cardiac_aortic_001.wav",
       "validationStatus": "validated",
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "real",
+        "ageYears": null,
+        "sex": null,
+        "diagnosis": null,
+        "diagnosisSource": "CirCor veri kümesi (hasta alanı yok)",
+        "soundTypeRaw": null,
+        "site": null
+      }
     },
     {
       "id": "circor_early_systolic_murmur_cardiac_aortic_001",
@@ -85,7 +103,16 @@
       "nativeFilter": "unspecified",
       "runtimeUrl": "assets/audio/runtime/external/circor/circor_early_systolic_murmur_cardiac_aortic_001.wav",
       "validationStatus": "validated",
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "real",
+        "ageYears": null,
+        "sex": null,
+        "diagnosis": null,
+        "diagnosisSource": "CirCor veri kümesi (hasta alanı yok)",
+        "soundTypeRaw": null,
+        "site": null
+      }
     },
     {
       "id": "circor_late_systolic_murmur_cardiac_aortic_001",
@@ -105,7 +132,16 @@
       "nativeFilter": "unspecified",
       "runtimeUrl": "assets/audio/runtime/external/circor/circor_late_systolic_murmur_cardiac_aortic_001.wav",
       "validationStatus": "validated",
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "real",
+        "ageYears": null,
+        "sex": null,
+        "diagnosis": null,
+        "diagnosisSource": "CirCor veri kümesi (hasta alanı yok)",
+        "soundTypeRaw": null,
+        "site": null
+      }
     },
     {
       "id": "kauh_normal_lung_right_middle_posterior_001",
@@ -128,7 +164,16 @@
       "gender": "F",
       "runtimeUrl": "assets/audio/runtime/external/kauh/kauh_normal_lung_right_middle_posterior_001.wav",
       "validationStatus": "validated",
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "real",
+        "ageYears": 70,
+        "sex": "F",
+        "diagnosis": "Tanı yok (normal)",
+        "diagnosisSource": "KAUH tablosu",
+        "soundTypeRaw": "N",
+        "site": "Sağ orta bölge (posterior)"
+      }
     },
     {
       "id": "kauh_wheezing_lung_left_middle_posterior_001",
@@ -151,7 +196,16 @@
       "gender": "F",
       "runtimeUrl": "assets/audio/runtime/external/kauh/kauh_wheezing_lung_left_middle_posterior_001.wav",
       "validationStatus": "validated",
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "real",
+        "ageYears": 12,
+        "sex": "F",
+        "diagnosis": "Astım",
+        "diagnosisSource": "KAUH tablosu",
+        "soundTypeRaw": "E W",
+        "site": "Sol orta bölge (posterior)"
+      }
     },
     {
       "id": "kauh_normal_lung_left_lower_posterior_001",
@@ -174,7 +228,16 @@
       "gender": "M",
       "runtimeUrl": "assets/audio/runtime/external/kauh/kauh_normal_lung_left_lower_posterior_001.wav",
       "validationStatus": "validated",
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "real",
+        "ageYears": 41,
+        "sex": "M",
+        "diagnosis": "Tanı yok (normal)",
+        "diagnosisSource": "KAUH tablosu",
+        "soundTypeRaw": "N",
+        "site": "Sol alt bölge (posterior)"
+      }
     },
     {
       "id": "kauh_normal_lung_right_upper_posterior_001",
@@ -197,7 +260,16 @@
       "gender": "F",
       "runtimeUrl": "assets/audio/runtime/external/kauh/kauh_normal_lung_right_upper_posterior_001.wav",
       "validationStatus": "validated",
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "real",
+        "ageYears": 81,
+        "sex": "F",
+        "diagnosis": "Tanı yok (normal)",
+        "diagnosisSource": "KAUH tablosu",
+        "soundTypeRaw": "N",
+        "site": "Sağ üst bölge (posterior)"
+      }
     },
     {
       "id": "kauh_wheezing_lung_left_upper_posterior_001",
@@ -220,7 +292,16 @@
       "gender": "F",
       "runtimeUrl": "assets/audio/runtime/external/kauh/kauh_wheezing_lung_left_upper_posterior_001.wav",
       "validationStatus": "validated",
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "real",
+        "ageYears": 45,
+        "sex": "F",
+        "diagnosis": "Astım",
+        "diagnosisSource": "KAUH tablosu",
+        "soundTypeRaw": "E W",
+        "site": "Sol üst bölge (posterior)"
+      }
     },
     {
       "id": "kauh_wheezing_lung_left_upper_posterior_002",
@@ -243,7 +324,16 @@
       "gender": "F",
       "runtimeUrl": "assets/audio/runtime/external/kauh/kauh_wheezing_lung_left_upper_posterior_002.wav",
       "validationStatus": "validated",
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "real",
+        "ageYears": 45,
+        "sex": "F",
+        "diagnosis": "Astım",
+        "diagnosisSource": "KAUH tablosu",
+        "soundTypeRaw": "E W",
+        "site": "Sol üst bölge (posterior)"
+      }
     },
     {
       "id": "kauh_wheezing_lung_left_upper_posterior_003",
@@ -266,7 +356,16 @@
       "gender": "F",
       "runtimeUrl": "assets/audio/runtime/external/kauh/kauh_wheezing_lung_left_upper_posterior_003.wav",
       "validationStatus": "validated",
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "real",
+        "ageYears": 59,
+        "sex": "F",
+        "diagnosis": "Astım",
+        "diagnosisSource": "KAUH tablosu",
+        "soundTypeRaw": "E W",
+        "site": "Sol üst bölge (posterior)"
+      }
     },
     {
       "id": "kauh_wheezing_lung_right_lower_posterior_001",
@@ -289,7 +388,16 @@
       "gender": "M",
       "runtimeUrl": "assets/audio/runtime/external/kauh/kauh_wheezing_lung_right_lower_posterior_001.wav",
       "validationStatus": "validated",
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "real",
+        "ageYears": 63,
+        "sex": "M",
+        "diagnosis": "KOAH",
+        "diagnosisSource": "KAUH tablosu",
+        "soundTypeRaw": "E W",
+        "site": "Sağ alt bölge (posterior)"
+      }
     },
     {
       "id": "kauh_normal_lung_left_middle_posterior_001",
@@ -312,7 +420,16 @@
       "gender": "M",
       "runtimeUrl": "assets/audio/runtime/external/kauh/kauh_normal_lung_left_middle_posterior_001.wav",
       "validationStatus": "validated",
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "real",
+        "ageYears": 26,
+        "sex": "M",
+        "diagnosis": "Tanı yok (normal)",
+        "diagnosisSource": "KAUH tablosu",
+        "soundTypeRaw": "N",
+        "site": "Sol orta bölge (posterior)"
+      }
     },
     {
       "id": "kauh_wheezing_lung_right_upper_posterior_001",
@@ -335,7 +452,16 @@
       "gender": "M",
       "runtimeUrl": "assets/audio/runtime/external/kauh/kauh_wheezing_lung_right_upper_posterior_001.wav",
       "validationStatus": "validated",
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "real",
+        "ageYears": 59,
+        "sex": "M",
+        "diagnosis": "Astım",
+        "diagnosisSource": "KAUH tablosu",
+        "soundTypeRaw": "E W",
+        "site": "Sağ üst bölge (posterior)"
+      }
     },
     {
       "id": "kauh_wheezing_lung_left_lower_posterior_001",
@@ -358,7 +484,16 @@
       "gender": "M",
       "runtimeUrl": "assets/audio/runtime/external/kauh/kauh_wheezing_lung_left_lower_posterior_001.wav",
       "validationStatus": "validated",
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "real",
+        "ageYears": 62,
+        "sex": "M",
+        "diagnosis": "KOAH",
+        "diagnosisSource": "KAUH tablosu",
+        "soundTypeRaw": "E W",
+        "site": "Sol alt bölge (posterior)"
+      }
     },
     {
       "id": "kauh_wheezing_lung_right_lower_posterior_002",
@@ -381,7 +516,16 @@
       "gender": "M",
       "runtimeUrl": "assets/audio/runtime/external/kauh/kauh_wheezing_lung_right_lower_posterior_002.wav",
       "validationStatus": "validated",
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "real",
+        "ageYears": 51,
+        "sex": "M",
+        "diagnosis": "KOAH",
+        "diagnosisSource": "KAUH tablosu",
+        "soundTypeRaw": "E W",
+        "site": "Sağ alt bölge (posterior)"
+      }
     },
     {
       "id": "kauh_normal_lung_left_middle_posterior_002",
@@ -404,7 +548,16 @@
       "gender": "M",
       "runtimeUrl": "assets/audio/runtime/external/kauh/kauh_normal_lung_left_middle_posterior_002.wav",
       "validationStatus": "validated",
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "real",
+        "ageYears": 30,
+        "sex": "M",
+        "diagnosis": "Tanı yok (normal)",
+        "diagnosisSource": "KAUH tablosu",
+        "soundTypeRaw": "N",
+        "site": "Sol orta bölge (posterior)"
+      }
     },
     {
       "id": "kauh_fine_crackles_lung_left_lower_posterior_001",
@@ -427,7 +580,16 @@
       "gender": "M",
       "runtimeUrl": "assets/audio/runtime/external/kauh/kauh_fine_crackles_lung_left_lower_posterior_001.wav",
       "validationStatus": "validated",
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "real",
+        "ageYears": 53,
+        "sex": "M",
+        "diagnosis": "Kalp yetersizliği",
+        "diagnosisSource": "KAUH tablosu",
+        "soundTypeRaw": "C",
+        "site": "Sol alt bölge (posterior)"
+      }
     },
     {
       "id": "kauh_wheezing_lung_left_lower_posterior_002",
@@ -450,7 +612,16 @@
       "gender": "F",
       "runtimeUrl": "assets/audio/runtime/external/kauh/kauh_wheezing_lung_left_lower_posterior_002.wav",
       "validationStatus": "validated",
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "real",
+        "ageYears": 50,
+        "sex": "F",
+        "diagnosis": "Astım",
+        "diagnosisSource": "KAUH tablosu",
+        "soundTypeRaw": "E W",
+        "site": "Sol alt bölge (posterior)"
+      }
     },
     {
       "id": "kauh_fine_crackles_lung_left_lower_posterior_002",
@@ -473,7 +644,16 @@
       "gender": "M",
       "runtimeUrl": "assets/audio/runtime/external/kauh/kauh_fine_crackles_lung_left_lower_posterior_002.wav",
       "validationStatus": "validated",
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "real",
+        "ageYears": 55,
+        "sex": "M",
+        "diagnosis": "Kalp yetersizliği",
+        "diagnosisSource": "KAUH tablosu",
+        "soundTypeRaw": "C",
+        "site": "Sol alt bölge (posterior)"
+      }
     },
     {
       "id": "kauh_wheezing_lung_right_upper_posterior_002",
@@ -496,7 +676,16 @@
       "gender": "F",
       "runtimeUrl": "assets/audio/runtime/external/kauh/kauh_wheezing_lung_right_upper_posterior_002.wav",
       "validationStatus": "validated",
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "real",
+        "ageYears": 49,
+        "sex": "F",
+        "diagnosis": "Astım",
+        "diagnosisSource": "KAUH tablosu",
+        "soundTypeRaw": "E W",
+        "site": "Sağ üst bölge (posterior)"
+      }
     },
     {
       "id": "kauh_fine_crackles_lung_right_upper_posterior_001",
@@ -519,7 +708,16 @@
       "gender": "M",
       "runtimeUrl": "assets/audio/runtime/external/kauh/kauh_fine_crackles_lung_right_upper_posterior_001.wav",
       "validationStatus": "validated",
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "real",
+        "ageYears": 56,
+        "sex": "M",
+        "diagnosis": "Kalp yetersizliği",
+        "diagnosisSource": "KAUH tablosu",
+        "soundTypeRaw": "C",
+        "site": "Sağ üst bölge (posterior)"
+      }
     },
     {
       "id": "kauh_coarse_crackles_lung_right_upper_posterior_001",
@@ -542,7 +740,16 @@
       "gender": "M",
       "runtimeUrl": "assets/audio/runtime/external/kauh/kauh_coarse_crackles_lung_right_upper_posterior_001.wav",
       "validationStatus": "validated",
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "real",
+        "ageYears": 57,
+        "sex": "M",
+        "diagnosis": "Pnömoni",
+        "diagnosisSource": "KAUH tablosu",
+        "soundTypeRaw": "C",
+        "site": "Sağ üst bölge (posterior)"
+      }
     },
     {
       "id": "kauh_fine_crackles_lung_right_upper_posterior_002",
@@ -565,7 +772,16 @@
       "gender": "F",
       "runtimeUrl": "assets/audio/runtime/external/kauh/kauh_fine_crackles_lung_right_upper_posterior_002.wav",
       "validationStatus": "validated",
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "real",
+        "ageYears": 70,
+        "sex": "F",
+        "diagnosis": "Kalp yetersizliği",
+        "diagnosisSource": "KAUH tablosu",
+        "soundTypeRaw": "C",
+        "site": "Sağ üst bölge (posterior)"
+      }
     },
     {
       "id": "kauh_coarse_crackles_lung_right_lower_posterior_001",
@@ -588,7 +804,16 @@
       "gender": "M",
       "runtimeUrl": "assets/audio/runtime/external/kauh/kauh_coarse_crackles_lung_right_lower_posterior_001.wav",
       "validationStatus": "validated",
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "real",
+        "ageYears": 20,
+        "sex": "M",
+        "diagnosis": "Bronşit",
+        "diagnosisSource": "KAUH tablosu",
+        "soundTypeRaw": "Crep",
+        "site": "Sağ alt bölge (posterior)"
+      }
     },
     {
       "id": "kauh_coarse_crackles_lung_right_upper_posterior_002",
@@ -611,7 +836,16 @@
       "gender": "M",
       "runtimeUrl": "assets/audio/runtime/external/kauh/kauh_coarse_crackles_lung_right_upper_posterior_002.wav",
       "validationStatus": "validated",
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "real",
+        "ageYears": 24,
+        "sex": "M",
+        "diagnosis": "Bronşit",
+        "diagnosisSource": "KAUH tablosu",
+        "soundTypeRaw": "Crep",
+        "site": "Sağ üst bölge (posterior)"
+      }
     },
     {
       "id": "kauh_fine_crackles_lung_right_lower_posterior_001",
@@ -634,7 +868,16 @@
       "gender": "M",
       "runtimeUrl": "assets/audio/runtime/external/kauh/kauh_fine_crackles_lung_right_lower_posterior_001.wav",
       "validationStatus": "validated",
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "real",
+        "ageYears": 50,
+        "sex": "M",
+        "diagnosis": "Akciğer fibrozisi",
+        "diagnosisSource": "KAUH tablosu",
+        "soundTypeRaw": "Crep",
+        "site": "Sağ alt bölge (posterior)"
+      }
     },
     {
       "id": "kauh_fine_crackles_lung_right_lower_posterior_002",
@@ -657,7 +900,16 @@
       "gender": "F",
       "runtimeUrl": "assets/audio/runtime/external/kauh/kauh_fine_crackles_lung_right_lower_posterior_002.wav",
       "validationStatus": "validated",
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "real",
+        "ageYears": 76,
+        "sex": "F",
+        "diagnosis": "Kalp yetersizliği",
+        "diagnosisSource": "KAUH tablosu",
+        "soundTypeRaw": "Crep",
+        "site": "Sağ alt bölge (posterior)"
+      }
     },
     {
       "id": "kauh_wheezing_lung_left_lower_posterior_003",
@@ -680,7 +932,16 @@
       "gender": "M",
       "runtimeUrl": "assets/audio/runtime/external/kauh/kauh_wheezing_lung_left_lower_posterior_003.wav",
       "validationStatus": "validated",
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "real",
+        "ageYears": 76,
+        "sex": "M",
+        "diagnosis": "KOAH",
+        "diagnosisSource": "KAUH tablosu",
+        "soundTypeRaw": "E W",
+        "site": "Sol alt bölge (posterior)"
+      }
     },
     {
       "id": "kauh_wheezing_lung_right_middle_posterior_001",
@@ -703,7 +964,16 @@
       "gender": "F",
       "runtimeUrl": "assets/audio/runtime/external/kauh/kauh_wheezing_lung_right_middle_posterior_001.wav",
       "validationStatus": "validated",
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "real",
+        "ageYears": 53,
+        "sex": "F",
+        "diagnosis": "Astım",
+        "diagnosisSource": "KAUH tablosu",
+        "soundTypeRaw": "E W",
+        "site": "Sağ orta bölge (posterior)"
+      }
     },
     {
       "id": "kauh_coarse_crackles_lung_left_upper_posterior_001",
@@ -726,7 +996,16 @@
       "gender": "F",
       "runtimeUrl": "assets/audio/runtime/external/kauh/kauh_coarse_crackles_lung_left_upper_posterior_001.wav",
       "validationStatus": "validated",
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "real",
+        "ageYears": 68,
+        "sex": "F",
+        "diagnosis": "Bronşit",
+        "diagnosisSource": "KAUH tablosu",
+        "soundTypeRaw": "Crep",
+        "site": "Sol üst bölge (posterior)"
+      }
     },
     {
       "id": "kauh_fine_crackles_lung_left_lower_posterior_003",
@@ -749,7 +1028,16 @@
       "gender": "M",
       "runtimeUrl": "assets/audio/runtime/external/kauh/kauh_fine_crackles_lung_left_lower_posterior_003.wav",
       "validationStatus": "validated",
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "real",
+        "ageYears": 57,
+        "sex": "M",
+        "diagnosis": "Kalp yetersizliği",
+        "diagnosisSource": "KAUH tablosu",
+        "soundTypeRaw": "Crep",
+        "site": "Sol alt bölge (posterior)"
+      }
     },
     {
       "id": "kauh_normal_lung_right_middle_posterior_002",
@@ -772,7 +1060,16 @@
       "gender": "F",
       "runtimeUrl": "assets/audio/runtime/external/kauh/kauh_normal_lung_right_middle_posterior_002.wav",
       "validationStatus": "validated",
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "real",
+        "ageYears": 18,
+        "sex": "F",
+        "diagnosis": "Tanı yok (normal)",
+        "diagnosisSource": "KAUH tablosu",
+        "soundTypeRaw": "N",
+        "site": "Sağ orta bölge (posterior)"
+      }
     },
     {
       "id": "kauh_normal_lung_left_middle_posterior_003",
@@ -795,7 +1092,16 @@
       "gender": "F",
       "runtimeUrl": "assets/audio/runtime/external/kauh/kauh_normal_lung_left_middle_posterior_003.wav",
       "validationStatus": "validated",
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "real",
+        "ageYears": 27,
+        "sex": "F",
+        "diagnosis": "Tanı yok (normal)",
+        "diagnosisSource": "KAUH tablosu",
+        "soundTypeRaw": "N",
+        "site": "Sol orta bölge (posterior)"
+      }
     },
     {
       "id": "kauh_wheezing_lung_right_middle_posterior_002",
@@ -818,7 +1124,16 @@
       "gender": "F",
       "runtimeUrl": "assets/audio/runtime/external/kauh/kauh_wheezing_lung_right_middle_posterior_002.wav",
       "validationStatus": "validated",
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "real",
+        "ageYears": 43,
+        "sex": "F",
+        "diagnosis": "Astım",
+        "diagnosisSource": "KAUH tablosu",
+        "soundTypeRaw": "E W",
+        "site": "Sağ orta bölge (posterior)"
+      }
     },
     {
       "id": "kauh_fine_crackles_lung_right_middle_posterior_001",
@@ -841,7 +1156,16 @@
       "gender": "F",
       "runtimeUrl": "assets/audio/runtime/external/kauh/kauh_fine_crackles_lung_right_middle_posterior_001.wav",
       "validationStatus": "validated",
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "real",
+        "ageYears": 78,
+        "sex": "F",
+        "diagnosis": "Kalp yetersizliği",
+        "diagnosisSource": "KAUH tablosu",
+        "soundTypeRaw": "Crep",
+        "site": "Sağ orta bölge (posterior)"
+      }
     },
     {
       "id": "kauh_coarse_crackles_lung_right_middle_posterior_001",
@@ -864,7 +1188,16 @@
       "gender": "F",
       "runtimeUrl": "assets/audio/runtime/external/kauh/kauh_coarse_crackles_lung_right_middle_posterior_001.wav",
       "validationStatus": "validated",
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "real",
+        "ageYears": 36,
+        "sex": "F",
+        "diagnosis": "Pnömoni",
+        "diagnosisSource": "KAUH tablosu",
+        "soundTypeRaw": "Crep",
+        "site": "Sağ orta bölge (posterior)"
+      }
     },
     {
       "id": "kauh_wheezing_lung_right_middle_posterior_003",
@@ -887,7 +1220,16 @@
       "gender": "M",
       "runtimeUrl": "assets/audio/runtime/external/kauh/kauh_wheezing_lung_right_middle_posterior_003.wav",
       "validationStatus": "validated",
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "real",
+        "ageYears": 38,
+        "sex": "M",
+        "diagnosis": "Astım",
+        "diagnosisSource": "KAUH tablosu",
+        "soundTypeRaw": "E W",
+        "site": "Sağ orta bölge (posterior)"
+      }
     },
     {
       "id": "kauh_fine_crackles_lung_right_lower_posterior_003",
@@ -910,7 +1252,16 @@
       "gender": "M",
       "runtimeUrl": "assets/audio/runtime/external/kauh/kauh_fine_crackles_lung_right_lower_posterior_003.wav",
       "validationStatus": "validated",
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "real",
+        "ageYears": 67,
+        "sex": "M",
+        "diagnosis": "Kalp yetersizliği",
+        "diagnosisSource": "KAUH tablosu",
+        "soundTypeRaw": "Crep",
+        "site": "Sağ alt bölge (posterior)"
+      }
     },
     {
       "id": "kauh_coarse_crackles_lung_right_middle_posterior_002",
@@ -933,7 +1284,16 @@
       "gender": "M",
       "runtimeUrl": "assets/audio/runtime/external/kauh/kauh_coarse_crackles_lung_right_middle_posterior_002.wav",
       "validationStatus": "validated",
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "real",
+        "ageYears": 51,
+        "sex": "M",
+        "diagnosis": "Pnömoni",
+        "diagnosisSource": "KAUH tablosu",
+        "soundTypeRaw": "Crep",
+        "site": "Sağ orta bölge (posterior)"
+      }
     },
     {
       "id": "kauh_fine_crackles_lung_left_lower_posterior_004",
@@ -956,7 +1316,16 @@
       "gender": "M",
       "runtimeUrl": "assets/audio/runtime/external/kauh/kauh_fine_crackles_lung_left_lower_posterior_004.wav",
       "validationStatus": "validated",
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "real",
+        "ageYears": 56,
+        "sex": "M",
+        "diagnosis": "Kalp yetersizliği",
+        "diagnosisSource": "KAUH tablosu",
+        "soundTypeRaw": "Crep",
+        "site": "Sol alt bölge (posterior)"
+      }
     },
     {
       "id": "kauh_wheezing_lung_left_middle_posterior_002",
@@ -979,7 +1348,16 @@
       "gender": "M",
       "runtimeUrl": "assets/audio/runtime/external/kauh/kauh_wheezing_lung_left_middle_posterior_002.wav",
       "validationStatus": "validated",
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "real",
+        "ageYears": 15,
+        "sex": "M",
+        "diagnosis": "Astım",
+        "diagnosisSource": "KAUH tablosu",
+        "soundTypeRaw": "E W",
+        "site": "Sol orta bölge (posterior)"
+      }
     },
     {
       "id": "kauh_wheezing_lung_right_upper_posterior_003",
@@ -1002,7 +1380,16 @@
       "gender": "M",
       "runtimeUrl": "assets/audio/runtime/external/kauh/kauh_wheezing_lung_right_upper_posterior_003.wav",
       "validationStatus": "validated",
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "real",
+        "ageYears": 40,
+        "sex": "M",
+        "diagnosis": "Astım",
+        "diagnosisSource": "KAUH tablosu",
+        "soundTypeRaw": "E W",
+        "site": "Sağ üst bölge (posterior)"
+      }
     },
     {
       "id": "kauh_fine_crackles_lung_right_lower_posterior_004",
@@ -1025,7 +1412,16 @@
       "gender": "M",
       "runtimeUrl": "assets/audio/runtime/external/kauh/kauh_fine_crackles_lung_right_lower_posterior_004.wav",
       "validationStatus": "validated",
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "real",
+        "ageYears": 30,
+        "sex": "M",
+        "diagnosis": "Kalp yetersizliği",
+        "diagnosisSource": "KAUH tablosu",
+        "soundTypeRaw": "Crep",
+        "site": "Sağ alt bölge (posterior)"
+      }
     },
     {
       "id": "kauh_wheezing_lung_left_upper_posterior_004",
@@ -1048,7 +1444,16 @@
       "gender": "F",
       "runtimeUrl": "assets/audio/runtime/external/kauh/kauh_wheezing_lung_left_upper_posterior_004.wav",
       "validationStatus": "validated",
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "real",
+        "ageYears": 41,
+        "sex": "F",
+        "diagnosis": "Astım",
+        "diagnosisSource": "KAUH tablosu",
+        "soundTypeRaw": "E W",
+        "site": "Sol üst bölge (posterior)"
+      }
     },
     {
       "id": "kauh_wheezing_lung_left_middle_posterior_003",
@@ -1071,7 +1476,16 @@
       "gender": "M",
       "runtimeUrl": "assets/audio/runtime/external/kauh/kauh_wheezing_lung_left_middle_posterior_003.wav",
       "validationStatus": "validated",
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "real",
+        "ageYears": 60,
+        "sex": "M",
+        "diagnosis": "Astım",
+        "diagnosisSource": "KAUH tablosu",
+        "soundTypeRaw": "E W",
+        "site": "Sol orta bölge (posterior)"
+      }
     },
     {
       "id": "kauh_normal_lung_left_upper_posterior_001",
@@ -1094,7 +1508,16 @@
       "gender": "M",
       "runtimeUrl": "assets/audio/runtime/external/kauh/kauh_normal_lung_left_upper_posterior_001.wav",
       "validationStatus": "validated",
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "real",
+        "ageYears": 31,
+        "sex": "M",
+        "diagnosis": "Tanı yok (normal)",
+        "diagnosisSource": "KAUH tablosu",
+        "soundTypeRaw": "N",
+        "site": "Sol üst bölge (posterior)"
+      }
     },
     {
       "id": "kauh_normal_lung_right_middle_posterior_003",
@@ -1117,7 +1540,16 @@
       "gender": "M",
       "runtimeUrl": "assets/audio/runtime/external/kauh/kauh_normal_lung_right_middle_posterior_003.wav",
       "validationStatus": "validated",
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "real",
+        "ageYears": 21,
+        "sex": "M",
+        "diagnosis": "Tanı yok (normal)",
+        "diagnosisSource": "KAUH tablosu",
+        "soundTypeRaw": "N",
+        "site": "Sağ orta bölge (posterior)"
+      }
     },
     {
       "id": "kauh_normal_lung_right_lower_posterior_001",
@@ -1140,7 +1572,16 @@
       "gender": "M",
       "runtimeUrl": "assets/audio/runtime/external/kauh/kauh_normal_lung_right_lower_posterior_001.wav",
       "validationStatus": "validated",
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "real",
+        "ageYears": 27,
+        "sex": "M",
+        "diagnosis": "Tanı yok (normal)",
+        "diagnosisSource": "KAUH tablosu",
+        "soundTypeRaw": "N",
+        "site": "Sağ alt bölge (posterior)"
+      }
     },
     {
       "id": "kauh_normal_lung_left_middle_posterior_004",
@@ -1163,7 +1604,16 @@
       "gender": "M",
       "runtimeUrl": "assets/audio/runtime/external/kauh/kauh_normal_lung_left_middle_posterior_004.wav",
       "validationStatus": "validated",
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "real",
+        "ageYears": 30,
+        "sex": "M",
+        "diagnosis": "Tanı yok (normal)",
+        "diagnosisSource": "KAUH tablosu",
+        "soundTypeRaw": "N",
+        "site": "Sol orta bölge (posterior)"
+      }
     },
     {
       "id": "kauh_fine_crackles_lung_left_lower_posterior_005",
@@ -1186,7 +1636,16 @@
       "gender": "F",
       "runtimeUrl": "assets/audio/runtime/external/kauh/kauh_fine_crackles_lung_left_lower_posterior_005.wav",
       "validationStatus": "validated",
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "real",
+        "ageYears": 76,
+        "sex": "F",
+        "diagnosis": "Akciğer fibrozisi",
+        "diagnosisSource": "KAUH tablosu",
+        "soundTypeRaw": "Crep",
+        "site": "Sol alt bölge (posterior)"
+      }
     },
     {
       "id": "kauh_wheezing_lung_right_middle_posterior_004",
@@ -1209,7 +1668,16 @@
       "gender": "F",
       "runtimeUrl": "assets/audio/runtime/external/kauh/kauh_wheezing_lung_right_middle_posterior_004.wav",
       "validationStatus": "validated",
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "real",
+        "ageYears": 72,
+        "sex": "F",
+        "diagnosis": "Astım",
+        "diagnosisSource": "KAUH tablosu",
+        "soundTypeRaw": "E W",
+        "site": "Sağ orta bölge (posterior)"
+      }
     },
     {
       "id": "kauh_fine_crackles_lung_right_lower_posterior_005",
@@ -1232,7 +1700,16 @@
       "gender": "F",
       "runtimeUrl": "assets/audio/runtime/external/kauh/kauh_fine_crackles_lung_right_lower_posterior_005.wav",
       "validationStatus": "validated",
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "real",
+        "ageYears": 73,
+        "sex": "F",
+        "diagnosis": "Kalp yetersizliği",
+        "diagnosisSource": "KAUH tablosu",
+        "soundTypeRaw": "Crep",
+        "site": "Sağ alt bölge (posterior)"
+      }
     },
     {
       "id": "kauh_wheezing_lung_right_upper_posterior_004",
@@ -1255,7 +1732,16 @@
       "gender": "F",
       "runtimeUrl": "assets/audio/runtime/external/kauh/kauh_wheezing_lung_right_upper_posterior_004.wav",
       "validationStatus": "validated",
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "real",
+        "ageYears": 72,
+        "sex": "F",
+        "diagnosis": "Astım",
+        "diagnosisSource": "KAUH tablosu",
+        "soundTypeRaw": "E W",
+        "site": "Sağ üst bölge (posterior)"
+      }
     },
     {
       "id": "kauh_wheezing_lung_right_middle_posterior_005",
@@ -1278,7 +1764,16 @@
       "gender": "F",
       "runtimeUrl": "assets/audio/runtime/external/kauh/kauh_wheezing_lung_right_middle_posterior_005.wav",
       "validationStatus": "validated",
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "real",
+        "ageYears": 56,
+        "sex": "F",
+        "diagnosis": "Astım",
+        "diagnosisSource": "KAUH tablosu",
+        "soundTypeRaw": "E W",
+        "site": "Sağ orta bölge (posterior)"
+      }
     },
     {
       "id": "kauh_wheezing_lung_right_lower_posterior_003",
@@ -1301,7 +1796,16 @@
       "gender": "M",
       "runtimeUrl": "assets/audio/runtime/external/kauh/kauh_wheezing_lung_right_lower_posterior_003.wav",
       "validationStatus": "validated",
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "real",
+        "ageYears": 42,
+        "sex": "M",
+        "diagnosis": "KOAH",
+        "diagnosisSource": "KAUH tablosu",
+        "soundTypeRaw": "E W",
+        "site": "Sağ alt bölge (posterior)"
+      }
     },
     {
       "id": "kauh_wheezing_lung_left_middle_posterior_004",
@@ -1324,7 +1828,16 @@
       "gender": "M",
       "runtimeUrl": "assets/audio/runtime/external/kauh/kauh_wheezing_lung_left_middle_posterior_004.wav",
       "validationStatus": "validated",
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "real",
+        "ageYears": 40,
+        "sex": "M",
+        "diagnosis": "Astım",
+        "diagnosisSource": "KAUH tablosu",
+        "soundTypeRaw": "E W",
+        "site": "Sol orta bölge (posterior)"
+      }
     },
     {
       "id": "kauh_fine_crackles_lung_right_lower_posterior_006",
@@ -1347,7 +1860,16 @@
       "gender": "F",
       "runtimeUrl": "assets/audio/runtime/external/kauh/kauh_fine_crackles_lung_right_lower_posterior_006.wav",
       "validationStatus": "validated",
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "real",
+        "ageYears": 83,
+        "sex": "F",
+        "diagnosis": "Kalp yetersizliği",
+        "diagnosisSource": "KAUH tablosu",
+        "soundTypeRaw": "Crep",
+        "site": "Sağ alt bölge (posterior)"
+      }
     },
     {
       "id": "kauh_fine_crackles_lung_left_lower_posterior_006",
@@ -1370,7 +1892,16 @@
       "gender": "F",
       "runtimeUrl": "assets/audio/runtime/external/kauh/kauh_fine_crackles_lung_left_lower_posterior_006.wav",
       "validationStatus": "validated",
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "real",
+        "ageYears": 83,
+        "sex": "F",
+        "diagnosis": "Kalp yetersizliği",
+        "diagnosisSource": "KAUH tablosu",
+        "soundTypeRaw": "Crep",
+        "site": "Sol alt bölge (posterior)"
+      }
     },
     {
       "id": "kauh_wheezing_lung_right_lower_posterior_004",
@@ -1393,7 +1924,16 @@
       "gender": "M",
       "runtimeUrl": "assets/audio/runtime/external/kauh/kauh_wheezing_lung_right_lower_posterior_004.wav",
       "validationStatus": "validated",
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "real",
+        "ageYears": 53,
+        "sex": "M",
+        "diagnosis": "KOAH",
+        "diagnosisSource": "KAUH tablosu",
+        "soundTypeRaw": "E W",
+        "site": "Sağ alt bölge (posterior)"
+      }
     },
     {
       "id": "kauh_wheezing_lung_left_middle_posterior_005",
@@ -1416,7 +1956,16 @@
       "gender": "M",
       "runtimeUrl": "assets/audio/runtime/external/kauh/kauh_wheezing_lung_left_middle_posterior_005.wav",
       "validationStatus": "validated",
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "real",
+        "ageYears": 53,
+        "sex": "M",
+        "diagnosis": "KOAH",
+        "diagnosisSource": "KAUH tablosu",
+        "soundTypeRaw": "E W",
+        "site": "Sol orta bölge (posterior)"
+      }
     },
     {
       "id": "kauh_wheezing_lung_right_lower_posterior_005",
@@ -1439,7 +1988,16 @@
       "gender": "F",
       "runtimeUrl": "assets/audio/runtime/external/kauh/kauh_wheezing_lung_right_lower_posterior_005.wav",
       "validationStatus": "validated",
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "real",
+        "ageYears": 58,
+        "sex": "F",
+        "diagnosis": "KOAH",
+        "diagnosisSource": "KAUH tablosu",
+        "soundTypeRaw": "E W",
+        "site": "Sağ alt bölge (posterior)"
+      }
     },
     {
       "id": "kauh_wheezing_lung_left_upper_posterior_005",
@@ -1462,7 +2020,16 @@
       "gender": "M",
       "runtimeUrl": "assets/audio/runtime/external/kauh/kauh_wheezing_lung_left_upper_posterior_005.wav",
       "validationStatus": "validated",
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "real",
+        "ageYears": 60,
+        "sex": "M",
+        "diagnosis": "Astım",
+        "diagnosisSource": "KAUH tablosu",
+        "soundTypeRaw": "E W",
+        "site": "Sol üst bölge (posterior)"
+      }
     },
     {
       "id": "kauh_wheezing_lung_right_lower_posterior_006",
@@ -1485,7 +2052,16 @@
       "gender": "F",
       "runtimeUrl": "assets/audio/runtime/external/kauh/kauh_wheezing_lung_right_lower_posterior_006.wav",
       "validationStatus": "validated",
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "real",
+        "ageYears": 60,
+        "sex": "F",
+        "diagnosis": "Astım",
+        "diagnosisSource": "KAUH tablosu",
+        "soundTypeRaw": "E W",
+        "site": "Sağ alt bölge (posterior)"
+      }
     },
     {
       "id": "kauh_fine_crackles_lung_right_lower_posterior_007",
@@ -1508,7 +2084,16 @@
       "gender": "M",
       "runtimeUrl": "assets/audio/runtime/external/kauh/kauh_fine_crackles_lung_right_lower_posterior_007.wav",
       "validationStatus": "validated",
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "real",
+        "ageYears": 43,
+        "sex": "M",
+        "diagnosis": "Kalp yetersizliği",
+        "diagnosisSource": "KAUH tablosu",
+        "soundTypeRaw": "Crep",
+        "site": "Sağ alt bölge (posterior)"
+      }
     },
     {
       "id": "kauh_fine_crackles_lung_right_lower_posterior_008",
@@ -1531,7 +2116,16 @@
       "gender": "F",
       "runtimeUrl": "assets/audio/runtime/external/kauh/kauh_fine_crackles_lung_right_lower_posterior_008.wav",
       "validationStatus": "validated",
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "real",
+        "ageYears": 24,
+        "sex": "F",
+        "diagnosis": "Kalp yetersizliği",
+        "diagnosisSource": "KAUH tablosu",
+        "soundTypeRaw": "Crep",
+        "site": "Sağ alt bölge (posterior)"
+      }
     },
     {
       "id": "kauh_wheezing_lung_right_lower_posterior_007",
@@ -1554,7 +2148,16 @@
       "gender": "F",
       "runtimeUrl": "assets/audio/runtime/external/kauh/kauh_wheezing_lung_right_lower_posterior_007.wav",
       "validationStatus": "validated",
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "real",
+        "ageYears": 21,
+        "sex": "F",
+        "diagnosis": "Astım",
+        "diagnosisSource": "KAUH tablosu",
+        "soundTypeRaw": "E W",
+        "site": "Sağ alt bölge (posterior)"
+      }
     },
     {
       "id": "kauh_normal_lung_left_upper_posterior_002",
@@ -1577,7 +2180,16 @@
       "gender": "F",
       "runtimeUrl": "assets/audio/runtime/external/kauh/kauh_normal_lung_left_upper_posterior_002.wav",
       "validationStatus": "validated",
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "real",
+        "ageYears": 52,
+        "sex": "F",
+        "diagnosis": "Tanı yok (normal)",
+        "diagnosisSource": "KAUH tablosu",
+        "soundTypeRaw": "N",
+        "site": "Sol üst bölge (posterior)"
+      }
     },
     {
       "id": "kauh_normal_lung_right_upper_posterior_002",
@@ -1600,7 +2212,16 @@
       "gender": "M",
       "runtimeUrl": "assets/audio/runtime/external/kauh/kauh_normal_lung_right_upper_posterior_002.wav",
       "validationStatus": "validated",
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "real",
+        "ageYears": 36,
+        "sex": "M",
+        "diagnosis": "Tanı yok (normal)",
+        "diagnosisSource": "KAUH tablosu",
+        "soundTypeRaw": "N",
+        "site": "Sağ üst bölge (posterior)"
+      }
     },
     {
       "id": "kauh_normal_lung_right_upper_posterior_003",
@@ -1623,7 +2244,16 @@
       "gender": "F",
       "runtimeUrl": "assets/audio/runtime/external/kauh/kauh_normal_lung_right_upper_posterior_003.wav",
       "validationStatus": "validated",
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "real",
+        "ageYears": 24,
+        "sex": "F",
+        "diagnosis": "Tanı yok (normal)",
+        "diagnosisSource": "KAUH tablosu",
+        "soundTypeRaw": "N",
+        "site": "Sağ üst bölge (posterior)"
+      }
     },
     {
       "id": "kauh_normal_lung_left_lower_posterior_002",
@@ -1646,7 +2276,16 @@
       "gender": "M",
       "runtimeUrl": "assets/audio/runtime/external/kauh/kauh_normal_lung_left_lower_posterior_002.wav",
       "validationStatus": "validated",
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "real",
+        "ageYears": 32,
+        "sex": "M",
+        "diagnosis": "Tanı yok (normal)",
+        "diagnosisSource": "KAUH tablosu",
+        "soundTypeRaw": "N",
+        "site": "Sol alt bölge (posterior)"
+      }
     },
     {
       "id": "kauh_normal_lung_right_middle_posterior_004",
@@ -1669,7 +2308,16 @@
       "gender": "M",
       "runtimeUrl": "assets/audio/runtime/external/kauh/kauh_normal_lung_right_middle_posterior_004.wav",
       "validationStatus": "validated",
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "real",
+        "ageYears": 74,
+        "sex": "M",
+        "diagnosis": "Tanı yok (normal)",
+        "diagnosisSource": "KAUH tablosu",
+        "soundTypeRaw": "N",
+        "site": "Sağ orta bölge (posterior)"
+      }
     },
     {
       "id": "kauh_normal_lung_left_upper_posterior_003",
@@ -1692,7 +2340,16 @@
       "gender": "F",
       "runtimeUrl": "assets/audio/runtime/external/kauh/kauh_normal_lung_left_upper_posterior_003.wav",
       "validationStatus": "validated",
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "real",
+        "ageYears": 73,
+        "sex": "F",
+        "diagnosis": "Tanı yok (normal)",
+        "diagnosisSource": "KAUH tablosu",
+        "soundTypeRaw": "N",
+        "site": "Sol üst bölge (posterior)"
+      }
     },
     {
       "id": "kauh_wheezing_lung_right_middle_posterior_006",
@@ -1715,7 +2372,16 @@
       "gender": "M",
       "runtimeUrl": "assets/audio/runtime/external/kauh/kauh_wheezing_lung_right_middle_posterior_006.wav",
       "validationStatus": "validated",
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "real",
+        "ageYears": 20,
+        "sex": "M",
+        "diagnosis": "Astım",
+        "diagnosisSource": "KAUH tablosu",
+        "soundTypeRaw": "E W",
+        "site": "Sağ orta bölge (posterior)"
+      }
     },
     {
       "id": "kauh_normal_lung_left_upper_posterior_004",
@@ -1738,7 +2404,16 @@
       "gender": "M",
       "runtimeUrl": "assets/audio/runtime/external/kauh/kauh_normal_lung_left_upper_posterior_004.wav",
       "validationStatus": "validated",
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "real",
+        "ageYears": 33,
+        "sex": "M",
+        "diagnosis": "Tanı yok (normal)",
+        "diagnosisSource": "KAUH tablosu",
+        "soundTypeRaw": "N",
+        "site": "Sol üst bölge (posterior)"
+      }
     },
     {
       "id": "kauh_normal_lung_left_upper_posterior_005",
@@ -1761,7 +2436,16 @@
       "gender": "M",
       "runtimeUrl": "assets/audio/runtime/external/kauh/kauh_normal_lung_left_upper_posterior_005.wav",
       "validationStatus": "validated",
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "real",
+        "ageYears": 38,
+        "sex": "M",
+        "diagnosis": "Tanı yok (normal)",
+        "diagnosisSource": "KAUH tablosu",
+        "soundTypeRaw": "N",
+        "site": "Sol üst bölge (posterior)"
+      }
     },
     {
       "id": "kauh_normal_lung_right_upper_posterior_004",
@@ -1784,7 +2468,16 @@
       "gender": "F",
       "runtimeUrl": "assets/audio/runtime/external/kauh/kauh_normal_lung_right_upper_posterior_004.wav",
       "validationStatus": "validated",
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "real",
+        "ageYears": 68,
+        "sex": "F",
+        "diagnosis": "Tanı yok (normal)",
+        "diagnosisSource": "KAUH tablosu",
+        "soundTypeRaw": "N",
+        "site": "Sağ üst bölge (posterior)"
+      }
     },
     {
       "id": "kauh_normal_lung_right_middle_posterior_005",
@@ -1807,7 +2500,16 @@
       "gender": "M",
       "runtimeUrl": "assets/audio/runtime/external/kauh/kauh_normal_lung_right_middle_posterior_005.wav",
       "validationStatus": "validated",
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "real",
+        "ageYears": 72,
+        "sex": "M",
+        "diagnosis": "Tanı yok (normal)",
+        "diagnosisSource": "KAUH tablosu",
+        "soundTypeRaw": "N",
+        "site": "Sağ orta bölge (posterior)"
+      }
     },
     {
       "id": "kauh_normal_lung_left_middle_posterior_005",
@@ -1830,7 +2532,16 @@
       "gender": "M",
       "runtimeUrl": "assets/audio/runtime/external/kauh/kauh_normal_lung_left_middle_posterior_005.wav",
       "validationStatus": "validated",
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "real",
+        "ageYears": 70,
+        "sex": "M",
+        "diagnosis": "Tanı yok (normal)",
+        "diagnosisSource": "KAUH tablosu",
+        "soundTypeRaw": "N",
+        "site": "Sol orta bölge (posterior)"
+      }
     },
     {
       "id": "kauh_fine_crackles_lung_left_middle_posterior_001",
@@ -1853,7 +2564,16 @@
       "gender": "F",
       "runtimeUrl": "assets/audio/runtime/external/kauh/kauh_fine_crackles_lung_left_middle_posterior_001.wav",
       "validationStatus": "validated",
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "real",
+        "ageYears": 74,
+        "sex": "F",
+        "diagnosis": "Kalp yetersizliği",
+        "diagnosisSource": "KAUH tablosu",
+        "soundTypeRaw": "Crep",
+        "site": "Sol orta bölge (posterior)"
+      }
     },
     {
       "id": "kauh_wheezing_lung_right_upper_posterior_005",
@@ -1876,7 +2596,16 @@
       "gender": "F",
       "runtimeUrl": "assets/audio/runtime/external/kauh/kauh_wheezing_lung_right_upper_posterior_005.wav",
       "validationStatus": "validated",
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "real",
+        "ageYears": 43,
+        "sex": "F",
+        "diagnosis": "Astım",
+        "diagnosisSource": "KAUH tablosu",
+        "soundTypeRaw": "E W",
+        "site": "Sağ üst bölge (posterior)"
+      }
     },
     {
       "id": "kauh_normal_lung_left_lower_posterior_003",
@@ -1899,7 +2628,16 @@
       "gender": "M",
       "runtimeUrl": "assets/audio/runtime/external/kauh/kauh_normal_lung_left_lower_posterior_003.wav",
       "validationStatus": "validated",
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "real",
+        "ageYears": 43,
+        "sex": "M",
+        "diagnosis": "Tanı yok (normal)",
+        "diagnosisSource": "KAUH tablosu",
+        "soundTypeRaw": "N",
+        "site": "Sol alt bölge (posterior)"
+      }
     },
     {
       "id": "kauh_normal_lung_right_middle_posterior_006",
@@ -1922,7 +2660,16 @@
       "gender": "M",
       "runtimeUrl": "assets/audio/runtime/external/kauh/kauh_normal_lung_right_middle_posterior_006.wav",
       "validationStatus": "validated",
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "real",
+        "ageYears": 75,
+        "sex": "M",
+        "diagnosis": "Tanı yok (normal)",
+        "diagnosisSource": "KAUH tablosu",
+        "soundTypeRaw": "N",
+        "site": "Sağ orta bölge (posterior)"
+      }
     },
     {
       "id": "kauh_normal_lung_left_lower_posterior_004",
@@ -1945,7 +2692,16 @@
       "gender": "M",
       "runtimeUrl": "assets/audio/runtime/external/kauh/kauh_normal_lung_left_lower_posterior_004.wav",
       "validationStatus": "validated",
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "real",
+        "ageYears": 24,
+        "sex": "M",
+        "diagnosis": "Tanı yok (normal)",
+        "diagnosisSource": "KAUH tablosu",
+        "soundTypeRaw": "N",
+        "site": "Sol alt bölge (posterior)"
+      }
     },
     {
       "id": "kauh_normal_lung_left_middle_posterior_006",
@@ -1968,7 +2724,16 @@
       "gender": "M",
       "runtimeUrl": "assets/audio/runtime/external/kauh/kauh_normal_lung_left_middle_posterior_006.wav",
       "validationStatus": "validated",
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "real",
+        "ageYears": 18,
+        "sex": "M",
+        "diagnosis": "Tanı yok (normal)",
+        "diagnosisSource": "KAUH tablosu",
+        "soundTypeRaw": "N",
+        "site": "Sol orta bölge (posterior)"
+      }
     },
     {
       "id": "kauh_normal_lung_right_lower_posterior_002",
@@ -1991,7 +2756,16 @@
       "gender": "F",
       "runtimeUrl": "assets/audio/runtime/external/kauh/kauh_normal_lung_right_lower_posterior_002.wav",
       "validationStatus": "validated",
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "real",
+        "ageYears": 66,
+        "sex": "F",
+        "diagnosis": "Tanı yok (normal)",
+        "diagnosisSource": "KAUH tablosu",
+        "soundTypeRaw": "N",
+        "site": "Sağ alt bölge (posterior)"
+      }
     },
     {
       "id": "kauh_wheezing_lung_right_upper_posterior_006",
@@ -2014,7 +2788,16 @@
       "gender": "M",
       "runtimeUrl": "assets/audio/runtime/external/kauh/kauh_wheezing_lung_right_upper_posterior_006.wav",
       "validationStatus": "validated",
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "real",
+        "ageYears": 24,
+        "sex": "M",
+        "diagnosis": "Astım",
+        "diagnosisSource": "KAUH tablosu",
+        "soundTypeRaw": "E W",
+        "site": "Sağ üst bölge (posterior)"
+      }
     },
     {
       "id": "kauh_normal_lung_left_lower_posterior_005",
@@ -2037,7 +2820,16 @@
       "gender": "M",
       "runtimeUrl": "assets/audio/runtime/external/kauh/kauh_normal_lung_left_lower_posterior_005.wav",
       "validationStatus": "validated",
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "real",
+        "ageYears": 53,
+        "sex": "M",
+        "diagnosis": "Tanı yok (normal)",
+        "diagnosisSource": "KAUH tablosu",
+        "soundTypeRaw": "N",
+        "site": "Sol alt bölge (posterior)"
+      }
     },
     {
       "id": "kauh_normal_lung_right_middle_posterior_007",
@@ -2060,7 +2852,16 @@
       "gender": "M",
       "runtimeUrl": "assets/audio/runtime/external/kauh/kauh_normal_lung_right_middle_posterior_007.wav",
       "validationStatus": "validated",
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "real",
+        "ageYears": 50,
+        "sex": "M",
+        "diagnosis": "Tanı yok (normal)",
+        "diagnosisSource": "KAUH tablosu",
+        "soundTypeRaw": "N",
+        "site": "Sağ orta bölge (posterior)"
+      }
     },
     {
       "id": "kauh_wheezing_lung_right_lower_posterior_008",
@@ -2083,7 +2884,16 @@
       "gender": "M",
       "runtimeUrl": "assets/audio/runtime/external/kauh/kauh_wheezing_lung_right_lower_posterior_008.wav",
       "validationStatus": "validated",
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "real",
+        "ageYears": 59,
+        "sex": "M",
+        "diagnosis": "Astım",
+        "diagnosisSource": "KAUH tablosu",
+        "soundTypeRaw": "E W",
+        "site": "Sağ alt bölge (posterior)"
+      }
     },
     {
       "id": "sprsound_rhonchi_lung_left_lower_posterior_001",
@@ -2094,6 +2904,7 @@
       "sourceDataset": "sprsound",
       "sourceFile": "sprsound/4996",
       "internalSourceId": "sprsound-4996",
+      "internalPatientId": "sprsound-patient-64824049",
       "durationSec": 15.36,
       "sampleRate": 8000,
       "channels": 1,
@@ -2106,7 +2917,16 @@
       "nativeFilter": "unspecified",
       "runtimeUrl": "assets/audio/runtime/external/sprsound/sprsound_rhonchi_lung_left_lower_posterior_001.wav",
       "validationStatus": "validated",
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "real",
+        "ageYears": 1.5,
+        "sex": "F",
+        "diagnosis": "Ağır pnömoni",
+        "diagnosisSource": "SPRSound hasta özeti",
+        "soundTypeRaw": "Rhonchi",
+        "site": "Sol bölge (posterior)"
+      }
     },
     {
       "id": "sprsound_rhonchi_lung_left_upper_posterior_001",
@@ -2117,6 +2937,7 @@
       "sourceDataset": "sprsound",
       "sourceFile": "sprsound/6065",
       "internalSourceId": "sprsound-6065",
+      "internalPatientId": "sprsound-patient-41132911",
       "durationSec": 15.36,
       "sampleRate": 8000,
       "channels": 1,
@@ -2129,7 +2950,16 @@
       "nativeFilter": "unspecified",
       "runtimeUrl": "assets/audio/runtime/external/sprsound/sprsound_rhonchi_lung_left_upper_posterior_001.wav",
       "validationStatus": "validated",
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "real",
+        "ageYears": 3,
+        "sex": "M",
+        "diagnosis": "Pnömoni (ağır olmayan)",
+        "diagnosisSource": "SPRSound hasta özeti",
+        "soundTypeRaw": "Rhonchi",
+        "site": "Sol bölge (posterior)"
+      }
     },
     {
       "id": "sprsound_rhonchi_lung_left_lower_posterior_002",
@@ -2140,6 +2970,7 @@
       "sourceDataset": "sprsound",
       "sourceFile": "sprsound/5261",
       "internalSourceId": "sprsound-5261",
+      "internalPatientId": "sprsound-patient-66236931",
       "durationSec": 15.36,
       "sampleRate": 8000,
       "channels": 1,
@@ -2152,7 +2983,16 @@
       "nativeFilter": "unspecified",
       "runtimeUrl": "assets/audio/runtime/external/sprsound/sprsound_rhonchi_lung_left_lower_posterior_002.wav",
       "validationStatus": "validated",
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "real",
+        "ageYears": 2,
+        "sex": "F",
+        "diagnosis": "Kontrol grubu (hastalık yok)",
+        "diagnosisSource": "SPRSound hasta özeti",
+        "soundTypeRaw": "Rhonchi",
+        "site": "Sol bölge (posterior)"
+      }
     },
     {
       "id": "sprsound_rhonchi_lung_right_lower_posterior_001",
@@ -2163,6 +3003,7 @@
       "sourceDataset": "sprsound",
       "sourceFile": "sprsound/5263",
       "internalSourceId": "sprsound-5263",
+      "internalPatientId": "sprsound-patient-66236931",
       "durationSec": 15.36,
       "sampleRate": 8000,
       "channels": 1,
@@ -2175,7 +3016,16 @@
       "nativeFilter": "unspecified",
       "runtimeUrl": "assets/audio/runtime/external/sprsound/sprsound_rhonchi_lung_right_lower_posterior_001.wav",
       "validationStatus": "validated",
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "real",
+        "ageYears": 2,
+        "sex": "F",
+        "diagnosis": "Kontrol grubu (hastalık yok)",
+        "diagnosisSource": "SPRSound hasta özeti",
+        "soundTypeRaw": "Rhonchi",
+        "site": "Sağ bölge (posterior)"
+      }
     },
     {
       "id": "sprsound_rhonchi_lung_right_upper_posterior_001",
@@ -2186,6 +3036,7 @@
       "sourceDataset": "sprsound",
       "sourceFile": "sprsound/5628",
       "internalSourceId": "sprsound-5628",
+      "internalPatientId": "sprsound-patient-41213916",
       "durationSec": 15.36,
       "sampleRate": 8000,
       "channels": 1,
@@ -2198,7 +3049,16 @@
       "nativeFilter": "unspecified",
       "runtimeUrl": "assets/audio/runtime/external/sprsound/sprsound_rhonchi_lung_right_upper_posterior_001.wav",
       "validationStatus": "validated",
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "real",
+        "ageYears": 3.1,
+        "sex": "F",
+        "diagnosis": "Pnömoni (ağır olmayan)",
+        "diagnosisSource": "SPRSound hasta özeti",
+        "soundTypeRaw": "Rhonchi",
+        "site": "Sağ bölge (posterior)"
+      }
     },
     {
       "id": "sprsound_rhonchi_lung_right_lower_posterior_002",
@@ -2209,6 +3069,7 @@
       "sourceDataset": "sprsound",
       "sourceFile": "sprsound/5377",
       "internalSourceId": "sprsound-5377",
+      "internalPatientId": "sprsound-patient-66315749",
       "durationSec": 9.22,
       "sampleRate": 8000,
       "channels": 1,
@@ -2221,7 +3082,16 @@
       "nativeFilter": "unspecified",
       "runtimeUrl": "assets/audio/runtime/external/sprsound/sprsound_rhonchi_lung_right_lower_posterior_002.wav",
       "validationStatus": "validated",
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "real",
+        "ageYears": 1.4,
+        "sex": "F",
+        "diagnosis": "Pnömoni (ağır olmayan)",
+        "diagnosisSource": "SPRSound hasta özeti",
+        "soundTypeRaw": "Rhonchi",
+        "site": "Sağ bölge (posterior)"
+      }
     },
     {
       "id": "sprsound_wheezing_lung_left_lower_posterior_001",
@@ -2232,6 +3102,7 @@
       "sourceDataset": "sprsound",
       "sourceFile": "sprsound/5760",
       "internalSourceId": "sprsound-5760",
+      "internalPatientId": "sprsound-patient-41184079",
       "durationSec": 15.36,
       "sampleRate": 8000,
       "channels": 1,
@@ -2244,7 +3115,16 @@
       "nativeFilter": "unspecified",
       "runtimeUrl": "assets/audio/runtime/external/sprsound/sprsound_wheezing_lung_left_lower_posterior_001.wav",
       "validationStatus": "validated",
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "real",
+        "ageYears": 6.2,
+        "sex": "M",
+        "diagnosis": "Astım",
+        "diagnosisSource": "SPRSound hasta özeti",
+        "soundTypeRaw": "Wheeze",
+        "site": "Sol bölge (posterior)"
+      }
     },
     {
       "id": "sprsound_wheezing_lung_left_upper_posterior_001",
@@ -2255,6 +3135,7 @@
       "sourceDataset": "sprsound",
       "sourceFile": "sprsound/4170",
       "internalSourceId": "sprsound-4170",
+      "internalPatientId": "sprsound-patient-65118898",
       "durationSec": 9.22,
       "sampleRate": 8000,
       "channels": 1,
@@ -2267,7 +3148,16 @@
       "nativeFilter": "unspecified",
       "runtimeUrl": "assets/audio/runtime/external/sprsound/sprsound_wheezing_lung_left_upper_posterior_001.wav",
       "validationStatus": "validated",
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "real",
+        "ageYears": 0.7,
+        "sex": "M",
+        "diagnosis": "Pnömoni (ağır olmayan)",
+        "diagnosisSource": "SPRSound hasta özeti",
+        "soundTypeRaw": "Wheeze",
+        "site": "Sol bölge (posterior)"
+      }
     },
     {
       "id": "sprsound_wheezing_lung_left_lower_posterior_002",
@@ -2278,6 +3168,7 @@
       "sourceDataset": "sprsound",
       "sourceFile": "sprsound/4162",
       "internalSourceId": "sprsound-4162",
+      "internalPatientId": "sprsound-patient-65118898",
       "durationSec": 9.22,
       "sampleRate": 8000,
       "channels": 1,
@@ -2290,7 +3181,16 @@
       "nativeFilter": "unspecified",
       "runtimeUrl": "assets/audio/runtime/external/sprsound/sprsound_wheezing_lung_left_lower_posterior_002.wav",
       "validationStatus": "validated",
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "real",
+        "ageYears": 0.7,
+        "sex": "M",
+        "diagnosis": "Pnömoni (ağır olmayan)",
+        "diagnosisSource": "SPRSound hasta özeti",
+        "soundTypeRaw": "Wheeze",
+        "site": "Sol bölge (posterior)"
+      }
     },
     {
       "id": "sprsound_wheezing_lung_right_lower_posterior_001",
@@ -2301,6 +3201,7 @@
       "sourceDataset": "sprsound",
       "sourceFile": "sprsound/3593",
       "internalSourceId": "sprsound-3593",
+      "internalPatientId": "sprsound-patient-41223618",
       "durationSec": 15.36,
       "sampleRate": 8000,
       "channels": 1,
@@ -2313,7 +3214,16 @@
       "nativeFilter": "unspecified",
       "runtimeUrl": "assets/audio/runtime/external/sprsound/sprsound_wheezing_lung_right_lower_posterior_001.wav",
       "validationStatus": "validated",
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "real",
+        "ageYears": 1,
+        "sex": "M",
+        "diagnosis": "Diğer solunum hastalıkları",
+        "diagnosisSource": "SPRSound hasta özeti",
+        "soundTypeRaw": "Wheeze",
+        "site": "Sağ bölge (posterior)"
+      }
     },
     {
       "id": "sprsound_wheezing_lung_right_upper_posterior_001",
@@ -2324,6 +3234,7 @@
       "sourceDataset": "sprsound",
       "sourceFile": "sprsound/4109",
       "internalSourceId": "sprsound-4109",
+      "internalPatientId": "sprsound-patient-65121853",
       "durationSec": 9.22,
       "sampleRate": 8000,
       "channels": 1,
@@ -2336,7 +3247,16 @@
       "nativeFilter": "unspecified",
       "runtimeUrl": "assets/audio/runtime/external/sprsound/sprsound_wheezing_lung_right_upper_posterior_001.wav",
       "validationStatus": "validated",
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "real",
+        "ageYears": 1.5,
+        "sex": "M",
+        "diagnosis": "Pnömoni (ağır olmayan)",
+        "diagnosisSource": "SPRSound hasta özeti",
+        "soundTypeRaw": "Wheeze",
+        "site": "Sağ bölge (posterior)"
+      }
     },
     {
       "id": "sprsound_wheezing_lung_right_lower_posterior_002",
@@ -2347,6 +3267,7 @@
       "sourceDataset": "sprsound",
       "sourceFile": "sprsound/2175",
       "internalSourceId": "sprsound-2175",
+      "internalPatientId": "sprsound-patient-64913238",
       "durationSec": 15.36,
       "sampleRate": 8000,
       "channels": 1,
@@ -2359,7 +3280,16 @@
       "nativeFilter": "unspecified",
       "runtimeUrl": "assets/audio/runtime/external/sprsound/sprsound_wheezing_lung_right_lower_posterior_002.wav",
       "validationStatus": "validated",
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "real",
+        "ageYears": 0.6,
+        "sex": "F",
+        "diagnosis": "Ağır pnömoni",
+        "diagnosisSource": "SPRSound hasta özeti",
+        "soundTypeRaw": "Wheeze",
+        "site": "Sağ bölge (posterior)"
+      }
     }
   ]
 }

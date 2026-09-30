@@ -7,6 +7,7 @@ import {
   parseKauhFileName,
   truncatePcm16,
 } from "../../packages/sim-ausculta/tools/import-kauh.mjs";
+import { kauhPatientInfo } from "../../packages/sim-ausculta/tools/patient-info.mjs";
 
 /** T227 — KAUH aktarım aracının saf yardımcıları; sentetik tampon, dosya sistemi yok. */
 
@@ -92,6 +93,7 @@ describe("KAUH dosya adı çözümleme ve tıbbi eşleme", () => {
       diagnosis: "N",
       sound: "N",
       region: "PRM",
+      age: "70",
       sex: "F",
     });
     expect(parseKauhFileName("BP10_Asthma,E W,P R U ,59,m.wav")).toMatchObject({
@@ -121,6 +123,22 @@ describe("KAUH dosya adı çözümleme ve tıbbi eşleme", () => {
       finding: "coarse_crackles",
       pointId: "lung_right_lower_posterior",
     });
+  });
+
+  it("gösterilen hasta alanını üretir (T259; hasta numarası/adı taşımaz)", () => {
+    const entry = entryOf("DP100_N,N,P R M,70,F.wav");
+    const patient = kauhPatientInfo(entry);
+    expect(patient).toEqual({
+      origin: "real",
+      ageYears: 70,
+      sex: "F",
+      diagnosis: "Tanı yok (normal)",
+      diagnosisSource: "KAUH tablosu",
+      soundTypeRaw: "N",
+      site: "Sağ orta bölge (posterior)",
+    });
+    expect(JSON.stringify(patient)).not.toContain(entry.patientNo);
+    expect(JSON.stringify(patient)).not.toMatch(/DP\d+/i);
   });
 
   it("kapsam dışı kayıtları gerekçesiyle eler", () => {
