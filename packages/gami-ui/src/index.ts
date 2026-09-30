@@ -1,5 +1,5 @@
 export { GamiAvatar } from "./GamiAvatar";
-export { GamiBadgeCard, GamiBadgeDetail, GamiBadgeGrid, GamiBadgeIc, GamiRecentBadges } from "./GamiBadge";
+export { GamiBadgeCard, GamiBadgeDetail, GamiBadgeGrid, GamiBadgeIc, GamiCapstoneInfo, GamiRecentBadges, GAMI_CAPSTONE_INFO, GAMI_CAPSTONE_LABEL } from "./GamiBadge";
 export { GamiDemoBanner } from "./GamiDemoBanner";
 export { GamiDomainPanel } from "./GamiDomainPanel";
 export { GamiEmptyCard } from "./GamiEmptyCard";

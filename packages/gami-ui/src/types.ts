@@ -54,6 +54,8 @@ export interface GamiBadgeModel {
   rule: string;
   studyKey: string | null;
   iconName: string;
+  /** 40. "Gerçek Rozet" kartı: altın çerçeve, bilgi düğmesi ve Dekanlık metni. */
+  capstone?: boolean;
   /** Kilitli özel not (ör. podyum). Yoksa ilerleme çubuğu. */
   lockedNote: string | null;
   assessmentOnly: boolean;

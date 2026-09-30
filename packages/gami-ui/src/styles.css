@@ -199,6 +199,18 @@
 .eg-gami-badge.is-locked .nm,
 .eg-gami-badge.is-locked .cat{ color: var(--ink-600); }
 .eg-gami-badge.is-locked .ds{ color: var(--ink-600); }
+/* 40. rozet (capstone): altın çerçeve + "Gerçek Rozet" etiketi; bilgi düğmesi 44 px. */
+.eg-gami-badge.capstone{ border-color: var(--orange-500); box-shadow: 0 0 0 2px color-mix(in srgb, var(--orange-500) 40%, transparent); }
+.eg-gami-badge.capstone .cat{ color: var(--amber-700); text-transform: uppercase; letter-spacing: .4px; }
+.eg-gami-badge.capstone .eg-gami-badge-ic:not(.progress):not(.locked){ background: linear-gradient(145deg, var(--orange-500), var(--amber-700)); box-shadow: 0 6px 16px color-mix(in srgb, var(--amber-700) 35%, transparent); }
+.eg-gami-badge-wrap{ position: relative; display: flex; flex-direction: column; }
+.eg-gami-badge-wrap > .eg-gami-badge{ flex: 1; width: 100%; }
+.eg-gami-badge-info{ position: absolute; top: 2px; right: 2px; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; border: 0; border-radius: var(--r-md); background: transparent; color: var(--ink-600); cursor: pointer; }
+.eg-gami-badge-info:hover{ background: var(--blue-50); color: var(--ink-900); }
+.eg-gami-badge-info[aria-expanded="true"]{ background: var(--orange-100); color: var(--amber-700); }
+.eg-gami-badge-info svg{ width: 20px; height: 20px; }
+.eg-gami-badge-detail .eg-gami-badge-info{ position: static; }
+.eg-gami-badge-info-text{ margin: var(--sp-2) 0 0; padding: var(--sp-2) var(--sp-3); border: 1px solid var(--orange-500); border-radius: var(--r-md); background: var(--orange-100); color: var(--amber-700); font-size: var(--fs-xs); font-weight: 600; line-height: 1.4; text-align: left; }
 .eg-gami-recent{ display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--sp-3); }
 .eg-gami-recent .eg-gami-badge{ padding: var(--sp-3); }
 .eg-gami-count{ font-size: var(--fs-sm); color: var(--ink-600); font-weight: 700; font-variant-numeric: tabular-nums; }
