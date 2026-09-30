@@ -89,10 +89,11 @@ export function ModeSelectScreen({
             </p>
           )}
           <ScreenHeading className="mode-title">Çalışma Modunu Seçin</ScreenHeading>
-          <p className="mode-sub">Önce öğrenme modunda okuma sırasını oturtmanız önerilir.</p>
+          <p className="mode-sub">Hangi modda çalışmak istersiniz?</p>
           {isFaculty && (
             <p className="mode-sub">Öğretim üyesi görünümü — rozet ve sıralama yalnız öğrenciler içindir.</p>
           )}
+          <p className="mode-note mode-advice">Önce öğrenme modunda okuma sırasını oturtmanız önerilir.</p>
           <div className="mode-cards">
             <ModeCard
               kind="learn"
@@ -102,6 +103,9 @@ export function ModeSelectScreen({
               items={['ABCDE okuma rehberi', 'Uzman işaretlemesi açılıp kapanır', 'Süre ve puan yok']}
               cta="Öğrenmeye başla"
               onPick={() => pick('learn')}
+              progress={gate.openedCount}
+              progressTotal={gate.total}
+              progressUnit="konu incelendi"
             />
             <ModeCard
               kind="practice"
@@ -179,6 +183,9 @@ export function ModeCard({
   lockedText,
   learnLocked,
   lockText,
+  progress,
+  progressTotal,
+  progressUnit,
 }: {
   kind: Mode
   icon: ReactNode
@@ -201,6 +208,9 @@ export function ModeCard({
   learnLocked?: boolean
   /** Kilit metni: "Önce öğrenme modunu tamamlayın: X/Y konu incelendi." */
   lockText?: string
+  progress?: number
+  progressTotal?: number
+  progressUnit?: string
 }): JSX.Element {
   return (
     <div
@@ -228,13 +238,21 @@ export function ModeCard({
           </li>
         ))}
       </ul>
+      {typeof progress === 'number' && typeof progressTotal === 'number' && (
+        <div className="mode-progress-status">
+          {progress}/{progressTotal} {progressUnit}
+          <div className="mode-progress" role="progressbar" aria-label="Öğrenme ilerlemesi" aria-valuenow={progress} aria-valuemin={0} aria-valuemax={progressTotal}>
+            <span style={{ width: `${progressTotal ? progress / progressTotal * 100 : 0}%` }} />
+          </div>
+        </div>
+      )}
       {!locked && rules && <p className="mode-rules">{rules}</p>}
-      {!locked && extra}
-      {!locked && typeof bestScore === 'number' && (
+      {typeof bestScore === 'number' && (
         <p className="mode-rules">
           {bestScore > 0 ? <>En iyi puan: <b>{bestScore}</b></> : 'Henüz denenmedi'}
         </p>
       )}
+      {extra}
       <button className={`btn ${kind === 'learn' ? 'green' : kind === 'assessment' ? 'purple' : 'primary'}`} onClick={onPick} disabled={disabled}>
         {cta}
       </button>
