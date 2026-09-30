@@ -23,6 +23,8 @@ export {
   type SimModule,
   type SimModuleLoader,
   type SimMountContext,
+  type SimRewardsSnapshot,
+  type SimRewardsSource,
   type SimMountOptions,
   type SimMountTarget,
   type SimSessionSource,
