@@ -169,7 +169,7 @@ function Shell({
         />
         <main className="app-content">
           {screen === "start" ? <StartScreen embedded={embedded} audio={volumeAudio(audio)} /> : null}
-          {screen === "modes" ? <ModeSelectScreen embedded={embedded} /> : null}
+          {screen === "modes" ? <ModeSelectScreen embedded={embedded} rewards={rewards} onLeaderboard={() => openProgress("leaderboard")} /> : null}
           {screen === "tutorial" ? <TutorialScreen embedded={embedded} audio={audio} /> : null}
           {screen === "learn" ? (
             <LearnScreen embedded={embedded} audio={audio} {...(learnEnv ? { env: learnEnv } : {})} />

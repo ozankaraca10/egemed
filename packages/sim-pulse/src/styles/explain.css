@@ -7,7 +7,9 @@
 .eg-sim-pulse .mode-chip.assessment:before{background:var(--purple-600)}
 .eg-sim-pulse .app[data-mode-identity=assessment] .topbar{box-shadow:inset 0 -3px 0 var(--purple-600)}
 .eg-sim-pulse .topbar .eg-navbtn[aria-pressed=true]{background:rgba(255,255,255,.22);color:var(--card)}
-.eg-sim-pulse .modes-view{max-width:1020px;margin:0 auto;padding:8px 0 24px}
+.eg-sim-pulse .app:has(#modesView:not([hidden])){height:100dvh;min-height:0}
+.eg-sim-pulse .app:has(#modesView:not([hidden])) main{min-height:0;overflow:auto}
+.eg-sim-pulse .modes-view{max-width:1020px;min-height:100%;margin:0 auto;padding:12px 0;display:flex;flex-direction:column;justify-content:safe center}
 .eg-sim-pulse .stepper{display:flex;justify-content:center;margin:8px auto 2px;padding:0;list-style:none;max-width:520px}
 .eg-sim-pulse .step{position:relative;width:150px;display:flex;flex-direction:column;align-items:center;gap:4px}
 .eg-sim-pulse .step .dot{width:20px;height:20px;border-radius:50%;display:grid;place-items:center;font-size:var(--fs-xs);font-weight:700;background:var(--card);color:var(--ink-400);border:2px solid var(--border-strong);z-index:1}
@@ -21,7 +23,7 @@
 .eg-sim-pulse .mode-cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}
 .eg-sim-pulse .mode-card{background:rgba(255,255,255,.92);border:1px solid var(--border);border-radius:var(--r-xl);padding:20px 20px 16px;text-align:center;box-shadow:var(--shadow-card);display:flex;flex-direction:column;gap:10px}
 .eg-sim-pulse .mode-card .ic{width:60px;height:60px;border-radius:50%;margin:0 auto;display:grid;place-items:center}
-.eg-sim-pulse .mode-card .ic svg{width:30px;height:30px;fill:currentColor}
+.eg-sim-pulse .mode-card .ic svg{width:30px;height:30px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .eg-sim-pulse .mode-card.learn .ic{background:var(--green-50);color:var(--green-600)}
 .eg-sim-pulse .mode-card.practice .ic{background:var(--blue-50);color:var(--blue-600)}
 .eg-sim-pulse .mode-card.assessment .ic{background:var(--purple-50);color:var(--purple-600)}
@@ -40,14 +42,19 @@
 .eg-sim-pulse .mode-card.assessment li .ck{background:var(--purple-100);color:var(--purple-600)}
 .eg-sim-pulse .mode-status{font-size:var(--fs-sm);color:var(--ink-600);text-align:left}
 .eg-sim-pulse .mode-card.locked .mode-status{color:var(--amber-700)}
+.eg-sim-pulse .mode-card.learn-locked{opacity:.78}
+.eg-sim-pulse .mode-lock-hint{display:flex;align-items:center;justify-content:center;gap:6px;margin:0 0 6px;padding:5px 10px;font-size:var(--fs-xs);color:var(--blue-700);background:var(--blue-50);border-radius:var(--r-pill);line-height:1.3}
+.eg-sim-pulse .mode-lock-hint .lock-ic{flex-shrink:0}
 .eg-sim-pulse .mode-progress{height:6px;border-radius:var(--r-pill);background:var(--blue-100);overflow:hidden;margin-top:6px}
 .eg-sim-pulse .mode-progress i{display:block;height:100%;background:var(--blue-600);border-radius:var(--r-pill)}
 .eg-sim-pulse .mode-card.learn .mode-progress i{background:var(--green-600)}
+.eg-sim-pulse .mode-card .mode-status{margin-top:auto}
 .eg-sim-pulse .mode-card .btn{margin-top:auto;width:100%;min-height:44px;border-radius:var(--r-md);font-weight:700;border:0;color:var(--card);font-size:var(--fs-md)}
 .eg-sim-pulse .mode-card.learn .btn{background:color-mix(in srgb,var(--green-600),black 18%)}
 .eg-sim-pulse .mode-card.practice .btn{background:var(--blue-600)}
 .eg-sim-pulse .mode-card.assessment .btn{background:var(--purple-600)}
-.eg-sim-pulse .mode-card.locked .btn{background:var(--card);color:var(--ink-700);border:1.5px solid var(--border-strong)}
+.eg-sim-pulse .mode-card.locked .btn,.eg-sim-pulse .mode-card.learn-locked .btn{background:var(--blue-100);color:var(--ink-500);box-shadow:none}
+.eg-sim-pulse .mode-reward{display:inline-flex;align-items:center;justify-content:center;min-height:44px;border:0;background:none;color:var(--amber-700);font-size:var(--fs-xs);font-weight:700}
 .eg-sim-pulse .mode-rules{font-size:var(--fs-xs);color:var(--ink-600);text-align:left}
 .eg-sim-pulse .mode-foot{text-align:center;margin-top:16px}
 .eg-sim-pulse .link-btn{border:0;background:transparent;color:var(--blue-700);font-size:var(--fs-sm);text-decoration:underline;text-underline-offset:3px}
@@ -82,7 +89,7 @@
 .eg-sim-pulse .mode-card .btn{min-height:38px}
 .eg-sim-pulse .mode-rules{font-size:var(--fs-xs)}
 .eg-sim-pulse .mode-foot{margin-top:10px}}
-@media(max-width:1024px){.eg-sim-pulse .mode-cards{grid-template-columns:minmax(0,1fr)}
+@media(max-width:720px){.eg-sim-pulse .mode-cards{grid-template-columns:minmax(0,1fr)}
 .eg-sim-pulse .modes-view{max-width:560px}}
 @media(max-width:999px){.eg-sim-pulse .tutorial-panel{left:12px;right:auto;top:auto;bottom:70px;width:min(300px,calc(100vw - 24px));max-height:40dvh}}
 @media(max-width:720px){.eg-sim-pulse .mode-context{order:4}

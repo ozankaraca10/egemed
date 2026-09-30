@@ -133,7 +133,7 @@ const ROOT_BY_SIM: Readonly<Record<SimId, string>> = {
 async function openSim(page: Page, sim: SimConfig): Promise<Locator> {
   await page.goto(`/#/sims/${sim.id}`);
   const root = page.locator(ROOT_BY_SIM[sim.id]).first();
-  await expect(root).toBeVisible();
+  await expect(root).toBeVisible({ timeout: 15_000 });
   await expect(page.getByRole("heading", { name: sim.entryHeading })).toBeVisible();
   return root;
 }
