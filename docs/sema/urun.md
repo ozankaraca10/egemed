@@ -1,0 +1,126 @@
+# Ürün şeması
+
+> Kaynak: `packages/contracts/src/ids.ts` (rol/sim kimlikleri),
+> `packages/sim-host/src/SimHost.ts` (`SimAudience`, `SIM_SCREEN_KEYS`, mod
+> kilidi yardımcıları), `apps/shell/src/routes.ts` (rotalar),
+> `apps/shell/src/session.ts` (`isFacultyLike`, `isLearnUnlocked`),
+> `apps/api/src/me/challenges.ts` / `simSessions.ts` (sunucu tarafı kilitler).
+> T286, 2026-09-30.
+
+## Roller ve yüzeyler
+
+```mermaid
+flowchart LR
+  admin["Yönetici (admin)"]
+  kullanici["Öğrenci (kullanici)"]
+  ogretim["Öğretim üyesi (ogretim_uyesi)"]
+  uzmanlik["Uzmanlık öğrencisi (uzmanlik_ogrencisi)"]
+  ziyaretci["Ziyaretçi (hesapsız, visitor)"]
+
+  anaSayfa["Ana sayfa (/)"]
+  simler["Simülatörler (/simulatorler)"]
+  meydanOkuma["Meydan Okuma merkezi (/sims/<sim>/meydan-okuma, sim barı altında)"]
+  yonetim["Yönetim paneli (/admin/*)"]
+
+  pulse["Pulse (/sims/pulse)"]
+  ausculta["Ausculta (/sims/ausculta)"]
+  opaca["Opaca (/sims/opaca)"]
+
+  ogrenme["Mod: Öğrenme"]
+  uygulama["Mod: Uygulama"]
+  degerlendirme["Mod: Değerlendirme"]
+  duello["Mod: Meydan Okuma (düello)"]
+
+  ilerlemem["İlerlemem / liderlik / rozet"]
+
+  admin --> anaSayfa --> simler
+  admin --> yonetim
+  kullanici --> anaSayfa
+  ogretim --> anaSayfa
+  uzmanlik --> anaSayfa
+  kullanici --> simler
+  ogretim --> simler
+  uzmanlik --> simler
+  ziyaretci --> pulse
+  ziyaretci --> ausculta
+  ziyaretci --> opaca
+
+  simler --> pulse
+  simler --> ausculta
+  simler --> opaca
+
+  pulse --> ogrenme
+  ausculta --> ogrenme
+  opaca --> ogrenme
+  pulse --> uygulama
+  ausculta --> uygulama
+  opaca --> uygulama
+  pulse --> degerlendirme
+  ausculta --> degerlendirme
+  opaca --> degerlendirme
+  duello -->|"4. mod kartı (openChallenges)"| meydanOkuma
+  pulse --> duello
+  ausculta --> duello
+  opaca --> duello
+
+  kullanici --> ilerlemem
+  admin -.->|"gizli (oyunlaştırma yüzeyi yok)"| ilerlemem
+  ogretim -.->|"gizli (oyunlaştırma yüzeyi yok)"| ilerlemem
+  uzmanlik -.->|"gizli (oyunlaştırma yüzeyi yok)"| ilerlemem
+```
+
+## Mod kilitleri
+
+```mermaid
+flowchart TD
+  giris{"Kim giriyor?"}
+  giris -->|"ziyaretçi"| zOgrenme["Yalnız Öğrenme açık;\nUygulama/Değerlendirme/Meydan Okuma kilitli\n(audienceCanUseMode, istemci tarafı)"]
+  giris -->|"öğrenci (kullanici)"| ogrenmeBittiMi{"sim_learn_completions\nkaydı var mı?"}
+  giris -->|"admin / öğretim üyesi / uzmanlık öğrencisi"| muaf["Öğrenme kilidi MUAF\n(isLearnUnlocked, istemci tarafı)\nUygulama/Değerlendirme hemen açık"]
+
+  ogrenmeBittiMi -->|"hayır"| kilitli["Uygulama/Değerlendirme/Meydan Okuma\noluşturma+katılma kilitli"]
+  ogrenmeBittiMi -->|"evet"| acik["Uygulama/Değerlendirme açık"]
+
+  acik --> duelloKontrol{"POST /me/challenges\nveya /me/challenges/join"}
+  kilitli -.->|"sunucu da ayrıca reddeder\n(learnCompleted kontrolü)"| duelloRed["403 — öğrenme kilidi\n(yalnız düello uçlarında sunucu tarafı kontrol var)"]
+  duelloKontrol -->|"gamified=false ise"| rolRed["403 role_not_permitted\n(ogretim_uyesi / uzmanlik_ogrencisi)"]
+```
+
+## Notlar (koddan)
+
+- **Roller** `packages/contracts/src/ids.ts` `ROLES`: `admin`, `kullanici`,
+  `ogretim_uyesi`, `uzmanlik_ogrencisi`. Plan metnindeki "öğrenci" = `kullanici`,
+  "uzmanlık öğrencisi" = `uzmanlik_ogrencisi`, "öğretim üyesi" = `ogretim_uyesi`,
+  "yönetici" = `admin`. "Ziyaretçi" DB rolü değildir; `SimAudience = "visitor"`
+  (hesapsız, `apps/shell/src/visitor.ts`, yalnız `sessionStorage` işareti — kişisel
+  veri tutulmaz).
+- **Oyunlaştırma uygunluğu** (`isGamificationEligible`, `packages/contracts/src/ids.ts`):
+  `ogretim_uyesi` ve `uzmanlik_ogrencisi` rozet/XP/liderlik/Meydan Okuma'ya
+  katılmaz (`actor.gamified = false`); İlerlemem/liderlik/rozet/Meydan Okuma
+  yüzeyleri bu roller ve admin için kabukta gizlenir (`session.ts isFacultyLike`).
+- **Öğrenme kilidi muafiyeti** (`apps/shell/src/session.ts isLearnUnlocked`,
+  T219, 28 Eyl 2026 depo sahibi kararı): `admin`, `ogretim_uyesi`,
+  `uzmanlik_ogrencisi` sime verilen öğrenme portu her zaman "tamamlanmış"
+  sayılır (`createUnlockedLearnPort`); yalnız `kullanici` (öğrenci) gerçek
+  `sim_learn_completions` kaydına bağlıdır.
+- **Önemli bulgu — kilidin uygulama katmanı:** Uygulama/Değerlendirme modu için
+  öğrenme kilidi yalnız **istemci tarafında** (`apps/shell`, `audienceCanUseMode` /
+  `isLearnUnlocked`) uygulanıyor; `POST /me/sims/:simId/sessions` (uygulama/
+  değerlendirme oturumu başlatma) API ucu `sim_learn_completions`'ı kontrol
+  ETMİYOR. Yalnız **Meydan Okuma oluşturma/katılma** (`POST /me/challenges`,
+  `POST /me/challenges/join`, `apps/api/src/me/challenges.ts` `learnCompleted`)
+  sunucu tarafında da kilitlenmiş. Bu asimetri koddan gözlemlendi, plan
+  metninde "öğrenme tamamlanmadan uygulama/değerlendirme/düello kapalı" olarak
+  tek kural gibi geçiyor — düello dışındaki kilit sunucu tarafından zorlanmıyor.
+- **Ekranlar** (`SIM_SCREEN_KEYS`, `packages/sim-host/src/SimHost.ts`):
+  `modlar`, `ogrenme`, `uygulama`, `degerlendirme`, `sonuc`, `ilerlemem`,
+  `yardim`, `hakkinda`, `meydan-okuma` — hash alt yoluna yazılır (`#/sims/<id>/<screenKey>`).
+- **Rotalar** (`apps/shell/src/routes.ts`): `/` (ana sayfa), `/simulatorler`,
+  `/sims/<pulse|ausculta|opaca>` ve `/sims/<id>/meydan-okuma[/<uuid>]` (ana gezinmeye eklenmez, kart
+  bağlantılarından açılır; eski `/meydan-okuma[/<uuid>]` adresleri sim içi merkeze yönlendirilir, üst menüde Meydan Okuma yok), `/admin`, `/admin/kullanicilar`, `/admin/ice-aktar`,
+  `/admin/roller`, `/admin/denetim`, `/admin/oduller` (yalnız admin oturumuyla,
+  ana gezinmede görünmez), `/giris/admin`, `/giris/test-ogrenci` (yalnız
+  geliştirme, dev girişi).
+- **Üç sim** `pulse`, `ausculta`, `opaca` — `packages/sim-host` `SimulatorId`
+  birlik tipi; sim verileri hiçbir yüzeyde birleştirilmez (ADR-006), dashboard
+  sim sekmeleriyle ayrı gösterir, simler arası toplam puan yoktur (ADR-007).

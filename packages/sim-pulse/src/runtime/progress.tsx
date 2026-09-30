@@ -300,7 +300,7 @@ export function PulseProgressPage({
   const [tab, setTab] = useState<GamiPageTab>("achievements");
   useEffect(() => setTab(requestedTab), [requestedTab]);
   const [period, setPeriod] = useState<AchievementsPeriod>("last30");
-  const [boardPeriod, setBoardPeriod] = useState<Period>("week");
+  const [boardPeriod, setBoardPeriod] = useState<Period>("month");
   const [cohort, setCohort] = useState<CohortFilter>("all");
   const [privacy, setPrivacy] = useState<Profile>({ cohort: null, displayName: null, public: false });
   const body = (server: ServerGamiData | null) => (

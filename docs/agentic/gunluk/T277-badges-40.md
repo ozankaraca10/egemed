@@ -1,7 +1,7 @@
 # T277-badges-40
 
-- Tarih: 2026-10-01 01:40
-- Commit: T277: her simde 39 rozet kolaydan zora + 40. Gerçek Rozet (capstone, Dekanlık bilgisi); kazanılamayan Podyum geçici rozetle değişti (DeepSeek; review: Claude)
+- Tarih: 2026-10-01 02:00
+- Commit: T277: her simde 39 rozet kolaydan zora + 40. Gerçek Rozet (Dekanlık bilgisi) — dev ile tazelendi
 - Dal: task/T277-badges-40
 
 ---

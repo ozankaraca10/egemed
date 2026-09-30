@@ -11,6 +11,8 @@ Yeni bir test ancak şu dört soruyu yanıtlıyorsa eklenir (yanıtlar `.egemed-
 
 Hata düzelten test, düzeltme öncesi kodda kırılmalı, sonrasında geçmelidir. Aynı senaryoyu her katmanda (birim + API + e2e) tekrar etme; hatayı en ucuz yakalayan katmanda bir kez yaz.
 
+**Şemalara danış (1 Eki 2026):** Test yazmadan önce `docs/sema/` altındaki ilgili şemayı (veritabani, urun, mimari, akislar) oku; testin iddiası şemadaki kurala dayanmalı. Şema ile kod çelişiyorsa testi koda göre değil, doğru kurala göre yaz ve çelişkiyi summary'de bildir. Değişikliğin şemayı etkiliyorsa şemayı aynı görevde güncelle.
+
 ## 2. Çöp desenler (kapıdan geçmez; denetimde kaldırılır ya da güçlendirilir)
 - Hiçbir şeyi doğrulamayan ya da yalnız "hata fırlatmadı"yı doğrulayan test.
 - Kendini kendisiyle karşılaştıran test (aynı fonksiyonun çıktısını beklenen değer olarak kullanma).

@@ -166,6 +166,10 @@ const expectedColumns: Record<string, readonly string[]> = {
     "created_at",
   ],
   gami_learn: ["id", "user_id", "sim_id", "topic", "xp", "learned_at", "created_at"],
+  integrity_flags: [
+    "id", "session_id", "user_id", "sim_id", "mode", "score", "signals", "status", "created_at",
+    "reviewed_by", "reviewed_at", "note",
+  ],
 };
 
 const expectedConstraints = [
@@ -295,7 +299,7 @@ describe("kısıtlar", () => {
 
   it("her sim_id CHECK'i tam olarak üç simi içerir", () => {
     const simChecks = [...allUp.matchAll(/check \(\s*sim_id\s+in \(([^)]*)\)/g)];
-    expect(simChecks).toHaveLength(8);
+    expect(simChecks).toHaveLength(9);
     for (const check of simChecks) {
       const values = [...(check[1] ?? "").matchAll(/'([^']+)'/g)].map((value) => value[1] ?? "").sort();
       expect(values).toEqual(["ausculta", "opaca", "pulse"]);

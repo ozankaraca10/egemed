@@ -1,3 +1,4 @@
+import type { GamiRewardMarks } from "./model";
 import { useState, type ReactNode } from "react";
 import type { Cohort, GamiLeaderboardRow, MonthlyReward, RewardWinner } from "@egemed/gamification-core";
 import { GamiAvatar } from "./GamiAvatar";
@@ -36,7 +37,7 @@ export function GamiRewardBanner({ reward, compact, countdown, status, onTerms, 
     return (
       <div className="card eg-gami-reward compact">
         <span className="eg-gami-badge-ic eg-gami-cat-streak" aria-hidden="true">{icons.gift({ width: 16, height: 16 })}</span>
-        <span className="txt">Bu ayın ödülü: <b>{reward.title}</b> · {countdown} kaldı</span>
+        <span className="txt">Bu ayın ödülü: <b>{reward.title}</b> · ilk {reward.winnersCount} kişiye · {countdown} kaldı</span>
         <button className="eg-gami-link" type="button" onClick={onMonthly}>Aylık sıralamayı gör {icons.chevronRight({ width: 14, height: 14 })}</button>
       </div>
     );
@@ -51,6 +52,7 @@ export function GamiRewardBanner({ reward, compact, countdown, status, onTerms, 
         <p>{reward.description}</p>
       </div>
       <div className="eg-gami-reward-meta">
+        <span className="badge orange">İlk {reward.winnersCount} kişiye verilir</span>
         <span className="badge gray" aria-live="off">{icons.clock({ width: 14, height: 14 })} Kapanışa {countdown}</span>
         {status && (status.action ? (
           <button type="button" className={`badge ${chipCls}`} style={{ border: 0, cursor: "pointer" }} onClick={() => onStatusAction(status.action!)}>Senin durumun: {status.text}</button>
@@ -79,7 +81,16 @@ export function GamiRewardTerms({ reward, returnTo, onClose, env = NOOP_GAMI_MOD
   );
 }
 
-export function GamiPodium({ rows, candidates, avatarOf }: { rows: readonly GamiLeaderboardRow[]; candidates: Set<string> | null; avatarOf: GamiAvatarOf }) {
+/** Ödül adayı / ödül dışı işareti (renk dışında metinle de ayırt edilir). */
+function GamiRewardMark({ marks, id, small = false }: { marks: GamiRewardMarks | null; id: string; small?: boolean }) {
+  if (marks === null) return null;
+  const style = small ? { fontSize: "var(--fs-xs)", padding: "1px 8px", marginLeft: 6 } : undefined;
+  if (marks.candidates.has(id)) return <span className="badge orange" style={style}>Ödül adayı</span>;
+  const reason = marks.excluded.get(id);
+  return reason === undefined ? null : <span className="badge gray" style={style}>{reason}</span>;
+}
+
+export function GamiPodium({ rows, candidates, avatarOf }: { rows: readonly GamiLeaderboardRow[]; candidates: GamiRewardMarks | null; avatarOf: GamiAvatarOf }) {
   const top = rows.filter((r) => r.rank !== null && r.rank <= 3).sort((a, b) => a.rank! - b.rank!);
   if (top.length < 3) return null;
   return (
@@ -87,7 +98,7 @@ export function GamiPodium({ rows, candidates, avatarOf }: { rows: readonly Gami
       {top.map((r) => (
         <li key={r.id} className={`card eg-gami-podium-card r${r.rank}${r.isMe ? " me" : ""}`}>
           <span className={`eg-gami-medal m${r.rank}`} aria-label={`${r.rank}. sıra`}>{r.rank}</span>
-          {candidates?.has(r.id) && <span className="badge orange">Ödül adayı</span>}
+          <GamiRewardMark marks={candidates} id={r.id} />
           <GamiAvatar model={avatarOf(r.id, nameOf(r))} size="lg" />
           <span className="nm">{r.isMe ? `Sen · ${r.displayName}` : r.displayName}</span>
           <span className="sc">{tr1(r.periodScore)}</span>
@@ -101,13 +112,13 @@ export function GamiPodium({ rows, candidates, avatarOf }: { rows: readonly Gami
 
 export function GamiLeaderboardTable({ items, candidates, meDelta, avatarOf, deltaIcon }: {
   items: GamiTableItem[];
-  candidates: Set<string> | null;
+  candidates: GamiRewardMarks | null;
   meDelta: number | null;
   avatarOf: GamiAvatarOf;
   deltaIcon: ReactNode;
 }) {
   if (items.length === 0) return null;
-  const cand = (r: GamiLeaderboardRow) => candidates?.has(r.id) ? <> <span className="badge orange" style={{ fontSize: "var(--fs-xs)", padding: "1px 8px" }}>Ödül adayı</span></> : null;
+  const cand = (r: GamiLeaderboardRow) => <GamiRewardMark marks={candidates} id={r.id} small />;
   return (
     <>
       <div className="table-scroll eg-gami-lb-table-wrap">
@@ -135,7 +146,7 @@ export function GamiLeaderboardTable({ items, candidates, meDelta, avatarOf, del
           <li key={it.row.id} className={it.row.isMe ? "me" : undefined}>
             <span className="rank">{it.row.rank}</span>
             <GamiAvatar model={avatarOf(it.row.id, nameOf(it.row))} />
-            <span className="nm">{it.row.isMe ? `Sen · ${it.row.displayName}` : it.row.displayName}</span>
+            <span className="nm">{it.row.isMe ? `Sen · ${it.row.displayName}` : it.row.displayName}{cand(it.row)}</span>
             <span className="sub">Seviye {it.row.level} · {it.row.attemptsCount} deneme · {trInt(it.row.totalXp)} XP</span>
             <span className="sc">{tr1(it.row.periodScore)}{it.row.isMe && <GamiDelta delta={meDelta} icon={deltaIcon} />}</span>
           </li>
