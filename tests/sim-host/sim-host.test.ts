@@ -263,6 +263,19 @@ describe("SimHost release ve aktör bağlamı", () => {
     expect(pulse.contexts[1] !== undefined && "requestSignIn" in pulse.contexts[1]).toBe(false);
   });
 
+  it("rewards (aylık ödül) kanalı bağlama taşınır; verilmezse alan yoktur", async () => {
+    const opaca = fake("opaca");
+    const { host, target } = harness(() => Promise.resolve(opaca.module));
+    const snap = { current: null, winners: [] };
+    const rewards = { snapshot: () => snap, subscribe: () => () => undefined };
+    host.mount(target, "opaca", { rewards });
+    await flush();
+    host.mount(target, "opaca");
+    await flush();
+    expect(opaca.contexts[0]?.rewards?.snapshot()).toBe(snap);
+    expect(opaca.contexts[1] !== undefined && "rewards" in opaca.contexts[1]).toBe(false);
+  });
+
   it("sessions (A1 sunucu oturumu) kanalı bağlama taşınır; verilmezse alan yoktur", async () => {
     const pulse = fake("pulse");
     const { host, target } = harness(() => Promise.resolve(pulse.module));

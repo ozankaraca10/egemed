@@ -1,4 +1,4 @@
-import type { CohortFilter, GamiLeaderboardRow, Period } from "@egemed/gamification-core";
+import type { CohortFilter, GamiLeaderboardRow, MonthlyReward, Period, RewardWinner } from "@egemed/gamification-core";
 import type {
   SimCaseResult,
   SimPublicCase,
@@ -197,6 +197,22 @@ export interface SimLearnRecord {
   readonly topic: string;
 }
 
+/** Sim başına aylık ödül görünümü (sunucu `GET /me/rewards/:simId` ile aynı anlam; 30 Eyl 2026). */
+export interface SimRewardsSnapshot {
+  /** İçinde bulunulan ayın ödülü; yoksa en son geçmiş ayınki; hiç yoksa null. */
+  readonly current: MonthlyReward | null;
+  /** Kesinleşmiş geçmiş ayların kazananları (en yeni önce, en çok 6 ay). */
+  readonly winners: readonly RewardWinner[];
+}
+
+/** Kabuğun verdiği ödül kanalı: ödül yönetimindeki değişiklik abonelere anında iletilir. */
+export interface SimRewardsSource {
+  /** Son bilinen değer (senkron); henüz yüklenmediyse null. */
+  snapshot(): SimRewardsSnapshot | null;
+  /** Değer değişince çağrılır (abone olunca mevcut değer hemen iletilmez); dönüş aboneliği kaldırır. */
+  subscribe(listener: (snapshot: SimRewardsSnapshot) => void): () => void;
+}
+
 /** Modüle taşınan oturum bağlamı; sim başına ayrıktır (veri izolasyonu). */
 export interface SimMountContext {
   readonly simId: SimulatorId;
@@ -234,6 +250,8 @@ export interface SimMountContext {
   readonly challengeId?: string;
   /** Düello oturumu bitince (sonuç karşılaştırması kabukta). */
   readonly onChallengeFinished?: (challengeId: string) => void;
+  /** Aylık ödül kanalı (30 Eyl 2026); ziyaretçide verilmez. */
+  readonly rewards?: SimRewardsSource;
 }
 
 /** Modül `mount` dönüşünde zorunlu cleanup verir; idempotent olmalıdır. */
@@ -275,6 +293,7 @@ export interface SimMountOptions {
   readonly learn?: SimLearnPort;
   readonly challengeId?: string;
   readonly onChallengeFinished?: (challengeId: string) => void;
+  readonly rewards?: SimRewardsSource;
 }
 
 /** Bir `mount` çağrısının kimliği; yalnız o çağrının oturumunu bırakmak için. */
@@ -316,6 +335,7 @@ function mountContext(simId: SimulatorId, now: () => number, mountOptions: SimMo
   const learn = mountOptions?.learn;
   const challengeId = mountOptions?.challengeId;
   const onChallengeFinished = mountOptions?.onChallengeFinished;
+  const rewards = mountOptions?.rewards;
   return {
     now,
     simId,
@@ -330,6 +350,7 @@ function mountContext(simId: SimulatorId, now: () => number, mountOptions: SimMo
     ...(learn === undefined ? {} : { learn }),
     ...(challengeId === undefined ? {} : { challengeId }),
     ...(onChallengeFinished === undefined ? {} : { onChallengeFinished }),
+    ...(rewards === undefined ? {} : { rewards }),
   };
 }
 
