@@ -8,6 +8,7 @@ import {
   selectSprsoundRecords,
   type SprsoundAnnotation,
 } from "../../packages/sim-ausculta/tools/import-sprsound.mjs";
+import { parsePatientSummaryCsv, sprsoundPatientInfo } from "../../packages/sim-ausculta/tools/patient-info.mjs";
 
 /** T234 — SPRSound aktarım aracının saf yardımcıları; sentetik anotasyon, dosya sistemi yok. */
 
@@ -26,7 +27,16 @@ function pureEvents(type: EventType, durationMs = 10_000): { start: number; end:
 }
 
 function candidate(fileName: string, location: "p1" | "p3", type: EventType, durationMs = 10_000, record = "CAS") {
-  return { fileName, recordNo: fileName.match(/_(\d+)\.wav$/u)?.[1] ?? fileName, location, annotation: annotation(record, pureEvents(type, durationMs)), durationSec: 10 };
+  return {
+    fileName,
+    recordNo: fileName.match(/_(\d+)\.wav$/u)?.[1] ?? fileName,
+    patientNo: "10000000",
+    age: "3.0",
+    gender: "0",
+    location,
+    annotation: annotation(record, pureEvents(type, durationMs)),
+    durationSec: 10,
+  };
 }
 
 describe("SPRSound dosya adı çözümleme (KVKK)", () => {
@@ -45,6 +55,49 @@ describe("SPRSound dosya adı çözümleme (KVKK)", () => {
     expect(parseSprsoundFileName("65097128_5.6_1_p1.wav")).toBeNull();
     expect(parseSprsoundFileName("65097128_5.6_1_p1_2242.json")).toBeNull();
     expect(parseSprsoundFileName("bozuk-dosya.wav")).toBeNull();
+  });
+});
+
+describe("SPRSound hasta alanı (T259)", () => {
+  it("hasta özeti CSV'sini baştaki sıfırlardan bağımsız okur; ilk kayıt geçerlidir", () => {
+    const csv =
+      "\ufeff,patient_num,disease,age,gender\n" +
+      '0,00014365,"Control group",4.3,F\n' +
+      "1,65044484,Pneumonia (non-severe),6.1,F\n" +
+      "2,65044484,Pneumonia (severe),9,M\n";
+    const summaries = parsePatientSummaryCsv(csv);
+    expect(summaries.get("14365")).toBe("Control group");
+    expect(summaries.get("65044484")).toBe("Pneumonia (non-severe)");
+  });
+
+  it("gösterilen hasta alanını yaş/cinsiyet/tanı/yerden üretir; hasta numarası taşımaz", () => {
+    const parsed = parseSprsoundFileName("65097128_5.6_1_p1_2242.wav");
+    if (parsed === null) throw new Error("çözümlenemedi");
+    const patient = sprsoundPatientInfo(parsed, "rhonchi", {
+      disease: "Pneumonia (non-severe)",
+      source: "SPRSound_patient_summary.csv",
+    });
+    expect(patient).toEqual({
+      origin: "real",
+      ageYears: 5.6,
+      sex: "F",
+      diagnosis: "Pnömoni (ağır olmayan)",
+      diagnosisSource: "SPRSound hasta özeti",
+      soundTypeRaw: "Rhonchi",
+      site: "Sol bölge (posterior)",
+    });
+    expect(JSON.stringify(patient)).not.toContain(parsed.patientNo);
+    expect(JSON.stringify(patient)).not.toContain(parsed.recordNo);
+  });
+
+  it("hasta özeti yoksa tanı uydurulmaz (null)", () => {
+    const parsed = parseSprsoundFileName("41132911_3.0_0_p3_6065.wav");
+    if (parsed === null) throw new Error("çözümlenemedi");
+    const patient = sprsoundPatientInfo(parsed, "wheezing", null);
+    expect(patient.diagnosis).toBeNull();
+    expect(patient.sex).toBe("M");
+    expect(patient.soundTypeRaw).toBe("Wheeze");
+    expect(patient.site).toBe("Sağ bölge (posterior)");
   });
 });
 

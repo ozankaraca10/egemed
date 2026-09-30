@@ -35,7 +35,11 @@
       "gainApplied": 30,
       "rmsNormalized": 0.0333,
       "peakNormalized": 0.4468,
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "manikin",
+        "sex": "F"
+      }
     },
     {
       "id": "heart_normal_lc_001",
@@ -58,7 +62,11 @@
       "gainApplied": 20.939,
       "rmsNormalized": 0.0595,
       "peakNormalized": 0.97,
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "manikin",
+        "sex": "F"
+      }
     },
     {
       "id": "heart_normal_rusb_001",
@@ -81,7 +89,11 @@
       "gainApplied": 8.742,
       "rmsNormalized": 0.0535,
       "peakNormalized": 0.97,
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "manikin",
+        "sex": "M"
+      }
     },
     {
       "id": "heart_normal_lusb_001",
@@ -104,7 +116,11 @@
       "gainApplied": 22.29,
       "rmsNormalized": 0.0939,
       "peakNormalized": 0.97,
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "manikin",
+        "sex": "F"
+      }
     },
     {
       "id": "heart_normal_llsb_001",
@@ -127,7 +143,11 @@
       "gainApplied": 21.022,
       "rmsNormalized": 0.091,
       "peakNormalized": 0.97,
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "manikin",
+        "sex": "F"
+      }
     },
     {
       "id": "heart_normal_apex_001",
@@ -150,7 +170,11 @@
       "gainApplied": 30,
       "rmsNormalized": 0.0726,
       "peakNormalized": 0.7553,
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "manikin",
+        "sex": "F"
+      }
     },
     {
       "id": "heart_late_diastolic_murmur_lc_001",
@@ -173,7 +197,11 @@
       "gainApplied": 30,
       "rmsNormalized": 0.0932,
       "peakNormalized": 0.8084,
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "manikin",
+        "sex": "M"
+      }
     },
     {
       "id": "heart_mid_systolic_murmur_apex_001",
@@ -196,7 +224,11 @@
       "gainApplied": 30,
       "rmsNormalized": 0.0624,
       "peakNormalized": 0.4074,
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "manikin",
+        "sex": "M"
+      }
     },
     {
       "id": "heart_normal_rusb_002",
@@ -219,7 +251,11 @@
       "gainApplied": 15.517,
       "rmsNormalized": 0.1,
       "peakNormalized": 0.8197,
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "manikin",
+        "sex": "F"
+      }
     },
     {
       "id": "heart_mid_systolic_murmur_apex_002",
@@ -242,7 +278,11 @@
       "gainApplied": 30,
       "rmsNormalized": 0.0278,
       "peakNormalized": 0.3268,
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "manikin",
+        "sex": "F"
+      }
     },
     {
       "id": "heart_normal_lc_002",
@@ -265,7 +305,11 @@
       "gainApplied": 30,
       "rmsNormalized": 0.0467,
       "peakNormalized": 0.4047,
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "manikin",
+        "sex": "M"
+      }
     },
     {
       "id": "heart_late_systolic_murmur_lusb_001",
@@ -288,7 +332,11 @@
       "gainApplied": 30,
       "rmsNormalized": 0.0806,
       "peakNormalized": 0.9338,
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "manikin",
+        "sex": "F"
+      }
     },
     {
       "id": "heart_late_systolic_murmur_rusb_001",
@@ -311,7 +359,11 @@
       "gainApplied": 30,
       "rmsNormalized": 0.0548,
       "peakNormalized": 0.64,
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "manikin",
+        "sex": "M"
+      }
     },
     {
       "id": "heart_atrial_fibrillation_apex_001",
@@ -334,7 +386,11 @@
       "gainApplied": 30,
       "rmsNormalized": 0.0544,
       "peakNormalized": 0.7462,
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "manikin",
+        "sex": "F"
+      }
     },
     {
       "id": "heart_s4_rc_001",
@@ -357,7 +413,11 @@
       "gainApplied": 30,
       "rmsNormalized": 0.0149,
       "peakNormalized": 0.119,
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "manikin",
+        "sex": "F"
+      }
     },
     {
       "id": "heart_early_systolic_murmur_rusb_001",
@@ -380,7 +440,11 @@
       "gainApplied": 30,
       "rmsNormalized": 0.064,
       "peakNormalized": 0.5246,
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "manikin",
+        "sex": "F"
+      }
     },
     {
       "id": "heart_late_systolic_murmur_apex_001",
@@ -403,7 +467,11 @@
       "gainApplied": 30,
       "rmsNormalized": 0.0709,
       "peakNormalized": 0.5118,
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "manikin",
+        "sex": "F"
+      }
     },
     {
       "id": "heart_mid_systolic_murmur_lusb_001",
@@ -426,7 +494,11 @@
       "gainApplied": 30,
       "rmsNormalized": 0.0635,
       "peakNormalized": 0.8295,
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "manikin",
+        "sex": "M"
+      }
     },
     {
       "id": "heart_early_systolic_murmur_lusb_001",
@@ -449,7 +521,11 @@
       "gainApplied": 12.984,
       "rmsNormalized": 0.0597,
       "peakNormalized": 0.97,
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "manikin",
+        "sex": "F"
+      }
     },
     {
       "id": "heart_mid_systolic_murmur_rc_001",
@@ -472,7 +548,11 @@
       "gainApplied": 30,
       "rmsNormalized": 0.0667,
       "peakNormalized": 0.8789,
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "manikin",
+        "sex": "M"
+      }
     },
     {
       "id": "heart_late_diastolic_murmur_lusb_001",
@@ -495,7 +575,11 @@
       "gainApplied": 30,
       "rmsNormalized": 0.0897,
       "peakNormalized": 0.8157,
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "manikin",
+        "sex": "M"
+      }
     },
     {
       "id": "heart_early_systolic_murmur_rusb_002",
@@ -518,7 +602,11 @@
       "gainApplied": 8.508,
       "rmsNormalized": 0.0476,
       "peakNormalized": 0.97,
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "manikin",
+        "sex": "M"
+      }
     },
     {
       "id": "heart_s3_lusb_001",
@@ -541,7 +629,11 @@
       "gainApplied": 30,
       "rmsNormalized": 0.0672,
       "peakNormalized": 0.8606,
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "manikin",
+        "sex": "M"
+      }
     },
     {
       "id": "heart_late_diastolic_murmur_apex_001",
@@ -564,7 +656,11 @@
       "gainApplied": 28.927,
       "rmsNormalized": 0.1,
       "peakNormalized": 0.7963,
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "manikin",
+        "sex": "F"
+      }
     },
     {
       "id": "heart_early_systolic_murmur_lusb_002",
@@ -587,7 +683,11 @@
       "gainApplied": 14.654,
       "rmsNormalized": 0.0449,
       "peakNormalized": 0.97,
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "manikin",
+        "sex": "M"
+      }
     },
     {
       "id": "heart_s3_llsb_001",
@@ -610,7 +710,11 @@
       "gainApplied": 10.949,
       "rmsNormalized": 0.0618,
       "peakNormalized": 0.97,
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "manikin",
+        "sex": "F"
+      }
     },
     {
       "id": "heart_late_diastolic_murmur_llsb_001",
@@ -633,7 +737,11 @@
       "gainApplied": 20.56,
       "rmsNormalized": 0.1,
       "peakNormalized": 0.9468,
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "manikin",
+        "sex": "M"
+      }
     },
     {
       "id": "heart_atrial_fibrillation_lusb_001",
@@ -656,7 +764,11 @@
       "gainApplied": 29.027,
       "rmsNormalized": 0.0913,
       "peakNormalized": 0.97,
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "manikin",
+        "sex": "F"
+      }
     },
     {
       "id": "heart_tachycardia_lc_001",
@@ -679,7 +791,11 @@
       "gainApplied": 30,
       "rmsNormalized": 0.0393,
       "peakNormalized": 0.2335,
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "manikin",
+        "sex": "F"
+      }
     },
     {
       "id": "heart_tachycardia_apex_001",
@@ -702,7 +818,11 @@
       "gainApplied": 30,
       "rmsNormalized": 0.0624,
       "peakNormalized": 0.5255,
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "manikin",
+        "sex": "F"
+      }
     },
     {
       "id": "heart_late_diastolic_murmur_lusb_002",
@@ -725,7 +845,11 @@
       "gainApplied": 30,
       "rmsNormalized": 0.0984,
       "peakNormalized": 0.7663,
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "manikin",
+        "sex": "F"
+      }
     },
     {
       "id": "heart_s3_apex_001",
@@ -748,7 +872,11 @@
       "gainApplied": 25.028,
       "rmsNormalized": 0.0891,
       "peakNormalized": 0.97,
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "manikin",
+        "sex": "F"
+      }
     },
     {
       "id": "heart_s4_lusb_001",
@@ -771,7 +899,11 @@
       "gainApplied": 27.127,
       "rmsNormalized": 0.1,
       "peakNormalized": 0.8204,
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "manikin",
+        "sex": "M"
+      }
     },
     {
       "id": "heart_av_block_llsb_001",
@@ -794,7 +926,11 @@
       "gainApplied": 19.721,
       "rmsNormalized": 0.1,
       "peakNormalized": 0.7041,
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "manikin",
+        "sex": "M"
+      }
     },
     {
       "id": "heart_s3_lc_001",
@@ -817,7 +953,11 @@
       "gainApplied": 27.606,
       "rmsNormalized": 0.1,
       "peakNormalized": 0.7456,
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "manikin",
+        "sex": "F"
+      }
     },
     {
       "id": "heart_av_block_apex_001",
@@ -840,7 +980,11 @@
       "gainApplied": 21.886,
       "rmsNormalized": 0.1,
       "peakNormalized": 0.7374,
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "manikin",
+        "sex": "M"
+      }
     },
     {
       "id": "heart_tachycardia_lusb_001",
@@ -863,7 +1007,11 @@
       "gainApplied": 11.939,
       "rmsNormalized": 0.1,
       "peakNormalized": 0.881,
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "manikin",
+        "sex": "M"
+      }
     },
     {
       "id": "heart_atrial_fibrillation_lc_001",
@@ -886,7 +1034,11 @@
       "gainApplied": 17.853,
       "rmsNormalized": 0.1,
       "peakNormalized": 0.7611,
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "manikin",
+        "sex": "M"
+      }
     },
     {
       "id": "heart_late_systolic_murmur_lusb_002",
@@ -909,7 +1061,11 @@
       "gainApplied": 11.913,
       "rmsNormalized": 0.0538,
       "peakNormalized": 0.97,
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "manikin",
+        "sex": "M"
+      }
     },
     {
       "id": "heart_late_diastolic_murmur_llsb_002",
@@ -932,7 +1088,11 @@
       "gainApplied": 9.148,
       "rmsNormalized": 0.1,
       "peakNormalized": 0.854,
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "manikin",
+        "sex": "F"
+      }
     },
     {
       "id": "heart_mid_systolic_murmur_lusb_002",
@@ -955,7 +1115,11 @@
       "gainApplied": 15.813,
       "rmsNormalized": 0.0662,
       "peakNormalized": 0.97,
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "manikin",
+        "sex": "F"
+      }
     },
     {
       "id": "heart_mid_systolic_murmur_llsb_001",
@@ -978,7 +1142,11 @@
       "gainApplied": 21.289,
       "rmsNormalized": 0.0922,
       "peakNormalized": 0.97,
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "manikin",
+        "sex": "F"
+      }
     },
     {
       "id": "heart_av_block_rc_001",
@@ -1001,7 +1169,11 @@
       "gainApplied": 10.445,
       "rmsNormalized": 0.0198,
       "peakNormalized": 0.97,
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "manikin",
+        "sex": "M"
+      }
     },
     {
       "id": "heart_normal_llsb_002",
@@ -1024,7 +1196,11 @@
       "gainApplied": 20.552,
       "rmsNormalized": 0.1,
       "peakNormalized": 0.6736,
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "manikin",
+        "sex": "M"
+      }
     },
     {
       "id": "heart_mid_systolic_murmur_rusb_001",
@@ -1047,7 +1223,11 @@
       "gainApplied": 28.43,
       "rmsNormalized": 0.0916,
       "peakNormalized": 0.97,
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "manikin",
+        "sex": "M"
+      }
     },
     {
       "id": "heart_s3_llsb_002",
@@ -1070,7 +1250,11 @@
       "gainApplied": 7.479,
       "rmsNormalized": 0.1,
       "peakNormalized": 0.6813,
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "manikin",
+        "sex": "M"
+      }
     },
     {
       "id": "heart_early_systolic_murmur_llsb_001",
@@ -1093,7 +1277,11 @@
       "gainApplied": 23.071,
       "rmsNormalized": 0.1,
       "peakNormalized": 0.7125,
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "manikin",
+        "sex": "F"
+      }
     },
     {
       "id": "heart_late_systolic_murmur_llsb_001",
@@ -1116,7 +1304,11 @@
       "gainApplied": 28.43,
       "rmsNormalized": 0.0773,
       "peakNormalized": 0.97,
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "manikin",
+        "sex": "F"
+      }
     },
     {
       "id": "heart_early_systolic_murmur_apex_001",
@@ -1139,7 +1331,11 @@
       "gainApplied": 23.421,
       "rmsNormalized": 0.1,
       "peakNormalized": 0.4603,
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "manikin",
+        "sex": "M"
+      }
     },
     {
       "id": "heart_atrial_fibrillation_rusb_001",
@@ -1162,7 +1358,11 @@
       "gainApplied": 21.332,
       "rmsNormalized": 0.0844,
       "peakNormalized": 0.97,
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "manikin",
+        "sex": "M"
+      }
     },
     {
       "id": "lung_normal_rua_001",
@@ -1185,7 +1385,11 @@
       "gainApplied": 18.221,
       "rmsNormalized": 0.1,
       "peakNormalized": 0.6094,
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "manikin",
+        "sex": "M"
+      }
     },
     {
       "id": "lung_normal_lua_001",
@@ -1208,7 +1412,11 @@
       "gainApplied": 23.435,
       "rmsNormalized": 0.1,
       "peakNormalized": 0.5736,
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "manikin",
+        "sex": "F"
+      }
     },
     {
       "id": "lung_normal_rma_001",
@@ -1231,7 +1439,11 @@
       "gainApplied": 11.23,
       "rmsNormalized": 0.1,
       "peakNormalized": 0.8711,
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "manikin",
+        "sex": "F"
+      }
     },
     {
       "id": "lung_normal_lma_001",
@@ -1254,7 +1466,11 @@
       "gainApplied": 16.199,
       "rmsNormalized": 0.1,
       "peakNormalized": 0.4973,
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "manikin",
+        "sex": "F"
+      }
     },
     {
       "id": "lung_normal_rla_001",
@@ -1277,7 +1493,11 @@
       "gainApplied": 30,
       "rmsNormalized": 0.0419,
       "peakNormalized": 0.2792,
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "manikin",
+        "sex": "M"
+      }
     },
     {
       "id": "lung_normal_lla_001",
@@ -1300,7 +1520,11 @@
       "gainApplied": 8.692,
       "rmsNormalized": 0.0832,
       "peakNormalized": 0.97,
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "manikin",
+        "sex": "M"
+      }
     },
     {
       "id": "lung_pleural_rub_rma_001",
@@ -1323,7 +1547,11 @@
       "gainApplied": 30,
       "rmsNormalized": 0.0987,
       "peakNormalized": 0.6995,
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "manikin",
+        "sex": "M"
+      }
     },
     {
       "id": "lung_pleural_rub_lua_001",
@@ -1346,7 +1574,11 @@
       "gainApplied": 24.299,
       "rmsNormalized": 0.1,
       "peakNormalized": 0.7749,
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "manikin",
+        "sex": "M"
+      }
     },
     {
       "id": "lung_rhonchi_lua_001",
@@ -1369,7 +1601,11 @@
       "gainApplied": 17.505,
       "rmsNormalized": 0.1,
       "peakNormalized": 0.6069,
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "manikin",
+        "sex": "F"
+      }
     },
     {
       "id": "lung_wheezing_lua_001",
@@ -1392,7 +1628,11 @@
       "gainApplied": 22.893,
       "rmsNormalized": 0.1,
       "peakNormalized": 0.5345,
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "manikin",
+        "sex": "M"
+      }
     },
     {
       "id": "lung_fine_crackles_lua_001",
@@ -1415,7 +1655,11 @@
       "gainApplied": 27.398,
       "rmsNormalized": 0.1,
       "peakNormalized": 0.9063,
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "manikin",
+        "sex": "M"
+      }
     },
     {
       "id": "lung_normal_lua_002",
@@ -1438,7 +1682,11 @@
       "gainApplied": 17.552,
       "rmsNormalized": 0.1,
       "peakNormalized": 0.669,
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "manikin",
+        "sex": "M"
+      }
     },
     {
       "id": "lung_coarse_crackles_lla_001",
@@ -1461,7 +1709,11 @@
       "gainApplied": 30,
       "rmsNormalized": 0.0349,
       "peakNormalized": 0.271,
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "manikin",
+        "sex": "M"
+      }
     },
     {
       "id": "lung_coarse_crackles_lua_001",
@@ -1484,7 +1736,11 @@
       "gainApplied": 26.069,
       "rmsNormalized": 0.1,
       "peakNormalized": 0.7685,
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "manikin",
+        "sex": "M"
+      }
     },
     {
       "id": "lung_fine_crackles_lua_002",
@@ -1507,7 +1763,11 @@
       "gainApplied": 21.375,
       "rmsNormalized": 0.0761,
       "peakNormalized": 0.97,
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "manikin",
+        "sex": "F"
+      }
     },
     {
       "id": "lung_coarse_crackles_rla_001",
@@ -1530,7 +1790,11 @@
       "gainApplied": 30,
       "rmsNormalized": 0.0351,
       "peakNormalized": 0.5447,
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "manikin",
+        "sex": "M"
+      }
     },
     {
       "id": "lung_rhonchi_rla_001",
@@ -1553,7 +1817,11 @@
       "gainApplied": 30,
       "rmsNormalized": 0.0169,
       "peakNormalized": 0.173,
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "manikin",
+        "sex": "F"
+      }
     },
     {
       "id": "lung_wheezing_rua_001",
@@ -1576,7 +1844,11 @@
       "gainApplied": 30,
       "rmsNormalized": 0.0451,
       "peakNormalized": 0.3442,
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "manikin",
+        "sex": "F"
+      }
     },
     {
       "id": "lung_pleural_rub_lla_001",
@@ -1599,7 +1871,11 @@
       "gainApplied": 30,
       "rmsNormalized": 0.0237,
       "peakNormalized": 0.2124,
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "manikin",
+        "sex": "M"
+      }
     },
     {
       "id": "lung_pleural_rub_lma_001",
@@ -1622,7 +1898,11 @@
       "gainApplied": 30,
       "rmsNormalized": 0.0267,
       "peakNormalized": 0.2399,
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "manikin",
+        "sex": "M"
+      }
     },
     {
       "id": "lung_rhonchi_rua_001",
@@ -1645,7 +1925,11 @@
       "gainApplied": 30,
       "rmsNormalized": 0.0377,
       "peakNormalized": 0.303,
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "manikin",
+        "sex": "M"
+      }
     },
     {
       "id": "lung_fine_crackles_rua_001",
@@ -1668,7 +1952,11 @@
       "gainApplied": 30,
       "rmsNormalized": 0.0298,
       "peakNormalized": 0.2444,
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "manikin",
+        "sex": "M"
+      }
     },
     {
       "id": "lung_rhonchi_lua_002",
@@ -1691,7 +1979,11 @@
       "gainApplied": 30,
       "rmsNormalized": 0.0365,
       "peakNormalized": 0.6143,
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "manikin",
+        "sex": "M"
+      }
     },
     {
       "id": "lung_pleural_rub_lma_002",
@@ -1714,7 +2006,11 @@
       "gainApplied": 30,
       "rmsNormalized": 0.0881,
       "peakNormalized": 0.8093,
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "manikin",
+        "sex": "F"
+      }
     },
     {
       "id": "lung_coarse_crackles_lma_001",
@@ -1737,7 +2033,11 @@
       "gainApplied": 30,
       "rmsNormalized": 0.0675,
       "peakNormalized": 0.9073,
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "manikin",
+        "sex": "F"
+      }
     },
     {
       "id": "lung_coarse_crackles_rla_002",
@@ -1760,7 +2060,11 @@
       "gainApplied": 30,
       "rmsNormalized": 0.0131,
       "peakNormalized": 0.1254,
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "manikin",
+        "sex": "F"
+      }
     },
     {
       "id": "lung_fine_crackles_rla_001",
@@ -1783,7 +2087,11 @@
       "gainApplied": 17.228,
       "rmsNormalized": 0.0455,
       "peakNormalized": 0.97,
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "manikin",
+        "sex": "M"
+      }
     },
     {
       "id": "lung_coarse_crackles_rma_001",
@@ -1806,7 +2114,11 @@
       "gainApplied": 30,
       "rmsNormalized": 0.0978,
       "peakNormalized": 0.7599,
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "manikin",
+        "sex": "F"
+      }
     },
     {
       "id": "lung_wheezing_rla_001",
@@ -1829,7 +2141,11 @@
       "gainApplied": 16.977,
       "rmsNormalized": 0.1,
       "peakNormalized": 0.7922,
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "manikin",
+        "sex": "M"
+      }
     },
     {
       "id": "lung_rhonchi_rla_002",
@@ -1852,7 +2168,11 @@
       "gainApplied": 30,
       "rmsNormalized": 0.0137,
       "peakNormalized": 0.1236,
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "manikin",
+        "sex": "M"
+      }
     },
     {
       "id": "lung_fine_crackles_rla_002",
@@ -1875,7 +2195,11 @@
       "gainApplied": 22.801,
       "rmsNormalized": 0.0767,
       "peakNormalized": 0.97,
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "manikin",
+        "sex": "F"
+      }
     },
     {
       "id": "lung_normal_rma_002",
@@ -1898,7 +2222,11 @@
       "gainApplied": 30,
       "rmsNormalized": 0.0466,
       "peakNormalized": 0.3754,
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "manikin",
+        "sex": "M"
+      }
     },
     {
       "id": "lung_rhonchi_lma_001",
@@ -1921,7 +2249,11 @@
       "gainApplied": 20.696,
       "rmsNormalized": 0.1,
       "peakNormalized": 0.7289,
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "manikin",
+        "sex": "M"
+      }
     },
     {
       "id": "lung_coarse_crackles_lla_002",
@@ -1944,7 +2276,11 @@
       "gainApplied": 30,
       "rmsNormalized": 0.0244,
       "peakNormalized": 0.2335,
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "manikin",
+        "sex": "F"
+      }
     },
     {
       "id": "lung_rhonchi_lma_002",
@@ -1967,7 +2303,11 @@
       "gainApplied": 28.466,
       "rmsNormalized": 0.1,
       "peakNormalized": 0.7949,
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "manikin",
+        "sex": "F"
+      }
     },
     {
       "id": "lung_normal_lla_002",
@@ -1990,7 +2330,11 @@
       "gainApplied": 30,
       "rmsNormalized": 0.0641,
       "peakNormalized": 0.6381,
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "manikin",
+        "sex": "F"
+      }
     },
     {
       "id": "lung_wheezing_rua_002",
@@ -2013,7 +2357,11 @@
       "gainApplied": 30,
       "rmsNormalized": 0.0744,
       "peakNormalized": 0.542,
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "manikin",
+        "sex": "M"
+      }
     },
     {
       "id": "lung_normal_lma_002",
@@ -2036,7 +2384,11 @@
       "gainApplied": 5.069,
       "rmsNormalized": 0.0385,
       "peakNormalized": 0.97,
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "manikin",
+        "sex": "M"
+      }
     },
     {
       "id": "lung_pleural_rub_lla_002",
@@ -2059,7 +2411,11 @@
       "gainApplied": 30,
       "rmsNormalized": 0.0409,
       "peakNormalized": 0.4056,
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "manikin",
+        "sex": "F"
+      }
     },
     {
       "id": "lung_wheezing_rma_001",
@@ -2082,7 +2438,11 @@
       "gainApplied": 30,
       "rmsNormalized": 0.0778,
       "peakNormalized": 0.4495,
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "manikin",
+        "sex": "M"
+      }
     },
     {
       "id": "lung_pleural_rub_rua_001",
@@ -2105,7 +2465,11 @@
       "gainApplied": 28.128,
       "rmsNormalized": 0.0709,
       "peakNormalized": 0.97,
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "manikin",
+        "sex": "M"
+      }
     },
     {
       "id": "lung_wheezing_lla_001",
@@ -2128,7 +2492,11 @@
       "gainApplied": 30,
       "rmsNormalized": 0.0721,
       "peakNormalized": 0.3516,
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "manikin",
+        "sex": "M"
+      }
     },
     {
       "id": "lung_rhonchi_lla_001",
@@ -2151,7 +2519,11 @@
       "gainApplied": 30,
       "rmsNormalized": 0.0653,
       "peakNormalized": 0.4688,
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "manikin",
+        "sex": "M"
+      }
     },
     {
       "id": "lung_normal_rla_002",
@@ -2174,7 +2546,11 @@
       "gainApplied": 27.882,
       "rmsNormalized": 0.0936,
       "peakNormalized": 0.97,
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "manikin",
+        "sex": "F"
+      }
     },
     {
       "id": "lung_coarse_crackles_lma_002",
@@ -2197,7 +2573,11 @@
       "gainApplied": 29.733,
       "rmsNormalized": 0.0927,
       "peakNormalized": 0.97,
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "manikin",
+        "sex": "M"
+      }
     },
     {
       "id": "lung_wheezing_lma_001",
@@ -2220,7 +2600,11 @@
       "gainApplied": 5.06,
       "rmsNormalized": 0.0454,
       "peakNormalized": 0.97,
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "manikin",
+        "sex": "M"
+      }
     },
     {
       "id": "lung_normal_rua_002",
@@ -2243,7 +2627,11 @@
       "gainApplied": 17.023,
       "rmsNormalized": 0.1,
       "peakNormalized": 0.7881,
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "manikin",
+        "sex": "F"
+      }
     },
     {
       "id": "lung_pleural_rub_rla_001",
@@ -2266,7 +2654,11 @@
       "gainApplied": 29.187,
       "rmsNormalized": 0.0986,
       "peakNormalized": 0.97,
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "manikin",
+        "sex": "M"
+      }
     },
     {
       "id": "lung_coarse_crackles_lua_002",
@@ -2289,7 +2681,11 @@
       "gainApplied": 30,
       "rmsNormalized": 0.0462,
       "peakNormalized": 0.6308,
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "manikin",
+        "sex": "F"
+      }
     },
     {
       "id": "lung_pleural_rub_lua_002",
@@ -2312,7 +2708,11 @@
       "gainApplied": 30,
       "rmsNormalized": 0.0768,
       "peakNormalized": 0.7306,
-      "issues": []
+      "issues": [],
+      "patient": {
+        "origin": "manikin",
+        "sex": "F"
+      }
     },
     {
       "id": "mixed_late_systolic_murmur+rhonchi_lusb_001",
@@ -2337,7 +2737,11 @@
       "peakNormalized": 0.5142,
       "issues": [],
       "heartFinding": "late_systolic_murmur",
-      "lungFinding": "rhonchi"
+      "lungFinding": "rhonchi",
+      "patient": {
+        "origin": "manikin",
+        "sex": "F"
+      }
     },
     {
       "id": "mixed_s3+normal_rla_001",
@@ -2362,7 +2766,11 @@
       "peakNormalized": 0.6711,
       "issues": [],
       "heartFinding": "s3",
-      "lungFinding": "normal"
+      "lungFinding": "normal",
+      "patient": {
+        "origin": "manikin",
+        "sex": "F"
+      }
     },
     {
       "id": "mixed_atrial_fibrillation+normal_lma_001",
@@ -2387,7 +2795,11 @@
       "peakNormalized": 0.7021,
       "issues": [],
       "heartFinding": "atrial_fibrillation",
-      "lungFinding": "normal"
+      "lungFinding": "normal",
+      "patient": {
+        "origin": "manikin",
+        "sex": "M"
+      }
     },
     {
       "id": "mixed_s3+coarse_crackles_apex_001",
@@ -2412,7 +2824,11 @@
       "peakNormalized": 0.2417,
       "issues": [],
       "heartFinding": "s3",
-      "lungFinding": "coarse_crackles"
+      "lungFinding": "coarse_crackles",
+      "patient": {
+        "origin": "manikin",
+        "sex": "F"
+      }
     },
     {
       "id": "mixed_av_block+fine_crackles_rusb_001",
@@ -2437,7 +2853,11 @@
       "peakNormalized": 0.97,
       "issues": [],
       "heartFinding": "av_block",
-      "lungFinding": "fine_crackles"
+      "lungFinding": "fine_crackles",
+      "patient": {
+        "origin": "manikin",
+        "sex": "M"
+      }
     },
     {
       "id": "mixed_s3+pleural_rub_rc_001",
@@ -2462,7 +2882,11 @@
       "peakNormalized": 0.6111,
       "issues": [],
       "heartFinding": "s3",
-      "lungFinding": "pleural_rub"
+      "lungFinding": "pleural_rub",
+      "patient": {
+        "origin": "manikin",
+        "sex": "F"
+      }
     },
     {
       "id": "mixed_tachycardia+pleural_rub_apex_001",
@@ -2487,7 +2911,11 @@
       "peakNormalized": 0.2591,
       "issues": [],
       "heartFinding": "tachycardia",
-      "lungFinding": "pleural_rub"
+      "lungFinding": "pleural_rub",
+      "patient": {
+        "origin": "manikin",
+        "sex": "M"
+      }
     },
     {
       "id": "mixed_early_systolic_murmur+pleural_rub_lma_001",
@@ -2512,7 +2940,11 @@
       "peakNormalized": 0.5709,
       "issues": [],
       "heartFinding": "early_systolic_murmur",
-      "lungFinding": "pleural_rub"
+      "lungFinding": "pleural_rub",
+      "patient": {
+        "origin": "manikin",
+        "sex": "F"
+      }
     },
     {
       "id": "mixed_mid_systolic_murmur+wheezing_lua_001",
@@ -2537,7 +2969,11 @@
       "peakNormalized": 0.5725,
       "issues": [],
       "heartFinding": "mid_systolic_murmur",
-      "lungFinding": "wheezing"
+      "lungFinding": "wheezing",
+      "patient": {
+        "origin": "manikin",
+        "sex": "M"
+      }
     },
     {
       "id": "mixed_early_systolic_murmur+coarse_crackles_lua_001",
@@ -2562,7 +2998,11 @@
       "peakNormalized": 0.97,
       "issues": [],
       "heartFinding": "early_systolic_murmur",
-      "lungFinding": "coarse_crackles"
+      "lungFinding": "coarse_crackles",
+      "patient": {
+        "origin": "manikin",
+        "sex": "F"
+      }
     },
     {
       "id": "mixed_s4+normal_apex_001",
@@ -2587,7 +3027,11 @@
       "peakNormalized": 0.5255,
       "issues": [],
       "heartFinding": "s4",
-      "lungFinding": "normal"
+      "lungFinding": "normal",
+      "patient": {
+        "origin": "manikin",
+        "sex": "M"
+      }
     },
     {
       "id": "mixed_av_block+rhonchi_rma_001",
@@ -2612,7 +3056,11 @@
       "peakNormalized": 0.3534,
       "issues": [],
       "heartFinding": "av_block",
-      "lungFinding": "rhonchi"
+      "lungFinding": "rhonchi",
+      "patient": {
+        "origin": "manikin",
+        "sex": "F"
+      }
     },
     {
       "id": "mixed_atrial_fibrillation+pleural_rub_rc_001",
@@ -2637,7 +3085,11 @@
       "peakNormalized": 0.1465,
       "issues": [],
       "heartFinding": "atrial_fibrillation",
-      "lungFinding": "pleural_rub"
+      "lungFinding": "pleural_rub",
+      "patient": {
+        "origin": "manikin",
+        "sex": "F"
+      }
     },
     {
       "id": "mixed_late_diastolic_murmur+rhonchi_lua_001",
@@ -2662,7 +3114,11 @@
       "peakNormalized": 0.5445,
       "issues": [],
       "heartFinding": "late_diastolic_murmur",
-      "lungFinding": "rhonchi"
+      "lungFinding": "rhonchi",
+      "patient": {
+        "origin": "manikin",
+        "sex": "F"
+      }
     },
     {
       "id": "mixed_late_diastolic_murmur+coarse_crackles_lua_001",
@@ -2687,7 +3143,11 @@
       "peakNormalized": 0.97,
       "issues": [],
       "heartFinding": "late_diastolic_murmur",
-      "lungFinding": "coarse_crackles"
+      "lungFinding": "coarse_crackles",
+      "patient": {
+        "origin": "manikin",
+        "sex": "F"
+      }
     },
     {
       "id": "mixed_atrial_fibrillation+rhonchi_rla_001",
@@ -2712,7 +3172,11 @@
       "peakNormalized": 0.108,
       "issues": [],
       "heartFinding": "atrial_fibrillation",
-      "lungFinding": "rhonchi"
+      "lungFinding": "rhonchi",
+      "patient": {
+        "origin": "manikin",
+        "sex": "F"
+      }
     },
     {
       "id": "mixed_s3+coarse_crackles_rc_001",
@@ -2737,7 +3201,11 @@
       "peakNormalized": 0.1913,
       "issues": [],
       "heartFinding": "s3",
-      "lungFinding": "coarse_crackles"
+      "lungFinding": "coarse_crackles",
+      "patient": {
+        "origin": "manikin",
+        "sex": "F"
+      }
     },
     {
       "id": "mixed_late_systolic_murmur+wheezing_rma_001",
@@ -2762,7 +3230,11 @@
       "peakNormalized": 0.4825,
       "issues": [],
       "heartFinding": "late_systolic_murmur",
-      "lungFinding": "wheezing"
+      "lungFinding": "wheezing",
+      "patient": {
+        "origin": "manikin",
+        "sex": "F"
+      }
     },
     {
       "id": "mixed_tachycardia+pleural_rub_rua_001",
@@ -2787,7 +3259,11 @@
       "peakNormalized": 0.3351,
       "issues": [],
       "heartFinding": "tachycardia",
-      "lungFinding": "pleural_rub"
+      "lungFinding": "pleural_rub",
+      "patient": {
+        "origin": "manikin",
+        "sex": "M"
+      }
     },
     {
       "id": "mixed_late_diastolic_murmur+normal_rla_001",
@@ -2812,7 +3288,11 @@
       "peakNormalized": 0.97,
       "issues": [],
       "heartFinding": "late_diastolic_murmur",
-      "lungFinding": "normal"
+      "lungFinding": "normal",
+      "patient": {
+        "origin": "manikin",
+        "sex": "F"
+      }
     },
     {
       "id": "mixed_late_systolic_murmur+coarse_crackles_lusb_001",
@@ -2837,7 +3317,11 @@
       "peakNormalized": 0.7714,
       "issues": [],
       "heartFinding": "late_systolic_murmur",
-      "lungFinding": "coarse_crackles"
+      "lungFinding": "coarse_crackles",
+      "patient": {
+        "origin": "manikin",
+        "sex": "M"
+      }
     },
     {
       "id": "mixed_av_block+fine_crackles_lma_001",
@@ -2862,7 +3346,11 @@
       "peakNormalized": 0.97,
       "issues": [],
       "heartFinding": "av_block",
-      "lungFinding": "fine_crackles"
+      "lungFinding": "fine_crackles",
+      "patient": {
+        "origin": "manikin",
+        "sex": "M"
+      }
     },
     {
       "id": "mixed_tachycardia+normal_lc_001",
@@ -2887,7 +3375,11 @@
       "peakNormalized": 0.97,
       "issues": [],
       "heartFinding": "tachycardia",
-      "lungFinding": "normal"
+      "lungFinding": "normal",
+      "patient": {
+        "origin": "manikin",
+        "sex": "M"
+      }
     },
     {
       "id": "mixed_s4+wheezing_lusb_001",
@@ -2912,7 +3404,11 @@
       "peakNormalized": 0.5902,
       "issues": [],
       "heartFinding": "s4",
-      "lungFinding": "wheezing"
+      "lungFinding": "wheezing",
+      "patient": {
+        "origin": "manikin",
+        "sex": "M"
+      }
     },
     {
       "id": "mixed_atrial_fibrillation+pleural_rub_rc_002",
@@ -2937,7 +3433,11 @@
       "peakNormalized": 0.6547,
       "issues": [],
       "heartFinding": "atrial_fibrillation",
-      "lungFinding": "pleural_rub"
+      "lungFinding": "pleural_rub",
+      "patient": {
+        "origin": "manikin",
+        "sex": "M"
+      }
     },
     {
       "id": "mixed_s3+pleural_rub_lusb_001",
@@ -2962,7 +3462,11 @@
       "peakNormalized": 0.7457,
       "issues": [],
       "heartFinding": "s3",
-      "lungFinding": "pleural_rub"
+      "lungFinding": "pleural_rub",
+      "patient": {
+        "origin": "manikin",
+        "sex": "F"
+      }
     },
     {
       "id": "mixed_late_diastolic_murmur+coarse_crackles_rma_001",
@@ -2987,7 +3491,11 @@
       "peakNormalized": 0.3973,
       "issues": [],
       "heartFinding": "late_diastolic_murmur",
-      "lungFinding": "coarse_crackles"
+      "lungFinding": "coarse_crackles",
+      "patient": {
+        "origin": "manikin",
+        "sex": "M"
+      }
     },
     {
       "id": "mixed_av_block+coarse_crackles_rc_001",
@@ -3012,7 +3520,11 @@
       "peakNormalized": 0.629,
       "issues": [],
       "heartFinding": "av_block",
-      "lungFinding": "coarse_crackles"
+      "lungFinding": "coarse_crackles",
+      "patient": {
+        "origin": "manikin",
+        "sex": "F"
+      }
     },
     {
       "id": "mixed_tachycardia+pleural_rub_lc_001",
@@ -3037,7 +3549,11 @@
       "peakNormalized": 0.563,
       "issues": [],
       "heartFinding": "tachycardia",
-      "lungFinding": "pleural_rub"
+      "lungFinding": "pleural_rub",
+      "patient": {
+        "origin": "manikin",
+        "sex": "M"
+      }
     },
     {
       "id": "mixed_s4+pleural_rub_rc_001",
@@ -3062,7 +3578,11 @@
       "peakNormalized": 0.3882,
       "issues": [],
       "heartFinding": "s4",
-      "lungFinding": "pleural_rub"
+      "lungFinding": "pleural_rub",
+      "patient": {
+        "origin": "manikin",
+        "sex": "F"
+      }
     },
     {
       "id": "mixed_late_systolic_murmur+fine_crackles_rc_001",
@@ -3087,7 +3607,11 @@
       "peakNormalized": 0.97,
       "issues": [],
       "heartFinding": "late_systolic_murmur",
-      "lungFinding": "fine_crackles"
+      "lungFinding": "fine_crackles",
+      "patient": {
+        "origin": "manikin",
+        "sex": "F"
+      }
     },
     {
       "id": "mixed_tachycardia+pleural_rub_lua_001",
@@ -3112,7 +3636,11 @@
       "peakNormalized": 0.7828,
       "issues": [],
       "heartFinding": "tachycardia",
-      "lungFinding": "pleural_rub"
+      "lungFinding": "pleural_rub",
+      "patient": {
+        "origin": "manikin",
+        "sex": "F"
+      }
     },
     {
       "id": "mixed_late_systolic_murmur+fine_crackles_lusb_001",
@@ -3137,7 +3665,11 @@
       "peakNormalized": 0.97,
       "issues": [],
       "heartFinding": "late_systolic_murmur",
-      "lungFinding": "fine_crackles"
+      "lungFinding": "fine_crackles",
+      "patient": {
+        "origin": "manikin",
+        "sex": "F"
+      }
     },
     {
       "id": "mixed_early_systolic_murmur+coarse_crackles_rc_001",
@@ -3162,7 +3694,11 @@
       "peakNormalized": 0.5732,
       "issues": [],
       "heartFinding": "early_systolic_murmur",
-      "lungFinding": "coarse_crackles"
+      "lungFinding": "coarse_crackles",
+      "patient": {
+        "origin": "manikin",
+        "sex": "M"
+      }
     },
     {
       "id": "mixed_s4+fine_crackles_rla_001",
@@ -3187,7 +3723,11 @@
       "peakNormalized": 0.2408,
       "issues": [],
       "heartFinding": "s4",
-      "lungFinding": "fine_crackles"
+      "lungFinding": "fine_crackles",
+      "patient": {
+        "origin": "manikin",
+        "sex": "M"
+      }
     },
     {
       "id": "mixed_s3+normal_lua_001",
@@ -3212,7 +3752,11 @@
       "peakNormalized": 0.66,
       "issues": [],
       "heartFinding": "s3",
-      "lungFinding": "normal"
+      "lungFinding": "normal",
+      "patient": {
+        "origin": "manikin",
+        "sex": "M"
+      }
     },
     {
       "id": "mixed_av_block+normal_llsb_001",
@@ -3237,7 +3781,11 @@
       "peakNormalized": 0.8904,
       "issues": [],
       "heartFinding": "av_block",
-      "lungFinding": "normal"
+      "lungFinding": "normal",
+      "patient": {
+        "origin": "manikin",
+        "sex": "M"
+      }
     },
     {
       "id": "mixed_s3+normal_llsb_001",
@@ -3262,7 +3810,11 @@
       "peakNormalized": 0.97,
       "issues": [],
       "heartFinding": "s3",
-      "lungFinding": "normal"
+      "lungFinding": "normal",
+      "patient": {
+        "origin": "manikin",
+        "sex": "F"
+      }
     },
     {
       "id": "mixed_normal+wheezing_lc_001",
@@ -3287,7 +3839,11 @@
       "peakNormalized": 0.7935,
       "issues": [],
       "heartFinding": "normal",
-      "lungFinding": "wheezing"
+      "lungFinding": "wheezing",
+      "patient": {
+        "origin": "manikin",
+        "sex": "M"
+      }
     },
     {
       "id": "mixed_tachycardia+rhonchi_lc_001",
@@ -3312,7 +3868,11 @@
       "peakNormalized": 0.7392,
       "issues": [],
       "heartFinding": "tachycardia",
-      "lungFinding": "rhonchi"
+      "lungFinding": "rhonchi",
+      "patient": {
+        "origin": "manikin",
+        "sex": "M"
+      }
     },
     {
       "id": "mixed_atrial_fibrillation+normal_lla_001",
@@ -3337,7 +3897,11 @@
       "peakNormalized": 0.2316,
       "issues": [],
       "heartFinding": "atrial_fibrillation",
-      "lungFinding": "normal"
+      "lungFinding": "normal",
+      "patient": {
+        "origin": "manikin",
+        "sex": "F"
+      }
     },
     {
       "id": "mixed_mid_systolic_murmur+coarse_crackles_rua_001",
@@ -3362,7 +3926,11 @@
       "peakNormalized": 0.97,
       "issues": [],
       "heartFinding": "mid_systolic_murmur",
-      "lungFinding": "coarse_crackles"
+      "lungFinding": "coarse_crackles",
+      "patient": {
+        "origin": "manikin",
+        "sex": "F"
+      }
     },
     {
       "id": "mixed_tachycardia+pleural_rub_llsb_001",
@@ -3387,7 +3955,11 @@
       "peakNormalized": 0.6415,
       "issues": [],
       "heartFinding": "tachycardia",
-      "lungFinding": "pleural_rub"
+      "lungFinding": "pleural_rub",
+      "patient": {
+        "origin": "manikin",
+        "sex": "M"
+      }
     },
     {
       "id": "mixed_normal+coarse_crackles_rc_001",
@@ -3412,7 +3984,11 @@
       "peakNormalized": 0.1364,
       "issues": [],
       "heartFinding": "normal",
-      "lungFinding": "coarse_crackles"
+      "lungFinding": "coarse_crackles",
+      "patient": {
+        "origin": "manikin",
+        "sex": "M"
+      }
     },
     {
       "id": "mixed_late_diastolic_murmur+fine_crackles_llsb_001",
@@ -3437,7 +4013,11 @@
       "peakNormalized": 0.6487,
       "issues": [],
       "heartFinding": "late_diastolic_murmur",
-      "lungFinding": "fine_crackles"
+      "lungFinding": "fine_crackles",
+      "patient": {
+        "origin": "manikin",
+        "sex": "M"
+      }
     },
     {
       "id": "mixed_atrial_fibrillation+normal_lma_002",
@@ -3462,7 +4042,11 @@
       "peakNormalized": 0.8622,
       "issues": [],
       "heartFinding": "atrial_fibrillation",
-      "lungFinding": "normal"
+      "lungFinding": "normal",
+      "patient": {
+        "origin": "manikin",
+        "sex": "F"
+      }
     },
     {
       "id": "mixed_atrial_fibrillation+rhonchi_rma_001",
@@ -3487,7 +4071,11 @@
       "peakNormalized": 0.6717,
       "issues": [],
       "heartFinding": "atrial_fibrillation",
-      "lungFinding": "rhonchi"
+      "lungFinding": "rhonchi",
+      "patient": {
+        "origin": "manikin",
+        "sex": "M"
+      }
     },
     {
       "id": "mixed_s4+wheezing_rla_001",
@@ -3512,7 +4100,11 @@
       "peakNormalized": 0.6566,
       "issues": [],
       "heartFinding": "s4",
-      "lungFinding": "wheezing"
+      "lungFinding": "wheezing",
+      "patient": {
+        "origin": "manikin",
+        "sex": "F"
+      }
     },
     {
       "id": "mixed_s4+rhonchi_rua_001",
@@ -3537,7 +4129,11 @@
       "peakNormalized": 0.2417,
       "issues": [],
       "heartFinding": "s4",
-      "lungFinding": "rhonchi"
+      "lungFinding": "rhonchi",
+      "patient": {
+        "origin": "manikin",
+        "sex": "M"
+      }
     },
     {
       "id": "mixed_early_systolic_murmur+wheezing_lusb_001",
@@ -3562,7 +4158,11 @@
       "peakNormalized": 0.8143,
       "issues": [],
       "heartFinding": "early_systolic_murmur",
-      "lungFinding": "wheezing"
+      "lungFinding": "wheezing",
+      "patient": {
+        "origin": "manikin",
+        "sex": "F"
+      }
     },
     {
       "id": "mixed_tachycardia+normal_rc_001",
@@ -3587,7 +4187,11 @@
       "peakNormalized": 0.766,
       "issues": [],
       "heartFinding": "tachycardia",
-      "lungFinding": "normal"
+      "lungFinding": "normal",
+      "patient": {
+        "origin": "manikin",
+        "sex": "F"
+      }
     },
     {
       "id": "mixed_early_systolic_murmur+pleural_rub_lc_001",
@@ -3612,7 +4216,11 @@
       "peakNormalized": 0.5164,
       "issues": [],
       "heartFinding": "early_systolic_murmur",
-      "lungFinding": "pleural_rub"
+      "lungFinding": "pleural_rub",
+      "patient": {
+        "origin": "manikin",
+        "sex": "F"
+      }
     },
     {
       "id": "mixed_atrial_fibrillation+coarse_crackles_llsb_001",
@@ -3637,7 +4245,11 @@
       "peakNormalized": 0.97,
       "issues": [],
       "heartFinding": "atrial_fibrillation",
-      "lungFinding": "coarse_crackles"
+      "lungFinding": "coarse_crackles",
+      "patient": {
+        "origin": "manikin",
+        "sex": "F"
+      }
     },
     {
       "id": "mixed_late_diastolic_murmur+wheezing_rusb_001",
@@ -3662,7 +4274,11 @@
       "peakNormalized": 0.5576,
       "issues": [],
       "heartFinding": "late_diastolic_murmur",
-      "lungFinding": "wheezing"
+      "lungFinding": "wheezing",
+      "patient": {
+        "origin": "manikin",
+        "sex": "F"
+      }
     },
     {
       "id": "mixed_late_systolic_murmur+fine_crackles_rc_002",
@@ -3687,7 +4303,11 @@
       "peakNormalized": 0.2206,
       "issues": [],
       "heartFinding": "late_systolic_murmur",
-      "lungFinding": "fine_crackles"
+      "lungFinding": "fine_crackles",
+      "patient": {
+        "origin": "manikin",
+        "sex": "M"
+      }
     },
     {
       "id": "mixed_av_block+rhonchi_lusb_001",
@@ -3712,7 +4332,11 @@
       "peakNormalized": 0.97,
       "issues": [],
       "heartFinding": "av_block",
-      "lungFinding": "rhonchi"
+      "lungFinding": "rhonchi",
+      "patient": {
+        "origin": "manikin",
+        "sex": "F"
+      }
     },
     {
       "id": "mixed_late_diastolic_murmur+coarse_crackles_rla_001",
@@ -3737,7 +4361,11 @@
       "peakNormalized": 0.7974,
       "issues": [],
       "heartFinding": "late_diastolic_murmur",
-      "lungFinding": "coarse_crackles"
+      "lungFinding": "coarse_crackles",
+      "patient": {
+        "origin": "manikin",
+        "sex": "F"
+      }
     },
     {
       "id": "mixed_s4+rhonchi_rusb_001",
@@ -3762,7 +4390,11 @@
       "peakNormalized": 0.8661,
       "issues": [],
       "heartFinding": "s4",
-      "lungFinding": "rhonchi"
+      "lungFinding": "rhonchi",
+      "patient": {
+        "origin": "manikin",
+        "sex": "M"
+      }
     },
     {
       "id": "mixed_s3+pleural_rub_rla_001",
@@ -3787,7 +4419,11 @@
       "peakNormalized": 0.97,
       "issues": [],
       "heartFinding": "s3",
-      "lungFinding": "pleural_rub"
+      "lungFinding": "pleural_rub",
+      "patient": {
+        "origin": "manikin",
+        "sex": "F"
+      }
     },
     {
       "id": "mixed_late_diastolic_murmur+wheezing_lma_001",
@@ -3812,7 +4448,11 @@
       "peakNormalized": 0.7426,
       "issues": [],
       "heartFinding": "late_diastolic_murmur",
-      "lungFinding": "wheezing"
+      "lungFinding": "wheezing",
+      "patient": {
+        "origin": "manikin",
+        "sex": "M"
+      }
     },
     {
       "id": "mixed_s4+rhonchi_llsb_001",
@@ -3837,7 +4477,11 @@
       "peakNormalized": 0.9031,
       "issues": [],
       "heartFinding": "s4",
-      "lungFinding": "rhonchi"
+      "lungFinding": "rhonchi",
+      "patient": {
+        "origin": "manikin",
+        "sex": "F"
+      }
     },
     {
       "id": "mixed_tachycardia+coarse_crackles_rma_001",
@@ -3862,7 +4506,11 @@
       "peakNormalized": 0.745,
       "issues": [],
       "heartFinding": "tachycardia",
-      "lungFinding": "coarse_crackles"
+      "lungFinding": "coarse_crackles",
+      "patient": {
+        "origin": "manikin",
+        "sex": "F"
+      }
     },
     {
       "id": "mixed_s4+pleural_rub_rua_001",
@@ -3887,7 +4535,11 @@
       "peakNormalized": 0.8865,
       "issues": [],
       "heartFinding": "s4",
-      "lungFinding": "pleural_rub"
+      "lungFinding": "pleural_rub",
+      "patient": {
+        "origin": "manikin",
+        "sex": "F"
+      }
     },
     {
       "id": "mixed_s4+pleural_rub_apex_001",
@@ -3912,7 +4564,11 @@
       "peakNormalized": 0.7513,
       "issues": [],
       "heartFinding": "s4",
-      "lungFinding": "pleural_rub"
+      "lungFinding": "pleural_rub",
+      "patient": {
+        "origin": "manikin",
+        "sex": "M"
+      }
     },
     {
       "id": "mixed_atrial_fibrillation+pleural_rub_apex_001",
@@ -3937,7 +4593,11 @@
       "peakNormalized": 0.7134,
       "issues": [],
       "heartFinding": "atrial_fibrillation",
-      "lungFinding": "pleural_rub"
+      "lungFinding": "pleural_rub",
+      "patient": {
+        "origin": "manikin",
+        "sex": "F"
+      }
     },
     {
       "id": "mixed_normal+normal_llsb_001",
@@ -3962,7 +4622,11 @@
       "peakNormalized": 0.9102,
       "issues": [],
       "heartFinding": "normal",
-      "lungFinding": "normal"
+      "lungFinding": "normal",
+      "patient": {
+        "origin": "manikin",
+        "sex": "M"
+      }
     },
     {
       "id": "mixed_atrial_fibrillation+rhonchi_rua_001",
@@ -3987,7 +4651,11 @@
       "peakNormalized": 0.4367,
       "issues": [],
       "heartFinding": "atrial_fibrillation",
-      "lungFinding": "rhonchi"
+      "lungFinding": "rhonchi",
+      "patient": {
+        "origin": "manikin",
+        "sex": "F"
+      }
     },
     {
       "id": "mixed_s3+fine_crackles_rusb_001",
@@ -4012,7 +4680,11 @@
       "peakNormalized": 0.9668,
       "issues": [],
       "heartFinding": "s3",
-      "lungFinding": "fine_crackles"
+      "lungFinding": "fine_crackles",
+      "patient": {
+        "origin": "manikin",
+        "sex": "M"
+      }
     },
     {
       "id": "mixed_late_systolic_murmur+coarse_crackles_rla_001",
@@ -4037,7 +4709,11 @@
       "peakNormalized": 0.97,
       "issues": [],
       "heartFinding": "late_systolic_murmur",
-      "lungFinding": "coarse_crackles"
+      "lungFinding": "coarse_crackles",
+      "patient": {
+        "origin": "manikin",
+        "sex": "M"
+      }
     },
     {
       "id": "mixed_late_systolic_murmur+normal_lua_001",
@@ -4062,7 +4738,11 @@
       "peakNormalized": 0.9308,
       "issues": [],
       "heartFinding": "late_systolic_murmur",
-      "lungFinding": "normal"
+      "lungFinding": "normal",
+      "patient": {
+        "origin": "manikin",
+        "sex": "F"
+      }
     },
     {
       "id": "mixed_s3+rhonchi_rusb_001",
@@ -4087,7 +4767,11 @@
       "peakNormalized": 0.97,
       "issues": [],
       "heartFinding": "s3",
-      "lungFinding": "rhonchi"
+      "lungFinding": "rhonchi",
+      "patient": {
+        "origin": "manikin",
+        "sex": "M"
+      }
     },
     {
       "id": "mixed_s3+pleural_rub_apex_001",
@@ -4112,7 +4796,11 @@
       "peakNormalized": 0.8551,
       "issues": [],
       "heartFinding": "s3",
-      "lungFinding": "pleural_rub"
+      "lungFinding": "pleural_rub",
+      "patient": {
+        "origin": "manikin",
+        "sex": "M"
+      }
     },
     {
       "id": "mixed_mid_systolic_murmur+pleural_rub_lma_001",
@@ -4137,7 +4825,11 @@
       "peakNormalized": 0.7703,
       "issues": [],
       "heartFinding": "mid_systolic_murmur",
-      "lungFinding": "pleural_rub"
+      "lungFinding": "pleural_rub",
+      "patient": {
+        "origin": "manikin",
+        "sex": "M"
+      }
     },
     {
       "id": "mixed_normal+normal_rua_001",
@@ -4162,7 +4854,11 @@
       "peakNormalized": 0.7361,
       "issues": [],
       "heartFinding": "normal",
-      "lungFinding": "normal"
+      "lungFinding": "normal",
+      "patient": {
+        "origin": "manikin",
+        "sex": "F"
+      }
     },
     {
       "id": "mixed_early_systolic_murmur+pleural_rub_lusb_001",
@@ -4187,7 +4883,11 @@
       "peakNormalized": 0.531,
       "issues": [],
       "heartFinding": "early_systolic_murmur",
-      "lungFinding": "pleural_rub"
+      "lungFinding": "pleural_rub",
+      "patient": {
+        "origin": "manikin",
+        "sex": "F"
+      }
     },
     {
       "id": "mixed_mid_systolic_murmur+fine_crackles_lma_001",
@@ -4212,7 +4912,11 @@
       "peakNormalized": 0.97,
       "issues": [],
       "heartFinding": "mid_systolic_murmur",
-      "lungFinding": "fine_crackles"
+      "lungFinding": "fine_crackles",
+      "patient": {
+        "origin": "manikin",
+        "sex": "F"
+      }
     },
     {
       "id": "mixed_late_diastolic_murmur+rhonchi_rua_001",
@@ -4237,7 +4941,11 @@
       "peakNormalized": 0.4413,
       "issues": [],
       "heartFinding": "late_diastolic_murmur",
-      "lungFinding": "rhonchi"
+      "lungFinding": "rhonchi",
+      "patient": {
+        "origin": "manikin",
+        "sex": "F"
+      }
     },
     {
       "id": "mixed_late_systolic_murmur+normal_rma_001",
@@ -4262,7 +4970,11 @@
       "peakNormalized": 0.97,
       "issues": [],
       "heartFinding": "late_systolic_murmur",
-      "lungFinding": "normal"
+      "lungFinding": "normal",
+      "patient": {
+        "origin": "manikin",
+        "sex": "M"
+      }
     },
     {
       "id": "mixed_tachycardia+coarse_crackles_lc_001",
@@ -4287,7 +4999,11 @@
       "peakNormalized": 0.5402,
       "issues": [],
       "heartFinding": "tachycardia",
-      "lungFinding": "coarse_crackles"
+      "lungFinding": "coarse_crackles",
+      "patient": {
+        "origin": "manikin",
+        "sex": "F"
+      }
     },
     {
       "id": "mixed_mid_systolic_murmur+pleural_rub_lusb_001",
@@ -4312,7 +5028,11 @@
       "peakNormalized": 0.97,
       "issues": [],
       "heartFinding": "mid_systolic_murmur",
-      "lungFinding": "pleural_rub"
+      "lungFinding": "pleural_rub",
+      "patient": {
+        "origin": "manikin",
+        "sex": "M"
+      }
     },
     {
       "id": "mixed_late_systolic_murmur+wheezing_llsb_001",
@@ -4337,7 +5057,11 @@
       "peakNormalized": 0.8146,
       "issues": [],
       "heartFinding": "late_systolic_murmur",
-      "lungFinding": "wheezing"
+      "lungFinding": "wheezing",
+      "patient": {
+        "origin": "manikin",
+        "sex": "F"
+      }
     },
     {
       "id": "mixed_late_systolic_murmur+fine_crackles_lua_001",
@@ -4362,7 +5086,11 @@
       "peakNormalized": 0.6564,
       "issues": [],
       "heartFinding": "late_systolic_murmur",
-      "lungFinding": "fine_crackles"
+      "lungFinding": "fine_crackles",
+      "patient": {
+        "origin": "manikin",
+        "sex": "F"
+      }
     },
     {
       "id": "mixed_av_block+pleural_rub_llsb_001",
@@ -4387,7 +5115,11 @@
       "peakNormalized": 0.9223,
       "issues": [],
       "heartFinding": "av_block",
-      "lungFinding": "pleural_rub"
+      "lungFinding": "pleural_rub",
+      "patient": {
+        "origin": "manikin",
+        "sex": "M"
+      }
     },
     {
       "id": "mixed_early_systolic_murmur+normal_lma_001",
@@ -4412,7 +5144,11 @@
       "peakNormalized": 0.8057,
       "issues": [],
       "heartFinding": "early_systolic_murmur",
-      "lungFinding": "normal"
+      "lungFinding": "normal",
+      "patient": {
+        "origin": "manikin",
+        "sex": "M"
+      }
     },
     {
       "id": "mixed_normal+rhonchi_lc_001",
@@ -4437,7 +5173,11 @@
       "peakNormalized": 0.5429,
       "issues": [],
       "heartFinding": "normal",
-      "lungFinding": "rhonchi"
+      "lungFinding": "rhonchi",
+      "patient": {
+        "origin": "manikin",
+        "sex": "F"
+      }
     },
     {
       "id": "mixed_mid_systolic_murmur+wheezing_lma_001",
@@ -4462,7 +5202,11 @@
       "peakNormalized": 0.5,
       "issues": [],
       "heartFinding": "mid_systolic_murmur",
-      "lungFinding": "wheezing"
+      "lungFinding": "wheezing",
+      "patient": {
+        "origin": "manikin",
+        "sex": "M"
+      }
     },
     {
       "id": "mixed_atrial_fibrillation+coarse_crackles_lma_001",
@@ -4487,7 +5231,11 @@
       "peakNormalized": 0.97,
       "issues": [],
       "heartFinding": "atrial_fibrillation",
-      "lungFinding": "coarse_crackles"
+      "lungFinding": "coarse_crackles",
+      "patient": {
+        "origin": "manikin",
+        "sex": "M"
+      }
     },
     {
       "id": "mixed_s4+rhonchi_lc_001",
@@ -4512,7 +5260,11 @@
       "peakNormalized": 0.7315,
       "issues": [],
       "heartFinding": "s4",
-      "lungFinding": "rhonchi"
+      "lungFinding": "rhonchi",
+      "patient": {
+        "origin": "manikin",
+        "sex": "M"
+      }
     },
     {
       "id": "mixed_mid_systolic_murmur+wheezing_lc_001",
@@ -4537,7 +5289,11 @@
       "peakNormalized": 0.5617,
       "issues": [],
       "heartFinding": "mid_systolic_murmur",
-      "lungFinding": "wheezing"
+      "lungFinding": "wheezing",
+      "patient": {
+        "origin": "manikin",
+        "sex": "M"
+      }
     },
     {
       "id": "mixed_tachycardia+rhonchi_rua_001",
@@ -4562,7 +5318,11 @@
       "peakNormalized": 0.97,
       "issues": [],
       "heartFinding": "tachycardia",
-      "lungFinding": "rhonchi"
+      "lungFinding": "rhonchi",
+      "patient": {
+        "origin": "manikin",
+        "sex": "M"
+      }
     },
     {
       "id": "mixed_atrial_fibrillation+rhonchi_rusb_001",
@@ -4587,7 +5347,11 @@
       "peakNormalized": 0.2655,
       "issues": [],
       "heartFinding": "atrial_fibrillation",
-      "lungFinding": "rhonchi"
+      "lungFinding": "rhonchi",
+      "patient": {
+        "origin": "manikin",
+        "sex": "M"
+      }
     },
     {
       "id": "mixed_s4+wheezing_rc_001",
@@ -4612,7 +5376,11 @@
       "peakNormalized": 0.6346,
       "issues": [],
       "heartFinding": "s4",
-      "lungFinding": "wheezing"
+      "lungFinding": "wheezing",
+      "patient": {
+        "origin": "manikin",
+        "sex": "M"
+      }
     },
     {
       "id": "mixed_av_block+coarse_crackles_lma_001",
@@ -4637,7 +5405,11 @@
       "peakNormalized": 0.97,
       "issues": [],
       "heartFinding": "av_block",
-      "lungFinding": "coarse_crackles"
+      "lungFinding": "coarse_crackles",
+      "patient": {
+        "origin": "manikin",
+        "sex": "M"
+      }
     },
     {
       "id": "mixed_late_systolic_murmur+rhonchi_lc_001",
@@ -4662,7 +5434,11 @@
       "peakNormalized": 0.5887,
       "issues": [],
       "heartFinding": "late_systolic_murmur",
-      "lungFinding": "rhonchi"
+      "lungFinding": "rhonchi",
+      "patient": {
+        "origin": "manikin",
+        "sex": "M"
+      }
     },
     {
       "id": "mixed_mid_systolic_murmur+normal_apex_001",
@@ -4687,7 +5463,11 @@
       "peakNormalized": 0.5511,
       "issues": [],
       "heartFinding": "mid_systolic_murmur",
-      "lungFinding": "normal"
+      "lungFinding": "normal",
+      "patient": {
+        "origin": "manikin",
+        "sex": "F"
+      }
     },
     {
       "id": "mixed_normal+rhonchi_lua_001",
@@ -4712,7 +5492,11 @@
       "peakNormalized": 0.4706,
       "issues": [],
       "heartFinding": "normal",
-      "lungFinding": "rhonchi"
+      "lungFinding": "rhonchi",
+      "patient": {
+        "origin": "manikin",
+        "sex": "M"
+      }
     },
     {
       "id": "mixed_late_diastolic_murmur+pleural_rub_rusb_001",
@@ -4737,7 +5521,11 @@
       "peakNormalized": 0.2985,
       "issues": [],
       "heartFinding": "late_diastolic_murmur",
-      "lungFinding": "pleural_rub"
+      "lungFinding": "pleural_rub",
+      "patient": {
+        "origin": "manikin",
+        "sex": "F"
+      }
     },
     {
       "id": "mixed_tachycardia+wheezing_lusb_001",
@@ -4762,7 +5550,11 @@
       "peakNormalized": 0.6752,
       "issues": [],
       "heartFinding": "tachycardia",
-      "lungFinding": "wheezing"
+      "lungFinding": "wheezing",
+      "patient": {
+        "origin": "manikin",
+        "sex": "M"
+      }
     },
     {
       "id": "mixed_av_block+fine_crackles_rusb_002",
@@ -4787,7 +5579,11 @@
       "peakNormalized": 0.8707,
       "issues": [],
       "heartFinding": "av_block",
-      "lungFinding": "fine_crackles"
+      "lungFinding": "fine_crackles",
+      "patient": {
+        "origin": "manikin",
+        "sex": "F"
+      }
     },
     {
       "id": "mixed_late_systolic_murmur+coarse_crackles_llsb_001",
@@ -4812,7 +5608,11 @@
       "peakNormalized": 0.9183,
       "issues": [],
       "heartFinding": "late_systolic_murmur",
-      "lungFinding": "coarse_crackles"
+      "lungFinding": "coarse_crackles",
+      "patient": {
+        "origin": "manikin",
+        "sex": "F"
+      }
     },
     {
       "id": "mixed_late_systolic_murmur+wheezing_rma_002",
@@ -4837,7 +5637,11 @@
       "peakNormalized": 0.6821,
       "issues": [],
       "heartFinding": "late_systolic_murmur",
-      "lungFinding": "wheezing"
+      "lungFinding": "wheezing",
+      "patient": {
+        "origin": "manikin",
+        "sex": "M"
+      }
     },
     {
       "id": "mixed_atrial_fibrillation+pleural_rub_rla_001",
@@ -4862,7 +5666,11 @@
       "peakNormalized": 0.303,
       "issues": [],
       "heartFinding": "atrial_fibrillation",
-      "lungFinding": "pleural_rub"
+      "lungFinding": "pleural_rub",
+      "patient": {
+        "origin": "manikin",
+        "sex": "M"
+      }
     },
     {
       "id": "mixed_normal+wheezing_lla_001",
@@ -4887,7 +5695,11 @@
       "peakNormalized": 0.9484,
       "issues": [],
       "heartFinding": "normal",
-      "lungFinding": "wheezing"
+      "lungFinding": "wheezing",
+      "patient": {
+        "origin": "manikin",
+        "sex": "F"
+      }
     },
     {
       "id": "mixed_mid_systolic_murmur+fine_crackles_lusb_001",
@@ -4912,7 +5724,11 @@
       "peakNormalized": 0.97,
       "issues": [],
       "heartFinding": "mid_systolic_murmur",
-      "lungFinding": "fine_crackles"
+      "lungFinding": "fine_crackles",
+      "patient": {
+        "origin": "manikin",
+        "sex": "M"
+      }
     },
     {
       "id": "mixed_late_systolic_murmur+wheezing_rusb_001",
@@ -4937,7 +5753,11 @@
       "peakNormalized": 0.97,
       "issues": [],
       "heartFinding": "late_systolic_murmur",
-      "lungFinding": "wheezing"
+      "lungFinding": "wheezing",
+      "patient": {
+        "origin": "manikin",
+        "sex": "F"
+      }
     },
     {
       "id": "mixed_normal+rhonchi_rc_001",
@@ -4962,7 +5782,11 @@
       "peakNormalized": 0.423,
       "issues": [],
       "heartFinding": "normal",
-      "lungFinding": "rhonchi"
+      "lungFinding": "rhonchi",
+      "patient": {
+        "origin": "manikin",
+        "sex": "M"
+      }
     },
     {
       "id": "mixed_normal+pleural_rub_llsb_001",
@@ -4987,7 +5811,11 @@
       "peakNormalized": 0.7357,
       "issues": [],
       "heartFinding": "normal",
-      "lungFinding": "pleural_rub"
+      "lungFinding": "pleural_rub",
+      "patient": {
+        "origin": "manikin",
+        "sex": "M"
+      }
     },
     {
       "id": "mixed_late_systolic_murmur+rhonchi_lua_001",
@@ -5012,7 +5840,11 @@
       "peakNormalized": 0.6409,
       "issues": [],
       "heartFinding": "late_systolic_murmur",
-      "lungFinding": "rhonchi"
+      "lungFinding": "rhonchi",
+      "patient": {
+        "origin": "manikin",
+        "sex": "F"
+      }
     },
     {
       "id": "mixed_mid_systolic_murmur+fine_crackles_lla_001",
@@ -5037,7 +5869,11 @@
       "peakNormalized": 0.613,
       "issues": [],
       "heartFinding": "mid_systolic_murmur",
-      "lungFinding": "fine_crackles"
+      "lungFinding": "fine_crackles",
+      "patient": {
+        "origin": "manikin",
+        "sex": "F"
+      }
     },
     {
       "id": "mixed_early_systolic_murmur+normal_rla_001",
@@ -5062,7 +5898,11 @@
       "peakNormalized": 0.6184,
       "issues": [],
       "heartFinding": "early_systolic_murmur",
-      "lungFinding": "normal"
+      "lungFinding": "normal",
+      "patient": {
+        "origin": "manikin",
+        "sex": "F"
+      }
     },
     {
       "id": "mixed_normal+fine_crackles_lla_001",
@@ -5087,7 +5927,11 @@
       "peakNormalized": 0.97,
       "issues": [],
       "heartFinding": "normal",
-      "lungFinding": "fine_crackles"
+      "lungFinding": "fine_crackles",
+      "patient": {
+        "origin": "manikin",
+        "sex": "F"
+      }
     },
     {
       "id": "mixed_late_systolic_murmur+pleural_rub_lla_001",
@@ -5112,7 +5956,11 @@
       "peakNormalized": 0.97,
       "issues": [],
       "heartFinding": "late_systolic_murmur",
-      "lungFinding": "pleural_rub"
+      "lungFinding": "pleural_rub",
+      "patient": {
+        "origin": "manikin",
+        "sex": "F"
+      }
     },
     {
       "id": "mixed_mid_systolic_murmur+rhonchi_rusb_001",
@@ -5137,7 +5985,11 @@
       "peakNormalized": 0.97,
       "issues": [],
       "heartFinding": "mid_systolic_murmur",
-      "lungFinding": "rhonchi"
+      "lungFinding": "rhonchi",
+      "patient": {
+        "origin": "manikin",
+        "sex": "F"
+      }
     },
     {
       "id": "mixed_atrial_fibrillation+wheezing_apex_001",
@@ -5162,7 +6014,11 @@
       "peakNormalized": 0.97,
       "issues": [],
       "heartFinding": "atrial_fibrillation",
-      "lungFinding": "wheezing"
+      "lungFinding": "wheezing",
+      "patient": {
+        "origin": "manikin",
+        "sex": "M"
+      }
     },
     {
       "id": "mixed_atrial_fibrillation+fine_crackles_lla_001",
@@ -5187,7 +6043,11 @@
       "peakNormalized": 0.9161,
       "issues": [],
       "heartFinding": "atrial_fibrillation",
-      "lungFinding": "fine_crackles"
+      "lungFinding": "fine_crackles",
+      "patient": {
+        "origin": "manikin",
+        "sex": "F"
+      }
     },
     {
       "id": "mixed_s4+coarse_crackles_rua_001",
@@ -5212,7 +6072,11 @@
       "peakNormalized": 0.97,
       "issues": [],
       "heartFinding": "s4",
-      "lungFinding": "coarse_crackles"
+      "lungFinding": "coarse_crackles",
+      "patient": {
+        "origin": "manikin",
+        "sex": "M"
+      }
     },
     {
       "id": "mixed_early_systolic_murmur+rhonchi_rma_001",
@@ -5237,7 +6101,11 @@
       "peakNormalized": 0.97,
       "issues": [],
       "heartFinding": "early_systolic_murmur",
-      "lungFinding": "rhonchi"
+      "lungFinding": "rhonchi",
+      "patient": {
+        "origin": "manikin",
+        "sex": "M"
+      }
     },
     {
       "id": "mixed_tachycardia+fine_crackles_rma_001",
@@ -5262,7 +6130,11 @@
       "peakNormalized": 0.97,
       "issues": [],
       "heartFinding": "tachycardia",
-      "lungFinding": "fine_crackles"
+      "lungFinding": "fine_crackles",
+      "patient": {
+        "origin": "manikin",
+        "sex": "M"
+      }
     },
     {
       "id": "mixed_s3+wheezing_lla_001",
@@ -5287,7 +6159,11 @@
       "peakNormalized": 0.9686,
       "issues": [],
       "heartFinding": "s3",
-      "lungFinding": "wheezing"
+      "lungFinding": "wheezing",
+      "patient": {
+        "origin": "manikin",
+        "sex": "F"
+      }
     },
     {
       "id": "mixed_early_systolic_murmur+fine_crackles_lla_001",
@@ -5312,7 +6188,11 @@
       "peakNormalized": 0.7205,
       "issues": [],
       "heartFinding": "early_systolic_murmur",
-      "lungFinding": "fine_crackles"
+      "lungFinding": "fine_crackles",
+      "patient": {
+        "origin": "manikin",
+        "sex": "F"
+      }
     },
     {
       "id": "mixed_av_block+wheezing_lla_001",
@@ -5337,7 +6217,11 @@
       "peakNormalized": 0.6777,
       "issues": [],
       "heartFinding": "av_block",
-      "lungFinding": "wheezing"
+      "lungFinding": "wheezing",
+      "patient": {
+        "origin": "manikin",
+        "sex": "F"
+      }
     },
     {
       "id": "mixed_normal+normal_rc_001",
@@ -5362,7 +6246,11 @@
       "peakNormalized": 0.97,
       "issues": [],
       "heartFinding": "normal",
-      "lungFinding": "normal"
+      "lungFinding": "normal",
+      "patient": {
+        "origin": "manikin",
+        "sex": "M"
+      }
     },
     {
       "id": "mixed_late_diastolic_murmur+wheezing_lma_002",
@@ -5387,7 +6275,11 @@
       "peakNormalized": 0.97,
       "issues": [],
       "heartFinding": "late_diastolic_murmur",
-      "lungFinding": "wheezing"
+      "lungFinding": "wheezing",
+      "patient": {
+        "origin": "manikin",
+        "sex": "M"
+      }
     },
     {
       "id": "mixed_av_block+wheezing_rma_001",
@@ -5412,7 +6304,11 @@
       "peakNormalized": 0.97,
       "issues": [],
       "heartFinding": "av_block",
-      "lungFinding": "wheezing"
+      "lungFinding": "wheezing",
+      "patient": {
+        "origin": "manikin",
+        "sex": "M"
+      }
     },
     {
       "id": "mixed_mid_systolic_murmur+normal_lusb_001",
@@ -5437,7 +6333,11 @@
       "peakNormalized": 0.97,
       "issues": [],
       "heartFinding": "mid_systolic_murmur",
-      "lungFinding": "normal"
+      "lungFinding": "normal",
+      "patient": {
+        "origin": "manikin",
+        "sex": "F"
+      }
     },
     {
       "id": "mixed_normal+fine_crackles_lla_002",
@@ -5462,7 +6362,11 @@
       "peakNormalized": 0.97,
       "issues": [],
       "heartFinding": "normal",
-      "lungFinding": "fine_crackles"
+      "lungFinding": "fine_crackles",
+      "patient": {
+        "origin": "manikin",
+        "sex": "F"
+      }
     },
     {
       "id": "mixed_s3+wheezing_lla_002",
@@ -5487,7 +6391,11 @@
       "peakNormalized": 0.8393,
       "issues": [],
       "heartFinding": "s3",
-      "lungFinding": "wheezing"
+      "lungFinding": "wheezing",
+      "patient": {
+        "origin": "manikin",
+        "sex": "M"
+      }
     },
     {
       "id": "mixed_mid_systolic_murmur+fine_crackles_rusb_001",
@@ -5512,7 +6420,11 @@
       "peakNormalized": 0.8387,
       "issues": [],
       "heartFinding": "mid_systolic_murmur",
-      "lungFinding": "fine_crackles"
+      "lungFinding": "fine_crackles",
+      "patient": {
+        "origin": "manikin",
+        "sex": "F"
+      }
     },
     {
       "id": "mixed_tachycardia+wheezing_apex_001",
@@ -5537,7 +6449,11 @@
       "peakNormalized": 0.97,
       "issues": [],
       "heartFinding": "tachycardia",
-      "lungFinding": "wheezing"
+      "lungFinding": "wheezing",
+      "patient": {
+        "origin": "manikin",
+        "sex": "F"
+      }
     },
     {
       "id": "mixed_early_systolic_murmur+normal_llsb_001",
@@ -5562,7 +6478,11 @@
       "peakNormalized": 0.97,
       "issues": [],
       "heartFinding": "early_systolic_murmur",
-      "lungFinding": "normal"
+      "lungFinding": "normal",
+      "patient": {
+        "origin": "manikin",
+        "sex": "F"
+      }
     },
     {
       "id": "mixed_s4+fine_crackles_lc_001",
@@ -5587,7 +6507,11 @@
       "peakNormalized": 0.97,
       "issues": [],
       "heartFinding": "s4",
-      "lungFinding": "fine_crackles"
+      "lungFinding": "fine_crackles",
+      "patient": {
+        "origin": "manikin",
+        "sex": "M"
+      }
     },
     {
       "id": "mixed_s3+wheezing_lua_001",
@@ -5612,7 +6536,11 @@
       "peakNormalized": 0.7617,
       "issues": [],
       "heartFinding": "s3",
-      "lungFinding": "wheezing"
+      "lungFinding": "wheezing",
+      "patient": {
+        "origin": "manikin",
+        "sex": "M"
+      }
     },
     {
       "id": "mixed_normal+fine_crackles_apex_001",
@@ -5637,7 +6565,11 @@
       "peakNormalized": 0.97,
       "issues": [],
       "heartFinding": "normal",
-      "lungFinding": "fine_crackles"
+      "lungFinding": "fine_crackles",
+      "patient": {
+        "origin": "manikin",
+        "sex": "F"
+      }
     },
     {
       "id": "mixed_av_block+normal_lma_001",
@@ -5662,7 +6594,11 @@
       "peakNormalized": 0.97,
       "issues": [],
       "heartFinding": "av_block",
-      "lungFinding": "normal"
+      "lungFinding": "normal",
+      "patient": {
+        "origin": "manikin",
+        "sex": "M"
+      }
     },
     {
       "id": "mixed_s4+normal_lc_001",
@@ -5687,7 +6623,11 @@
       "peakNormalized": 0.97,
       "issues": [],
       "heartFinding": "s4",
-      "lungFinding": "normal"
+      "lungFinding": "normal",
+      "patient": {
+        "origin": "manikin",
+        "sex": "M"
+      }
     },
     {
       "id": "mixed_tachycardia+wheezing_rusb_001",
@@ -5712,7 +6652,11 @@
       "peakNormalized": 0.6511,
       "issues": [],
       "heartFinding": "tachycardia",
-      "lungFinding": "wheezing"
+      "lungFinding": "wheezing",
+      "patient": {
+        "origin": "manikin",
+        "sex": "M"
+      }
     },
     {
       "id": "mixed_late_diastolic_murmur+fine_crackles_apex_001",
@@ -5737,7 +6681,11 @@
       "peakNormalized": 0.9062,
       "issues": [],
       "heartFinding": "late_diastolic_murmur",
-      "lungFinding": "fine_crackles"
+      "lungFinding": "fine_crackles",
+      "patient": {
+        "origin": "manikin",
+        "sex": "M"
+      }
     },
     {
       "id": "mixed_tachycardia+normal_lla_001",
@@ -5762,7 +6710,11 @@
       "peakNormalized": 0.97,
       "issues": [],
       "heartFinding": "tachycardia",
-      "lungFinding": "normal"
+      "lungFinding": "normal",
+      "patient": {
+        "origin": "manikin",
+        "sex": "M"
+      }
     },
     {
       "id": "mixed_s3+wheezing_lc_001",
@@ -5787,7 +6739,11 @@
       "peakNormalized": 0.97,
       "issues": [],
       "heartFinding": "s3",
-      "lungFinding": "wheezing"
+      "lungFinding": "wheezing",
+      "patient": {
+        "origin": "manikin",
+        "sex": "M"
+      }
     },
     {
       "id": "mixed_early_systolic_murmur+normal_rla_002",
@@ -5812,7 +6768,11 @@
       "peakNormalized": 0.97,
       "issues": [],
       "heartFinding": "early_systolic_murmur",
-      "lungFinding": "normal"
+      "lungFinding": "normal",
+      "patient": {
+        "origin": "manikin",
+        "sex": "F"
+      }
     },
     {
       "id": "mixed_s4+wheezing_apex_001",
@@ -5837,7 +6797,11 @@
       "peakNormalized": 0.97,
       "issues": [],
       "heartFinding": "s4",
-      "lungFinding": "wheezing"
+      "lungFinding": "wheezing",
+      "patient": {
+        "origin": "manikin",
+        "sex": "M"
+      }
     },
     {
       "id": "mixed_mid_systolic_murmur+normal_rma_001",
@@ -5862,7 +6826,11 @@
       "peakNormalized": 0.97,
       "issues": [],
       "heartFinding": "mid_systolic_murmur",
-      "lungFinding": "normal"
+      "lungFinding": "normal",
+      "patient": {
+        "origin": "manikin",
+        "sex": "F"
+      }
     },
     {
       "id": "mixed_early_systolic_murmur+wheezing_rla_001",
@@ -5887,7 +6855,11 @@
       "peakNormalized": 0.97,
       "issues": [],
       "heartFinding": "early_systolic_murmur",
-      "lungFinding": "wheezing"
+      "lungFinding": "wheezing",
+      "patient": {
+        "origin": "manikin",
+        "sex": "F"
+      }
     },
     {
       "id": "mixed_av_block+normal_lua_001",
@@ -5912,7 +6884,11 @@
       "peakNormalized": 0.97,
       "issues": [],
       "heartFinding": "av_block",
-      "lungFinding": "normal"
+      "lungFinding": "normal",
+      "patient": {
+        "origin": "manikin",
+        "sex": "F"
+      }
     },
     {
       "id": "mixed_late_diastolic_murmur+normal_rusb_001",
@@ -5937,7 +6913,11 @@
       "peakNormalized": 0.97,
       "issues": [],
       "heartFinding": "late_diastolic_murmur",
-      "lungFinding": "normal"
+      "lungFinding": "normal",
+      "patient": {
+        "origin": "manikin",
+        "sex": "M"
+      }
     }
   ]
 }

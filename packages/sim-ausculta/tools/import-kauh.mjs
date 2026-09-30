@@ -1,6 +1,7 @@
 import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { kauhPatientInfo } from "./patient-info.mjs";
 
 const { console, process } = globalThis;
 
@@ -16,8 +17,12 @@ const { console, process } = globalThis;
  *
  * Anterior bölgeler, belirsiz posterior kodlar (PLR/PLLR/P) ve kapsam dışı ses/tanı
  * etiketleri alınmaz. Kayıtlar RMS hedefi ≈0.0333'e (HLS rmsNormalized) normalize
- * edilir; tepe ≤ 0.9 korunur, 30 sn üzeri kırpılır. Yaş/ad içeren özgün dosya adı
- * kaydedilmez (KVKK). Yeni bağımlılık yok; WAV oku/yaz saf Node (PCM16).
+ * edilir; tepe ≤ 0.9 korunur, 30 sn üzeri kırpılır.
+ *
+ * T259: kayda gösterilen hasta alanı (`patient`) eklenir — yaş, cinsiyet, Türkçe
+ * tanı (bronşit dahil; eşleme `patient-info.mjs`), ham ses tipi ve Türkçe dinleme
+ * yeri. KVKK: hasta adı ve özgün dosya adı kaydedilmez; hasta numarası yalnız iç
+ * kimlikte (`internalSourceId`, mevcut desen) kalır. WAV oku/yaz saf Node (PCM16).
  */
 
 const PACKAGE_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
@@ -164,16 +169,17 @@ export function normalizePcm16(samples, targetRms = TARGET_RMS, maxPeak = MAX_PE
   };
 }
 
-/** `<F>P<no>_<tanı>,<ses>,<bölge>,<yaş>,<cinsiyet>.wav` → alanlar (bölge boşluksuz/BÜYÜK). */
+/** `<F>P<no>_<tanı>,<ses>,<bölge>,<yaş>,<cinsiyet>.wav` → alanlar (bölge boşluksuz/BÜYÜK).
+ *  Yaş T259 hasta alanında gösterilir; hasta numarası/adı yalnız iç kimlikte kalır. */
 export function parseKauhFileName(fileName) {
   const match = /^([BDE])P(\d+)_(.+)\.wav$/i.exec(fileName);
   if (match === null) return null;
   const parts = match[3].split(",");
   if (parts.length !== 5) return null;
-  // Yaş alanı (parts[3]) bilinçli okunmaz: KVKK gereği kayda geçmez.
   const diagnosis = (parts[0] ?? "").trim();
   const sound = (parts[1] ?? "").trim();
   const region = (parts[2] ?? "").trim();
+  const age = (parts[3] ?? "").trim();
   const sex = (parts[4] ?? "").trim();
   if (!diagnosis || !sound || !region || !sex) return null;
   return {
@@ -182,6 +188,7 @@ export function parseKauhFileName(fileName) {
     diagnosis,
     sound,
     region: region.replace(/\s+/g, "").toUpperCase(),
+    age,
     sex: sex.toUpperCase(),
   };
 }
@@ -252,6 +259,7 @@ function buildRecord({ id, entry, mapping, wav, normalized }) {
     runtimeUrl: `assets/audio/runtime/external/kauh/${id}.wav`,
     validationStatus: "validated",
     issues: [],
+    patient: kauhPatientInfo(entry),
   };
 }
 
@@ -342,6 +350,10 @@ function main() {
   console.log(`Kaynak: ${sourceDir}`);
   console.log(`D filtresi dosyası: ${files.length}`);
   console.log(`Alınan kayıt: ${records.length} (bildirimde toplam ${manifest.total}, korunan ${manifest.kept})`);
+  const incomplete = records.filter(
+    (record) => record.patient.diagnosis === null || record.patient.ageYears === null || record.patient.sex === null,
+  ).length;
+  console.log(`Hasta alanı: ${records.length - incomplete}/${records.length} tam (yaş, cinsiyet, tanı)`);
   console.log(`Çıktı: ${OUTPUT_DIR}${removed > 0 ? ` (${removed} eski dosya silindi)` : ""}`);
   for (const [reason, count] of [...skipped.entries()].sort((a, b) => b[1] - a[1])) {
     console.log(`  atlandı — ${reason}: ${count}`);

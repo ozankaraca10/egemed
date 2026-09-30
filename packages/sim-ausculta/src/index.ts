@@ -75,6 +75,8 @@ export {
   findLibraryItem,
 } from "./data/library";
 export type { LibGroup, LibItem } from "./data/library";
+export { LEARNING_SAMPLES, learningSamplesFor } from "./data/learningSamples";
+export type { LearningSamplesFile } from "./data/learningSamples";
 export {
   AUSCULTA_CONTENT_VERSION,
   LEARN_LISTENED_KEY,
@@ -327,13 +329,16 @@ export type {
   AuscultationPoint,
   CaseDef,
   CaseResult,
+  ManikinPatientInfo,
   Mode,
+  PatientInfo,
   PatientView,
   PointVisit,
   Question,
   QuestionDomain,
   QuestionOption,
   QuestionType,
+  RealPatientInfo,
   RuntimeFlags,
   ScoringWeights,
   Screen,
