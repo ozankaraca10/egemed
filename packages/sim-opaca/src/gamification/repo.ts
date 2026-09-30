@@ -16,7 +16,6 @@ import { OPACA_RULES } from "./rules";
 import type { OpacaAttemptRecord } from "./attempt";
 import { CT_STACKS_ITEM_KEY } from "./attempt";
 import { demoPeriodRow, DEMO_PEERS } from "./mock";
-import { monthlyRewardFor, rewardWinnersHistory } from "./rewards";
 import { computeStats } from "./stats";
 import { loadState, saveState, type OpacaGamiState } from "./storage";
 import type { LeaderboardRow, LeaderboardView } from "./types";
@@ -192,12 +191,15 @@ export class LocalRepo implements GamiRepository<OpacaAttemptRecord> {
     return { period, cohort, generatedAt: now.toISOString(), isDemo: true, rows: ranked };
   }
 
-  async getMonthlyReward(month: string): Promise<MonthlyReward | null> {
-    return monthlyRewardFor(month);
+  /** T253a: aylık ödül sabit katalogdan okunmaz; kabuk kanalından gelir (bkz. `SimRewardsSource`).
+   *  Yerel depoda katalog yoktur → ödül yoktur (kanal yoksa ödül yüzeyi çizilmez). */
+  async getMonthlyReward(): Promise<MonthlyReward | null> {
+    return null;
   }
 
-  async getRewardWinners(lastNMonths: number, now: Date): Promise<RewardWinner[]> {
-    return rewardWinnersHistory(lastNMonths, now);
+  /** T253a: kazanan geçmişi de kabuk kanalından gelir; yerel depo geçmiş tutmaz. */
+  async getRewardWinners(): Promise<RewardWinner[]> {
+    return [];
   }
 }
 

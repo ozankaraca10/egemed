@@ -161,6 +161,8 @@ export function createOpacaModule(deps?: OpacaModuleDeps): SimModule {
             ? {}
             : { reportLearn: (record: SimLearnRecord) => forwardReportLearn?.(record) }),
           ...(context.gamification === undefined ? {} : { gamification: context.gamification }),
+          // T253a: aylık ödül kanalı (kabuk) — ziyaretçide/kanalsız mount'ta verilmez.
+          ...(context.rewards === undefined ? {} : { rewards: context.rewards }),
           children: createElement(StoreProvider, {
             now: context.now,
             storage,

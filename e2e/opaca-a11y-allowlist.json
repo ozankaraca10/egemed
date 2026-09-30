@@ -1,11 +1,5 @@
 {
-  "note": "T116/T116b — Opaca iç ekranlarında kaynaktan devralınmış erişilebilirlik borcu. T116b: birleşik bardaki eylem 'İlerlemem' oldu ve sayfa @egemed/gami-ui yüzeyine taşındı (T122); eski sim-içi gami kayıtları kaldırıldı, yeni yüzeyin ölçümleri gerçek koşudan girildi. Kayıtlar yalnız küçülür: düzeltilen bir kayıt testi 'düzeltildi — listeden çıkar' diye başarısız eder. T130: sim-içi kontrast (.good-text, .lib-count), select adı (mobilde görsel gizli etiket), yardım gövdesi odaklanabilir, tüm .btn/film araçları/bölge çipleri/sekme/modal kapat 44 px — 11→5 ihlal, 37→4 küçük hedef. T135: @egemed/gami-ui rozet .ft kontrastı ve sekme/segment 44 px düzeltildi — 5→0 ihlal, 4→1 küçük hedef. Kalan tek kayıt paragraf içi .gami-link (WCAG 2.5.8 satır içi istisnası).",
+  "note": "T116/T116b — Opaca iç ekranlarında kaynaktan devralınmış erişilebilirlik borcu. T116b: birleşik bardaki eylem 'İlerlemem' oldu ve sayfa @egemed/gami-ui yüzeyine taşındı (T122); eski sim-içi gami kayıtları kaldırıldı, yeni yüzeyin ölçümleri gerçek koşudan girildi. Kayıtlar yalnız küçülür: düzeltilen bir kayıt testi 'düzeltildi — listeden çıkar' diye başarısız eder. T130: sim-içi kontrast (.good-text, .lib-count), select adı (mobilde görsel gizli etiket), yardım gövdesi odaklanabilir, tüm .btn/film araçları/bölge çipleri/sekme/modal kapat 44 px — 11→5 ihlal, 37→4 küçük hedef. T135: @egemed/gami-ui rozet .ft kontrastı ve sekme/segment 44 px düzeltildi — 5→0 ihlal, 4→1 küçük hedef. T253a: mod seçimindeki 'ayın ödülü' satırı artık yalnız kabuk ödül kanalıyla çizilir; API'siz erişilebilirlik kapısında satır içi .gami-link oluşmadığından son kayıt listeden çıkarıldı (kayıtlar yalnız küçülür).",
   "violations": [],
-  "smallTargets": [
-    {
-      "screen": "modes",
-      "selector": "div.eg-sim-opaca.app-shell > main.app-content > div.screen > div.container.screen-body > div.mode-cards > div.mode-card.assessment:nth-of-type(*) > p.mode-rules:nth-of-type(*) > button.gami-link",
-      "size": "186x16"
-    }
-  ]
+  "smallTargets": []
 }

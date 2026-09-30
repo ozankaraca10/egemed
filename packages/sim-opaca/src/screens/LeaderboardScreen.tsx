@@ -10,8 +10,7 @@ import { useGami, useLeaderboard } from '../gamification/useGami'
 import { useGamiContext } from '../gamification/GamiContext'
 import { gamiDemoFrom } from '../gamification/flag'
 import { previousPeriodNow } from '../gamification/leaderboardView'
-import { monthKeyTr } from '@egemed/gamification-core'
-import type { CohortFilter, MonthlyReward, Period, RewardWinner } from '@egemed/gamification-core'
+import type { CohortFilter, Period } from '@egemed/gamification-core'
 import { opacaAvatarOf, opacaGamiIcons } from '../ui/opacaGami'
 
 /** Liderlik Tahtası + Ayın Ödülü (tasarım promptu §5, §5.1). Yalnız oyunlaştırma bayrağı açıkken erişilir. */
@@ -36,14 +35,15 @@ function LeaderboardBody({
 }) {
   const { dispatch, now } = useStore()
   const startMode = useStartMode()
-  const { reportSyncError } = useGamiContext()
+  // T253a: aylık ödül ve kazanan geçmişi yalnız kabuk kanalından okunur (sabit katalog yok).
+  const { reportSyncError, rewardsSnapshot } = useGamiContext()
   const [version, setVersion] = useState(0)
   const demo = gamiDemoFrom(locationSearch(), devBuild)
   const view = useGami(version, demo)
   const [clock, setClock] = useState(view.now)
   const [terms, setTerms] = useState<ModalFocusable | null | false>(false)
-  const [reward, setReward] = useState<MonthlyReward | null>(null)
-  const [winners, setWinners] = useState<RewardWinner[]>([])
+  const reward = rewardsSnapshot?.current ?? null
+  const winners = useMemo(() => [...(rewardsSnapshot?.winners ?? [])], [rewardsSnapshot])
 
   useEffect(() => {
     setClock(view.now)
@@ -51,10 +51,6 @@ function LeaderboardBody({
     const t = w ? w.setInterval(() => setClock(new Date(now())), 60_000) : 0
     return () => { if (w && t) w.clearInterval(t) }
   }, [now, view.now])
-  useEffect(() => {
-    void view.repo.getMonthlyReward(monthKeyTr(view.now)).then(setReward).catch((error: unknown) => reportSyncError(error, 'read'))
-    void view.repo.getRewardWinners(3, view.now).then(setWinners).catch((error: unknown) => reportSyncError(error, 'read'))
-  }, [view.repo, view.now, reportSyncError])
 
   const board = useLeaderboard(period, cohort, view.now, view.repo, version)
   const prevNow = useMemo(() => previousPeriodNow(period, view.now), [period, view.now])

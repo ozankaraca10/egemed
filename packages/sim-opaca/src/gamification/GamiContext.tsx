@@ -1,9 +1,10 @@
-import { createContext, type JSX, type ReactNode, useCallback, useContext, useMemo, useState } from "react";
+import { createContext, type JSX, type ReactNode, useCallback, useContext, useMemo, useState, useSyncExternalStore } from "react";
 import type { GamiRepository } from "@egemed/gamification-core";
-import type { SimGamificationSource, SimLearnRecord } from "@egemed/sim-host";
+import type { SimGamificationSource, SimLearnRecord, SimRewardsSnapshot, SimRewardsSource } from "@egemed/sim-host";
 import type { OpacaAttemptRecord } from "./attempt";
 import { formatGamiSyncError } from "./errors";
 import { configureGamiRepository } from "./repo";
+import { createRewardsTracker } from "./rewardsChannel";
 
 export interface GamiSyncError {
   readonly message: string;
@@ -17,6 +18,8 @@ export interface GamiContextValue {
   readonly clearSyncError: () => void;
   readonly reportLearn?: (record: SimLearnRecord) => void;
   readonly gamification?: SimGamificationSource;
+  /** T253a: kabuğun aylık ödül kanalı anlık görüntüsü; kanal yoksa null. */
+  readonly rewardsSnapshot: SimRewardsSnapshot | null;
 }
 
 const GamiContext = createContext<GamiContextValue | null>(null);
@@ -26,15 +29,25 @@ export function GamiProvider({
   now,
   reportLearn,
   gamification,
+  rewards,
   children,
 }: {
   readonly repository?: GamiRepository<OpacaAttemptRecord> | null;
   readonly now: () => number;
   readonly reportLearn?: (record: SimLearnRecord) => void;
   readonly gamification?: SimGamificationSource;
+  /** T253a: kabuğun aylık ödül kanalı; ziyaretçide/kanalsız mount'ta verilmez. */
+  readonly rewards?: SimRewardsSource;
   readonly children: ReactNode;
 }): JSX.Element {
   const [syncError, setSyncError] = useState<GamiSyncError | null>(null);
+  // T253a: kanal aboneliği React abonelik ömrüne bağlıdır; unmount'ta kaldırılır.
+  const rewardsTracker = useMemo(() => createRewardsTracker(rewards), [rewards]);
+  const rewardsSnapshot = useSyncExternalStore(
+    rewardsTracker.subscribe,
+    rewardsTracker.snapshot,
+    rewardsTracker.snapshot,
+  );
 
   const reportSyncError = useCallback((error: unknown, kind: "read" | "write" = "read") => {
     setSyncError({ message: formatGamiSyncError(error, kind), at: now() });
@@ -53,10 +66,11 @@ export function GamiProvider({
     };
     return {
       ...base,
+      rewardsSnapshot,
       ...(reportLearn === undefined ? {} : { reportLearn }),
       ...(gamification === undefined ? {} : { gamification }),
     };
-  }, [clearSyncError, gamification, reportLearn, reportSyncError, repository, syncError]);
+  }, [clearSyncError, gamification, reportLearn, reportSyncError, repository, rewardsSnapshot, syncError]);
 
   return <GamiContext.Provider value={value}>{children}</GamiContext.Provider>;
 }
@@ -74,6 +88,7 @@ export function useGamiContext(): GamiContextValue {
       syncError: null,
       reportSyncError: () => undefined,
       clearSyncError: () => undefined,
+      rewardsSnapshot: null,
     };
   }
   return ctx;
