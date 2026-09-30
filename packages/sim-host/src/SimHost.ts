@@ -24,6 +24,24 @@ import type {
  */
 export type SimulatorId = "pulse" | "ausculta" | "opaca";
 
+/** Kabuğa bildirilen sim ekran anahtarı; hash alt yoluna yazılır. */
+export type SimScreenKey = string;
+export const SIM_SCREEN_KEYS = ["modlar", "ogrenme", "uygulama", "degerlendirme", "sonuc", "ilerlemem", "yardim", "hakkinda"] as const;
+
+/** Bilinmeyen anahtarlar da geçerlidir; biçim platform genelinde sabittir. */
+export function isSimScreenKey(value: unknown): value is SimScreenKey {
+  return typeof value === "string" && /^[a-z0-9-]{1,40}$/.test(value);
+}
+
+export interface SimNavigation {
+  /** Mount anındaki derin bağlantı ekranı; yoksa null. */
+  readonly initial: SimScreenKey | null;
+  /** Sim yeni ekrana geçti; varsayılan push, replace seçeneği geçmiş girdisini değiştirir. */
+  report(screen: SimScreenKey | null, options?: { readonly replace?: boolean }): void;
+  /** Kabuk tarafındaki geri/ileri ya da hash değişikliğini alır; dönüş aboneliği kaldırır. */
+  subscribe(listener: (screen: SimScreenKey | null) => void): () => void;
+}
+
 export const SIMULATOR_IDS: readonly SimulatorId[] = ["pulse", "ausculta", "opaca"];
 
 /** Çalışma zamanı koruması: birlik tipi dışındaki değerleri reddeder. */
@@ -216,6 +234,8 @@ export interface SimRewardsSource {
 /** Modüle taşınan oturum bağlamı; sim başına ayrıktır (veri izolasyonu). */
 export interface SimMountContext {
   readonly simId: SimulatorId;
+  /** Sim içi adres ve tarayıcı geri/ileri gezinmesi için opsiyonel kabuk kanalı. */
+  readonly navigation?: SimNavigation;
   /** AGENTS.md: zaman doğrudan okunmaz, bağımlılık olarak enjekte edilir. */
   readonly now: () => number;
   /**
@@ -283,6 +303,7 @@ export interface SimHostOptions {
 
 /** `mount`a eşlik eden, kabuktan gelen oturum bilgisi. */
 export interface SimMountOptions {
+  readonly navigation?: SimNavigation;
   readonly actorId?: string;
   readonly reportLearn?: (record: SimLearnRecord) => void;
   readonly gamification?: SimGamificationSource;
@@ -336,9 +357,11 @@ function mountContext(simId: SimulatorId, now: () => number, mountOptions: SimMo
   const challengeId = mountOptions?.challengeId;
   const onChallengeFinished = mountOptions?.onChallengeFinished;
   const rewards = mountOptions?.rewards;
+  const navigation = mountOptions?.navigation;
   return {
     now,
     simId,
+    ...(navigation === undefined ? {} : { navigation }),
     ...(actorId === undefined ? {} : { actorId }),
     ...(reportLearn === undefined ? {} : { reportLearn }),
     ...(gamification === undefined ? {} : { gamification }),

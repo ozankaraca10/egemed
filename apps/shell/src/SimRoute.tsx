@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type JSX } from "react";
-import { audienceShowsGamification, createSimHost, type SimAudience, type SimChrome, type SimHost, type SimulatorId } from "@egemed/sim-host";
+import { audienceShowsGamification, createSimHost, type SimAudience, type SimChrome, type SimHost, type SimScreenKey, type SimulatorId } from "@egemed/sim-host";
 import { t } from "@egemed/ui/i18n";
 import { shellNow } from "./now";
 import { challengeHref, routeHref, simTitleKey } from "./routes";
@@ -9,6 +9,7 @@ import { SERVER_SESSION_SIMS, createBrowserSessionSource } from "./sims/sessionS
 import { createBrowserLearnSource, createLearnPort, createUnlockedLearnPort } from "./learn/learnSource";
 import type { SimLearnPort, SimSessionSource } from "@egemed/sim-host";
 import { useShellDataSources } from "./dataSources";
+import { createBrowserSimNavigation } from "./simNavigation";
 
 /**
  * A1.4 (ADR-009): uygulama/değerlendirme vakaları sunucu oturumundan gelir. Ziyaretçide
@@ -81,6 +82,8 @@ export interface SimRouteProps {
   readonly onRequestSignIn?: (() => void) | undefined;
   /** ADR-010: düello modunda açılış (`#/sims/<sim>/duello/<id>`). */
   readonly challengeId?: string | undefined;
+  /** Sim içi hash alt yolundan gelen ilk ekran. */
+  readonly screenKey?: SimScreenKey | undefined;
 }
 
 /** Duyuru kartı simgesi: erişim reddi (kilit) ve hata (uyarı). Dekoratiftir. */
@@ -178,7 +181,7 @@ export function SimErrorNotice({ onRetry }: SimErrorNoticeProps): JSX.Element {
  * kutusu host'un kardeşidir; yükleniyor/hata sırasında host gizlenmez, boş
  * kalır ve aşama ızgarasında aynı hücreyi paylaşır.
  */
-export function SimRoute({ actorId, allowed = true, apiBaseUrl = null, audience, challengeId, learnUnlocked = false, onChrome, onRequestSignIn, simId }: SimRouteProps): JSX.Element {
+export function SimRoute({ actorId, allowed = true, apiBaseUrl = null, audience, challengeId, learnUnlocked = false, onChrome, onRequestSignIn, screenKey, simId }: SimRouteProps): JSX.Element {
   if (!allowed) return <SimAccessDenied />;
   return (
     <SimRouteHost
@@ -189,12 +192,13 @@ export function SimRoute({ actorId, allowed = true, apiBaseUrl = null, audience,
       learnUnlocked={learnUnlocked}
       onChrome={onChrome}
       onRequestSignIn={onRequestSignIn}
+      screenKey={screenKey}
       simId={simId}
     />
   );
 }
 
-function SimRouteHost({ actorId, apiBaseUrl = null, audience = "student", challengeId, learnUnlocked, onChrome, onRequestSignIn, simId }: Omit<SimRouteProps, "allowed">): JSX.Element {
+function SimRouteHost({ actorId, apiBaseUrl = null, audience = "student", challengeId, learnUnlocked, onChrome, onRequestSignIn, screenKey, simId }: Omit<SimRouteProps, "allowed">): JSX.Element {
   const shellSources = useShellDataSources();
   // Kanal ref'te tutulur: üst bileşen yeniden çizilince sim yeniden mount edilmez.
   const chromeRef = useRef(onChrome);
@@ -202,6 +206,8 @@ function SimRouteHost({ actorId, apiBaseUrl = null, audience = "student", challe
   const signInRef = useRef(onRequestSignIn);
   signInRef.current = onRequestSignIn;
   const containerRef = useRef<SimContainer | null>(null);
+  const screenKeyRef = useRef<SimScreenKey | null>(screenKey ?? null);
+  screenKeyRef.current = screenKey ?? null;
   const hostRef = useRef<SimHost | null>(null);
   const [status, setStatus] = useState<SimRouteStatus>("loading");
   const [attempt, setAttempt] = useState(0);
@@ -222,6 +228,8 @@ function SimRouteHost({ actorId, apiBaseUrl = null, audience = "student", challe
     const host = hostRef.current;
     const container = containerRef.current;
     if (host === null || container === null) return;
+    // Düello adresi (`/duello/<id>`) ekran bildirimiyle ezilmemeli: düelloda kanal verilmez.
+    const navigation = challengeId === undefined ? createBrowserSimNavigation(simId, screenKeyRef.current) : null;
     // Mount da mikro göreve ertelenir: önceki simin (ör. Opaca React kökü)
     // kapanışı React render'ı sırasında değil, ondan sonra olur. Sıra korunur:
     // önceki cleanup'ın `release`ı bu mount'tan önce kuyruğa girer.
@@ -248,6 +256,7 @@ function SimRouteHost({ actorId, apiBaseUrl = null, audience = "student", challe
         requestSignIn: () => signInRef.current?.(),
         ...(sessions === null ? {} : { sessions }),
         ...(learn === null ? {} : { learn }),
+        ...(navigation === null ? {} : { navigation: navigation.navigation }),
         ...(audience === "visitor" || shellSources === null ? {} : { rewards: shellSources.rewardStore.forSim(simId) }),
         ...(challengeId === undefined || sessions === null
           ? {}
@@ -273,6 +282,7 @@ function SimRouteHost({ actorId, apiBaseUrl = null, audience = "student", challe
       // Ertelenmiş cleanup yalnız KENDİ mount'unu bırakır: sim doğrudan
       // değiştirildiğinde yeni mount'u iptal etmez (PLATFORM-01).
       void mounted.then((token) => host.release(token));
+      navigation?.dispose();
       chromeRef.current?.(null);
     };
   }, [simId, actorId, apiBaseUrl, audience, challengeId, learnUnlocked, attempt]);
