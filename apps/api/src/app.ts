@@ -9,6 +9,8 @@ import { registerAdminExtrasRoutes, type AdminOverviewRepo } from "./admin/extra
 import { registerAdminImportRoutes } from "./admin/imports";
 import { registerAdminRoleRoutes } from "./admin/roles";
 import { registerAdminUserRoutes, type AdminDeps } from "./admin/users";
+import { registerAdminIntegrityRoutes } from "./integrity/adminRoutes";
+import { createMemoryIntegrityRepo, type IntegrityRepo } from "./integrity/repo";
 import { createMemorySimSessionRepo, registerSimSessionRoutes, type SimSessionDeps } from "./me/simSessions";
 import { challengeFinishedHook, createMemoryChallengeRepo, registerChallengeRoutes, type ChallengeRepo } from "./me/challenges";
 import { createMemoryLearnRepo, registerLearnRoutes, type LearnRepo } from "./me/learn";
@@ -48,12 +50,14 @@ export interface AppDeps {
   readonly lrsProbe?: () => Promise<boolean>;
   /** Aylık ödüller (26 Eyl 2026); verilmezse bellek deposu (yalnız test/DB'siz geliştirme). */
   readonly rewards?: RewardsRepo;
-  /** A1 sunucu vaka oturumu (ADR-009); verilmezse bellek deposu ve ses yok (yalnız test/DB'siz geliştirme). */
-  readonly simSessions?: Omit<SimSessionDeps, "gamification" | "onFinished">;
+  /** A1 sunucu vaka oturumu (ADR-009); verilmezse bellek deposu ve ses yok (yalnız test/DB'siz geliştirme). `integrity` ayrı alanla enjekte edilir. */
+  readonly simSessions?: Omit<SimSessionDeps, "gamification" | "onFinished" | "integrity">;
   /** ADR-010 Meydan Okuma deposu; verilmezse bellek deposu. */
   readonly challenges?: ChallengeRepo;
   /** Öğrenme tamamlama kaydı (27 Eyl 2026); verilmezse bellek deposu. */
   readonly learn?: LearnRepo;
+  /** T283a — davranış sinyali işaretleri (ADR-009 §6); verilmezse bellek deposu. */
+  readonly integrity?: IntegrityRepo;
 }
 
 /** WebCrypto (Node 20+ genel `crypto`); kök tsconfig DOM'suz olduğu için yapısal tip. */
@@ -224,15 +228,25 @@ export function createApp(deps: AppDeps): Hono<AppEnv> {
     newId: () => cryptoUuid(),
   };
   const challenges = deps.challenges ?? createMemoryChallengeRepo();
+  // T283a — bellek varsayılanı kullanıcının kurum/görünen adını `auth.users` üzerinden çözer (test/DB'siz geliştirme).
+  const integrity =
+    deps.integrity ??
+    createMemoryIntegrityRepo(async (userId) => {
+      const context = await deps.auth.users.getMeContext(userId);
+      return context === null ? null : { institutionId: context.institution.id, displayName: context.displayName };
+    });
   registerSimSessionRoutes(
     app,
     {
       gamification: deps.gamification,
       ...simSessionDeps,
+      integrity,
       onFinished: challengeFinishedHook({ challenges, sessions: simSessionDeps.sessions, gamification: deps.gamification }),
     },
     deps.now,
   );
+  // T283a — `GET /admin/integrity`; `/admin/*` ara katmanı yukarıda bağlandığı için ondan sonra kaydedilir.
+  registerAdminIntegrityRoutes(app, integrity);
   registerChallengeRoutes(
     app,
     { auth: deps.auth, challenges, learn, sessions: simSessionDeps.sessions, random: simSessionDeps.random, newId: simSessionDeps.newId },

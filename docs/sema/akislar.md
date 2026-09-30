@@ -33,8 +33,9 @@ sequenceDiagram
       Sim->>API: POST .../cases/:index/hint
       API-->>Sim: {hint, hintsUsed}
     end
-    Sim->>API: POST .../cases/:index/answer {answer}
+    Sim->>API: POST .../cases/:index/answer {answer, integrity?}
     API->>API: sunucu saatiyle süre kontrolü (süresi dolmuş cevap reddedilir)
+    API->>API: T283a vaka sinyalleri (çok hızlı cevap vb., yalnız sayı) state'e yazılır
     API->>DB: sim_sessions UPDATE (state.cases[index].result yazılmaz — yalnız kayıt)
     API-->>Sim: {mode:"assessment", accepted:true} (doğru/yanlış bilgisi YOK)
   end
@@ -43,6 +44,10 @@ sequenceDiagram
   API->>Bank: gradeItem(...) her vaka için (scoreCase saf/deterministik)
   API->>DB: gami_attempts INSERT (yalnız actor.gamified=true ise — kodlu summary)
   API->>API: serverAttemptXp(mode, caseCount, hintsUsed, score) → xpGained
+  API->>API: T283a integrityScore (10 vakaya normalize) ≥ eşik mi?
+  opt Eşik aşıldı (yalnız tespit; puan/XP değişmez)
+    API->>DB: integrity_flags INSERT (status="pending") + sim_sessions.integrity_status="unverified"
+  end
   API->>DB: sim_sessions UPDATE (status="finished", total)
   API-->>Sim: {total, passed, cases[] (doğru cevap + açıklama ARTIK dahil), xpGained}
 ```
@@ -57,6 +62,9 @@ Notlar:
   soruyu anında kontrol eder; değerlendirmede kullanılmaz.
 - Öğretim üyesi/uzmanlık öğrencisi (`actor.gamified=false`) için `finish`
   puanı hesaplar ama `gami_attempts` satırı YAZILMAZ (deneme kaydı tutulmaz).
+- T283a (ADR-009 §6): işaretler yönetici tarafından `GET /admin/integrity` ile
+  listelenir; engelleme ve karar (T283b) bu akışta YOKTUR — eşikler
+  `apps/api/src/integrity/thresholds.ts`.
 
 ## 2. Meydan Okuma düellosu (ADR-010)
 

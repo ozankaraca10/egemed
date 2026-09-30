@@ -14,6 +14,7 @@ import {
   createMemoryAdminStore,
   type MemoryAdminUserSeed,
 } from "../../apps/api/src/admin/users";
+import { createMemoryIntegrityRepo } from "../../apps/api/src/integrity/repo";
 import { createMemoryAuthStore, type MemoryUserSeed } from "../../apps/api/src/auth/repo";
 import type { AuthDeps } from "../../apps/api/src/auth/routes";
 import {
@@ -227,6 +228,10 @@ export function createAdminHarness(
   const simSessions = createMemorySimSessionRepo();
   const challenges = createMemoryChallengeRepo();
   const learn = createMemoryLearnRepo();
+  const integrity = createMemoryIntegrityRepo(async (userId) => {
+    const context = await authStore.repos.users.getMeContext(userId);
+    return context === null ? null : { institutionId: context.institution.id, displayName: context.displayName };
+  });
   let tokenCounter = 0;
   let randomSeed = 42;
   let idCounter = 0;
@@ -240,6 +245,7 @@ export function createAdminHarness(
     rewards,
     challenges,
     learn,
+    integrity,
     simSessions: {
       sessions: simSessions,
       readAudio: options.readAudio ?? (() => Promise.resolve(null)),
@@ -270,6 +276,7 @@ export function createAdminHarness(
     simSessions,
     challenges,
     learn,
+    integrity,
     advance(ms: number) {
       clock += ms;
     },
