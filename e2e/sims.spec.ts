@@ -58,6 +58,22 @@ test.describe("sim rotaları yaşam döngüsü", () => {
     await expect(page.locator(".eg-sim-ausculta")).toHaveCount(0);
     await expect(page.locator(PULSE_ROOT).first()).toBeVisible();
   });
+
+  test("deep link sim kökünü açar, bulunamadı sayfası göstermez ve ekran yolu değişiminde kökü korur", async ({ page }) => {
+    await openRoute(page, "#/sims/ausculta/ogrenme");
+    const root = page.locator(".eg-sim-ausculta.app-shell").first();
+    await expect(root).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Sayfa bulunamadı" })).toHaveCount(0);
+    await root.evaluate((node) => {
+      (window as Window & { __simRoot?: Element }).__simRoot = node;
+    });
+    await page.evaluate(() => {
+      window.history.pushState(null, "", "#/sims/ausculta/yardim");
+      window.dispatchEvent(new PopStateEvent("popstate"));
+    });
+    await expect(page).toHaveURL(/#\/sims\/ausculta\/yardim$/);
+    expect(await root.evaluate((node) => (window as Window & { __simRoot?: Element }).__simRoot === node)).toBe(true);
+  });
 });
 
 /**

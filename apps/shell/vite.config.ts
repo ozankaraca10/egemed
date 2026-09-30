@@ -317,14 +317,30 @@ function auscultaRootAssetsPlugin(): Plugin {
   };
 }
 
-export default defineConfig(({ mode }) => ({
-  base: "./",
-  plugins: [
-    react(),
-    opacaAssetsPlugin(),
-    pulseAssetsPlugin(),
-    auscultaAssetsPlugin(),
-    auscultaRootAssetsPlugin(),
-  ],
-  ...apiProxyConfig(loadEnv(mode, SHELL_ROOT, "VITE_")),
-}));
+/**
+ * Sim modülleri tembel yüklenir; geliştirme sunucusunda ilk istek büyük sim
+ * parçasını (Opaca ≈ 1,25 MB + veri) soğuk derler. Paralel e2e yükünde bu
+ * 5 sn bekleme sınırını aşıp sim kökünü "bulunamadı" yapıyordu (audit 30 Eyl).
+ * Açılışta önceden dönüştürülür; üretim derlemesini etkilemez.
+ */
+const SIM_WARMUP_FILES = [
+  "./src/sims/loaders.ts",
+  "../../packages/sim-opaca/src/index.ts",
+  "../../packages/sim-ausculta/src/index.ts",
+  "../../packages/sim-pulse/src/index.ts",
+];
+
+export default defineConfig(({ mode }) => {
+  const proxy = apiProxyConfig(loadEnv(mode, SHELL_ROOT, "VITE_")) as { server?: Record<string, unknown> };
+  return {
+    base: "./",
+    plugins: [
+      react(),
+      opacaAssetsPlugin(),
+      pulseAssetsPlugin(),
+      auscultaAssetsPlugin(),
+      auscultaRootAssetsPlugin(),
+    ],
+    server: { ...proxy.server, warmup: { clientFiles: SIM_WARMUP_FILES } },
+  };
+});

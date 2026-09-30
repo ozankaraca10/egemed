@@ -55,7 +55,6 @@ yönetici `#/giris/admin` → `admin` / `egemed`; test öğrencisi `#/giris/test
 | `docs/specs/` | Epik ve plan belgeleri (E0–E3) | Aşağıda §5 |
 | `docs/agentic/` | Ajan devir/kurulum notları (`CODEX-DEVIR.md`) | Tarihsel bağlam |
 | `docs/ops/` · `docs/audits/` | Üretim işletim kılavuzu ve denetim raporları (güvenlik, test bulguları) | Yayın hazırlığı ve denetim kaydı |
-| `sims/` | **Eski yer tutucu** — K-P1 kararıyla simler `packages/sim-<id>` altında; burası arşiv/boş | Lint ve workspace dışı |
 | `.agtx/` | Görev worktree'leri (`.agtx/worktrees/<görev>`) ve pano verisi — **git dışı** | Lint'ten hariç |
 
 **Kaynak (eski) depolar** — salt okunur referans, platforma port edilen kod buradan gelir:

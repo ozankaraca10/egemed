@@ -27,6 +27,21 @@ Bu kılavuz, platformun tek sunucu dağıtımını (egemed.ege.edu.tr) kurmayı,
   (ADR-004). Tarayıcı LRS'ye doğrudan bağlanır; nginx CSP `connect-src`
   adresi kurum LRS uç noktasıyla değiştirilir.
 
+### Ters vekil sertleştirmesi (T269)
+
+`infra/prod/nginx-egemed.conf` `conf.d` (http bağlamı) include'u içindir;
+dosya başındaki `server_tokens`/`limit_req_zone`/`limit_req_status`/`map`
+yönergeleri bir `server` bloğunun içine alınırsa `http` bloğuna taşınmalıdır.
+Dosya; hız sınırlarını (api 20 r/s burst 40 nodelay ve media 30 r/s burst 60 —
+ikisi de oturum çerezi varsa oturum, yoksa IP başına; kampüs NAT'ı için —, auth
+yalnız giriş başlatan uçlarda IP başına 30 r/dk burst 30; `/auth/me` genel api
+bölgesindedir; aşımda 429), AI tarayıcı engelini (UA eşleşmesinde 403,
+`X-Robots-Tag`, nginx'in döndürdüğü `/robots.txt`) ve `Permissions-Policy` /
+`Cross-Origin-Opener-Policy` başlıklarını taşır.
+**Kurulumdan önce `__EGEMED_LRS_ORIGIN__` yer tutucusu kurum LRS uç noktasıyla
+doldurulmalıdır** (`envsubst` ya da `sed`); doldurulmadan kurulum yapılmaz —
+aksi hâlde CSP `connect-src` LRS'siz kalır ve xAPI ifadeleri gönderilemez.
+
 ## 2. Kurulum
 
 Derleme makinesinde (Node 22, pnpm — `.nvmrc`):

@@ -23,20 +23,13 @@ export type SprsoundFinding = "rhonchi" | "wheezing";
 
 export type SprsoundFindingResult = { readonly finding: SprsoundFinding } | { readonly skipped: string };
 
-export interface SprsoundCandidate {
+export interface SprsoundCandidate extends SprsoundFileFields {
   readonly fileName: string;
-  readonly recordNo: string;
-  readonly location: string;
   readonly annotation: SprsoundAnnotation;
   readonly durationSec: number;
 }
 
-export interface SprsoundSelected {
-  readonly fileName: string;
-  readonly recordNo: string;
-  readonly location: string;
-  readonly annotation: SprsoundAnnotation;
-  readonly durationSec: number;
+export interface SprsoundSelected extends SprsoundCandidate {
   readonly finding: SprsoundFinding;
   readonly coverage: number;
   readonly pointId: string;

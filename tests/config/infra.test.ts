@@ -513,6 +513,124 @@ describe("nginx-egemed.conf", () => {
   it("sır taşımaz", () => {
     expect(SECRET_PATTERN.test(nginx)).toBe(false);
   });
+
+  // --- T269: üretim sertleştirmesi -----------------------------------------
+  const AI_BOT_USER_AGENTS = [
+    "GPTBot",
+    "ChatGPT-User",
+    "OAI-SearchBot",
+    "ClaudeBot",
+    "Claude-Web",
+    "anthropic-ai",
+    "CCBot",
+    "Google-Extended",
+    "PerplexityBot",
+    "Perplexity-User",
+    "Bytespider",
+    "Amazonbot",
+    "Applebot-Extended",
+    "meta-externalagent",
+    "Meta-ExternalAgent",
+    "FacebookBot",
+    "Diffbot",
+    "cohere-ai",
+    "Omgilibot",
+    "ImagesiftBot",
+    "YouBot",
+    "Timpibot",
+  ] as const;
+  const NGINX_LOCATIONS = [
+    "/assets/",
+    "/sims/",
+    "/api/",
+    "~ ^/api/auth/(sso/start|sso/callback|dev/login)$",
+    "= /index.html",
+    "/",
+    "= /robots.txt",
+  ] as const;
+  const BOT_GUARD = "if ($egemed_ai_bot) { return 403; }";
+
+  /** `location <açılış> {` gövdesini bir sonraki location'a kadar döndürür. */
+  function locationBlock(opening: string): string {
+    const marker = `    location ${opening} {\n`;
+    const start = nginx.indexOf(marker);
+    if (start === -1) {
+      throw new Error(`location bulunamadı: ${opening}`);
+    }
+    const rest = nginx.slice(start + marker.length);
+    const next = rest.search(/^ {4}location |^}/m);
+    return next === -1 ? rest : rest.slice(0, next);
+  }
+
+  it("sunucu sürüm imzasını kapatır ve üç hız sınırı bölgesini tanımlar", () => {
+    expect(nginx).toMatch(/^server_tokens off;$/m);
+    expect(nginx).toMatch(/^limit_req_zone \$egemed_rl_key zone=api:10m rate=20r\/s;$/m);
+    expect(nginx).toMatch(/map \$cookie_egemed_session \$egemed_rl_key \{/);
+    expect(nginx).toMatch(/^limit_req_zone \$binary_remote_addr zone=auth:10m rate=30r\/m;$/m);
+    expect(nginx).toMatch(/^limit_req_zone \$egemed_rl_key zone=media:10m rate=30r\/s;$/m);
+    expect(nginx).toMatch(/^limit_req_status 429;$/m);
+  });
+
+  it("hız sınırlarını doğru location'lara uygular, auth önekini korur", () => {
+    expect(locationBlock("/api/")).toContain("limit_req zone=api burst=40 nodelay;");
+    expect(locationBlock("~ ^/api/auth/(sso/start|sso/callback|dev/login)$")).toContain("limit_req zone=auth burst=30 nodelay;");
+    expect(locationBlock("/sims/")).toContain("limit_req zone=media burst=60;");
+    expect(locationBlock("/assets/")).toContain("limit_req zone=media burst=60;");
+    // /api/auth/x → /auth/x; yanlış soyma tüm giriş/SSO uçlarını 404 yapardı.
+    expect(locationBlock("~ ^/api/auth/(sso/start|sso/callback|dev/login)$")).toContain("rewrite ^/api/(.*)$ /$1 break;");
+    // /auth/me her rota değişiminde çağrılır; sıkı auth bölgesine girmemeli.
+    expect(nginx).not.toMatch(/location \/api\/auth\/ \{/);
+  });
+
+  it("AI tarayıcı UA'larını büyük/küçük harf duyarsız eşler, robots.txt dışında 403 uygular", () => {
+    const mapStart = nginx.indexOf("map $http_user_agent $egemed_ai_bot {");
+    expect(mapStart, "AI bot map bloğu").toBeGreaterThan(-1);
+    const mapBody = nginx.slice(mapStart, nginx.indexOf("\n}", mapStart));
+    expect(mapBody).toMatch(/^ {4}default 0;$/m);
+    for (const ua of AI_BOT_USER_AGENTS) {
+      expect(mapBody, ua).toContain(`~*${ua} 1;`);
+    }
+    for (const path of NGINX_LOCATIONS) {
+      // robots.txt istisnadır: botlar kapalılık direktifini okuyabilmelidir.
+      if (path === "= /robots.txt") {
+        expect(locationBlock(path), path).not.toContain(BOT_GUARD);
+      } else {
+        expect(locationBlock(path), path).toContain(BOT_GUARD);
+      }
+    }
+  });
+
+  it("robots.txt'i nginx'ten düz metin döner ve AI UA'larını açıkça listeler", () => {
+    const block = locationBlock("= /robots.txt");
+    expect(block).toContain("default_type text/plain;");
+    expect(block).toMatch(/return 200 "/);
+    expect(block).toContain("User-agent: *");
+    expect(block).toContain("Disallow: /");
+    for (const ua of AI_BOT_USER_AGENTS) {
+      expect(block, ua).toContain(`User-agent: ${ua}`);
+    }
+  });
+
+  it("tüm location'larda X-Robots-Tag, Permissions-Policy ve COOP taşır", () => {
+    // nginx add_header kalıtımı olmadığı için her location kendi başlığını taşır.
+    const headers = [
+      'X-Robots-Tag "noindex, nofollow, noarchive, noai, noimageai" always;',
+      'Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=(), usb=()" always;',
+      'Cross-Origin-Opener-Policy "same-origin" always;',
+    ];
+    for (const path of NGINX_LOCATIONS) {
+      for (const header of headers) {
+        expect(locationBlock(path), `${path} → ${header}`).toContain(`add_header ${header}`);
+      }
+    }
+  });
+
+  it("LRS adresini yer tutucuya çevirir ve doldurma yönergesini taşır", () => {
+    expect(nginx).not.toContain("lrs.ornek-kurum");
+    // İki CSP (index.html ve SPA fallback) LRS yer tutucusunu taşır.
+    expect(nginx.match(/connect-src 'self' __EGEMED_LRS_ORIGIN__;/g)).toHaveLength(2);
+    expect(nginx).toMatch(/envsubst|sed/);
+  });
 });
 
 describe(".gitignore (T32)", () => {
