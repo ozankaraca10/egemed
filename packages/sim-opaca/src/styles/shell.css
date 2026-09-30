@@ -60,7 +60,7 @@ flex: 1; min-height: 0; overflow: auto;
    `.mode-cards` içeren gövdeyi hedefler; çalışma ekranlarının (öğrenme/film/
    değerlendirme) doldur+kaydır davranışı `.screen-body` temel kuralıyla değişmez. */
 .eg-sim-opaca .screen-body:has(.mode-cards) {
-display: flex; flex-direction: column; justify-content: center;
+display: flex; flex-direction: column; justify-content: safe center;
 }
 .eg-sim-opaca .screen-body.no-scroll {
 overflow: hidden;
@@ -588,11 +588,8 @@ flex-shrink: 0; color: var(--blue-600);
 opacity: .55;
 }
 /* T218: öğrenme kilidi — kart soluklaşır, kilit ikonu + ilerleme metni çizilir (öneri değil). */
-.eg-sim-opaca .mode-card.learn-locked .ic,
-.eg-sim-opaca .mode-card.learn-locked .desc,
-.eg-sim-opaca .mode-card.learn-locked ul {
-opacity: .6;
-}
+.eg-sim-opaca .mode-card.learn-locked { opacity: .78; }
+.eg-sim-opaca .mode-card.learn-locked .mode-lock-hint { color: var(--ink-900); }
 .eg-sim-opaca .visitor-banner {
 display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin: 0 0 var(--sp-4);
   padding: 10px var(--sp-4); border-radius: var(--r-lg);
@@ -613,6 +610,10 @@ display: flex; justify-content: center; margin: 4px 0 var(--sp-4);
 .eg-sim-opaca .mode-note .headphone-banner {
 max-width: 720px; margin: 0 auto;
 }
+.eg-sim-opaca .mode-advice { max-width: 720px; margin-inline: auto; padding: 8px 16px; border: 1px solid var(--border); border-radius: var(--r-lg); background: var(--card); color: var(--ink-700); font-size: var(--fs-sm); text-align: center; }
+.eg-sim-opaca .mode-progress-status { margin-top: auto; font-size: var(--fs-xs); color: var(--ink-600); text-align: left; }
+.eg-sim-opaca .mode-progress { height: 6px; margin-top: 6px; overflow: hidden; border-radius: var(--r-pill); background: var(--green-100); }
+.eg-sim-opaca .mode-progress span { display: block; height: 100%; background: var(--green-600); }
 .eg-sim-opaca .headphone-banner.thin {
 padding: 8px 16px; gap: 10px;
 }

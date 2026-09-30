@@ -110,6 +110,36 @@ test.describe("sim rotaları yaşam döngüsü", () => {
 });
 
 /**
+ * T281a — Meydan Okuma simin 4. modudur: sim içi merkez aynı birleşik barın
+ * altında açılır, sim modülü mount edilmez ve ana gezinmede yer almaz. Eski
+ * liste adresi (`#/meydan-okuma`) Simülatörler sayfasına yönlenir.
+ */
+test.describe("sim içi meydan okuma merkezi (T281a)", () => {
+  test("meydan okuma merkezi sim barıyla açılır, sim modülü mount edilmez; eski adres Simülatörler'e döner", async ({
+    page,
+  }, testInfo) => {
+    const errors = trackErrors(page);
+    await openRoute(page, "#/sims/opaca/meydan-okuma");
+    await expect(page.locator(".eg-shell-simbar")).toBeVisible();
+    await expect(page.locator(".eg-shell-simbar__simName")).toHaveText("Opaca");
+    await expect(page.getByRole("heading", { name: "Meydan Okuma" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Sayfa bulunamadı" })).toHaveCount(0);
+    // Sim modülü çizilmez; sim rotasında olduğu gibi ana gezinme de yoktur.
+    await expect(page.locator(".eg-sim-opaca")).toHaveCount(0);
+    await expect(page.getByRole("navigation", { name: "Ana gezinme" })).toHaveCount(0);
+
+    const overflow = await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth + 1);
+    expect(overflow, "yatay kaydırma").toBe(false);
+
+    await captureRouteScreenshot(page, testInfo.project.name, "#/sims/opaca/meydan-okuma");
+    expect(errors, "konsol/sayfa hatası").toEqual([]);
+
+    await page.goto("/#/meydan-okuma");
+    await expect(page).toHaveURL(/#\/simulatorler$/);
+  });
+});
+
+/**
  * Opaca gerçek modüle bağlandı (T14c): kart artık yer tutucu değil, gerçek
  * @egemed/sim-opaca ağacını mount eder. Bu blok yer tutucu sözleşmesi yerine
  * gerçek modülün başlangıç ekranını, tek üst bar kuralını (embedded — kendi

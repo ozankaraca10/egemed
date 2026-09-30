@@ -482,6 +482,22 @@ const EMBED_CSS = `
 /* Birleşik barda adım göstergesi bardadır; içerikteki kopya çizilmez. */
 :host(.pulse-unified) .stepper{display:none!important}
 :host(.pulse-unified) .topbar,:host(.pulse-unified) .app>.eg-footer,:host(.pulse-unified) .landing{display:none!important}
+:host(.pulse-unified){min-height:calc(var(--pulse-vh,100dvh) - 2.5625rem)}
+:host(.pulse-unified) .pulse-html,:host(.pulse-unified) .pulse-body{min-height:calc(var(--pulse-vh,100dvh) - 2.5625rem)}
+:host(.pulse-unified) .app:has(#modesView:not([hidden])){height:calc(var(--pulse-vh,100dvh) - 2.5625rem)}
+.app:has(#modesView:not([hidden])){min-height:0}
+.app:has(#modesView:not([hidden])) main{min-height:0;overflow:auto}
+@media(min-width:721px){.app:has(#modesView:not([hidden])){display:flex;flex-direction:column}.app:has(#modesView:not([hidden])) main{flex:1}}
+.modes-view{display:flex;flex-direction:column;justify-content:safe center;width:100%;min-height:100%;padding:12px 0}
+.mode-card .ic svg{fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.mode-card.learn-locked{opacity:.78}
+.mode-lock-hint{display:flex;align-items:center;justify-content:center;gap:6px;margin:0 0 6px;padding:5px 10px;font-size:var(--fs-xs);color:var(--blue-700);background:var(--blue-50);border-radius:var(--r-pill);line-height:1.3}
+.mode-lock-hint .lock-ic{flex-shrink:0}
+.mode-card .mode-status{margin-top:auto}
+.mode-card.learn-locked .btn{background:var(--blue-100);color:var(--ink-500);box-shadow:none}
+.mode-reward{display:inline-flex;align-items:center;justify-content:center;min-height:44px;border:0;background:none;color:var(--amber-700);font-size:var(--fs-xs);font-weight:700}
+@media(min-width:721px) and (max-width:1024px){.mode-cards{grid-template-columns:repeat(3,minmax(0,1fr))}.modes-view{max-width:1020px}}
+@media(max-width:720px){:host(.pulse-unified) .app:has(#modesView:not([hidden])){height:auto;min-height:calc(var(--pulse-vh,100dvh) - 2.5625rem)}}
 /* T139 (kullanıcı kararı, 25 Eylül 2026): tam ekran yalnız birleşik bardaki ikondan; oynatma
    çubuğundaki ikinci "↗ Tam ekran" düğmesi çizilmez (panel büyütme ↗ düğmeleri tam ekran değildir, kalır). */
 :host(.pulse-unified) #transportFullscreen{display:none!important}

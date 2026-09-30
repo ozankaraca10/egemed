@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, type JSX } from "react";
 import { audienceShowsGamification, createSimHost, type SimAudience, type SimChrome, type SimHost, type SimScreenKey, type SimulatorId } from "@egemed/sim-host";
 import { t } from "@egemed/ui/i18n";
 import { shellNow } from "./now";
-import { challengeHref, routeHref, simTitleKey } from "./routes";
+import { challengeHref, routeHref, simScreenHref, simTitleKey } from "./routes";
 import { createBrowserGamification, createBrowserLearnReporter, type ReportedLearnActivity } from "./reportLearn";
 import { loadSimModule } from "./sims/loaders";
 import { SERVER_SESSION_SIMS, createBrowserSessionSource } from "./sims/sessionSources";
@@ -230,6 +230,15 @@ function SimRouteHost({ actorId, apiBaseUrl = null, audience = "student", challe
     if (host === null || container === null) return;
     // Düello adresi (`/duello/<id>`) ekran bildirimiyle ezilmemeli: düelloda kanal verilmez.
     const navigation = challengeId === undefined ? createBrowserSimNavigation(simId, screenKeyRef.current) : null;
+    // T281a: 4. mod kartı ("Meydan Okuma") için gerçek hash değişimi; geri tuşu
+    // mod seçimine döner. Ziyaretçide ve düello modunda kanal verilmez.
+    const openChallenges =
+      audience === "visitor" || challengeId !== undefined
+        ? undefined
+        : () => {
+            const scope = globalThis as { location?: { hash: string } };
+            if (scope.location !== undefined) scope.location.hash = simScreenHref(simId, "meydan-okuma");
+          };
     // Mount da mikro göreve ertelenir: önceki simin (ör. Opaca React kökü)
     // kapanışı React render'ı sırasında değil, ondan sonra olur. Sıra korunur:
     // önceki cleanup'ın `release`ı bu mount'tan önce kuyruğa girer.
@@ -257,6 +266,7 @@ function SimRouteHost({ actorId, apiBaseUrl = null, audience = "student", challe
         ...(sessions === null ? {} : { sessions }),
         ...(learn === null ? {} : { learn }),
         ...(navigation === null ? {} : { navigation: navigation.navigation }),
+        ...(openChallenges === undefined ? {} : { openChallenges }),
         ...(audience === "visitor" || shellSources === null ? {} : { rewards: shellSources.rewardStore.forSim(simId) }),
         ...(challengeId === undefined || sessions === null
           ? {}
@@ -264,7 +274,7 @@ function SimRouteHost({ actorId, apiBaseUrl = null, audience = "student", challe
               challengeId,
               onChallengeFinished: (finishedId: string) => {
                 const scope = globalThis as { location?: { hash: string } };
-                if (scope.location !== undefined) scope.location.hash = challengeHref(finishedId);
+                if (scope.location !== undefined) scope.location.hash = challengeHref(simId, finishedId);
               },
             }),
       };

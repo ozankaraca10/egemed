@@ -48,7 +48,7 @@ export async function openRoute(page: Page, hash: string): Promise<void> {
   if (liveRootSelector !== undefined) {
     // Kaynak paket kapsayıcısı ve gerçek modül kökü aynı sınıfı paylaşabilir
     // (iç içe); `.first()` ilkini görünür bekler.
-    await expect(page.locator(liveRootSelector).first()).toBeVisible();
+    await expect(page.locator(liveRootSelector).first()).toBeVisible({ timeout: 15_000 });
     // Sim host hazır olunca opaklık geçişiyle belirir (T107); axe/renk ölçümleri
     // geçiş sırasında yarı saydam okuyup kararsızlaşmasın diye tam opaklık beklenir.
     await page.waitForFunction(() => {

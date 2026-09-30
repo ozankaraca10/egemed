@@ -1,3 +1,4 @@
+import type { GamiRewardMarks } from "./model";
 import type { ReactNode } from "react";
 import type { AchievementsPeriod, BadgeCategory, ChartPoint, Cohort, CohortFilter, GamiLeaderboardRow, MonthlyReward, Period, RewardWinner, WeeklyGoal } from "@egemed/gamification-core";
 import { GamiBadgeGrid, GamiRecentBadges } from "./GamiBadge";
@@ -200,7 +201,7 @@ export function GamiLeaderboardView({
   onStatusAction: (a: NonNullable<GamiMeStatus["action"]>) => void;
   rankedEmpty: boolean;
   rows: readonly GamiLeaderboardRow[];
-  candidates: Set<string> | null;
+  candidates: GamiRewardMarks | null;
   items: GamiTableItem[];
   meDelta: number | null;
   qualify: { left: number } | null;

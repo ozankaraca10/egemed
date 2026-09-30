@@ -288,16 +288,19 @@ export function PulseProgressPage({
   actions,
   gamification,
   rewards = null,
+  requestedTab = "achievements",
 }: {
   state: PulseGamiState;
   now: Date;
   actions: PulseProgressActions;
   gamification?: GamiServerSource;
   rewards?: SimRewardsSnapshot | null;
+  requestedTab?: GamiPageTab;
 }): JSX.Element {
   const [tab, setTab] = useState<GamiPageTab>("achievements");
+  useEffect(() => setTab(requestedTab), [requestedTab]);
   const [period, setPeriod] = useState<AchievementsPeriod>("last30");
-  const [boardPeriod, setBoardPeriod] = useState<Period>("week");
+  const [boardPeriod, setBoardPeriod] = useState<Period>("month");
   const [cohort, setCohort] = useState<CohortFilter>("all");
   const [privacy, setPrivacy] = useState<Profile>({ cohort: null, displayName: null, public: false });
   const body = (server: ServerGamiData | null) => (
@@ -336,7 +339,7 @@ export function PulseProgressPage({
 }
 
 export interface PulseProgressHandle {
-  update(state: PulseGamiState, now: Date): void;
+  update(state: PulseGamiState, now: Date, tab?: GamiPageTab): void;
   dispose(): void;
 }
 
@@ -346,12 +349,14 @@ function PulseProgressConnected({
   actions,
   gamification,
   rewards,
+  requestedTab,
 }: {
   state: PulseGamiState;
   now: Date;
   actions: PulseProgressActions;
   gamification?: GamiServerSource;
   rewards?: SimRewardsSource;
+  requestedTab: GamiPageTab;
 }): JSX.Element {
   const [snapshot, setSnapshot] = useState<SimRewardsSnapshot | null>(() => rewards?.snapshot() ?? null);
   useEffect(() => {
@@ -362,7 +367,7 @@ function PulseProgressConnected({
     setSnapshot(rewards.snapshot());
     return rewards.subscribe(setSnapshot);
   }, [rewards]);
-  return <PulseProgressPage actions={actions} now={now} rewards={snapshot} state={state} {...(gamification === undefined ? {} : { gamification })} />;
+  return <PulseProgressPage actions={actions} now={now} requestedTab={requestedTab} rewards={snapshot} state={state} {...(gamification === undefined ? {} : { gamification })} />;
 }
 
 /** Gölge kök içindeki `container`a React kökü kurar; durum değiştikçe `update`. */
@@ -375,11 +380,12 @@ export function mountPulseProgress(
   const root: Root = createRoot(container);
   return {
     dispose: () => root.unmount(),
-    update: (state, now) => root.render(
+    update: (state, now, requestedTab = "achievements") => root.render(
       <PulseProgressConnected
         actions={actions}
         now={now}
         state={state}
+        requestedTab={requestedTab}
         {...(gamification === undefined ? {} : { gamification })}
         {...(rewards === undefined ? {} : { rewards })}
       />,
