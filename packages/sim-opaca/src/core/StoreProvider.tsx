@@ -15,6 +15,7 @@ import {
 } from "./reducer";
 import { createSimRuntime, type RuntimeAdapter, type SimRuntime } from "./runtime";
 import { CASE_INVENTORY } from "../data/inventory";
+import type { SimNavigation } from "@egemed/sim-host";
 
 /** Opaca store sağlayıcısı (kaynak `core/store.tsx` portu, E2 §7.2/§7.4/§7.5).
  *  Mount başına tek olay veri yolu (`createBus(now)`), tek çalışma zamanı (`createSimRuntime`)
@@ -58,6 +59,7 @@ export interface StoreProviderProps {
   readonly env: WindowLike;
   /** Test/fixture: varsayılan `initialState` yerine verilen durumla başlar (bestScore yine storage'dan okunur). */
   readonly initialState?: AppState;
+  readonly navigation?: SimNavigation;
 }
 
 /** Mount başına tek örnek: render sırasında tembel kurulur, ilk örnek korunur. Kurulan nesneler
@@ -76,6 +78,7 @@ export function StoreProvider({
   runtime: adapter,
   env,
   initialState: seedState,
+  navigation,
 }: StoreProviderProps): JSX.Element {
   const bus = useMountRef(() => createBus(now));
   const seam = useMountRef<ReducerSeam>(() => ({ emit: (event) => bus.emit(event) }));
@@ -86,6 +89,8 @@ export function StoreProvider({
   );
   const stateRef = useRef(state);
   stateRef.current = state;
+  const externalScreen = useRef<AppState["screen"] | null>(null);
+  const firstNavigationRender = useRef(true);
   const simRuntime = useMountRef(() =>
     createSimRuntime({
       adapter,
@@ -95,6 +100,46 @@ export function StoreProvider({
     })
   );
   const lifecycle = useMountRef<Lifecycle>(() => createLifecycle(env));
+
+  useEffect(() => {
+    if (navigation === undefined) return;
+    return navigation.subscribe((key) => {
+      const current = stateRef.current;
+      if (key !== null && !["modlar", "ogrenme", "uygulama", "degerlendirme", "sonuc", "ilerlemem"].includes(key)) return;
+      const screen = key === null || key === "modlar" ? "modes"
+        : key === "ogrenme" ? "learn"
+          : key === "uygulama" && current.mode !== "assessment" ? "simulation"
+            : key === "degerlendirme" && current.mode === "assessment" && current.server !== null ? "simulation"
+              : key === "sonuc" && current.caseResults.length > 0 ? "results"
+                : key === "ilerlemem" ? "achievements" : null;
+      if (screen === null) {
+        navigation.report(current.screen === "learn" ? "ogrenme" : "modlar", { replace: true });
+        return;
+      }
+      if (screen !== current.screen) {
+        externalScreen.current = screen;
+        dispatch({ type: "goto", screen });
+      }
+    });
+  }, [dispatch, navigation]);
+
+  useEffect(() => {
+    if (navigation === undefined) return;
+    const key = state.screen === "learn" ? "ogrenme"
+      : state.screen === "simulation" ? (state.mode === "assessment" ? "degerlendirme" : "uygulama")
+        : state.screen === "results" ? "sonuc"
+          : state.screen === "achievements" || state.screen === "leaderboard" ? "ilerlemem" : "modlar";
+    if (firstNavigationRender.current) {
+      firstNavigationRender.current = false;
+      if (navigation.initial !== null && navigation.initial !== key) navigation.report(key, { replace: true });
+      return;
+    }
+    if (externalScreen.current === state.screen) {
+      externalScreen.current = null;
+      return;
+    }
+    navigation.report(key);
+  }, [navigation, state.mode, state.screen]);
 
   // A4: en iyi puan cihaz-yerel depoya yazılır (kaynak: localStorage; portta StoragePort).
   useEffect(() => {

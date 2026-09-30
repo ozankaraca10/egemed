@@ -79,7 +79,9 @@ test.describe("Ausculta kayıt izolasyonu", () => {
 
     // Hesap değişimi: sayfa yeniden yüklenir (gerçek kullanımda oturum baştan okunur).
     await asUser(page, STUDENT);
-    await page.reload({ waitUntil: "networkidle" });
+    // Öğrenme ekranı artık URL'de kalıcıdır; hesap değişimini mod seçimi
+    // kökünden doğrulamak için yeni kullanıcıyı sim köküne aç.
+    await page.goto("/#/sims/ausculta", { waitUntil: "networkidle" });
     await expect(page.locator(`${ROOT}.app-shell`)).toHaveCount(1);
     // Birleşik barda oturum kimliği kompakt hesap düğmesinde baş harflerle
     // durur (T120); görünen ad menüde doğrulanır.

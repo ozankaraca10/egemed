@@ -252,7 +252,11 @@ export function createAuscultaModule(deps?: AuscultaModuleDeps): SimModule {
         storage,
         runtime: resolved.runtime ?? createNoopRuntimeAdapter(),
         env: resolved.env,
-        initialState: { ...initialState, screen: "modes" },
+        initialState: {
+          ...initialState,
+          screen: context.navigation?.initial === "ogrenme" ? "learn" : "modes",
+        },
+        ...(context.navigation === undefined ? {} : { navigation: context.navigation }),
         children: createElement(App, appProps),
       });
       root.render(resolved.stageEnv ? createElement(StageEnvProvider, { env: resolved.stageEnv }, store) : store);

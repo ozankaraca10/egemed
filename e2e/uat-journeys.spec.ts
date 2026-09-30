@@ -133,6 +133,15 @@ test.describe("T155 UAT yolculukları", () => {
     await expect(root.locator(".q-card-dark").first()).toBeVisible();
 
     await page.goBack();
+    await expect(page).toHaveURL(/#\/sims\/opaca\/ogrenme$/);
+    await expect(page.locator(".eg-sim-opaca")).toHaveCount(baselineRootCount);
+    await expect(root.locator(".learn-progress")).toBeVisible();
+
+    await page.goBack();
+    await expect(page).toHaveURL(/#\/sims\/opaca$/);
+    await expect(page.getByRole("heading", { name: "Çalışma Modunu Seçin" })).toBeVisible();
+
+    await page.goBack();
     await expect(page).toHaveURL(/#\/$/);
     await expect(page.getByRole("heading", { name: "İlerlemem" })).toBeVisible();
     await expect(page.locator(".eg-sim-opaca")).toHaveCount(0);
@@ -166,7 +175,7 @@ test.describe("T155 UAT yolculukları", () => {
 
     await expect(page.locator("main").first()).toBeVisible();
     await expect(page.locator(".eg-sim-opaca").first()).toBeVisible();
-    await expect(page).toHaveURL(/#\/sims\/opaca$/);
+    await expect(page).toHaveURL(/#\/sims\/opaca\/modlar$/);
     // Kullanıcı hâlâ oturumda: girişe düşülmedi, hesap menüsü öğrenci oturumunu gösterir.
     await expect(page.getByRole("heading", { name: "Yönetici girişi" })).toHaveCount(0);
     await expect(page.getByRole("button", { name: /Hesap menüsü/ })).toBeVisible();
