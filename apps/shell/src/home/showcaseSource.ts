@@ -9,6 +9,7 @@
 
 import type { ApiClient } from "@egemed/api-client";
 import type { SimId } from "@egemed/contracts";
+import type { RewardsDataSource } from "../admin/rewardsDataSource";
 
 export interface ShowcaseLeader {
   readonly rank: number;
@@ -35,6 +36,7 @@ export interface ShowcaseSim {
 
 export interface ShowcaseSource {
   getShowcase(): Promise<readonly ShowcaseSim[]>;
+  subscribe?(listener: () => void): () => void;
 }
 
 /** 'YYYY-MM' ayının Türkçe adı ("Eylül 2026"). */
@@ -54,7 +56,7 @@ export function daysLeftInMonth(month: string, now: number): number {
 const SYNTH_NAMES = ["E. Y.", "M. K.", "D. A.", "Z. Ö.", "B. T.", "S. Ç.", "C. D.", "İ. Ş.", "A. B.", "K. E."];
 
 /** Deterministik sentetik vitrin; gerçek öğrenci verisi taşımaz. */
-export function createSyntheticShowcaseSource(month = "2026-09"): ShowcaseSource {
+export function createSyntheticShowcaseSource(month: string | (() => string) = "2026-09", rewards?: RewardsDataSource, subscribe?: (listener: () => void) => () => void): ShowcaseSource {
   const make = (offset: number, base: number): ShowcaseLeader[] =>
     SYNTH_NAMES.map((_, index) => ({
       rank: index + 1,
@@ -65,15 +67,21 @@ export function createSyntheticShowcaseSource(month = "2026-09"): ShowcaseSource
   const sims: ShowcaseSim[] = (["pulse", "ausculta", "opaca"] as const).map((simId, index) => ({
     simId,
     leaders: make(index * 3, 96 - index),
-    reward:
-      simId === "opaca"
-        ? { month, title: "Girişimsel Radyolojide bir girişime gözlemci olarak katılım", sponsor: "Radyoloji Anabilim Dalı" }
-        : simId === "pulse"
-          ? { month, title: "Kardiyoloji kateter laboratuvarında bir gün", sponsor: "Kardiyoloji Anabilim Dalı" }
-          : null,
+    reward: null,
     lastMonthWinners: make(index * 3 + 5, 93 - index).slice(0, 3),
   }));
-  return { getShowcase: () => Promise.resolve(sims) };
+  return {
+    async getShowcase() {
+      if (rewards === undefined) return sims;
+      const currentMonth = typeof month === "function" ? month() : month;
+      return Promise.all(sims.map(async (sim) => {
+        const rows = await rewards.list(sim.simId);
+        const selected = rows.find((row) => row.month === currentMonth) ?? [...rows].filter((row) => row.month < currentMonth).sort((a, b) => (a.month < b.month ? 1 : -1))[0];
+        return { ...sim, reward: selected === undefined ? null : { month: currentMonth, title: selected.title, sponsor: selected.sponsor } };
+      }));
+    },
+    ...(subscribe === undefined ? {} : { subscribe }),
+  };
 }
 
 /**
@@ -81,8 +89,9 @@ export function createSyntheticShowcaseSource(month = "2026-09"): ShowcaseSource
  * `GET /me/gamification/:simId/leaderboard?period=month` (ilk 10). Yalnız erişim
  * verilen simler döner; bir simin sıralaması okunamazsa o sütun boş kalır.
  */
-export function createApiShowcaseSource(client: Pick<ApiClient, "rewards" | "gamification">): ShowcaseSource {
+export function createApiShowcaseSource(client: Pick<ApiClient, "rewards" | "gamification">, subscribe?: (listener: () => void) => () => void): ShowcaseSource {
   return {
+    ...(subscribe === undefined ? {} : { subscribe }),
     async getShowcase(): Promise<readonly ShowcaseSim[]> {
       const overview = await client.rewards.getMyRewards();
       return Promise.all(

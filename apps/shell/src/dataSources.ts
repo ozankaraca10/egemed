@@ -5,7 +5,7 @@
  * sahte oturumda kalır.
  */
 
-import { createContext, createElement, useContext, useRef, type ReactNode } from "react";
+import { createContext, createElement, useContext, useEffect, useRef, type ReactNode } from "react";
 import { createMockAuditSource, type AuditDataSource } from "./admin/auditDataSource";
 import { createMockImportsSource, type ImportsDataSource } from "./admin/importsDataSource";
 import { createMockRewardsSource, type RewardsDataSource } from "./admin/rewardsDataSource";
@@ -18,6 +18,9 @@ import type { ShellSession } from "./session";
 import { createSyntheticShowcaseSource, type ShowcaseSource } from "./home/showcaseSource";
 import type { ChallengeSource } from "./challenges/challengeSource";
 import type { LearnSource } from "./learn/learnSource";
+import { createRewardStore, type RewardStore } from "./rewards/rewardStore";
+import { shellNow } from "./now";
+import { monthKeyTr } from "@egemed/gamification-core";
 
 export interface LeaderboardPreferencesSource {
   getVisible(): Promise<boolean>;
@@ -30,6 +33,7 @@ export interface ShellDataSources {
   readonly audit: AuditDataSource;
   /** Aylık ödüller (T186); sim başına CRUD + kesinleştirme, admin oturumunda kullanılır. */
   readonly rewards: RewardsDataSource;
+  readonly rewardStore: RewardStore;
   /** API oturumunda `session === null` iken boş döner; `1450` XP üretmez. */
   gamification(session: ShellSession | null): GamificationSource;
   /** Sahte oturumda `null`; API oturumunda liderlik görünürlüğü. */
@@ -51,6 +55,7 @@ export function ShellDataSourcesProvider({
   readonly sources: ShellDataSources;
   readonly children: ReactNode;
 }): ReactNode {
+  useEffect(() => () => sources.rewardStore.dispose(), [sources]);
   return createElement(ShellDataSourcesContext.Provider, { value: sources }, children);
 }
 
@@ -78,10 +83,12 @@ export function createMockShellDataSources(): ShellDataSources {
   const imports = createMockImportsSource();
   const audit = createMockAuditSource();
   const rewards = createMockRewardsSource();
-  const syntheticShowcase = createSyntheticShowcaseSource();
+  const rewardStore = createRewardStore({ now: shellNow, rewards });
+  const syntheticShowcase = createSyntheticShowcaseSource(() => monthKeyTr(new Date(shellNow())), rewards, rewardStore.subscribe);
   return {
     audit,
     rewards,
+    rewardStore,
     gamification(session) {
       return createSyntheticGamificationSource(session !== null);
     },

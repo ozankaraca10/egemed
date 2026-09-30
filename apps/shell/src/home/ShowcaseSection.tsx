@@ -112,16 +112,17 @@ export function ShowcaseSection({ source, month, previousMonth }: ShowcaseSectio
   useEffect(() => {
     if (source === null) return undefined;
     let alive = true;
-    source
-      .getShowcase()
-      .then((next) => {
-        if (alive) setSims(next);
-      })
-      .catch(() => {
-        if (alive) setSims([]);
-      });
+    const refresh = () => {
+      source.getShowcase().then(
+        (next) => { if (alive) setSims(next); },
+        () => { if (alive) setSims([]); },
+      );
+    };
+    refresh();
+    const unsubscribe = source.subscribe?.(refresh);
     return () => {
       alive = false;
+      unsubscribe?.();
     };
   }, [source]);
   if (source === null || sims === null || sims.length === 0) return null;

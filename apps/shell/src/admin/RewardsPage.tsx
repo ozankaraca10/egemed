@@ -17,7 +17,7 @@ import {
 } from "@egemed/ui";
 import { t, type TrKey } from "@egemed/ui/i18n";
 import { monthKeyTr } from "@egemed/gamification-core";
-import { useShellSource } from "../dataSources";
+import { useShellDataSources, useShellSource } from "../dataSources";
 import { shellNow } from "../now";
 import {
   REWARD_COHORTS,
@@ -353,6 +353,7 @@ export interface RewardsPageProps {
  * `RewardsDataSource` üzerinden enjekte edilir; çizim `RewardsView`'dedir.
  */
 export function RewardsPage({ dataSource }: RewardsPageProps): JSX.Element {
+  const shellSources = useShellDataSources();
   const source = useShellSource(dataSource, (sources) => sources.rewards, () => createMockRewardsSource());
   const toast = useToast();
   const [currentMonthKey] = useState(() => monthKeyTr(new Date(shellNow())));
@@ -431,6 +432,7 @@ export function RewardsPage({ dataSource }: RewardsPageProps): JSX.Element {
       () => {
         setFormSubmitting(false);
         setFormOpen(false);
+        void shellSources?.rewardStore.invalidate();
         toast({ title: t("admin.rewards.form.toast.success"), tone: "success" });
         refetch();
       },
@@ -457,6 +459,7 @@ export function RewardsPage({ dataSource }: RewardsPageProps): JSX.Element {
       () => {
         setDeleteBusy(false);
         setDeleteTarget(null);
+        void shellSources?.rewardStore.invalidate();
         toast({ title: t("admin.rewards.delete.toast.success"), tone: "success" });
         refetch();
       },
@@ -481,6 +484,7 @@ export function RewardsPage({ dataSource }: RewardsPageProps): JSX.Element {
       () => {
         setFinalizeBusy(false);
         setFinalizeTarget(null);
+        void shellSources?.rewardStore.invalidate();
         toast({ title: t("admin.rewards.finalize.toast.success"), tone: "success" });
         refetch();
       },
