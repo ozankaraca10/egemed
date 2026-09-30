@@ -29,6 +29,7 @@ import { ShellLayout } from "../../apps/shell/src/ShellLayout";
 import { shellSessionFromDev } from "../../apps/shell/src/session";
 import { t } from "../../packages/ui/i18n/tr";
 import { describe, expect, it } from "vitest";
+import { DEV_ENTRY_STRINGS } from "../../apps/shell/src/devStrings";
 
 const ADMIN: DevSession = { actorId: "dev-admin-0001", role: "admin" };
 const STUDENT: DevSession = { actorId: "dev-student-0001", role: "student" };
@@ -177,23 +178,23 @@ describe("#/admin rotası ve AdminPage", () => {
 describe("EntryPage dev davranışı", () => {
   it("dev kapalıyken ipucu kutusu yoktur; önizleme metni ve form korunur", () => {
     const html = renderToStaticMarkup(createElement(EntryPage, { role: "admin" }));
-    expect(html).not.toContain(t("entry.dev.title"));
-    expect(html).not.toContain(t("entry.dev.admin"));
-    expect(html).not.toContain(t("entry.dev.note"));
+    expect(html).not.toContain(DEV_ENTRY_STRINGS.title);
+    expect(html).not.toContain(DEV_ENTRY_STRINGS.admin);
+    expect(html).not.toContain(DEV_ENTRY_STRINGS.note);
     expect(html).toContain(t("entry.auth.pending"));
     expect(html).toContain('class="eg-shell-entry__form"');
     expect(html).not.toContain('role="alert"');
   });
   it("dev açıkken rolün hesabını ve notu gösterir, önizleme satırını gizler", () => {
     const admin = renderToStaticMarkup(createElement(EntryPage, { devEnabled: true, role: "admin" }));
-    expect(admin).toContain(t("entry.dev.title"));
-    expect(admin).toContain(t("entry.dev.admin"));
-    expect(admin).toContain(t("entry.dev.note"));
+    expect(admin).toContain(DEV_ENTRY_STRINGS.title);
+    expect(admin).toContain(DEV_ENTRY_STRINGS.admin);
+    expect(admin).toContain(DEV_ENTRY_STRINGS.note);
     expect(admin).not.toContain(t("entry.auth.pending"));
     expect(admin).not.toContain(t("entry.error.invalid"));
     const student = renderToStaticMarkup(createElement(EntryPage, { devEnabled: true, role: "student" }));
-    expect(student).toContain(t("entry.dev.student"));
-    expect(student).not.toContain(t("entry.dev.admin"));
+    expect(student).toContain(DEV_ENTRY_STRINGS.student);
+    expect(student).not.toContain(DEV_ENTRY_STRINGS.admin);
   });
 });
 
