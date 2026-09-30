@@ -24,6 +24,7 @@ interface RecordShape {
   sourceDataset: string;
   sourceFile: string;
   validationStatus: string;
+  mappingStatus?: string;
   internalSourceId?: string;
   internalPatientId?: string;
   patient?: PatientShape;
@@ -110,6 +111,29 @@ describe("öğrenme örnek listesi", () => {
         // Anormal bulguda "Kontrol grubu (hastalık yok)" etiketi öğrenciyi yanıltır.
         expect(list.some((record) => /^Kontrol grubu/.test(record?.patient?.diagnosis ?? "")), topic.key).toBe(false);
       }
+    }
+  });
+
+  it("kalp normal/üfürüm konularında CirCor gerçek hastalar önde (T260)", () => {
+    const expected: [string, number][] = [
+      ["heart.normal", 5],
+      ["heart.murmur.early_systolic", 5],
+      // Pansistolik yaklaşık eşleme (educational_mapping) örnek sayılmaz: 4 gerçek + 1 manken.
+      ["heart.murmur.mid_systolic", 4],
+      ["heart.murmur.late_systolic", 1],
+    ];
+    for (const [key, realCount] of expected) {
+      const list = learningSamplesFor(key).map((id) => {
+        const record = byId.get(id);
+        if (record === undefined) throw new Error(`kayıt yok: ${id}`);
+        return record;
+      });
+      expect(list, key).toHaveLength(5);
+      const real = list.filter((record) => record.patient?.origin === "real");
+      expect(real.length, key).toBe(realCount);
+      expect(list.slice(0, real.length).every((record) => record.patient?.origin === "real"), key).toBe(true);
+      expect(new Set(real.map((record) => patientKeyOf(record))).size, key).toBe(real.length);
+      expect(list.some((record) => record.mappingStatus === "educational_mapping"), key).toBe(false);
     }
   });
 

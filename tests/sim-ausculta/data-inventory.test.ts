@@ -43,7 +43,9 @@ const libraryItems = (library.groups ?? []).flatMap((group) => group.items ?? []
 interface PatientShape {
   origin: string;
   ageYears?: number | null;
+  ageGroup?: string | null;
   sex?: string | null;
+  pregnant?: boolean;
   diagnosis?: string | null;
   diagnosisSource?: string;
   soundTypeRaw?: string | null;
@@ -52,6 +54,7 @@ interface PatientShape {
 
 interface ExternalRecordShape {
   id: string;
+  category: string;
   sourceDataset: string;
   acousticFinding: string;
   mappingStatus: string;
@@ -66,6 +69,8 @@ interface ExternalRecordShape {
   population: string;
   sampleRate: number;
   channels: number;
+  durationSec: number;
+  runtimeUrl: string;
   patient: PatientShape;
 }
 
@@ -93,6 +98,20 @@ const sprsoundRecords = ((external.records ?? []) as ExternalRecordShape[]).filt
   (record) => record.sourceDataset === "sprsound",
 );
 
+/** T260 — T259'dan korunan CirCor kimlikleri; değerlendirme bankası bunlara bağlı. */
+const CIRCOR_LEGACY_IDS = [
+  "circor_normal_cardiac_aortic_001",
+  "circor_early_systolic_murmur_cardiac_aortic_001",
+  "circor_mid_systolic_murmur_cardiac_aortic_001",
+  "circor_late_systolic_murmur_cardiac_aortic_001",
+];
+const CIRCOR_RECORDED_TO_SIMULATION: Record<string, string> = {
+  AV: "cardiac_aortic",
+  PV: "cardiac_pulmonary",
+  TV: "cardiac_tricuspid",
+  MV: "cardiac_mitral",
+};
+
 describe("Ausculta veri envanteri", () => {
   it("kopyalanan JSON dosyaları okunur", () => {
     for (const name of JSON_NAMES) {
@@ -103,8 +122,8 @@ describe("Ausculta veri envanteri", () => {
   it("kayıt sayıları kaynak kopyasıyla aynıdır", () => {
     expect(sounds.count).toBe(245);
     expect(soundRecords).toHaveLength(245);
-    expect(external.count).toBe(102);
-    expect(externalRecords).toHaveLength(102);
+    expect(external.count).toBe(114);
+    expect(externalRecords).toHaveLength(114);
     expect(cases.cases).toHaveLength(24);
     expect(casesAuto.count).toBe(176);
     expect(casesAuto.cases).toHaveLength(176);
@@ -173,17 +192,69 @@ describe("Ausculta veri envanteri", () => {
     }
   });
 
-  it("CirCor gerçek hasta kayıtları hasta alanını taşır (T259)", () => {
+  it("CirCor: T259 kayıtları aynen korunur", () => {
     const circor = (externalRecords as ExternalRecordShape[]).filter(
       (record) => record.sourceDataset === "physionet-circor",
     );
-    expect(circor).toHaveLength(4);
-    for (const record of circor) {
+    const legacy = circor.filter((record) => CIRCOR_LEGACY_IDS.includes(record.id));
+    expect(legacy.map((record) => record.id).sort()).toEqual([...CIRCOR_LEGACY_IDS].sort());
+    expect(legacy.map((record) => record.internalSourceId)).toEqual([
+      "circor-patient-2530",
+      "circor-patient-9979",
+      "circor-patient-14241",
+      "circor-patient-85132",
+    ]);
+    for (const record of legacy) {
       expect(record.patient.origin).toBe("real");
       expect(record.patient.diagnosis).toBeNull();
       expect(record.patient.ageYears).toBeNull();
       expect(record.patient.sex).toBeNull();
       expect(record.patient.diagnosisSource).toContain("CirCor");
+    }
+  });
+
+  it("CirCor yeni kayıtları hasta alanı ve odak eşlemesiyle gelir (T260)", () => {
+    const circor = (externalRecords as ExternalRecordShape[]).filter(
+      (record) => record.sourceDataset === "physionet-circor",
+    );
+    expect(circor).toHaveLength(16);
+    const imported = circor.filter((record) => !CIRCOR_LEGACY_IDS.includes(record.id));
+    expect(imported).toHaveLength(12);
+    const findings = imported.map((record) => record.acousticFinding);
+    expect(findings.filter((finding) => finding === "normal")).toHaveLength(4);
+    expect(findings.filter((finding) => finding === "early_systolic_murmur")).toHaveLength(4);
+    expect(findings.filter((finding) => finding === "mid_systolic_murmur")).toHaveLength(4);
+    for (const record of imported) {
+      expect(record.category).toBe("heart");
+      expect(record.mappingStatus).toBe("pending_faculty");
+      expect(record.mappingNote.length).toBeGreaterThan(10);
+      expect(record.nativeFilter).toBe("unspecified");
+      expect(record.sampleRate).toBe(4000);
+      expect(record.channels).toBe(1);
+      expect(record.durationSec).toBeLessThanOrEqual(30);
+      expect(record.recordedLocation).toMatch(/^(AV|PV|TV|MV)$/);
+      expect(record.simulationLocation).toBe(CIRCOR_RECORDED_TO_SIMULATION[record.recordedLocation]);
+      expect(record.runtimeUrl).toBe(`assets/audio/runtime/external/circor/${record.id}.wav`);
+      expect(record.internalPatientId).toMatch(/^circor-patient-\d+$/);
+      // KVKK: hasta numarası yalnız iç kimlikte; gösterilen alanlara girmez.
+      const patientNo = String(record.internalPatientId).replace("circor-patient-", "");
+      expect(record.sourceFile).toMatch(/^circor\/[a-z0-9_]+$/);
+      expect(`${record.sourceFile} ${JSON.stringify(record.patient)}`).not.toContain(patientNo);
+      expect(record.patient.origin).toBe("real");
+      expect(record.patient.ageYears).toBeNull();
+      expect([null, "Yenidoğan", "Süt çocuğu", "Çocuk", "Ergen"]).toContain(record.patient.ageGroup);
+      expect(["F", "M"]).toContain(record.patient.sex);
+      expect(typeof record.patient.pregnant).toBe("boolean");
+      expect(record.patient.diagnosis).toBeNull();
+      expect(record.patient.diagnosisSource).toBe("CirCor (tanı bilgisi yok)");
+      expect(record.patient.soundTypeRaw).toBeTruthy();
+      if (record.acousticFinding === "normal") {
+        expect(record.patient.soundTypeRaw).toBe("Üfürüm yok");
+      } else {
+        expect(record.patient.soundTypeRaw).toMatch(/^(Early|Mid|Late)-systolic (III|II|I)\/VI$/);
+      }
+      expect(["Aort odağı", "Pulmoner odak", "Triküspit odağı", "Mitral odağı"]).toContain(record.patient.site);
+      expect(JSON.stringify(record.patient)).not.toMatch(/[0-9]{5,}/u);
     }
   });
 

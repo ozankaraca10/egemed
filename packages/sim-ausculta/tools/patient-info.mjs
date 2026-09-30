@@ -5,6 +5,11 @@
  * kısaltması veri kümesi makalesine göre bronşittir (Data in Brief 2021, Tablo 1:
  * yedi hastalık arasında bronşit; bronşektazi yok).
  *
+ * T260 — CirCor hasta alanı: yaş sayısal değil yalnız grup (Neonate/Infant/Child/
+ * Adolescent), cinsiyet Female/Male, gebelik True/False, dinleme yeri AV/PV/TV/MV.
+ * Tanı bilgisi veri kümesinde yoktur (Outcome klinik sonuçtur, tanı değildir) —
+ * gösterilmez.
+ *
  * KVKK: ad, özgün dosya adı ve kaynak hasta numarası bu alanlara asla girmez.
  */
 
@@ -54,6 +59,25 @@ const SPRSOUND_SITE_TR = {
   p1: "Sol bölge (posterior)",
   p3: "Sağ bölge (posterior)",
 };
+
+/** T260 — CirCor yaş grubu → Türkçe (plan: Neonate/Infant/Child/Adolescent). */
+const CIRCOR_AGE_GROUP_TR = {
+  Neonate: "Yenidoğan",
+  Infant: "Süt çocuğu",
+  Child: "Çocuk",
+  Adolescent: "Ergen",
+};
+
+/** T260 — CirCor dinleme yeri kodu → Türkçe odak adı (plan: AV/PV/TV/MV). */
+const CIRCOR_SITE_TR = {
+  AV: "Aort odağı",
+  PV: "Pulmoner odak",
+  TV: "Triküspit odağı",
+  MV: "Mitral odağı",
+};
+
+/** T260 — CirCor tanı taşımaz; Outcome klinik sonuçtur, tanı olarak gösterilmez. */
+export const CIRCOR_DIAGNOSIS_SOURCE = "CirCor (tanı bilgisi yok)";
 
 const DIAGNOSIS_TABLES = { "kauh-v3": KAUH_DIAGNOSIS_TR, sprsound: SPRSOUND_DIAGNOSIS_TR };
 
@@ -115,6 +139,49 @@ export function kauhPatientInfo(entry) {
   };
 }
 
+/** T260 — CirCor cinsiyet kodu ("Female"/"Male") → "F"/"M"; başka değer null. */
+export function sexOfCircor(raw) {
+  const text = normalized(raw).toLowerCase();
+  if (text === "female") return "F";
+  if (text === "male") return "M";
+  return null;
+}
+
+/** T260 — CirCor yaş grubu → Türkçe; eşlenmeyen/boş değer null. */
+export function circorAgeGroup(raw) {
+  const text = normalized(raw);
+  return CIRCOR_AGE_GROUP_TR[text] ?? null;
+}
+
+/** T260 — CirCor dinleme yeri kodu → Türkçe odak adı; eşlenmeyen kod null. */
+export function circorSite(raw) {
+  return CIRCOR_SITE_TR[normalized(raw).toUpperCase()] ?? null;
+}
+
+/** T260 — CirCor ham ses tipi: "Üfürüm yok" ya da "<timing> <grading>"; boşsa null. */
+export function circorSoundType(murmur, timing, grading) {
+  if (normalized(murmur).toLowerCase() === "absent") return "Üfürüm yok";
+  return [normalized(timing), normalized(grading)]
+    .filter((part) => part !== "" && part.toLowerCase() !== "nan")
+    .join(" ") || null;
+}
+
+/** T260 — CirCor hasta alanı (origin: "real"): yaş grup olarak verilir (sayısal yaş
+ *  veri kümesinde yok), tanı null kalır. Hasta numarası bu alana girmez. */
+export function circorPatientInfo(entry) {
+  return {
+    origin: "real",
+    ageYears: null,
+    ageGroup: circorAgeGroup(entry.age),
+    sex: sexOfCircor(entry.sex),
+    pregnant: normalized(entry.pregnancy).toLowerCase() === "true",
+    diagnosis: null,
+    diagnosisSource: CIRCOR_DIAGNOSIS_SOURCE,
+    soundTypeRaw: circorSoundType(entry.murmur, entry.timing, entry.grading),
+    site: circorSite(entry.location),
+  };
+}
+
 /** SPRSound dosya adı alanları + hasta özeti → `patient` alanı (origin: "real").
  *  Hasta özeti bulunamazsa tanı null kalır (uydurulmaz). */
 export function sprsoundPatientInfo(fields, finding, summary) {
@@ -135,7 +202,8 @@ export function normalizePatientNo(value) {
   return String(value ?? "").trim().replace(/^0+(?=\d)/u, "");
 }
 
-function splitCsvLine(line) {
+/** Tırnaklı alan destekli CSV satır çözücü (CirCor `training_data.csv` dahil). */
+export function splitCsvLine(line) {
   const cells = [];
   let cell = "";
   let quoted = false;

@@ -10,6 +10,21 @@ export interface RealPatientInfo {
   readonly site: string | null;
 }
 
+export interface CircorPatientInfo extends RealPatientInfo {
+  readonly ageGroup: string | null;
+  readonly pregnant: boolean;
+}
+
+export interface CircorPatientFields {
+  readonly age: string;
+  readonly sex: string;
+  readonly pregnancy: string;
+  readonly murmur: string;
+  readonly timing: string;
+  readonly grading: string;
+  readonly location: string;
+}
+
 export interface SprsoundPatientSummary {
   readonly disease: string;
   readonly source: string;
@@ -30,6 +45,7 @@ export interface SprsoundPatientFields {
 }
 
 export const DIAGNOSIS_SOURCE: Readonly<Record<"kauh-v3" | "sprsound", string>>;
+export const CIRCOR_DIAGNOSIS_SOURCE: string;
 
 export function diagnosisToTurkish(datasetId: string, raw: string | null | undefined): string | null;
 export function siteToTurkish(datasetId: string, raw: string | null | undefined): string | null;
@@ -44,3 +60,9 @@ export function sprsoundPatientInfo(
 ): RealPatientInfo;
 export function normalizePatientNo(value: string | number | null | undefined): string;
 export function parsePatientSummaryCsv(csvText: string): Map<string, string>;
+export function sexOfCircor(raw: string | null | undefined): "F" | "M" | null;
+export function circorAgeGroup(raw: string | null | undefined): string | null;
+export function circorSite(raw: string | null | undefined): string | null;
+export function circorSoundType(murmur: string | null | undefined, timing: string | null | undefined, grading: string | null | undefined): string | null;
+export function circorPatientInfo(entry: CircorPatientFields): CircorPatientInfo;
+export function splitCsvLine(line: string): string[];
