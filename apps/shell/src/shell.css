@@ -418,7 +418,7 @@ html, body { margin: 0; }
 .eg-shell-sim-page__stage > * { grid-area: 1 / 1; min-width: 0; }
 /* Sim tam alan ve çerçevesiz (UX kararı 25 Eylül 2026); hazır olunca yumuşak belirir. */
 .eg-shell-sim-page__host {
-  box-sizing: border-box; min-height: calc(100dvh - 3.75rem);
+  box-sizing: border-box; min-height: calc(100dvh - 6rem);
   isolation: isolate; opacity: 0; transition: opacity .28s ease;
 }
 .eg-shell-sim-page__host--ready { opacity: 1; }

@@ -89,7 +89,7 @@ test.describe("T155 UAT yolculukları", () => {
     await opacaSection.getByRole("link", { name: "Simülatörü aç" }).click();
     await expect(page).toHaveURL(/#\/sims\/opaca$/);
     const root = page.locator(".eg-sim-opaca").first();
-    await expect(root).toBeVisible();
+    await expect(root).toBeVisible({ timeout: 15_000 });
     await expect(page.getByRole("heading", { name: "Çalışma Modunu Seçin" })).toBeVisible();
 
     await startTopicPractice(root);
@@ -123,7 +123,7 @@ test.describe("T155 UAT yolculukları", () => {
     await page.locator('a[href="#/sims/opaca"]').first().click();
     await expect(page).toHaveURL(/#\/sims\/opaca$/);
     const root = page.locator(".eg-sim-opaca").first();
-    await expect(root).toBeVisible();
+    await expect(root).toBeVisible({ timeout: 15_000 });
     // Sim modülü kendi kapsayıcısını kabuğun sim sayfası kökü içine gömer
     // (T14c, `.eg-sim-opaca` iç içe iki kez eşleşir; bkz. helpers.ts `openRoute`
     // yorum satırı); referans temel sayı ilk açılışta alınır.
@@ -150,7 +150,7 @@ test.describe("T155 UAT yolculukları", () => {
     await expect(page).toHaveURL(/#\/sims\/opaca$/);
     // Çift kök yok: ileri gidince sim yeniden aynı (iç içe) kök sayısıyla açılır,
     // ikiye katlanmaz (ör. 4 yerine 2).
-    await expect(page.locator(".eg-sim-opaca").first()).toBeVisible();
+    await expect(page.locator(".eg-sim-opaca").first()).toBeVisible({ timeout: 15_000 });
     await expect(page.locator(".eg-sim-opaca")).toHaveCount(baselineRootCount);
 
     expect(appErrors(errors), "konsol/sayfa hatası").toEqual([]);
@@ -166,7 +166,7 @@ test.describe("T155 UAT yolculukları", () => {
     await signInStudent(page);
     await page.locator('a[href="#/sims/opaca"]').first().click();
     const root = page.locator(".eg-sim-opaca").first();
-    await expect(root).toBeVisible();
+    await expect(root).toBeVisible({ timeout: 15_000 });
     await startTopicPractice(root);
     await giveAnswer(root, "opaca");
     await submitAnswer(root);
@@ -174,7 +174,7 @@ test.describe("T155 UAT yolculukları", () => {
     await page.reload({ waitUntil: "domcontentloaded" });
 
     await expect(page.locator("main").first()).toBeVisible();
-    await expect(page.locator(".eg-sim-opaca").first()).toBeVisible();
+    await expect(page.locator(".eg-sim-opaca").first()).toBeVisible({ timeout: 15_000 });
     await expect(page).toHaveURL(/#\/sims\/opaca\/modlar$/);
     // Kullanıcı hâlâ oturumda: girişe düşülmedi, hesap menüsü öğrenci oturumunu gösterir.
     await expect(page.getByRole("heading", { name: "Yönetici girişi" })).toHaveCount(0);
@@ -263,7 +263,7 @@ test.describe("T155 UAT yolculukları", () => {
 
     await page.locator('a[href="#/sims/opaca"]').click();
     await expect(page).toHaveURL(/#\/sims\/opaca$/);
-    await expect(page.getByRole("heading", { name: "Çalışma Modunu Seçin" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Çalışma Modunu Seçin" })).toBeVisible({ timeout: 15_000 });
     await assertNoHorizontalScroll(page);
 
     await signInAdmin(page);

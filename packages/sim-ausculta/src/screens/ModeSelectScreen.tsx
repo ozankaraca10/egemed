@@ -9,6 +9,7 @@ import { LIBRARY_ITEM_COUNT } from "../data/library";
 import { EcgDeco, Footer, touchTarget } from "../ui/chrome";
 import { ScreenHeading, useAudience, useRequestSignIn, useSessions, useSetChrome } from "../ui/ScreenHeading";
 import { IconArrowRight, IconChart, IconCheck, IconGraduation, IconHeadphones, IconLock, IconStethoscope } from "../ui/icons";
+import type { SimRewardsSnapshot } from "@egemed/sim-host";
 import { modeLearnLocked, modePickTarget, sessionSeed } from "./entry";
 
 const practiceCases = { length: CASE_INVENTORY.practicePoolSize };
@@ -22,7 +23,7 @@ export interface ModeSelectScreenProps {
 
 /** Mod seçimi: Öğrenme / Uygulama / Değerlendirme. T209: öğrenme tamamlanmadan
  *  uygulama ve değerlendirme KİLİTLİDİR (öneri değil); ziyaretçi kilidi önceliklidir. */
-export function ModeSelectScreen({ embedded = false }: ModeSelectScreenProps): JSX.Element {
+export function ModeSelectScreen({ embedded = false, rewards = null, onLeaderboard }: ModeSelectScreenProps & { rewards?: SimRewardsSnapshot | null; onLeaderboard?: () => void }): JSX.Element {
   const { state, dispatch, now } = useStore();
   const unified = useSetChrome() !== undefined;
   const audience = useAudience();
@@ -83,6 +84,9 @@ export function ModeSelectScreen({ embedded = false }: ModeSelectScreenProps): J
               items={["Rehberli öğrenme", "Ses metaforları", "Sınırsız dinleme"]}
               cta="Öğrenmeye başla"
               onPick={() => pick("learn")}
+              progress={gate.listenedCount}
+              progressTotal={gate.total}
+              progressUnit="ses dinlendi"
             />
             <ModeCard
               kind="practice"
@@ -120,6 +124,11 @@ export function ModeSelectScreen({ embedded = false }: ModeSelectScreenProps): J
               visitorLocked={assessmentVisitorLocked}
               onPick={() => (assessmentVisitorLocked ? requestSignIn?.() : pick("assessment"))}
               bestScore={state.bestScore.assessment}
+              extra={rewards?.current && onLeaderboard ? (
+                <button type="button" className="mode-reward" onClick={onLeaderboard}>
+                  Bu ayın ödülü · {daysLeftInMonth(now())} gün kaldı
+                </button>
+              ) : undefined}
             />
           </div>
         </div>
@@ -127,6 +136,12 @@ export function ModeSelectScreen({ embedded = false }: ModeSelectScreenProps): J
       <Footer embedded={embedded} />
     </>
   );
+}
+
+function daysLeftInMonth(nowMs: number): number {
+  const local = new Date(nowMs + 3 * 60 * 60 * 1000);
+  const nextMonth = Date.UTC(local.getUTCFullYear(), local.getUTCMonth() + 1, 1) - 3 * 60 * 60 * 1000;
+  return Math.ceil((nextMonth - nowMs) / 86_400_000);
 }
 
 function poolReady(mode: Mode): boolean {
@@ -163,6 +178,10 @@ export function ModeCard({
   lockText,
   visitorLocked,
   bestScore,
+  progress,
+  progressTotal,
+  progressUnit,
+  extra,
 }: {
   kind: Mode;
   icon: ReactNode;
@@ -181,6 +200,10 @@ export function ModeCard({
   /** Ziyaretçi kilidi: renk dışında ikon+metinle işaretlenir, düğme "Öğrenci girişi"ne gider. */
   visitorLocked?: boolean;
   bestScore?: number;
+  progress?: number;
+  progressTotal?: number;
+  progressUnit?: string;
+  extra?: ReactNode;
 }): JSX.Element {
   return (
     <div
@@ -208,12 +231,21 @@ export function ModeCard({
           </li>
         ))}
       </ul>
+      {typeof progress === "number" && typeof progressTotal === "number" && (
+        <div className="mode-progress-status">
+          {progress}/{progressTotal} {progressUnit}
+          <div className="mode-progress" role="progressbar" aria-label="Öğrenme ilerlemesi" aria-valuenow={progress} aria-valuemin={0} aria-valuemax={progressTotal}>
+            <span style={{ width: `${progressTotal ? progress / progressTotal * 100 : 0}%` }} />
+          </div>
+        </div>
+      )}
       {rules && <p className="mode-rules">{rules}</p>}
       {typeof bestScore === "number" && (
         <p className="mode-best-score">
           {bestScore > 0 ? <>En iyi puan: <b>{bestScore}</b></> : "Henüz denenmedi"}
         </p>
       )}
+      {extra}
       <button
         className={`btn ${kind === "learn" ? "green" : kind === "assessment" ? "purple" : "primary"}`}
         style={HIT}

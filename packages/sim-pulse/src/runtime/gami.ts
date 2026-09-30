@@ -168,17 +168,48 @@ export function attachPulseGamification(handle: PulseRuntimeHandle, options: Pul
       showSourceView("sim");
     },
   }, options.gamification);
-  const renderProgress = (): void => {
-    progress.update(gamiState ?? emptyPulseGamiState(), nowDate());
+  let activeProgressTab: "achievements" | "leaderboard" = "achievements";
+  const renderProgress = (tab: "achievements" | "leaderboard" = activeProgressTab): void => {
+    activeProgressTab = tab;
+    progress.update(gamiState ?? emptyPulseGamiState(), nowDate(), activeProgressTab);
   };
-  const openDialog = (): void => {
-    renderProgress();
+  const openDialog = (tab: "achievements" | "leaderboard" = "achievements"): void => {
+    renderProgress(tab);
     progressHost.hidden = false;
     progressHost.scrollTop = 0;
     // React kökü bir sonraki karede çizer; odak “Simülatöre dön” düğmesine taşınır.
     requestAnimationFrame(() => progressHost.querySelector<HTMLButtonElement>(".egemed-pulse-progress__close")?.focus());
   };
-  button.addEventListener("click", openDialog);
+  button.addEventListener("click", () => openDialog());
+
+  const modeCards = shadow.getElementById("modeCards");
+  const renderReward = (): void => {
+    const card = modeCards?.querySelector(".mode-card.assessment");
+    const reward = options.rewards?.snapshot()?.current;
+    const existing = card?.querySelector(".mode-reward");
+    if (!reward) {
+      existing?.remove();
+      return;
+    }
+    const now = options.now();
+    const local = new Date(now + 3 * 60 * 60 * 1000);
+    const nextMonth = Date.UTC(local.getUTCFullYear(), local.getUTCMonth() + 1, 1) - 3 * 60 * 60 * 1000;
+    const label = `Bu ayın ödülü · ${Math.ceil((nextMonth - now) / 86_400_000)} gün kaldı`;
+    if (existing) {
+      if (existing.textContent !== label) existing.textContent = label;
+      return;
+    }
+    const link = doc.createElement("button");
+    link.type = "button";
+    link.className = "mode-reward";
+    link.textContent = label;
+    link.addEventListener("click", () => openDialog("leaderboard"));
+    card?.querySelector(".mode-status")?.insertAdjacentElement("afterend", link);
+  };
+  const rewardObserver = new MutationObserver(renderReward);
+  if (modeCards) rewardObserver.observe(modeCards, { childList: true });
+  const unsubscribeRewards = options.rewards?.subscribe(renderReward);
+  renderReward();
 
   const gains = doc.createElement("div");
   gains.id = GAMI_GAINS_ID;
@@ -186,8 +217,8 @@ export function attachPulseGamification(handle: PulseRuntimeHandle, options: Pul
   shadow.getElementById("resultsView")?.append(gains);
   // Kazanım kartı da ortak tasarım: React kökü model geldikçe güncellenir.
   const gainsView = mountPulseGains(gains, {
-    onAchievements: openDialog,
-    onLeaderboard: openDialog,
+    onAchievements: () => openDialog("achievements"),
+    onLeaderboard: () => openDialog("leaderboard"),
     serverData: options.gamification !== undefined,
   });
 
@@ -326,6 +357,8 @@ export function attachPulseGamification(handle: PulseRuntimeHandle, options: Pul
     detached = true;
     if (scorm.save === wrappedSave) scorm.save = originalSave;
     button.remove();
+    rewardObserver.disconnect();
+    unsubscribeRewards?.();
     progress.dispose();
     progressHost.remove();
     gainsView.dispose();
