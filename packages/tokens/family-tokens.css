@@ -30,6 +30,8 @@
 
   /* --- Uyarı / durum renkleri --- */
   --orange-500:#f59e0b; --orange-100:#fdeecd; --amber-700:#92400e; --bronze-400:#c98a4b;
+  /* Koyu görsel üstü cam yüzeyler (giriş tanıtım paneli). */
+  --glass-deep:rgba(6,30,68,.62); --glass-chip:rgba(255,255,255,.10); --glass-line:rgba(255,255,255,.22); --gold-tint:rgba(245,158,11,.18);
   --red-600:#b91c1c; --red-500:#e11d48; --red-100:#fde5ea;
 
   /* --- Zemin, kart, kenar, gölge --- */
