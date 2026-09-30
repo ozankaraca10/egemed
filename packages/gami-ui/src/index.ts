@@ -6,6 +6,8 @@ export { GamiEmptyCard } from "./GamiEmptyCard";
 export { GamiGainsView } from "./GamiGains";
 export { GamiDelta, GamiLeaderboardTable, GamiPodium, GamiPrivacyCard, GamiRewardBanner, GamiRewardHistory, GamiRewardTerms, gamiMonthTitle } from "./GamiLeaderboard";
 export { GamiModal } from "./GamiModal";
+export { GAMI_FAIR_PLAY_TEXT, GamiFairPlay, GamiModeJourney } from "./GamiModeJourney";
+export type { GamiModeCard, GamiModeJourneyProps, GamiModeKey } from "./GamiModeJourney";
 export { GamiPageTabs } from "./GamiPageTabs";
 export type { GamiPageTab } from "./GamiPageTabs";
 export { GamiProfileStrip } from "./GamiProfileStrip";

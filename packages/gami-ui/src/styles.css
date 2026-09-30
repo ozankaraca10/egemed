@@ -461,3 +461,71 @@
   .eg-gami-dash .eg-gami-profile{ grid-template-columns: 1fr; }
   .eg-gami-dash .eg-gami-profile .rs-box:first-child{ grid-column: auto; }
 }
+
+/* T289 — Ortak mod yolculuğu (üç sim). Sahne bar ile footer arasında ortalanır;
+   dört kart bir yolculuk olarak dizilir. Renkler yalnız token. */
+.eg-gami-journey-wrap{ display: grid; justify-items: center; align-content: center; gap: var(--sp-5); width: 100%; min-height: 100%; padding: var(--sp-5) var(--sp-4); box-sizing: border-box; }
+.eg-gami-journey-head{ display: grid; justify-items: center; gap: var(--sp-2); text-align: center; }
+.eg-gami-journey-eyebrow{ color: var(--ink-600); font-size: var(--fs-xs); font-weight: 800; letter-spacing: .14em; text-transform: uppercase; }
+.eg-gami-journey-title{ margin: 0; color: var(--navy-900); font-size: clamp(26px, 3vw, 36px); line-height: 1.1; letter-spacing: -.02em; text-wrap: balance; }
+.eg-gami-journey-title:focus{ outline: none; }
+.eg-gami-journey-strip{ display: inline-flex; align-items: center; gap: var(--sp-3); padding: 6px var(--sp-4) 6px 6px; border-radius: var(--r-pill); background: var(--card); box-shadow: var(--shadow-card); }
+.eg-gami-journey-strip-t{ color: var(--ink-700); font-size: var(--fs-sm); }
+.eg-gami-journey-strip-t b{ color: var(--ink-900); font-variant-numeric: tabular-nums; }
+.eg-gami-journey-ring{ position: relative; display: grid; place-items: center; width: 40px; height: 40px; border-radius: 50%; background: conic-gradient(var(--green-600) calc(var(--p) * 1%), var(--green-100) 0); color: var(--green-600); font-size: 11px; font-weight: 800; }
+.eg-gami-journey-ring::after{ content: ""; position: absolute; inset: 5px; border-radius: 50%; background: var(--card); }
+.eg-gami-journey-ring > span{ position: relative; z-index: 1; font-variant-numeric: tabular-nums; }
+.eg-gami-journey-note{ display: inline-flex; align-items: center; gap: 6px; margin: 0; color: var(--ink-600); font-size: var(--fs-sm); }
+
+.eg-gami-journey{ position: relative; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--sp-4); width: min(100%, 1180px); margin: 0; padding: 0; list-style: none; }
+.eg-gami-journey::before{ content: ""; position: absolute; top: 46px; left: 12%; right: 12%; height: 2px; background: repeating-linear-gradient(90deg, var(--ink-300) 0 8px, var(--clear) 8px 14px); }
+.eg-gami-mode{ --c: var(--green-600); --soft: var(--green-50); --ring: var(--green-100);
+  position: relative; z-index: 1; display: flex; flex-direction: column; gap: var(--sp-3); min-height: 400px; padding: var(--sp-4) var(--sp-4) var(--sp-4); border-radius: var(--r-xl); background: var(--card); box-shadow: 0 0 0 1px var(--border), var(--shadow-card); }
+.eg-gami-mode.m-practice{ --c: var(--blue-600); --soft: var(--blue-50); --ring: var(--blue-100); }
+.eg-gami-mode.m-assessment{ --c: var(--purple-600); --soft: var(--purple-50); --ring: var(--purple-100); }
+.eg-gami-mode-top{ display: flex; align-items: center; justify-content: space-between; gap: var(--sp-2); }
+.eg-gami-mode-medal{ display: grid; place-items: center; width: 56px; height: 56px; border-radius: var(--r-lg); background: var(--soft); color: var(--c); box-shadow: inset 0 0 0 1.5px var(--ring); }
+.eg-gami-mode-step{ color: var(--ink-400); font-size: var(--fs-xs); font-weight: 800; letter-spacing: .12em; }
+.eg-gami-mode-title{ margin: 0; color: var(--c); font-size: var(--fs-xl); letter-spacing: -.01em; }
+.eg-gami-mode-desc{ margin: 0; color: var(--ink-700); font-size: var(--fs-sm); }
+.eg-gami-mode-list{ display: grid; gap: 6px; margin: 0; padding: 0; list-style: none; }
+.eg-gami-mode-list li{ display: flex; gap: var(--sp-2); align-items: flex-start; color: var(--ink-700); font-size: var(--fs-sm); }
+.eg-gami-mode-list li::before{ content: "✓"; display: grid; flex: none; place-items: center; width: 18px; height: 18px; border-radius: 50%; background: var(--soft); color: var(--c); font-size: 11px; font-weight: 900; }
+.eg-gami-mode-status{ display: grid; gap: 6px; margin-top: auto; color: var(--ink-600); font-size: var(--fs-xs); }
+.eg-gami-mode-bar{ display: block; height: 6px; overflow: hidden; border-radius: 6px; background: var(--soft); }
+.eg-gami-mode-bar i{ display: block; height: 100%; background: var(--c); }
+.eg-gami-mode-seal{ display: flex; align-items: center; gap: var(--sp-2); margin: 0; padding: 10px 12px; border-radius: var(--r-md); background: var(--soft); box-shadow: inset 0 0 0 1px var(--ring); color: var(--ink-700); font-size: var(--fs-xs); }
+.eg-gami-mode-seal .lk{ display: grid; flex: none; place-items: center; width: 28px; height: 28px; border-radius: 50%; background: var(--card); color: var(--c); box-shadow: 0 0 0 1.5px var(--ring); }
+.eg-gami-mode-cta{ display: inline-flex; align-items: center; justify-content: center; gap: var(--sp-2); min-height: 48px; padding: 0 var(--sp-4); border: 0; border-radius: var(--r-md); background: var(--c); color: var(--card); font: inherit; font-weight: 800; cursor: pointer; box-shadow: 0 10px 20px -14px var(--c); }
+.eg-gami-mode-cta:disabled{ background: var(--card); color: var(--ink-500); box-shadow: inset 0 0 0 1.5px var(--border); cursor: not-allowed; }
+.eg-gami-mode.locked .eg-gami-mode-medal, .eg-gami-mode.locked .eg-gami-mode-title, .eg-gami-mode.locked .eg-gami-mode-desc, .eg-gami-mode.locked .eg-gami-mode-list{ opacity: .6; }
+.eg-gami-mode-ribbon{ position: absolute; top: -12px; right: 14px; display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px; border-radius: var(--r-pill); background: var(--orange-500); color: var(--navy-950); font-size: var(--fs-xs); font-weight: 800; box-shadow: 0 8px 18px -8px var(--gold-glow); }
+
+/* 4. mod: koyu meydan kartı (altın kimlik). */
+.eg-gami-mode.m-challenge{ --c: var(--orange-500); --soft: var(--gold-tint); --ring: var(--orange-500);
+  color: var(--card); background:
+    radial-gradient(70% 50% at 20% 30%, var(--duel-me-glow), var(--clear) 70%),
+    radial-gradient(70% 50% at 80% 30%, var(--duel-rival-glow), var(--clear) 70%),
+    linear-gradient(180deg, var(--navy-950), var(--navy-900));
+  box-shadow: 0 0 0 1px var(--orange-500), var(--shadow-card); }
+.eg-gami-mode.m-challenge .eg-gami-mode-step{ color: var(--orange-500); }
+.eg-gami-mode.m-challenge .eg-gami-mode-title{ color: var(--card); }
+.eg-gami-mode.m-challenge .eg-gami-mode-desc, .eg-gami-mode.m-challenge .eg-gami-mode-list li, .eg-gami-mode.m-challenge .eg-gami-mode-status{ color: var(--blue-100); }
+.eg-gami-mode.m-challenge .eg-gami-mode-seal{ background: var(--gold-tint); color: var(--blue-100); }
+.eg-gami-mode.m-challenge .eg-gami-mode-seal .lk{ background: var(--navy-950); }
+.eg-gami-mode.m-challenge .eg-gami-mode-cta{ color: var(--navy-950); }
+.eg-gami-mode.m-challenge .eg-gami-mode-cta:disabled{ background: var(--glass-chip); color: var(--blue-100); box-shadow: inset 0 0 0 1px var(--glass-line); }
+.eg-gami-mode.m-challenge.locked .eg-gami-mode-medal, .eg-gami-mode.m-challenge.locked .eg-gami-mode-title, .eg-gami-mode.m-challenge.locked .eg-gami-mode-desc, .eg-gami-mode.m-challenge.locked .eg-gami-mode-list{ opacity: .75; }
+.eg-gami-mode-vs{ display: flex; align-items: center; justify-content: center; gap: var(--sp-3); }
+.eg-gami-mode-vs i{ display: grid; place-items: center; width: 40px; height: 40px; border-radius: 50%; font-size: 11px; font-style: normal; font-weight: 800; }
+.eg-gami-mode-vs .a{ background: var(--blue-600); box-shadow: 0 0 18px var(--duel-me-glow); }
+.eg-gami-mode-vs .b{ background: var(--glass-chip); box-shadow: inset 0 0 0 2px var(--glass-line); color: var(--ink-300); }
+.eg-gami-mode-vs em{ font-size: var(--fs-lg); font-style: italic; font-weight: 900; color: var(--orange-500); }
+
+.eg-gami-fair{ display: flex; align-items: flex-start; gap: var(--sp-3); width: min(100%, 1180px); box-sizing: border-box; padding: var(--sp-3) var(--sp-4); border-radius: var(--r-md); background: var(--orange-100); box-shadow: inset 0 0 0 1px var(--orange-500); color: var(--ink-800); font-size: var(--fs-xs); line-height: 1.5; }
+.eg-gami-fair p{ margin: 0; }
+.eg-gami-fair b{ color: var(--amber-700); }
+.eg-gami-fair-ic{ display: grid; flex: none; place-items: center; width: 24px; height: 24px; border-radius: var(--r-sm); background: var(--orange-500); color: var(--navy-950); }
+
+@media (max-width: 1100px){ .eg-gami-journey{ grid-template-columns: repeat(2, minmax(0, 1fr)); } .eg-gami-journey::before{ display: none; } }
+@media (max-width: 620px){ .eg-gami-journey{ grid-template-columns: 1fr; } .eg-gami-mode{ min-height: 0; } .eg-gami-journey-wrap{ padding: var(--sp-4) var(--sp-3); } }
