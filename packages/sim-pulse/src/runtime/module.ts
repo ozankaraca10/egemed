@@ -73,6 +73,9 @@ export function createPulseRuntimeModule(deps: PulseRuntimeModuleDeps = {}): Sim
       // A3.3: uygulama/değerlendirme maddeleri sunucu oturumundan gelir (ADR-009).
       // Kanal yoksa (ziyaretçi, API'siz üretim) kartlar kapalı tutulur.
       const server = context.sessions === undefined ? null : createPulseServerItemsBridge(context.sessions, learnBridge.bridge);
+      const eventBridge = server?.bridge ?? learnBridge.bridge;
+      let navigationReady = false;
+      let suppressNavigationReport = false;
       const handle = mountPulseRuntime(target as unknown as HTMLElement, {
         assetBase: deps.assetBase ?? DEFAULT_PULSE_RUNTIME_ASSET_BASE,
         storage: deps.storage ?? browserStorage(),
@@ -85,7 +88,24 @@ export function createPulseRuntimeModule(deps: PulseRuntimeModuleDeps = {}): Sim
         // izlenme kaydı değişmez.
         learnComplete: learn?.complete === true,
         ...(server === null ? {} : { serverItems: server.port }),
-        bridge: server === null ? learnBridge.bridge : server.bridge,
+        bridge: {
+          ...eventBridge,
+          onEvent(type, detail) {
+            eventBridge.onEvent?.(type, detail);
+            if (type !== "cardai:view" || !navigationReady || context.navigation === undefined) return;
+            if (suppressNavigationReport) {
+              suppressNavigationReport = false;
+              return;
+            }
+            const view = (detail as { view?: string } | null)?.view;
+            const key = view === "modes" ? "modlar"
+              : view === "sim" ? "ogrenme"
+                : view === "case" ? "uygulama"
+                  : view === "quiz" ? "degerlendirme"
+                    : view === "results" ? "sonuc" : null;
+            if (key !== null) context.navigation.report(key);
+          },
+        },
       });
       // İçerik sürümü (`pulse-23-8`) runtime küresellerinden çözülür; yerel
       // öğrenme açılışta zaten tamamsa olay mount içinde gelir ve kayıt burada
@@ -121,15 +141,53 @@ export function createPulseRuntimeModule(deps: PulseRuntimeModuleDeps = {}): Sim
         }
       }
       let detachChrome: (() => void) | null = null;
-      if (context.setChrome !== undefined) {
+      if (context.setChrome !== undefined || context.navigation !== undefined) {
         // Birleşik barda kaynağın açılış sayfası atlanır (kullanıcı kararı):
         // Pulse, Opaca/Ausculta gibi doğrudan mod seçimiyle açılır.
         (handle.global("CardAILanding") as { enter?: () => void } | undefined)?.enter?.();
-        detachChrome = attachPulseChrome(handle, context.setChrome);
+        if (context.setChrome !== undefined) detachChrome = attachPulseChrome(handle, context.setChrome);
+      }
+      let unsubscribeNavigation: (() => void) | null = null;
+      if (context.navigation !== undefined) {
+        const controller = handle.global("CardAIController") as {
+          readonly state: { readonly activeView: string; readonly assessed: boolean };
+          showView(view: string): void;
+        } | undefined;
+        const routeView = (key: string | null): string | null => key === "modlar" ? "modes"
+          : key === "ogrenme" ? "sim"
+            : key === "uygulama" ? "case"
+              : key === "degerlendirme" ? "quiz"
+                : key === "sonuc" ? "results" : null;
+        const keyForView = (view: string): string | null => view === "modes" ? "modlar"
+          : view === "sim" || view === "tutorial" ? "ogrenme"
+            : view === "case" ? "uygulama"
+              : view === "quiz" ? "degerlendirme"
+                : view === "results" ? "sonuc" : null;
+        const applyRoute = (key: string | null): void => {
+          if (controller === undefined) return;
+          if (key !== null && !["modlar", "ogrenme", "uygulama", "degerlendirme", "sonuc"].includes(key)) return;
+          const requested = key === null ? "modes" : routeView(key);
+          if (requested === null || (requested === "results" && !controller.state.assessed)) {
+            context.navigation?.report(keyForView(controller.state.activeView) ?? "modlar", { replace: true });
+            return;
+          }
+          suppressNavigationReport = true;
+          controller.showView(requested);
+          const actualKey = keyForView(controller.state.activeView) ?? "modlar";
+          if (actualKey !== key) context.navigation?.report(actualKey, { replace: true });
+        };
+
+        if (context.navigation.initial !== null) {
+          applyRoute(context.navigation.initial);
+          suppressNavigationReport = false;
+        }
+        navigationReady = true;
+        unsubscribeNavigation = context.navigation.subscribe((key) => applyRoute(key));
       }
       const detachAudience = attachPulseAudience(handle, context);
       return () => {
         detachAudience();
+        unsubscribeNavigation?.();
         detachChrome?.();
         detachGami?.();
         detachRequired?.();

@@ -15,6 +15,7 @@ import {
 } from "./reducer";
 import { createSimRuntime, type RuntimeAdapter, type SimRuntime } from "./runtime";
 import { ASSESSMENT_CASE_COUNT } from "../data/inventory";
+import type { SimNavigation } from "@egemed/sim-host";
 
 /** Ausculta store sağlayıcısı (kaynak `StoreProvider`, S8c/S8d).
  *  Mount başına tek veri yolu, tek çalışma zamanı ve tek yaşam döngüsü kurulur.
@@ -48,6 +49,7 @@ export interface StoreProviderProps {
   readonly runtime: RuntimeAdapter;
   readonly env: WindowLike;
   readonly initialState?: AppState;
+  readonly navigation?: SimNavigation;
 }
 
 function useMountRef<T>(factory: () => T): T {
@@ -63,6 +65,7 @@ export function StoreProvider({
   runtime: adapter,
   env,
   initialState: seedState,
+  navigation,
 }: StoreProviderProps): JSX.Element {
   const bus = useMountRef(() => createBus(now));
   const seam = useMountRef<ReducerSeam>(() => ({ emit: (event) => bus.emit(event) }));
@@ -73,6 +76,8 @@ export function StoreProvider({
   );
   const stateRef = useRef(state);
   stateRef.current = state;
+  const externalScreen = useRef<AppState["screen"] | null>(null);
+  const firstNavigationRender = useRef(true);
   const simRuntime = useMountRef(() =>
     createSimRuntime({
       adapter,
@@ -82,6 +87,46 @@ export function StoreProvider({
     }),
   );
   const lifecycle = useMountRef<Lifecycle>(() => createLifecycle(env));
+
+  useEffect(() => {
+    if (navigation === undefined) return;
+    return navigation.subscribe((key) => {
+      const current = stateRef.current;
+      if (key !== null && !["modlar", "ogrenme", "uygulama", "degerlendirme", "sonuc", "ilerlemem"].includes(key)) return;
+      const screen = key === null || key === "modlar" ? "modes"
+        : key === "ogrenme" ? "learn"
+          : key === "uygulama" && current.mode !== "assessment" ? "simulation"
+            : key === "degerlendirme" && current.mode === "assessment" && current.server !== null ? "simulation"
+              : key === "sonuc" && current.caseResults.length > 0 ? "results"
+                : key === "ilerlemem" ? "progress" : null;
+      if (screen === null) {
+        navigation.report(current.screen === "learn" ? "ogrenme" : "modlar", { replace: true });
+        return;
+      }
+      if (screen !== current.screen) {
+        externalScreen.current = screen;
+        dispatch({ type: "goto", screen });
+      }
+    });
+  }, [dispatch, navigation]);
+
+  useEffect(() => {
+    if (navigation === undefined) return;
+    const key = state.screen === "learn" ? "ogrenme"
+      : state.screen === "simulation" ? (state.mode === "assessment" ? "degerlendirme" : "uygulama")
+        : state.screen === "results" ? "sonuc"
+          : state.screen === "progress" ? "ilerlemem" : "modlar";
+    if (firstNavigationRender.current) {
+      firstNavigationRender.current = false;
+      if (navigation.initial !== null && navigation.initial !== key) navigation.report(key, { replace: true });
+      return;
+    }
+    if (externalScreen.current === state.screen) {
+      externalScreen.current = null;
+      return;
+    }
+    navigation.report(key);
+  }, [navigation, state.mode, state.screen]);
 
   useEffect(() => {
     saveBestScore(storage, state.bestScore);

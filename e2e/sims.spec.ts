@@ -74,6 +74,39 @@ test.describe("sim rotaları yaşam döngüsü", () => {
     await expect(page).toHaveURL(/#\/sims\/ausculta\/yardim$/);
     expect(await root.evaluate((node) => (window as Window & { __simRoot?: Element }).__simRoot === node)).toBe(true);
   });
+
+  for (const simId of ["pulse", "ausculta", "opaca"] as const) {
+    test(`${simId}: öğrenme ekranı URL, geri/ileri ve yenilemeyle eşleşir`, async ({ page }) => {
+      await page.goto("/#/");
+      await page.evaluate(() => {
+        sessionStorage.setItem("egemed.devSession", JSON.stringify({ actorId: "dev-student-0001", role: "student" }));
+      });
+      await openRoute(page, simId === "pulse" ? "#/sims/pulse/modlar" : `#/sims/${simId}`);
+
+      await page.getByRole("button", { name: /Öğrenmeye başla|Öğrenmeye devam et/ }).click();
+      await expect(page).toHaveURL(new RegExp(`#\\/sims\\/${simId}\\/ogrenme$`));
+
+      await page.goBack();
+      const modesUrl = simId === "pulse" ? /#\/sims\/pulse\/modlar$/ : new RegExp(`#\\/sims\\/${simId}$`);
+      await expect(page).toHaveURL(modesUrl);
+      await expect(page.getByRole("heading", { name: "Çalışma Modunu Seçin" })).toBeVisible();
+
+      await page.goForward();
+      await expect(page).toHaveURL(new RegExp(`#\\/sims\\/${simId}\\/ogrenme$`));
+      if (simId === "pulse") {
+        await expect(page.locator("#simView")).toBeVisible();
+      } else {
+        await expect(page.locator(".learn-progress")).toBeVisible();
+      }
+      await page.reload();
+      await expect(page).toHaveURL(new RegExp(`#\\/sims\\/${simId}\\/ogrenme$`));
+      if (simId === "pulse") {
+        await expect(page.locator("#simView")).toBeVisible();
+      } else {
+        await expect(page.locator(".learn-progress")).toBeVisible();
+      }
+    });
+  }
 });
 
 /**
