@@ -12,9 +12,9 @@ export type SimId = (typeof SIM_IDS)[number];
  * görseli sabit yüksekliğe `object-fit: contain` ile oturur, CLS oluşmaz.
  */
 export const SIM_LOGOS: Record<SimId, { src: string; width: number; height: number }> = {
-  ausculta: { height: 300, src: "/brand/sims/ausculta-horizontal.png", width: 827 },
-  opaca: { height: 300, src: "/brand/sims/opaca-horizontal.png", width: 872 },
-  pulse: { height: 300, src: "/brand/sims/pulse-horizontal.png", width: 688 },
+  ausculta: { height: 300, src: "/brand/sims/ausculta-horizontal.png", width: 757 },
+  opaca: { height: 300, src: "/brand/sims/opaca-horizontal.png", width: 757 },
+  pulse: { height: 300, src: "/brand/sims/pulse-horizontal.png", width: 757 },
 };
 
 /**
