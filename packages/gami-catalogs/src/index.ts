@@ -40,3 +40,5 @@ export {
   duelStatsFrom,
 } from "./duel";
 export type { DuelOutcome, DuelOutcomeRow, DuelStats } from "./duel";
+export { REWARD_SEED } from "./rewardSeed";
+export type { RewardSeedItem, RewardSeedSimId } from "./rewardSeed";
