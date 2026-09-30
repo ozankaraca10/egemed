@@ -46,16 +46,6 @@ export function formatLmsDisplayName(raw: string): string {
   return `${first} ${last}`;
 }
 
-/** Tabloda yalnız baş harfler gösterilir; ad-soyad veya e-posta asla dönmez. */
-export function leaderboardInitials(name: string): string {
-  const parts = name.trim().split(/\s+/).filter(Boolean);
-  if (parts.length === 0) return "";
-  const first = parts[0]!;
-  const last = parts.length > 1 ? parts[parts.length - 1]! : null;
-  const letters = last ? [first[0], last[0]] : [first[0]];
-  return letters.map((ch) => ch!.toLocaleUpperCase("tr-TR")).join("");
-}
-
 export function cohortFromUnitCode(code: string | null | undefined): Cohort | null {
   if (code === null || code === undefined || code.length === 0) return null;
   const match = /^(\d)-sinif$/.exec(code);
@@ -72,12 +62,13 @@ export function resolveLeaderboardDisplayName(input: {
   if (!input.isPublic) {
     return { displayName: ANONYMOUS_LEADERBOARD_LABEL, isPublic: false };
   }
+  // Depo sahibi kararı (30 Eylül 2026): tabloda kalmayı seçen (çekilmeyen) öğrenci
+  // tam adıyla görünür; çekilen anonimdir. E-posta/kullanıcı adı asla dönmez.
   const formatted = formatLmsDisplayName(input.displayName);
-  const initials = leaderboardInitials(formatted);
-  if (initials.length === 0) {
+  if (formatted.length === 0) {
     return { displayName: ANONYMOUS_LEADERBOARD_LABEL, isPublic: false };
   }
-  return { displayName: initials, isPublic: true };
+  return { displayName: formatted, isPublic: true };
 }
 
 function cohortMatches(filter: CohortFilter, cohort: Cohort | null): boolean {

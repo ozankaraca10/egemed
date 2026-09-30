@@ -47,10 +47,11 @@ html, body { margin: 0; }
   box-sizing: border-box; min-height: var(--eg-shell-touch-min);
   color: var(--card); text-decoration: none;
 }
-.eg-shell-logo { display: inline-flex; flex-direction: column; align-items: flex-start; gap: 2px; min-width: 0; }
+.eg-shell-logo { display: inline-flex; flex-direction: row; align-items: center; gap: var(--sp-3); min-width: 0; }
 .eg-shell-logo__mark { display: block; flex: 0 0 auto; width: auto; height: 2.5rem; }
 .eg-shell-logo--compact .eg-shell-logo__mark { height: 2.25rem; }
-.eg-shell-logo__tagline { display: none; color: var(--blue-100); font-size: var(--fs-xs); font-weight: 500; white-space: nowrap; }
+/* Ana platform başlığında logonun yanında alt yazı; sim modunda (compact) çizilmez. */
+.eg-shell-logo__tagline { display: block; max-width: 12rem; padding-left: var(--sp-3); border-left: 1px solid var(--blue-300); color: var(--blue-100); font-size: var(--fs-sm); font-weight: 600; line-height: 1.2; white-space: normal; }
 .eg-shell-logo--on-light .eg-shell-logo__tagline { color: var(--muted); }
 .eg-shell-header__side { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-2); }
 .eg-shell-session-banner {
@@ -547,9 +548,9 @@ html, body { margin: 0; }
   opacity: .10;
 }
 .eg-shell-entry__logo { width: clamp(5rem, 12vw, 9rem); height: auto; }
-.eg-shell-entry__brand > .eg-shell-logo { margin: var(--sp-4) 0 var(--sp-2); align-items: center; gap: var(--sp-3); }
+.eg-shell-entry__brand > .eg-shell-logo { flex-direction: column; margin: var(--sp-4) 0 var(--sp-2); align-items: center; gap: var(--sp-3); }
 .eg-shell-entry__brand .eg-shell-logo__mark { height: clamp(4rem, 9vw, 6.5rem); }
-.eg-shell-entry__brand .eg-shell-logo__tagline { display: block; max-width: 28rem; white-space: normal; text-align: center; font-size: var(--fs-xl); }
+.eg-shell-entry__brand .eg-shell-logo__tagline { display: block; max-width: 28rem; padding-left: 0; border-left: 0; white-space: normal; text-align: center; font-size: var(--fs-xl); }
 /* Beyaz sim ikon sırası: dekoratif (alt=""), adlar altta görünür metinle. */
 .eg-shell-entry__sims { display: grid; gap: var(--sp-2); justify-items: center; margin-top: var(--sp-5); }
 .eg-shell-entry__simrow { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: var(--sp-4); }
@@ -859,7 +860,7 @@ button.eg-shell-simbar__chip:hover { background: var(--navy-600); }
 }
 .eg-shell-podium__place--1 .eg-shell-podium__avatar { width: 56px; height: 56px; box-shadow: 0 0 0 3px var(--eg-shell-medal-1); }
 .eg-shell-podium__place--3 .eg-shell-podium__avatar { box-shadow: 0 0 0 3px var(--eg-shell-medal-3); }
-.eg-shell-podium__name { max-width: 100%; overflow: hidden; color: var(--ink-900); font-size: var(--fs-sm); font-weight: 700; text-overflow: ellipsis; white-space: nowrap; }
+.eg-shell-podium__name { max-width: 100%; color: var(--ink-900); font-size: var(--fs-sm); font-weight: 700; line-height: 1.25; overflow-wrap: anywhere; text-wrap: balance; }
 .eg-shell-podium__me { color: var(--blue-600); font-weight: 800; }
 .eg-shell-podium__score { color: var(--ink-600); font-size: var(--fs-xs); font-variant-numeric: tabular-nums; }
 .eg-shell-podium__step {
