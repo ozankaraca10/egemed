@@ -16,7 +16,7 @@ const ENTRY_MODES = [
   { key: "learn", Icon: icons.BookOpen },
   { key: "practice", Icon: icons.Target },
   { key: "assessment", Icon: icons.ClipboardList },
-  { key: "challenge", Icon: icons.Swords },
+  { key: "challenge", Icon: icons.Medal },
 ] as const;
 const ENTRY_PERKS = [
   { key: "badges", Icon: icons.Award },

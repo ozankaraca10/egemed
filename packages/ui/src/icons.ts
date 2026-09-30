@@ -28,6 +28,7 @@ export {
   Info,
   LayoutDashboard,
   LogOut,
+  Medal,
   Menu as MenuIcon,
   MoreHorizontal,
   NotebookPen,
