@@ -133,7 +133,7 @@ function LeaderboardBody({
 
 export function LeaderboardScreen({ embedded = false, devBuild = false, modalEnv }: { embedded?: boolean; devBuild?: boolean; modalEnv?: ModalEnv }) {
   const { gamification } = useGamiContext()
-  const [period, setPeriod] = useState<Period>('week')
+  const [period, setPeriod] = useState<Period>('month')
   const [cohort, setCohort] = useState<CohortFilter>('all')
   const body = (server: ServerGamiData | null) => (
     <LeaderboardBody

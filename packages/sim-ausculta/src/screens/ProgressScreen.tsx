@@ -245,7 +245,7 @@ export function ProgressScreen({
   rewards?: SimRewardsSnapshot | null;
 }): JSX.Element {
   const [period, setPeriod] = useState<AchievementsPeriod>("last30");
-  const [boardPeriod, setBoardPeriod] = useState<Period>("week");
+  const [boardPeriod, setBoardPeriod] = useState<Period>("month");
   const [cohort, setCohort] = useState<CohortFilter>("all");
   const [privacy, setPrivacy] = useState<{ public: boolean; displayName: string | null; cohort: Cohort | null }>({
     public: false,
