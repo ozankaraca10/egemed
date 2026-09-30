@@ -9,6 +9,7 @@ import { entryHref, entryRedirectHref, type EntryRole } from "./routes";
 import type { ShellSession } from "./session";
 import { SIM_ICONS, SIM_IDS } from "./SimCard";
 import { EgemedLogo } from "./brand/EgemedLogo";
+import { DEV_ENTRY_STRINGS } from "./devStrings";
 
 /** Sol paneldeki tanıtım: dört çalışma modu ve oyunlaştırma öğeleri (dekoratif ikonlar). */
 const ENTRY_MODES = [
@@ -206,13 +207,13 @@ export function EntryPage({ role, devEnabled = false, apiBaseUrl = null, onApiSi
           <h1 className="eg-shell-entry__title">{title}</h1>
           <p className="eg-shell-entry__help">{t("entry.help")}</p>
           {!isAdmin && <p className="eg-shell-entry__notice">{t("entry.session.synthetic")}</p>}
-          {devEnabled ? (
+          {import.meta.env.DEV && devEnabled ? (
             <div className="eg-shell-entry__dev">
-              <p className="eg-shell-entry__dev-title">{t("entry.dev.title")}</p>
+              <p className="eg-shell-entry__dev-title">{DEV_ENTRY_STRINGS.title}</p>
               <p className="eg-shell-entry__dev-account">
-                {t(isAdmin ? "entry.dev.admin" : "entry.dev.student")}
+                {isAdmin ? DEV_ENTRY_STRINGS.admin : DEV_ENTRY_STRINGS.student}
               </p>
-              <p className="eg-shell-entry__dev-note">{t("entry.dev.note")}</p>
+              <p className="eg-shell-entry__dev-note">{DEV_ENTRY_STRINGS.note}</p>
             </div>
           ) : (
             <p className="eg-shell-entry__status">{t("entry.auth.pending")}</p>

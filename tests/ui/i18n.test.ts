@@ -2,10 +2,6 @@ import { t, tr, type TrKey } from "../../packages/ui/i18n/tr";
 import { describe, expect, it } from "vitest";
 
 const devAuthKeys: TrKey[] = [
-  "entry.dev.title",
-  "entry.dev.admin",
-  "entry.dev.student",
-  "entry.dev.note",
   "entry.error.invalid",
   "shell.session.admin",
   "shell.session.student",
