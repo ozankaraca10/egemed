@@ -847,7 +847,8 @@ button.eg-shell-simbar__chip:hover { background: var(--navy-600); }
 /* Kabuğun standart sim "Hakkında" penceresi (sim kendi Hakkında'sını vermezse). */
 .eg-shell-simabout { display: grid; gap: var(--sp-3); color: var(--ink-700); line-height: 1.55; }
 .eg-shell-simabout p { margin: 0; }
-.eg-shell-simabout__logo { width: auto; height: 48px; padding: var(--sp-2) var(--sp-3); background: var(--navy-900); border-radius: var(--r-md); justify-self: start; }
+/* Sim logoları renklidir (T263/T264); açık zeminde gösterilir. */
+.eg-shell-simabout__logo { width: auto; height: 56px; padding: var(--sp-2) var(--sp-3); background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--r-md); justify-self: start; }
 .eg-shell-simabout__tagline { color: var(--ink-900); font-weight: 700; }
 .eg-shell-simabout__dev { color: var(--ink-600); font-size: var(--fs-sm); }
 .eg-shell-simabout__note { padding: var(--sp-2) var(--sp-3); background: var(--blue-50); border-radius: var(--r-md); color: var(--ink-700); font-size: var(--fs-sm); }

@@ -15,6 +15,25 @@ export type StethHead = "bell" | "diaphragm";
 export type ValidationStatus = "validated" | "educational_mapping" | "experimental";
 export type SoundCategory = "heart" | "lung" | "mixed";
 
+/** T259 — kaydın arkasındaki hasta: gerçek hasta (gösterilen alanlar) ya da manken.
+ *  KVKK: ad, özgün dosya adı ve kaynak hasta numarası gösterilen alanlara girmez. */
+export interface RealPatientInfo {
+  origin: "real";
+  ageYears: number | null;
+  sex: "F" | "M" | null;
+  diagnosis: string | null;
+  diagnosisSource: string;
+  soundTypeRaw: string | null;
+  site: string | null;
+}
+
+export interface ManikinPatientInfo {
+  origin: "manikin";
+  sex: "F" | "M" | null;
+}
+
+export type PatientInfo = RealPatientInfo | ManikinPatientInfo;
+
 /** sounds.json kaydı (import üretimi) */
 export interface SoundRecord {
   id: string;
@@ -37,6 +56,8 @@ export interface SoundRecord {
   runtimeUrl: string;
   validationStatus: "validated" | "missing_asset";
   issues: string[];
+  /** Hasta kartı (T261) için; sunucu oturumu gibi sentetik kayıtlarda bulunmaz. */
+  patient?: PatientInfo;
 }
 
 export interface SoundsManifest {
