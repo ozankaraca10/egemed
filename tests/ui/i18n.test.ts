@@ -354,7 +354,7 @@ describe("i18n/tr sözlüğü", () => {
       expect(t(key).trim().length, key).toBeGreaterThan(0);
     }
     expect(t("home.how.title")).toBe("Nasıl çalışır?");
-    expect(t("home.how.learn.title")).toBe("İnceleme");
+    expect(t("home.how.learn.title")).toBe("Öğrenme");
     expect(t("home.how.learn.body")).toBe(
       "Konuyu sistematik okuma rehberiyle, gerçek örnekler üzerinde keşfedin.",
     );

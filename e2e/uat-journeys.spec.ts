@@ -90,7 +90,7 @@ test.describe("T155 UAT yolculukları", () => {
     await expect(page).toHaveURL(/#\/sims\/opaca$/);
     const root = page.locator(".eg-sim-opaca").first();
     await expect(root).toBeVisible();
-    await expect(page.getByRole("heading", { name: "Çalışma modunu seçin" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Çalışma Modunu Seçin" })).toBeVisible();
 
     await startTopicPractice(root);
     await completeTopicPractice(root, "opaca");
@@ -254,7 +254,7 @@ test.describe("T155 UAT yolculukları", () => {
 
     await page.locator('a[href="#/sims/opaca"]').click();
     await expect(page).toHaveURL(/#\/sims\/opaca$/);
-    await expect(page.getByRole("heading", { name: "Çalışma modunu seçin" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Çalışma Modunu Seçin" })).toBeVisible();
     await assertNoHorizontalScroll(page);
 
     await signInAdmin(page);

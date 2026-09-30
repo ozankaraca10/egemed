@@ -171,7 +171,7 @@ async function completeQuiz(root: Locator): Promise<void> {
 const SCREENS: readonly PulseScreen[] = [
   {
     id: "sim",
-    label: "İnceleme",
+    label: "Öğrenme",
     route: "#/sims/pulse/inceleme",
     async open(root) {
       await openMode(root, "sim");

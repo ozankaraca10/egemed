@@ -84,12 +84,12 @@ describe("ModeSelectScreen", () => {
     expect(html).toContain("mode-card assessment learn-locked");
     expect(html).toContain('data-learn-locked="true"');
     expect(html).toContain("Öğrenmeye başla");
-    expect(html).toContain("Öğrenmeye git");
+    expect(html).toContain("Önce öğrenme modunu tamamlayın");
     expect(html).toContain("mode-lock-hint");
     expect(html).toContain("Önce öğrenme modunu tamamlayın: 0/20 ses dinlendi.");
     expect(html).toContain("Henüz denenmedi");
     // Kilit gönderimi kapatır: düğme pasiftir.
-    expect(html).toMatch(/disabled=""[^>]*>Öğrenmeye git/);
+    expect(html).toMatch(/disabled=""[^>]*>Önce öğrenme modunu tamamlayın/);
   });
 
   it("gömülü modda SCORM ifadesi yoktur (ADR-006, T134)", () => {

@@ -474,7 +474,7 @@ test.describe("API oturumu (dev sağlayıcı)", () => {
     const finished = page.waitForResponse((response) => /\/me\/sims\/opaca\/sessions\/[^/]+\/finish$/.test(response.url()));
     await page.goto("/#/sims/opaca");
     const root = page.locator(".eg-sim-opaca").first();
-    await expect(page.getByRole("heading", { name: "Çalışma modunu seçin" })).toBeVisible({ timeout: 20_000 });
+    await expect(page.getByRole("heading", { name: "Çalışma Modunu Seçin" })).toBeVisible({ timeout: 20_000 });
     await startTopicPractice(root);
     // İlk vaka: yanıt ver → uygulama kontrolü (check) sunucuda yapılır; görüntü vekilden gelir.
     const completion = completeTopicPractice(root, "opaca");

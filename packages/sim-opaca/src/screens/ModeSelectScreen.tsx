@@ -36,7 +36,7 @@ export interface ModeSelectScreenProps {
   readonly requestSignIn?: () => void
 }
 
-/** Mod seçim ekranı: Öğrenme (İnceleme) / Uygulama / Değerlendirme. */
+/** Mod seçim ekranı: Öğrenme / Uygulama / Değerlendirme. */
 export function ModeSelectScreen({
   embedded = false,
   gamiEnabled = false,
@@ -84,7 +84,7 @@ export function ModeSelectScreen({
               ) : null}
             </p>
           )}
-          <ScreenHeading className="mode-title">Çalışma modunu seçin</ScreenHeading>
+          <ScreenHeading className="mode-title">Çalışma Modunu Seçin</ScreenHeading>
           <p className="mode-sub">Önce öğrenme modunda okuma sırasını oturtmanız önerilir.</p>
           {isFaculty && (
             <p className="mode-sub">Öğretim üyesi görünümü — rozet ve sıralama yalnız öğrenciler içindir.</p>
@@ -105,7 +105,7 @@ export function ModeSelectScreen({
               title="Uygulama Modu"
               text={practiceCount ? `${practiceCount} vakalık havuzdan her oturumda rastgele ${Math.min(SESSION_SIZE, practiceCount)} vaka; ipucu ve geri bildirimle.` : 'Uygulama havuzu boş: önce veri setini içe aktarın.'}
               items={['Görüntü üzerinde işaretleme', 'İpucu desteği', 'Yanıttan sonra uzman işaretlemesi']}
-              cta={!canPractice ? VISITOR_LOCK_TEXT.cta : practiceLocked ? 'Öğrenmeye git' : 'Vakaları çöz'}
+              cta={!canPractice ? VISITOR_LOCK_TEXT.cta : practiceLocked ? 'Önce öğrenme modunu tamamlayın' : 'Vakaları çöz'}
               disabled={canPractice && (practiceLocked || !practiceCount || !serverReady)}
               learnLocked={canPractice && practiceLocked}
               lockText={gate.lockText}
@@ -121,7 +121,7 @@ export function ModeSelectScreen({
               text={assessmentCount ? `${assessmentCount} radyolog etiketli vakalık havuzdan rastgele ${Math.min(SESSION_SIZE, assessmentCount)} vaka.` : 'Değerlendirme havuzu boş: radyolog etiketli veri seti içe aktarılmalı.'}
               items={['Okuma bölgesi ve uzman katmanı yok', 'Vaka başına süre sınırı', embedded ? 'Puan kaydedilir' : 'SCORM puanı']}
               rules="İpucu yok · geri bildirim yalnız sonunda · puan kaydedilir"
-              cta={!canAssessment ? VISITOR_LOCK_TEXT.cta : assessmentLocked ? 'Öğrenmeye git' : 'Değerlendirmeye gir'}
+              cta={!canAssessment ? VISITOR_LOCK_TEXT.cta : assessmentLocked ? 'Önce öğrenme modunu tamamlayın' : 'Değerlendirmeye gir'}
               disabled={canAssessment && (assessmentLocked || !assessmentCount || !serverReady)}
               learnLocked={canAssessment && assessmentLocked}
               lockText={gate.lockText}
@@ -195,7 +195,7 @@ export function ModeCard({
   /** T218: öğrenme tamamlanmadı — kart kilit ikonu ve ilerleme metniyle işaretlenir,
    *  düğme gönderime kapalıdır (`disabled`); ziyaretçi kilidi önceliklidir. */
   learnLocked?: boolean
-  /** Kilit metni: "Önce öğrenme modunu tamamlayın: X/Y konu açıldı." */
+  /** Kilit metni: "Önce öğrenme modunu tamamlayın: X/Y konu incelendi." */
   lockText?: string
 }): JSX.Element {
   return (

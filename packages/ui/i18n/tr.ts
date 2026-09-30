@@ -542,7 +542,7 @@ export const tr = {
   "home.hero.cta": "Simülatörlere git",
   "home.hero.secondary": "Nasıl çalışır?",
   "home.how.title": "Nasıl çalışır?",
-  "home.how.learn.title": "İnceleme",
+  "home.how.learn.title": "Öğrenme",
   "home.how.learn.body":
     "Konuyu sistematik okuma rehberiyle, gerçek örnekler üzerinde keşfedin.",
   "home.how.practice.title": "Uygulama",
