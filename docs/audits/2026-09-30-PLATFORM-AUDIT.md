@@ -81,11 +81,13 @@ Yöntem: tam e2e (3 genişlik), çalışan demo API'ye kimliksiz sondalar, üret
 | T269 | DeepSeek | ✅ dev (A2, A4, B6; D3 düzeltmesiyle) |
 | T270 | DeepSeek | ✅ dev (B5 görseller, C2; D2) |
 | T271a | Luna | ✅ dev (A1 sözleşme + kabuk; D1) |
-| T272 | Luna | kapıda (B1, C1) |
-| T273 | Luna | çalışıyor (B5 kod bölme, B7) |
+| T272 | Luna | ✅ dev (B1, C1; e2e ön ısıtma) |
+| T273 | Luna | ✅ dev (B5: ana paket 764→488 KB; B7) — API kaynaklarını DEV'e bağlayan değişiklik incelemede geri alındı |
 | T259 | DeepSeek | ✅ dev (D4 düzeltmesiyle) |
-| T260 | DeepSeek | çalışıyor (CirCor kalp sesleri) |
-| Sıradaki | — | T271b (simler gezinme sözleşmesine bağlanır), B2 ortak Hakkında/Yardım, B3 rozet sınıflaması, B4 Pulse SCORM katmanı, C4 sim CSS renk literalleri, T253a yeniden kapı |
+| T260 | DeepSeek | ✅ dev (CirCor; yaklaşık eşleme öğrenmeden çıkarıldı) |
+| T253a | Luna | ✅ dev (Opaca ödül kanalı; ödül bağlantısı 44 px) |
+| T271b | Luna | ✅ dev (A1 kapandı: sim içi adres, geri/ileri, derin bağlantı; kilitli ekran güvenli düşüş doğrulandı) |
+| Sıradaki | — | A3 (depo sahibi kararı), B2 ortak Hakkında/Yardım, B3 rozet sınıflaması, B4 Pulse SCORM katmanı, C4 sim CSS renk literalleri, T271b için birim testleri |
 
 ## İlk dağıtım planı
 
