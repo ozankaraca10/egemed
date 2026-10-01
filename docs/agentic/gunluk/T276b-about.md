@@ -1,6 +1,6 @@
 # T276b-about
 
-- Tarih: 2026-10-01 09:38
+- Tarih: 2026-10-01 09:57
 - Commit: T276b: Hakkında tek sayfa (#/hakkinda, sim sekmeli, eski ayrıntılı içerik); sim içi Hakkında kaldırıldı; Pulse hikâye bölümü kaldırıldı (Claude + Sonnet)
 - Dal: task/T276b-about
 
