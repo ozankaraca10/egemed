@@ -1,11 +1,12 @@
 import { useCallback, useEffect, useMemo, useState, type JSX } from "react";
-import { Button, EmptyState, icons, useToast } from "@egemed/ui";
+import { EmptyState, icons, useToast } from "@egemed/ui";
 import { t, type TrKey } from "@egemed/ui/i18n";
 import type { ChallengeBody } from "@egemed/contracts";
 import type { SimulatorId } from "@egemed/sim-host";
 import { useShellDataSources } from "../dataSources";
 import { challengeHref, challengePlayHref, routeHref, simScreenHref } from "../routes";
 import type { ShellSession } from "../session";
+import { ArenaEyebrow, CodeTiles, DuelRules, DuelStage, FairPlayNotice, Versus } from "./arena/ArenaParts";
 import { ChallengeStatusBadge } from "./ChallengesPage";
 import { challengeErrorKey, formatDuration, outcomeFor } from "./challengeSource";
 
@@ -88,7 +89,7 @@ export function ChallengeDetailPage({ challengeId, session = null, simId, headin
 
   if (source === null || missing) {
     return (
-      <section className="eg-shell-page eg-shell-duel">
+      <section className="eg-shell-page eg-shell-arena">
         {back}
         <EmptyState
           description={t(source === null ? "challenges.unavailable.body" : "challenges.error.notFound")}
@@ -100,16 +101,19 @@ export function ChallengeDetailPage({ challengeId, session = null, simId, headin
   }
   if (challenge === null) {
     return (
-      <section className="eg-shell-page eg-shell-duel" aria-busy="true">
+      <section className="eg-shell-page eg-shell-arena" aria-busy="true">
         {back}
       </section>
     );
   }
 
   const me = challenge.participants.find((participant) => participant.isMe);
+  const rival = challenge.participants.find((participant) => !participant.isMe);
   const outcome = outcomeFor(challenge);
   const canPlay =
     me !== undefined && !me.finished && (challenge.status === "accepted" || (challenge.status === "open" && me.role === "inviter"));
+  const rivalName = rival?.displayName ?? t("challenges.opponent");
+  const named = (key: TrKey) => t(key).replace("{name}", rivalName);
 
   const rematch = async () => {
     setRematching(true);
@@ -123,9 +127,128 @@ export function ChallengeDetailPage({ challengeId, session = null, simId, headin
     }
   };
 
+  const playButton = canPlay ? (
+    <button
+      className="eg-shell-arena__cta eg-shell-arena__cta--gold"
+      onClick={() => navigate(challengePlayHref(challenge.simId, challenge.challengeId))}
+      type="button"
+    >
+      {t("challenges.match.start")}
+      <icons.ArrowRight aria-hidden="true" className="eg-shell-arena__ctaIcon" />
+    </button>
+  ) : null;
+  const refreshButton = (
+    <button className="eg-shell-arena__cta eg-shell-arena__cta--ghost" onClick={refresh} type="button">
+      {t("challenges.detail.refresh")}
+    </button>
+  );
+
+  let stage: JSX.Element;
+  if (challenge.status === "expired" && challenge.winner === null) {
+    stage = (
+      <div className="eg-shell-arena__center">
+        <ArenaEyebrow>{t("challenges.status.expired")}</ArenaEyebrow>
+        <p className="eg-shell-arena__title">{t("challenges.expired.title")}</p>
+        <div className="eg-shell-arena__actions">
+          <a className="eg-shell-arena__cta eg-shell-arena__cta--ghost" href={simScreenHref(challenge.simId, "meydan-okuma")}>
+            {t("challenges.result.back")}
+          </a>
+        </div>
+      </div>
+    );
+  } else if (challenge.winner !== null) {
+    const winnerSide = challenge.winner === "draw" ? null : challenge.winner === me?.role ? "me" : "rival";
+    const scoreMe = me?.score ?? 0;
+    const scoreRival = rival?.score ?? 0;
+    const scoreMax = Math.max(1, scoreMe, scoreRival);
+    const timeMe = me?.durationMs ?? 0;
+    const timeRival = rival?.durationMs ?? 0;
+    const timeMax = Math.max(1, timeMe, timeRival);
+    stage = (
+      <div className="eg-shell-arena__center">
+        <p className={`eg-shell-arena__banner eg-shell-arena__banner--${outcome}`} role="status">{t(BANNER[outcome])}</p>
+        <p className="eg-shell-arena__title">
+          {named(outcome === "win" ? "challenges.result.titleWin" : outcome === "lose" ? "challenges.result.titleLose" : "challenges.result.titleDraw")}
+        </p>
+        <Versus
+          me={{ side: "me", name: me?.displayName ?? null, crowned: winnerSide === "me" }}
+          rival={{ side: "rival", name: rival?.displayName ?? null, crowned: winnerSide === "rival" }}
+        />
+        <div className="eg-shell-arena__board">
+          {[
+            { key: "score", label: t("challenges.result.score"), me: scoreMe, rival: scoreRival, max: scoreMax, text: (v: number) => String(Math.round(v)) },
+            { key: "time", label: t("challenges.result.time"), me: timeMe, rival: timeRival, max: timeMax, text: (v: number) => formatDuration(v) },
+          ].map((row) => (
+            <div key={row.key}>
+              <p className="eg-shell-arena__boardLbl">{row.label}</p>
+              <div className="eg-shell-arena__boardRow">
+                <span className="eg-shell-arena__boardVal eg-shell-arena__boardVal--me">{row.text(row.me)}</span>
+                <span aria-hidden="true" className="eg-shell-arena__bars">
+                  <i className="eg-shell-arena__barMe" style={{ width: `${Math.round((row.me / row.max) * 100)}%` }} />
+                  <i className="eg-shell-arena__barRival" style={{ width: `${Math.round((row.rival / row.max) * 100)}%` }} />
+                </span>
+                <span className="eg-shell-arena__boardVal">{row.text(row.rival)}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+        <div className="eg-shell-arena__actions">
+          <button className="eg-shell-arena__cta eg-shell-arena__cta--gold" disabled={rematching} onClick={() => void rematch()} type="button">
+            <icons.Medal aria-hidden="true" className="eg-shell-arena__ctaIcon" />
+            {t("challenges.result.rematch")}
+          </button>
+          <a className="eg-shell-arena__cta eg-shell-arena__cta--ghost" href={simScreenHref(challenge.simId, "meydan-okuma")}>
+            {t("challenges.result.back")}
+          </a>
+        </div>
+      </div>
+    );
+  } else if (rival === undefined) {
+    stage = (
+      <div className="eg-shell-arena__center">
+        <ArenaEyebrow>{t("challenges.lobby.eyebrow")}</ArenaEyebrow>
+        <p className="eg-shell-arena__title">{t("challenges.lobby.title")}</p>
+        <p className="eg-shell-arena__lead">{t("challenges.lobby.lead")}</p>
+        <Versus
+          me={{ side: "me", name: me?.displayName ?? null, state: t(me?.finished === true ? "challenges.match.finishedHidden" : "challenges.lobby.ready") }}
+          rival={{ side: "rival", name: null, waiting: true, state: t("challenges.lobby.rivalHint") }}
+        />
+        {challenge.code !== null ? (
+          <>
+            <CodeTiles code={challenge.code} />
+            <p className="eg-shell-arena__lock">{t("challenges.code.expires")}</p>
+          </>
+        ) : null}
+        <div className="eg-shell-arena__actions">
+          {playButton}
+          {refreshButton}
+        </div>
+      </div>
+    );
+  } else {
+    const title = me?.finished === true ? t("challenges.match.titleMeDone") : rival.finished ? named("challenges.match.titleRivalDone") : t("challenges.match.titleReady");
+    stage = (
+      <div className="eg-shell-arena__center">
+        <ArenaEyebrow>{t("challenges.match.eyebrow")}</ArenaEyebrow>
+        <p className="eg-shell-arena__title">{title}</p>
+        <p className="eg-shell-arena__lead">{t("challenges.match.lead")}</p>
+        <Versus
+          me={{ side: "me", name: me?.displayName ?? null, state: t(me?.finished === true ? "challenges.match.finishedHidden" : "challenges.match.notStarted") }}
+          rival={{ side: "rival", name: rival.displayName, state: t(rival.finished ? "challenges.match.finishedHidden" : "challenges.match.playing") }}
+        />
+        <DuelRules caseCount={challenge.caseCount} perCaseLimitMs={challenge.perCaseLimitMs} totalLimitMs={challenge.totalLimitMs} />
+        {me?.finished === true ? <p className="eg-shell-arena__lock" role="status">{t("challenges.detail.waiting")}</p> : null}
+        <div className="eg-shell-arena__actions">
+          {playButton}
+          {refreshButton}
+        </div>
+      </div>
+    );
+  }
+
   const Heading = headingLevel === 2 ? "h2" : "h1";
   return (
-    <section className="eg-shell-page eg-shell-duel">
+    <section className="eg-shell-page eg-shell-arena">
       {back}
       <header className="eg-shell-duel__detailHead">
         <Heading className="eg-shell-page__title">
@@ -133,73 +256,8 @@ export function ChallengeDetailPage({ challengeId, session = null, simId, headin
         </Heading>
         <ChallengeStatusBadge challenge={challenge} />
       </header>
-      {challenge.winner !== null ? (
-        <p className={`eg-shell-duel__banner eg-shell-duel__banner--${outcome}`} role="status">
-          <icons.Trophy aria-hidden="true" className="eg-shell-duel__bannerIcon" />
-          {t(BANNER[outcome])}
-        </p>
-      ) : me?.finished === true ? (
-        <p className="eg-shell-duel__waiting" role="status">
-          {t("challenges.detail.waiting")}
-        </p>
-      ) : null}
-      {challenge.code !== null ? (
-        <div className="eg-shell-duel__code">
-          <p className="eg-shell-duel__codeLabel">{t("challenges.code.label")}</p>
-          <p className="eg-shell-duel__codeValue">{challenge.code}</p>
-          <p className="eg-shell-duel__codeNote">{t("challenges.code.expires")}</p>
-        </div>
-      ) : null}
-      <ul className="eg-shell-duel__versus">
-        {challenge.participants.map((participant) => (
-          <li
-            className={[
-              "eg-shell-duel__side",
-              participant.isMe ? "eg-shell-duel__side--me" : "",
-              challenge.winner === participant.role ? "eg-shell-duel__side--winner" : "",
-            ].join(" ")}
-            key={participant.role}
-          >
-            <p className="eg-shell-duel__sideRole">
-              {t(participant.role === "inviter" ? "challenges.inviter" : "challenges.opponent")}
-              {participant.isMe ? ` · ${t("challenges.you")}` : ""}
-            </p>
-            <p className="eg-shell-duel__sideName">{participant.displayName}</p>
-            <p className="eg-shell-duel__sideState">{t(participant.finished ? "challenges.detail.played" : "challenges.detail.notPlayed")}</p>
-            <dl className="eg-shell-duel__stats">
-              <div>
-                <dt>{t("challenges.detail.score")}</dt>
-                <dd>{participant.score === null ? "—" : Math.round(participant.score)}</dd>
-              </div>
-              <div>
-                <dt>{t("challenges.detail.duration")}</dt>
-                <dd>{formatDuration(participant.durationMs)}</dd>
-              </div>
-            </dl>
-          </li>
-        ))}
-        {challenge.participants.length < 2 ? (
-          <li className="eg-shell-duel__side eg-shell-duel__side--empty">
-            <p className="eg-shell-duel__sideRole">{t("challenges.opponent")}</p>
-            <p className="eg-shell-duel__sideName">{t("challenges.opponent.none")}</p>
-          </li>
-        ) : null}
-      </ul>
-      <div className="eg-shell-duel__actions">
-        {canPlay ? (
-          <Button iconEnd={<icons.ArrowRight />} onClick={() => navigate(challengePlayHref(challenge.simId, challenge.challengeId))}>
-            {t("challenges.play")}
-          </Button>
-        ) : null}
-        {challenge.winner !== null ? (
-          <Button loading={rematching} onClick={() => void rematch()} variant="secondary">
-            {t("challenges.detail.rematch")}
-          </Button>
-        ) : null}
-        <Button onClick={refresh} variant="ghost">
-          {t("challenges.detail.refresh")}
-        </Button>
-      </div>
+      <DuelStage label={t("challenges.detail.title")}>{stage}</DuelStage>
+      <FairPlayNotice />
     </section>
   );
 }

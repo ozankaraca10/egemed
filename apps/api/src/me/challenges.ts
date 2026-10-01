@@ -110,6 +110,15 @@ function decideWinner(inviter: { score: number; durationMs: number }, opponent: 
   return "draw";
 }
 
+/** Kullanıcının bu simdeki son `limit` sonuçlanmış düellosu, en yenisi önce (T287). */
+export function recentDuelForm(rows: readonly DuelOutcomeRow[], userId: string, limit = 5): ("win" | "loss" | "draw")[] {
+  return rows
+    .filter((row) => row.winner !== null && row.finishedAt !== null && row.opponentId !== null && (row.inviterId === userId || row.opponentId === userId))
+    .sort((a, b) => (b.finishedAt ?? 0) - (a.finishedAt ?? 0))
+    .slice(0, limit)
+    .map((row) => (row.winner === "draw" ? "draw" : (row.winner === "inviter") === (row.inviterId === userId) ? "win" : "loss"));
+}
+
 /** Oturumun düello puanı/süresi; oturum yoksa ya da bitmemişse sıfır. */
 function duelScore(session: SimSessionRow | undefined): { readonly score: number; readonly durationMs: number } {
   return {
@@ -151,6 +160,7 @@ export function registerChallengeRoutes(app: Hono<AppEnv>, deps: ChallengeDeps, 
         finished: entry.session?.status === "finished",
         score: bothDone ? duelScore(entry.session).score : null,
         durationMs: bothDone ? duelScore(entry.session).durationMs : null,
+        recentForm: recentDuelForm(await deps.challenges.listDuelOutcomes(record.simId, entry.userId), entry.userId),
       })),
     );
     const winner = bothDone ? decideWinner(duelScore(results[0]?.session), duelScore(results[1]?.session)) : null;

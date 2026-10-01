@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useMemo, useState, type JSX } from "react";
-import { Button, EmptyState, Field, TextInput, icons, useToast } from "@egemed/ui";
+import { EmptyState, icons, useToast } from "@egemed/ui";
 import { t, type TrKey } from "@egemed/ui/i18n";
 import type { ChallengeBody, LearnStatus, SimId } from "@egemed/contracts";
 import { useShellDataSources } from "../dataSources";
-import { challengeHref, challengePlayHref, simScreenHref } from "../routes";
+import { challengeHref, simScreenHref } from "../routes";
 import { isFacultyLike, type ShellSession } from "../session";
+import { ArenaEyebrow, CareerPanel, CodeTiles, DuelRow, DuelRules, DuelStage, Versus } from "./arena/ArenaParts";
 import { challengeErrorKey, outcomeFor, type ChallengeSource } from "./challengeSource";
 
 /**
@@ -54,31 +55,37 @@ export function ChallengeStatusBadge({ challenge }: { readonly challenge: Challe
   );
 }
 
-function CodeCard({ challenge }: { readonly challenge: ChallengeBody }): JSX.Element | null {
+/** Sunucu kuralları (`apps/api` CHALLENGE_*): liste boşken kural haplarında gösterilir. */
+const DEFAULT_RULES = { caseCount: 10, perCaseLimitMs: 2 * 60_000, totalLimitMs: 8 * 60_000 } as const;
+
+function isActive(challenge: ChallengeBody): boolean {
+  return challenge.winner === null && challenge.status !== "expired";
+}
+
+function CreatedCode({ challenge }: { readonly challenge: ChallengeBody }): JSX.Element | null {
   const toast = useToast();
   if (challenge.code === null) return null;
   return (
-    <div className="eg-shell-duel__code" aria-live="polite">
-      <p className="eg-shell-duel__codeLabel">{t("challenges.code.label")}</p>
-      <p className="eg-shell-duel__codeValue" aria-label={`${t("challenges.code.label")}: ${challenge.code.split("").join(" ")}`}>
-        {challenge.code}
-      </p>
-      <p className="eg-shell-duel__codeNote">{t("challenges.code.expires")}</p>
-      <div className="eg-shell-duel__actions">
-        <Button
-          icon={<icons.ClipboardList />}
+    <div className="eg-shell-arena__center" aria-live="polite">
+      <CodeTiles code={challenge.code} />
+      <p className="eg-shell-arena__lock">{t("challenges.code.expires")}</p>
+      <div className="eg-shell-arena__actions">
+        <button
+          className="eg-shell-arena__cta eg-shell-arena__cta--ghost"
           onClick={() => {
             void copyText(challenge.code ?? "")
               .then(() => toast({ title: t("challenges.code.copied"), tone: "success" }))
               .catch(() => undefined);
           }}
-          variant="secondary"
+          type="button"
         >
+          <icons.ClipboardList aria-hidden="true" className="eg-shell-arena__ctaIcon" />
           {t("challenges.code.copy")}
-        </Button>
-        <Button iconEnd={<icons.ArrowRight />} onClick={() => navigate(challengePlayHref(challenge.simId, challenge.challengeId))}>
-          {t("challenges.play")}
-        </Button>
+        </button>
+        <a className="eg-shell-arena__cta eg-shell-arena__cta--gold" href={challengeHref(challenge.simId, challenge.challengeId)}>
+          {t("challenges.lobby.eyebrow")}
+          <icons.ArrowRight aria-hidden="true" className="eg-shell-arena__ctaIcon" />
+        </a>
       </div>
     </div>
   );
@@ -88,12 +95,15 @@ export function ChallengeWorkspace({
   source,
   learn = null,
   simId,
+  myName = null,
 }: {
   readonly source: ChallengeSource;
   /** Öğrenme tamamlama durumu; null iken durum henüz okunmamıştır (kapı sunucuda). */
   readonly learn?: LearnStatus | null;
   /** Merkezin sabit simi; oluşturma bu sim için yapılır ve liste buna göre süzülür. */
   readonly simId: SimId;
+  /** VS kompozisyonunda "Sen" tarafının adı (sahte oturumda yok). */
+  readonly myName?: string | null;
 }): JSX.Element {
   const toast = useToast();
   const [created, setCreated] = useState<ChallengeBody | null>(null);
@@ -146,86 +156,100 @@ export function ChallengeWorkspace({
   // pasiftir; durum henüz okunmadıysa (`null`) düğmeler açık kalır ve kapıyı
   // sunucu uygular.
   const canCreate = learn === null || learn[simId].complete === true;
+  const lockNote = learn !== null && !canCreate ? (
+    <p className="eg-shell-arena__lock" role="note">{t("challenges.create.learnHint")}</p>
+  ) : null;
+  const rules = list?.[0] ?? DEFAULT_RULES;
+  const active = (list ?? []).filter(isActive);
+  const history = (list ?? []).filter((challenge) => !isActive(challenge));
 
   return (
     <>
-      <div className="eg-shell-duel__grid">
-        <section aria-labelledby="eg-duel-create" className="eg-shell-duel__card">
-          <h2 className="eg-shell-duel__cardTitle" id="eg-duel-create">
-            <icons.Target aria-hidden="true" className="eg-shell-duel__cardIcon" />
-            {t("challenges.create.title")}
+      <DuelStage label={t("challenges.arena.eyebrow")}>
+        <div className="eg-shell-arena__hero">
+          <div>
+            <ArenaEyebrow>{t("challenges.arena.eyebrow")}</ArenaEyebrow>
+            <p className="eg-shell-arena__title">{t("challenges.arena.title")}</p>
+            <p className="eg-shell-arena__lead">{t("challenges.arena.lead")}</p>
+          </div>
+          <Versus compact me={{ side: "me", name: myName ?? t("challenges.arena.me") }} rival={{ side: "rival", name: null, waiting: true }} />
+        </div>
+        <DuelRules caseCount={rules.caseCount} perCaseLimitMs={rules.perCaseLimitMs} totalLimitMs={rules.totalLimitMs} />
+        <div className="eg-shell-arena__moves">
+          <section aria-labelledby="eg-duel-create" className="eg-shell-arena__move">
+            <h3 className="eg-shell-arena__moveTitle" id="eg-duel-create">{t("challenges.arena.invite.title")}</h3>
+            <p className="eg-shell-arena__moveText">{t("challenges.arena.invite.body")}</p>
+            {created !== null ? (
+              <CreatedCode challenge={created} />
+            ) : (
+              <button className="eg-shell-arena__cta eg-shell-arena__cta--gold" disabled={!canCreate || creating} onClick={() => void create()} type="button">
+                <icons.Medal aria-hidden="true" className="eg-shell-arena__ctaIcon" />
+                {t("challenges.arena.invite.action")}
+              </button>
+            )}
+            {lockNote}
+          </section>
+          <section aria-labelledby="eg-duel-join" className="eg-shell-arena__move">
+            <h3 className="eg-shell-arena__moveTitle" id="eg-duel-join">{t("challenges.join.title")}</h3>
+            <p className="eg-shell-arena__moveText">{t("challenges.arena.join.body")}</p>
+            <form
+              className="eg-shell-arena__center"
+              noValidate
+              onSubmit={(event) => {
+                event.preventDefault();
+                void join();
+              }}
+            >
+              <label className="eg-shell-arena__lock" htmlFor="eg-duel-code">{t("challenges.join.label")}</label>
+              <input
+                aria-describedby={codeError === null ? undefined : "eg-duel-code-error"}
+                aria-invalid={codeError !== null}
+                autoComplete="one-time-code"
+                className="eg-shell-arena__codeInput"
+                id="eg-duel-code"
+                inputMode="numeric"
+                maxLength={6}
+                onChange={(event) => setCode(event.currentTarget.value.replace(/\D/g, "").slice(0, 6))}
+                value={code}
+              />
+              {codeError !== null ? <p className="eg-shell-arena__error" id="eg-duel-code-error" role="alert">{codeError}</p> : null}
+              <button className="eg-shell-arena__cta eg-shell-arena__cta--ghost" disabled={!canCreate || joining} type="submit">
+                {t("challenges.join.action")}
+                <icons.ArrowRight aria-hidden="true" className="eg-shell-arena__ctaIcon" />
+              </button>
+            </form>
+            {lockNote}
+          </section>
+        </div>
+      </DuelStage>
+      <div className="eg-shell-arena__below">
+        <section aria-labelledby="eg-duel-list" className="eg-shell-arena__panel">
+          <h2 className="eg-shell-arena__panelTitle" id="eg-duel-list">
+            {t("challenges.arena.active")}
+            <span className="eg-shell-arena__muted eg-shell-arena__num">{active.length}</span>
           </h2>
-          <Button disabled={!canCreate} fullWidth loading={creating} onClick={() => void create()}>
-            {t("challenges.create.action")}
-          </Button>
-          {learn !== null && !canCreate ? (
-            <p className="eg-shell-duel__lockNote" role="note">
-              {t("challenges.create.learnHint")}
-            </p>
-          ) : null}
-          {created !== null ? <CodeCard challenge={created} /> : null}
+          {list === null ? null : list.length === 0 ? (
+            <p className="eg-shell-arena__muted">{t("challenges.arena.empty")}</p>
+          ) : (
+            <>
+              {active.length > 0 ? (
+                <ul className="eg-shell-arena__list">
+                  {active.map((challenge) => <DuelRow challenge={challenge} href={challengeHref(challenge.simId, challenge.challengeId)} key={challenge.challengeId} />)}
+                </ul>
+              ) : null}
+              {history.length > 0 ? (
+                <>
+                  <h3 className="eg-shell-arena__panelTitle">{t("challenges.arena.history")}</h3>
+                  <ul className="eg-shell-arena__list">
+                    {history.map((challenge) => <DuelRow challenge={challenge} href={challengeHref(challenge.simId, challenge.challengeId)} key={challenge.challengeId} />)}
+                  </ul>
+                </>
+              ) : null}
+            </>
+          )}
         </section>
-        <section aria-labelledby="eg-duel-join" className="eg-shell-duel__card">
-          <h2 className="eg-shell-duel__cardTitle" id="eg-duel-join">
-            <icons.Users aria-hidden="true" className="eg-shell-duel__cardIcon" />
-            {t("challenges.join.title")}
-          </h2>
-          <form
-            className="eg-shell-duel__join"
-            onSubmit={(event) => {
-              event.preventDefault();
-              void join();
-            }}
-          >
-            <Field error={codeError ?? undefined} label={t("challenges.join.label")}>
-              {(control) => (
-                <TextInput
-                  {...control}
-                  autoComplete="one-time-code"
-                  className="eg-shell-duel__codeInput"
-                  inputMode="numeric"
-                  maxLength={6}
-                  onChange={(event) => setCode(event.currentTarget.value.replace(/\D/g, "").slice(0, 6))}
-                  value={code}
-                />
-              )}
-            </Field>
-            <Button disabled={!canCreate} fullWidth loading={joining} type="submit" variant="secondary">
-              {t("challenges.join.action")}
-            </Button>
-          </form>
-          {learn !== null && !canCreate ? (
-            <p className="eg-shell-duel__lockNote" role="note">
-              {t("challenges.create.learnHint")}
-            </p>
-          ) : null}
-        </section>
+        <CareerPanel challenges={list ?? []} />
       </div>
-      <section aria-labelledby="eg-duel-list" className="eg-shell-duel__listSection">
-        <h2 className="eg-shell-section__title" id="eg-duel-list">
-          {t("challenges.list.title")}
-        </h2>
-        {list === null ? null : list.length === 0 ? (
-          <EmptyState description={t("challenges.list.empty")} icon={<icons.Trophy />} title={t("challenges.list.title")} />
-        ) : (
-          <ul className="eg-shell-duel__list">
-            {list.map((challenge) => {
-              const opponent = challenge.participants.find((participant) => !participant.isMe);
-              return (
-                <li className="eg-shell-duel__row" key={challenge.challengeId}>
-                  <span className="eg-shell-duel__rowSim">{t(`sims.${challenge.simId}.name`)}</span>
-                  <span className="eg-shell-duel__rowName">{opponent?.displayName ?? t("challenges.opponent.none")}</span>
-                  <ChallengeStatusBadge challenge={challenge} />
-                  <a className="eg-shell-duel__rowLink" href={challengeHref(challenge.simId, challenge.challengeId)}>
-                    {t("challenges.list.open")}
-                    <icons.ArrowRight aria-hidden="true" className="eg-shell-cta__icon" />
-                  </a>
-                </li>
-              );
-            })}
-          </ul>
-        )}
-      </section>
     </>
   );
 }
@@ -263,22 +287,20 @@ export function ChallengesPage({ session = null, simId, headingLevel = 1 }: Chal
 
   const Heading = headingLevel === 2 ? "h2" : "h1";
   return (
-    <section className="eg-shell-page eg-shell-duel">
+    <section className="eg-shell-page eg-shell-arena">
       <a className="eg-shell-duel__back" href={simScreenHref(simId, "modlar")}>
         <icons.ChevronLeft aria-hidden="true" className="eg-shell-cta__icon" />
         {t("challenges.backToModes")}
       </a>
-      <header className="eg-shell-duel__hero">
-        <Heading className="eg-shell-page__title">{t("challenges.title")}</Heading>
-        <p className="eg-shell-duel__lead">{t("challenges.lead")}</p>
-        <p className="eg-shell-duel__rules">{t("challenges.rules")}</p>
-      </header>
+      <Heading className="eg-shell-page__title">
+        {t("challenges.title")}
+      </Heading>
       {isFacultyLike(session) ? (
         <EmptyState description={t("challenges.faculty.body")} icon={<icons.ShieldCheck />} title={t("challenges.faculty.title")} />
       ) : source === null ? (
         <EmptyState description={t("challenges.unavailable.body")} icon={<icons.Users />} title={t("challenges.unavailable.title")} />
       ) : (
-        <ChallengeWorkspace learn={learn} simId={simId} source={source} />
+        <ChallengeWorkspace learn={learn} myName={session?.displayName ?? null} simId={simId} source={source} />
       )}
     </section>
   );
