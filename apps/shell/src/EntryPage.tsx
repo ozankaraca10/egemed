@@ -11,19 +11,6 @@ import { SIM_ICONS, SIM_IDS } from "./SimCard";
 import { EgemedLogo } from "./brand/EgemedLogo";
 import { DEV_ENTRY_STRINGS } from "./devStrings";
 
-/** Sol paneldeki tanıtım: dört çalışma modu ve oyunlaştırma öğeleri (dekoratif ikonlar). */
-const ENTRY_MODES = [
-  { key: "learn", Icon: icons.BookOpen },
-  { key: "practice", Icon: icons.Target },
-  { key: "assessment", Icon: icons.ClipboardList },
-  { key: "challenge", Icon: icons.Medal },
-] as const;
-const ENTRY_PERKS = [
-  { key: "badges", Icon: icons.Award },
-  { key: "leaderboard", Icon: icons.Trophy },
-  { key: "rewards", Icon: icons.Gift },
-] as const;
-
 /** Kök tsconfig DOM lib'i taşımadığı için form alanı erişimi en dar arayüzle yapılır. */
 interface FieldLike { value: string }
 interface FormLike { elements: { namedItem(name: string): FieldLike | null } }
@@ -157,51 +144,41 @@ export function EntryPage({ role, devEnabled = false, apiBaseUrl = null, onApiSi
   return (
     <div className="eg-shell-entry">
       <a className="eg-shell-skip" href="#icerik" onClick={focusMain}>{t("shell.skip")}</a>
+      {/* T296 (depo sahibi onayı 1 Eki 2026): fotoğrafsız lacivert sahne, gerçek EGEMED ve sim logo setleri. */}
       <section aria-label={t("entry.brand")} className="eg-shell-entry__brand">
-        <img alt="" className="eg-shell-entry__logo" src="/brand/ege-tip-logo.png" />
-        <EgemedLogo variant="on-dark" />
-        <ul aria-label={t("entry.sims")} className="eg-shell-entry__sims">
-          {SIM_IDS.map((id) => (
-            <li className="eg-shell-entry__sim" key={id}>
-              <img
-                alt=""
-                className="eg-shell-entry__simicon"
-                height={SIM_ICONS[id].height}
-                src={SIM_ICONS[id].src}
-                width={SIM_ICONS[id].width}
-              />
-              <span className="eg-shell-entry__simname">{t(`sims.${id}.name`)}</span>
-            </li>
-          ))}
-        </ul>
-        <div aria-label={t("entry.features")} className="eg-shell-entry__features" role="group">
-          <p className="eg-shell-entry__featTitle">{t("entry.features.modes")}</p>
-          <ul className="eg-shell-entry__modes">
-            {ENTRY_MODES.map(({ key, Icon }) => (
-              <li className="eg-shell-entry__mode" key={key}>
-                <Icon aria-hidden="true" className="eg-shell-entry__featIcon" />
-                {t(`entry.features.mode.${key}`)}
-              </li>
-            ))}
-          </ul>
-          <ul className="eg-shell-entry__perks">
-            {ENTRY_PERKS.map(({ key, Icon }) => (
-              <li className="eg-shell-entry__perk" key={key}>
-                <span aria-hidden="true" className="eg-shell-entry__perkIcon"><Icon /></span>
-                {t(`entry.features.${key}`)}
+        <div className="eg-shell-entry__brandTop">
+          <img alt="" className="eg-shell-entry__logo" height={128} src="/brand/ege-tip-logo.png" width={128} />
+          <EgemedLogo variant="on-dark" />
+        </div>
+        <div className="eg-shell-entry__pitch">
+          <p className="eg-shell-entry__eyebrow">{t("shell.brand.tagline")}</p>
+          <p className="eg-shell-entry__headline">{t("entry.headline")}</p>
+          <p className="eg-shell-entry__lead">{t("entry.lead")}</p>
+          <ul aria-label={t("entry.sims")} className="eg-shell-entry__sims">
+            {SIM_IDS.map((id) => (
+              <li className={`eg-shell-entry__sim eg-shell-entry__sim--${id}`} key={id}>
+                <img
+                  alt=""
+                  className="eg-shell-entry__simicon"
+                  height={SIM_ICONS[id].height}
+                  src={SIM_ICONS[id].src}
+                  width={SIM_ICONS[id].width}
+                />
+                <span className="eg-shell-entry__simname">{t(`sims.${id}.name`)}</span>
               </li>
             ))}
           </ul>
         </div>
+        <p className="eg-shell-entry__quote">{t("entry.quote")}</p>
       </section>
       <main className="eg-shell-entry__main" id="icerik" tabIndex={-1}>
         <div className="eg-shell-entry__panel">
           <nav aria-label={t("entry.brand")} className="eg-shell-entry__roles">
-            <a aria-current={isAdmin ? "page" : undefined} href={entryHref("admin")}>
-              {t("entry.role.admin")}
-            </a>
             <a aria-current={!isAdmin ? "page" : undefined} href={entryHref("student")}>
               {t("entry.role.student")}
+            </a>
+            <a aria-current={isAdmin ? "page" : undefined} href={entryHref("admin")}>
+              {t("entry.role.admin")}
             </a>
           </nav>
           <h1 className="eg-shell-entry__title">{title}</h1>
@@ -262,6 +239,11 @@ export function EntryPage({ role, devEnabled = false, apiBaseUrl = null, onApiSi
               <p className="eg-shell-entry__visitorNote">{t("entry.visitor.note")}</p>
             </div>
           )}
+          <ul aria-label={t("entry.trust")} className="eg-shell-entry__trust">
+            <li>{t("entry.trust.privacy")}</li>
+            <li>{t("entry.trust.data")}</li>
+            <li>{t("entry.trust.edu")}</li>
+          </ul>
           <a className="eg-shell-entry__back" href="#/">{t("entry.back")}</a>
         </div>
         <ShellFooter small />

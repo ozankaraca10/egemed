@@ -34,6 +34,11 @@
   --glass-deep:rgba(6,30,68,.62); --glass-chip:rgba(255,255,255,.10); --glass-line:rgba(255,255,255,.22); --gold-tint:rgba(245,158,11,.18);
   /* Meydan Okuma arenası: taraf ışımaları ve ızgara (T287). */
   --duel-me-glow:rgba(46,141,247,.30); --duel-rival-glow:rgba(225,29,72,.26); --duel-grid:rgba(255,255,255,.05); --duel-shade:rgba(0,0,0,.26); --gold-glow:rgba(245,158,11,.55); --clear:rgba(255,255,255,0);
+  /* T296: sim kimlik renkleri (Simülatörler sayfası ve ana sayfa kartları); glow = sahne ışığı. */
+  --sim-pulse:#e2384d; --sim-pulse-soft:#fde8eb; --sim-pulse-glow:rgba(226,56,77,.45);
+  --sim-ausculta:#0e9384; --sim-ausculta-soft:#e0f5f2; --sim-ausculta-glow:rgba(14,147,132,.45); --sim-ausculta-ink:#0b6b60;
+  --sim-opaca:#4f46e5; --sim-opaca-soft:#ecebfd; --sim-opaca-glow:rgba(79,70,229,.45);
+  --sim-dev:#5f7ba6; --sim-dev-glow:rgba(124,147,184,.30);
   --red-600:#b91c1c; --red-500:#e11d48; --red-100:#fde5ea;
 
   /* --- Zemin, kart, kenar, gölge --- */
