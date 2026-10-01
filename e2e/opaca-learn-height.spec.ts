@@ -17,7 +17,7 @@ test.describe("Opaca öğrenme ekranı dikey yerleşimi (T207)", () => {
     const errors = trackErrors(page);
     await openRoute(page, "#/sims/opaca");
     const root = page.locator(".eg-sim-opaca").first();
-    await root.locator(".mode-card.learn button.btn").first().click();
+    await root.locator(".mode-card.learn button.eg-gami-mode-cta").first().click();
     await expect(root.locator(".lib-col")).toBeVisible();
 
     const metrics = await page.evaluate(() => {

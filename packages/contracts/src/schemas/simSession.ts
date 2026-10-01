@@ -298,9 +298,25 @@ export const simSessionCheckRequestSchema = z.strictObject({
   answer: z.array(simAnswerEntrySchema).min(1).max(12),
 });
 
+/**
+ * T283a (ADR-009 §6 ek sertleştirme): istemcinin beyan ettiği davranış sayaçları
+ * — sekme/uygulama gizlenmesi, pencere odak kaybı, yapıştırma, kullanıcı etkileşimi.
+ * Alan isteğe bağlıdır (eski istemciler göndermez); yoksa sunucu ilgili sinyalleri
+ * "bilinmiyor" sayar (T283a apps/api/src/integrity). Serbest metin taşımaz.
+ */
+export const simIntegritySchema = z.strictObject({
+  hiddenCount: z.number().int().min(0).max(1000),
+  hiddenMs: z.number().int().min(0).max(3_600_000),
+  blurCount: z.number().int().min(0).max(1000),
+  pasteCount: z.number().int().min(0).max(1000),
+  interactions: z.number().int().min(0).max(100_000),
+});
+export type SimIntegrity = z.infer<typeof simIntegritySchema>;
+
 export const simSessionAnswerRequestSchema = z.strictObject({
   answers: z.record(publicQuestionSchema.shape.id, z.array(simAnswerEntrySchema).max(12)),
   telemetry: simTelemetrySchema,
+  integrity: simIntegritySchema.optional(),
 });
 
 export const questionFeedbackSchema = z.strictObject({

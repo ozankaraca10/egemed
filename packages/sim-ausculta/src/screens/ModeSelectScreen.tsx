@@ -1,5 +1,6 @@
-import type { JSX, ReactNode } from "react";
+import type { JSX } from "react";
 import { audienceCanUseMode, VISITOR_LOCK_TEXT } from "@egemed/sim-host";
+import { defaultGamiIcons, GamiModeJourney, type GamiModeCard } from "@egemed/gami-ui";
 import { useLearnGate, useStartMode } from "../core/LearnGate";
 import { useStore } from "../core/StoreProvider";
 import { SESSION_SIZE } from "../core/session";
@@ -7,8 +8,8 @@ import type { Mode } from "../core/types";
 import { CASE_INVENTORY } from "../data/inventory";
 import { LIBRARY_ITEM_COUNT } from "../data/library";
 import { EcgDeco, Footer, touchTarget } from "../ui/chrome";
-import { ScreenHeading, useAudience, useRequestSignIn, useSessions, useSetChrome } from "../ui/ScreenHeading";
-import { IconArrowRight, IconChart, IconCheck, IconGraduation, IconHeadphones, IconLock, IconStethoscope } from "../ui/icons";
+import { useAudience, useOpenChallenges, useRequestSignIn, useSessions, useSetChrome } from "../ui/ScreenHeading";
+import { IconLock } from "../ui/icons";
 import type { SimRewardsSnapshot } from "@egemed/sim-host";
 import { modeLearnLocked, modePickTarget, sessionSeed } from "./entry";
 
@@ -21,13 +22,14 @@ export interface ModeSelectScreenProps {
   readonly embedded?: boolean;
 }
 
-/** Mod seçimi: Öğrenme / Uygulama / Değerlendirme. T209: öğrenme tamamlanmadan
- *  uygulama ve değerlendirme KİLİTLİDİR (öneri değil); ziyaretçi kilidi önceliklidir. */
+/** Mod seçimi (T289): ortak dört modlu yolculuk — Öğrenme / Uygulama / Değerlendirme / Meydan Okuma.
+ *  T209: öğrenme tamamlanmadan diğer modlar KİLİTLİDİR (öneri değil); ziyaretçi kilidi önceliklidir. */
 export function ModeSelectScreen({ embedded = false, rewards = null, onLeaderboard }: ModeSelectScreenProps & { rewards?: SimRewardsSnapshot | null; onLeaderboard?: () => void }): JSX.Element {
   const { state, dispatch, now } = useStore();
   const unified = useSetChrome() !== undefined;
   const audience = useAudience();
   const requestSignIn = useRequestSignIn();
+  const openChallenges = useOpenChallenges();
   const gate = useLearnGate();
   const startMode = useStartMode();
   // T196: uygulama/değerlendirme vakaları yalnız sunucu oturumundan gelir; kanal yoksa kapalı.
@@ -38,99 +40,108 @@ export function ModeSelectScreen({ embedded = false, rewards = null, onLeaderboa
     startMode(target);
     if (target === "learn") dispatch({ type: "goto", screen: "learn" });
   };
+  const signIn = () => requestSignIn?.();
   const practiceLocked = modeLearnLocked(gate.complete, practiceCases.length > 0);
   const assessmentLocked = modeLearnLocked(gate.complete, assessmentCases.length > 0);
-  const practiceVisitorLocked = !audienceCanUseMode(audience, "practice");
-  const assessmentVisitorLocked = !audienceCanUseMode(audience, "assessment");
+  const canPractice = audienceCanUseMode(audience, "practice");
+  const canAssessment = audienceCanUseMode(audience, "assessment");
+  const isVisitor = audience === "visitor";
+  const isFaculty = audience === "faculty";
+  const monthlyReward = rewards?.current ?? null;
+  const cards: GamiModeCard[] = [
+    {
+      key: "learn",
+      title: "Öğrenme Modu",
+      description: `${libraryCount} ses sınıfını metafor, dalga formu ve klinik bilgiyle sınırsız dinleyerek keşfedin.`,
+      bullets: ["Rehberli öğrenme", "Ses metaforları", "Sınırsız dinleme"],
+      progress: gate.total > 0 ? gate.listenedCount / gate.total : 0,
+      cta: gate.listenedCount > 0 ? "Öğrenmeye devam et" : "Öğrenmeye başla",
+      onSelect: () => pick("learn"),
+    },
+    {
+      key: "practice",
+      title: "Uygulama Modu",
+      description: practiceCases.length
+        ? `${practiceCases.length} vakalık havuzdan her oturumda rastgele ${SESSION_SIZE} vaka; ipucu ve geri bildirimle çalışın.`
+        : "Uygulama havuzu boş.",
+      bullets: [`Rastgele ${SESSION_SIZE} vaka`, "İpucu desteği", "Detaylı geri bildirim"],
+      status: state.bestScore.practice > 0 ? `En iyi puan: ${state.bestScore.practice}` : "Henüz denenmedi",
+      audienceLocked: !canPractice,
+      learnLocked: canPractice && practiceLocked,
+      lockText: canPractice ? gate.lockText : VISITOR_LOCK_TEXT.modeLocked,
+      cta: !canPractice ? VISITOR_LOCK_TEXT.cta : practiceLocked ? "Önce öğrenme modunu tamamlayın" : "Vakaları çöz",
+      disabled: canPractice && (practiceLocked || practiceCases.length === 0 || !serverReady),
+      onSelect: canPractice ? () => pick("practice") : signIn,
+    },
+    {
+      key: "assessment",
+      title: "Değerlendirme Modu",
+      description: assessmentCases.length
+        ? `${assessmentCases.length} doğrulanmış vakalık havuzdan rastgele ${SESSION_SIZE} vaka ile maksimum zorlukta ölçülün.`
+        : "Değerlendirme havuzu boş.",
+      bullets: ["İpucu yok · tek dinleme", "Geri bildirim sonda", "Puan kaydedilir, liderliğe girer"],
+      status: state.bestScore.assessment > 0 ? `En iyi puan: ${state.bestScore.assessment}` : "Henüz denenmedi",
+      audienceLocked: !canAssessment,
+      learnLocked: canAssessment && assessmentLocked,
+      lockText: canAssessment ? gate.lockText : VISITOR_LOCK_TEXT.modeLocked,
+      cta: !canAssessment ? VISITOR_LOCK_TEXT.cta : assessmentLocked ? "Önce öğrenme modunu tamamlayın" : "Değerlendirmeye gir",
+      disabled: canAssessment && (assessmentLocked || assessmentCases.length === 0 || !serverReady),
+      onSelect: canAssessment ? () => pick("assessment") : signIn,
+      ribbon: monthlyReward && onLeaderboard ? `Bu ayın ödülü · ilk ${monthlyReward.winnersCount} kişiye · ${daysLeftInMonth(now())} gün` : null,
+      ...(monthlyReward && onLeaderboard ? {
+        extra: (
+          <button type="button" className="eg-gami-link" style={HIT} onClick={onLeaderboard}>
+            {defaultGamiIcons.gift({ width: 14, height: 14 })} Aylık sıralamayı gör
+          </button>
+        ),
+      } : {}),
+    },
+    {
+      key: "challenge",
+      title: "Meydan Okuma",
+      description: "Bir arkadaşınla aynı vakalarda yarış. Önce doğru sayısı, eşitlikte süre kazanır.",
+      bullets: ["6 haneli davet kodu", "Vaka başı süre sınırı", "Kazanana ½ değerlendirme XP"],
+      ...(isFaculty ? { status: "Karşılaşmalar yalnız öğrenciler içindir" } : {}),
+      audienceLocked: isVisitor,
+      learnLocked: !isVisitor && !gate.complete,
+      lockText: isVisitor ? VISITOR_LOCK_TEXT.modeLocked : gate.lockText,
+      cta: isVisitor ? VISITOR_LOCK_TEXT.cta : !gate.complete ? "Önce öğrenme modunu tamamlayın" : "Meydana gir",
+      disabled: isVisitor ? false : !gate.complete || isFaculty || openChallenges === undefined,
+      onSelect: isVisitor ? signIn : () => openChallenges?.(),
+    },
+  ];
   return (
     <>
       <EcgDeco embedded={embedded} />
       <div className="screen" style={{ position: "relative", zIndex: 1 }}>
-        <div className="container screen-body">
-          {unified ? null : <Stepper active={1} labels={["Mod Seçimi", "Çalışma", "Tamamla"]} />}
-          {audience === "visitor" ? (
-            <div className="note-strip visitor-strip" role="note">
-              <IconLock width={17} height={17} aria-hidden="true" />
-              <span>
-                <b>{VISITOR_LOCK_TEXT.badge}.</b> {VISITOR_LOCK_TEXT.locked}{" "}
-                <button type="button" className="hero-link visitor-signin" style={HIT} onClick={() => requestSignIn?.()}>
-                  {VISITOR_LOCK_TEXT.cta}
-                </button>
-              </span>
-            </div>
-          ) : null}
-          <ScreenHeading className="mode-title">Çalışma Modunu Seçin</ScreenHeading>
-          <p className="mode-sub">Hangi modda çalışmak istersiniz?</p>
-          {audience === "faculty" ? (
-            <p className="mode-sub faculty-note">
-              Öğretim üyesi görünümü — rozet ve sıralama yalnız öğrenciler içindir.
-            </p>
-          ) : null}
-          <div className="mode-note">
-            <div className="headphone-banner thin">
-              <IconHeadphones />
-              <span className="vsep" />
-              <span>
-                Tüm modlarda gerçek hasta sesleri kullanılır — <span className="muted">kulaklıkla çalışmanız önerilir.</span>
-              </span>
-            </div>
-          </div>
-          <div className="mode-cards">
-            <ModeCard
-              kind="learn"
-              icon={<IconGraduation />}
-              title="Öğrenme Modu"
-              text={`${libraryCount} ses sınıfını metafor, dalga formu ve klinik bilgiyle sınırsız dinleyerek keşfedin.`}
-              items={["Rehberli öğrenme", "Ses metaforları", "Sınırsız dinleme"]}
-              cta="Öğrenmeye başla"
-              onPick={() => pick("learn")}
-              progress={gate.listenedCount}
-              progressTotal={gate.total}
-              progressUnit="ses dinlendi"
-            />
-            <ModeCard
-              kind="practice"
-              icon={<IconStethoscope />}
-              title="Uygulama Modu"
-              text={
-                practiceCases.length
-                  ? `${practiceCases.length} vakalık havuzdan her oturumda rastgele ${SESSION_SIZE} vaka sunulur; ipucu ve geri bildirimle çalışın.`
-                  : "Uygulama havuzu boş."
-              }
-              items={["Rastgele 10 vaka", "İpucu desteği", "Detaylı geri bildirim"]}
-              cta={practiceVisitorLocked ? VISITOR_LOCK_TEXT.cta : practiceLocked ? "Önce öğrenme modunu tamamlayın" : "Vakaları çöz"}
-              disabled={!practiceVisitorLocked && (practiceLocked || practiceCases.length === 0 || !serverReady)}
-              learnLocked={!practiceVisitorLocked && practiceLocked}
-              lockText={gate.lockText}
-              visitorLocked={practiceVisitorLocked}
-              onPick={() => (practiceVisitorLocked ? requestSignIn?.() : pick("practice"))}
-              bestScore={state.bestScore.practice}
-            />
-            <ModeCard
-              kind="assessment"
-              icon={<IconChart />}
-              title="Değerlendirme Modu"
-              text={
-                assessmentCases.length
-                  ? `${assessmentCases.length} doğrulanmış vakalık havuzdan rastgele ${SESSION_SIZE} vaka ile maksimum zorlukta ölçülün.`
-                  : "Değerlendirme havuzu boş."
-              }
-              items={["Rastgele 10 vaka", "İpuçsuz + tek dinleme", embedded ? "Puan kaydedilir" : "SCORM puanı"]}
-              rules={embedded ? "İpucu yok · tek dinleme · puan kaydedilir" : "İpucu yok · tek dinleme · SCORM'a puan yazılır"}
-              cta={assessmentVisitorLocked ? VISITOR_LOCK_TEXT.cta : assessmentLocked ? "Önce öğrenme modunu tamamlayın" : "Değerlendirmeye gir"}
-              disabled={!assessmentVisitorLocked && (assessmentLocked || assessmentCases.length === 0 || !serverReady)}
-              learnLocked={!assessmentVisitorLocked && assessmentLocked}
-              lockText={gate.lockText}
-              visitorLocked={assessmentVisitorLocked}
-              onPick={() => (assessmentVisitorLocked ? requestSignIn?.() : pick("assessment"))}
-              bestScore={state.bestScore.assessment}
-              extra={rewards?.current && onLeaderboard ? (
-                <button type="button" className="mode-reward" onClick={onLeaderboard}>
-                  Bu ayın ödülü · {daysLeftInMonth(now())} gün kaldı
-                </button>
-              ) : undefined}
-            />
-          </div>
+        {unified ? null : <Stepper active={1} labels={["Mod Seçimi", "Çalışma", "Tamamla"]} />}
+        <div className="screen-body">
+        <GamiModeJourney
+          simLabel="Ausculta · Oskültasyon Simülatörü"
+          learnDone={gate.listenedCount}
+          learnTotal={gate.total}
+          learnUnit="ses dinlendi"
+          note="Tüm modlarda gerçek hasta sesleri kullanılır — kulaklıkla çalışmanız önerilir."
+          banner={
+            <>
+              {isVisitor ? (
+                <div className="note-strip visitor-strip" role="note">
+                  <IconLock width={17} height={17} aria-hidden="true" />
+                  <span>
+                    <b>{VISITOR_LOCK_TEXT.badge}.</b> {VISITOR_LOCK_TEXT.locked}{" "}
+                    <button type="button" className="hero-link visitor-signin" style={HIT} onClick={signIn}>
+                      {VISITOR_LOCK_TEXT.cta}
+                    </button>
+                  </span>
+                </div>
+              ) : null}
+              {isFaculty ? <p className="mode-sub faculty-note">Öğretim üyesi görünümü — rozet ve sıralama yalnız öğrenciler içindir.</p> : null}
+            </>
+          }
+          cards={cards}
+          showFairPlay={!isVisitor && !isFaculty}
+          icons={defaultGamiIcons}
+        />
         </div>
       </div>
       <Footer embedded={embedded} />
@@ -160,100 +171,6 @@ export function Stepper({ active, labels }: { active: number; labels: string[] }
           <span className="lbl">{label}</span>
         </div>
       ))}
-    </div>
-  );
-}
-
-export function ModeCard({
-  kind,
-  icon,
-  title,
-  text,
-  items,
-  cta,
-  onPick,
-  rules,
-  disabled,
-  learnLocked,
-  lockText,
-  visitorLocked,
-  bestScore,
-  progress,
-  progressTotal,
-  progressUnit,
-  extra,
-}: {
-  kind: Mode;
-  icon: ReactNode;
-  title: string;
-  text: string;
-  items: string[];
-  cta: string;
-  onPick: () => void;
-  rules?: string;
-  disabled?: boolean;
-  /** T209: öğrenme tamamlanmadı — kart kilit ikonu ve ilerleme metniyle işaretlenir,
-   *  düğme gönderime kapalıdır (`disabled`). */
-  learnLocked?: boolean;
-  /** Kilit metni: "Önce öğrenme modunu tamamlayın: X/Y ses dinlendi." */
-  lockText?: string;
-  /** Ziyaretçi kilidi: renk dışında ikon+metinle işaretlenir, düğme "Öğrenci girişi"ne gider. */
-  visitorLocked?: boolean;
-  bestScore?: number;
-  progress?: number;
-  progressTotal?: number;
-  progressUnit?: string;
-  extra?: ReactNode;
-}): JSX.Element {
-  return (
-    <div
-      className={`mode-card ${kind}${learnLocked ? " learn-locked" : ""}${visitorLocked ? " visitor-locked" : ""}`}
-      data-learn-locked={learnLocked ? "true" : "false"}
-      data-visitor-locked={visitorLocked ? "true" : "false"}
-    >
-      <div className="ic">{icon}</div>
-      {visitorLocked ? (
-        <p className="mode-lock-hint" role="status">
-          <IconLock width={14} height={14} aria-hidden="true" /> {VISITOR_LOCK_TEXT.modeLocked}
-        </p>
-      ) : learnLocked ? (
-        <p className="mode-lock-hint" role="status">
-          <IconLock width={14} height={14} aria-hidden="true" /> {lockText}
-        </p>
-      ) : null}
-      <h3>{title}</h3>
-      <p className="desc">{text}</p>
-      <ul>
-        {items.map((item) => (
-          <li key={item}>
-            <span className="ck"><IconCheck /></span>
-            {item}
-          </li>
-        ))}
-      </ul>
-      {typeof progress === "number" && typeof progressTotal === "number" && (
-        <div className="mode-progress-status">
-          {progress}/{progressTotal} {progressUnit}
-          <div className="mode-progress" role="progressbar" aria-label="Öğrenme ilerlemesi" aria-valuenow={progress} aria-valuemin={0} aria-valuemax={progressTotal}>
-            <span style={{ width: `${progressTotal ? progress / progressTotal * 100 : 0}%` }} />
-          </div>
-        </div>
-      )}
-      {rules && <p className="mode-rules">{rules}</p>}
-      {typeof bestScore === "number" && (
-        <p className="mode-best-score">
-          {bestScore > 0 ? <>En iyi puan: <b>{bestScore}</b></> : "Henüz denenmedi"}
-        </p>
-      )}
-      {extra}
-      <button
-        className={`btn ${kind === "learn" ? "green" : kind === "assessment" ? "purple" : "primary"}`}
-        style={HIT}
-        onClick={onPick}
-        disabled={disabled}
-      >
-        {cta} <IconArrowRight />
-      </button>
     </div>
   );
 }

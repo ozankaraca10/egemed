@@ -58,6 +58,8 @@ export interface AppProps {
   /** ADR-010: düello bağlamı; verilirse değerlendirme oturumu düellodan açılır. */
   readonly challengeId?: string;
   readonly onChallengeFinished?: (challengeId: string) => void;
+  /** T281a/T289: 4. mod kartı → kabuğun sim içi Meydan Okuma merkezi. */
+  readonly openChallenges?: () => void;
 }
 
 function PendingScreen({ screen, embedded }: { screen: Screen; embedded: boolean }): JSX.Element {
@@ -192,6 +194,7 @@ function Shell({
   sessions,
   challengeId,
   onChallengeFinished,
+  openChallenges,
 }: AppProps & { embedded: boolean }): JSX.Element {
   const { dispatch } = useStore();
   const { syncError, clearSyncError } = useGamiContext();
@@ -223,6 +226,7 @@ function Shell({
       {...(sessions === undefined ? {} : { sessions })}
       {...(challengeId === undefined ? {} : { challengeId })}
       {...(onChallengeFinished === undefined ? {} : { onChallengeFinished })}
+      {...(openChallenges === undefined ? {} : { openChallenges })}
     >
       <div className="eg-sim-opaca app-shell">
         <Header embedded={embedded} env={chromeEnv} modals={{ help: HelpModal, confirm: ConfirmModal }} gamiEnabled={effectiveGami} />

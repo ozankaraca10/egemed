@@ -66,9 +66,9 @@ describe("Opaca App (statik render)", () => {
     expect(html).not.toContain("<iframe");
     expect(html).not.toContain("Simülatörü başlat");
     expect(html).toContain("Çalışma Modunu Seçin");
-    expect(html).toContain('<h2 class="mode-title">');
+    expect(html).toContain('<h2 class="mode-title eg-gami-journey-title"');
     expect(html).not.toContain('<h1 class="mode-title">');
-    expect(html).toContain('class="mode-card learn"');
+    expect(html).toContain('class="mode-card learn ');
     expect(html).toContain('class="eg-sim-opaca app-shell"');
   });
 
@@ -117,15 +117,16 @@ describe("Opaca App — kitle (T175)", () => {
     expect(html).toContain("visitor-banner");
     expect(html).toContain("Ziyaretçi modu");
     expect(html).toContain("Öğrenci girişi");
-    expect(html.match(/data-audience-locked="true"/g) ?? []).toHaveLength(2);
+    // T289: uygulama, değerlendirme ve 4. mod Meydan Okuma ziyaretçide kilitli.
+    expect(html.match(/data-audience-locked="true"/g) ?? []).toHaveLength(3);
     expect(html).not.toContain("Başarılarım");
     expect(html).not.toContain("Bu ayın ödülü");
   });
 
   it("ziyaretçi mod kartlarında uygulama/değerlendirme kilit sınıfı taşır", () => {
     const html = renderApp({ audience: "visitor" });
-    expect(html).toContain('class="mode-card practice audience-locked"');
-    expect(html).toContain('class="mode-card assessment audience-locked"');
+    expect(html).toContain('class="mode-card practice audience-locked ');
+    expect(html).toContain('class="mode-card assessment audience-locked ');
   });
 
   it("ziyaretçi Öğrenme ekranında ilk kategori + 2 bulgu açık; diğerleri kilit rozetiyle işaretli", () => {

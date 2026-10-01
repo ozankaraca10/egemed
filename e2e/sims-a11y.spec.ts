@@ -365,7 +365,7 @@ const OPACA_SCREENS: readonly Screen[] = [
     label: "Öğrenme (kütüphane)",
     route: "#/sims/opaca/ogrenme",
     async open(root) {
-      await root.locator(".mode-card.learn button.btn").first().click();
+      await root.locator(".mode-card.learn button.eg-gami-mode-cta").first().click();
       await expect(root.locator(".lib-col")).toBeVisible();
     },
   },
@@ -414,7 +414,7 @@ const AUSCULTA_SCREENS: readonly Screen[] = [
     label: "Öğrenme (kütüphane)",
     route: "#/sims/ausculta/ogrenme",
     async open(root) {
-      await root.locator(".mode-card.learn button.btn").first().click();
+      await root.locator(".mode-card.learn button.eg-gami-mode-cta").first().click();
       // Kütüphane başlığı (h2) kaynağın mobil düzeninde gizlidir (T133) — görünür ilk kayıt yeterli.
       await expect(root.locator(".lib-col .lib-item").first()).toBeVisible();
     },

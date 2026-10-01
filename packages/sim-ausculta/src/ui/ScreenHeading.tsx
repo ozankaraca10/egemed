@@ -11,6 +11,7 @@ interface EmbeddedValue {
   readonly sessions?: SimSessionSource;
   readonly challengeId?: string;
   readonly onChallengeFinished?: (challengeId: string) => void;
+  readonly openChallenges?: () => void;
 }
 
 const EmbeddedContext = createContext<EmbeddedValue>({ embedded: false, audience: "student" });
@@ -23,6 +24,7 @@ export function EmbeddedProvider({
   sessions,
   challengeId,
   onChallengeFinished,
+  openChallenges,
   children,
 }: {
   readonly embedded: boolean;
@@ -32,6 +34,7 @@ export function EmbeddedProvider({
   readonly sessions?: SimSessionSource;
   readonly challengeId?: string;
   readonly onChallengeFinished?: (challengeId: string) => void;
+  readonly openChallenges?: () => void;
   readonly children: ReactNode;
 }): JSX.Element {
   const value: EmbeddedValue = {
@@ -42,6 +45,7 @@ export function EmbeddedProvider({
     ...(sessions === undefined ? {} : { sessions }),
     ...(challengeId === undefined ? {} : { challengeId }),
     ...(onChallengeFinished === undefined ? {} : { onChallengeFinished }),
+    ...(openChallenges === undefined ? {} : { openChallenges }),
   };
   return <EmbeddedContext.Provider value={value}>{children}</EmbeddedContext.Provider>;
 }
@@ -77,6 +81,11 @@ export function useChallenge(): { readonly challengeId?: string; readonly onChal
     ...(value.challengeId === undefined ? {} : { challengeId: value.challengeId }),
     ...(value.onChallengeFinished === undefined ? {} : { onChallengeFinished: value.onChallengeFinished }),
   };
+}
+
+/** T289: 4. mod kartı "Meydan Okuma" → kabuk merkezi; ziyaretçide/düelloda yoktur. */
+export function useOpenChallenges(): (() => void) | undefined {
+  return useContext(EmbeddedContext).openChallenges;
 }
 
 export interface ScreenHeadingProps {

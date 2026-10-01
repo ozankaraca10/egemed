@@ -22,6 +22,9 @@ import { createLoginRateLimiter } from "../auth/rate-limit";
 import { toIstanbulIso } from "../admin/users";
 import { serverAttemptXp, type GamificationRepo } from "./gamification";
 import { varyWav } from "./wav";
+import { CONSISTENCY_SESSION_COUNT, type IntegritySignalName } from "../integrity/thresholds";
+import { buildFlagSignals, computeCaseSignals, integrityScore, isConsistentFast, median, shouldFlag } from "../integrity/signals";
+import type { IntegrityRepo } from "../integrity/repo";
 
 /**
  * A1.3 (ADR-009, docs/specs/A1-sunucu-oturumu.md): sunucu vaka oturumu.
@@ -189,6 +192,8 @@ export interface SimCaseState {
   heardTokens: string[];
   timedOut: boolean;
   result: SimCaseResult | null;
+  /** T283a: yanıt anında hesaplanan davranış sinyalleri (ör. `too_fast`); hiç açılmamış/sentetik puanlanan vakada boş kalır. */
+  integritySignals: IntegritySignalName[];
 }
 
 export interface SimSessionRow {
@@ -205,6 +210,8 @@ export interface SimSessionRow {
   readonly challengeId: string | null;
   /** Düelloda iki tarafa aynı seçenek sırası için tohum; diğer modlarda null. */
   readonly state: { readonly cases: SimCaseState[]; readonly shuffleSeed?: number | null; total?: number | null };
+  /** T283a: oturum bitişinde bütünlük skoru eşiği aşılırsa `unverified`; ceza değildir, yalnız işarettir. */
+  integrityStatus: "unverified" | "verified" | null;
 }
 
 export interface SimSessionRepo {
@@ -215,6 +222,8 @@ export interface SimSessionRepo {
   expireOpen(userId: string, simId: SimId, mode: SimSessionMode): Promise<void>;
   /** ADR-010: bir düelloya ait oturumlar. */
   listByChallenge(challengeId: string): Promise<readonly SimSessionRow[]>;
+  /** T283a: tutarlılık sinyali için kullanıcının son bitmiş oturumları (bitiş anına göre azalan). */
+  listRecentFinished(userId: string, modes: readonly SimSessionMode[], limit: number): Promise<readonly SimSessionRow[]>;
 }
 
 export interface SimSessionDeps {
@@ -231,6 +240,8 @@ export interface SimSessionDeps {
   readonly newId: () => string;
   /** ADR-010: düello oturumu bitince düello kaydı güncellenir (verilmezse yok sayılır). */
   readonly onFinished?: (row: SimSessionRow, total: number) => Promise<void>;
+  /** T283a: davranış sinyali eşiği aşılırsa `integrity_flags`'e yazar. */
+  readonly integrity: IntegrityRepo;
 }
 
 const EMPTY_TELEMETRY: SimTelemetry = { visits: {}, order: [], headChanges: 0, headUse: { bell: 0, diaphragm: 0 }, replayCount: 0 };
@@ -274,6 +285,7 @@ export function newSessionRow(input: {
     expiresAt: input.at + SIM_SESSION_TTL_MS,
     finishedAt: null,
     challengeId: input.challengeId ?? null,
+    integrityStatus: null,
     state: {
       shuffleSeed: input.shuffleSeed ?? null,
       cases: input.caseIds.map((caseId) => ({
@@ -288,9 +300,17 @@ export function newSessionRow(input: {
         heardTokens: [],
         timedOut: false,
         result: null,
+        integritySignals: [],
       })),
     },
   };
+}
+
+/** Sunucu saatiyle gerçekten açılıp yanıtlanmış vakaların gecikmeleri (ms); sentetik puanlanan vakalar `openedAt === null` kaldığı için hariç kalır. */
+function realCaseLatencies(row: SimSessionRow): number[] {
+  return row.state.cases
+    .filter((item) => item.openedAt !== null && item.answeredAt !== null)
+    .map((item) => (item.answeredAt as number) - (item.openedAt as number));
 }
 
 /** Hiç ses jetonu istenmemiş noktanın dinleme beyanı sıfırlanır (çapraz doğrulama). */
@@ -539,6 +559,14 @@ export function registerSimSessionRoutes(app: Hono<AppEnv>, deps: SimSessionDeps
     item.answeredAt = at;
     item.timedOut = late;
     item.result = result;
+    // T283a: sunucu saatiyle ölçülen sinyaller — yalnız tespit/işaretleme, bu istekte ceza yok.
+    item.integritySignals = computeCaseSignals({
+      simId: row.simId,
+      mastery: result.mastery,
+      latencyMs: at - item.openedAt,
+      noListenedPoints: row.simId === "ausculta" && heardPointsOf(item).size === 0,
+      integrity: parsed.data.integrity,
+    });
     await deps.sessions.save(row);
     if (late) return jsonError(c, "validation_failed", { issues: [{ code: "case_time_exceeded" }] });
     if (row.mode === "practice") return c.json({ data: { mode: "practice" as const, result } });
@@ -616,10 +644,40 @@ export function registerSimSessionRoutes(app: Hono<AppEnv>, deps: SimSessionDeps
         xpGained = serverAttemptXp({ mode: row.mode, caseCount: counted.length, hintsUsed, score: total, maxScore: 100, passed });
       }
     }
+    // T283a (ADR-009 §6): davranış sinyalleri yalnız burada toplanır ve işaretlenir;
+    // puan/XP/rozet/liderlik yukarıdaki bloktan etkilenmez (yalnız tespit).
+    const caseSignalLists = row.state.cases.map((item) => item.integritySignals);
+    let consistentFast = false;
+    if (isTimedSessionMode(row.mode)) {
+      const priorRecent = await deps.sessions.listRecentFinished(actor.userId, ["assessment", "challenge"], CONSISTENCY_SESSION_COUNT - 1);
+      consistentFast = isConsistentFast([
+        { simId: row.simId, correctRate: total, medianLatencyMs: median(realCaseLatencies(row)) },
+        ...priorRecent.map((session) => ({
+          simId: session.simId,
+          correctRate: session.state.total ?? 0,
+          medianLatencyMs: median(realCaseLatencies(session)),
+        })),
+      ]);
+    }
+    const integrityScoreValue = integrityScore(caseSignalLists, consistentFast);
+    const flagged = shouldFlag(integrityScoreValue);
+    if (flagged) row.integrityStatus = "unverified";
     row.status = "finished";
     row.finishedAt = at;
     row.state.total = total;
     await deps.sessions.save(row);
+    if (flagged) {
+      await deps.integrity.write({
+        id: deps.newId(),
+        sessionId: row.id,
+        userId: actor.userId,
+        simId: row.simId,
+        mode: row.mode,
+        score: integrityScoreValue,
+        signals: buildFlagSignals(caseSignalLists, consistentFast),
+        createdAt: at,
+      });
+    }
     if (row.challengeId !== null && deps.onFinished !== undefined) await deps.onFinished(row, total);
     return c.json({
       data: {
@@ -695,6 +753,7 @@ interface PgSimSessionRow {
   readonly expires_at: Date;
   readonly finished_at: Date | null;
   readonly challenge_id: string | null;
+  readonly integrity_status: SimSessionRow["integrityStatus"];
 }
 
 export function createPgSimSessionRepo(db: SimSessionDb): SimSessionRepo {
@@ -719,7 +778,7 @@ export function createPgSimSessionRepo(db: SimSessionDb): SimSessionRepo {
     },
     async get(id) {
       const result = await db.query(
-        "select id, user_id, institution_id, sim_id, mode, status, state, started_at, expires_at, finished_at, challenge_id from sim_sessions where id = $1",
+        "select id, user_id, institution_id, sim_id, mode, status, state, started_at, expires_at, finished_at, challenge_id, integrity_status from sim_sessions where id = $1",
         [id],
       );
       const row = result.rows[0] as PgSimSessionRow | undefined;
@@ -736,18 +795,28 @@ export function createPgSimSessionRepo(db: SimSessionDb): SimSessionRepo {
         expiresAt: row.expires_at.getTime(),
         finishedAt: row.finished_at === null ? null : row.finished_at.getTime(),
         challengeId: row.challenge_id,
+        integrityStatus: row.integrity_status,
       };
     },
     async save(row) {
-      await db.query("update sim_sessions set status = $2, state = $3::jsonb, finished_at = $4 where id = $1", [
+      await db.query("update sim_sessions set status = $2, state = $3::jsonb, finished_at = $4, integrity_status = $5 where id = $1", [
         row.id,
         row.status,
         JSON.stringify(row.state),
         row.finishedAt === null ? null : new Date(row.finishedAt),
+        row.integrityStatus,
       ]);
     },
     async listByChallenge(challengeId) {
       const result = await db.query("select id from sim_sessions where challenge_id = $1", [challengeId]);
+      const rows = await Promise.all((result.rows as readonly { readonly id: string }[]).map((row) => this.get(row.id)));
+      return rows.filter((row): row is SimSessionRow => row !== null);
+    },
+    async listRecentFinished(userId, modes, limit) {
+      const result = await db.query(
+        "select id from sim_sessions where user_id = $1 and status = 'finished' and mode = any($2) order by finished_at desc limit $3",
+        [userId, modes, limit],
+      );
       const rows = await Promise.all((result.rows as readonly { readonly id: string }[]).map((row) => this.get(row.id)));
       return rows.filter((row): row is SimSessionRow => row !== null);
     },
@@ -779,6 +848,13 @@ export function createMemorySimSessionRepo(): SimSessionRepo & { readonly rows: 
     },
     async listByChallenge(challengeId) {
       return [...rows.values()].filter((row) => row.challengeId === challengeId).map(clone);
+    },
+    async listRecentFinished(userId, modes, limit) {
+      return [...rows.values()]
+        .filter((row) => row.userId === userId && row.status === "finished" && modes.includes(row.mode))
+        .sort((a, b) => (b.finishedAt ?? 0) - (a.finishedAt ?? 0))
+        .slice(0, limit)
+        .map(clone);
     },
     async expireOpen(userId, simId, mode) {
       for (const row of rows.values()) {

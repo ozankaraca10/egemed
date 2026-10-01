@@ -235,7 +235,7 @@ okuma kapsamı dışında bırakıldı, yalnız migration'daki view koda dayanı
 ## 3. Sim oturumları ve Meydan Okuma
 
 Kaynak: `009_sim_sessions.sql`, `010_challenges.sql`, `011_sim_learn_completions.sql`,
-`013_duel_results.sql`.
+`013_duel_results.sql`, `015_integrity_flags.sql`.
 
 ```mermaid
 erDiagram
@@ -251,6 +251,21 @@ erDiagram
     timestamptz expires_at
     timestamptz finished_at "nullable"
     uuid challenge_id "nullable (010); FK KISITI TANIMLI DEĞİL"
+    text integrity_status "nullable, unverified|verified (015)"
+  }
+  integrity_flags {
+    uuid id PK
+    uuid session_id FK "sim_sessions, on delete cascade"
+    uuid user_id FK "users, on delete cascade"
+    text sim_id "pulse|ausculta|opaca"
+    text mode "practice|assessment|challenge"
+    numeric score ">= 0; 10 vakaya normalize sinyal puanı"
+    jsonb signals "yalnız sinyal adı + sayı; serbest metin yok (KVKK)"
+    text status "pending|cleared|confirmed, varsayılan pending"
+    timestamptz created_at
+    uuid reviewed_by FK "nullable, users, on delete set null"
+    timestamptz reviewed_at "nullable"
+    text note "nullable; yalnız yönetici notu (T283b)"
   }
   sim_learn_completions {
     uuid user_id PK, FK
@@ -276,6 +291,8 @@ erDiagram
   }
 
   challenges |o..o{ sim_sessions : "challenge_id (uygulama düzeyinde eşleşir, DB FK'sı yok)"
+  sim_sessions ||--o{ integrity_flags : "şüpheli oturum işaretlenir (T283a, yalnız tespit)"
+  users ||--o{ integrity_flags : "işaretlenen kullanıcı"
 ```
 
 ## 4. Aylık ödüller

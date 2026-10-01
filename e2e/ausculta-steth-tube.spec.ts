@@ -32,7 +32,7 @@ test.describe("Ausculta stetoskop tüpü (T228)", () => {
   test("tüp göğüs parçasını izler, bağlantı sabit kalır, sahne taşmaz", async ({ page }, testInfo) => {
     const errors = trackErrors(page);
     await openRoute(page, "#/sims/ausculta");
-    await page.locator(".mode-card.learn button.btn").first().click();
+    await page.locator(".mode-card.learn button.eg-gami-mode-cta").first().click();
 
     const stage = page.locator(".learn-grid .stage-card .stage");
     await expect(stage).toBeVisible();
