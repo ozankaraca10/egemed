@@ -147,7 +147,6 @@ export function EntryPage({ role, devEnabled = false, apiBaseUrl = null, onApiSi
       {/* T296 (depo sahibi onayı 1 Eki 2026): fotoğrafsız lacivert sahne, gerçek EGEMED ve sim logo setleri. */}
       <section aria-label={t("entry.brand")} className="eg-shell-entry__brand">
         <div className="eg-shell-entry__brandTop">
-          <img alt="" className="eg-shell-entry__logo" height={128} src="/brand/ege-tip-logo.png" width={128} />
           <EgemedLogo variant="on-dark" />
         </div>
         <div className="eg-shell-entry__pitch">
