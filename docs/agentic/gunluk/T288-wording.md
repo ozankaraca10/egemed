@@ -1,7 +1,7 @@
 # T288-wording
 
-- Tarih: 2026-10-01 08:11
-- Commit: T288: kullanıcıya görünen 'düello' ifadeleri 'karşılaşma' oldu — rozetler, sim sonuç düğmeleri, e-postalar (Luna; review: Claude)
+- Tarih: 2026-10-01 09:21
+- Commit: T288: kullanıcıya görünen 'düello' → 'karşılaşma' (rozetler, sim sonuçları, e-postalar); ai-guard e2e sağlamlaştırma (Luna; review: Claude)
 - Dal: task/T288-wording
 
 ---
