@@ -10,6 +10,7 @@ import { createBrowserLearnSource, createLearnPort, createUnlockedLearnPort } fr
 import type { SimLearnPort, SimSessionSource } from "@egemed/sim-host";
 import { useShellDataSources } from "./dataSources";
 import { createBrowserSimNavigation } from "./simNavigation";
+import { AiGuardOverlay, useAiGuard } from "./integrity/AiGuardOverlay";
 
 /**
  * A1.4 (ADR-009): uygulama/değerlendirme vakaları sunucu oturumundan gelir. Ziyaretçide
@@ -297,6 +298,8 @@ function SimRouteHost({ actorId, apiBaseUrl = null, audience = "student", challe
     };
   }, [simId, actorId, apiBaseUrl, audience, challengeId, learnUnlocked, attempt]);
 
+  // T283f: XP kazandıran rekabetçi ekranda (değerlendirme, Meydan Okuma) yerel yapay zekâ ajanı tespiti.
+  const guard = useAiGuard(audience === "student");
   // Başlık (h1) ve konum birleşik bardadır; sim tam alanı çerçevesiz kaplar.
   return (
     <section aria-busy={status === "loading"} aria-label={t(simTitleKey(simId))} className="eg-shell-sim-page">
@@ -316,6 +319,7 @@ function SimRouteHost({ actorId, apiBaseUrl = null, audience = "student", challe
           </div>
         )}
         {status === "error" && <SimErrorNotice onRetry={() => setAttempt((value) => value + 1)} />}
+        <AiGuardOverlay now={guard.now} state={guard.state} />
       </div>
     </section>
   );

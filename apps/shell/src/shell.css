@@ -416,6 +416,16 @@ html, body { margin: 0; }
    boş kalır, hazır olduğunda vanilla sim modülü kendi kökünü buraya ekler. */
 .eg-shell-sim-page__stage { display: grid; }
 .eg-shell-sim-page__stage > * { grid-area: 1 / 1; min-width: 0; }
+/* T283f — yapay zekâ ajanı uyarısı: sim sahnesini kaplar, altındaki ekran kullanılamaz. */
+.eg-shell-aiguard { position: relative; z-index: 80; display: grid; place-items: center; padding: var(--sp-4); background: var(--duel-shade); backdrop-filter: blur(6px); }
+.eg-shell-aiguard__card { display: grid; justify-items: center; gap: var(--sp-3); width: min(100%, 30rem); padding: var(--sp-5); border-radius: var(--r-xl); background: var(--card); box-shadow: var(--elev-3); text-align: center; }
+.eg-shell-aiguard__icon { display: grid; place-items: center; width: 52px; height: 52px; border-radius: 50%; background: var(--orange-100); color: var(--amber-700); }
+.eg-shell-aiguard__icon svg { width: 28px; height: 28px; }
+.eg-shell-aiguard__title { margin: 0; color: var(--navy-900); font-size: var(--fs-xl); }
+.eg-shell-aiguard__body { margin: 0; color: var(--ink-700); }
+.eg-shell-aiguard__signals { margin: 0; padding: 0; list-style: none; color: var(--ink-700); font-size: var(--fs-sm); font-weight: 700; }
+.eg-shell-aiguard__countdown { margin: 0; padding: 6px 14px; border-radius: var(--r-pill); background: var(--orange-100); color: var(--amber-700); font-weight: 800; font-variant-numeric: tabular-nums; }
+.eg-shell-aiguard__privacy { margin: 0; color: var(--ink-600); font-size: var(--fs-xs); }
 /* Sim tam alan ve çerçevesiz (UX kararı 25 Eylül 2026); hazır olunca yumuşak belirir. */
 .eg-shell-sim-page__host {
   box-sizing: border-box; min-height: calc(100dvh - 6rem);
