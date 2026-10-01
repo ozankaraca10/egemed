@@ -51,7 +51,7 @@ async function suppressFullscreenPrompt(page: Page, actorIds: readonly (string |
 
 /**
  * T208 öğrenme kilidi: uygulama ve değerlendirme, ALL_MODES'daki 23 paternin her
- * biri 16 sn izlenene kadar (değerlendirme ayrıca 10 vaka gönderilene kadar)
+ * biri 60 sn incelenene kadar (değerlendirme ayrıca 10 vaka gönderilene kadar)
  * kapalıdır. Testler kayıt tohumuyla bu eşiği açar; `PULSE_STATE_KEY` biçimi
  * kaynak `scorm.js` ile aynıdır.
  */
@@ -84,7 +84,7 @@ function pulseSeedRecord(options: PulseSeedOptions = {}): Record<string, unknown
     t: 2,
     p: 1,
     f: 0,
-    v: Array.from({ length: 23 }, () => 16_000),
+    v: Array.from({ length: 23 }, () => 60_000),
     u: 4,
     c: seedSession("case", options.casesComplete === true),
     q: seedSession("quiz", false),
@@ -151,6 +151,10 @@ test.describe("Pulse kaynak runtime", () => {
     await expect(root.getByText("Öğretim Üyesinin Seçtiği Kayıtlar")).toBeVisible();
     // "Bu patern hakkında" açılır pencere değil, EKG'nin altında sabit
     await expect(root.locator(".pl-about [data-pl='crit']")).toContainText("PR 120–200 ms");
+    // T302: ölçütün kılavuz kaynağı DOI bağlantısıyla, yeni sekmede
+    const ref = root.locator('[data-pl="refs"] a').first();
+    await expect(ref).toHaveAttribute("href", /^https:\/\/doi\.org\/10\.1161\/CIRCULATIONAHA\.106\.180200$/);
+    await expect(ref).toHaveAttribute("target", "_blank");
     const ecgWidth = await root.locator('[data-pl="canvas"]').evaluate((c) => (c as HTMLCanvasElement).getBoundingClientRect().width);
     expect(ecgWidth, "EKG kâğıdı çerçeveyi doldurur").toBeGreaterThan((page.viewportSize()?.width ?? 0) * 0.5);
     expect(await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)).toBeLessThanOrEqual(0);
@@ -463,7 +467,7 @@ test.describe("Pulse kaynak runtime", () => {
     await openLearn(root);
     await expect(root.locator('[data-pl="done"]')).toHaveText("0");
     await expect(root.locator('[data-pl="total"]')).toHaveText("23");
-    await expect.poll(async () => root.locator('[data-pl="studyText"]').innerText(), { timeout: 8_000 }).toMatch(/İnceleme [2-9]\/16 s/);
+    await expect.poll(async () => root.locator('[data-pl="studyText"]').innerText(), { timeout: 8_000 }).toMatch(/İnceleme [2-9]\/60 s/);
     expect(errors).toEqual([]);
   });
 });

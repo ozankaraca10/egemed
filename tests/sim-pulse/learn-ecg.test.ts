@@ -1,7 +1,8 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import manifest from "../../packages/sim-pulse/src/data/realEcg.json";
-import { learnTextFor, PULSE_VENDOR_MODE } from "../../packages/sim-pulse/src/learn/content";
+import { learnRefsFor, learnTextFor, PULSE_VENDOR_MODE } from "../../packages/sim-pulse/src/learn/content";
+import { PULSE_LEARN_SECONDS } from "../../packages/sim-pulse/src/learn/workspace";
 import { decodePulseEcg, pulseEcgRecord, pulseRhythmStats } from "../../packages/sim-pulse/src/learn/ecg";
 
 // T298: öğrenme modu gerçek 12 derivasyon kaydı gösterir; hız, RR ve kalp
@@ -66,11 +67,19 @@ describe("Pulse öğrenme modu EKG çözümleme", () => {
       expect(text?.crit.length, pattern.key).toBeGreaterThan(20);
       expect(text?.look.length, pattern.key).toBeGreaterThan(0);
       expect(text?.mech.length, pattern.key).toBeGreaterThan(20);
+      // Her ölçütün en az bir DOI'li kılavuz kaynağı var
+      const refs = learnRefsFor(pattern.key);
+      expect(refs.length, `${pattern.key} kaynak`).toBeGreaterThan(0);
+      for (const ref of refs) expect(ref.doi, pattern.key).toMatch(/^10\.\d{4,}\//);
     }
-    // Kaynak runtime ALL_MODES (model.js): kilit bu 23 modun her birinin ≥16 s izlenmesini ister.
+    // Kaynak runtime ALL_MODES (model.js): kilit bu 23 modun her birinin ≥60 s incelenmesini ister.
     const model = readFileSync("packages/sim-pulse/src/runtime/vendor/model.js", "utf8");
     const vendorModes = [...model.matchAll(/MODES=\[([^\]]*)\]/g)].flatMap((m) => [...(m[1] ?? "").matchAll(/'([a-z0-9]+)'/g)].map((x) => x[1]));
     expect(new Set(vendorModes).size).toBe(23);
+    // T302: kilit süresi kaynakta ve öğrenme alanında aynı (60 s)
+    const stateSource = readFileSync("packages/sim-pulse/src/runtime/vendor/state.js", "utf8");
+    expect(Number(/LEARN_S=(\d+)/.exec(stateSource)?.[1])).toBe(PULSE_LEARN_SECONDS);
+    expect(PULSE_LEARN_SECONDS).toBe(60);
     const mapped = Object.values(PULSE_VENDOR_MODE);
     expect(new Set(mapped).size).toBe(mapped.length);
     expect([...mapped].sort()).toEqual([...new Set(vendorModes)].sort());

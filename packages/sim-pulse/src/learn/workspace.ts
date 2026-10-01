@@ -4,13 +4,13 @@
  * Kaynak runtime'ın `#simView` öğrenme alanı (ritim sekmeleri, sentetik EKG,
  * transport) gizlenir; yerine üç sütun gelir: patern rayı · kalp kesiti ve
  * öğretim üyesinin seçtiği kayıtlar · 12 derivasyon kâğıt + EKG altında sabit
- * "Bu patern hakkında". İlerleme kaynağın `state.viewed[mod]` sayacına (≥16 s)
+ * "Bu patern hakkında". İlerleme kaynağın `state.viewed[mod]` sayacına (≥60 s)
  * yazılır; böylece vaka/sınav kilidi, `pulse:learn-complete` ve oyunlaştırma
  * köprüsü değişmeden çalışır.
  */
 import manifest from "../data/realEcg.json";
 import type { PulseRuntimeHandle } from "../runtime/host";
-import { heartProfileFor, learnTextFor, PULSE_VENDOR_MODE } from "./content";
+import { heartProfileFor, learnRefsFor, learnTextFor, PULSE_GUIDELINES, PULSE_VENDOR_MODE } from "./content";
 import { PULSE_ECG_FS, PULSE_ECG_LEADS, pulseEcgRecord, pulseRhythmStats } from "./ecg";
 import type { PulseEcgRecord, PulseRhythmStats } from "./ecg";
 import { PULSE_HEART_SVG, PulseHeartAnimator } from "./heart";
@@ -37,8 +37,8 @@ interface ManifestSource {
 const PATTERNS = (manifest as { patterns: readonly ManifestPattern[] }).patterns;
 const SOURCES = (manifest as unknown as { sources: Readonly<Record<string, ManifestSource>> }).sources;
 
-/** Bir paterni "incelendi" saymak için gereken süre (kaynakla aynı: 16 s). */
-export const PULSE_LEARN_SECONDS = 16;
+/** Bir paterni "incelendi" saymak için gereken süre (kaynak `PulseState.LEARN_S` ile aynı; T302: 60 s). */
+export const PULSE_LEARN_SECONDS = 60;
 const EXTRA_KEY = "pulse.learn.extra";
 
 interface Controller {
@@ -63,6 +63,10 @@ const LAYOUT = [[0, 3, 6, 9], [1, 4, 7, 10], [2, 5, 8, 11]] as const;
 
 function esc(text: string): string {
   return text.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c] ?? c);
+}
+
+function guidelineLink(g: { readonly label: string; readonly title: string; readonly doi: string }): string {
+  return `<a href="https://doi.org/${esc(g.doi)}" target="_blank" rel="noopener noreferrer" title="${esc(g.title)}">${esc(g.label)}</a>`;
 }
 
 function markup(): string {
@@ -106,11 +110,11 @@ function markup(): string {
     <div class="pl-about-head"><span class="pl-eb" data-pl="aGroup"></span><h3 id="pl-about-name" data-pl="aName"></h3><span class="pl-lbl">Bu patern hakkında</span></div>
     <div class="pl-alert" data-pl="aAlert" hidden>Acil: hayatı tehdit eden ya da acil müdahale gerektiren patern.</div>
     <div class="pl-grid">
-      <div class="pl-card"><div class="pl-lbl">Rehber ölçütü</div><div class="pl-crit" data-pl="crit"></div></div>
+      <div class="pl-card"><div class="pl-lbl">Rehber ölçütü</div><div class="pl-crit" data-pl="crit"></div><p class="pl-refs" data-pl="refs"></p></div>
       <div class="pl-card"><div class="pl-lbl">Bu kayıtta bakın</div><ul class="pl-look" data-pl="look"></ul></div>
       <div class="pl-card"><div class="pl-lbl">Kalpte ne oluyor?</div><p class="pl-mech" data-pl="mech"></p></div>
     </div>
-    <p class="pl-src">Ölçütler: AHA/ACCF/HRS EKG standartları · 4. Evrensel MI Tanımı · ESC 2023 AKS kılavuzu</p>
+    <p class="pl-src">Ölçütler: ${[PULSE_GUIDELINES["aha1"], PULSE_GUIDELINES["udmi4"], PULSE_GUIDELINES["escAcs"]].map((g) => (g === undefined ? "" : guidelineLink(g))).join(" · ")} · paterne özgü kılavuzlar ölçüt kartında</p>
   </section>
 </section>
 </div>`;
@@ -259,6 +263,8 @@ export function attachPulseLearnWorkspace(handle: PulseRuntimeHandle, options: P
     $("aName").textContent = p.name;
     $("aAlert").hidden = !p.urgent;
     $("crit").textContent = text?.crit ?? "";
+    const refs = learnRefsFor(key);
+    $("refs").innerHTML = refs.length === 0 ? "" : `<span>Kaynak:</span>${refs.map(guidelineLink).join("")}`;
     $("look").innerHTML = (text?.look ?? []).map((x) => `<li>${esc(x)}</li>`).join("");
     $("mech").textContent = text?.mech ?? "";
     const recs = $("recs");

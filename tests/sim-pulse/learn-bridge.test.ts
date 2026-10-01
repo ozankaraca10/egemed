@@ -71,7 +71,7 @@ function v6Record(): Record<string, unknown> {
     t: 2,
     p: 1,
     f: 0,
-    v: Array.from({ length: 23 }, () => 16_000),
+    v: Array.from({ length: 23 }, () => 60_000),
     u: 4,
     c: {
       i: "egemed-test-session-001",

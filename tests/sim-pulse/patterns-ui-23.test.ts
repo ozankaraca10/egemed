@@ -67,7 +67,7 @@ function vendorObject(name: string): Record<string, unknown> {
   return new Function(`return {${match[1] as string}}`)() as Record<string, unknown>;
 }
 
-const VIEW_MS = 16_000;
+const VIEW_MS = 60_000;
 const completeViews = (): number[] => modelApi.ALL_MODES.map(() => VIEW_MS);
 const GROUP_ORDER = [
   "normal", "sintach", "sinbrady",
@@ -174,14 +174,14 @@ describe("T208 23 paterne geçiş — durum geriye uyumu", () => {
   it("eski 13 uzunluklu v dizisi çözülür, ilerleme korunur, yeni paternler 0 başlar", () => {
     const legacy = v6Record(modelApi.MODES.map(() => VIEW_MS));
     const decoded = stateApi.decode(legacy);
-    expect(decoded.viewed["normal"]).toBe(16);
-    expect(decoded.viewed["rbbb"]).toBe(16);
+    expect(decoded.viewed["normal"]).toBe(VIEW_MS / 1000);
+    expect(decoded.viewed["rbbb"]).toBe(VIEW_MS / 1000);
     for (const pattern of modelApi.PATTERN_MODES) expect(decoded.viewed[pattern], pattern).toBe(0);
     expect(Object.keys(decoded.viewed)).toHaveLength(23);
     const roundtrip = stateApi.encode(decoded);
     expect(roundtrip["v"]).toHaveLength(23);
     const again = stateApi.decode(roundtrip);
-    expect(again.viewed["normal"]).toBe(16);
+    expect(again.viewed["normal"]).toBe(VIEW_MS / 1000);
     expect(again.viewed["hyperk"]).toBe(0);
   });
 
@@ -192,7 +192,7 @@ describe("T208 23 paterne geçiş — durum geriye uyumu", () => {
     expect(stateApi.decode({ ...v6Record(views), m: 22 }).mode).toBe("hyperk");
     const decoded = stateApi.decode({ ...v6Record(views), v: [...views.slice(0, 22), 0] });
     expect(decoded.viewed["hyperk"]).toBe(0);
-    expect(decoded.viewed["inferior"]).toBe(16);
+    expect(decoded.viewed["inferior"]).toBe(VIEW_MS / 1000);
   });
 });
 
