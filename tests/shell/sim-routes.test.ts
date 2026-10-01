@@ -2,7 +2,7 @@ import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { SimulatorsPage } from "../../apps/shell/src/pages";
 import { resolveRoute, routeHref, SIM_PATHS, simHref, simTitleKey } from "../../apps/shell/src/routes";
-import { SIM_IDS, SimCard } from "../../apps/shell/src/SimCard";
+import { SIM_IDS } from "../../apps/shell/src/SimCard";
 import { ShellLayout } from "../../apps/shell/src/ShellLayout";
 import { SimErrorNotice, SimRoute } from "../../apps/shell/src/SimRoute";
 import { SIMULATOR_IDS } from "../../packages/sim-host/src/SimHost";
@@ -26,33 +26,12 @@ describe("sim rotaları", () => {
   });
 });
 
-describe("SimCard erişilebilir başlık düzeni", () => {
-  it("logo dekoratif, başlık görsel gizli ve logodan önce; rozet çizilmez", () => {
-    for (const [headingLevel, tag] of [[3, "h3"], [2, "h2"]] as const) {
-      for (const simId of SIM_IDS) {
-        const html = renderToStaticMarkup(
-          createElement(SimCard, { headingLevel, href: simHref(simId), id: simId }),
-        );
-        const headingIndex = html.indexOf(`<${tag} class="eg-visually-hidden">`);
-        const logoIndex = html.indexOf('class="eg-shell-sim__logo"');
-        const linkIndex = html.indexOf('class="eg-shell-sim__link"');
-        expect(html, `${simId} ${tag}`).toContain(
-          `<${tag} class="eg-visually-hidden">${t(`sims.${simId}.name`)}</${tag}>`,
-        );
-        expect(headingIndex, `${simId} ${tag}`).toBeLessThan(logoIndex);
-        expect(logoIndex, `${simId} ${tag}`).toBeLessThan(linkIndex);
-        expect(html, `${simId} ${tag}`).not.toContain('class="eg-badge"');
-        expect(html, `${simId} ${tag}`).toContain(`href="${simHref(simId)}"`);
-      }
-    }
-  });
+describe("Simülatörler sayfası başlık düzeni", () => {
 
-  it("simülatörler sayfasında kart başlıkları h2 olarak kalır", () => {
+  it("simülatörler sayfasında kart başlıkları h2 olarak kalır (T296 vitrin kartı)", () => {
     const html = renderToStaticMarkup(createElement(SimulatorsPage));
     for (const simId of SIM_IDS) {
-      expect(html, simId).toContain(
-        `<h2 class="eg-visually-hidden">${t(`sims.${simId}.name`)}</h2>`,
-      );
+      expect(html, simId).toContain(`<h2 class="eg-shell-simshow__name" id="eg-sim-${simId}">${t(`sims.${simId}.name`)}</h2>`);
     }
   });
 });

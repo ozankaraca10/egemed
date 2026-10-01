@@ -366,6 +366,7 @@ html, body { margin: 0; }
 .eg-shell-how__step--learn { border-top-color: var(--green-600); }
 .eg-shell-how__step--practice { border-top-color: var(--blue-600); }
 .eg-shell-how__step--assess { border-top-color: var(--purple-600); }
+.eg-shell-how__step--challenge { border-top-color: var(--orange-500); }
 .eg-shell-how__num {
   display: inline-flex; align-items: center; justify-content: center;
   width: 2rem; height: 2rem; border-radius: var(--r-pill);
@@ -374,36 +375,13 @@ html, body { margin: 0; }
 .eg-shell-how__step--learn .eg-shell-how__num { background: var(--green-50); color: var(--green-600); }
 .eg-shell-how__step--practice .eg-shell-how__num { background: var(--blue-50); color: var(--blue-700); }
 .eg-shell-how__step--assess .eg-shell-how__num { background: var(--purple-50); color: var(--purple-600); }
+.eg-shell-how__step--challenge .eg-shell-how__num { background: var(--orange-100); color: var(--amber-700); }
 .eg-shell-how__title { margin: var(--sp-2) 0; color: var(--navy-800); font-size: var(--fs-lg); }
 .eg-shell-how__body { margin: 0; color: var(--muted); }
-.eg-shell-sim { display: grid; gap: var(--sp-2); }
 /* Rozet kartın en üstünde, başlığın yanındadır; başlık görsel gizli kalır
    (ad zaten logoda yazılı), erişilebilir ad tek kaynaktan gelir. */
-.eg-shell-sim__head { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-2); }
 /* T162: sabit logo çerçevesi — farklı en-boy oranlı logolar aynı hizada ortalanır. */
-.eg-shell-sim__logoFrame {
-  display: flex; align-items: center; justify-content: center; box-sizing: border-box; height: 7rem; padding: var(--sp-3);
-  background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--r-md);
-}
-.eg-shell-sim--large .eg-shell-sim__logoFrame { height: 9rem; }
-.eg-shell-sim__logo { width: 100%; height: 100%; min-width: 0; min-height: 0; object-fit: contain; object-position: center; }
-.eg-shell-sim__tagline { margin: 0; color: var(--navy-800); font-weight: 600; }
-.eg-shell-sim__body { margin: 0; color: var(--muted); }
-.eg-shell-sim__noaccess { margin: 0; color: var(--red-600); font-size: var(--fs-sm); font-weight: 700; }
-.eg-shell-sim__link,
-.eg-shell-progress__openSim {
-  justify-self: start; display: inline-flex; align-items: center; gap: var(--sp-2); box-sizing: border-box;
-  min-height: var(--eg-shell-touch-min); margin-top: var(--sp-1); padding: 0 var(--sp-4);
-  background: var(--surface); border: 1px solid var(--border-strong); border-radius: var(--r-md); box-shadow: var(--elev-1);
-  color: var(--ink-800); font-weight: 600; text-decoration: none;
-  transition: background-color var(--dur-2) var(--ease-out), border-color var(--dur-2) var(--ease-out);
-}
-.eg-shell-sim__link:hover,
-.eg-shell-progress__openSim:hover { background: var(--blue-50); border-color: var(--blue-300); }
-.eg-shell-sim__link:focus-visible,
-.eg-shell-progress__openSim:focus-visible { outline: 2px solid var(--focus-color); outline-offset: 2px; }
 .eg-shell-progress__openSim { justify-self: end; }
-.eg-shell-sim__linkIcon { width: 18px; height: 18px; }
 /* --- Sim rotası (React host + yer tutucu modül) --- */
 .eg-shell-sim-page { display: grid; gap: var(--sp-4); }
 .eg-shell-sim-page__bar {
@@ -552,8 +530,7 @@ html, body { margin: 0; }
   display: flex; flex-direction: column; align-items: center; justify-content: center;
   box-sizing: border-box; min-width: 0; padding: var(--sp-6);
   /* Sahibin klinik sahne görseli tam görünür; üzerinde mevcut panel renginde %10 katman (::before). */
-  background: var(--navy-900) url("/brand/entry-bg.jpg") center 35% / cover no-repeat; color: var(--card); text-align: center;
-  text-shadow: 0 1px 3px var(--navy-900), 0 0 12px var(--navy-900);
+  background: var(--navy-900); color: var(--card); text-align: center;
 }
 .eg-shell-entry__brand::before {
   position: absolute; z-index: -1; inset: 0; content: "";
@@ -572,35 +549,6 @@ html, body { margin: 0; }
 .eg-shell-entry__sim { display: grid; justify-items: center; gap: var(--sp-2); }
 .eg-shell-entry__simicon { display: block; width: 3.25rem; height: 3.25rem; object-fit: contain; }
 .eg-shell-entry__simname { color: var(--card); font-size: var(--fs-sm); font-weight: 700; letter-spacing: .06em; }
-/* Tanıtım paneli: koyu cam kart, altın vurgulu başlık; modlar hap, oyunlaştırma ikonlu satır. */
-.eg-shell-entry__features {
-  display: grid; justify-items: center; gap: var(--sp-3); box-sizing: border-box;
-  width: min(100%, 34rem); margin-top: var(--sp-5); padding: var(--sp-4) var(--sp-5);
-  background: var(--glass-deep);
-  border: 1px solid var(--glass-line); border-radius: var(--r-xl);
-  box-shadow: var(--elev-3); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
-  text-shadow: none;
-}
-.eg-shell-entry__featTitle { margin: 0; color: var(--orange-500); font-size: var(--fs-xs); font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
-.eg-shell-entry__modes, .eg-shell-entry__perks { display: flex; flex-wrap: wrap; justify-content: center; margin: 0; padding: 0; list-style: none; }
-.eg-shell-entry__modes { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--sp-2); width: min(100%, 22rem); }
-.eg-shell-entry__modes .eg-shell-entry__mode { justify-content: center; }
-.eg-shell-entry__mode {
-  display: inline-flex; align-items: center; gap: var(--sp-1); padding: 6px var(--sp-3);
-  background: var(--glass-chip); border: 1px solid var(--glass-line);
-  border-radius: var(--r-pill); color: var(--card); font-size: var(--fs-sm); font-weight: 600;
-}
-.eg-shell-entry__featIcon { width: 1rem; height: 1rem; color: var(--blue-300); }
-.eg-shell-entry__perks {
-  gap: var(--sp-2) var(--sp-5); width: 100%; padding-top: var(--sp-3);
-  border-top: 1px solid var(--glass-line);
-}
-.eg-shell-entry__perk { display: inline-flex; align-items: center; gap: var(--sp-2); color: var(--card); font-size: var(--fs-sm); font-weight: 700; }
-.eg-shell-entry__perkIcon {
-  display: inline-grid; place-items: center; width: 2rem; height: 2rem; border-radius: var(--r-pill);
-  background: var(--gold-tint); box-shadow: inset 0 0 0 1px var(--orange-500); color: var(--orange-500);
-}
-.eg-shell-entry__perkIcon svg { width: 1rem; height: 1rem; }
 .eg-shell-entry__main {
   display: flex; flex-direction: column; align-items: center; justify-content: center;
   box-sizing: border-box; min-width: 0; padding: var(--sp-6);
@@ -652,14 +600,11 @@ html, body { margin: 0; }
 @media (max-width: 768px) {
   .eg-shell-entry { grid-template-columns: minmax(0, 1fr); }
   .eg-shell-entry__brand { min-height: 13rem; padding: var(--sp-4); }
-  .eg-shell-entry__brand { background-image: url("/brand/entry-bg-760.jpg"); }
   .eg-shell-entry__brand > .eg-shell-logo { margin: var(--sp-2) 0; gap: var(--sp-1); }
   .eg-shell-entry__brand .eg-shell-logo__mark { height: 3.5rem; }
   .eg-shell-entry__brand .eg-shell-logo__tagline { font-size: var(--fs-md); }
   .eg-shell-entry__sims { gap: var(--sp-3); margin-top: var(--sp-3); }
   .eg-shell-entry__simicon { width: 2.5rem; height: 2.5rem; }
-  .eg-shell-entry__features { margin-top: var(--sp-3); padding: var(--sp-3); gap: var(--sp-2); }
-  .eg-shell-entry__perks { gap: var(--sp-2) var(--sp-3); padding-top: var(--sp-2); }
   .eg-shell-entry__main { align-items: center; justify-content: flex-start; padding: var(--sp-4) var(--sp-3) calc(var(--sp-5) + env(safe-area-inset-bottom)); }
   .eg-shell-entry__panel { padding: var(--sp-4); }
 }
@@ -693,7 +638,7 @@ html, body { margin: 0; }
   /* Gezinme üst bara döndüğü için footer'ın alt çubuk boşluğu gerekmez. */
   .eg-shell .eg-shell-footer { padding-bottom: var(--sp-2); }
   .eg-shell-cards { grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr)); }
-  .eg-shell-how { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .eg-shell-how { grid-template-columns: repeat(4, minmax(0, 1fr)); }
   .eg-shell-trust { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .eg-shell-hero { padding: var(--sp-6); }
 }
@@ -1184,3 +1129,175 @@ body { font-family: var(--font); }
 .eg-shell-about__tab:focus-visible { outline: 2px solid var(--focus-color); outline-offset: 2px; }
 .eg-shell-about__tabIcon { width: 24px; height: 24px; border-radius: 6px; }
 .eg-shell-about__panel { margin-top: var(--sp-4); }
+
+/* T296 — Giriş (depo sahibi onayı 1 Eki 2026): fotoğrafsız lacivert sahne, gerçek logo setleri,
+   güçlü başlık; sağ panel sade. Önceki merkezli düzenin üzerine yazar. */
+.eg-shell-entry { grid-template-columns: minmax(0, 1.1fr) minmax(0, .9fr); background: var(--card); }
+.eg-shell-entry__brand {
+  align-items: flex-start; justify-content: space-between; gap: var(--sp-6); text-align: left;
+  padding: clamp(24px, 4vw, 56px);
+  background:
+    radial-gradient(70% 60% at 85% 10%, var(--duel-me-glow), var(--clear) 70%),
+    radial-gradient(60% 50% at 0% 100%, var(--gold-glow), var(--clear) 70%),
+    linear-gradient(165deg, var(--navy-950), var(--navy-800));
+}
+.eg-shell-entry__brand::before { opacity: 0; }
+.eg-shell-entry__brandTop { display: flex; align-items: center; gap: var(--sp-4); }
+.eg-shell-entry__logo { width: 4.5rem; height: auto; }
+.eg-shell-entry__brand > .eg-shell-entry__brandTop > .eg-shell-logo { margin: 0; }
+.eg-shell-entry__brand .eg-shell-logo__mark { height: clamp(2.75rem, 4vw, 3.5rem); width: auto; }
+.eg-shell-entry__brand .eg-shell-logo__tagline { display: none; }
+.eg-shell-entry__pitch { display: grid; gap: var(--sp-3); max-width: 36rem; }
+.eg-shell-entry__eyebrow { margin: 0; color: var(--orange-500); font-size: var(--fs-xs); font-weight: 800; letter-spacing: .14em; text-transform: uppercase; }
+.eg-shell-entry__headline { margin: 0; color: var(--card); font-size: clamp(30px, 3.6vw, 48px); font-weight: 800; line-height: 1.05; letter-spacing: -.025em; text-wrap: balance; }
+.eg-shell-entry__lead { margin: 0; color: var(--blue-100); max-width: 46ch; }
+.eg-shell-entry__sims { display: flex; flex-wrap: wrap; justify-content: flex-start; gap: var(--sp-2); margin: var(--sp-3) 0 0; grid-template-columns: none; }
+.eg-shell-entry__sim { display: inline-flex; align-items: center; gap: var(--sp-2); padding: 6px 14px 6px 6px; border-radius: var(--r-pill); background: var(--glass-chip); box-shadow: inset 0 0 0 1px var(--glass-line); }
+.eg-shell-entry__simicon { width: 2rem; height: 2rem; }
+.eg-shell-entry__simname { letter-spacing: 0; }
+.eg-shell-entry__quote { margin: 0; padding-left: var(--sp-3); border-left: 3px solid var(--orange-500); color: var(--blue-100); font-size: var(--fs-sm); max-width: 44ch; }
+.eg-shell-entry__main { background: var(--card); }
+.eg-shell-entry__panel { width: min(100%, 28rem); padding: 0; border: 0; box-shadow: none; background: var(--clear); }
+.eg-shell-entry__roles { background: var(--surface-2); border: 0; box-shadow: inset 0 0 0 1px var(--border); }
+.eg-shell-entry__roles a[aria-current="page"] { background: var(--card); color: var(--navy-900); box-shadow: var(--shadow-card); }
+.eg-shell-entry__title { font-size: var(--fs-3xl); letter-spacing: -.02em; }
+.eg-shell-entry__trust { display: flex; flex-wrap: wrap; gap: var(--sp-2) var(--sp-4); margin: var(--sp-4) 0 0; padding: 0; list-style: none; color: var(--ink-600); font-size: var(--fs-xs); }
+.eg-shell-entry__trust li { display: inline-flex; align-items: center; gap: 6px; }
+.eg-shell-entry__trust li::before { content: "✓"; color: var(--green-600); font-weight: 800; }
+@media (max-width: 900px) {
+  .eg-shell-entry { grid-template-columns: minmax(0, 1fr); }
+  .eg-shell-entry__brand { min-height: 0; gap: var(--sp-4); padding: var(--sp-5) var(--sp-4); }
+  .eg-shell-entry__headline { font-size: var(--fs-2xl); }
+  .eg-shell-entry__quote { display: none; }
+}
+
+/* T296 — Simülatörler (depo sahibi onayı 1 Eki 2026): sim başına geniş vitrin kartı. */
+.eg-shell-simspage { display: grid; gap: var(--sp-5); max-width: 76rem; }
+.eg-shell-simspage__head { display: grid; gap: var(--sp-1); }
+.eg-shell-simspage__eyebrow { margin: 0; color: var(--blue-700); font-size: var(--fs-xs); font-weight: 800; letter-spacing: .14em; text-transform: uppercase; }
+.eg-shell-simspage__list, .eg-shell-simspage__upcoming { display: grid; gap: var(--sp-4); }
+.eg-shell-simspage__upcoming { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.eg-shell-simshow {
+  --eg-sim-c: var(--sim-pulse); --eg-sim-soft: var(--sim-pulse-soft); --eg-sim-glow: var(--sim-pulse-glow);
+  display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); overflow: hidden;
+  border: 1px solid var(--border); border-radius: var(--r-xl); background: var(--card); box-shadow: var(--shadow-card);
+}
+.eg-shell-simshow--ausculta { --eg-sim-c: var(--sim-ausculta); --eg-sim-soft: var(--sim-ausculta-soft); --eg-sim-glow: var(--sim-ausculta-glow); }
+.eg-shell-simshow--opaca { --eg-sim-c: var(--sim-opaca); --eg-sim-soft: var(--sim-opaca-soft); --eg-sim-glow: var(--sim-opaca-glow); }
+.eg-shell-simshow--upcoming { --eg-sim-c: var(--sim-dev); --eg-sim-soft: var(--surface-2); --eg-sim-glow: var(--sim-dev-glow); grid-template-columns: minmax(0, 1fr); }
+.eg-shell-simshow__stage {
+  position: relative; display: grid; align-content: space-between; gap: var(--sp-3); min-height: 15rem; padding: var(--sp-5);
+  background: radial-gradient(90% 90% at 25% 20%, var(--eg-sim-glow), var(--clear) 70%), linear-gradient(160deg, var(--navy-900), var(--navy-950));
+  color: var(--card); overflow: hidden;
+}
+.eg-shell-simshow--upcoming .eg-shell-simshow__stage { min-height: 0; grid-template-columns: auto 1fr; align-items: center; }
+.eg-shell-simshow__icon { position: absolute; right: -1.5rem; bottom: -1.5rem; width: 12rem; height: 12rem; object-fit: contain; opacity: .9; }
+.eg-shell-simshow__glyph { display: grid; place-items: center; width: 3.5rem; height: 3.5rem; border-radius: var(--r-md); background: var(--glass-chip); box-shadow: inset 0 0 0 1px var(--glass-line); color: var(--blue-100); }
+.eg-shell-simshow__glyph svg { width: 2rem; height: 2rem; }
+.eg-shell-simshow__brand { font-size: var(--fs-xs); font-weight: 800; letter-spacing: .16em; color: var(--blue-100); }
+.eg-shell-simshow__name { margin: 0; color: var(--card); font-size: clamp(28px, 3vw, 36px); line-height: 1.1; letter-spacing: -.02em; }
+.eg-shell-simshow__pitch { position: relative; margin: 0; max-width: 24ch; color: var(--blue-100); font-size: var(--fs-sm); }
+.eg-shell-simshow__body { display: grid; align-content: start; gap: var(--sp-3); padding: var(--sp-5); }
+.eg-shell-simshow__head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--sp-2); }
+.eg-shell-simshow__tagline { margin: 0; color: var(--eg-sim-c); font-size: var(--fs-xs); font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
+.eg-shell-simshow--pulse .eg-shell-simshow__tagline { color: var(--red-600); }
+.eg-shell-simshow--ausculta .eg-shell-simshow__tagline { color: var(--sim-ausculta-ink); }
+.eg-shell-simshow--upcoming .eg-shell-simshow__tagline { color: var(--ink-600); }
+.eg-shell-simshow__state { padding: 4px 10px; border-radius: var(--r-pill); background: var(--blue-50); color: var(--blue-700); font-size: var(--fs-xs); font-weight: 800; }
+.eg-shell-simshow__state--done { background: var(--green-100); color: var(--green-800); }
+.eg-shell-simshow__state--dev { background: var(--orange-100); color: var(--amber-700); }
+.eg-shell-simshow__facts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--sp-2); margin: 0; }
+.eg-shell-simshow__fact { display: grid; padding: 10px 12px; border-radius: var(--r-md); background: var(--surface-2); }
+.eg-shell-simshow__fact dt { order: 2; color: var(--ink-600); font-size: var(--fs-xs); }
+.eg-shell-simshow__fact dd { order: 1; margin: 0; color: var(--navy-900); font-size: var(--fs-xl); font-weight: 800; font-variant-numeric: tabular-nums; }
+.eg-shell-simshow__foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--sp-3); }
+.eg-shell-simshow__status { color: var(--ink-600); font-size: var(--fs-sm); }
+.eg-shell-simshow__cta {
+  display: inline-flex; align-items: center; min-height: 46px; padding: 0 var(--sp-4); border-radius: var(--r-md);
+  background: var(--blue-700); color: var(--card); font-weight: 800; text-decoration: none;
+}
+.eg-shell-simshow__cta:hover { background: var(--navy-700); }
+.eg-shell-simshow__soon { margin: 0; color: var(--ink-600); }
+.eg-shell-modechips { display: flex; flex-wrap: wrap; gap: 6px; margin: 0; padding: 0; list-style: none; }
+.eg-shell-modechip { padding: 4px 10px; border-radius: var(--r-pill); background: var(--surface-2); color: var(--ink-700); font-size: var(--fs-xs); font-weight: 700; }
+.eg-shell-modechip--done { background: var(--green-100); color: var(--green-800); }
+.eg-shell-modechip--next { background: var(--blue-50); color: var(--blue-700); box-shadow: inset 0 0 0 1px var(--blue-200); }
+.eg-shell-modechip--locked { color: var(--ink-600); }
+.eg-shell-modechip--challenge:not(.eg-shell-modechip--locked) { background: var(--orange-100); color: var(--amber-700); }
+@media (max-width: 900px) {
+  .eg-shell-simshow, .eg-shell-simspage__upcoming { grid-template-columns: minmax(0, 1fr); }
+  .eg-shell-simshow__stage { min-height: 11rem; }
+  .eg-shell-simshow__icon { width: 8rem; height: 8rem; }
+}
+
+/* İlerlemem bölümünün "Simülatörde İlerlemem'i aç" bağlantısı (eski sim kartı bağlantısıyla ortaktı; T296'da kart kalktı). */
+.eg-shell-progress__openSim {
+  justify-self: start; display: inline-flex; align-items: center; gap: var(--sp-2); box-sizing: border-box;
+  min-height: var(--eg-shell-touch-min); margin-top: var(--sp-1); padding: 0 var(--sp-4);
+  background: var(--surface); border: 1px solid var(--border-strong); border-radius: var(--r-md); box-shadow: var(--elev-1);
+  color: var(--ink-800); font-weight: 600; text-decoration: none;
+  transition: background-color var(--dur-2) var(--ease-out), border-color var(--dur-2) var(--ease-out);
+}
+.eg-shell-progress__openSim:hover { background: var(--blue-50); border-color: var(--blue-300); }
+.eg-shell-progress__openSim:focus-visible { outline: 2px solid var(--focus-color); outline-offset: 2px; }
+
+/* T296 — Ana Sayfa (depo sahibi onayı 1 Eki 2026): koyu karşılama + Bugün kartı, sim kartları, sayılı güven. */
+.eg-shell-homehero {
+  position: relative; overflow: hidden; display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); align-items: center; gap: var(--sp-5);
+  padding: clamp(22px, 4vw, 40px); border-radius: var(--r-xl); color: var(--card);
+  background:
+    radial-gradient(70% 120% at 85% 10%, var(--duel-me-glow), var(--clear) 60%),
+    radial-gradient(60% 100% at 0% 100%, var(--gold-tint), var(--clear) 60%),
+    linear-gradient(160deg, var(--navy-950), var(--navy-800));
+  box-shadow: var(--elev-3);
+}
+.eg-shell-homehero__eyebrow { margin: 0; color: var(--orange-500); font-size: var(--fs-xs); font-weight: 800; letter-spacing: .14em; text-transform: uppercase; }
+.eg-shell-homehero__title { margin: var(--sp-2) 0; color: var(--card); font-size: clamp(26px, 3.2vw, 40px); line-height: 1.08; letter-spacing: -.025em; text-wrap: balance; }
+.eg-shell-homehero__lead { margin: 0; max-width: 52ch; color: var(--blue-100); }
+.eg-shell-homehero__actions { display: flex; flex-wrap: wrap; gap: var(--sp-2); margin: var(--sp-4) 0 0; }
+.eg-shell-homehero__cta, .eg-shell-homehero__ghost {
+  display: inline-flex; align-items: center; gap: var(--sp-2); min-height: 46px; padding: 0 var(--sp-4);
+  border-radius: var(--r-md); font-weight: 800; text-decoration: none;
+}
+.eg-shell-homehero__cta { background: linear-gradient(180deg, var(--orange-100), var(--orange-500) 45%); color: var(--navy-950); box-shadow: 0 12px 26px -12px var(--gold-glow); }
+.eg-shell-homehero__ghost { background: var(--glass-chip); color: var(--card); box-shadow: inset 0 0 0 1px var(--glass-line); }
+.eg-shell-today { display: grid; gap: var(--sp-3); padding: var(--sp-4); border-radius: var(--r-lg); background: var(--glass-chip); box-shadow: inset 0 0 0 1px var(--glass-line); }
+.eg-shell-today__title { margin: 0; color: var(--blue-200); font-size: var(--fs-xs); font-weight: 800; letter-spacing: .14em; text-transform: uppercase; }
+.eg-shell-today__empty { margin: 0; color: var(--blue-100); font-size: var(--fs-sm); }
+.eg-shell-today__resume { display: flex; align-items: center; gap: var(--sp-3); min-height: 56px; padding: var(--sp-2) var(--sp-3); border-radius: var(--r-md); background: var(--card); color: var(--ink-900); text-decoration: none; }
+.eg-shell-today__icon { width: 40px; height: 40px; object-fit: contain; }
+.eg-shell-today__what { display: grid; font-size: var(--fs-xs); color: var(--ink-600); }
+.eg-shell-today__what b { color: var(--navy-900); font-size: var(--fs-md); }
+.eg-shell-today__go { display: inline-flex; align-items: center; gap: 4px; margin-left: auto; color: var(--blue-700); font-size: var(--fs-sm); font-weight: 800; }
+.eg-shell-today__stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--sp-2); margin: 0; }
+.eg-shell-today__stats > div { display: grid; padding: var(--sp-2); border-radius: var(--r-md); background: var(--glass-chip); text-align: center; }
+.eg-shell-today__stats dt { order: 2; color: var(--blue-200); font-size: var(--fs-xs); }
+.eg-shell-today__stats dd { order: 1; margin: 0; color: var(--card); font-size: var(--fs-lg); font-weight: 800; font-variant-numeric: tabular-nums; }
+.eg-shell-today__modes { display: grid; gap: var(--sp-2); margin: 0; padding: 0; list-style: none; }
+.eg-shell-today__modes li { display: flex; align-items: center; gap: var(--sp-2); color: var(--card); font-weight: 700; }
+.eg-shell-today__modes span { display: grid; place-items: center; width: 28px; height: 28px; border-radius: var(--r-sm); background: var(--glass-chip); color: var(--orange-500); font-weight: 900; }
+.eg-shell-home__sectionHead { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: var(--sp-2); }
+.eg-shell-home__sectionLead { margin: 2px 0 0; color: var(--ink-600); font-size: var(--fs-sm); }
+.eg-shell-homesims { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--sp-4); margin-top: var(--sp-3); }
+.eg-shell-homesim {
+  --eg-sim-c: var(--sim-pulse); --eg-sim-soft: var(--sim-pulse-soft);
+  position: relative; display: grid; gap: var(--sp-3); overflow: hidden; padding: var(--sp-4);
+  border: 1px solid var(--border); border-radius: var(--r-lg); background: var(--card); box-shadow: var(--shadow-card);
+}
+.eg-shell-homesim::before { position: absolute; inset: 0 0 auto 0; height: 4px; background: var(--eg-sim-c); content: ""; }
+.eg-shell-homesim--ausculta { --eg-sim-c: var(--sim-ausculta); --eg-sim-soft: var(--sim-ausculta-soft); }
+.eg-shell-homesim--opaca { --eg-sim-c: var(--sim-opaca); --eg-sim-soft: var(--sim-opaca-soft); }
+.eg-shell-homesim__top { display: flex; align-items: center; gap: var(--sp-3); }
+.eg-shell-homesim__icon { width: 48px; height: 48px; padding: 6px; border-radius: var(--r-md); background: var(--eg-sim-soft); object-fit: contain; box-sizing: border-box; }
+.eg-shell-homesim__names { min-width: 0; }
+.eg-shell-homesim__name { margin: 0; color: var(--navy-900); font-size: var(--fs-lg); }
+.eg-shell-homesim__tag { margin: 0; color: var(--ink-600); font-size: var(--fs-xs); }
+.eg-shell-homesim__ring { margin-left: auto; padding: 4px 10px; border-radius: var(--r-pill); background: var(--blue-50); color: var(--blue-700); font-size: var(--fs-xs); font-weight: 800; white-space: nowrap; }
+.eg-shell-homesim__ring--done { display: grid; place-items: center; width: 34px; height: 34px; padding: 0; background: var(--green-100); color: var(--green-800); }
+.eg-shell-homesim__foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--sp-2); padding-top: var(--sp-3); border-top: 1px dashed var(--border); color: var(--ink-600); font-size: var(--fs-sm); }
+.eg-shell-homesim__link { display: inline-flex; align-items: center; gap: 4px; min-height: 44px; color: var(--blue-700); font-weight: 800; text-decoration: none; }
+.eg-shell-trust__item { display: flex; align-items: flex-start; gap: var(--sp-3); }
+.eg-shell-trust__figure { min-width: 5rem; color: var(--navy-900); font-size: var(--fs-2xl); font-weight: 900; line-height: 1; }
+@media (max-width: 900px) {
+  .eg-shell-homehero, .eg-shell-homesims { grid-template-columns: minmax(0, 1fr); }
+}

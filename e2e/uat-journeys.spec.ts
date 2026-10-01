@@ -18,7 +18,8 @@ const STUDENT_ENTRY = "/#/giris/test-ogrenci";
 /** Vite dev sunucusunun HMR soketi her tam sayfa geçişinde/offline sırasında
  *  düşer; bu gürültü uygulama hatası değildir (bkz. admin.spec.ts `openAdmin`). */
 function appErrors(errors: readonly string[]): string[] {
-  return errors.filter((error) => !error.includes("WebSocket connection to 'ws://"));
+  // Çevrimdışıyken önbellekte olmayan görsel isteği tarayıcı kaynağı hatasıdır, uygulama hatası değil (T296).
+  return errors.filter((error) => !error.includes("WebSocket connection to 'ws://") && !error.includes("net::ERR_INTERNET_DISCONNECTED"));
 }
 
 async function signInStudent(page: Page): Promise<void> {
@@ -82,10 +83,8 @@ test.describe("T155 UAT yolculukları", () => {
     // (sim kartı + öğrencide "İlerlemem" boş durum bağlantısı); dış liste
     // bölümü de "Opaca" başlığını (iç içe) içerdiğinden yalnız "has" filtresi
     // yetmez — "Pulse" başlığını İÇERMEYEN bölüm tam olarak Opaca kartıdır.
-    const opacaSection = page
-      .locator("section")
-      .filter({ has: page.getByRole("heading", { name: "Opaca", exact: true }) })
-      .filter({ hasNot: page.getByRole("heading", { name: "Pulse", exact: true }) });
+    // T296: her sim kendi vitrin kartıdır (`article`).
+    const opacaSection = page.locator("article").filter({ has: page.getByRole("heading", { name: "Opaca", exact: true }) });
     await opacaSection.getByRole("link", { name: "Simülatörü aç" }).click();
     await expect(page).toHaveURL(/#\/sims\/opaca$/);
     const root = page.locator(".eg-sim-opaca").first();

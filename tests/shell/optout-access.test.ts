@@ -7,7 +7,6 @@ import {
 } from "../../apps/shell/src/home/ProgressSection";
 import { routeHref, simHref } from "../../apps/shell/src/routes";
 import { sessionAllowsSim, shellSessionFromDev, shellSessionFromMe } from "../../apps/shell/src/session";
-import { SimCard } from "../../apps/shell/src/SimCard";
 import { SimRoute } from "../../apps/shell/src/SimRoute";
 import { t } from "../../packages/ui/i18n/tr";
 import { describe, expect, it } from "vitest";
@@ -32,15 +31,6 @@ describe("oturum sim erişimi", () => {
 });
 
 describe("sim kartı ve rotası erişim kapısı", () => {
-  it("erişimi olmayan sim işaretlenir; bağlantı durur", () => {
-    const html = renderToStaticMarkup(
-      createElement(SimCard, { denied: true, href: simHref("pulse"), id: "pulse" }),
-    );
-    expect(html).toContain(t("sims.access.none"));
-    expect(html).toContain(`href="${simHref("pulse")}"`);
-    expect(html).toContain(t("sims.open"));
-  });
-
   it("ana sayfa ve simülatörler API oturumunda kapalı simi işaretler", () => {
     for (const html of [
       renderToStaticMarkup(createElement(HomePage, { session: API_SESSION })),

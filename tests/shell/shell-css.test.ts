@@ -43,19 +43,15 @@ describe("shell.css token sözleşmesi", () => {
     expect(shellCss).toMatch(/position:\s*fixed/);
     expect(shellCss).toContain("env(safe-area-inset-bottom)");
   });
-  it("giriş ekranını masaüstünde %60 / %40 böler ve mobilde tek sütuna indirir", () => {
-    expect(shellCss).toMatch(/\.eg-shell-entry\s*\{[^}]*grid-template-columns:\s*minmax\(0,\s*3fr\)\s*minmax\(0,\s*2fr\)/);
-    expect(shellCss).toContain("@media (max-width: 768px)");
+  it("giriş ekranı: iki sütun, mobilde tek sütun; sol sahne fotoğrafsız (T296, depo sahibi kararı 1 Eki 2026)", () => {
+    expect(shellCss).toMatch(/\.eg-shell-entry\s*\{[^}]*grid-template-columns:\s*minmax\(0,\s*1\.1fr\)\s*minmax\(0,\s*\.9fr\)/);
+    expect(shellCss).toMatch(/@media \(max-width: 900px\)\s*\{\s*\.eg-shell-entry\s*\{\s*grid-template-columns:\s*minmax\(0,\s*1fr\)/);
     expect(shellCss).toMatch(/\.eg-shell-entry__input[\s\S]*?min-height:\s*48px/);
     expect(shellCss).toContain("prefers-reduced-motion: reduce");
     expect(shellCss).toContain(":focus-visible");
     expect(shellCss).not.toMatch(/\.eg-shell-entry__logo\s*\{[^}]*filter:/);
-    // Görsel panelin kendi arka planıdır (tam görünür); %10 katman ::before'dadır ve görsel içermez.
-    expect(shellCss).toMatch(/\.eg-shell-entry__brand\s*\{[^}]*url\("\/brand\/entry-bg\.jpg"\)/);
-    expect(shellCss).toContain('background-image: url("/brand/entry-bg-760.jpg")');
-    expect(shellCss).toMatch(/\.eg-shell-entry__brand::before\s*\{[^}]*opacity:\s*\.10/);
-    expect(shellCss).not.toMatch(/\.eg-shell-entry__brand::before\s*\{[^}]*url\(/);
-    expect(shellCss).toMatch(/\.eg-shell-entry__brand\s*\{[^}]*center 35% \/ cover/);
+    // Arka plan görseli yok: sahne yalnız token gradyanıdır.
+    expect(shellCss).not.toMatch(/entry-bg/);
   });
   it("gövde kenar boşluğunu sıfırlar ve programatik odakta çerçeve çizmez (B2)", () => {
     expect(shellCss).toMatch(/html\s*,\s*body\s*\{[^}]*margin:\s*0/);
