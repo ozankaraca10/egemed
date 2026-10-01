@@ -39,12 +39,12 @@ test.describe("Opaca öğrenme kilidi", () => {
 
     const practice = root.locator(".mode-card.practice");
     await expect(practice).toHaveClass(/learn-locked/);
-    await expect(practice.locator("button.btn")).toBeDisabled();
+    await expect(practice.locator("button.eg-gami-mode-cta")).toBeDisabled();
     await expect(practice.getByText("Önce öğrenme modunu tamamlayın: 0/33 konu incelendi.")).toBeVisible();
 
     const assessment = root.locator(".mode-card.assessment");
     await expect(assessment).toHaveClass(/learn-locked/);
-    await expect(assessment.locator("button.btn")).toBeDisabled();
+    await expect(assessment.locator("button.eg-gami-mode-cta")).toBeDisabled();
     await captureRouteScreenshot(page, testInfo.project.name, "#/sims/opaca kilitli mod seçimi");
 
     // Öğrenme her zaman açıktır; ilerleme satırı ve kilitli odaklı uygulama düğmesi.

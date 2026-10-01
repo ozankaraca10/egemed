@@ -502,7 +502,7 @@
 .eg-gami-mode.m-assessment{ --c: var(--purple-600); --soft: var(--purple-50); --ring: var(--purple-100); }
 .eg-gami-mode-top{ display: flex; align-items: center; justify-content: space-between; gap: var(--sp-2); }
 .eg-gami-mode-medal{ display: grid; place-items: center; width: 56px; height: 56px; border-radius: var(--r-lg); background: var(--soft); color: var(--c); box-shadow: inset 0 0 0 1.5px var(--ring); }
-.eg-gami-mode-step{ color: var(--ink-400); font-size: var(--fs-xs); font-weight: 800; letter-spacing: .12em; }
+.eg-gami-mode-step{ color: var(--ink-600); font-size: var(--fs-xs); font-weight: 800; letter-spacing: .12em; }
 .eg-gami-mode-title{ margin: 0; color: var(--c); font-size: var(--fs-xl); letter-spacing: -.01em; }
 .eg-gami-mode-desc{ margin: 0; color: var(--ink-700); font-size: var(--fs-sm); }
 .eg-gami-mode-list{ display: grid; gap: 6px; margin: 0; padding: 0; list-style: none; }
@@ -515,7 +515,8 @@
 .eg-gami-mode-seal .lk{ display: grid; flex: none; place-items: center; width: 28px; height: 28px; border-radius: 50%; background: var(--card); color: var(--c); box-shadow: 0 0 0 1.5px var(--ring); }
 .eg-gami-mode-cta{ display: inline-flex; align-items: center; justify-content: center; gap: var(--sp-2); min-height: 48px; padding: 0 var(--sp-4); border: 0; border-radius: var(--r-md); background: var(--c); color: var(--card); font: inherit; font-weight: 800; cursor: pointer; box-shadow: 0 10px 20px -14px var(--c); }
 .eg-gami-mode-cta:disabled{ background: var(--card); color: var(--ink-500); box-shadow: inset 0 0 0 1.5px var(--border); cursor: not-allowed; }
-.eg-gami-mode.locked .eg-gami-mode-medal, .eg-gami-mode.locked .eg-gami-mode-title, .eg-gami-mode.locked .eg-gami-mode-desc, .eg-gami-mode.locked .eg-gami-mode-list{ opacity: .6; }
+/* Kilitli kartta yalnız dekoratif madalya solar; metinler AA kontrastını korur (kilit mühür + simgeyle belirtilir). */
+.eg-gami-mode.locked .eg-gami-mode-medal{ opacity: .6; }
 .eg-gami-mode-ribbon{ position: absolute; top: -12px; right: 14px; display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px; border-radius: var(--r-pill); background: var(--orange-500); color: var(--navy-950); font-size: var(--fs-xs); font-weight: 800; box-shadow: 0 8px 18px -8px var(--gold-glow); }
 
 /* 4. mod: koyu meydan kartı (altın kimlik). */
@@ -530,9 +531,11 @@
 .eg-gami-mode.m-challenge .eg-gami-mode-desc, .eg-gami-mode.m-challenge .eg-gami-mode-list li, .eg-gami-mode.m-challenge .eg-gami-mode-status{ color: var(--blue-100); }
 .eg-gami-mode.m-challenge .eg-gami-mode-seal{ background: var(--gold-tint); color: var(--blue-100); }
 .eg-gami-mode.m-challenge .eg-gami-mode-seal .lk{ background: var(--navy-950); }
+/* Beyaz metin 16px kalın: yeşil-600 (3.3:1) AA altında kalır; öğrenme düğmesi koyu yeşil (7:1). */
+.eg-gami-mode.m-learn .eg-gami-mode-cta:not(:disabled){ background: var(--green-800); }
 .eg-gami-mode.m-challenge .eg-gami-mode-cta{ color: var(--navy-950); }
 .eg-gami-mode.m-challenge .eg-gami-mode-cta:disabled{ background: var(--glass-chip); color: var(--blue-100); box-shadow: inset 0 0 0 1px var(--glass-line); }
-.eg-gami-mode.m-challenge.locked .eg-gami-mode-medal, .eg-gami-mode.m-challenge.locked .eg-gami-mode-title, .eg-gami-mode.m-challenge.locked .eg-gami-mode-desc, .eg-gami-mode.m-challenge.locked .eg-gami-mode-list{ opacity: .75; }
+.eg-gami-mode.m-challenge.locked .eg-gami-mode-medal{ opacity: .75; }
 .eg-gami-mode-vs{ display: flex; align-items: center; justify-content: center; gap: var(--sp-3); }
 .eg-gami-mode-vs i{ display: grid; place-items: center; width: 40px; height: 40px; border-radius: 50%; font-size: 11px; font-style: normal; font-weight: 800; }
 .eg-gami-mode-vs .a{ background: var(--blue-600); box-shadow: 0 0 18px var(--duel-me-glow); }
