@@ -1,4 +1,4 @@
-import { statSync } from "node:fs";
+import ts from "typescript";
 import { describe, expect, it } from "vitest";
 import manifest from "../../packages/sim-pulse/src/data/realEcg.json";
 
@@ -12,7 +12,7 @@ describe("Pulse gerçek EKG referans manifesti", () => {
     expect(new Set(ids).size).toBe(ids.length);
     for (const pattern of manifest.patterns) {
       for (const ref of pattern.refs) {
-        expect(statSync(`packages/sim-pulse/public/${ref.file}`).size, ref.id).toBe(bytes);
+        expect(ts.sys.getFileSize?.(`packages/sim-pulse/public/${ref.file}`), ref.id).toBe(bytes);
         expect(Object.keys(manifest.sources)).toContain(ref.source);
       }
       expect(pattern.status, pattern.key).toBe(pattern.refs.length > 0 ? "ready" : "awaiting");
