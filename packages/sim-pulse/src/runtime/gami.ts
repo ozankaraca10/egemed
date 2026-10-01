@@ -49,7 +49,7 @@ interface SourceCurriculum {
   readonly byId?: Readonly<Record<string, { readonly correct: number } | undefined>>;
 }
 
-interface SourceScorm {
+interface SourcePersistence {
   save(state: unknown): unknown;
 }
 
@@ -100,10 +100,10 @@ export interface PulseGamiBridgeOptions {
 
 /** Köprüyü kurar; dönen işlev izlemeyi bırakır ve eklenen öğeleri kaldırır. */
 export function attachPulseGamification(handle: PulseRuntimeHandle, options: PulseGamiBridgeOptions): () => void {
-  const scorm = handle.global("CardAIScorm") as SourceScorm | undefined;
+  const persistence = handle.global("CardAIScorm") as SourcePersistence | undefined;
   const controller = handle.global("CardAIController") as { readonly state: SourceState } | undefined;
   const curriculum = handle.global("PulseCurriculum") as SourceCurriculum | undefined;
-  if (scorm === undefined || controller === undefined || curriculum === undefined) {
+  if (persistence === undefined || controller === undefined || curriculum === undefined) {
     throw new Error("Pulse oyunlaştırma: kaynak runtime API'leri bulunamadı.");
   }
   const { repo } = options;
@@ -344,9 +344,9 @@ export function attachPulseGamification(handle: PulseRuntimeHandle, options: Pul
     }
   };
 
-  const originalSave = scorm.save;
+  const originalSave = persistence.save;
   const wrappedSave = (state: unknown): unknown => {
-    const result = originalSave.call(scorm, state);
+    const result = originalSave.call(persistence, state);
     if (!detached) {
       try {
         observe(controller.state);
@@ -356,7 +356,7 @@ export function attachPulseGamification(handle: PulseRuntimeHandle, options: Pul
     }
     return result;
   };
-  scorm.save = wrappedSave;
+  persistence.save = wrappedSave;
   // Açılışta zaten tamamlanmış oturumlar yeniden ödüllendirilmez.
   for (const session of [controller.state.quizSession, controller.state.caseSession]) {
     if (session.submitted.length > 0 && session.submitted.every(Boolean)) {
@@ -366,7 +366,7 @@ export function attachPulseGamification(handle: PulseRuntimeHandle, options: Pul
 
   return () => {
     detached = true;
-    if (scorm.save === wrappedSave) scorm.save = originalSave;
+    if (persistence.save === wrappedSave) persistence.save = originalSave;
     button.remove();
     rewardObserver.disconnect();
     unsubscribeRewards?.();

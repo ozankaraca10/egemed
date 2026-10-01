@@ -42,6 +42,13 @@ describe("Pulse vendor çıktısı (T138)", () => {
     expect(appVendor).toContain("en iyi puan kaydedilir");
   });
 
+  it("SCORM/LMS kalıntısı kullanıcıya görünen yüzeylerde kalmaz (T278)", () => {
+    for (const file of ["app.js", "features.js", "landing.js", "markup.js"]) {
+      const source = readFileSync(`packages/sim-pulse/src/runtime/vendor/${file}`, "utf8");
+      expect(source, file).not.toMatch(/SCORM|LMS/);
+    }
+  });
+
   it("vendor platform kaynağıdır: üretilmiş dosya işareti ve manifest yok (ADR-011)", () => {
     const dir = "packages/sim-pulse/src/runtime/vendor";
     const files = readdirSync(dir);

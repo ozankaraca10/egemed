@@ -129,11 +129,7 @@ document.addEventListener('click',event=>{const target=event.target.closest('#re
 window.addEventListener('cardai:session',e=>{if(e.detail.section==='case')renderCase();$('returnToCaseBtn').hidden=true;});
 $('cancelChallenge').addEventListener('click',()=>{activeChallenge=null;$('challengeBanner').hidden=true;});
 
-// Educator summary, CSV export, and explicit reset.
-const featureNames={fullscreen:'Tam ekran',focus:'Panel odağı',compare:'Normal karşılaştırma',caliper:'Kaliper',guide:'Rehberli tur',systematic:'Sistematik okuma',cases:'Vaka çalışmaları'};
 window.addEventListener('cardai:view',e=>{if(e.detail.view==='case')renderCase();});
-$('downloadReport').addEventListener('click',()=>{const q=s=>`"${String(s).replaceAll('"','""')}"`,rows=[['EGEMED PULSE Raporu','2026'],['Ritim','İzleme (sn)','Durum'],...Object.entries(state.viewed).map(([k,v])=>[k,v.toFixed(1),v>=16?'Tamamlandı':'Sürüyor']),[],['Test puanı',state.score??'Değerlendirilmedi'],['Başarı',state.passed?'Evet':'Hayır'],['Yanıtlanan vaka',state.caseAnswers.filter(x=>x!==null).length+'/10'],['Doğru vaka',state.caseCorrect.filter(Boolean).length+'/10'],[],['Araç','Kullanım'],...Object.entries(featureNames).map(([k,n])=>[n,state.features[k]])];const blob=new Blob(['\ufeff'+rows.map(r=>r.map(q).join(';')).join('\n')],{type:'text/csv;charset=utf-8'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='EGEMED_PULSE_rapor.csv';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);$('reportStatus').textContent='CSV raporu indirildi.';});
-$('resetProgress').addEventListener('click',()=>$('resetDialog').showModal());$('closeReset').addEventListener('click',()=>$('resetDialog').close());$('cancelReset').addEventListener('click',()=>$('resetDialog').close());$('confirmReset').addEventListener('click',()=>{$('resetDialog').close();activeChallenge=null;caliperVisible=false;C.resetAll();$('reportStatus').textContent='İlerleme sıfırlandı.';});
 window.addEventListener('cardai:reset',()=>{$('caliperLayer').hidden=true;$('compareKey').hidden=true;$('guidedCoach').hidden=true;$('returnToCaseBtn').hidden=true;applyScale();setFocus('split');restoreCases();renderSystematic();});
 
 // Keyboard controls are ignored while the learner is editing a form control.

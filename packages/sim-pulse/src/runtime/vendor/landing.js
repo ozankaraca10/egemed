@@ -8,8 +8,7 @@ const $=id=>document.getElementById(id),landing=$('landingPage'),app=$('appRoot'
 document.querySelector('.landing-lead').textContent=count+' sentetik EKG sonucu, 12 derivasyon, '+pool.caseCount+' vaka ve '+pool.quizCount+' değerlendirme maddesi. Her oturumda rastgele 10 vaka ve 10 soru.';
 $('landingFeatures').innerHTML=[
  [count+' sentetik EKG sonucu','12 derivasyon; ilk 13 sonuç Kardiyoloji Anabilim Dalı öğretim üyelerince valide edilmiştir; patern 14–23 onay bekliyor.'],
- [pool.caseCount+' vaka · '+pool.quizCount+' soru','Her oturumda rastgele 10 vaka ve 10 soru.'],
- ['SCORM 1.2','Puan ve durum LMS’e raporlanır.']
+ [pool.caseCount+' vaka · '+pool.quizCount+' soru','Her oturumda rastgele 10 vaka ve 10 soru.']
 ].map(row=>'<article class="why-card"><strong>'+row[0]+'</strong><span>'+row[1]+'</span></article>').join('');
 // Ortak footer tek kaynaktan kopyalanır; böylece iki metin birbirinden ayrışmaz.
 const footerSource=app.querySelector('.eg-footer'),landingFooter=$('landingFooter');
