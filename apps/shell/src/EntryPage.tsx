@@ -8,7 +8,6 @@ import { ShellFooter } from "./ShellFooter";
 import { entryHref, entryRedirectHref, type EntryRole } from "./routes";
 import type { ShellSession } from "./session";
 import { SIM_ICONS, SIM_IDS } from "./SimCard";
-import { EgemedLogo } from "./brand/EgemedLogo";
 import { DEV_ENTRY_STRINGS } from "./devStrings";
 
 /** Kök tsconfig DOM lib'i taşımadığı için form alanı erişimi en dar arayüzle yapılır. */
@@ -147,7 +146,7 @@ export function EntryPage({ role, devEnabled = false, apiBaseUrl = null, onApiSi
       {/* T296 (depo sahibi onayı 1 Eki 2026): fotoğrafsız lacivert sahne, gerçek EGEMED ve sim logo setleri. */}
       <section aria-label={t("entry.brand")} className="eg-shell-entry__brand">
         <div className="eg-shell-entry__brandTop">
-          <EgemedLogo variant="on-dark" />
+          <img alt={t("shell.brand.full")} className="eg-shell-entry__brandLogo" height={315} src="/brand/egemed-logo-color.png" width={900} />
         </div>
         <div className="eg-shell-entry__pitch">
           <p className="eg-shell-entry__eyebrow">
