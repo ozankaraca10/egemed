@@ -4,6 +4,7 @@ import { t } from "@egemed/ui/i18n";
 import { simHref } from "../routes";
 import { shellNow } from "../now";
 import { daysLeftInMonth, monthLabelTr, type ShowcaseLeader, type ShowcaseSim, type ShowcaseSource } from "./showcaseSource";
+import { FairPlayNotice } from "../challenges/arena/ArenaParts";
 
 /**
  * Ana sayfa liderlik vitrini (26 Eyl 2026): "reklam gibi" çekici blok. Her sim
@@ -140,6 +141,7 @@ export function ShowcaseSection({ source, month, previousMonth }: ShowcaseSectio
         </h2>
         <p className="eg-shell-showcase__lead">{t("home.showcase.lead")}</p>
       </div>
+      <FairPlayNotice />
       <div className="eg-shell-showcase__grid">
         {sims.map((sim) => (
           <SimColumn key={sim.simId} now={now} sim={sim} />

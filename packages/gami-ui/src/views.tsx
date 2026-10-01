@@ -1,3 +1,4 @@
+import { GamiFairPlay } from "./GamiModeJourney";
 import type { GamiRewardMarks } from "./model";
 import type { ReactNode } from "react";
 import type { AchievementsPeriod, BadgeCategory, ChartPoint, Cohort, CohortFilter, GamiLeaderboardRow, MonthlyReward, Period, RewardWinner, WeeklyGoal } from "@egemed/gamification-core";
@@ -31,6 +32,8 @@ export function GamiProgressPage({ active, onTab, icons, demoIcon, demo = true, 
         onChange={onTab}
         icons={{ achievements: icons.award({ width: 16, height: 16 }), leaderboard: icons.chart({}) }}
       />
+      {/* Adil oyun kuralı (depo sahibi kararı 30 Eyl 2026): rozet ve liderlik alanlarında net uyarı. */}
+      <GamiFairPlay icon={icons.info({ width: 14, height: 14 })} />
       {children}
     </div>
   );
