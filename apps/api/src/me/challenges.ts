@@ -12,6 +12,7 @@ import { duelBadgeIds, duelStatsFrom, type DuelOutcomeRow } from "@egemed/gami-c
 import { jsonError, validationDetails, type AppEnv } from "../http";
 import { toIstanbulIso } from "../admin/users";
 import type { AuthDeps } from "../auth/routes";
+import type { CompetitionBansRepo } from "../integrity/bans";
 import type { GamificationRepo } from "./gamification";
 import { hasCompletedLearn, learnRequiredError, type LearnRepo } from "./learn";
 import {
@@ -89,6 +90,8 @@ export interface ChallengeDeps {
   readonly sessions: SimSessionRepo;
   readonly random: () => number;
   readonly newId: () => string;
+  /** T283b: yönetici onaylı rekabet engeli — oluşturma/katılma 403 `competition_banned` alır. */
+  readonly bans: Pick<CompetitionBansRepo, "isActive">;
 }
 
 export function hashChallengeCode(code: string): string {
@@ -187,6 +190,8 @@ export function registerChallengeRoutes(app: Hono<AppEnv>, deps: ChallengeDeps, 
   app.post("/me/challenges", async (c) => {
     const actor = c.get("meActor");
     if (!actor.gamified) return jsonError(c, "role_not_permitted");
+    // T283b: rekabet engelli öğrenci Meydan Okuma oluşturamaz (yönetici onaylı engel, otomatik ceza yok).
+    if (await deps.bans.isActive(actor.userId)) return jsonError(c, "forbidden", { issues: [{ code: "competition_banned" }] });
     const parsed = challengeCreateRequestSchema.safeParse(await readJson(c));
     if (!parsed.success) return jsonError(c, "invalid_request", validationDetails(parsed.error));
     if (!CHALLENGE_SIMS.includes(parsed.data.simId)) return jsonError(c, "not_found");
@@ -230,6 +235,8 @@ export function registerChallengeRoutes(app: Hono<AppEnv>, deps: ChallengeDeps, 
   app.post("/me/challenges/join", async (c) => {
     const actor = c.get("meActor");
     if (!actor.gamified) return jsonError(c, "role_not_permitted");
+    // T283b: rekabet engelli öğrenci Meydan Okuma'ya katılamaz.
+    if (await deps.bans.isActive(actor.userId)) return jsonError(c, "forbidden", { issues: [{ code: "competition_banned" }] });
     const parsed = challengeJoinRequestSchema.safeParse(await readJson(c));
     if (!parsed.success) return jsonError(c, "invalid_request", validationDetails(parsed.error));
     const at = now();

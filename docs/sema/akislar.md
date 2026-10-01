@@ -2,10 +2,11 @@
 
 > Kaynak: `apps/api/src/me/simSessions.ts`, `apps/api/src/me/challenges.ts`,
 > `apps/api/src/rewards.ts`, `apps/api/src/me/learn.ts`, `apps/api/src/me/gamification.ts`,
+> `apps/api/src/integrity/adminRoutes.ts`, `apps/api/src/integrity/bans.ts`,
 > `apps/api/src/auth/routes.ts`, `apps/api/src/auth/sso/routes.ts`,
 > `apps/api/src/auth/sso/flow.ts`, `apps/shell/src/reportLearn.ts`,
 > `apps/shell/src/SimRoute.tsx`, `apps/shell/src/session.ts`, ilgili ADR'ler
-> (009, 010, 007). T286, 2026-09-30.
+> (009, 010, 007). T286, 2026-09-30; T283b güncellemesi 1 Eki 2026.
 
 ## 1. Değerlendirme oturumu (ADR-009)
 
@@ -44,7 +45,8 @@ sequenceDiagram
   Sim->>API: POST /me/sims/:simId/sessions/:id/finish
   API->>Bank: gradeItem(...) her vaka için (scoreCase saf/deterministik)
   API->>DB: gami_attempts INSERT (yalnız actor.gamified=true ise — kodlu summary)
-  API->>API: serverAttemptXp(mode, caseCount, hintsUsed, score) → xpGained
+  API->>API: competitionBanned = bans.isActive(userId) (T283b)
+  API->>API: serverAttemptXp(mode, caseCount, hintsUsed, score, competitionBanned) → xpGained (banned + mode≠practice ⇒ 0)
   API->>API: T283a integrityScore (10 vakaya normalize) ≥ eşik mi?
   opt Eşik aşıldı (yalnız tespit; puan/XP değişmez)
     API->>DB: integrity_flags INSERT (status="pending") + sim_sessions.integrity_status="unverified"
@@ -69,8 +71,10 @@ Notlar:
 - Öğretim üyesi/uzmanlık öğrencisi (`actor.gamified=false`) için `finish`
   puanı hesaplar ama `gami_attempts` satırı YAZILMAZ (deneme kaydı tutulmaz).
 - T283a (ADR-009 §6): işaretler yönetici tarafından `GET /admin/integrity` ile
-  listelenir; engelleme ve karar (T283b) bu akışta YOKTUR — eşikler
-  `apps/api/src/integrity/thresholds.ts`.
+  listelenir; eşikler `apps/api/src/integrity/thresholds.ts`.
+- T283b: karar ucu (`decide`) ve rekabet engelinin değerlendirme/düello XP'sine
+  etkisi bu akıştadır (yukarı bkz.); öğrenme/uygulama (`mode="practice"`)
+  etkilenmez. Karar ve engel yaşam döngüsü Bölüm 6'dadır.
 
 ## 2. Meydan Okuma düellosu (ADR-010)
 
@@ -82,13 +86,13 @@ sequenceDiagram
   participant DB as PostgreSQL (challenges, sim_sessions)
 
   D->>API: POST /me/challenges {simId}
-  API->>API: gamified? + learnCompleted(simId)? + açık davet/günlük sınır kontrolü
+  API->>API: gamified? + bans.isActive(D)? (T283b, 403 competition_banned) + learnCompleted(simId)? + açık davet/günlük sınır kontrolü
   API->>DB: challenges INSERT (code_hash=sha256(6 haneli kod), case_ids, shuffle_seed, status="open")
   API-->>D: {challengeId, code (yalnız bu yanıtta düz metin), expiresAt}
   D--)K: Kod/bağlantı paylaşımı (davet edenin kendi eylemi — arama/liste YOK)
 
   K->>API: POST /me/challenges/join {code}
-  API->>API: gamified? + kendi daveti değil mi? + sim erişimi? + learnCompleted(simId)?
+  API->>API: gamified? + bans.isActive(K)? (T283b, 403 competition_banned) + kendi daveti değil mi? + sim erişimi? + learnCompleted(simId)?
   API->>DB: challenges UPDATE (opponent_id, status="accepted")
   API-->>K: {challengeId, status:"accepted", ...}
 
@@ -124,6 +128,9 @@ Notlar:
   değeri ayrı sayılır).
 - `sim_sessions.challenge_id`'nin DB'de FK kısıtı yoktur (bkz. `veritabani.md`
   Açık sorular); eşleşme uygulama kodundadır.
+- T283b: aktif rekabet engelli öğrenci ne oluşturabilir ne katılabilir (zaten
+  kabul edilmiş/devam eden düellosu etkilenmez — yalnız yeni oluşturma/katılma
+  engellenir).
 
 ## 3. Aylık ödül ve liderlik (depo sahibi kararı, 26 Eyl 2026)
 
@@ -141,13 +148,15 @@ sequenceDiagram
 
   Note over Sim,API: Ay boyunca öğrenciler değerlendirme çözer (Bölüm 1) → gami_profiles.xp güncellenir
   Sim->>API: GET /me/gamification/:simId/leaderboard
-  API->>DB: gami_leaderboard görünümü (rank() over institution_id,sim_id — leaderboard_visible=false filtrelenir)
+  API->>DB: bans.activeUserIds(institutionId) (T283b)
+  API->>DB: gami_leaderboard görünümü (rank() over institution_id,sim_id — leaderboard_visible=false VE rekabet engelli filtrelenir)
   API-->>Sim: sıralama satırları
 
   Note over Admin: Ay kapandıktan SONRA (path.month < bu ayın anahtarı)
   Admin->>API: POST /admin/rewards/:simId/:month/finalize
   API->>API: finalizedAt zaten dolu mu? (tek seferlik, "conflict" ile reddedilir)
-  API->>DB: getLeaderboard(period="month", cohort="all", at=ayın sonu)
+  API->>DB: bans.activeUserIds(institutionId) (T283b)
+  API->>DB: getLeaderboard(period="month", cohort="all", at=ayın sonu, bannedUserIds)
   API->>API: uygunluk filtresi: minAssessments, requirePublicName→isPublic, cohorts.includes
   API->>DB: reward_winners INSERT (ilk winnersCount satır, rank/displayName/score)
   API->>DB: monthly_rewards UPDATE (finalized_at)
@@ -164,6 +173,9 @@ Notlar:
 - `require_public_name=true` ise yalnız `leaderboard_visible=true` (adla
   görünmeyi seçmiş) öğrenciler kazanan olabilir (`row.isPublic` kontrolü).
 - Düello (`challenge`) denemeleri liderlik hesabına girmez (Bölüm 2 notu).
+- T283b: aktif rekabet engelli kullanıcı liderlikte (ana sayfa vitrini dahil)
+  hiç listelenmez, dolayısıyla kazanan adaylığına da girmez — `buildLeaderboardRows`
+  `bannedUserIds` ile süzer (Bölüm 6).
 
 ## 4. Öğrenme kaydı ve XP (tek sefer, idempotent)
 
@@ -265,3 +277,60 @@ Notlar:
 - SSO state çerezi tek kullanımlıktır; callback'te doğrulanır doğrulanmaz
   silinir. Asıl yeniden-oynatma koruması IdP'nin kod/assertion doğrulamasıdır
   (adaptöre bağlı, bu görev kapsamında adaptör implementasyonu incelenmedi).
+
+## 6. Yönetici karar ucu ve rekabet engeli (T283b, ADR-009 §6)
+
+Otomatik ceza YOK: rekabet engeli yalnız yönetici "confirmed" kararıyla açılır,
+yalnız yönetici kaldırmasıyla kapanır. Kaynak: `apps/api/src/integrity/adminRoutes.ts`,
+`apps/api/src/integrity/bans.ts`, migration `016_competition_bans.sql`.
+
+```mermaid
+sequenceDiagram
+  participant Admin as Admin (panel)
+  participant API as apps/api (integrity/adminRoutes.ts)
+  participant DB as PostgreSQL (integrity_flags, competition_bans)
+
+  Admin->>API: GET /admin/integrity
+  API->>DB: integrity_flags + bans.activeUserIds(institutionId)
+  API-->>Admin: satırlar ({..., banned}) — `pending` işaretler karar bekler
+
+  Admin->>API: POST /admin/integrity/:flagId/decision {decision:"cleared"|"confirmed", note?}
+  API->>DB: integrity_flags SELECT (institution eşleşir mi? status="pending" mi?)
+  alt Başka kurum ya da işaret yok
+    API-->>Admin: 404 not_found
+  else status≠"pending"
+    API-->>Admin: 409 conflict
+  else pending
+    API->>DB: integrity_flags UPDATE (status, reviewed_by, reviewed_at, note)
+    opt decision="confirmed"
+      API->>DB: competition_bans INSERT (user_id, flag_id, created_by) — aktif engel zaten varsa yok sayılır (kısmi benzersiz dizin)
+    end
+    API->>DB: audit_log INSERT (action="integrity.decision")
+    API-->>Admin: {id, status, reviewedAt, note, banned}
+  end
+
+  Admin->>API: POST /admin/integrity/bans/:userId/lift
+  API->>DB: users SELECT (kurum eşleşir mi?)
+  API->>DB: competition_bans UPDATE (lifted_at, lifted_by) where user_id=... and lifted_at is null
+  alt Aktif engel yok ya da başka kurum
+    API-->>Admin: 404 not_found
+  else
+    API->>DB: audit_log INSERT (action="integrity.ban_lift")
+    API-->>Admin: {userId, banned:false}
+  end
+```
+
+Etkiler (aktif engelli öğrenci; Bölüm 1-3'te ayrıntılı):
+- Meydan Okuma oluşturma/katılma → 403 `forbidden` + `issues:[{code:"competition_banned"}]`.
+- Liderlik (sim + ana sayfa vitrini) ve aylık ödül adaylığı → `bannedUserIds` ile
+  süzülür, hiç listelenmez.
+- Değerlendirme/düello XP'si → `serverAttemptXp` 0 döner (`mode≠"practice"`);
+  deneme kaydı ve rozet değerlendirmesi normal yazılır (öğrenme verisi silinmez).
+- `GET /me/gamification` yanıtı `data.competitionBanned` taşır (istemci arayüzü T283d'de).
+
+Notlar:
+- Kullanıcı başına tek AKTİF engel: `competition_bans (user_id) where lifted_at is null`
+  kısmi benzersiz dizini. `open` ikinci `confirmed` kararında yok sayılır (idempotent).
+- `note` yalnız yöneticinin kendi notudur (≤500 karakter); kişisel veri eklenmez (KVKK).
+- Zaten kabul edilmiş/devam eden Meydan Okuma veya açılmış sim oturumu geri alınmaz;
+  engel yalnız YENİ oluşturma/katılmayı ve YENİ denemenin XP'sini etkiler.

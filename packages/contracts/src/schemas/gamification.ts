@@ -67,9 +67,13 @@ export const gamiSummaryResponseSchema = z.strictObject({ data: gamiSimSummarySc
 export type GamiSummaryResponse = z.infer<typeof gamiSummaryResponseSchema>;
 
 /** GET /me/gamification: üç simin ayrı özeti; birleşik/türetilmiş puan yok
- *  (ADR-006/007 izolasyonu). Aynı sim iki kez dönemez. */
+ *  (ADR-006/007 izolasyonu). Aynı sim iki kez dönemez. `competitionBanned`
+ *  T283b (ADR-009 §6): yönetici onaylı rekabet engeli, yalnız bilgi amaçlı
+ *  (istemci arayüzü T283d'de). */
 export const gamiAllResponseSchema = z.strictObject({
   data: z.strictObject({
+    // Sunucu her zaman yazar; eski sabit (fixture) veri kırılmasın diye şemada opsiyonel.
+    competitionBanned: z.boolean().optional(),
     sims: z
       .array(gamiSimSummarySchema)
       .max(SIM_IDS.length)

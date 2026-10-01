@@ -11,6 +11,7 @@ import { registerAdminRoleRoutes } from "./admin/roles";
 import { registerAdminUserRoutes, type AdminDeps } from "./admin/users";
 import { registerAdminIntegrityRoutes } from "./integrity/adminRoutes";
 import { createMemoryIntegrityRepo, type IntegrityRepo } from "./integrity/repo";
+import { createMemoryCompetitionBansRepo, type CompetitionBansRepo } from "./integrity/bans";
 import { createMemorySimSessionRepo, registerSimSessionRoutes, type SimSessionDeps } from "./me/simSessions";
 import { challengeFinishedHook, createMemoryChallengeRepo, registerChallengeRoutes, type ChallengeRepo } from "./me/challenges";
 import { createMemoryLearnRepo, registerLearnRoutes, type LearnRepo } from "./me/learn";
@@ -50,14 +51,16 @@ export interface AppDeps {
   readonly lrsProbe?: () => Promise<boolean>;
   /** Aylık ödüller (26 Eyl 2026); verilmezse bellek deposu (yalnız test/DB'siz geliştirme). */
   readonly rewards?: RewardsRepo;
-  /** A1 sunucu vaka oturumu (ADR-009); verilmezse bellek deposu ve ses yok (yalnız test/DB'siz geliştirme). `integrity` ayrı alanla enjekte edilir. */
-  readonly simSessions?: Omit<SimSessionDeps, "gamification" | "onFinished" | "integrity" | "auth" | "learn">;
+  /** A1 sunucu vaka oturumu (ADR-009); verilmezse bellek deposu ve ses yok (yalnız test/DB'siz geliştirme). `integrity`/`bans` ayrı alanla enjekte edilir. */
+  readonly simSessions?: Omit<SimSessionDeps, "gamification" | "onFinished" | "integrity" | "auth" | "learn" | "bans">;
   /** ADR-010 Meydan Okuma deposu; verilmezse bellek deposu. */
   readonly challenges?: ChallengeRepo;
   /** Öğrenme tamamlama kaydı (27 Eyl 2026); verilmezse bellek deposu. */
   readonly learn?: LearnRepo;
   /** T283a — davranış sinyali işaretleri (ADR-009 §6); verilmezse bellek deposu. */
   readonly integrity?: IntegrityRepo;
+  /** T283b — yönetici onaylı rekabet engeli (ADR-009 §6, migration 016); verilmezse bellek deposu. */
+  readonly bans?: CompetitionBansRepo;
 }
 
 /** WebCrypto (Node 20+ genel `crypto`); kök tsconfig DOM'suz olduğu için yapısal tip. */
@@ -210,9 +213,17 @@ export function createApp(deps: AppDeps): Hono<AppEnv> {
     },
     deps.now,
   );
+  // T283a/T283b — bellek varsayılanları kullanıcının kurum/görünen adını `auth.users`
+  // üzerinden çözer (test/DB'siz geliştirme). Her iki depo aynı arayla paylaşır.
+  const userLookup = async (userId: string) => {
+    const context = await deps.auth.users.getMeContext(userId);
+    return context === null ? null : { institutionId: context.institution.id, displayName: context.displayName };
+  };
+  const integrity = deps.integrity ?? createMemoryIntegrityRepo(userLookup);
+  const bans = deps.bans ?? createMemoryCompetitionBansRepo(userLookup);
   const rewards = deps.rewards ?? createMemoryRewardsRepo();
-  registerAdminRewardRoutes(app, { admin: deps.admin, gamification: deps.gamification, rewards }, deps.now);
-  registerMeGamificationRoutes(app, { auth: deps.auth, gamification: deps.gamification }, deps.now);
+  registerAdminRewardRoutes(app, { admin: deps.admin, gamification: deps.gamification, rewards, bans }, deps.now);
+  registerMeGamificationRoutes(app, { auth: deps.auth, gamification: deps.gamification, bans }, deps.now);
   // `/me/*` ara katmanı `registerMeGamificationRoutes` içinde bağlanır; ödül okumaları ondan sonra.
   registerMeRewardRoutes(app, { rewards }, deps.now);
   // Öğrenme tamamlama kaydı (27 Eyl 2026): `/me/*` ara katmanına bağlı iki uç;
@@ -228,13 +239,6 @@ export function createApp(deps: AppDeps): Hono<AppEnv> {
     newId: () => cryptoUuid(),
   };
   const challenges = deps.challenges ?? createMemoryChallengeRepo();
-  // T283a — bellek varsayılanı kullanıcının kurum/görünen adını `auth.users` üzerinden çözer (test/DB'siz geliştirme).
-  const integrity =
-    deps.integrity ??
-    createMemoryIntegrityRepo(async (userId) => {
-      const context = await deps.auth.users.getMeContext(userId);
-      return context === null ? null : { institutionId: context.institution.id, displayName: context.displayName };
-    });
   registerSimSessionRoutes(
     app,
     {
@@ -243,15 +247,16 @@ export function createApp(deps: AppDeps): Hono<AppEnv> {
       learn,
       ...simSessionDeps,
       integrity,
+      bans,
       onFinished: challengeFinishedHook({ challenges, sessions: simSessionDeps.sessions, gamification: deps.gamification }),
     },
     deps.now,
   );
-  // T283a — `GET /admin/integrity`; `/admin/*` ara katmanı yukarıda bağlandığı için ondan sonra kaydedilir.
-  registerAdminIntegrityRoutes(app, integrity);
+  // T283a/T283b — `/admin/integrity*`; `/admin/*` ara katmanı yukarıda bağlandığı için ondan sonra kaydedilir.
+  registerAdminIntegrityRoutes(app, { integrity, bans, auth: deps.auth, newId: deps.admin.newId }, deps.now);
   registerChallengeRoutes(
     app,
-    { auth: deps.auth, challenges, learn, sessions: simSessionDeps.sessions, random: simSessionDeps.random, newId: simSessionDeps.newId },
+    { auth: deps.auth, challenges, learn, sessions: simSessionDeps.sessions, random: simSessionDeps.random, newId: simSessionDeps.newId, bans },
     deps.now,
   );
 

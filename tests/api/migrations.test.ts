@@ -170,6 +170,7 @@ const expectedColumns: Record<string, readonly string[]> = {
     "id", "session_id", "user_id", "sim_id", "mode", "score", "signals", "status", "created_at",
     "reviewed_by", "reviewed_at", "note",
   ],
+  competition_bans: ["id", "user_id", "flag_id", "created_by", "created_at", "lifted_at", "lifted_by"],
 };
 
 const expectedConstraints = [

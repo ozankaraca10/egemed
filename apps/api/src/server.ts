@@ -7,6 +7,7 @@ import { createPgRewardsRepo } from "./rewards.ts";
 import { cryptoRandom, cryptoToken, cryptoUuid } from "./app.ts";
 import { createPgSimSessionRepo } from "./me/simSessions.ts";
 import { createPgIntegrityRepo } from "./integrity/repo.ts";
+import { createPgCompetitionBansRepo } from "./integrity/bans.ts";
 import { createPgChallengeRepo } from "./me/challenges.ts";
 import { createPgLearnRepo } from "./me/learn.ts";
 import { readFile } from "node:fs/promises";
@@ -81,6 +82,7 @@ const app = createApp({
   challenges: createPgChallengeRepo(db),
   learn: createPgLearnRepo(db),
   integrity: createPgIntegrityRepo(db),
+  bans: createPgCompetitionBansRepo(db),
   simSessions: {
     sessions: createPgSimSessionRepo(db),
     // Yol bankadaki güvenilir veriden gelir; yine de kök dışına çıkış reddedilir.
