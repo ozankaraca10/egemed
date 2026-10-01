@@ -31,7 +31,7 @@
   /* --- Uyarı / durum renkleri --- */
   --orange-500:#f59e0b; --orange-100:#fdeecd; --amber-700:#92400e; --bronze-400:#c98a4b;
   /* Koyu görsel üstü cam yüzeyler (giriş tanıtım paneli). */
-  --glass-deep:rgba(6,30,68,.62); --glass-chip:rgba(255,255,255,.10); --glass-line:rgba(255,255,255,.22); --logo-halo:rgba(255,255,255,.92); --logo-halo-soft:rgba(186,214,255,.55); --logo-drop:rgba(2,10,28,.45); --gold-tint:rgba(245,158,11,.18);
+  --glass-deep:rgba(6,30,68,.62); --glass-chip:rgba(255,255,255,.10); --glass-line:rgba(255,255,255,.22); --gold-tint:rgba(245,158,11,.18);
   /* Meydan Okuma arenası: taraf ışımaları ve ızgara (T287). */
   --duel-me-glow:rgba(46,141,247,.30); --duel-rival-glow:rgba(225,29,72,.26); --duel-grid:rgba(255,255,255,.05); --duel-shade:rgba(0,0,0,.26); --gold-glow:rgba(245,158,11,.55); --clear:rgba(255,255,255,0);
   /* T296: sim kimlik renkleri (Simülatörler sayfası ve ana sayfa kartları); glow = sahne ışığı. */

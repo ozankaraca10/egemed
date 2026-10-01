@@ -1146,8 +1146,8 @@ body { font-family: var(--font); }
 .eg-shell-entry__brandTop { display: flex; align-items: center; gap: var(--sp-5); margin-bottom: calc(var(--sp-5) + 1.5rem); }
 .eg-shell-entry__brand > .eg-shell-entry__brandTop > .eg-shell-logo { margin: 0; }
 .eg-shell-entry__brand .eg-shell-logo__mark { height: clamp(4.125rem, 6vw, 5.25rem); width: auto; }
-/* T305: renkli EGEMED logosu; lacivert zeminde okunsun diye açık hale + yumuşak gölge (depo sahibi, 1 Eki 2026). */
-.eg-shell-entry__brandLogo { display: block; width: auto; height: clamp(4.5rem, 6.5vw, 6rem); filter: drop-shadow(0 0 1px var(--logo-halo)) drop-shadow(0 0 2px var(--logo-halo)) drop-shadow(0 0 14px var(--logo-halo-soft)) drop-shadow(0 8px 18px var(--logo-drop)); }
+/* T306: beyaz 3B logo, gölgesiz. */
+.eg-shell-entry__brandLogo { display: block; width: auto; height: clamp(4.5rem, 6.5vw, 6rem); }
 .eg-shell-entry__brand .eg-shell-logo__tagline { display: none; }
 .eg-shell-entry__pitch { display: grid; gap: var(--sp-3); max-width: 36rem; }
 .eg-shell-entry__claim { display: block; margin-bottom: var(--sp-1); color: var(--card); }

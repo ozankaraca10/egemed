@@ -21,8 +21,8 @@ describe("giriş rotaları", () => {
     // T304: sol panelde yalnız EGEMED logosu; fakülte mührü sağ alttaki alt bilgide
     expect(html).not.toContain('class="eg-shell-entry__logo"');
     expect(html).toContain(`alt="${t("shell.brand.full")}"`);
-    // T305: girişte renkli EGEMED logosu (açık haleli)
-    expect(html).toContain('src="/brand/egemed-logo-color.png"');
+    // T306: girişte beyaz 3B EGEMED logosu (gölgesiz)
+    expect(html).toContain('src="/brand/egemed-logo-3d-white.png"');
     expect(html).not.toContain("CLIX");
     expect(html).toContain('href="#icerik"');
     const warningIndex = html.indexOf(t("entry.auth.pending"));
