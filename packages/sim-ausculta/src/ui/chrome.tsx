@@ -197,6 +197,9 @@ export function UnifiedChrome({
       onSelect: toggleFs,
     });
     actions.push({ id: "help", icon: "help", label: "Yardım", onSelect: () => setHelpOpen(true) });
+    // T276b: Hakkında simin kendi kaynaklar ekranını açar (Pulse ile aynı); çalışma ekranında
+    // oturumu bölmemek için kabuğun standart penceresi kalır.
+    if (!inWork) actions.push({ id: "about", icon: "info", label: "Hakkında", onSelect: () => dispatch({ type: "goto", screen: "sources" }) });
   }
   usePublishChrome(setChrome ? { actions, chips, steps: { current: step, labels: STEP_LABELS, onSelect: onStepSelect } } : null);
   if (!setChrome) return null;

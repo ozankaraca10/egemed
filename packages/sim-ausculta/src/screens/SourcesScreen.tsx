@@ -2,7 +2,7 @@ import type { JSX } from "react";
 import { useStore } from "../core/StoreProvider";
 import sourcesData from "../data/sources.json";
 import { EcgDeco, Footer, touchTarget } from "../ui/chrome";
-import { ScreenHeading } from "../ui/ScreenHeading";
+import { ScreenHeading, SectionHeading } from "../ui/ScreenHeading";
 import { IconBook, IconDoc, IconHeart, IconInfo } from "../ui/icons";
 
 /** Kaynaklar (E2 §9 S16b). Atıf, lisans ve validasyon metinleri `sources.json` ile aynıdır.
@@ -108,9 +108,9 @@ export function SourcesScreen({ embedded = false }: SourcesScreenProps): JSX.Ele
           </p>
 
           <section className="src-section" aria-labelledby="credits-h" style={{ marginTop: 0 }}>
-            <h2 id="credits-h">
+            <SectionHeading id="credits-h">
               <IconHeart /> Geliştiriciler
-            </h2>
+            </SectionHeading>
             <div className="credit-groups">
               {data.credits.map((group) => (
                 <div className="credit-group lead" key={group.role}>
@@ -153,9 +153,9 @@ export function SourcesScreen({ embedded = false }: SourcesScreenProps): JSX.Ele
           </section>
 
           <section className="src-section" aria-labelledby="inst-h">
-            <h2 id="inst-h">
+            <SectionHeading id="inst-h">
               <IconDoc /> Kurum
-            </h2>
+            </SectionHeading>
             <div className="inst-card">
               <img src="brand/ege-tip-logo.png" alt="Ege Üniversitesi Tıp Fakültesi amblemi" />
               <div>
@@ -195,9 +195,9 @@ export function SourcesScreen({ embedded = false }: SourcesScreenProps): JSX.Ele
           </section>
 
           <section className="src-section" aria-labelledby="ds-h">
-            <h2 id="ds-h">
+            <SectionHeading id="ds-h">
               <IconBook /> Ses Veri Setleri
-            </h2>
+            </SectionHeading>
             <p className="src-sub">
               Yalnız lisansı doğrulanmış ve etiketleri oskültasyon taksonomisine birebir eşlenen açık veri setleri
               kullanılır; uymayan etiketler uydurulmaz.
@@ -266,9 +266,9 @@ export function SourcesScreen({ embedded = false }: SourcesScreenProps): JSX.Ele
 
           {data.assets && data.assets.length > 0 && (
             <section className="src-section" aria-labelledby="assets-h">
-              <h2 id="assets-h">
+              <SectionHeading id="assets-h">
                 <IconDoc /> Görsel Varlıklar
-              </h2>
+              </SectionHeading>
               <div className="ds-grid">
                 {data.assets.map((asset) => (
                   <article className="ds-card" key={asset.id}>
@@ -301,9 +301,9 @@ export function SourcesScreen({ embedded = false }: SourcesScreenProps): JSX.Ele
           )}
 
           <section className="src-section" aria-labelledby="disclaimer-h">
-            <h2 id="disclaimer-h">
+            <SectionHeading id="disclaimer-h">
               <IconInfo /> Validasyon, sınırlılıklar ve sorumluluk
-            </h2>
+            </SectionHeading>
             <div className="src-disclaimer">
               <IconInfo />
               <div>
