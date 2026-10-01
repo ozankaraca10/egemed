@@ -329,7 +329,7 @@ export function ResultsScreen({
                   if (state.serverChallengeId !== null) challenge.onChallengeFinished?.(state.serverChallengeId)
                 }}
               >
-                Düello sonucunu gör
+                Karşılaşma sonucunu gör
               </button>
             ) : null}
             <button type="button" className={state.serverChallengeId !== null ? 'btn outline' : 'btn primary'} onClick={exit}>

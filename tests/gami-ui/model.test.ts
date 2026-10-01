@@ -97,8 +97,8 @@ describe("gami-ui model sözleşmesi", () => {
         id: "duel-first",
         category: "challenge",
         tier: "bronze",
-        name: "İlk düello",
-        description: "İlk düelloyu tamamla.",
+        name: "İlk karşılaşma",
+        description: "İlk karşılaşmayı tamamla.",
         progress: (s) => ({ value: s.n, max: 1 }),
       },
     ];

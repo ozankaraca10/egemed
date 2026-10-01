@@ -179,7 +179,7 @@ describe('ResultsScreen (statik render)', () => {
     expect(aggregateResults([lowResult()]).mastery).toBe(false)
   })
 
-  it('düelloda "Düello sonucunu gör" eylemi çizilir; tekrar dene gizlenir', () => {
+  it('karşılaşmada "Karşılaşma sonucunu gör" eylemi çizilir; tekrar dene gizlenir', () => {
     const prepared: AppState = { ...preparedState([highResult()], 'assessment'), serverChallengeId: 'ch-1' }
     const html = renderToStaticMarkup(
       createElement(StoreProvider, {
@@ -196,7 +196,7 @@ describe('ResultsScreen (statik render)', () => {
         }),
       })
     )
-    expect(html).toContain('Düello sonucunu gör')
+    expect(html).toContain('Karşılaşma sonucunu gör')
     expect(html).not.toContain('Tekrar dene')
   })
 })

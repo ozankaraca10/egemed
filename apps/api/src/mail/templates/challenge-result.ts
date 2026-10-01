@@ -40,11 +40,11 @@ export function renderChallengeResult(data: ChallengeResultData): MailRenderResu
   const simName = escapeHtml(data.simName);
   const opponent = escapeHtml(data.opponentDisplayName);
   const winner = escapeHtml(data.winnerDisplayName);
-  const outcomeText = data.recipientIsWinner ? "Bu düelloyu kazandınız." : `Bu düelloyu ${winner} kazandı.`;
+  const outcomeText = data.recipientIsWinner ? "Bu karşılaşmayı kazandınız." : `Bu karşılaşmayı ${winner} kazandı.`;
 
   const bodyHtml = `
     <p style="margin:0 0 16px;">Merhaba ${name},</p>
-    <p style="margin:0 0 8px;"><strong>${simName}</strong> simülasyonundaki düellonuz sona erdi.</p>
+    <p style="margin:0 0 8px;"><strong>${simName}</strong> simülasyonundaki karşılaşmanız sona erdi.</p>
     <p style="margin:0 0 16px;font-weight:600;color:${data.recipientIsWinner ? mailColors.success : mailColors.text};">${outcomeText}</p>
     <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin:0 0 20px;">
       ${scoreRow("Siz", escapeHtml(data.recipientScoreLabel), escapeHtml(data.recipientDurationLabel), data.recipientIsWinner)}
@@ -54,7 +54,7 @@ export function renderChallengeResult(data: ChallengeResultData): MailRenderResu
   `;
 
   const html = renderMailLayout({
-    preheader: `${data.simName} düellonuzun sonucu hazır — ${outcomeText}`,
+    preheader: `${data.simName} karşılaşmanızın sonucu hazır — ${outcomeText}`,
     bandTitle: INSTITUTION_LINE,
     bodyHtml,
     cta: { label: "Rövanş isteği gönder", url: data.rematchUrl },
@@ -63,7 +63,7 @@ export function renderChallengeResult(data: ChallengeResultData): MailRenderResu
 
   const text = joinTextLines([
     `Merhaba ${data.recipientName},`,
-    `${data.simName} simülasyonundaki düellonuz sona erdi.`,
+    `${data.simName} simülasyonundaki karşılaşmanız sona erdi.`,
     outcomeText,
     `Siz: ${data.recipientScoreLabel} · ${data.recipientDurationLabel}`,
     `${data.opponentDisplayName}: ${data.opponentScoreLabel} · ${data.opponentDurationLabel}`,
@@ -72,7 +72,7 @@ export function renderChallengeResult(data: ChallengeResultData): MailRenderResu
   ]);
 
   return {
-    subject: `${data.simName} düello sonucu: ${data.recipientIsWinner ? "Kazandınız!" : `${data.winnerDisplayName} kazandı`}`,
+    subject: `${data.simName} karşılaşma sonucu: ${data.recipientIsWinner ? "Kazandınız!" : `${data.winnerDisplayName} kazandı`}`,
     html,
     text,
   };

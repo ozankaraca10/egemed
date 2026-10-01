@@ -61,7 +61,7 @@ function buildEntries(): PreviewEntry[] {
     },
     {
       slug: "challenge-result",
-      title: "Düello sonucu",
+      title: "Karşılaşma sonucu",
       result: renderChallengeResult({
         recipientName: "Öğrenci A",
         simName: "EGEMED Ausculta",

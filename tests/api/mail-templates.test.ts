@@ -169,7 +169,7 @@ describe("mail şablonları — ADR-006 (sim verileri birleştirilmez)", () => {
   });
 });
 
-describe("mail şablonları — düello sonucu kazanan rozeti", () => {
+describe("mail şablonları — karşılaşma sonucu kazanan rozeti", () => {
   it("recipientIsWinner=true iken 'KAZANAN' rozeti alıcı satırında görünür", () => {
     const result = renderChallengeResult({
       recipientName: "Öğrenci A",
