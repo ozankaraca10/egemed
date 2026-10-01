@@ -389,6 +389,9 @@ export const challengeParticipantSchema = z.strictObject({
   /** İki taraf da bitirene dek null (sonuç erken sızmaz). */
   score: z.number().min(0).max(100).nullable(),
   durationMs: z.number().int().min(0).nullable(),
+  /** Bu taraf için o simdeki son 5 sonuçlanmış düello, en yenisi önce (T287). Yalnız
+   *  galibiyet/mağlubiyet/beraberlik; rakip adı ya da puan taşımaz. */
+  recentForm: z.array(z.enum(["win", "loss", "draw"])).max(5).default([]),
 });
 
 export const challengeSchema = z.strictObject({

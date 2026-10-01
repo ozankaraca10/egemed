@@ -21,7 +21,10 @@ const MARK_FOCUS = "airspace_opacity";
 
 function harness(): AdminHarness {
   const users = DEFAULT_USERS.map((entry) => (entry.id === ALI_ID ? { ...ALI, simAccess: ["pulse", "ausculta", "opaca"] as const } : entry));
-  return createAdminHarness({ users, readImage: () => Promise.resolve(IMAGE_BYTES) });
+  const h = createAdminHarness({ users, readImage: () => Promise.resolve(IMAGE_BYTES) });
+  // Öğrenme kilidi (T290): bu dosya oturum akışını test eder, kilidi değil; Opaca tamamlama kaydı baştan eklenir.
+  h.learn.records.set(`${ALI_ID}:opaca`, { userId: ALI_ID, simId: "opaca", completedAt: FIXED_NOW, contentVersion: "test.1" });
+  return h;
 }
 
 async function call(h: AdminHarness, who: Login, method: string, path: string, body?: unknown) {
@@ -409,6 +412,8 @@ describe("Opaca sunucu vaka oturumu (A2.2)", () => {
   it("sim erişimi olmayan kullanıcı 403; Ausculta oturumunda görüntü ucu 404", async () => {
     const users = DEFAULT_USERS.map((entry) => (entry.id === ALI_ID ? { ...ALI, simAccess: ["ausculta"] as const } : entry));
     const h = createAdminHarness({ users });
+    // Öğrenme kilidi (T290): bu test sim erişimini ölçer, kilidi değil.
+    h.learn.records.set(`${ALI_ID}:ausculta`, { userId: ALI_ID, simId: "ausculta", completedAt: FIXED_NOW, contentVersion: "test.1" });
     const ali = await login(h, "ali.veli");
     expect((await call(h, ali, "POST", "/me/sims/opaca/sessions", { mode: "practice" })).status).toBe(403);
     const ausculta = await call(h, ali, "POST", "/me/sims/ausculta/sessions", { mode: "practice" });

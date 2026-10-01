@@ -53,6 +53,19 @@ export function learnStatusBody(records: readonly LearnRecord[]) {
   };
 }
 
+/**
+ * Öğrenme kilidi ortak kontrolü (27 Eyl 2026 Meydan Okuma, T290 uygulama/
+ * değerlendirme oturumu): ilgili simin tamamlama kaydı var mı?
+ */
+export async function hasCompletedLearn(learn: LearnRepo, userId: string, simId: SimId): Promise<boolean> {
+  return (await learn.list(userId)).some((record) => record.simId === simId);
+}
+
+/** Öğrenme kilidi ihlali: 403 `forbidden` + `learn_required` (Meydan Okuma ile aynı biçim). */
+export function learnRequiredError(c: Context<AppEnv>) {
+  return jsonError(c, "forbidden", { issues: [{ code: "learn_required" }] });
+}
+
 /** `/me/*` ara katmanından (oturum + CSRF, `meActor`) SONRA kaydedilmelidir. */
 export function registerLearnRoutes(app: Hono<AppEnv>, deps: LearnDeps, now: () => number): void {
   app.get("/me/learn", async (c) => {

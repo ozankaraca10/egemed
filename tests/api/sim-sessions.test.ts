@@ -8,7 +8,7 @@ import {
 } from "../../packages/contracts/src/index";
 import { ausculta } from "../../packages/assessment-bank/src/index";
 import { resolveAssignmentEx } from "../../packages/assessment-bank/src/ausculta/resolver";
-import { ALI, ALI_ID, DEFAULT_USERS, createAdminHarness, login, type AdminHarness, type Login } from "./admin-harness";
+import { ALI, ALI_ID, DEFAULT_USERS, FIXED_NOW, createAdminHarness, login, type AdminHarness, type Login } from "./admin-harness";
 
 // A1.3 (ADR-009): sunucu vaka oturumu uçtan uca — anahtarsız vaka, sıralı açılış,
 // uygulamada anında / değerlendirmede sonda geri bildirim, süre sınırı, sahiplik,
@@ -42,7 +42,11 @@ const AUDIO = wav(Array.from({ length: 400 }, (_, i) => Math.round(Math.sin(i / 
 
 function harness(roles: readonly ("kullanici" | "ogretim_uyesi" | "uzmanlik_ogrencisi")[] = ["kullanici"]): AdminHarness {
   const users = DEFAULT_USERS.map((entry) => (entry.id === ALI_ID ? { ...ALI, simAccess: ["pulse", "ausculta"] as const, roles } : entry));
-  return createAdminHarness({ users, readAudio: () => Promise.resolve(AUDIO) });
+  const h = createAdminHarness({ users, readAudio: () => Promise.resolve(AUDIO) });
+  // Öğrenme kilidi (T290): bu dosya oturum akışını test eder, kilidi değil;
+  // Ausculta tamamlama kaydı baştan eklenir (öğretim üyesi/uzmanlık öğrencisi zaten muaf).
+  h.learn.records.set(`${ALI_ID}:ausculta`, { userId: ALI_ID, simId: "ausculta", completedAt: FIXED_NOW, contentVersion: "test.1" });
+  return h;
 }
 
 async function call(h: AdminHarness, who: Login, method: string, path: string, body?: unknown) {

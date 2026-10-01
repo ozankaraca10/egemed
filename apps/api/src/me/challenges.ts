@@ -13,7 +13,7 @@ import { jsonError, validationDetails, type AppEnv } from "../http";
 import { toIstanbulIso } from "../admin/users";
 import type { AuthDeps } from "../auth/routes";
 import type { GamificationRepo } from "./gamification";
-import type { LearnRepo } from "./learn";
+import { hasCompletedLearn, learnRequiredError, type LearnRepo } from "./learn";
 import {
   CHALLENGE_PER_CASE_MS,
   CHALLENGE_TOTAL_MS,
@@ -110,6 +110,15 @@ function decideWinner(inviter: { score: number; durationMs: number }, opponent: 
   return "draw";
 }
 
+/** Kullanıcının bu simdeki son `limit` sonuçlanmış düellosu, en yenisi önce (T287). */
+export function recentDuelForm(rows: readonly DuelOutcomeRow[], userId: string, limit = 5): ("win" | "loss" | "draw")[] {
+  return rows
+    .filter((row) => row.winner !== null && row.finishedAt !== null && row.opponentId !== null && (row.inviterId === userId || row.opponentId === userId))
+    .sort((a, b) => (b.finishedAt ?? 0) - (a.finishedAt ?? 0))
+    .slice(0, limit)
+    .map((row) => (row.winner === "draw" ? "draw" : (row.winner === "inviter") === (row.inviterId === userId) ? "win" : "loss"));
+}
+
 /** Oturumun düello puanı/süresi; oturum yoksa ya da bitmemişse sıfır. */
 function duelScore(session: SimSessionRow | undefined): { readonly score: number; readonly durationMs: number } {
   return {
@@ -124,14 +133,9 @@ export function registerChallengeRoutes(app: Hono<AppEnv>, deps: ChallengeDeps, 
     return context?.displayName ?? "Silinmiş kullanıcı";
   }
 
-  /** Öğrenme kilidi: simin tamamlama kaydı yoksa meydan okuma yok (27 Eyl 2026). */
-  async function learnCompleted(userId: string, simId: SimId): Promise<boolean> {
-    return (await deps.learn.list(userId)).some((record) => record.simId === simId);
-  }
-
-  function learnRequired(c: Context<AppEnv>) {
-    return jsonError(c, "forbidden", { issues: [{ code: "learn_required" }] });
-  }
+  /** Öğrenme kilidi: simin tamamlama kaydı yoksa meydan okuma yok (27 Eyl 2026; T290 ile paylaşılan kontrol). */
+  const learnCompleted = (userId: string, simId: SimId) => hasCompletedLearn(deps.learn, userId, simId);
+  const learnRequired = learnRequiredError;
 
   async function body(record: ChallengeRecord, viewerId: string, at: number, code: string | null = null): Promise<ChallengeBody> {
     const status = effectiveStatus(record, at);
@@ -151,6 +155,7 @@ export function registerChallengeRoutes(app: Hono<AppEnv>, deps: ChallengeDeps, 
         finished: entry.session?.status === "finished",
         score: bothDone ? duelScore(entry.session).score : null,
         durationMs: bothDone ? duelScore(entry.session).durationMs : null,
+        recentForm: recentDuelForm(await deps.challenges.listDuelOutcomes(record.simId, entry.userId), entry.userId),
       })),
     );
     const winner = bothDone ? decideWinner(duelScore(results[0]?.session), duelScore(results[1]?.session)) : null;
