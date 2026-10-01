@@ -101,10 +101,10 @@ describe("SimRoute yükleniyor durumu", () => {
       // Mod çipi düğme (mod seçimine döner), süre düz durum metni.
       expect(html, simId).toMatch(/<button class="eg-shell-simbar__chip eg-shell-simbar__chip--assessment"/);
       expect(html, simId).toContain('<span class="eg-shell-simbar__status">04:59</span>');
-      // Sabit sıra: İlerlemem · Tam ekran (kabuğun) · Yardım · Hakkında (kabuğun); simin tam ekranı yok sayılır.
+      // Sabit sıra: İlerlemem · Tam ekran (kabuğun) · Yardım; Hakkında simin içinde yok (T276b, `#/hakkinda`); simin tam ekranı yok sayılır.
       const group = html.slice(html.indexOf('class="eg-shell-simbar__actions"'), html.indexOf('class="eg-shell-simbar__more"'));
       const labels = [...group.matchAll(/aria-label="([^"]+)"/g)].map((match) => match[1]);
-      expect(labels, simId).toEqual(["İlerlemem", t("shell.sim.action.fullscreen"), "Yardım", t("shell.sim.action.about")]);
+      expect(labels, simId).toEqual(["İlerlemem", t("shell.sim.action.fullscreen"), "Yardım"]);
       expect(html, simId).not.toContain("Simin tam ekranı");
       expect(html, simId).not.toContain('class="eg-shell-nav"');
       expect(html, simId).toContain("eg-shell-footer");

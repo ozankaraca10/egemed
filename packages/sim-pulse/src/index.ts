@@ -146,3 +146,4 @@ export { createMemoryPersistence } from "./persistence/memory";
 export { MAX_PERSISTENCE_BYTES, utf8ByteLength } from "./persistence/policy";
 export { PULSE_LEGACY_STORAGE_KEYS, PULSE_STORAGE_KEY } from "./persistence/types";
 export type { PersistenceErrorCode, PersistencePort, PersistenceResult, PersistenceStorage } from "./persistence/types";
+export { PulseAbout, pulseAboutHtml } from "./about/PulseAbout";

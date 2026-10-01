@@ -2,7 +2,7 @@ import type { JSX } from "react";
 import { useStore } from "../core/StoreProvider";
 import sourcesData from "../data/sources.json";
 import { EcgDeco, Footer, touchTarget } from "../ui/chrome";
-import { ScreenHeading, SectionHeading } from "../ui/ScreenHeading";
+import { EmbeddedProvider, ScreenHeading, SectionHeading } from "../ui/ScreenHeading";
 import { IconBook, IconDoc, IconHeart, IconInfo } from "../ui/icons";
 
 /** Kaynaklar (E2 §9 S16b). Atıf, lisans ve validasyon metinleri `sources.json` ile aynıdır.
@@ -89,15 +89,11 @@ export interface SourcesScreenProps {
   readonly embedded?: boolean;
 }
 
-export function SourcesScreen({ embedded = false }: SourcesScreenProps): JSX.Element {
-  const { dispatch } = useStore();
+/** Eski Hakkında içeriği (mağazasız): sim içi Kaynaklar ekranı ve kabuğun `#/hakkinda` sayfası ortak kullanır. */
+export function AuscultaAboutContent(): JSX.Element {
   const inventoryById = new Map(data.inventory.map((item) => [item.id, item]));
-
   return (
     <>
-      <EcgDeco embedded={embedded} />
-      <div className="screen" style={{ position: "relative", zIndex: 1 }}>
-        <div className="src-wrap screen-body">
           <ScreenHeading className="src-title">
             EGEMED Ausculta<sup className="tm">™</sup> Hakkında
           </ScreenHeading>
@@ -317,6 +313,32 @@ export function SourcesScreen({ embedded = false }: SourcesScreenProps): JSX.Ele
               </div>
             </div>
           </section>
+    </>
+  );
+}
+
+/** Kabuk `#/hakkinda` sayfası için: gömülü başlık düzeyi (h2/h3) ve sim stil kapsamı. */
+export function AuscultaAbout(): JSX.Element {
+  return (
+    <EmbeddedProvider embedded={true}>
+      <div className="eg-sim-ausculta eg-sim-about">
+        <div className="src-wrap">
+          <AuscultaAboutContent />
+        </div>
+      </div>
+    </EmbeddedProvider>
+  );
+}
+
+export function SourcesScreen({ embedded = false }: SourcesScreenProps): JSX.Element {
+  const { dispatch } = useStore();
+
+  return (
+    <>
+      <EcgDeco embedded={embedded} />
+      <div className="screen" style={{ position: "relative", zIndex: 1 }}>
+        <div className="src-wrap screen-body">
+          <AuscultaAboutContent />
 
           <div className="results-actions" style={{ justifyContent: "flex-start" }}>
             <button

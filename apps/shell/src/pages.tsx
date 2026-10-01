@@ -8,6 +8,7 @@ import { shellNow } from "./now";
 import { routeHref, simHref, type RouteId } from "./routes";
 import { sessionAllowsSim, type ShellSession } from "./session";
 import { SIM_IDS, SimCard } from "./SimCard";
+import { AboutPage } from "./about/AboutPage";
 
 const TRUST_KEYS = ["data", "faculty", "privacy"] as const;
 const TRUST_SECTION_ID = "eg-neden-guvenilir";
@@ -176,5 +177,6 @@ export function SimulatorsPage({ session = null }: { readonly session?: ShellSes
 
 export function pageFor(id: RouteId, session: ShellSession | null = null): JSX.Element {
   if (id === "home") return <HomePage session={session} />;
+  if (id === "about") return <AboutPage />;
   return <SimulatorsPage session={session} />;
 }

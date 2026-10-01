@@ -39,7 +39,7 @@ describe("resolveRoute", () => {
   });
 
   it("Meydan Okuma ana gezinmede yoktur; sim içi bağlantılar yeni biçimdedir", () => {
-    expect(ROUTES.map((route) => route.id)).toEqual(["home", "simulators"]);
+    expect(ROUTES.map((route) => route.id)).toEqual(["home", "simulators", "about"]);
     expect(ROUTES.some((route) => route.path === "/meydan-okuma")).toBe(false);
     const id = "11111111-1111-4111-8111-111111111111";
     expect(simScreenHref("opaca", "modlar")).toBe("#/sims/opaca/modlar");
@@ -49,9 +49,9 @@ describe("resolveRoute", () => {
 
   it("gidiş-dönüş, benzersizlik ve sözlük anahtarları korunur", () => {
     const keys = new Set(Object.keys(tr));
-    expect(ROUTES.length).toBe(2);
-    expect(new Set(ROUTES.map((route) => route.id)).size).toBe(2);
-    expect(new Set(ROUTES.map((route) => route.path)).size).toBe(2);
+    expect(ROUTES.length).toBe(3);
+    expect(new Set(ROUTES.map((route) => route.id)).size).toBe(3);
+    expect(new Set(ROUTES.map((route) => route.path)).size).toBe(3);
     for (const route of ROUTES) {
       expect(routeHref(route.id), route.id).toBe(`#${route.path}`);
       expect(pageId(routeHref(route.id)), route.id).toBe(route.id);

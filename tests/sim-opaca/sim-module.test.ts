@@ -113,7 +113,7 @@ describe("createOpacaModule (SimHost adaptörü)", () => {
     expect(chrome?.steps?.current).toBe(0);
     expect(chrome?.steps?.labels).toEqual(["Mod seçimi", "Çalışma", "Tamamla"]);
     expect(typeof chrome?.steps?.onSelect).toBe("function");
-    expect(chrome?.actions?.map((action) => action.id)).toEqual(["progress", "fullscreen", "help", "about"]);
+    expect(chrome?.actions?.map((action) => action.id)).toEqual(["progress", "fullscreen", "help"]);
     dispose();
     expect(sent.at(-1)).toBeNull();
   });

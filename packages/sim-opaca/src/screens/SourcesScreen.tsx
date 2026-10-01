@@ -5,6 +5,7 @@ import { ScreenHeading, SectionHeading } from '../ui/ScreenHeading'
 import sourcesData from '../data/sources.json'
 import { IconInfo, IconBook, IconHeart, IconDoc } from '../ui/icons'
 import { datasetCounts, assetUrl } from '../core/images'
+import { EmbeddedProvider } from '../EmbeddedContext'
 
 /** Kaynaklar ve Katkıda Bulunanlar (§33). Tüm metinler makine okunur `sources.json`'dan gelir:
  *  geliştiriciler (`credits`, Ünisis bağlantılı), kurum (`module`), veri setleri (`datasets`),
@@ -83,15 +84,11 @@ export interface SourcesScreenProps {
   readonly embedded?: boolean
 }
 
-export function SourcesScreen({ embedded = false }: SourcesScreenProps): JSX.Element {
-  const { dispatch } = useStore()
+/** Eski Hakkında içeriği (mağazasız): sim içi Kaynaklar ekranı ve kabuğun `#/hakkinda` sayfası ortak kullanır. */
+export function OpacaAboutContent(): JSX.Element {
   const counts = datasetCounts()
-
   return (
     <>
-      <EcgDeco embedded={embedded} />
-      <div className="screen" style={{ position: 'relative', zIndex: 1 }}>
-        <div className="src-wrap screen-body">
           <ScreenHeading className="src-title">EGEMED Opaca<sup className="tm">™</sup> Hakkında</ScreenHeading>
           <p className="src-sub">
             {data.module.product}
@@ -241,6 +238,32 @@ export function SourcesScreen({ embedded = false }: SourcesScreenProps): JSX.Ele
               </div>
             </div>
           </section>
+    </>
+  )
+}
+
+/** Kabuk `#/hakkinda` sayfası için: gömülü başlık düzeyi (h2/h3) ve sim stil kapsamı. */
+export function OpacaAbout(): JSX.Element {
+  return (
+    <EmbeddedProvider embedded={true}>
+      <div className="eg-sim-opaca eg-sim-about">
+        <div className="src-wrap">
+          <OpacaAboutContent />
+        </div>
+      </div>
+    </EmbeddedProvider>
+  )
+}
+
+export function SourcesScreen({ embedded = false }: SourcesScreenProps): JSX.Element {
+  const { dispatch } = useStore()
+
+  return (
+    <>
+      <EcgDeco embedded={embedded} />
+      <div className="screen" style={{ position: 'relative', zIndex: 1 }}>
+        <div className="src-wrap screen-body">
+          <OpacaAboutContent />
 
           <div className="results-actions" style={{ justifyContent: 'flex-start' }}>
             <button className="btn outline" onClick={() => dispatch({ type: 'goto', screen: 'start' })}>

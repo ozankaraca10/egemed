@@ -64,6 +64,7 @@ function navIcon(paths: readonly string[]): ReactNode {
 const NAV_ICONS: Record<RouteId, ReactNode> = {
   home: navIcon(["M3 10.5 12 3l9 7.5", "M5.5 9.2V21h13V9.2"]),
   simulators: navIcon(["M3 12h4l2-5 3 10 2-5h7", "M3 20h18"]),
+  about: navIcon(["M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18z", "M12 11v5", "M12 8h.01"]),
 };
 
 /**

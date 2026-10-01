@@ -1,5 +1,5 @@
 import { useEffect, useState, type JSX } from "react";
-import { Button, Dialog, Menu, icons, type MenuEntry } from "@egemed/ui";
+import { Menu, icons, type MenuEntry } from "@egemed/ui";
 import { SIMULATOR_IDS, type SimChrome, type SimChromeAction, type SimChromeIcon, type SimulatorId } from "@egemed/sim-host";
 import { t } from "@egemed/ui/i18n";
 import { routeHref, simHref } from "./routes";
@@ -13,10 +13,10 @@ import { routeHref, simHref } from "./routes";
  * - Geri düğmesi yoktur; "Sim ▾" menüsü diğer simleri ve "Tüm simülatörler"i verir.
  * - Her öğe tıklanabilir: tamamlanan adımlar (sim destekliyorsa), mod çipi
  *   (mod seçimine döner). Süre/ilerleme gibi durumlar düğme görünümü almaz.
- * - Sabit eylem sırası: [sime özgü] · İlerlemem · Tam ekran · Yardım · Hakkında.
+ * - Sabit eylem sırası: [sime özgü] · İlerlemem · Tam ekran · Yardım.
  *   Tam ekranı kabuk yönetir (belge düzeyinde; bar tam ekranda da kalır) ve
- *   simin kendi tam ekran eylemi yok sayılır. Sim "Hakkında" vermezse kabuk
- *   standart Hakkında penceresini açar.
+ *   simin kendi tam ekran eylemi yok sayılır. Hakkında simin içinde
+ *   yoktur (T276b); kabuğun `#/hakkinda` sayfasındadır.
  * - <768 px'te eylemler "⋯" menüsünde toplanır (yatay taşma yok).
  */
 const ICON_PATHS: Record<SimChromeIcon, readonly string[]> = {
@@ -61,12 +61,13 @@ function slotOf(action: SimChromeAction): number {
   }
 }
 
-/** Sim eylemlerini sabit sıraya dizer; tam ekranı kabuk verir, Hakkında yoksa kabuğunkini ekler. */
+/** Sim eylemlerini sabit sıraya dizer; tam ekranı kabuk verir. */
 export function orderBarActions(
   simActions: readonly SimChromeAction[],
-  shell: { readonly fullscreen: boolean; readonly toggleFullscreen: () => void; readonly openAbout: () => void },
+  shell: { readonly fullscreen: boolean; readonly toggleFullscreen: () => void },
 ): BarAction[] {
-  const own = simActions.filter((action) => action.icon !== "fullscreen");
+  // T276b: Hakkında simin içinde gösterilmez (kabuğun `#/hakkinda` sayfası); tam ekranı kabuk verir.
+  const own = simActions.filter((action) => action.icon !== "fullscreen" && action.icon !== "info");
   const sorted = own
     .map((action, index) => ({ action, index }))
     .sort((a, b) => slotOf(a.action) - slotOf(b.action) || a.index - b.index)
@@ -87,9 +88,6 @@ export function orderBarActions(
   // Tam ekran İlerlemem'den sonra, Yardım'dan önce (yuva 2).
   const helpAt = sorted.findIndex((action) => action.icon === "help" || action.icon === "info");
   const result = helpAt === -1 ? [...sorted, fullscreen] : [...sorted.slice(0, helpAt), fullscreen, ...sorted.slice(helpAt)];
-  if (!own.some((action) => action.icon === "info")) {
-    result.push({ id: "about", label: t("shell.sim.action.about"), icon: "info", onSelect: shell.openAbout });
-  }
   return result;
 }
 
@@ -123,11 +121,9 @@ export interface SimBarProps {
 export function SimBar({ simId, title, chrome }: SimBarProps): JSX.Element {
   const steps = chrome?.steps;
   const { fullscreen, toggle } = useDocumentFullscreen();
-  const [aboutOpen, setAboutOpen] = useState(false);
   const actions = orderBarActions(chrome?.actions ?? [], {
     fullscreen,
     toggleFullscreen: toggle,
-    openAbout: () => setAboutOpen(true),
   });
 
   const switchItems: MenuEntry[] = [
@@ -245,25 +241,6 @@ export function SimBar({ simId, title, chrome }: SimBarProps): JSX.Element {
           }
         />
       </div>
-      <Dialog
-        closeLabel={t("shell.sim.about.close")}
-        footer={
-          <Button onClick={() => setAboutOpen(false)} variant="secondary">
-            {t("shell.sim.about.close")}
-          </Button>
-        }
-        onOpenChange={setAboutOpen}
-        open={aboutOpen}
-        title={`${title} · ${t("shell.sim.action.about")}`}
-      >
-        <div className="eg-shell-simabout">
-          <img alt="" className="eg-shell-simabout__logo" height={48} src={`/brand/sims/${simId}-horizontal.png`} />
-          <p className="eg-shell-simabout__tagline">{t(`sims.${simId}.tagline`)}</p>
-          <p>{t(`sims.${simId}.body`)}</p>
-          <p className="eg-shell-simabout__dev">{t("shell.sim.about.dev")}</p>
-          <p className="eg-shell-simabout__note">{t("shell.sim.about.note")}</p>
-        </div>
-      </Dialog>
     </div>
   );
 }

@@ -168,7 +168,7 @@ describe("createAuscultaModule (SimHost adaptörü)", () => {
     });
     renderToStaticMarkup(target.children[0]?.tree as ReactNode);
     await Promise.resolve();
-    expect(sent.at(-1)?.actions?.map((action) => action.id)).toEqual(["fullscreen", "help", "about"]);
+    expect(sent.at(-1)?.actions?.map((action) => action.id)).toEqual(["fullscreen", "help"]);
   });
 
   it("ziyaretçi kitlesinde mod seçiminde kilit şeridi ve kilitli kart CTA'ları görünür", async () => {
