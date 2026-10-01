@@ -22,14 +22,14 @@ import runFeatures from "./vendor/features.js";
 import runLanding from "./vendor/landing.js";
 import markup from "./vendor/markup.js";
 import runModel from "./vendor/model.js";
-import runScorm from "./vendor/scorm.js";
+import runPersistence from "./vendor/persistence.js";
 import runState from "./vendor/state.js";
 import styles from "./vendor/styles.js";
 
-/** index.html sırası (BUILD.md): model → scorm → curriculum → state → app → features → landing. */
+/** index.html sırası (BUILD.md): model → kalıcılık → curriculum → state → app → features → landing. */
 const SCRIPTS: readonly (readonly [string, (env: PulseScriptEnv) => void])[] = [
   ["model", runModel],
-  ["scorm", runScorm],
+  ["persistence", runPersistence],
   ["curriculum", runCurriculum],
   ["state", runState],
   ["app", runApp],
@@ -400,7 +400,7 @@ export function mountPulseRuntime(target: HTMLElement, options: PulseRuntimeOpti
     },
     dispose() {
       if (disposed) return;
-      // Kaynak kendi kayıt yolunu çalıştırsın (app.js / scorm.js `pagehide`).
+      // Kaynak kendi kayıt yolunu çalıştırsın (app.js / persistence.js `pagehide`).
       try {
         bus.dispatchEvent(new PageTransitionEvent("pagehide", { persisted: false }));
       } catch {

@@ -7,6 +7,7 @@ import { attachPulseAudience } from "./audience";
 import { attachPulseChallengeCard } from "./challengeCard";
 import { attachPulseChrome } from "./chrome";
 import { attachPulseGamification } from "./gami";
+import { attachPulseLearnWorkspace } from "../learn/workspace";
 import { mountPulseRuntime } from "./host";
 import type { PulseRuntimeBridge } from "./host";
 import { createPulseLearnBridge, pulseLearnPort } from "./learn";
@@ -185,11 +186,14 @@ export function createPulseRuntimeModule(deps: PulseRuntimeModuleDeps = {}): Sim
         navigationReady = true;
         unsubscribeNavigation = context.navigation.subscribe((key) => applyRoute(key));
       }
+      // T298: öğrenme modu gerçek 12 derivasyon EKG çalışma alanıyla açılır.
+      const detachLearn = attachPulseLearnWorkspace(handle, { assetBase: deps.assetBase ?? DEFAULT_PULSE_RUNTIME_ASSET_BASE });
       const detachAudience = attachPulseAudience(handle, context);
       const detachChallenge = attachPulseChallengeCard(handle, context, detachGami !== null);
       return () => {
         detachChallenge();
         detachAudience();
+        detachLearn();
         unsubscribeNavigation?.();
         detachChrome?.();
         detachGami?.();

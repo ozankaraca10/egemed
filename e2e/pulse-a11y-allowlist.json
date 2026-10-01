@@ -1,31 +1,5 @@
 {
-  "note": "T102/PULSE-10 — Pulse iç ekranlarında kaynaktan devralınmış erişilebilirlik borcu. Kayıtlar yalnız küçülür: düzeltilen bir kayıt testi 'düzeltildi — listeden çıkar' diye başarısız eder. T113 (host.ts EMBED_CSS): kontrast token'ları ve 44 px dokunma hedefleri düzeltildi; liste 17→5 ihlal, 55→8 küçük hedefe indi. Kalan küçük hedefler: satır içi kaynak bağlantıları (WCAG 2.5.8 satır içi istisnası; hedefi büyütmek satır akışını bozar) ve katman menüsü onay kutuları (44 px kutu kalp sahnesini örter). T136: seçenek etiketlerindeki role=radio/aria-checked vendor kaynağında kaldırıldı (ADR-011; anlam ve klavye yerel radyodan) — ihlal 5→0. T276b: Pulse Hakkında sim içinden kalktı (kabuk #/hakkinda); 'about' ekranı ve kayıtları çıkarıldı.",
+  "note": "T102/PULSE-10 — Pulse iç ekranlarında kaynaktan devralınmış erişilebilirlik borcu. Kayıtlar yalnız küçülür: düzeltilen bir kayıt testi 'düzeltildi — listeden çıkar' diye başarısız eder. T113 (host.ts EMBED_CSS): kontrast token'ları ve 44 px dokunma hedefleri düzeltildi; liste 17→5 ihlal, 55→8 küçük hedefe indi. Kalan küçük hedefler: satır içi kaynak bağlantıları (WCAG 2.5.8 satır içi istisnası; hedefi büyütmek satır akışını bozar) ve katman menüsü onay kutuları (44 px kutu kalp sahnesini örter). T136: seçenek etiketlerindeki role=radio/aria-checked vendor kaynağında kaldırıldı (ADR-011; anlam ve klavye yerel radyodan) — ihlal 5→0. T276b: Pulse Hakkında sim içinden kalktı (kabuk #/hakkinda); 'about' ekranı ve kayıtları çıkarıldı. T298: öğrenme ekranı gerçek 12 derivasyon çalışma alanıyla değişti (vendor katman menüsü gizli, tüm hedefler ≥44 px); 'sim' küçük hedef kayıtları 5→0.",
   "violations": [],
-  "smallTargets": [
-    {
-      "screen": "sim",
-      "selector": "#coronaryToggle",
-      "size": "24x24"
-    },
-    {
-      "screen": "sim",
-      "selector": "#electricToggle",
-      "size": "24x24"
-    },
-    {
-      "screen": "sim",
-      "selector": "#flowToggle",
-      "size": "24x24"
-    },
-    {
-      "screen": "sim",
-      "selector": "#labelsToggle",
-      "size": "24x24"
-    },
-    {
-      "screen": "sim",
-      "selector": "#valveToggle",
-      "size": "24x24"
-    }
-  ]
+  "smallTargets": []
 }
