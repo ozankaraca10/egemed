@@ -76,7 +76,6 @@ function AchievementsBody({ embedded = false, devBuild = false, modalEnv, server
     weekRows: server?.rows ?? week?.rows ?? null,
     domainMeta: DOMAIN_META,
     weakPct: WEAK_DOMAIN_PCT,
-    lockedNote: (id) => (id === 'podium' ? 'Sunucu bağlantısı gelince kazanılabilir (şu an demo sıralama).' : null),
     congrats,
     ...(server ? { activity: serverHasActivity(server.summary, view.state.attempts.length) } : {}),
   }), [congrats, earned, period, server, view, week])

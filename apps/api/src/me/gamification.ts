@@ -27,6 +27,7 @@ import { csrfGuard, type AuthDeps } from "../auth/routes";
 import { createLoginRateLimiter } from "../auth/rate-limit";
 import { SESSION_COOKIE, createSessionService } from "../auth/session";
 import { toIstanbulIso } from "../admin/users";
+import type { CompetitionBansRepo } from "../integrity/bans";
 
 /**
  * T67 — `/me/gamification*` (E3 §d, §c): oturum sahibinin KENDİ oyunlaştırma
@@ -81,7 +82,10 @@ export function serverAttemptXp(input: {
   readonly score: number | null;
   readonly maxScore: number | null;
   readonly passed: boolean | null;
+  /** T283b (ADR-009 §6): yönetici onaylı rekabet engeli — öğrenme/uygulama etkilenmez, yalnız değerlendirme/düello XP'si sıfırlanır. Ceza değil, rekabetten dışlamadır. */
+  readonly competitionBanned?: boolean;
 }): number {
+  if (input.competitionBanned === true && input.mode !== "practice") return 0;
   const percent =
     input.score !== null && input.maxScore !== null && input.maxScore > 0
       ? Math.round((input.score * 100) / input.maxScore)
@@ -177,6 +181,8 @@ export interface GamiLeaderboardQuery {
   readonly page: number;
   readonly pageSize: number;
   readonly at: number;
+  /** T283b: rekabet engelli kullanıcıları liderlikten (ve aylık ödül adaylığından) düşürür. */
+  readonly bannedUserIds?: ReadonlySet<string> | undefined;
 }
 
 export interface GamiLeaderboardRecord {
@@ -204,6 +210,8 @@ export interface GamiAttemptInput {
   readonly mode: GamiAttemptMode;
   readonly caseCount: number;
   readonly hintsUsed: number;
+  /** T283b: `serverAttemptXp`e aynen geçer (yalnız XP hesabını etkiler; deneme kaydı normal yazılır). */
+  readonly competitionBanned?: boolean;
 }
 
 export interface GamiAttemptRecord {
@@ -705,6 +713,7 @@ function assembleLeaderboardRecord(
     period: query.period as Period,
     cohort: query.cohort,
     at: query.at,
+    bannedUserIds: query.bannedUserIds,
   });
   const page = paginateRows(ranked, query.page, query.pageSize);
   return {
@@ -1174,6 +1183,7 @@ export function createMemoryGamificationRepo(
         period: query.period as Period,
         cohort: query.cohort,
         at: query.at,
+        bannedUserIds: query.bannedUserIds,
       });
       const page = paginateRows(ranked, query.page, query.pageSize);
       return {
@@ -1192,6 +1202,8 @@ export function createMemoryGamificationRepo(
 export interface MeGamificationDeps {
   readonly auth: AuthDeps;
   readonly gamification: GamificationRepo;
+  /** T283b: profildeki `competitionBanned` bilgisi ve liderlik süzgeci için. */
+  readonly bans: Pick<CompetitionBansRepo, "isActive" | "activeUserIds">;
 }
 
 function readJson(c: Context<AppEnv>): Promise<unknown> {
@@ -1333,17 +1345,20 @@ export function registerMeGamificationRoutes(
     const at = now();
     // Üç simin özeti AYRI tutulur; birleştirme veya toplam puan üretilmez.
     // Yalnız erişim verilmiş simler döner (API-03).
-    const summaries = await Promise.all(
-      SIM_IDS.filter((simId) => actor.simAccess.includes(simId)).map((simId) =>
-        deps.gamification.getSummary({
-          userId: actor.userId,
-          institutionId: actor.institutionId,
-          simId,
-          at,
-        }),
+    const [summaries, competitionBanned] = await Promise.all([
+      Promise.all(
+        SIM_IDS.filter((simId) => actor.simAccess.includes(simId)).map((simId) =>
+          deps.gamification.getSummary({
+            userId: actor.userId,
+            institutionId: actor.institutionId,
+            simId,
+            at,
+          }),
+        ),
       ),
-    );
-    return c.json({ data: { sims: summaries.map(summaryBody) } });
+      deps.bans.isActive(actor.userId),
+    ]);
+    return c.json({ data: { competitionBanned, sims: summaries.map(summaryBody) } });
   });
 
   // Liderlik tablosuna katılım tercihi (üç simde ortak; sim erişimi gerektirmez).
@@ -1366,6 +1381,8 @@ export function registerMeGamificationRoutes(
     if (!parsedQuery.success) return jsonError(c, "invalid_request", validationDetails(parsedQuery.error));
     if (!canUseSim(c, parsedSim.data)) return jsonError(c, "forbidden");
     const actor = c.get("meActor");
+    // T283b: rekabet engelli kullanıcılar liderlikte (ve dolayısıyla aylık ödül adaylığında) hiç görünmez.
+    const bannedUserIds = await deps.bans.activeUserIds(actor.institutionId);
     const board = await deps.gamification.getLeaderboard({
       userId: actor.userId,
       institutionId: actor.institutionId,
@@ -1375,6 +1392,7 @@ export function registerMeGamificationRoutes(
       page: parsedQuery.data.page,
       pageSize: parsedQuery.data.pageSize,
       at: now(),
+      bannedUserIds,
     });
     return c.json({
       data: leaderboardBody(board),

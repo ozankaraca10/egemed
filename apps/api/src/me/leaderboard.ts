@@ -114,9 +114,12 @@ export function buildLeaderboardRows(input: {
   readonly period: Period;
   readonly cohort: CohortFilter;
   readonly at: number;
+  /** T283b: yönetici kararıyla rekabet engelli kullanıcılar — liderlikte (ve dolayısıyla aylık ödül adaylığında) hiç listelenmez. */
+  readonly bannedUserIds?: ReadonlySet<string> | undefined;
 }): readonly LeaderboardRowDraft[] {
   const drafts: LeaderboardRowDraft[] = [];
   for (const peer of input.peers) {
+    if (input.bannedUserIds?.has(peer.userId) === true) continue;
     const profile = input.profiles.get(peer.userId);
     const cohort = cohortFromUnitCode(peer.unitCode);
     if (!cohortMatches(input.cohort, cohort)) continue;

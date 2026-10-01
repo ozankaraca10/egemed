@@ -29,7 +29,7 @@ export function renderChallengeInvite(data: ChallengeInviteData): MailRenderResu
 
   const bodyHtml = `
     <p style="margin:0 0 16px;">Merhaba ${name},</p>
-    <p style="margin:0 0 16px;"><strong>${inviter}</strong> sizi <strong>${simName}</strong> simülasyonunda bir Meydan Okuma düellosuna davet etti.</p>
+    <p style="margin:0 0 16px;"><strong>${inviter}</strong> sizi <strong>${simName}</strong> simülasyonunda bir Meydan Okuma karşılaşmasına davet etti.</p>
     <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color:${mailColors.pageBg};border-radius:8px;margin:0 0 16px;">
       <tr>
         <td align="center" style="padding:18px;font-family:${mailFontFamily};">
@@ -43,16 +43,16 @@ export function renderChallengeInvite(data: ChallengeInviteData): MailRenderResu
   `;
 
   const html = renderMailLayout({
-    preheader: `${data.inviterDisplayName} sizi bir Meydan Okuma düellosuna davet etti.`,
+    preheader: `${data.inviterDisplayName} sizi bir Meydan Okuma karşılaşmasına davet etti.`,
     bandTitle: INSTITUTION_LINE,
     bodyHtml,
-    cta: { label: "Düelloya katıl", url: data.joinUrl },
+    cta: { label: "Karşılaşmaya katıl", url: data.joinUrl },
     logoUrl: data.logoUrl,
   });
 
   const text = joinTextLines([
     `Merhaba ${data.recipientName},`,
-    `${data.inviterDisplayName} sizi ${data.simName} simülasyonunda bir Meydan Okuma düellosuna davet etti.`,
+    `${data.inviterDisplayName} sizi ${data.simName} simülasyonunda bir Meydan Okuma karşılaşmasına davet etti.`,
     `Davet kodu: ${data.code}`,
     `Bu davet ${data.expiresInLabel} içinde geçerliliğini kaybeder. Katılmak için: ${data.joinUrl}`,
     INSTITUTION_LINE,

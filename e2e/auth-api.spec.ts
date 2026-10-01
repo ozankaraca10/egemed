@@ -592,7 +592,7 @@ test.describe("API oturumu (dev sağlayıcı)", () => {
     const username = `duello.${randomUUID().slice(0, 8)}`;
     const created = await admin.request.post("/api/admin/users", {
       headers: { "x-csrf-token": csrf },
-      data: { username, displayName: "Düello Rakibi", authMethod: "dev", role: "kullanici", simAccess: ["ausculta"] },
+      data: { username, displayName: "Karşılaşma Rakibi", authMethod: "dev", role: "kullanici", simAccess: ["ausculta"] },
     });
     expect(created.ok(), "ikinci öğrenci").toBe(true);
     await adminContext.close();
@@ -650,7 +650,7 @@ test.describe("API oturumu (dev sağlayıcı)", () => {
         await target.waitForTimeout(120);
       }
       await expect(report).toBeVisible({ timeout: 20_000 });
-      await target.getByRole("button", { name: "Düello sonucunu gör" }).click();
+      await target.getByRole("button", { name: "Karşılaşma sonucunu gör" }).click();
       await expect(target).toHaveURL(/#\/sims\/ausculta\/meydan-okuma\/[0-9a-f-]{36}$/);
     }
 

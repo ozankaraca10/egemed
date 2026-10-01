@@ -235,7 +235,7 @@ okuma kapsamı dışında bırakıldı, yalnız migration'daki view koda dayanı
 ## 3. Sim oturumları ve Meydan Okuma
 
 Kaynak: `009_sim_sessions.sql`, `010_challenges.sql`, `011_sim_learn_completions.sql`,
-`013_duel_results.sql`, `015_integrity_flags.sql`.
+`013_duel_results.sql`, `015_integrity_flags.sql`, `016_competition_bans.sql`.
 
 ```mermaid
 erDiagram
@@ -267,6 +267,15 @@ erDiagram
     timestamptz reviewed_at "nullable"
     text note "nullable; yalnız yönetici notu (T283b)"
   }
+  competition_bans {
+    uuid id PK
+    uuid user_id FK "users, on delete cascade"
+    uuid flag_id FK "nullable, integrity_flags, on delete set null"
+    uuid created_by FK "nullable, users, on delete set null"
+    timestamptz created_at
+    timestamptz lifted_at "nullable; dolu ise engel kalkmıştır"
+    uuid lifted_by FK "nullable, users, on delete set null"
+  }
   sim_learn_completions {
     uuid user_id PK, FK
     text sim_id PK "pulse|ausculta|opaca"
@@ -293,7 +302,17 @@ erDiagram
   challenges |o..o{ sim_sessions : "challenge_id (uygulama düzeyinde eşleşir, DB FK'sı yok)"
   sim_sessions ||--o{ integrity_flags : "şüpheli oturum işaretlenir (T283a, yalnız tespit)"
   users ||--o{ integrity_flags : "işaretlenen kullanıcı"
+  users ||--o{ competition_bans : "engellenen kullanıcı (T283b, yalnız yönetici 'confirmed' kararıyla)"
+  integrity_flags |o--o{ competition_bans : "engeli açan işaretleme (nullable)"
 ```
+
+`competition_bans` kullanıcı başına tek AKTİF engel tutar: kısmi benzersiz dizin
+`(user_id) where lifted_at is null`. Otomatik ceza YOK — satır yalnız
+`POST /admin/integrity/:flagId/decision` (`confirmed`) ile açılır,
+`POST /admin/integrity/bans/:userId/lift` ile kapatılır (`lifted_at`/`lifted_by`
+dolar, satır silinmez). Etkiler: Meydan Okuma oluşturma/katılma 403
+`competition_banned`; liderlik + aylık ödül adaylığından düşme; değerlendirme/
+düello XP'si sıfır (öğrenme/uygulama etkilenmez) — bkz. `docs/sema/akislar.md`.
 
 ## 4. Aylık ödüller
 
