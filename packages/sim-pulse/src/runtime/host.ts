@@ -450,7 +450,7 @@ export function mountPulseRuntime(target: HTMLElement, options: PulseRuntimeOpti
  * altında kalması için `position: fixed` landing ve ekran yüksekliği kabuk
  * alanına indirgenir (`--pulse-vh`, mount'ta ölçülür).
  */
-const EMBED_CSS = `
+export const EMBED_CSS = `
 :host{display:block;position:relative;min-height:var(--pulse-vh,100dvh)}
 .pulse-html,.pulse-body{min-height:var(--pulse-vh,100dvh)}
 .landing{position:absolute;min-height:var(--pulse-vh,100dvh)}

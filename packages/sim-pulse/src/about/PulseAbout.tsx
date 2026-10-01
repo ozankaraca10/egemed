@@ -3,6 +3,7 @@ import { useEffect, useRef, type JSX } from "react";
 import sourcesData from "../data/sources.json";
 import { curriculum } from "../data/curriculum";
 import styles from "../runtime/vendor/styles.js";
+import { EMBED_CSS } from "../runtime/host";
 
 /**
  * T276b — Pulse'ın eski Hakkında içeriği, kabuğun `#/hakkinda` sayfası için
@@ -106,7 +107,7 @@ export function PulseAbout({ assetBase }: { readonly assetBase: string }): JSX.E
     const host = ref.current;
     if (host === null) return;
     const root = host.shadowRoot ?? host.attachShadow({ mode: "open" });
-    root.innerHTML = `<style>${styles}\n${ABOUT_CSS}</style><div class="about-root">${pulseAboutHtml(assetBase)}</div>`;
+    root.innerHTML = `<style>${styles}\n${EMBED_CSS}\n${ABOUT_CSS}</style><div class="about-root">${pulseAboutHtml(assetBase)}</div>`;
   }, [assetBase]);
   return <div className="egemed-pulse-about" ref={ref} />;
 }
