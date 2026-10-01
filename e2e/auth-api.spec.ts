@@ -72,7 +72,7 @@ async function openPulseQuiz(page: Page): Promise<Locator> {
     t: 2,
     p: 1,
     f: 0,
-    v: Array.from({ length: 23 }, () => 16_000),
+    v: Array.from({ length: 23 }, () => 60_000),
     u: 4,
     c: {
       // Oturum kimliği her koşuda benzersiz olmalı; sunucu aynı kimlikli denemeyi 409 ile reddeder.

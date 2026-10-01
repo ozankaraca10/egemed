@@ -75,7 +75,7 @@ function record(caseSession: Record<string, unknown>, quizSession: Record<string
     t: 2,
     p: 1,
     f: 0,
-    v: Array.from({ length: 23 }, () => 16_000),
+    v: Array.from({ length: 23 }, () => 60_000),
     u: 4,
     c: caseSession,
     q: quizSession,

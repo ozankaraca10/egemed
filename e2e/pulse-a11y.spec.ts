@@ -131,7 +131,7 @@ function pulseSeedRecord(options: PulseSeedOptions = {}): Record<string, unknown
     t: 2,
     p: 1,
     f: 0,
-    v: Array.from({ length: 23 }, () => 16_000),
+    v: Array.from({ length: 23 }, () => 60_000),
     u: 4,
     c: seedSession("case", options.casesComplete === true),
     q: seedSession("quiz", false),

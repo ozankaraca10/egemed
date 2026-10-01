@@ -53,8 +53,8 @@ interface SourcePersistence {
   save(state: unknown): unknown;
 }
 
-/** Kaynakta bir mod "incelendi" sayılmak için gereken gözlem saniyesi (16 s akış kuralı). */
-const STUDY_SECONDS = 16;
+/** Kaynakta bir mod "incelendi" sayılmak için gereken gözlem saniyesi (T302: 60 s; kaynak `PulseState.LEARN_S`). */
+const STUDY_SECONDS = 60;
 
 /**
  * A4 (ADR-009): sunucuya giden puansız öğrenme anahtarı. Yerel anahtar

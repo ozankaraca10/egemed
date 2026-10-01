@@ -90,6 +90,10 @@ export const PULSE_LEARN_CSS = `
 .pl-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
 .pl-card { background: #fff; border: 1px solid var(--pl-line); border-radius: 12px; padding: 12px; display: grid; gap: 8px; align-content: start; }
 .pl-crit { background: var(--pl-gold-soft); border-left: 3px solid var(--pl-gold); padding: 10px 12px; border-radius: 0 8px 8px 0; font-size: 13px; }
+.pl-refs { margin: 0; font-size: 12px; color: var(--pl-ink-3); display: flex; flex-wrap: wrap; align-items: center; column-gap: 8px; }
+.pl-refs a, .pl-src a { display: inline-flex; align-items: center; min-height: 44px; }
+.pl a { color: var(--pl-blue); text-decoration: underline; text-underline-offset: 2px; }
+.pl a:focus-visible { outline: 3px solid var(--pl-blue); outline-offset: 2px; border-radius: 2px; }
 .pl-look { margin: 0; padding-left: 18px; color: var(--pl-ink-2); font-size: 13px; display: grid; gap: 4px; }
 .pl-mech { margin: 0; font-size: 13px; color: var(--pl-ink-2); }
 @media (max-width: 1100px) {

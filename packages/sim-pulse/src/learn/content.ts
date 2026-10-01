@@ -73,7 +73,7 @@ export function heartProfileFor(key: string): PulseHeartProfile {
 }
 
 /**
- * Öğrenme kilidini taşıyan kaynak modları (`state.viewed`, ≥16 s). Gerçek EKG
+ * Öğrenme kilidini taşıyan kaynak modları (`state.viewed`, ≥60 s). Gerçek EKG
  * paterni bu modlardan birine eşlenir; eşlenmeyen MI alt paternleri yalnız
  * yerel olarak işaretlenir (kilit sayısı değişmez).
  */
@@ -232,6 +232,45 @@ export const PULSE_LEARN_TEXT: Readonly<Record<string, PulseLearnText>> = {
     mech: "Hücre dışı potasyum artınca dinlenim potansiyeli yükselir; repolarizasyon hızlanır (sivri T), ilerledikçe hücreler yavaş uyarılır (geniş QRS). Ölümcül aritmi riski vardır.",
   },
 };
+
+/** Ölçütlerin dayandığı kılavuz ve standartlar (DOI'ler Crossref'te doğrulandı, 1 Eki 2026). */
+export interface PulseGuideline {
+  readonly label: string;
+  readonly title: string;
+  readonly doi: string;
+}
+
+export const PULSE_GUIDELINES: Readonly<Record<string, PulseGuideline>> = {
+  aha1: { label: "AHA/ACCF/HRS 2007 · I", title: "Kligfield P, et al. Recommendations for the Standardization and Interpretation of the Electrocardiogram, Part I. Circulation 2007", doi: "10.1161/CIRCULATIONAHA.106.180200" },
+  aha3: { label: "AHA/ACCF/HRS 2009 · III", title: "Surawicz B, et al. AHA/ACCF/HRS Recommendations for the ECG, Part III: Intraventricular Conduction Disturbances. Circulation 2009", doi: "10.1161/CIRCULATIONAHA.108.191095" },
+  aha4: { label: "AHA/ACCF/HRS 2009 · IV", title: "Rautaharju PM, et al. AHA/ACCF/HRS Recommendations for the ECG, Part IV: The ST Segment, T and U Waves, and the QT Interval. Circulation 2009", doi: "10.1161/CIRCULATIONAHA.108.191096" },
+  aha6: { label: "AHA/ACCF/HRS 2009 · VI", title: "Wagner GS, et al. AHA/ACCF/HRS Recommendations for the ECG, Part VI: Acute Ischemia/Infarction. Circulation 2009", doi: "10.1161/CIRCULATIONAHA.108.191098" },
+  udmi4: { label: "4. Evrensel MI Tanımı 2018", title: "Thygesen K, et al. Fourth Universal Definition of Myocardial Infarction (2018). Eur Heart J 2019", doi: "10.1093/eurheartj/ehy462" },
+  escAcs: { label: "ESC 2023 AKS", title: "Byrne RA, et al. 2023 ESC Guidelines for the management of acute coronary syndromes. Eur Heart J 2023", doi: "10.1093/eurheartj/ehad191" },
+  escSvt: { label: "ESC 2019 SVT", title: "Brugada J, et al. 2019 ESC Guidelines for the management of patients with supraventricular tachycardia. Eur Heart J 2020", doi: "10.1093/eurheartj/ehz467" },
+  escAf: { label: "ESC 2024 AF", title: "Van Gelder IC, et al. 2024 ESC Guidelines for the management of atrial fibrillation. Eur Heart J 2024", doi: "10.1093/eurheartj/ehae176" },
+  accBrady: { label: "ACC/AHA/HRS 2018 Bradikardi", title: "Kusumoto FM, et al. 2018 ACC/AHA/HRS Guideline on the Evaluation and Management of Patients With Bradycardia and Cardiac Conduction Delay. Circulation 2019", doi: "10.1161/CIR.0000000000000628" },
+  escVa: { label: "ESC 2022 Ventriküler aritmi", title: "Zeppenfeld K, et al. 2022 ESC Guidelines for the management of patients with ventricular arrhythmias and the prevention of sudden cardiac death. Eur Heart J 2022", doi: "10.1093/eurheartj/ehac262" },
+  escPeri: { label: "ESC 2025 Miyokardit/Perikardit", title: "Schulz-Menger J, et al. 2025 ESC Guidelines for the management of myocarditis and pericarditis. Eur Heart J 2025", doi: "10.1093/eurheartj/ehaf192" },
+  levis: { label: "Levis 2013 Hiperkalemi", title: "Levis JT. ECG Diagnosis: Hyperkalemia. Perm J 2013", doi: "10.7812/TPP/12-088" },
+};
+
+/** Patern başına ölçütün kaynakları (sıra: en doğrudan kaynak önce). */
+export const PULSE_LEARN_REFS: Readonly<Record<string, readonly string[]>> = {
+  normal: ["aha1"], sintach: ["aha1"], sinbrady: ["aha1", "accBrady"],
+  pac: ["aha1", "escSvt"], pvc: ["aha1", "escVa"], junctional: ["accBrady", "aha1"],
+  af: ["escAf"], flutter: ["escSvt", "escAf"], pat: ["escSvt"], svt: ["escSvt"],
+  avb1: ["accBrady"], mobitz1: ["accBrady"], mobitz2: ["accBrady"], chb: ["accBrady"],
+  rbbb: ["aha3"], lbbb: ["aha3"], wpw: ["aha3", "escSvt"],
+  vt: ["escVa"], vf: ["escVa"],
+  mi_anterior: ["udmi4", "escAcs", "aha6"], mi_lateral: ["udmi4", "escAcs", "aha6"], mi_inferior: ["udmi4", "escAcs", "aha6"],
+  mi_posterior: ["escAcs", "udmi4"], mi_nstemi: ["escAcs", "udmi4"], mi_avr: ["escAcs"], mi_wellens: ["escAcs", "aha6"], mi_old: ["udmi4"],
+  pericarditis: ["escPeri"], hyperk: ["levis", "aha4"],
+};
+
+export function learnRefsFor(key: string): readonly PulseGuideline[] {
+  return (PULSE_LEARN_REFS[key] ?? []).map((id) => PULSE_GUIDELINES[id]).filter((g): g is PulseGuideline => g !== undefined);
+}
 
 export function learnTextFor(key: string): PulseLearnText | undefined {
   return PULSE_LEARN_TEXT[key];
