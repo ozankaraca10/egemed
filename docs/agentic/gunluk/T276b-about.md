@@ -1,7 +1,7 @@
 # T276b-about
 
-- Tarih: 2026-10-01 09:29
-- Commit: T276b: Hakkında hizalama — Pulse hikâye bölümü kaldırıldı; Opaca/Ausculta Hakkında kabuk barından kendi ekranını açar (Sonnet + Claude)
+- Tarih: 2026-10-01 09:38
+- Commit: T276b: Hakkında tek sayfa (#/hakkinda, sim sekmeli, eski ayrıntılı içerik); sim içi Hakkında kaldırıldı; Pulse hikâye bölümü kaldırıldı (Claude + Sonnet)
 - Dal: task/T276b-about
 
 ---
@@ -53,3 +53,11 @@ Yapılmadı (talimat gereği).
 - Opaca/Ausculta birleşik bara kendi "Hakkında" eylemini verir → `sources` ekranı (Pulse ile aynı); çalışma ekranında kabuk penceresi kalır (oturum bölünmez).
 - Opaca `App.tsx`: `SourcesScreen` bağlandı. Üç Hakkında ekranı 1440'ta görsel olarak aynı düzende.
 - Not: Opaca/Ausculta "Tıbbi içerik validasyonu" grubunda adsız "Doç. Dr." yer tutucuları görünüyor (veri; depo sahibinin radyolog/kardiyolog listesi bekleniyor).
+
+## Depo sahibi kararıyla yön değişikliği (1 Eki 2026, Claude)
+"Eski Hakkımızda sayfalarını ana sayfaya tek sayfa olarak ekleyelim; simülatör içindeki Hakkında'lar kalksın."
+- Kabuk `#/hakkinda` (üst menüde "Hakkında"): Pulse | Ausculta | Opaca sekmeleri; her sekme eski ayrıntılı içerik (Geliştiriciler, Kurum, Veri setleri/Kaynaklar, Validasyon/uyarı). Tembel yüklenir.
+- `OpacaAbout`, `AuscultaAbout` (mağazasız içerik bileşenleri, SourcesScreen de bunları kullanır), `PulseAbout` (kaynak `renderAbout` birebir; gölge kökte Pulse stilleriyle).
+- Sim barından Hakkında kaldırıldı (Pulse eylemi + kabuğun basit penceresi). Önceki "barda simin kendi Hakkında'sı" değişikliği geri alındı.
+- Pulse'ın sim içi Hakkında görünümündeki "Yerel veriler" (CSV indir / yerel ilerlemeyi sıfırla) artık erişilemez; SCORM kaldırma (T278) ile birlikte değerlendirilmeli.
+- Şema: urun.md rota + diyagram. Kapı 17/17, 1943 test; 1440/360 ekran görüntüleri kontrol edildi.
