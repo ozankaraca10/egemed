@@ -1,7 +1,7 @@
 # T289-mode-journey
 
-- Tarih: 2026-10-01 02:12
-- Commit: T289: üç simde ortak premium mod seçimi — dört modlu yolculuk (Öğrenme→Uygulama→Değerlendirme→Meydan Okuma), aylık ödül şeridi, adil oyun kuralı (Claude)
+- Tarih: 2026-10-01 07:20
+- Commit: T289: üç simde ortak premium mod seçimi — dört modlu yolculuk (Öğrenme→Uygulama→Değerlendirme→Meydan Okuma), aylık ödül şeridi, adil oyun kuralı, AA kontrastı (Claude)
 - Dal: task/T289-mode-journey
 
 ---
@@ -24,3 +24,8 @@ Yazan: Claude (Opus 5.5). Depo sahibi onayı: mod seçimi maketi v2 (artifact PT
 
 ## Şema
 - `docs/sema/urun.md` 4. mod kartı → `openChallenges` zaten T281a/T286 ile işlenmişti; ek şema değişikliği yok (yalnız görünüm).
+
+## e2e düzeltmeleri (ilk gate: 24 yeni kırmızı → geri alındı)
+- Öğrenme kilidi e2e'lerinde kalan `button.btn` seçicileri `button.eg-gami-mode-cta` oldu.
+- Erişilebilirlik (axe color-contrast): öğrenme düğmesi `--green-800` (yeni aile token'ı, beyaz metinle 7:1); kilitli kartta metinler soluklaştırılmıyor (yalnız madalya); adım etiketi `--ink-600`.
+- `sims-a11y` Opaca sonuç ekranı `.ok` kontrastı 1/3 kararsız (önceden var olan, bu görevle ilgisiz; gate yeniden denemesi geçiriyor).
