@@ -370,7 +370,8 @@ describe("ModeSelectScreen öğrenme kilidi", () => {
     expect(html).toContain("mode-card assessment learn-locked");
     expect(html).toContain('data-learn-locked="true"');
     expect(html).toContain("Önce öğrenme modunu tamamlayın: 0/20 ses dinlendi.");
-    expect(html).toMatch(/disabled=""[^>]*>Önce öğrenme modunu tamamlayın/);
+    // T289: kilitli düğmede metnin önünde kilit simgesi (svg) bulunur.
+    expect(html).toMatch(/disabled=""[^>]*>(?:<svg[\s\S]*?<\/svg>)?Önce öğrenme modunu tamamlayın/);
   });
 
   it("host complete ise yerel küme boşken de kartlar açıktır", () => {
@@ -390,7 +391,7 @@ describe("ModeSelectScreen öğrenme kilidi", () => {
 
   it("ziyaretçi kilidi önceliklidir: öğrenme kilidi metni çizilmez", () => {
     const html = renderInGate(createElement(ModeSelectScreen, { embedded: true }), { audience: "visitor" });
-    expect(html).toContain('data-visitor-locked="true"');
+    expect(html).toContain('data-audience-locked="true"');
     expect(html).toContain('data-learn-locked="false"');
     expect(html).toContain("Bu mod yalnızca Ege Üniversitesi Tıp Fakültesi öğrencilerine açıktır.");
     expect(html).not.toContain("Önce öğrenme modunu tamamlayın");

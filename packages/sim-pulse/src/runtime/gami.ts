@@ -16,7 +16,6 @@ import type { PulseAttemptRecord } from "../gamification/attempt";
 import { emptyPulseGamiState, pulseLearnTopic } from "../gamification/repo";
 import type { PulseGamiRepo, PulseGamiState, PulseGamiWriteResult } from "../gamification/repo";
 import { pulseSessionGains } from "../gamification/gains";
-import { gamiUiStyles } from "@egemed/gami-ui";
 import type { GamiServerSource } from "@egemed/gami-ui";
 import { mountPulseGains } from "./gains";
 import { mountPulseProgress } from "./progress";
@@ -136,10 +135,10 @@ export function attachPulseGamification(handle: PulseRuntimeHandle, options: Pul
   helpBtn?.parentElement?.insertBefore(button, helpBtn);
 
   // Ortak tasarım (@egemed/gami-ui): İlerlemem, Pulse alanını kaplayan tam sayfa
-  // görünümdür (Opaca/Ausculta ile aynı). Stiller gölge köke bir kez eklenir.
+  // görünümdür (Opaca/Ausculta ile aynı). gami-ui stilleri gölge köke `host.ts`
+  // ekler (T289: mod seçimi de ortak bileşendir); burada yalnız İlerlemem kabı.
   const style = doc.createElement("style");
-  style.textContent = `${gamiUiStyles}
-.egemed-pulse-progress-host{position:absolute;inset:0;z-index:60;overflow:auto;background:var(--bg-grad-a,#eef4fb)}
+  style.textContent = `.egemed-pulse-progress-host{position:absolute;inset:0;z-index:60;overflow:auto;background:var(--bg-grad-a,#eef4fb)}
 .egemed-pulse-progress-host[hidden]{display:none}
 .egemed-pulse-progress{max-width:1200px;margin:0 auto;padding:16px}
 .egemed-pulse-progress__bar{display:flex;justify-content:flex-start;margin-bottom:8px}
@@ -183,28 +182,40 @@ export function attachPulseGamification(handle: PulseRuntimeHandle, options: Pul
   button.addEventListener("click", () => openDialog());
 
   const modeCards = shadow.getElementById("modeCards");
+  // T289: ortak mod kartı — ödül değerlendirme kartının üst şeridinde; altında "Aylık sıralamayı gör".
+  const GIFT_ICON =
+    '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13"/><path d="M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7"/><path d="M7.5 8a2.5 2.5 0 0 1 0-5C11 3 12 8 12 8s1-5 4.5-5a2.5 2.5 0 0 1 0 5"/></svg>';
   const renderReward = (): void => {
     const card = modeCards?.querySelector(".mode-card.assessment");
     const reward = options.rewards?.snapshot()?.current;
-    const existing = card?.querySelector(".mode-reward");
-    if (!reward) {
-      existing?.remove();
+    const ribbon = card?.querySelector<HTMLElement>(".eg-gami-mode-ribbon");
+    const link = card?.querySelector(".eg-pulse-reward-link");
+    if (!reward || !card) {
+      ribbon?.remove();
+      link?.remove();
       return;
     }
     const now = options.now();
     const local = new Date(now + 3 * 60 * 60 * 1000);
     const nextMonth = Date.UTC(local.getUTCFullYear(), local.getUTCMonth() + 1, 1) - 3 * 60 * 60 * 1000;
-    const label = `Bu ayın ödülü · ${Math.ceil((nextMonth - now) / 86_400_000)} gün kaldı`;
-    if (existing) {
-      if (existing.textContent !== label) existing.textContent = label;
-      return;
+    const label = `Bu ayın ödülü · ilk ${reward.winnersCount} kişiye · ${Math.ceil((nextMonth - now) / 86_400_000)} gün`;
+    if (ribbon) {
+      if (ribbon.textContent?.trim() !== label) ribbon.innerHTML = `${GIFT_ICON} ${label}`;
+    } else {
+      const next = doc.createElement("span");
+      next.className = "eg-gami-mode-ribbon";
+      next.innerHTML = `${GIFT_ICON} ${label}`;
+      card.prepend(next);
     }
-    const link = doc.createElement("button");
-    link.type = "button";
-    link.className = "mode-reward";
-    link.textContent = label;
-    link.addEventListener("click", () => openDialog("leaderboard"));
-    card?.querySelector(".mode-status")?.insertAdjacentElement("afterend", link);
+    if (!link) {
+      const button = doc.createElement("button");
+      button.type = "button";
+      button.className = "eg-gami-link eg-pulse-reward-link";
+      button.style.minHeight = "44px";
+      button.innerHTML = `${GIFT_ICON} Aylık sıralamayı gör`;
+      button.addEventListener("click", () => openDialog("leaderboard"));
+      card.querySelector(".mode-status")?.insertAdjacentElement("beforebegin", button);
+    }
   };
   const rewardObserver = new MutationObserver(renderReward);
   if (modeCards) rewardObserver.observe(modeCards, { childList: true });

@@ -58,6 +58,8 @@ export interface AppProps {
   readonly rewards?: SimRewardsSource;
   readonly challengeId?: string;
   readonly onChallengeFinished?: (challengeId: string) => void;
+  /** T281a/T289: 4. mod kartı → kabuğun sim içi Meydan Okuma merkezi. */
+  readonly openChallenges?: () => void;
 }
 
 function Shell({
@@ -77,6 +79,7 @@ function Shell({
   rewards: rewardsSource,
   challengeId,
   onChallengeFinished,
+  openChallenges,
 }: AppProps & { embedded: boolean }): JSX.Element {
   const { state, dispatch, bus, now, storage } = useStore();
   const learnGate = useLearnGate();
@@ -159,6 +162,7 @@ function Shell({
       {...(sessions === undefined ? {} : { sessions })}
       {...(challengeId === undefined ? {} : { challengeId })}
       {...(onChallengeFinished === undefined ? {} : { onChallengeFinished })}
+      {...(openChallenges === undefined ? {} : { openChallenges })}
       {...(setChrome === undefined ? {} : { setChrome })}
       {...(requestSignIn === undefined ? {} : { requestSignIn })}
     >

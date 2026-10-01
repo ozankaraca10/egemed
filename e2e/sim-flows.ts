@@ -106,7 +106,7 @@ export async function unlockOpacaLearn(page: Page): Promise<void> {
  * denemez; "uygulama yap" eylemi olan ilk konu veri tarafında sabittir).
  */
 export async function startTopicPractice(root: Locator): Promise<void> {
-  await root.locator(".mode-card.learn button.btn").first().click();
+  await root.locator(".mode-card.learn button.eg-gami-mode-cta").first().click();
   await expect(root.locator(".tabbar.info-tabs")).toBeVisible();
   const items = root.locator(".lib-item");
   const count = await items.count();

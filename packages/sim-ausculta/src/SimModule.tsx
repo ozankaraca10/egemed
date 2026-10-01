@@ -245,6 +245,7 @@ export function createAuscultaModule(deps?: AuscultaModuleDeps): SimModule {
         ...(context.rewards === undefined ? {} : { rewards: context.rewards }),
         ...(context.challengeId === undefined ? {} : { challengeId: context.challengeId }),
         ...(context.onChallengeFinished === undefined ? {} : { onChallengeFinished: context.onChallengeFinished }),
+        ...(context.openChallenges === undefined ? {} : { openChallenges: context.openChallenges }),
       };
 
       const store = createElement(StoreProvider, {

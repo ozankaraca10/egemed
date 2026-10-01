@@ -119,7 +119,6 @@ describe("Ausculta CSS kapsam sözleşmesi (S17a–S17d)", () => {
     for (const query of ["(max-width: 1280px)", "(max-width: 1080px)", "(max-width: 720px)", "(max-width: 480px)", "(prefers-reduced-motion: reduce)"]) {
       expect(components, query).toContain(`@media ${query}`);
     }
-    expect(components).toMatch(/\.eg-sim-ausculta \.mode-cards \{ grid-template-columns: 1fr;/);
     expect(components).toMatch(/\.eg-sim-ausculta \.sim-grid, \.eg-sim-ausculta \.sim-grid\.wide-left \{ grid-template-columns: minmax\(0, 1fr\); \}/);
     const entry = read("packages/sim-ausculta/src/index.ts");
     expect(entry).toContain('import "@egemed/tokens/family-tokens.css"');
