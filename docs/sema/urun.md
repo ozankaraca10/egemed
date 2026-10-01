@@ -94,6 +94,26 @@ yerel olarak yoklar: işaret görülürse 10 sn kapatma uyarısı, süre dolunca
 dek duraklatılır. Ceza/kayıt yoktur, hiçbir veri gönderilmez (KVKK); sunucu sinyali T283c,
 yönetici kararı T283b. `navigator.webdriver` engel sebebi değildir.
 
+### Rekabet engeli (T283b, ADR-009 §6 karar ucu)
+
+Otomatik ceza YOK: T283a'nın işaretlediği (`integrity_flags`, `status="pending"`)
+oturumu yalnız yönetici panelden karara bağlar (`POST /admin/integrity/:flagId/decision`,
+`cleared`|`confirmed`). `confirmed` kararı kullanıcı başına tek AKTİF engel açar
+(`competition_bans`); yönetici `POST /admin/integrity/bans/:userId/lift` ile kaldırır.
+
+Aktif engelli öğrenci için etki yüzeyi — rol: `kullanici` (ve `uzmanlik_ogrencisi`
+gamified ise); yüzey → etki:
+- Meydan Okuma merkezi (oluşturma/katılma) → 403 `forbidden` + `competition_banned`
+  (zaten kabul edilmiş/devam eden düello etkilenmez).
+- İlerlemem / liderlik (sim ekranı + ana sayfa vitrini) → listelenmez.
+- Aylık ödül kazanan adaylığı → aday olmaz (liderlikle aynı süzgeç).
+- Değerlendirme / düello XP'si → 0 (Öğrenme ve Uygulama modları ETKİLENMEZ;
+  deneme kaydı ve rozet değerlendirmesi normal yürür).
+- `GET /me/gamification` → `data.competitionBanned: true` (istemci göstergesi T283d'de).
+
+İstemci arayüzü (banner, engelli rozeti vb.) T283d kapsamındadır; bu görevde
+yalnız sunucu kuralı ve veri alanı vardır.
+
 ## Notlar (koddan)
 
 - **Roller** `packages/contracts/src/ids.ts` `ROLES`: `admin`, `kullanici`,

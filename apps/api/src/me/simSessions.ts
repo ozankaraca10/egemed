@@ -27,6 +27,7 @@ import { varyWav } from "./wav";
 import { CONSISTENCY_SESSION_COUNT, type IntegritySignalName } from "../integrity/thresholds";
 import { buildFlagSignals, computeCaseSignals, integrityScore, isConsistentFast, median, shouldFlag } from "../integrity/signals";
 import type { IntegrityRepo } from "../integrity/repo";
+import type { CompetitionBansRepo } from "../integrity/bans";
 
 /**
  * A1.3 (ADR-009, docs/specs/A1-sunucu-oturumu.md): sunucu vaka oturumu.
@@ -248,6 +249,8 @@ export interface SimSessionDeps {
   readonly onFinished?: (row: SimSessionRow, total: number) => Promise<void>;
   /** T283a: davranış sinyali eşiği aşılırsa `integrity_flags`'e yazar. */
   readonly integrity: IntegrityRepo;
+  /** T283b: yönetici onaylı rekabet engeli — değerlendirme/düello XP'sini sıfırlar (öğrenme/uygulama etkilenmez). */
+  readonly bans: Pick<CompetitionBansRepo, "isActive">;
 }
 
 const EMPTY_TELEMETRY: SimTelemetry = { visits: {}, order: [], headChanges: 0, headUse: { bell: 0, diaphragm: 0 }, replayCount: 0 };
@@ -631,6 +634,9 @@ export function registerSimSessionRoutes(app: Hono<AppEnv>, deps: SimSessionDeps
           : row.simId === "opaca" && row.mode !== "challenge"
             ? opacaSummaryOf(counted, { mode: row.mode, total, startedAt: row.startedAt, at })
             : {};
+      // T283b: yönetici onaylı rekabet engeli — deneme normal yazılır (öğrenme verisi korunur),
+      // yalnız değerlendirme/düello XP'si sıfırlanır (`serverAttemptXp` mode=practice'i muaf tutar).
+      const competitionBanned = await deps.bans.isActive(actor.userId);
       const written = await deps.gamification.writeAttempt({
         id: deps.newId(),
         userId: actor.userId,
@@ -652,10 +658,11 @@ export function registerSimSessionRoutes(app: Hono<AppEnv>, deps: SimSessionDeps
         mode: row.mode,
         caseCount: counted.length,
         hintsUsed,
+        competitionBanned,
       });
       if (written.kind === "created" || written.kind === "existing") {
         attemptId = written.attempt.id;
-        xpGained = serverAttemptXp({ mode: row.mode, caseCount: counted.length, hintsUsed, score: total, maxScore: 100, passed });
+        xpGained = serverAttemptXp({ mode: row.mode, caseCount: counted.length, hintsUsed, score: total, maxScore: 100, passed, competitionBanned });
       }
     }
     // T283a (ADR-009 §6): davranış sinyalleri yalnız burada toplanır ve işaretlenir;

@@ -12,6 +12,7 @@ import {
 import { monthKeyTr } from "@egemed/gamification-core";
 import { jsonError, validationDetails, type AppEnv } from "./http";
 import { insertAdminAudit, toIstanbulIso, type AdminDeps } from "./admin/users";
+import type { CompetitionBansRepo } from "./integrity/bans";
 import type { GamificationRepo } from "./me/gamification";
 
 /**
@@ -131,6 +132,8 @@ export interface RewardsDeps {
   readonly admin: AdminDeps;
   readonly gamification: GamificationRepo;
   readonly rewards: RewardsRepo;
+  /** T283b: rekabet engelli kullanıcılar kesinleşen kazanan listesine aday olmaz (liderlikle aynı süzgeç). */
+  readonly bans: Pick<CompetitionBansRepo, "activeUserIds">;
 }
 
 /** `/admin/*` ara katmanı (csrf + requireAdmin) önceden bağlanmış olmalıdır. */
@@ -206,6 +209,8 @@ export function registerAdminRewardRoutes(app: Hono<AppEnv>, deps: RewardsDeps, 
     const reward = await deps.rewards.get(actor.institutionId, path.simId, path.month);
     if (reward === null) return jsonError(c, "not_found");
     if (reward.finalizedAt !== null) return jsonError(c, "conflict");
+    // T283b: rekabet engelli kullanıcılar kazanan adaylığından düşer (liderlikle aynı süzgeç).
+    const bannedUserIds = await deps.bans.activeUserIds(actor.institutionId);
     const board = await deps.gamification.getLeaderboard({
       userId: actor.userId,
       institutionId: actor.institutionId,
@@ -215,6 +220,7 @@ export function registerAdminRewardRoutes(app: Hono<AppEnv>, deps: RewardsDeps, 
       page: 1,
       pageSize: 1000,
       at: monthEndTr(path.month),
+      bannedUserIds,
     });
     const winners = board.rows
       .filter(

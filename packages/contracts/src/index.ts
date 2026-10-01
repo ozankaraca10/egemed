@@ -205,6 +205,8 @@ export {
   adminOverviewResponseSchema,
 } from "./schemas/admin";
 export type { AdminAuditListResponse, AdminHealthResponse, AdminOverviewResponse, AdminGamiSummaryResponse } from "./schemas/admin";
+export { integrityDecisionRequestSchema, integrityDecisionSchema } from "./schemas/integrity";
+export type { IntegrityDecision, IntegrityDecisionRequest } from "./schemas/integrity";
 export {
   MARK_ANSWER_PATTERN,
   OPAQUE_TOKEN_PATTERN,
