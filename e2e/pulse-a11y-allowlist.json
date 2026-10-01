@@ -1,22 +1,7 @@
 {
-  "note": "T102/PULSE-10 — Pulse iç ekranlarında kaynaktan devralınmış erişilebilirlik borcu. Kayıtlar yalnız küçülür: düzeltilen bir kayıt testi 'düzeltildi — listeden çıkar' diye başarısız eder. T113 (host.ts EMBED_CSS): kontrast token'ları ve 44 px dokunma hedefleri düzeltildi; liste 17→5 ihlal, 55→8 küçük hedefe indi. Kalan küçük hedefler: satır içi kaynak bağlantıları (WCAG 2.5.8 satır içi istisnası; hedefi büyütmek satır akışını bozar) ve katman menüsü onay kutuları (44 px kutu kalp sahnesini örter). T136: seçenek etiketlerindeki role=radio/aria-checked vendor kaynağında kaldırıldı (ADR-011; anlam ve klavye yerel radyodan) — ihlal 5→0.",
+  "note": "T102/PULSE-10 — Pulse iç ekranlarında kaynaktan devralınmış erişilebilirlik borcu. Kayıtlar yalnız küçülür: düzeltilen bir kayıt testi 'düzeltildi — listeden çıkar' diye başarısız eder. T113 (host.ts EMBED_CSS): kontrast token'ları ve 44 px dokunma hedefleri düzeltildi; liste 17→5 ihlal, 55→8 küçük hedefe indi. Kalan küçük hedefler: satır içi kaynak bağlantıları (WCAG 2.5.8 satır içi istisnası; hedefi büyütmek satır akışını bozar) ve katman menüsü onay kutuları (44 px kutu kalp sahnesini örter). T136: seçenek etiketlerindeki role=radio/aria-checked vendor kaynağında kaldırıldı (ADR-011; anlam ve klavye yerel radyodan) — ihlal 5→0. T276b: Pulse Hakkında sim içinden kalktı (kabuk #/hakkinda); 'about' ekranı ve kayıtları çıkarıldı.",
   "violations": [],
   "smallTargets": [
-    {
-      "screen": "about",
-      "selector": "#aboutContent > section.about-section:nth-of-type(*) > div.ds-grid > article.ds-card:nth-of-type(*) > dl > dd > a",
-      "size": "27x16"
-    },
-    {
-      "screen": "about",
-      "selector": "#aboutContent > section.about-section:nth-of-type(*) > div.inst-card > div > p.inst-evidence:nth-of-type(*) > span.inst-cite > a",
-      "size": "233x16"
-    },
-    {
-      "screen": "about",
-      "selector": "#aboutContent > section.about-section:nth-of-type(*) > div.inst-card > div > p.inst-evidence:nth-of-type(*) > sup > a",
-      "size": "17x13"
-    },
     {
       "screen": "sim",
       "selector": "#coronaryToggle",

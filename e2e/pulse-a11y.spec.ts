@@ -27,7 +27,7 @@ const MIN_TARGET_PX = 44;
  */
 const DISABLED_RULES = ["target-size"];
 
-type ScreenId = "sim" | "case" | "quiz" | "results" | "about" | "gami";
+type ScreenId = "sim" | "case" | "quiz" | "results" | "gami";
 
 interface AllowlistViolation {
   screen: ScreenId;
@@ -208,17 +208,6 @@ const SCREENS: readonly PulseScreen[] = [
     seed: { casesComplete: true },
     async open(root) {
       await completeQuiz(root);
-    },
-  },
-  {
-    id: "about",
-    label: "Hakkında",
-    route: "#/sims/pulse/hakkinda",
-    async open(root) {
-      // Birleşik bar (T107): kaynak üst çubuğu gizli; eylem kabuk barındadır.
-      await clickSimBarAction(root.page(), "Hakkında");
-      await expect(root.locator("#aboutView")).toBeVisible();
-      await expect(root.locator("#aboutContent")).toBeVisible();
     },
   },
   {

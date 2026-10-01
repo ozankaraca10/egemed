@@ -4,6 +4,7 @@ import { expect, type Locator, type Page } from "@playwright/test";
 export const ROUTES = [
   { hash: "#/", label: "ana sayfa" },
   { hash: "#/simulatorler", label: "simülatörler" },
+  { hash: "#/hakkinda", label: "hakkında" },
   { hash: "#/giris/admin", label: "yönetici girişi" },
   { hash: "#/giris/test-ogrenci", label: "test öğrencisi girişi" },
   { hash: "#/sims/opaca", label: "opaca sim rotası" },

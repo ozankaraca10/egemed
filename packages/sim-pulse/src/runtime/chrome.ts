@@ -58,7 +58,7 @@ export function attachPulseChrome(
     }
     actions.push({ icon: "fullscreen", id: "fullscreen", label: "Tam ekran", onSelect: click("fullscreenBtn") });
     actions.push({ icon: "help", id: "help", label: "Yardım", onSelect: click("helpBtn") });
-    actions.push({ icon: "info", id: "about", label: "Hakkında", onSelect: click("aboutBtn") });
+    // T276b: Hakkında simin içinden kalktı; kabuğun `#/hakkinda` sayfasındadır.
 
     const chips: SimChromeChip[] = [];
     const context = byId("headerContext");

@@ -19,6 +19,7 @@ flowchart LR
 
   anaSayfa["Ana sayfa (/)"]
   simler["Simülatörler (/simulatorler)"]
+  hakkinda["Hakkında (/hakkinda; üç simin sayfası sekmeli, T276b)"]
   meydanOkuma["Meydan Okuma merkezi (/sims/<sim>/meydan-okuma, sim barı altında)"]
   yonetim["Yönetim paneli (/admin/*)"]
 
@@ -34,6 +35,7 @@ flowchart LR
   ilerlemem["İlerlemem / liderlik / rozet"]
 
   admin --> anaSayfa --> simler
+  anaSayfa --> hakkinda
   admin --> yonetim
   kullanici --> anaSayfa
   ogretim --> anaSayfa
@@ -148,7 +150,7 @@ yalnız sunucu kuralı ve veri alanı vardır.
 - **Ekranlar** (`SIM_SCREEN_KEYS`, `packages/sim-host/src/SimHost.ts`):
   `modlar`, `ogrenme`, `uygulama`, `degerlendirme`, `sonuc`, `ilerlemem`,
   `yardim`, `hakkinda`, `meydan-okuma` — hash alt yoluna yazılır (`#/sims/<id>/<screenKey>`).
-- **Rotalar** (`apps/shell/src/routes.ts`): `/` (ana sayfa), `/simulatorler`,
+- **Rotalar** (`apps/shell/src/routes.ts`): `/` (ana sayfa), `/simulatorler`, `/hakkinda` (T276b: Hakkında simlerin içinde değil, burada),
   `/sims/<pulse|ausculta|opaca>` ve `/sims/<id>/meydan-okuma[/<uuid>]` (ana gezinmeye eklenmez, kart
   bağlantılarından açılır; eski `/meydan-okuma[/<uuid>]` adresleri sim içi merkeze yönlendirilir, üst menüde Meydan Okuma yok), `/admin`, `/admin/kullanicilar`, `/admin/ice-aktar`,
   `/admin/roller`, `/admin/denetim`, `/admin/oduller` (yalnız admin oturumuyla,
