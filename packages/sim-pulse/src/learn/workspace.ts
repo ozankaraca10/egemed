@@ -90,12 +90,15 @@ function markup(): string {
     <span class="pl-lbl" id="pl-gain-label">Kazanç</span>
     <div class="pl-seg" role="group" aria-labelledby="pl-gain-label" data-pl="gain">${GAINS.map((v) => `<button type="button" data-v="${v}" aria-pressed="${v === 10}">${v === 20 ? "20 mm/mV" : v}</button>`).join("")}</div>
     <button class="pl-tb" type="button" data-pl="calBtn" aria-pressed="true">⟷ Kaliper</button>
+    <button class="pl-tb" type="button" data-pl="origBtn" aria-pressed="false">Orijinal Görüntü</button>
   </div>
   <div class="pl-paper" data-pl="paper">
     <canvas data-pl="canvas" role="img" aria-label="12 derivasyon EKG, 4×3 düzen ve DII ritim şeridi"></canvas>
     <div class="pl-cal" data-pl="cal" tabindex="0" role="slider" aria-label="Kaliper konumu" aria-valuemin="0" aria-valuemax="10" aria-valuenow="0"><i class="pl-a"></i><span class="pl-bridge"></span><i class="pl-b"></i><span class="pl-read" data-pl="calRead"></span></div>
+    <img class="pl-orig" data-pl="orig" alt="" hidden>
     <div class="pl-msg" data-pl="msg" hidden></div>
   </div>
+  <p class="pl-orig-note" data-pl="origNote" hidden>Orijinal görüntü: hastanın ham kaydı (500 Hz), filtre ve işlem uygulanmamış · 25 mm/s · 10 mm/mV. Oynatma, kalp animasyonu, hız/kazanç ve kaliper etkileşimli görünümde çalışır.</p>
   <div class="pl-calrow" data-pl="calrow">Kaliper: kollar kilitli, bütün olarak sürükleyin · aralık
     <button class="pl-tb" type="button" data-d="-20">−20 ms</button><button class="pl-tb" type="button" data-d="20">+20 ms</button><button class="pl-tb" type="button" data-pl="calRR">RR'ye eşitle</button>
   </div>
@@ -183,6 +186,7 @@ export function attachPulseLearnWorkspace(handle: PulseRuntimeHandle, options: P
   let mmPerS: number = 25;
   let mmPerMv: number = 10;
   let calOn = true;
+  let original = false;
   let calStart = 1;
   let calSpan = 0.8;
   let disposed = false;
@@ -300,6 +304,7 @@ export function attachPulseLearnWorkspace(handle: PulseRuntimeHandle, options: P
       calSpan = chaos || stats.rrMedian === null ? 0.2 : stats.rrMedian;
       calStart = loaded.r[1] ?? loaded.r[0] ?? 1;
       draw();
+      showOriginal();
       drawHeart();
     } catch {
       if (token !== loadToken) return;
@@ -427,8 +432,8 @@ export function attachPulseLearnWorkspace(handle: PulseRuntimeHandle, options: P
 
   function placeCal(L = layout()): void {
     const cal = $("cal");
-    cal.hidden = !calOn || record === null;
-    $("calrow").hidden = !calOn;
+    cal.hidden = !calOn || record === null || original;
+    $("calrow").hidden = !calOn || original;
     if (cal.hidden) return;
     calStart = Math.max(0, Math.min(L.secs - calSpan, calStart));
     const perS = mmPerS * L.pxmm;
@@ -444,8 +449,38 @@ export function attachPulseLearnWorkspace(handle: PulseRuntimeHandle, options: P
 
   function drawHeart(): void {
     if (record === null) return;
-    const frame = heart.render(tNow || 0.05, record.r, stats.rrMedian, heartProfileFor(current));
-    $("hstate").textContent = frame.label;
+    // Orijinal görüntüde zaman ekseni yok: kalp diyastolde durur.
+    const frame = heart.render(original ? 0.05 : tNow || 0.05, record.r, stats.rrMedian, heartProfileFor(current));
+    $("hstate").textContent = original ? "Orijinal görüntü · animasyon kapalı" : frame.label;
+  }
+
+  function showOriginal(): void {
+    const p = PATTERNS.find((x) => x.key === current);
+    const ref = p?.refs[refIndex];
+    const img = $<HTMLImageElement>("orig");
+    if (!original || ref === undefined) return;
+    const src = `${options.assetBase}assets/ecg-orig/${ref.id}.png`;
+    if (img.getAttribute("src") !== src) img.src = src;
+    img.alt = `${p?.name ?? ""}: kayıt ${ref.id}, orijinal 12 derivasyon EKG çıktısı`;
+  }
+
+  /** Orijinal (işlenmemiş) görüntü ile etkileşimli kâğıt arasında geçiş. */
+  function setOriginal(on: boolean): void {
+    original = on;
+    if (on) setPlaying(false);
+    $("origBtn").setAttribute("aria-pressed", String(on));
+    for (const control of [$("play"), $("calBtn"), ...Array.from($("speed").querySelectorAll("button")), ...Array.from($("gain").querySelectorAll("button"))]) {
+      (control as HTMLButtonElement).disabled = on;
+      if (on) control.setAttribute("title", "Orijinal görüntüde kullanılamaz");
+      else control.removeAttribute("title");
+    }
+    canvas.hidden = on;
+    $("orig").hidden = !on;
+    $("origNote").hidden = !on;
+    showOriginal();
+    placeCal();
+    drawHeart();
+    if (!on) draw();
   }
 
   // --- Oynatma ve inceleme süresi ---------------------------------------------
@@ -502,6 +537,10 @@ export function attachPulseLearnWorkspace(handle: PulseRuntimeHandle, options: P
 
   // --- Denetimler -----------------------------------------------------------------
   $("play").addEventListener("click", () => setPlaying(!playing));
+  $("origBtn").addEventListener("click", () => setOriginal(!original));
+  $<HTMLImageElement>("orig").addEventListener("error", () => {
+    if (original) showMessage("Orijinal görüntü yüklenemedi.", () => { $<HTMLImageElement>("orig").removeAttribute("src"); showMessage(null); showOriginal(); });
+  });
   $("speed").querySelectorAll<HTMLButtonElement>("button").forEach((b) => b.addEventListener("click", () => {
     mmPerS = Number(b.dataset.v);
     $("speed").querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
@@ -551,7 +590,17 @@ export function attachPulseLearnWorkspace(handle: PulseRuntimeHandle, options: P
     ev.preventDefault();
     placeCal();
   });
-  const resize = new ResizeObserver(() => draw());
+  // Genişlik değişince yeniden çiz; çizim yüksekliği değiştirdiği için çağrı
+  // bir sonraki kareye ertelenir (ResizeObserver döngü uyarısı olmasın).
+  let lastWidth = 0;
+  let resizeFrame = 0;
+  const resize = new ResizeObserver((entries) => {
+    const width = Math.round(entries[0]?.contentRect.width ?? 0);
+    if (width === lastWidth) return;
+    lastWidth = width;
+    cancelAnimationFrame(resizeFrame);
+    resizeFrame = requestAnimationFrame(() => draw());
+  });
   resize.observe($("paper"));
 
   select(current);
@@ -561,6 +610,7 @@ export function attachPulseLearnWorkspace(handle: PulseRuntimeHandle, options: P
     setPlaying(false);
     window.clearInterval(studyTimer);
     resize.disconnect();
+    cancelAnimationFrame(resizeFrame);
     if (unsaved > 0) {
       if (PULSE_VENDOR_MODE[current] !== undefined) ctl.persist?.();
       else {

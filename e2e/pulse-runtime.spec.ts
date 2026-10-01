@@ -388,6 +388,55 @@ test.describe("Pulse kaynak runtime", () => {
     expect(errors).toEqual([]);
   });
 
+  test("masaüstünde öğrenme alanı başlıkla alt bilgi arasına oturur; sayfa kaymaz, sütunların altına ulaşılır (T299)", async ({ page }) => {
+    test.skip(test.info().project.name !== "desktop-1440", "sütun içi kaydırma masaüstü düzenidir");
+    await page.setViewportSize({ width: 1440, height: 760 });
+    await seedViewed(page);
+    const root = await openPulse(page);
+    await openLearn(root);
+    expect(await page.evaluate(() => document.documentElement.scrollHeight - window.innerHeight), "sayfa kayması").toBeLessThanOrEqual(0);
+    await expect(page.locator(".eg-shell-footer").first()).toBeInViewport();
+    for (const column of [".pl-left", ".pl-right"]) {
+      // Sütun sonuna kaydırılınca son öğesi sütunun görünür alanında kalır (kesilmez).
+      const fits = await root.locator(column).evaluate((node) => {
+        node.scrollTop = node.scrollHeight;
+        const box = node.getBoundingClientRect();
+        const last = node.lastElementChild?.getBoundingClientRect();
+        return last !== undefined && last.bottom <= box.bottom + 1;
+      });
+      expect(fits, `${column} sonu görünür`).toBe(true);
+    }
+  });
+
+  test("Orijinal Görüntü ham kaydı gösterir; oynatma, kaliper ve kalp animasyonu bu sırada kapalıdır (T299)", async ({ page }) => {
+    const errors = trackErrors(page);
+    await seedViewed(page);
+    const root = await openPulse(page);
+    await openLearn(root);
+    const pl = (name: string): Locator => root.locator(`[data-pl="${name}"]`);
+    await pl("play").click();
+    await pl("origBtn").click();
+    await expect(pl("origBtn")).toHaveAttribute("aria-pressed", "true");
+    await expect(pl("orig")).toBeVisible();
+    await expect(pl("orig")).toHaveAttribute("src", /assets\/ecg-orig\/JS00277\.png$/);
+    expect(await pl("orig").evaluate((img) => (img as HTMLImageElement).naturalWidth)).toBeGreaterThan(0);
+    await expect(pl("canvas")).toBeHidden();
+    await expect(pl("cal")).toBeHidden();
+    for (const name of ["play", "calBtn"]) await expect(pl(name)).toBeDisabled();
+    await expect(pl("play")).toHaveText("▶ Oynat");
+    await expect(pl("hstate")).toHaveText("Orijinal görüntü · animasyon kapalı");
+    const frozen = await root.locator('.pl-heart-svg [data-h="LV"]').getAttribute("d");
+    await page.waitForTimeout(400);
+    expect(await root.locator('.pl-heart-svg [data-h="LV"]').getAttribute("d"), "kalp duruyor").toBe(frozen);
+    // Kayıt değişince orijinal görüntü de değişir
+    await root.locator(".pl-rec").nth(1).click();
+    await expect(pl("orig")).toHaveAttribute("src", /JS00401\.png$/);
+    await pl("origBtn").click();
+    await expect(pl("canvas")).toBeVisible();
+    await expect(pl("play")).toBeEnabled();
+    expect(errors).toEqual([]);
+  });
+
   test("inceleme süresi kaynağın öğrenme sayacına yazılır (T298)", async ({ page }) => {
     const errors = trackErrors(page);
     const root = await openPulse(page);
