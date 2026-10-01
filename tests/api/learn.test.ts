@@ -1,15 +1,19 @@
 import { describe, expect, it } from "vitest";
-import { learnStatusSchema } from "../../packages/contracts/src/index";
+import { learnStatusSchema, simSessionStartResponseSchema } from "../../packages/contracts/src/index";
 import { ALI, DEFAULT_USERS, createAdminHarness, login, user, type AdminHarness, type Login } from "./admin-harness";
 
-// Öğrenme tamamlama kaydı (27 Eyl 2026): GET/POST uçları, sim erişimi ve
-// meydan okuma kilidi (`learn_required`). Kilidin tespiti sim paketlerindedir;
-// bu testler yalnız sunucu kaydını ve düello kapısını ölçer.
+// Öğrenme tamamlama kaydı (27 Eyl 2026): GET/POST uçları, sim erişimi,
+// meydan okuma kilidi ve T290 uygulama/değerlendirme oturumu kilidi
+// (`POST /me/sims/:simId/sessions`, aynı `learn_required` hatası). Kilidin
+// tespiti sim paketlerindedir; bu testler yalnız sunucu kaydını ve kapıları ölçer.
 
 const ZEYNEP = user({ id: "00000000-0000-4000-8000-000000000041", username: "zeynep.learn", displayName: "Zeynep Öğren", authMethod: "dev", simAccess: ["ausculta"] });
+/** T290: öğrenme kilidi muafiyeti — öğretim üyesi/uzmanlık öğrencisi tamamlama kaydı olmadan geçer. */
+const HOCA = user({ id: "00000000-0000-4000-8000-000000000042", username: "hoca.learn", displayName: "Hoca Öğren", authMethod: "dev", roles: ["ogretim_uyesi"], simAccess: ["ausculta"] });
+const UZMAN = user({ id: "00000000-0000-4000-8000-000000000043", username: "uzman.learn", displayName: "Uzman Öğren", authMethod: "dev", roles: ["uzmanlik_ogrencisi"], simAccess: ["ausculta"] });
 
 function harness(): AdminHarness {
-  const users = [...DEFAULT_USERS.map((entry) => (entry.id === ALI.id ? { ...ALI, simAccess: ["ausculta"] as const } : entry)), ZEYNEP];
+  const users = [...DEFAULT_USERS.map((entry) => (entry.id === ALI.id ? { ...ALI, simAccess: ["ausculta"] as const } : entry)), ZEYNEP, HOCA, UZMAN];
   return createAdminHarness({ users });
 }
 
@@ -103,5 +107,37 @@ describe("öğrenme tamamlama kaydı", () => {
     await complete(h, zeynep, "ausculta");
     const joined = await call(h, zeynep, "POST", "/me/challenges/join", { code: challengeId.code });
     expect(joined.status).toBe(200);
+  });
+
+  it("T290 — uygulama/değerlendirme oturumu kilidi: tamamlama yokken 403 learn_required, tamamlayınca açılır", async () => {
+    const h = harness();
+    const ali = await login(h, "ali.veli");
+
+    const lockedPractice = await call(h, ali, "POST", "/me/sims/ausculta/sessions", { mode: "practice" });
+    expect(lockedPractice.status).toBe(403);
+    expect(issueCode(await lockedPractice.json())).toBe("learn_required");
+
+    const lockedAssessment = await call(h, ali, "POST", "/me/sims/ausculta/sessions", { mode: "assessment" });
+    expect(lockedAssessment.status).toBe(403);
+    expect(issueCode(await lockedAssessment.json())).toBe("learn_required");
+
+    await complete(h, ali, "ausculta");
+    const unlocked = await call(h, ali, "POST", "/me/sims/ausculta/sessions", { mode: "practice" });
+    expect(unlocked.status).toBe(201);
+    simSessionStartResponseSchema.parse(await unlocked.json());
+  });
+
+  it("T290 — uygulama/değerlendirme oturumu kilidi: admin/öğretim üyesi/uzmanlık öğrencisi tamamlama kaydı olmadan muaf", async () => {
+    const h = harness();
+    const admin = await login(h, "ornek.yonetici");
+    const hoca = await login(h, "hoca.learn");
+    const uzman = await login(h, "uzman.learn");
+
+    expect((await status(h, admin)).ausculta.complete).toBe(false);
+    expect((await call(h, admin, "POST", "/me/sims/ausculta/sessions", { mode: "practice" })).status).toBe(201);
+    expect((await status(h, hoca)).ausculta.complete).toBe(false);
+    expect((await call(h, hoca, "POST", "/me/sims/ausculta/sessions", { mode: "practice" })).status).toBe(201);
+    expect((await status(h, uzman)).ausculta.complete).toBe(false);
+    expect((await call(h, uzman, "POST", "/me/sims/ausculta/sessions", { mode: "assessment" })).status).toBe(201);
   });
 });

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { pulsePublicCaseSchema, simSessionStartResponseSchema, type PulsePublicCase } from "../../packages/contracts/src/index";
 import { pulse } from "../../packages/assessment-bank/src/index";
-import { ALI, createAdminHarness, login, type AdminHarness, type Login } from "./admin-harness";
+import { ALI, ALI_ID, FIXED_NOW, createAdminHarness, login, type AdminHarness, type Login } from "./admin-harness";
 
 // T283a — sunucu davranış sinyalleri ve işaretleme, uçtan uca (Pulse seçildi:
 // tek soru, ses/lokalizasyon yok — `no_interaction_correct`'in Ausculta'ya özgü
@@ -17,7 +17,10 @@ const PULSE_THRESHOLD_MS = 4_000;
 const NO_INTEGRITY_SIGNALS = { hiddenCount: 0, hiddenMs: 0, blurCount: 0, pasteCount: 0, interactions: 5 };
 
 function harness(): AdminHarness {
-  return createAdminHarness();
+  const h = createAdminHarness();
+  // Öğrenme kilidi (T290): bu dosya davranış sinyallerini test eder, kilidi değil; Pulse tamamlama kaydı baştan eklenir.
+  h.learn.records.set(`${ALI_ID}:pulse`, { userId: ALI_ID, simId: "pulse", completedAt: FIXED_NOW, contentVersion: "test.1" });
+  return h;
 }
 
 async function call(h: AdminHarness, who: Login | undefined, method: string, path: string, body?: unknown) {

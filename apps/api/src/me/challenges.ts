@@ -13,7 +13,7 @@ import { jsonError, validationDetails, type AppEnv } from "../http";
 import { toIstanbulIso } from "../admin/users";
 import type { AuthDeps } from "../auth/routes";
 import type { GamificationRepo } from "./gamification";
-import type { LearnRepo } from "./learn";
+import { hasCompletedLearn, learnRequiredError, type LearnRepo } from "./learn";
 import {
   CHALLENGE_PER_CASE_MS,
   CHALLENGE_TOTAL_MS,
@@ -133,14 +133,9 @@ export function registerChallengeRoutes(app: Hono<AppEnv>, deps: ChallengeDeps, 
     return context?.displayName ?? "Silinmiş kullanıcı";
   }
 
-  /** Öğrenme kilidi: simin tamamlama kaydı yoksa meydan okuma yok (27 Eyl 2026). */
-  async function learnCompleted(userId: string, simId: SimId): Promise<boolean> {
-    return (await deps.learn.list(userId)).some((record) => record.simId === simId);
-  }
-
-  function learnRequired(c: Context<AppEnv>) {
-    return jsonError(c, "forbidden", { issues: [{ code: "learn_required" }] });
-  }
+  /** Öğrenme kilidi: simin tamamlama kaydı yoksa meydan okuma yok (27 Eyl 2026; T290 ile paylaşılan kontrol). */
+  const learnCompleted = (userId: string, simId: SimId) => hasCompletedLearn(deps.learn, userId, simId);
+  const learnRequired = learnRequiredError;
 
   async function body(record: ChallengeRecord, viewerId: string, at: number, code: string | null = null): Promise<ChallengeBody> {
     const status = effectiveStatus(record, at);

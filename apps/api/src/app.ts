@@ -51,7 +51,7 @@ export interface AppDeps {
   /** Aylık ödüller (26 Eyl 2026); verilmezse bellek deposu (yalnız test/DB'siz geliştirme). */
   readonly rewards?: RewardsRepo;
   /** A1 sunucu vaka oturumu (ADR-009); verilmezse bellek deposu ve ses yok (yalnız test/DB'siz geliştirme). `integrity` ayrı alanla enjekte edilir. */
-  readonly simSessions?: Omit<SimSessionDeps, "gamification" | "onFinished" | "integrity">;
+  readonly simSessions?: Omit<SimSessionDeps, "gamification" | "onFinished" | "integrity" | "auth" | "learn">;
   /** ADR-010 Meydan Okuma deposu; verilmezse bellek deposu. */
   readonly challenges?: ChallengeRepo;
   /** Öğrenme tamamlama kaydı (27 Eyl 2026); verilmezse bellek deposu. */
@@ -239,6 +239,8 @@ export function createApp(deps: AppDeps): Hono<AppEnv> {
     app,
     {
       gamification: deps.gamification,
+      auth: deps.auth,
+      learn,
       ...simSessionDeps,
       integrity,
       onFinished: challengeFinishedHook({ challenges, sessions: simSessionDeps.sessions, gamification: deps.gamification }),

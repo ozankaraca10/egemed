@@ -20,7 +20,9 @@ import { encodeAuscultaSummary, encodeOpacaSummary } from "@egemed/gami-catalogs
 import { jsonError, validationDetails, type AppEnv } from "../http";
 import { createLoginRateLimiter } from "../auth/rate-limit";
 import { toIstanbulIso } from "../admin/users";
+import type { AuthDeps } from "../auth/routes";
 import { serverAttemptXp, type GamificationRepo } from "./gamification";
+import { hasCompletedLearn, learnRequiredError, type LearnRepo } from "./learn";
 import { varyWav } from "./wav";
 import { CONSISTENCY_SESSION_COUNT, type IntegritySignalName } from "../integrity/thresholds";
 import { buildFlagSignals, computeCaseSignals, integrityScore, isConsistentFast, median, shouldFlag } from "../integrity/signals";
@@ -228,6 +230,10 @@ export interface SimSessionRepo {
 
 export interface SimSessionDeps {
   readonly gamification: GamificationRepo;
+  /** T290: uygulama/değerlendirme oturumu öğrenme kilidi kontrolü için (roller `getMeContext` ile okunur). */
+  readonly auth: AuthDeps;
+  /** T290: öğrenme kilidi — ilgili simin tamamlama kaydı (Meydan Okuma ile aynı depo). */
+  readonly learn: LearnRepo;
   readonly sessions: SimSessionRepo;
   /** Çalışma zamanı ses yolunu (örn. `assets/audio/runtime/heart/x.wav`) bayt olarak okur; yoksa null. */
   readonly readAudio: (runtimeUrl: string) => Promise<Uint8Array | null>;
@@ -435,6 +441,14 @@ export function registerSimSessionRoutes(app: Hono<AppEnv>, deps: SimSessionDeps
     if (!actor.simAccess.includes(sim.data)) return jsonError(c, "forbidden");
     const parsed = simSessionStartRequestSchema.safeParse(await readJson(c));
     if (!parsed.success) return jsonError(c, "invalid_request", validationDetails(parsed.error));
+    // T290 — öğrenme kilidi (yalnız uygulama/değerlendirme; bu uç `challenge` modunu kabul etmez).
+    // Admin/öğretim üyesi/uzmanlık öğrencisi muaf (istemci `isLearnUnlocked` ile aynı anlam);
+    // öğretim üyesi/uzmanlık öğrencisi zaten `gamified=false` ile muaf, admin ayrıca kontrol edilir.
+    if (actor.gamified) {
+      const context = await deps.auth.users.getMeContext(actor.userId);
+      const isAdmin = context?.roles.includes("admin") ?? false;
+      if (!isAdmin && !(await hasCompletedLearn(deps.learn, actor.userId, sim.data))) return learnRequiredError(c);
+    }
     const at = now();
     if (!startRate.consume(`sim-session:${actor.userId}`, at)) return jsonError(c, "rate_limited");
     if (parsed.data.mode === "assessment") await deps.sessions.expireOpen(actor.userId, sim.data, "assessment");

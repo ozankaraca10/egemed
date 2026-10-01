@@ -82,7 +82,7 @@ flowchart TD
   ogrenmeBittiMi -->|"evet"| acik["Uygulama/Değerlendirme açık"]
 
   acik --> duelloKontrol{"POST /me/challenges\nveya /me/challenges/join"}
-  kilitli -.->|"sunucu da ayrıca reddeder\n(learnCompleted kontrolü)"| duelloRed["403 — öğrenme kilidi\n(yalnız düello uçlarında sunucu tarafı kontrol var)"]
+  kilitli -.->|"sunucu da ayrıca reddeder\n(hasCompletedLearn kontrolü, T290)"| duelloRed["403 forbidden + learn_required\n(POST /me/sims/:simId/sessions VE düello uçlarında\nsunucu tarafı kontrol var — T290)"]
   duelloKontrol -->|"gamified=false ise"| rolRed["403 role_not_permitted\n(ogretim_uyesi / uzmanlik_ogrencisi)"]
 ```
 
@@ -103,15 +103,20 @@ flowchart TD
   `uzmanlik_ogrencisi` sime verilen öğrenme portu her zaman "tamamlanmış"
   sayılır (`createUnlockedLearnPort`); yalnız `kullanici` (öğrenci) gerçek
   `sim_learn_completions` kaydına bağlıdır.
-- **Önemli bulgu — kilidin uygulama katmanı:** Uygulama/Değerlendirme modu için
-  öğrenme kilidi yalnız **istemci tarafında** (`apps/shell`, `audienceCanUseMode` /
-  `isLearnUnlocked`) uygulanıyor; `POST /me/sims/:simId/sessions` (uygulama/
-  değerlendirme oturumu başlatma) API ucu `sim_learn_completions`'ı kontrol
-  ETMİYOR. Yalnız **Meydan Okuma oluşturma/katılma** (`POST /me/challenges`,
-  `POST /me/challenges/join`, `apps/api/src/me/challenges.ts` `learnCompleted`)
-  sunucu tarafında da kilitlenmiş. Bu asimetri koddan gözlemlendi, plan
-  metninde "öğrenme tamamlanmadan uygulama/değerlendirme/düello kapalı" olarak
-  tek kural gibi geçiyor — düello dışındaki kilit sunucu tarafından zorlanmıyor.
+- **Kilidin uygulama katmanı (T290, 1 Eki 2026 düzeltildi):** Uygulama/Değerlendirme
+  modu için öğrenme kilidi artık hem **istemci tarafında** (`apps/shell`,
+  `audienceCanUseMode` / `isLearnUnlocked`) hem **sunucu tarafında** uygulanıyor.
+  `POST /me/sims/:simId/sessions` (`apps/api/src/me/simSessions.ts`) `mode`
+  `practice`/`assessment` iken `actor.gamified` ise ve aktör admin değilse
+  (rol `apps/api/src/auth/repo.ts getMeContext` ile okunur) ilgili simin
+  `sim_learn_completions` kaydı yoksa 403 `forbidden` + `learn_required` döner
+  (`hasCompletedLearn` / `learnRequiredError`, `apps/api/src/me/learn.ts`) —
+  **Meydan Okuma ile aynı ortak yardımcı** (`POST /me/challenges`,
+  `POST /me/challenges/join`, `apps/api/src/me/challenges.ts`). Muaf roller
+  (admin/`ogretim_uyesi`/`uzmanlik_ogrencisi`) `isLearnUnlocked` ile aynı anlamda
+  geçer; `ogretim_uyesi`/`uzmanlik_ogrencisi` zaten `gamified=false` ile muaf,
+  admin ayrıca rol kontrolüyle muaf tutulur (`gamified=true` olsa da). Önceki
+  sürümde bu uç yalnız `sim_access` kontrol ediyordu; asimetri T290 ile kapatıldı.
 - **Ekranlar** (`SIM_SCREEN_KEYS`, `packages/sim-host/src/SimHost.ts`):
   `modlar`, `ogrenme`, `uygulama`, `degerlendirme`, `sonuc`, `ilerlemem`,
   `yardim`, `hakkinda`, `meydan-okuma` — hash alt yoluna yazılır (`#/sims/<id>/<screenKey>`).
