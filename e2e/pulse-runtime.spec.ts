@@ -120,6 +120,13 @@ async function openPulse(page: Page): Promise<Locator> {
   return root;
 }
 
+/** T298: öğrenme alanı gerçek kaydı yükleyene dek bekler. */
+async function openLearn(root: Locator): Promise<void> {
+  await openMode(root, "sim");
+  await expect(root.locator('[data-pl="canvas"]')).toBeVisible();
+  await expect(root.locator('[data-pl="msg"]')).toBeHidden({ timeout: 10_000 });
+}
+
 async function openMode(root: Locator, view: "sim" | "case" | "quiz"): Promise<void> {
   await root.locator(`#modeCards [data-view="${view}"]`).click();
 }
@@ -129,38 +136,42 @@ test.describe("Pulse kaynak runtime", () => {
     await suppressFullscreenPrompt(page, [null, ADMIN.actorId, STUDENT.actorId]);
   });
 
-  test("gölge kökte açılır; tek h1, inceleme araçları ve EKG tam genişlikte", async ({ page }, testInfo) => {
+  test("gölge kökte açılır; tek h1, kalp kesiti ve 12 derivasyon EKG tam genişlikte (T298)", async ({ page }, testInfo) => {
     const errors = trackErrors(page);
     await seedViewed(page);
     const root = await openPulse(page);
-    await openMode(root, "sim");
+    await openLearn(root);
     await expect(page.locator("h1")).toHaveCount(1);
     await expect(page.locator("header.eg-shell-header")).toHaveCount(1);
-    for (const id of ["#playBtn", "#ecgCanvas", "#heartSvg"]) await expect(root.locator(id)).toBeVisible();
-    const controls = await root.locator("button, input, select, canvas").evaluateAll(
-      (nodes) => nodes.filter((node) => (node as HTMLElement).getClientRects().length > 0).length,
-    );
-    expect(controls, "kaynak kontrol envanteri (kaynak: ~50)").toBeGreaterThanOrEqual(45);
-    const ecgWidth = await root.locator("#ecgCanvas").evaluate((c) => (c as HTMLCanvasElement).width);
-    expect(ecgWidth, "EKG canvas varsayılan 300px değil").toBeGreaterThan(300 * 0.9);
+    for (const selector of ['[data-pl="play"]', '[data-pl="canvas"]', ".pl-heart-svg", '[data-pl="cal"]']) await expect(root.locator(selector)).toBeVisible();
+    // 29 patern; kaydı olmayan (posterior MI) seçilemez
+    await expect(root.locator(".pl-pt")).toHaveCount(29);
+    await expect(root.locator(".pl-pt[disabled]")).toHaveCount(1);
+    await expect(root.locator(".pl-rec")).toHaveCount(3);
+    await expect(root.getByText("Öğretim Üyesinin Seçtiği Kayıtlar")).toBeVisible();
+    // "Bu patern hakkında" açılır pencere değil, EKG'nin altında sabit
+    await expect(root.locator(".pl-about [data-pl='crit']")).toContainText("PR 120–200 ms");
+    const ecgWidth = await root.locator('[data-pl="canvas"]').evaluate((c) => (c as HTMLCanvasElement).getBoundingClientRect().width);
+    expect(ecgWidth, "EKG kâğıdı çerçeveyi doldurur").toBeGreaterThan((page.viewportSize()?.width ?? 0) * 0.5);
     expect(await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)).toBeLessThanOrEqual(0);
     await captureRouteScreenshot(page, testInfo.project.name, "#/sims/pulse (inceleme)");
     expect(errors).toEqual([]);
   });
 
-  test("kalp SVG'si oynatılırken motorla birlikte değişir (PULSE-03)", async ({ page }) => {
+  test("kalp kesiti oynatılırken kaydın R tepelerine kilitli değişir (PULSE-03, T298)", async ({ page }) => {
     await seedViewed(page);
     const root = await openPulse(page);
-    await openMode(root, "sim");
-    await root.locator("#playBtn").click();
-    const states = new Set<string>();
-    for (let i = 0; i < 8; i += 1) {
-      states.add(
-        await root.locator("#heartSvg").evaluate((svg) => svg.outerHTML),
-      );
-      await page.waitForTimeout(180);
+    await openLearn(root);
+    await root.locator('[data-pl="play"]').click();
+    const shapes = new Set<string>();
+    const labels = new Set<string>();
+    for (let i = 0; i < 12; i += 1) {
+      shapes.add(await root.locator('.pl-heart-svg [data-h="LV"]').getAttribute("d") ?? "");
+      labels.add(await root.locator('[data-pl="hstate"]').innerText());
+      await page.waitForTimeout(140);
     }
-    expect(states.size, "farklı kalp durumu sayısı").toBeGreaterThan(1);
+    expect(shapes.size, "farklı sol ventrikül biçimi").toBeGreaterThan(1);
+    expect(labels.size, "farklı kalp evresi").toBeGreaterThan(1);
   });
 
   test("10 vaka oturumu sunucu oturumundan çözülür ve tamamlanma raporuyla biter (PULSE-05, A3.3)", async ({ page }) => {
@@ -332,38 +343,58 @@ test.describe("Pulse kaynak runtime", () => {
     expect(errors).toEqual([]);
   });
 
-  test("Mobitz I sekmesi seçilip oynatılınca kalpte AV blok işareti belirir (T208)", async ({ page }) => {
+  test("Mobitz I seçilip oynatılınca kalpte iletilmeyen P belirir (T298)", async ({ page }) => {
     const errors = trackErrors(page);
     await seedViewed(page);
     const root = await openPulse(page);
-    await openMode(root, "sim");
-    await root.locator('.rhythm-tab[data-mode="mobitz1"]').click();
-    await expect(root.locator(".rhythm-tab.selected")).toHaveAttribute("data-mode", "mobitz1");
-    await expect(root.locator("#explanationTitle")).toContainText("Mobitz");
-    await root.locator("#playBtn").click();
-    // Mobitz I'de her 4. P iletilmez; blok işareti döngü boyunca görünür olur.
-    await expect(root.locator("#heartSvg #avBlockMark")).toHaveCSS("opacity", "1", { timeout: 8_000 });
-    // Klavye şerit sırasını izler: ] görünür sıradaki sonraki sekmeye geçer (T208).
-    await page.keyboard.press("]");
-    await expect(root.locator(".rhythm-tab.selected")).toHaveAttribute("data-mode", "mobitz2");
+    await openLearn(root);
+    await root.locator('.pl-pt[data-key="mobitz1"]').click();
+    await expect(root.locator('.pl-pt[aria-current="true"]')).toHaveAttribute("data-key", "mobitz1");
+    await expect(root.locator('[data-pl="name"]')).toContainText("Mobitz I");
+    await expect(root.locator('[data-pl="crit"]')).toContainText("Wenckebach");
+    await expect(root.locator('[data-pl="msg"]')).toBeHidden({ timeout: 10_000 });
+    await root.locator('[data-pl="play"]').click();
+    // Uzun RR içinde iletilmeyen P (~0,3 s): atriyum kasılır, uyarı AV düğümde
+    // durur. Pencere kısa olduğu için evre etiketi tarayıcıda 50 ms'de bir örneklenir.
+    const labels = await root.locator('[data-pl="hstate"]').evaluate(async (node) => {
+      const seen = new Set<string>();
+      for (let i = 0; i < 240; i += 1) {
+        seen.add(node.textContent ?? "");
+        await new Promise((resolve) => setTimeout(resolve, 50));
+      }
+      return [...seen];
+    });
+    expect(labels).toContain("P iletilmedi · AV blok");
     expect(errors).toEqual([]);
   });
 
-  test("ritim şeridi 390/768/1440 px'te yatay sayfa kaydırması yapmaz (T208)", async ({ page }) => {
+  test("öğrenme alanı 390/768/1440 px'te yatay sayfa kaydırması yapmaz; dar ekranda patern rayı kendi içinde kayar (T298)", async ({ page }) => {
     const errors = trackErrors(page);
     await seedViewed(page);
     const root = await openPulse(page);
-    await openMode(root, "sim");
-    await expect(root.locator(".rhythm-group")).toHaveCount(6);
-    await expect(root.locator(".rhythm-tab[data-mode]")).toHaveCount(23);
+    await openLearn(root);
     for (const width of [390, 768, 1440]) {
       await page.setViewportSize({ width, height: 900 });
-      await page.waitForTimeout(120);
+      await page.waitForTimeout(150);
       const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
       expect(overflow, `yatay sayfa taşması ${width}px`).toBeLessThanOrEqual(0);
-      const strip = await root.locator(".rhythm-tabs").evaluate((node) => ({ scrollWidth: node.scrollWidth, clientWidth: node.clientWidth }));
-      expect(strip.scrollWidth, `şerit kendi içinde kaydırılabilir ${width}px`).toBeGreaterThan(strip.clientWidth);
+      if (width < 1100) {
+        const rail = await root.locator(".pl-rail").evaluate((node) => ({ scrollWidth: node.scrollWidth, clientWidth: node.clientWidth }));
+        expect(rail.scrollWidth, `ray kendi içinde kaydırılabilir ${width}px`).toBeGreaterThan(rail.clientWidth);
+      }
     }
+    await root.locator('.pl-pt[data-key="vt"]').click();
+    await expect(root.locator('[data-pl="name"]')).toContainText("Ventriküler taşikardi");
+    expect(errors).toEqual([]);
+  });
+
+  test("inceleme süresi kaynağın öğrenme sayacına yazılır (T298)", async ({ page }) => {
+    const errors = trackErrors(page);
+    const root = await openPulse(page);
+    await openLearn(root);
+    await expect(root.locator('[data-pl="done"]')).toHaveText("0");
+    await expect(root.locator('[data-pl="total"]')).toHaveText("23");
+    await expect.poll(async () => root.locator('[data-pl="studyText"]').innerText(), { timeout: 8_000 }).toMatch(/İnceleme [2-9]\/16 s/);
     expect(errors).toEqual([]);
   });
 });

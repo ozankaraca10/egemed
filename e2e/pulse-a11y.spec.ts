@@ -176,7 +176,8 @@ const SCREENS: readonly PulseScreen[] = [
     async open(root) {
       await openMode(root, "sim");
       await expect(root.locator("#simView")).toBeVisible();
-      await expect(root.locator("#playBtn")).toBeVisible();
+      await expect(root.locator('[data-pl="play"]')).toBeVisible();
+      await expect(root.locator('[data-pl="msg"]')).toBeHidden({ timeout: 10_000 });
     },
   },
   {
