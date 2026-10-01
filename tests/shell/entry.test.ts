@@ -18,7 +18,8 @@ describe("giriş rotaları", () => {
     } else {
       expect(html).not.toContain(t("entry.session.synthetic"));
     }
-    expect(html).toContain('src="/brand/ege-tip-logo.png"');
+    // T304: sol panelde yalnız EGEMED logosu; fakülte mührü sağ alttaki alt bilgide
+    expect(html).not.toContain('class="eg-shell-entry__logo"');
     expect(html).toContain(`aria-label="${t("shell.brand.full")}"`);
     expect(html).toContain('class="eg-shell-logo eg-shell-logo--on-dark"');
     expect(html).not.toContain("CLIX");
