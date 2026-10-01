@@ -51,6 +51,15 @@ describe("Pulse öğrenme modu EKG çözümleme", () => {
     }
   });
 
+  it("her kaydın işlenmemiş orijinal görüntüsü pakette (Orijinal Görüntü düğmesi)", () => {
+    for (const pattern of manifest.patterns) {
+      for (const ref of pattern.refs) {
+        const png = readFileSync(`packages/sim-pulse/public/assets/ecg-orig/${ref.id}.png`);
+        expect(png.subarray(1, 4).toString(), ref.id).toBe("PNG");
+      }
+    }
+  });
+
   it("her hazır paternin öğrenci metni var; öğrenme kilidinin 23 kaynak modu eksiksiz eşlenir", () => {
     for (const pattern of manifest.patterns) {
       const text = learnTextFor(pattern.key);
