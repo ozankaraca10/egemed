@@ -2,7 +2,7 @@ import { isSimScreenKey, isSimulatorId, type SimScreenKey, type SimulatorId } fr
 import type { TrKey } from "@egemed/ui/i18n";
 
 /** Kabukta tanımlı sayfa kimlikleri. */
-export type RouteId = "home" | "simulators";
+export type RouteId = "home" | "simulators" | "about";
 export type EntryRole = "admin" | "student";
 
 /** Tek sayfa rotası: hash yolu, gezinme etiketi ve sayfa başlığı anahtarı. */
@@ -69,6 +69,8 @@ export const ADMIN_REWARDS_PATH = "/admin/oduller" as const;
 export const ROUTES: readonly RouteDef[] = [
   { id: "home", path: "/", labelKey: "shell.nav.home", titleKey: "shell.home.title" },
   { id: "simulators", path: "/simulatorler", labelKey: "shell.nav.simulators", titleKey: "shell.simulators.title" },
+  // T276b (depo sahibi kararı 1 Eki 2026): üç simin eski Hakkında sayfaları tek sayfada; sim içinden kalktı.
+  { id: "about", path: "/hakkinda", labelKey: "shell.nav.about", titleKey: "shell.about.title" },
 ];
 
 /**

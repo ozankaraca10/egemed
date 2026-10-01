@@ -110,3 +110,26 @@ export function ScreenHeading({ className, id, children }: ScreenHeadingProps): 
     </h1>
   );
 }
+
+export interface SectionHeadingProps {
+  readonly className?: string;
+  readonly id?: string;
+  readonly children: ReactNode;
+}
+
+/** Bölüm başlığı: gömülü modda h3, bağımsız modda h2 (hiyerarşi kayması). */
+export function SectionHeading({ className, id, children }: SectionHeadingProps): JSX.Element {
+  const embedded = useEmbedded();
+  if (embedded) {
+    return (
+      <h3 className={className} id={id}>
+        {children}
+      </h3>
+    );
+  }
+  return (
+    <h2 className={className} id={id}>
+      {children}
+    </h2>
+  );
+}

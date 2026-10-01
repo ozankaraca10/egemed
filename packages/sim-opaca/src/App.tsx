@@ -5,7 +5,6 @@ import { audienceShowsGamification } from "@egemed/sim-host";
 import { useStore } from "./core/StoreProvider";
 import { LearnGateProvider, useLearnGate } from "./core/LearnGate";
 import { canStartMode } from "./core/learnLock";
-import type { Screen } from "./core/types";
 import { DevPanel } from "./DevPanel";
 import { useLearnGamiPort } from "./gamification/bindings";
 import { GamiSyncErrorBanner } from "@egemed/gami-ui";
@@ -14,6 +13,7 @@ import { IconInfo } from "./ui/icons";
 import { AchievementsScreen } from "./screens/AchievementsScreen";
 import { LeaderboardScreen } from "./screens/LeaderboardScreen";
 import { LearnScreen } from "./screens/LearnScreen";
+import { SourcesScreen } from "./screens/SourcesScreen";
 import { ModeSelectScreen } from "./screens/ModeSelectScreen";
 import { ResultsScreen } from "./screens/ResultsScreen";
 import { SimulationScreen } from "./screens/SimulationScreen";
@@ -62,9 +62,9 @@ export interface AppProps {
   readonly openChallenges?: () => void;
 }
 
-function PendingScreen({ screen, embedded }: { screen: Screen; embedded: boolean }): JSX.Element {
+function PendingScreen({ embedded }: { embedded: boolean }): JSX.Element {
   const { dispatch } = useStore();
-  const label = screen === "sources" ? "Kaynaklar ekranı yükleniyor." : "Ekran yükleniyor.";
+  const label = "Ekran yükleniyor.";
   return (
     <>
       <EcgDeco embedded={embedded} />
@@ -153,16 +153,16 @@ function ScreenBody({
       return gamiEnabled ? (
         <AchievementsScreen embedded={embedded} devBuild={devBuild} modalEnv={modalEnv} />
       ) : (
-        <PendingScreen screen="achievements" embedded={embedded} />
+        <PendingScreen embedded={embedded} />
       );
     case "leaderboard":
       return gamiEnabled ? (
         <LeaderboardScreen embedded={embedded} devBuild={devBuild} modalEnv={modalEnv} />
       ) : (
-        <PendingScreen screen="leaderboard" embedded={embedded} />
+        <PendingScreen embedded={embedded} />
       );
     case "sources":
-      return <PendingScreen screen="sources" embedded={embedded} />;
+      return <SourcesScreen embedded={embedded} />;
     default:
       return null;
   }

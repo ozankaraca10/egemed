@@ -1175,3 +1175,12 @@ body { font-family: var(--font); }
   .eg-shell-arena__boardRow { grid-template-columns: 64px 1fr 64px; }
   .eg-shell-arena__hero .eg-shell-arena__versus { justify-self: center; }
 }
+
+/* T276b — Hakkında: üç simin eski Hakkında sayfaları tek sayfada, sekmeli. */
+.eg-shell-about { max-width: 80rem; }
+.eg-shell-about__tabs { display: flex; flex-wrap: wrap; gap: var(--sp-2); margin-top: var(--sp-4); padding: 4px; border-radius: var(--r-pill); background: var(--surface-2); width: fit-content; max-width: 100%; }
+.eg-shell-about__tab { display: inline-flex; align-items: center; gap: var(--sp-2); min-height: 44px; padding: 0 var(--sp-4); border: 0; border-radius: var(--r-pill); background: var(--clear); color: var(--ink-700); font: inherit; font-weight: 700; cursor: pointer; }
+.eg-shell-about__tab[aria-selected="true"] { background: var(--card); color: var(--navy-900); box-shadow: var(--shadow-card); }
+.eg-shell-about__tab:focus-visible { outline: 2px solid var(--focus-color); outline-offset: 2px; }
+.eg-shell-about__tabIcon { width: 24px; height: 24px; border-radius: 6px; }
+.eg-shell-about__panel { margin-top: var(--sp-4); }
