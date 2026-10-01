@@ -43,8 +43,8 @@ describe("shell.css token sözleşmesi", () => {
     expect(shellCss).toMatch(/position:\s*fixed/);
     expect(shellCss).toContain("env(safe-area-inset-bottom)");
   });
-  it("giriş ekranı: iki sütun, mobilde tek sütun; sol sahne fotoğrafsız (T296, depo sahibi kararı 1 Eki 2026)", () => {
-    expect(shellCss).toMatch(/\.eg-shell-entry\s*\{[^}]*grid-template-columns:\s*minmax\(0,\s*1\.1fr\)\s*minmax\(0,\s*\.9fr\)/);
+  it("giriş ekranı: iki eşit sütun (%50/%50, T303), mobilde tek sütun; sol sahne fotoğrafsız (T296, depo sahibi kararı 1 Eki 2026)", () => {
+    expect(shellCss).toMatch(/\.eg-shell-entry\s*\{[^}]*grid-template-columns:\s*minmax\(0,\s*1fr\)\s*minmax\(0,\s*1fr\)/);
     expect(shellCss).toMatch(/@media \(max-width: 900px\)\s*\{\s*\.eg-shell-entry\s*\{\s*grid-template-columns:\s*minmax\(0,\s*1fr\)/);
     expect(shellCss).toMatch(/\.eg-shell-entry__input[\s\S]*?min-height:\s*48px/);
     expect(shellCss).toContain("prefers-reduced-motion: reduce");
