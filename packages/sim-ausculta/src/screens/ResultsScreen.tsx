@@ -403,7 +403,7 @@ export function ResultsScreen({ embedded = false, env = NOOP_RESULTS_ENV, reposi
                   if (state.serverChallengeId !== null) challenge.onChallengeFinished?.(state.serverChallengeId);
                 }}
               >
-                Düello sonucunu gör
+                Karşılaşma sonucunu gör
               </button>
             ) : null}
             <button type="button" className={state.serverChallengeId !== null ? "btn outline" : "btn primary"} style={HIT} onClick={exit}>

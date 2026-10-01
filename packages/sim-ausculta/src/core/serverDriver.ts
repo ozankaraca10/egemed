@@ -18,8 +18,8 @@ export function serverErrorMessage(error: unknown): string {
   if (/session_time_exceeded/.test(text)) return "Oturum süresi doldu.";
   if (/session_(expired|finished)/.test(text)) return "Oturum sona erdi. Yeni bir oturum başlatın.";
   if (/rate_limited/.test(text)) return "Çok sık oturum açıldı; biraz sonra yeniden deneyin.";
-  if (/challenge_already_played/.test(text)) return "Bu düelloyu zaten oynadınız.";
-  if (/challenge_(expired|not_accepted)/.test(text)) return "Bu düello şu an oynanamıyor (süresi dolmuş ya da rakip henüz katılmamış).";
+  if (/challenge_already_played/.test(text)) return "Bu karşılaşmayı zaten oynadınız.";
+  if (/challenge_(expired|not_accepted)/.test(text)) return "Bu karşılaşma şu an oynanamıyor (süresi dolmuş ya da rakip henüz katılmamış).";
   if (/forbidden|role_not_permitted|unauthorized/.test(text)) return "Bu işlem için yetkiniz yok.";
   return "Sunucuya ulaşılamadı. Bağlantınızı kontrol edip yeniden deneyin.";
 }

@@ -99,17 +99,17 @@ describe("gami-ui görünüm sözleşmesi", () => {
   it("kategori filtresi 'Meydan Okuma' çipini ve düello rozetini çizer", () => {
     const badge: GamiBadgeModel = {
       id: "duel-first",
-      name: "İlk düello",
+      name: "İlk karşılaşma",
       tier: "bronze",
       tierLabel: "Bronz",
-      description: "İki tarafın da bitirdiği ilk düelloyu tamamla.",
+      description: "İki tarafın da bitirdiği ilk karşılaşmayı tamamla.",
       category: "challenge",
       categoryLabel: "Meydan Okuma",
       state: "locked",
       value: 0,
       max: 1,
       earnedLabel: null,
-      rule: "1 düello",
+      rule: "1 karşılaşma",
       studyKey: null,
       iconName: "Medal",
       lockedNote: null,
@@ -145,7 +145,7 @@ describe("gami-ui görünüm sözleşmesi", () => {
     expect(html).toContain("Rozet kategorisi");
     expect(html).toContain("Meydan Okuma");
     expect(html).toContain('aria-pressed="true"');
-    expect(html).toContain("İlk düello");
+    expect(html).toContain("İlk karşılaşma");
   });
 
   it("liderlik görünümü dönem ve boş sıralama metnini çizer", () => {
