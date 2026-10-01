@@ -1,0 +1,601 @@
+{
+ "version": 1,
+ "reviewedAt": "2026-10-01",
+ "reviewer": "Doç. Dr. Evrim Şimşek (Kardiyoloji AD)",
+ "format": {
+  "encoding": "int16le",
+  "unit": "uV",
+  "fs": 250,
+  "samples": 2500,
+  "leads": [
+   "I",
+   "II",
+   "III",
+   "aVR",
+   "aVL",
+   "aVF",
+   "V1",
+   "V2",
+   "V3",
+   "V4",
+   "V5",
+   "V6"
+  ],
+  "layout": "lead-major",
+  "durationS": 10
+ },
+ "sources": {
+  "ecg-arrhythmia": {
+   "title": "A large scale 12-lead electrocardiogram database for arrhythmia study 1.0.0",
+   "license": "CC BY 4.0",
+   "doi": "10.13026/wgex-er52"
+  },
+  "mimic-iv-ecg": {
+   "title": "MIMIC-IV-ECG: Diagnostic Electrocardiogram Matched Subset 1.0",
+   "license": "ODbL 1.0",
+   "doi": "10.13026/4nqg-sb35"
+  }
+ },
+ "patterns": [
+  {
+   "key": "normal",
+   "name": "Normal sinüs ritmi",
+   "group": "1 · Normal ve sinüs ritimleri",
+   "urgent": false,
+   "refs": [
+    {
+     "id": "JS00277",
+     "source": "ecg-arrhythmia",
+     "file": "assets/ecg/JS00277.bin"
+    },
+    {
+     "id": "JS00401",
+     "source": "ecg-arrhythmia",
+     "file": "assets/ecg/JS00401.bin"
+    },
+    {
+     "id": "JS00448",
+     "source": "ecg-arrhythmia",
+     "file": "assets/ecg/JS00448.bin"
+    }
+   ],
+   "status": "ready"
+  },
+  {
+   "key": "sintach",
+   "name": "Sinüs taşikardisi",
+   "group": "1 · Normal ve sinüs ritimleri",
+   "urgent": false,
+   "refs": [
+    {
+     "id": "JS00633",
+     "source": "ecg-arrhythmia",
+     "file": "assets/ecg/JS00633.bin"
+    },
+    {
+     "id": "JS00795",
+     "source": "ecg-arrhythmia",
+     "file": "assets/ecg/JS00795.bin"
+    },
+    {
+     "id": "JS00871",
+     "source": "ecg-arrhythmia",
+     "file": "assets/ecg/JS00871.bin"
+    }
+   ],
+   "status": "ready"
+  },
+  {
+   "key": "sinbrady",
+   "name": "Sinüs bradikardisi",
+   "group": "1 · Normal ve sinüs ritimleri",
+   "urgent": false,
+   "refs": [
+    {
+     "id": "JS00006",
+     "source": "ecg-arrhythmia",
+     "file": "assets/ecg/JS00006.bin"
+    },
+    {
+     "id": "JS00062",
+     "source": "ecg-arrhythmia",
+     "file": "assets/ecg/JS00062.bin"
+    },
+    {
+     "id": "JS00082",
+     "source": "ecg-arrhythmia",
+     "file": "assets/ecg/JS00082.bin"
+    },
+    {
+     "id": "JS00193",
+     "source": "ecg-arrhythmia",
+     "file": "assets/ecg/JS00193.bin"
+    }
+   ],
+   "status": "ready"
+  },
+  {
+   "key": "pac",
+   "name": "Atriyal erken atım (PAC)",
+   "group": "2 · Erken ve kaçış atımları",
+   "urgent": false,
+   "refs": [
+    {
+     "id": "JS20621",
+     "source": "ecg-arrhythmia",
+     "file": "assets/ecg/JS20621.bin"
+    },
+    {
+     "id": "JS20673",
+     "source": "ecg-arrhythmia",
+     "file": "assets/ecg/JS20673.bin"
+    }
+   ],
+   "status": "ready"
+  },
+  {
+   "key": "pvc",
+   "name": "Ventriküler erken atım (PVC)",
+   "group": "2 · Erken ve kaçış atımları",
+   "urgent": false,
+   "refs": [
+    {
+     "id": "JS00356",
+     "source": "ecg-arrhythmia",
+     "file": "assets/ecg/JS00356.bin"
+    },
+    {
+     "id": "JS00587",
+     "source": "ecg-arrhythmia",
+     "file": "assets/ecg/JS00587.bin"
+    },
+    {
+     "id": "JS02545",
+     "source": "ecg-arrhythmia",
+     "file": "assets/ecg/JS02545.bin"
+    },
+    {
+     "id": "JS04635",
+     "source": "ecg-arrhythmia",
+     "file": "assets/ecg/JS04635.bin"
+    }
+   ],
+   "status": "ready"
+  },
+  {
+   "key": "junctional",
+   "name": "Junctional kaçış",
+   "group": "2 · Erken ve kaçış atımları",
+   "urgent": false,
+   "refs": [
+    {
+     "id": "JS02871",
+     "source": "ecg-arrhythmia",
+     "file": "assets/ecg/JS02871.bin"
+    }
+   ],
+   "status": "ready"
+  },
+  {
+   "key": "af",
+   "name": "Atriyal fibrilasyon",
+   "group": "3 · Supraventriküler taşiaritmiler",
+   "urgent": true,
+   "refs": [
+    {
+     "id": "JS00318",
+     "source": "ecg-arrhythmia",
+     "file": "assets/ecg/JS00318.bin"
+    },
+    {
+     "id": "JS00643",
+     "source": "ecg-arrhythmia",
+     "file": "assets/ecg/JS00643.bin"
+    },
+    {
+     "id": "JS01253",
+     "source": "ecg-arrhythmia",
+     "file": "assets/ecg/JS01253.bin"
+    }
+   ],
+   "status": "ready"
+  },
+  {
+   "key": "flutter",
+   "name": "Atriyal flutter",
+   "group": "3 · Supraventriküler taşiaritmiler",
+   "urgent": true,
+   "refs": [
+    {
+     "id": "JS03425",
+     "source": "ecg-arrhythmia",
+     "file": "assets/ecg/JS03425.bin"
+    },
+    {
+     "id": "JS05124",
+     "source": "ecg-arrhythmia",
+     "file": "assets/ecg/JS05124.bin"
+    }
+   ],
+   "status": "ready"
+  },
+  {
+   "key": "pat",
+   "name": "Atriyal taşikardi (PAT)",
+   "group": "3 · Supraventriküler taşiaritmiler",
+   "urgent": true,
+   "refs": [
+    {
+     "id": "JS10173",
+     "source": "ecg-arrhythmia",
+     "file": "assets/ecg/JS10173.bin"
+    },
+    {
+     "id": "JS10219",
+     "source": "ecg-arrhythmia",
+     "file": "assets/ecg/JS10219.bin"
+    }
+   ],
+   "status": "ready"
+  },
+  {
+   "key": "svt",
+   "name": "SVT",
+   "group": "3 · Supraventriküler taşiaritmiler",
+   "urgent": true,
+   "refs": [
+    {
+     "id": "JS09916",
+     "source": "ecg-arrhythmia",
+     "file": "assets/ecg/JS09916.bin"
+    },
+    {
+     "id": "JS10000",
+     "source": "ecg-arrhythmia",
+     "file": "assets/ecg/JS10000.bin"
+    }
+   ],
+   "status": "ready"
+  },
+  {
+   "key": "avb1",
+   "name": "1. derece AV blok",
+   "group": "4 · AV iletim blokları",
+   "urgent": false,
+   "refs": [
+    {
+     "id": "JS12320",
+     "source": "ecg-arrhythmia",
+     "file": "assets/ecg/JS12320.bin"
+    }
+   ],
+   "status": "ready"
+  },
+  {
+   "key": "mobitz1",
+   "name": "2. derece AV blok, Mobitz I",
+   "group": "4 · AV iletim blokları",
+   "urgent": true,
+   "refs": [
+    {
+     "id": "JS12426",
+     "source": "ecg-arrhythmia",
+     "file": "assets/ecg/JS12426.bin"
+    },
+    {
+     "id": "JS12429",
+     "source": "ecg-arrhythmia",
+     "file": "assets/ecg/JS12429.bin"
+    }
+   ],
+   "status": "ready"
+  },
+  {
+   "key": "mobitz2",
+   "name": "2. derece AV blok, Mobitz II",
+   "group": "4 · AV iletim blokları",
+   "urgent": true,
+   "refs": [
+    {
+     "id": "JS12438",
+     "source": "ecg-arrhythmia",
+     "file": "assets/ecg/JS12438.bin"
+    }
+   ],
+   "status": "ready"
+  },
+  {
+   "key": "chb",
+   "name": "Tam (3. derece) AV blok",
+   "group": "4 · AV iletim blokları",
+   "urgent": true,
+   "refs": [
+    {
+     "id": "JS12509",
+     "source": "ecg-arrhythmia",
+     "file": "assets/ecg/JS12509.bin"
+    },
+    {
+     "id": "JS12521",
+     "source": "ecg-arrhythmia",
+     "file": "assets/ecg/JS12521.bin"
+    },
+    {
+     "id": "JS12523",
+     "source": "ecg-arrhythmia",
+     "file": "assets/ecg/JS12523.bin"
+    },
+    {
+     "id": "JS12525",
+     "source": "ecg-arrhythmia",
+     "file": "assets/ecg/JS12525.bin"
+    }
+   ],
+   "status": "ready"
+  },
+  {
+   "key": "rbbb",
+   "name": "Sağ dal bloğu (RBBB)",
+   "group": "5 · Ventrikül içi ileti ve preeksitasyon",
+   "urgent": false,
+   "refs": [
+    {
+     "id": "JS01905",
+     "source": "ecg-arrhythmia",
+     "file": "assets/ecg/JS01905.bin"
+    },
+    {
+     "id": "JS02855",
+     "source": "ecg-arrhythmia",
+     "file": "assets/ecg/JS02855.bin"
+    },
+    {
+     "id": "JS03449",
+     "source": "ecg-arrhythmia",
+     "file": "assets/ecg/JS03449.bin"
+    }
+   ],
+   "status": "ready"
+  },
+  {
+   "key": "lbbb",
+   "name": "Sol dal bloğu (LBBB)",
+   "group": "5 · Ventrikül içi ileti ve preeksitasyon",
+   "urgent": false,
+   "refs": [
+    {
+     "id": "JS02492",
+     "source": "ecg-arrhythmia",
+     "file": "assets/ecg/JS02492.bin"
+    },
+    {
+     "id": "JS22458",
+     "source": "ecg-arrhythmia",
+     "file": "assets/ecg/JS22458.bin"
+    }
+   ],
+   "status": "ready"
+  },
+  {
+   "key": "wpw",
+   "name": "WPW paterni",
+   "group": "5 · Ventrikül içi ileti ve preeksitasyon",
+   "urgent": false,
+   "refs": [
+    {
+     "id": "JS24893",
+     "source": "ecg-arrhythmia",
+     "file": "assets/ecg/JS24893.bin"
+    },
+    {
+     "id": "JS36156",
+     "source": "ecg-arrhythmia",
+     "file": "assets/ecg/JS36156.bin"
+    }
+   ],
+   "status": "ready"
+  },
+  {
+   "key": "vt",
+   "name": "Ventriküler taşikardi",
+   "group": "6 · Ventriküler aritmiler",
+   "urgent": true,
+   "refs": [
+    {
+     "id": "JS45509",
+     "source": "ecg-arrhythmia",
+     "file": "assets/ecg/JS45509.bin"
+    },
+    {
+     "id": "JS45533",
+     "source": "ecg-arrhythmia",
+     "file": "assets/ecg/JS45533.bin"
+    },
+    {
+     "id": "JS45534",
+     "source": "ecg-arrhythmia",
+     "file": "assets/ecg/JS45534.bin"
+    }
+   ],
+   "status": "ready"
+  },
+  {
+   "key": "vf",
+   "name": "Ventriküler fibrilasyon",
+   "group": "6 · Ventriküler aritmiler",
+   "urgent": true,
+   "refs": [
+    {
+     "id": "JS45442",
+     "source": "ecg-arrhythmia",
+     "file": "assets/ecg/JS45442.bin"
+    },
+    {
+     "id": "JS45450",
+     "source": "ecg-arrhythmia",
+     "file": "assets/ecg/JS45450.bin"
+    }
+   ],
+   "status": "ready"
+  },
+  {
+   "key": "mi_anterior",
+   "name": "Anterior STEMI (V1–V4)",
+   "group": "7 · İskemi ve infarktüs",
+   "urgent": true,
+   "refs": [
+    {
+     "id": "JS23000",
+     "source": "ecg-arrhythmia",
+     "file": "assets/ecg/JS23000.bin"
+    },
+    {
+     "id": "JS23037",
+     "source": "ecg-arrhythmia",
+     "file": "assets/ecg/JS23037.bin"
+    },
+    {
+     "id": "JS23055",
+     "source": "ecg-arrhythmia",
+     "file": "assets/ecg/JS23055.bin"
+    }
+   ],
+   "status": "ready"
+  },
+  {
+   "key": "mi_lateral",
+   "name": "Lateral STEMI (I, aVL, V5–V6)",
+   "group": "7 · İskemi ve infarktüs",
+   "urgent": true,
+   "refs": [
+    {
+     "id": "JS04210",
+     "source": "ecg-arrhythmia",
+     "file": "assets/ecg/JS04210.bin"
+    }
+   ],
+   "status": "ready"
+  },
+  {
+   "key": "mi_inferior",
+   "name": "Inferior STEMI (II, III, aVF)",
+   "group": "7 · İskemi ve infarktüs",
+   "urgent": true,
+   "refs": [
+    {
+     "id": "JS07153",
+     "source": "ecg-arrhythmia",
+     "file": "assets/ecg/JS07153.bin"
+    },
+    {
+     "id": "JS12503",
+     "source": "ecg-arrhythmia",
+     "file": "assets/ecg/JS12503.bin"
+    }
+   ],
+   "status": "ready"
+  },
+  {
+   "key": "mi_posterior",
+   "name": "Posterior MI (V1–V3 ST çökmesi, belirgin R)",
+   "group": "7 · İskemi ve infarktüs",
+   "urgent": true,
+   "refs": [],
+   "status": "awaiting"
+  },
+  {
+   "key": "mi_nstemi",
+   "name": "NSTE-AKS / subendokardiyal iskemi",
+   "group": "7 · İskemi ve infarktüs",
+   "urgent": true,
+   "refs": [
+    {
+     "id": "JS20638",
+     "source": "ecg-arrhythmia",
+     "file": "assets/ecg/JS20638.bin"
+    }
+   ],
+   "status": "ready"
+  },
+  {
+   "key": "mi_avr",
+   "name": "aVR'de ST yükselmesi + yaygın ST çökmesi",
+   "group": "7 · İskemi ve infarktüs",
+   "urgent": true,
+   "refs": [
+    {
+     "id": "JS06105",
+     "source": "ecg-arrhythmia",
+     "file": "assets/ecg/JS06105.bin"
+    }
+   ],
+   "status": "ready"
+  },
+  {
+   "key": "mi_wellens",
+   "name": "Wellens paterni (V2–V3 derin T negatifliği)",
+   "group": "7 · İskemi ve infarktüs",
+   "urgent": true,
+   "refs": [
+    {
+     "id": "JS26258",
+     "source": "ecg-arrhythmia",
+     "file": "assets/ecg/JS26258.bin"
+    },
+    {
+     "id": "JS30720",
+     "source": "ecg-arrhythmia",
+     "file": "assets/ecg/JS30720.bin"
+    }
+   ],
+   "status": "ready"
+  },
+  {
+   "key": "mi_old",
+   "name": "Eski MI (patolojik Q dalgaları)",
+   "group": "7 · İskemi ve infarktüs",
+   "urgent": false,
+   "refs": [
+    {
+     "id": "JS06393",
+     "source": "ecg-arrhythmia",
+     "file": "assets/ecg/JS06393.bin"
+    },
+    {
+     "id": "JS28591",
+     "source": "ecg-arrhythmia",
+     "file": "assets/ecg/JS28591.bin"
+    }
+   ],
+   "status": "ready"
+  },
+  {
+   "key": "pericarditis",
+   "name": "Akut perikardit",
+   "group": "8 · ST–T'nin iskemi dışı nedenleri",
+   "urgent": false,
+   "refs": [
+    {
+     "id": "s48234769",
+     "source": "mimic-iv-ecg",
+     "file": "assets/ecg/s48234769.bin"
+    }
+   ],
+   "status": "ready"
+  },
+  {
+   "key": "hyperk",
+   "name": "Hiperkalemi (sivri T)",
+   "group": "8 · ST–T'nin iskemi dışı nedenleri",
+   "urgent": false,
+   "refs": [
+    {
+     "id": "s41449382",
+     "source": "mimic-iv-ecg",
+     "file": "assets/ecg/s41449382.bin"
+    }
+   ],
+   "status": "ready"
+  }
+ ]
+}
