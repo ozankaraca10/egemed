@@ -92,9 +92,12 @@ function SimOpenLink({ simId }: { readonly simId: SimId }): JSX.Element {
 function SimProgressPanel({
   simId,
   summary,
+  rankVisible = true,
 }: {
   readonly simId: SimId;
   readonly summary: GamiSimSummary | undefined;
+  /** T295: anonim izleyende sıra numarası gösterilmez (satır listede yok). */
+  readonly rankVisible?: boolean;
 }): JSX.Element {
   if (summary === undefined) {
     return (
@@ -132,7 +135,7 @@ function SimProgressPanel({
           periodPractice: 0,
           streakCurrent: summary.streak.current,
           streakLongest: summary.streak.best,
-          weekRank: summary.leaderboard.rank,
+          weekRank: rankVisible ? summary.leaderboard.rank : null,
           weekRanked: summary.leaderboard.total,
           xpInto: level.xpIntoLevel,
           xpSpan: level.levelEndXp - level.levelStartXp,
@@ -205,7 +208,9 @@ export function LeaderboardVisibilityControl({
         {t("home.progress.leaderboardVisible")}
       </label>
       <p className="eg-shell-progress__optoutHint" id="eg-leaderboard-visible-hint">
-        {t("home.progress.leaderboardVisible.hint")}
+        {visible
+          ? t("home.progress.leaderboardVisible.hint")
+          : t("home.progress.leaderboardVisible.hiddenNote")}
       </p>
       {error ? (
         <p className="eg-shell-progress__optoutError" role="alert">
@@ -246,11 +251,14 @@ export function ProgressSectionView({
   status,
   summaries,
 }: ProgressSectionViewProps): JSX.Element {
+  // T295: tercih yüklenirken (pending) mevcut görünüm korunur; yalnız kesin
+  // "görünmüyor" durumunda sıra gizlenir.
+  const rankVisible = leaderboard === null || leaderboard.pending || leaderboard.visible;
   const tabs: readonly TabItem[] = SIM_IDS.map((id) => ({
     id,
     label: t(`sims.${id}.name`),
     panel: (
-      <SimProgressPanel simId={id} summary={summaryForSim(summaries, id)} />
+      <SimProgressPanel rankVisible={rankVisible} simId={id} summary={summaryForSim(summaries, id)} />
     ),
   }));
   return (

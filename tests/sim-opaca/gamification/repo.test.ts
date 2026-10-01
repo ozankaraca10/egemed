@@ -74,21 +74,20 @@ describe("LocalRepo", () => {
     });
     expect(s.earned.map((e) => e.id)).toContain("ct-explorer");
   });
-  it('ad LMS\'ten gelir; anonim seçilince tabloda "Anonim öğrenci"; sonuç demo etiketli', async () => {
+  it('ad LMS\'ten gelir; anonim seçilince satır listelenmez (T295); sonuç demo etiketli', async () => {
     const repo = new LocalRepo({ lmsStudentName: "Çelik, Selin" });
     expect((await repo.getMe()).displayName).toBe("Selin Çelik");
     await repo.recordAttempt(attempt({ id: "m1", score: 90, finishedAt: "2026-09-22T10:00:00Z" }));
     await repo.recordAttempt(attempt({ id: "m2", score: 80, finishedAt: "2026-09-23T09:00:00Z" }));
     let view = await repo.getLeaderboard("month", "all", now);
     expect(view.isDemo).toBe(true);
-    let me = view.rows.find((r) => r.isMe)!;
+    const me = view.rows.find((r) => r.isMe)!;
     expect(me.displayName).toBe("Selin Çelik");
     expect(me.periodScore).toBe(85);
     expect(me.rank).not.toBeNull();
     await repo.updateMe({ public: false });
     view = await repo.getLeaderboard("month", "all", now);
-    me = view.rows.find((r) => r.isMe)!;
-    expect(me.displayName).toBe("Anonim öğrenci");
+    expect(view.rows.some((r) => r.isMe)).toBe(false);
     expect(JSON.stringify(view)).not.toContain("Selin");
   });
   it('kohort filtresi: yalnız o dönemin akranları; profil kohortu farklıysa "ben" listede yok', async () => {
@@ -97,6 +96,13 @@ describe("LocalRepo", () => {
     const view = await repo.getLeaderboard("month", 1, now);
     expect(view.rows.every((r) => r.cohort === 1)).toBe(true);
     expect(view.rows.some((r) => r.isMe)).toBe(false);
+  });
+  it("anonim demo akranı liderlikte satır olarak yer almaz (T295)", async () => {
+    const repo = new LocalRepo();
+    const view = await repo.getLeaderboard("month", "all", now);
+    expect(view.rows.some((r) => r.id === "demo-06")).toBe(false);
+    expect(view.rows.every((r) => r.isPublic)).toBe(true);
+    expect(JSON.stringify(view)).not.toContain("Anonim");
   });
 });
 

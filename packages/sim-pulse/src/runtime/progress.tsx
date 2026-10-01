@@ -74,7 +74,10 @@ const goalIcon = (id: WeeklyGoal["id"]) => {
 
 type Profile = { public: boolean; displayName: string | null; cohort: Cohort | null };
 
-/** Yerel sıralama: yalnız oturum sahibi (sunucu sıralaması API oturumunda gelir). */
+/**
+ * Yerel sıralama: yalnız oturum sahibi (sunucu sıralaması API oturumunda gelir).
+ * T295 (1 Eki 2026): görünmemeyi seçen (`public=false`) satır listelenmez.
+ */
 function localRows(attempts: readonly PulseAttemptRecord[], now: Date, period: Period, cohort: CohortFilter, profile: Profile): GamiLeaderboardRow[] {
   const { start, end } = periodRangeTr(period, now);
   const startIso = start.toISOString();
@@ -85,7 +88,7 @@ function localRows(attempts: readonly PulseAttemptRecord[], now: Date, period: P
   const row: GamiLeaderboardRow = {
     attemptsCount: scored.attemptsCount,
     cohort: profile.cohort,
-    displayName: profile.public ? profile.displayName ?? "Sen" : "Anonim öğrenci",
+    displayName: profile.displayName ?? "Sen",
     id: "me",
     isMe: true,
     isPublic: profile.public,
@@ -95,7 +98,8 @@ function localRows(attempts: readonly PulseAttemptRecord[], now: Date, period: P
     reachedAt: scored.reachedAt,
     totalXp: xp,
   };
-  return rankRows(cohort === "all" || profile.cohort === cohort ? [row] : [], PULSE_RULES);
+  const visible = profile.public && (cohort === "all" || profile.cohort === cohort);
+  return rankRows(visible ? [row] : [], PULSE_RULES);
 }
 
 export interface PulseProgressActions {

@@ -599,7 +599,9 @@ export const tr = {
   "home.progress.error.retry": "Yeniden dene",
   "home.progress.leaderboardVisible": "Liderlik tablosunda görün",
   "home.progress.leaderboardVisible.hint":
-    "Kapalıyken diğer öğrencilerin listelerinde görünmezsiniz; kendi sıranızı görmeye devam edersiniz.",
+    "Kapalıyken sıralamada yer almazsın; sıralamada ve ödülde görünmezsin.",
+  "home.progress.leaderboardVisible.hiddenNote":
+    "Sıralamada görünmüyorsun. Görünür olmayı seçersen sıralamaya ve ödüle katılırsın.",
   "home.progress.leaderboardVisible.error": "Tercih kaydedilemedi.",
   "home.progress.openInSim": "Simülatörde İlerlemem'i aç",
   "home.trust.title": "Neden güvenilir?",

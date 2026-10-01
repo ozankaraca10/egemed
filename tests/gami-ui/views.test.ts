@@ -182,7 +182,9 @@ describe("gami-ui görünüm sözleşmesi", () => {
     expect(html).toContain("Liderlik Tahtası");
     expect(html).toContain("Bu hafta");
     expect(html).toContain("Bu dönemde henüz sıralamaya giren yok.");
-    expect(html).toContain("Anonim öğrenci");
+    // T295: anonim izleyene "Anonim öğrenci" satırı değil bilgi notu gösterilir.
+    expect(html).toContain("Sıralamada görünmüyorsun. Görünür olmayı seçersen sıralamaya ve ödüle katılırsın.");
+    expect(html).not.toContain("Anonim öğrenci");
   });
 
   it("kazanım kartı XP ve rozet metnini çizer", () => {

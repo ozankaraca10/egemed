@@ -94,9 +94,13 @@ describe("seed:demo — deterministik plan", () => {
   });
 
   it("Eylül liderliği her simde en az 30 kişilik; ödüle uygun en az 5 kişi var", () => {
+    const hiddenIds = new Set(plan.users.filter((user) => !user.leaderboardVisible).map((user) => user.id));
     for (const simId of SIM_IDS) {
       const rows = leaderboardRowsFor(simId);
       expect(rows.filter((row) => row.rank !== null).length, `${simId} Eylül liderliği`).toBeGreaterThanOrEqual(30);
+      // T295: anonim demo hesapları hiçbir liderlik satırında yer almaz.
+      expect(rows.some((row) => hiddenIds.has(row.userId)), `${simId} anonim satır`).toBe(false);
+      expect(rows.every((row) => row.isPublic)).toBe(true);
       const reward = REWARD_SEED.find((item) => item.simId === simId)!.reward;
       const standings = rewardStandings(
         rows.map((row) => ({

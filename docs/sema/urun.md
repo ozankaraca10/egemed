@@ -116,6 +116,19 @@ gamified ise); yüzey → etki:
 İstemci arayüzü (banner, engelli rozeti vb.) T283d kapsamındadır; bu görevde
 yalnız sunucu kuralı ve veri alanı vardır.
 
+### Liderlik görünürlüğü ve anonimlik (T295, 1 Eki 2026 depo sahibi kararı)
+
+Sıralamada görünmemeyi seçen (`users.leaderboard_visible = false`) öğrenci
+HİÇBİR liderlik listesinde satır olarak yer almaz: sim içi liderlik (üç sim),
+ana sayfa vitrini, aylık ödül adayları ve yeni kesinleşen kazananlar. Sıra
+numaraları anonimler çıkarıldıktan sonra hesaplanır (boşluk kalmaz). Görüntüleyenin
+kendisi anonimse listede kendi satırı yoktur; yerine "Sıralamada görünmüyorsun.
+Görünür olmayı seçersen sıralamaya ve ödüle katılırsın." bilgi notu ve mevcut
+tercih anahtarı gösterilir. Kendi XP/İlerlemem verisi etkilenmez; özet
+sıralamasında yer almayan kullanıcı `rank = total + 1` ile raporlanır. Tercih üç
+simde ortaktır; "Anonim öğrenci" etiketiyle satır üreten yol kaldırılmıştır.
+Demo/mock liderlik verisi de anonim satır listelemez.
+
 ## Notlar (koddan)
 
 - **Roller** `packages/contracts/src/ids.ts` `ROLES`: `admin`, `kullanici`,

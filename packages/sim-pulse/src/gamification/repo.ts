@@ -34,7 +34,6 @@ export type PulseGamiState = GamiStateV1<string, PulseExtra>;
 
 export const PULSE_GAMI_STORAGE_KEY = "egemed-pulse-gami-1.0";
 export const PULSE_GAMI_MAX_ATTEMPTS = 500;
-export const PULSE_ANONYMOUS_LABEL = "Anonim öğrenci";
 
 export function emptyPulseGamiState(): PulseGamiState {
   return {
@@ -322,12 +321,13 @@ function createGamiRepo(initial: PulseGamiState, persist: (state: PulseGamiState
         PULSE_RULES,
       );
       const totalXp = totalXpFor(state.attempts, state.learn, PULSE_RULES);
-      const visibleName = state.profile.public ? state.profile.displayName : null;
+      // T295 (1 Eki 2026): anonim (görünmemeyi seçmiş) satır listelenmez.
+      // Görünür ama adı çözülemeyen kendi satırı "Sen" yer tutucusuyla kalır.
       const meRow: PulseLeaderboardRow = {
         id: "me",
-        displayName: visibleName ?? PULSE_ANONYMOUS_LABEL,
+        displayName: state.profile.displayName ?? "Sen",
         isMe: true,
-        isPublic: visibleName !== null,
+        isPublic: state.profile.public,
         cohort: state.profile.cohort,
         periodScore: mine.score,
         attemptsCount: mine.attemptsCount,
@@ -337,15 +337,20 @@ function createGamiRepo(initial: PulseGamiState, persist: (state: PulseGamiState
         rank: null,
       };
       const matches = (candidate: Cohort | null): boolean => cohort === "all" || candidate === cohort;
-      const peers = PULSE_DEMO_PEERS.filter((peer) => matches(peer.cohort)).map((peer) => ({
-        id: peer.id,
-        displayName: peer.public && peer.displayName ? peer.displayName : PULSE_ANONYMOUS_LABEL,
-        isMe: false,
-        isPublic: peer.public && peer.displayName !== null,
-        cohort: peer.cohort,
-        ...demoPeerRow(peer, period, now),
-      }));
-      const rows = matches(state.profile.cohort) ? [...peers, meRow] : peers;
+      // Anonim demo akranları ve adı olmayanlar liderlikte satır olarak yer almaz.
+      const peers = PULSE_DEMO_PEERS.flatMap((peer) =>
+        peer.public && peer.displayName !== null && matches(peer.cohort)
+          ? [{
+              id: peer.id,
+              displayName: peer.displayName,
+              isMe: false,
+              isPublic: true,
+              cohort: peer.cohort,
+              ...demoPeerRow(peer, period, now),
+            }]
+          : [],
+      );
+      const rows = matches(state.profile.cohort) && state.profile.public ? [...peers, meRow] : peers;
       return { period, cohort, generatedAt: now.toISOString(), isDemo: true, rows: rankRows(rows, PULSE_RULES) };
     },
   };

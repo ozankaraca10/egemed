@@ -33,7 +33,6 @@ export function isLocalRepo(repo: OpacaGamiRepo): repo is LocalRepo {
 }
 
 const ME_ID = "me";
-const ANONYMOUS_LABEL = "Anonim öğrenci";
 
 export function formatLmsName(raw: string | null | undefined): string {
   const s = (raw ?? "").trim();
@@ -153,9 +152,11 @@ export class LocalRepo implements GamiRepository<OpacaAttemptRecord> {
     const myStats = computeStats(s.attempts, s.learn, s.earned, now);
     const myDisplayName = s.profile.public ? (s.profile.displayName ?? this.defaultDisplayName()) : null;
 
+    // T295 (1 Eki 2026): anonim (görünmemeyi seçmiş) satır listelenmez;
+    // görünür ama adı çözülemeyen kendi satırı "Sen" yer tutucusuyla kalır.
     const meRow: LeaderboardRow = {
       id: ME_ID,
-      displayName: myDisplayName ?? ANONYMOUS_LABEL,
+      displayName: myDisplayName ?? "Sen",
       isMe: true,
       isPublic: s.profile.public,
       cohort: s.profile.cohort,
@@ -168,13 +169,15 @@ export class LocalRepo implements GamiRepository<OpacaAttemptRecord> {
     };
 
     const cohortMatches = (c: Cohort | null) => cohort === "all" || c === cohort;
-    const peerRows: LeaderboardRow[] = DEMO_PEERS.filter((p) => cohortMatches(p.cohort)).map((p) => {
+    // Anonim demo akranları ve adı olmayanlar liderlikte satır olarak yer almaz.
+    const peerRows: LeaderboardRow[] = DEMO_PEERS.flatMap((p) => {
+      if (!p.public || p.displayName === null || !cohortMatches(p.cohort)) return [];
       const row = demoPeriodRow(p, period, now);
-      return {
+      return [{
         id: p.id,
-        displayName: p.public && p.displayName ? p.displayName : ANONYMOUS_LABEL,
+        displayName: p.displayName,
         isMe: false,
-        isPublic: p.public && !!p.displayName,
+        isPublic: true,
         cohort: p.cohort,
         periodScore: row.periodScore,
         attemptsCount: row.attemptsCount,
@@ -182,10 +185,10 @@ export class LocalRepo implements GamiRepository<OpacaAttemptRecord> {
         totalXp: row.totalXp,
         level: row.level,
         rank: null,
-      };
+      }];
     });
 
-    const rows = cohortMatches(s.profile.cohort) ? [...peerRows, meRow] : peerRows;
+    const rows = cohortMatches(s.profile.cohort) && s.profile.public ? [...peerRows, meRow] : peerRows;
     const ranked = rankRows(rows, OPACA_RULES);
 
     return { period, cohort, generatedAt: now.toISOString(), isDemo: true, rows: ranked };

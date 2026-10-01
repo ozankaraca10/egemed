@@ -139,7 +139,6 @@ function meRewardStatus(
     const left = reward.eligibility.minAssessments - me.attemptsCount;
     return { tone: "gray", text: `Uygunluk için bu ay ${left} değerlendirme daha tamamla`, action: "assess" };
   }
-  if (me.reason === "private_profile") return { tone: "gray", text: "Ödüle aday olmak için sıralamada adınla görünmelisin", action: "privacy" };
   if (me.reason === "cohort") {
     const c = reward.eligibility.cohorts;
     return { tone: "gray", text: `Bu ödül Dönem ${Math.min(...c)}–${Math.max(...c)} öğrencilerine açıktır` };
@@ -298,10 +297,13 @@ export interface GamiRewardMarks {
   readonly winnersCount: number;
 }
 
-const EXCLUDED_REASON: Readonly<Record<Exclude<EligibilityReason, "eligible">, string>> = {
+/**
+ * T295 (1 Eki 2026): anonim kullanıcılar sıralamada hiç satır olmadığı için
+ * `private_profile` gerekçesi artık üretilmez; işaret listesinde yer almaz.
+ */
+const EXCLUDED_REASON: Readonly<Partial<Record<Exclude<EligibilityReason, "eligible">, string>>> = {
   min_assessments: "Ödül dışı · değerlendirme sayısı yetersiz",
   cohort: "Ödül dışı · dönemi ödüle dahil değil",
-  private_profile: "Ödül dışı · anonim görünüyor",
 };
 
 function rewardMarks(
@@ -312,7 +314,9 @@ function rewardMarks(
   const excluded = new Map<string, string>();
   for (const r of rows) {
     if (r.candidate || r.reason === "eligible" || r.periodScore === null || r.periodScore < cutoff) continue;
-    excluded.set(r.id, EXCLUDED_REASON[r.reason]);
+    const reason = EXCLUDED_REASON[r.reason];
+    if (reason === undefined) continue;
+    excluded.set(r.id, reason);
   }
   return { candidates: new Set(rows.filter((r) => r.candidate).map((r) => r.id)), excluded, winnersCount };
 }

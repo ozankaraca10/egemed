@@ -174,7 +174,8 @@ kullanıcı ilerlemesini hem modül içinden hem ana sayfa dashboard'undan (sim 
   eylemler); sim tam alan ve çerçevesiz, ana gezinme ve footer yok. Dar ekranda (<768) bar kademeli: geri + başlık + eylem simgeleri.
 - **Opaca:** röntgen görselleri yerel kopyadan (git dışı); import/SCORM betik hattı taşınmaz, platform hedefi 153 çalışma zamanı testi.
 - **Oyunlaştırma:** üç simde; çekirdek `gamification-core`, rozet/hedef sim başına, tasarım ortak (U3). Liderlik tablosu katılımı
-  kullanıcı tercihidir (opt-out; `users.leaderboard_visible`): çıkan kullanıcı başkalarının listesinde görünmez, kendi satırını görür.
+  kullanıcı tercihidir (opt-out; `users.leaderboard_visible`): çıkan kullanıcı hiçbir liderlik listesinde satır olarak görünmez
+  (T295; kendi XP/İlerlemem verisi etkilenmez).
 - **ADR-007 kabul;** onaylı bağımlılıklar: `pg`, `node-pg-migrate`, `zod`, `@playwright/test`, `@axe-core/playwright`.
 - **Roller:** yalnız admin + kullanıcı. **Görsel dil:** `egemed-sim-ui-ux-framework` bileşenleri ve renk kartelası; yeni renk yok.
 
@@ -233,8 +234,8 @@ Claude Code devir notu: `docs/agentic/CLAUDE-DEVIR.md`.
   profil XP/düzey/seri tek SQL ifadesinde yazılır; istemcinin kodlu özetindeki `xp` yetkili değildir (API-05). Rozetler sunucuda
   değerlendirilir: yeni deneme yazılınca `@egemed/gami-catalogs` kataloğuyla (`SIM_BADGE_EVALUATORS`) kodlu özetten istatistik
   türetilir ve rozet satırları idempotent yazılır (ADR-008 S1–S3; Pulse T101/T103, Opaca T104). Liderlik tablosu katılımı
-  `GET/PATCH /me/preferences` ile yönetilir (migration 006, `users.leaderboard_visible`); opt-out kullanıcı başkalarının
-  listesinde görünmez, kendi satırını görür (T100). Üretim compose/Dockerfile/nginx yapılandırması `infra/prod/`, işletim adımları
+  `GET/PATCH /me/preferences` ile yönetilir (migration 006, `users.leaderboard_visible`); opt-out kullanıcı hiçbir liderlik
+  listesinde satır olarak görünmez (T100; T295). Üretim compose/Dockerfile/nginx yapılandırması `infra/prod/`, işletim adımları
   `docs/ops/ISLETIM.md` içindedir; yayın hazırlığı sürüyor ve SSO protokolü kararı bekliyor.
 - **Kabuk veri kaynakları:** Admin ve ana sayfa (dashboard) sayfaları API oturumunda gerçek uçlara bağlanır
   (`apps/shell/src/dataSources.ts`, `apiShellSources.ts`); sahte `1450` XP sentetiği yalnız sahte dev oturumunda kalır
