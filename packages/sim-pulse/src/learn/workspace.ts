@@ -55,8 +55,10 @@ export interface PulseLearnWorkspaceOptions {
   readonly fetchRecord?: (url: string) => Promise<ArrayBuffer>;
 }
 
-const SPEEDS = [25, 50] as const;
-const GAINS = [5, 10, 20] as const;
+/** Oynatma hızı çarpanları; kâğıt ölçeği sabittir (25 mm/s, 10 mm/mV). */
+const RATES = [0.5, 1, 2] as const;
+const MM_PER_S = 25;
+const MM_PER_MV = 10;
 const LAYOUT = [[0, 3, 6, 9], [1, 4, 7, 10], [2, 5, 8, 11]] as const;
 
 function esc(text: string): string {
@@ -85,10 +87,8 @@ function markup(): string {
 <section class="pl-right" aria-label="12 derivasyon EKG">
   <div class="pl-tools">
     <button class="pl-tb pl-play" type="button" data-pl="play">▶ Oynat</button>
-    <span class="pl-lbl" id="pl-speed-label">Hız</span>
-    <div class="pl-seg" role="group" aria-labelledby="pl-speed-label" data-pl="speed">${SPEEDS.map((v) => `<button type="button" data-v="${v}" aria-pressed="${v === 25}">${v} mm/s</button>`).join("")}</div>
-    <span class="pl-lbl" id="pl-gain-label">Kazanç</span>
-    <div class="pl-seg" role="group" aria-labelledby="pl-gain-label" data-pl="gain">${GAINS.map((v) => `<button type="button" data-v="${v}" aria-pressed="${v === 10}">${v === 20 ? "20 mm/mV" : v}</button>`).join("")}</div>
+    <span class="pl-lbl" id="pl-rate-label">Oynatma hızı</span>
+    <div class="pl-seg" role="group" aria-labelledby="pl-rate-label" data-pl="playRate">${RATES.map((v) => `<button type="button" data-v="${v}" aria-pressed="${v === 1}" aria-label="${String(v).replace(".", ",")} kat">${String(v).replace(".", ",")}×</button>`).join("")}</div>
     <button class="pl-tb" type="button" data-pl="calBtn" aria-pressed="true">⟷ Kaliper</button>
     <button class="pl-tb" type="button" data-pl="origBtn" aria-pressed="false">Orijinal Görüntü</button>
   </div>
@@ -98,7 +98,7 @@ function markup(): string {
     <img class="pl-orig" data-pl="orig" alt="" hidden>
     <div class="pl-msg" data-pl="msg" hidden></div>
   </div>
-  <p class="pl-orig-note" data-pl="origNote" hidden>Orijinal görüntü: hastanın ham kaydı (500 Hz), filtre ve işlem uygulanmamış · 25 mm/s · 10 mm/mV. Oynatma, kalp animasyonu, hız/kazanç ve kaliper etkileşimli görünümde çalışır.</p>
+  <p class="pl-orig-note" data-pl="origNote" hidden>Orijinal görüntü: hastanın ham kaydı (500 Hz), filtre ve işlem uygulanmamış · 25 mm/s · 10 mm/mV. Oynatma, oynatma hızı, kalp animasyonu ve kaliper etkileşimli görünümde çalışır.</p>
   <div class="pl-calrow" data-pl="calrow">Kaliper: kollar kilitli, bütün olarak sürükleyin · aralık
     <button class="pl-tb" type="button" data-d="-20">−20 ms</button><button class="pl-tb" type="button" data-d="20">+20 ms</button><button class="pl-tb" type="button" data-pl="calRR">RR'ye eşitle</button>
   </div>
@@ -181,10 +181,9 @@ export function attachPulseLearnWorkspace(handle: PulseRuntimeHandle, options: P
   let loadToken = 0;
   let playing = false;
   let tNow = 0;
-  let startedAt = 0;
+  let lastFrame = 0;
   let raf = 0;
-  let mmPerS: number = 25;
-  let mmPerMv: number = 10;
+  let rate: number = 1;
   let calOn = true;
   let original = false;
   let calStart = 1;
@@ -330,8 +329,8 @@ export function attachPulseLearnWorkspace(handle: PulseRuntimeHandle, options: P
   // --- 12 derivasyon kâğıt ----------------------------------------------------
   function layout(): { w: number; pxmm: number; secs: number; rowH: number; h: number } {
     const w = Math.max(280, $("paper").clientWidth);
-    const secs = (10 * 25) / mmPerS;
-    const pxmm = w / (secs * mmPerS);
+    const secs = 10;
+    const pxmm = w / (secs * MM_PER_S);
     const rowH = 30 * pxmm;
     return { w, pxmm, secs, rowH, h: rowH * 4 + 6 * pxmm };
   }
@@ -365,8 +364,8 @@ export function attachPulseLearnWorkspace(handle: PulseRuntimeHandle, options: P
     if (record === null) return;
     const colS = L.secs / 4;
     const colW = L.w / 4;
-    const perMv = mmPerMv * L.pxmm;
-    const perS = mmPerS * L.pxmm;
+    const perMv = MM_PER_MV * L.pxmm;
+    const perS = MM_PER_S * L.pxmm;
     ctx.lineJoin = "round";
     ctx.font = "700 11px ui-monospace, Menlo, monospace";
     for (let row = 0; row < 3; row += 1) {
@@ -436,7 +435,7 @@ export function attachPulseLearnWorkspace(handle: PulseRuntimeHandle, options: P
     $("calrow").hidden = !calOn || original;
     if (cal.hidden) return;
     calStart = Math.max(0, Math.min(L.secs - calSpan, calStart));
-    const perS = mmPerS * L.pxmm;
+    const perS = MM_PER_S * L.pxmm;
     cal.style.left = `${calStart * perS}px`;
     cal.style.width = `${calSpan * perS}px`;
     cal.style.top = `${L.rowH * 3}px`;
@@ -469,7 +468,7 @@ export function attachPulseLearnWorkspace(handle: PulseRuntimeHandle, options: P
     original = on;
     if (on) setPlaying(false);
     $("origBtn").setAttribute("aria-pressed", String(on));
-    for (const control of [$("play"), $("calBtn"), ...Array.from($("speed").querySelectorAll("button")), ...Array.from($("gain").querySelectorAll("button"))]) {
+    for (const control of [$("play"), $("calBtn"), ...Array.from($("playRate").querySelectorAll("button"))]) {
       (control as HTMLButtonElement).disabled = on;
       if (on) control.setAttribute("title", "Orijinal görüntüde kullanılamaz");
       else control.removeAttribute("title");
@@ -486,7 +485,9 @@ export function attachPulseLearnWorkspace(handle: PulseRuntimeHandle, options: P
   // --- Oynatma ve inceleme süresi ---------------------------------------------
   function tick(now: number): void {
     if (!playing || disposed) return;
-    tNow = (now - startedAt) / 1000;
+    // Oynatma hızı yalnız zamanın akışını değiştirir; kâğıt ölçeği sabittir.
+    tNow += (Math.min(0.1, (now - lastFrame) / 1000)) * rate;
+    lastFrame = now;
     drawHeart();
     draw();
     raf = requestAnimationFrame(tick);
@@ -497,7 +498,7 @@ export function attachPulseLearnWorkspace(handle: PulseRuntimeHandle, options: P
     $("play").setAttribute("aria-pressed", String(on));
     cancelAnimationFrame(raf);
     if (on) {
-      startedAt = performance.now() - tNow * 1000;
+      lastFrame = performance.now();
       raf = requestAnimationFrame(tick);
     }
   }
@@ -541,15 +542,9 @@ export function attachPulseLearnWorkspace(handle: PulseRuntimeHandle, options: P
   $<HTMLImageElement>("orig").addEventListener("error", () => {
     if (original) showMessage("Orijinal görüntü yüklenemedi.", () => { $<HTMLImageElement>("orig").removeAttribute("src"); showMessage(null); showOriginal(); });
   });
-  $("speed").querySelectorAll<HTMLButtonElement>("button").forEach((b) => b.addEventListener("click", () => {
-    mmPerS = Number(b.dataset.v);
-    $("speed").querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
-    draw();
-  }));
-  $("gain").querySelectorAll<HTMLButtonElement>("button").forEach((b) => b.addEventListener("click", () => {
-    mmPerMv = Number(b.dataset.v);
-    $("gain").querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
-    draw();
+  $("playRate").querySelectorAll<HTMLButtonElement>("button").forEach((b) => b.addEventListener("click", () => {
+    rate = Number(b.dataset.v);
+    $("playRate").querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
   }));
   $("calBtn").addEventListener("click", () => {
     calOn = !calOn;
@@ -576,7 +571,7 @@ export function attachPulseLearnWorkspace(handle: PulseRuntimeHandle, options: P
   cal.addEventListener("pointermove", (ev) => {
     if (!cal.hasPointerCapture(ev.pointerId)) return;
     const L = layout();
-    calStart = dragStart + (ev.clientX - dragX) / (mmPerS * L.pxmm);
+    calStart = dragStart + (ev.clientX - dragX) / (MM_PER_S * L.pxmm);
     placeCal(L);
   });
   cal.addEventListener("pointerup", () => {
