@@ -86,6 +86,14 @@ flowchart TD
   duelloKontrol -->|"gamified=false ise"| rolRed["403 role_not_permitted\n(ogretim_uyesi / uzmanlik_ogrencisi)"]
 ```
 
+### Yapay zekâ ajanı uyarısı (T283f)
+
+XP kazandıran rekabetçi ekranlarda (`#/sims/<id>/degerlendirme`, `#/sims/<id>/duello/<uuid>`)
+öğrenci kitlesinde kabuk, sayfaya eklenmiş bilinen ajan işaretlerini (`[id^="claude-agent-"]`)
+yerel olarak yoklar: işaret görülürse 10 sn kapatma uyarısı, süre dolunca ekran ajan kapanana
+dek duraklatılır. Ceza/kayıt yoktur, hiçbir veri gönderilmez (KVKK); sunucu sinyali T283c,
+yönetici kararı T283b. `navigator.webdriver` engel sebebi değildir.
+
 ## Notlar (koddan)
 
 - **Roller** `packages/contracts/src/ids.ts` `ROLES`: `admin`, `kullanici`,
