@@ -423,6 +423,7 @@ test.describe("Pulse kaynak runtime", () => {
     await expect(pl("canvas")).toBeHidden();
     await expect(pl("cal")).toBeHidden();
     for (const name of ["play", "calBtn"]) await expect(pl(name)).toBeDisabled();
+    await expect(pl("playRate").locator("button").first()).toBeDisabled();
     await expect(pl("play")).toHaveText("▶ Oynat");
     await expect(pl("hstate")).toHaveText("Orijinal görüntü · animasyon kapalı");
     const frozen = await root.locator('.pl-heart-svg [data-h="LV"]').getAttribute("d");
@@ -434,6 +435,25 @@ test.describe("Pulse kaynak runtime", () => {
     await pl("origBtn").click();
     await expect(pl("canvas")).toBeVisible();
     await expect(pl("play")).toBeEnabled();
+    expect(errors).toEqual([]);
+  });
+
+  test("oynatma hızı (0,5× / 1× / 2×) yalnız zamanı değiştirir; EKG kâğıdı 25 mm/s · 10 mm/mV sabit kalır (T300)", async ({ page }) => {
+    const errors = trackErrors(page);
+    await seedViewed(page);
+    const root = await openPulse(page);
+    await openLearn(root);
+    const rates = root.locator('[data-pl="playRate"] button');
+    await expect(rates).toHaveText(["0,5×", "1×", "2×"]);
+    await expect(root.locator(".pl-tools")).not.toContainText("mm/s");
+    await expect(root.locator(".pl-tools")).not.toContainText("mm/mV");
+    const paper = async (): Promise<string> => root.locator('[data-pl="canvas"]').evaluate((c) => (c as HTMLCanvasElement).toDataURL());
+    const before = await paper();
+    for (const label of ["2×", "0,5×"]) {
+      await rates.filter({ hasText: label }).click();
+      await expect(rates.filter({ hasText: label })).toHaveAttribute("aria-pressed", "true");
+      expect(await paper(), `${label} kâğıdı değiştirmez`).toBe(before);
+    }
     expect(errors).toEqual([]);
   });
 
