@@ -144,6 +144,15 @@ export function attachPulseLearnWorkspace(handle: PulseRuntimeHandle, options: P
   ctl.setPlaying?.(false);
 
   const $ = <T extends Element = HTMLElement>(name: string): T => root.querySelector(`[data-pl="${name}"]`) as T;
+  // Kaynağın açılışı odağı seçili ritim sekmesine verir; sekmeler artık gizli
+  // olduğundan odak kaybolmasın diye görünür başlığa taşınır.
+  const active = shadow.activeElement as HTMLElement | null;
+  if (active !== null && active.getClientRects().length === 0) {
+    const view = ctl.state.activeView;
+    const heading = view === "sim" ? $("name") : shadow.getElementById(view === "modes" ? "modesTitle" : `${view}Title`);
+    heading?.setAttribute("tabindex", "-1");
+    heading?.focus();
+  }
   const heart = new PulseHeartAnimator(root);
   const canvas = $<HTMLCanvasElement>("canvas");
   const ctx = canvas.getContext("2d");

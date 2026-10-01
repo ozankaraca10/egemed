@@ -1,7 +1,7 @@
 # T298-pulse-learn
 
-- Tarih: 2026-10-01 16:32
-- Commit: T298: Pulse öğrenme modu gerçek 12 derivasyon EKG, dört boşluklu kalp ve EKG altında patern bilgisi
+- Tarih: 2026-10-01 16:50
+- Commit: T298: öğrenme alanı açılışta odağı görünür başlığa taşır (gizli ritim sekmesi)
 - Dal: task/T298-pulse-learn
 
 ---
