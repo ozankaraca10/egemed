@@ -172,7 +172,10 @@ export function EntryPage({ role, devEnabled = false, apiBaseUrl = null, onApiSi
             ))}
           </ul>
         </div>
-        <p className="eg-shell-entry__quote">{t("entry.quote")}</p>
+        <p className="eg-shell-entry__quote">
+          <span className="eg-shell-entry__quoteLine">{t("entry.quote")}</span>
+          <span className="eg-shell-entry__quoteLine">{t("entry.quote.detail")}</span>
+        </p>
       </section>
       <main className="eg-shell-entry__main" id="icerik" tabIndex={-1}>
         <div className="eg-shell-entry__panel">
