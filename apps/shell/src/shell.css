@@ -1134,7 +1134,7 @@ body { font-family: var(--font); }
    güçlü başlık; sağ panel sade. Önceki merkezli düzenin üzerine yazar. */
 .eg-shell-entry { grid-template-columns: minmax(0, 1.1fr) minmax(0, .9fr); background: var(--card); }
 .eg-shell-entry__brand {
-  align-items: flex-start; justify-content: space-between; gap: var(--sp-6); text-align: left;
+  align-items: flex-start; justify-content: center; gap: 0; text-align: left;
   padding: clamp(24px, 4vw, 56px);
   background:
     radial-gradient(70% 60% at 85% 10%, var(--duel-me-glow), var(--clear) 70%),
@@ -1142,20 +1142,28 @@ body { font-family: var(--font); }
     linear-gradient(165deg, var(--navy-950), var(--navy-800));
 }
 .eg-shell-entry__brand::before { opacity: 0; }
-.eg-shell-entry__brandTop { display: flex; align-items: center; gap: var(--sp-4); }
+.eg-shell-entry__brandTop { display: flex; align-items: center; gap: var(--sp-4); margin-bottom: var(--sp-5); }
 .eg-shell-entry__logo { width: 4.5rem; height: auto; }
 .eg-shell-entry__brand > .eg-shell-entry__brandTop > .eg-shell-logo { margin: 0; }
 .eg-shell-entry__brand .eg-shell-logo__mark { height: clamp(2.75rem, 4vw, 3.5rem); width: auto; }
 .eg-shell-entry__brand .eg-shell-logo__tagline { display: none; }
 .eg-shell-entry__pitch { display: grid; gap: var(--sp-3); max-width: 36rem; }
+.eg-shell-entry__claim { display: block; margin-bottom: var(--sp-1); color: var(--card); }
 .eg-shell-entry__eyebrow { margin: 0; color: var(--orange-500); font-size: var(--fs-xs); font-weight: 800; letter-spacing: .14em; text-transform: uppercase; }
 .eg-shell-entry__headline { margin: 0; color: var(--card); font-size: clamp(30px, 3.6vw, 48px); font-weight: 800; line-height: 1.05; letter-spacing: -.025em; text-wrap: balance; }
 .eg-shell-entry__lead { margin: 0; color: var(--blue-100); max-width: 46ch; }
 .eg-shell-entry__sims { display: flex; flex-wrap: wrap; justify-content: flex-start; gap: var(--sp-2); margin: var(--sp-3) 0 0; grid-template-columns: none; }
-.eg-shell-entry__sim { display: inline-flex; align-items: center; gap: var(--sp-2); padding: 6px 14px 6px 6px; border-radius: var(--r-pill); background: var(--glass-chip); box-shadow: inset 0 0 0 1px var(--glass-line); }
-.eg-shell-entry__simicon { width: 2rem; height: 2rem; }
+/* Simülatör logoları çerçevesiz ve büyük (depo sahibi isteği, 1 Eki 2026). */
+.eg-shell-entry__sim { display: inline-flex; align-items: center; gap: var(--sp-3); padding: 0; background: none; box-shadow: none; font-size: var(--fs-lg); font-weight: 800; }
+.eg-shell-entry__sims { column-gap: var(--sp-6); row-gap: var(--sp-3); }
+.eg-shell-entry__simicon { width: 3.5rem; height: 3.5rem; }
+@media (max-width: 900px) {
+  .eg-shell-entry__sims { column-gap: var(--sp-4); }
+  .eg-shell-entry__sim { gap: var(--sp-2); font-size: var(--fs-sm); }
+  .eg-shell-entry__simicon { width: 2.5rem; height: 2.5rem; }
+}
 .eg-shell-entry__simname { letter-spacing: 0; }
-.eg-shell-entry__quote { margin: 0; padding-left: var(--sp-3); border-left: 3px solid var(--orange-500); color: var(--blue-100); font-size: var(--fs-sm); max-width: 44ch; }
+.eg-shell-entry__quote { margin: calc(3 * 1.5em) 0 0; padding-left: var(--sp-3); border-left: 3px solid var(--orange-500); color: var(--blue-100); font-size: var(--fs-sm); max-width: 44ch; }
 .eg-shell-entry__main { background: var(--card); }
 .eg-shell-entry__panel { width: min(100%, 28rem); padding: 0; border: 0; box-shadow: none; background: var(--clear); }
 .eg-shell-entry__roles { background: var(--surface-2); border: 0; box-shadow: inset 0 0 0 1px var(--border); }

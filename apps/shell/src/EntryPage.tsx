@@ -151,7 +151,10 @@ export function EntryPage({ role, devEnabled = false, apiBaseUrl = null, onApiSi
           <EgemedLogo variant="on-dark" />
         </div>
         <div className="eg-shell-entry__pitch">
-          <p className="eg-shell-entry__eyebrow">{t("shell.brand.tagline")}</p>
+          <p className="eg-shell-entry__eyebrow">
+            <span className="eg-shell-entry__claim">{t("entry.claim")}</span>
+            {t("shell.brand.tagline")}
+          </p>
           <p className="eg-shell-entry__headline">{t("entry.headline")}</p>
           <p className="eg-shell-entry__lead">{t("entry.lead")}</p>
           <ul aria-label={t("entry.sims")} className="eg-shell-entry__sims">
