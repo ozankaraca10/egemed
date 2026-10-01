@@ -149,8 +149,9 @@ sequenceDiagram
   Note over Sim,API: Ay boyunca öğrenciler değerlendirme çözer (Bölüm 1) → gami_profiles.xp güncellenir
   Sim->>API: GET /me/gamification/:simId/leaderboard
   API->>DB: bans.activeUserIds(institutionId) (T283b)
-  API->>DB: gami_leaderboard görünümü (rank() over institution_id,sim_id — leaderboard_visible=false VE rekabet engelli filtrelenir)
-  API-->>Sim: sıralama satırları
+  API->>DB: gami_profiles × users (leaderboard_visible=false VE rekabet engelli filtrelenir; T295)
+  API->>API: adı çözülemeyen satır atlanır; sıralama kalan satırlar üzerinden (boşluksuz)
+  API-->>Sim: sıralama satırları (anonim izleyenin kendi satırı yoktur)
 
   Note over Admin: Ay kapandıktan SONRA (path.month < bu ayın anahtarı)
   Admin->>API: POST /admin/rewards/:simId/:month/finalize
@@ -170,8 +171,9 @@ sequenceDiagram
 
 Notlar:
 - Ödül kurum × sim × ay başınadır; simler arası birleşik ödül yoktur (ADR-006).
-- `require_public_name=true` ise yalnız `leaderboard_visible=true` (adla
-  görünmeyi seçmiş) öğrenciler kazanan olabilir (`row.isPublic` kontrolü).
+- T295 (1 Eki 2026): anonim (`leaderboard_visible=false`) öğrenci hiçbir liderlik
+  listesinde satır olmadığı için kesinleşen kazananlara da girmez; `require_public_name`
+  koşulu bu yüzden kendiliğinden sağlanır (`row.isPublic` her zaman true).
 - Düello (`challenge`) denemeleri liderlik hesabına girmez (Bölüm 2 notu).
 - T283b: aktif rekabet engelli kullanıcı liderlikte (ana sayfa vitrini dahil)
   hiç listelenmez, dolayısıyla kazanan adaylığına da girmez — `buildLeaderboardRows`

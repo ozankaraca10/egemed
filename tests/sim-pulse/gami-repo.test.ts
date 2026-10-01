@@ -4,7 +4,6 @@ import { rhythmStreakAfter } from "../../packages/sim-pulse/src/gamification/att
 import type { PulseAttemptRecord } from "../../packages/sim-pulse/src/gamification/attempt";
 import type { PulseGamiState } from "../../packages/sim-pulse/src/gamification/repo";
 import {
-  PULSE_ANONYMOUS_LABEL,
   PULSE_GAMI_MAX_ATTEMPTS,
   PULSE_GAMI_STORAGE_KEY,
   computePulseStats,
@@ -180,16 +179,14 @@ describe("Pulse oyunlaştırma deposu — liderlik", () => {
     expect((await single.getLeaderboard("month", "all", NOW)).rows.find((row) => row.isMe)?.periodScore).toBeNull();
   });
 
-  it("gizli profilde ad sızmaz; anonim etiket görünür", async () => {
+  it("gizli profilde ad sızmaz; satır listelenmez (T295)", async () => {
     const repo = createMemoryGamiRepo({ state: stateWith([attempt(), attempt({ id: "a2", score: 70 })]) });
     await repo.updateMe({ displayName: "Selin Çelik" });
     let board = await repo.getLeaderboard("month", "all", NOW);
     expect(board.rows.find((row) => row.isMe)?.displayName).toBe("Selin Çelik");
     await repo.updateMe({ public: false });
     board = await repo.getLeaderboard("month", "all", NOW);
-    const me = board.rows.find((row) => row.isMe);
-    expect(me?.displayName).toBe(PULSE_ANONYMOUS_LABEL);
-    expect(me?.isPublic).toBe(false);
+    expect(board.rows.some((row) => row.isMe)).toBe(false);
     expect(JSON.stringify(board)).not.toContain("Selin");
   });
 
@@ -202,10 +199,13 @@ describe("Pulse oyunlaştırma deposu — liderlik", () => {
     expect(board.rows.some((row) => row.isMe)).toBe(false);
   });
 
-  it("demo akran satırları deterministiktir", async () => {
+  it("demo akran satırları deterministiktir; anonim demo akranı listelenmez", async () => {
     const a = await createMemoryGamiRepo().getLeaderboard("month", "all", NOW);
     const b = await createMemoryGamiRepo().getLeaderboard("month", "all", NOW);
     expect(a.rows).toEqual(b.rows);
+    expect(a.rows.some((row) => row.id === "demo-06")).toBe(false);
+    expect(a.rows.every((row) => row.isPublic)).toBe(true);
+    expect(JSON.stringify(a)).not.toContain("Anonim");
   });
 });
 

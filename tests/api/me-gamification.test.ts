@@ -495,7 +495,7 @@ describe("sunucu yetkili XP, düzey ve seri (API-05)", () => {
 });
 
 describe("liderlik tablosuna katılım tercihi (opt-out)", () => {
-  it("varsayılan görünür; PATCH ile çıkan kullanıcı başkalarının listesinde yoktur, kendi satırını görür", async () => {
+  it("varsayılan görünür; PATCH ile çıkan kullanıcı hiçbir listede satır olarak yoktur (T295)", async () => {
     const testHarness = harness({ [MERT_ID]: ["pulse"] });
     const ali = await login(testHarness, "ali.veli");
     const mert = await login(testHarness, "mert.ikinci");
@@ -517,8 +517,32 @@ describe("liderlik tablosuna katılım tercihi (opt-out)", () => {
     expect(await patch.json()).toEqual({ data: { leaderboardVisible: false } });
     const after = await rowsFor(mert.headers);
     expect(after.meta.total).toBe(before.meta.total - 1);
+    // T295: anonim izleyen kendi satırını görmez; kalan satır yalnız akranıdır.
     const own = await rowsFor(ali.headers);
-    expect(own.data.rows.some((row) => row.isMe)).toBe(true);
+    expect(own.meta.total).toBe(after.meta.total);
+    expect(own.data.rows.some((row) => row.isMe)).toBe(false);
+    expect(own.data.rows).toHaveLength(1);
+  });
+
+  // T295: anonim kullanıcı özet sıralamasında sayılmaz; sıra numarası
+  // görünür satırlar üzerinden hesaplanır, anonim izleyenin sırası yoktur.
+  it("anonim kullanıcı özet sıralamasından düşer", async () => {
+    const testHarness = harness({ [MERT_ID]: ["pulse"] });
+    const ali = await login(testHarness, "ali.veli");
+    const mert = await login(testHarness, "mert.ikinci");
+    const summaryFor = async (headers: Record<string, string>) => {
+      const response = await testHarness.app.request("/me/gamification/pulse", { headers });
+      return ((await response.json()) as { data: { leaderboard: { rank: number; total: number } } }).data.leaderboard;
+    };
+    expect(await summaryFor(ali.headers)).toEqual({ rank: 2, total: 2 });
+    await testHarness.app.request("/me/preferences", {
+      method: "PATCH",
+      headers: { ...ali.headers, "content-type": "application/json" },
+      body: JSON.stringify({ leaderboardVisible: false }),
+    });
+    expect(await summaryFor(mert.headers)).toEqual({ rank: 1, total: 1 });
+    // Anonim izleyenin kendi sırası yoktur: rank = total + 1.
+    expect(await summaryFor(ali.headers)).toEqual({ rank: 2, total: 1 });
   });
 
   it("gövde katı şemadır; bilinmeyen alan 400 döner", async () => {

@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { PulseLeaderboardView } from "../../packages/sim-pulse/src/gamification/repo";
 import {
-  PULSE_ANONYMOUS_LABEL,
   createMemoryGamiRepo,
   emptyPulseGamiState,
 } from "../../packages/sim-pulse/src/gamification/repo";
@@ -81,7 +80,7 @@ describe("Liderlik görünümü", () => {
     isDemo: true,
     rows: [
       { id: "demo-01", displayName: "Deniz Kaya", isMe: false, isPublic: true, cohort: 5, periodScore: 90, attemptsCount: 3, reachedAt: NOW.toISOString(), totalXp: 800, level: 4, rank: 1 },
-      { id: "demo-02", displayName: PULSE_ANONYMOUS_LABEL, isMe: false, isPublic: false, cohort: 3, periodScore: 70, attemptsCount: 2, reachedAt: NOW.toISOString(), totalXp: 400, level: 3, rank: null },
+      { id: "demo-02", displayName: "Ayşe Yıldız", isMe: false, isPublic: true, cohort: 3, periodScore: 70, attemptsCount: 2, reachedAt: NOW.toISOString(), totalXp: 400, level: 3, rank: null },
       { id: "me", displayName: "<img src=x onerror=alert(1)>", isMe: true, isPublic: true, cohort: null, periodScore: 85, attemptsCount: 2, reachedAt: NOW.toISOString(), totalXp: 300, level: 2, rank: 2 },
     ],
   };

@@ -76,7 +76,6 @@ export type { PulseModeContent } from "./data/content";
 export { buildAttemptRecord, rhythmStreakAfter } from "./gamification/attempt";
 export type { PulseAttemptInput, PulseAttemptRecord, PulseDomain, PulseExtra } from "./gamification/attempt";
 export {
-  PULSE_ANONYMOUS_LABEL,
   PULSE_DEMO_PEERS,
   PULSE_GAMI_MAX_ATTEMPTS,
   PULSE_GAMI_STORAGE_KEY,

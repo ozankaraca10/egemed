@@ -2,9 +2,6 @@ import { DEFAULT_RULES, periodRangeTr, periodScore, rankRows, type Period } from
 import type { Cohort, CohortFilter } from "@egemed/gamification-core";
 import type { SimId } from "@egemed/contracts";
 
-/** Liderlik tablosunda tam ad/e-posta yerine gösterilen anonim etiket. */
-export const ANONYMOUS_LEADERBOARD_LABEL = "Anonim öğrenci";
-
 export interface LeaderboardPeerSeed {
   readonly userId: string;
   readonly displayName: string;
@@ -55,19 +52,19 @@ export function cohortFromUnitCode(code: string | null | undefined): Cohort | nu
   return null;
 }
 
+/**
+ * T295 (depo sahibi kararı, 1 Eki 2026): anonim satır yoktur. Sıralamada
+ * görünmemeyi seçen (`public=false`) ya da adı çözülemeyen kullanıcı listeye
+ * hiç girmez; bu yüzden `null` döner ve çağıran satırı atlar.
+ * E-posta/kullanıcı adı asla dönmez.
+ */
 export function resolveLeaderboardDisplayName(input: {
   readonly displayName: string;
   readonly isPublic: boolean;
-}): { readonly displayName: string; readonly isPublic: boolean } {
-  if (!input.isPublic) {
-    return { displayName: ANONYMOUS_LEADERBOARD_LABEL, isPublic: false };
-  }
-  // Depo sahibi kararı (30 Eylül 2026): tabloda kalmayı seçen (çekilmeyen) öğrenci
-  // tam adıyla görünür; çekilen anonimdir. E-posta/kullanıcı adı asla dönmez.
+}): { readonly displayName: string; readonly isPublic: boolean } | null {
+  if (!input.isPublic) return null;
   const formatted = formatLmsDisplayName(input.displayName);
-  if (formatted.length === 0) {
-    return { displayName: ANONYMOUS_LEADERBOARD_LABEL, isPublic: false };
-  }
+  if (formatted.length === 0) return null;
   return { displayName: formatted, isPublic: true };
 }
 
@@ -105,6 +102,11 @@ function periodScoreForAttempts(
   };
 }
 
+/**
+ * T295: anonim (sıralamada görünmemeyi seçmiş) kullanıcı HİÇBİR liderlik
+ * listesinde satır olarak yer almaz; adı çözülemeyen satır da üretilmez.
+ * Sıra numaraları kalan satırlar üzerinden hesaplandığı için boşluk oluşmaz.
+ */
 export function buildLeaderboardRows(input: {
   readonly viewerUserId: string;
   readonly peers: readonly LeaderboardPeerSeed[];
@@ -131,6 +133,7 @@ export function buildLeaderboardRows(input: {
       displayName: peer.displayName,
       isPublic: peer.public ?? true,
     });
+    if (visibility === null) continue;
     drafts.push({
       userId: peer.userId,
       displayName: visibility.displayName,

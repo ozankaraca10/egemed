@@ -51,7 +51,10 @@ import type { CompetitionBansRepo } from "../integrity/bans";
  * `xp` kodunun toplamıdır; `targetXp` veri yolunun politika varsayılanıdır
  * (E3 §d örneğiyle aynı: 300). Profil satırı olmayan kullanıcı için özet
  * sıfırlanır (xp 0, seviye 1); liderlik sıralamasında yer almayan kullanıcı
- * `rank = total + 1` ile raporlanır.
+ * `rank = total + 1` ile raporlanır. T295 (1 Eki 2026): anonim
+ * (`users.leaderboard_visible = false`) kullanıcı hiçbir liderlik listesinde
+ * satır olarak yer almaz — izleyenin kendisi anonimse de kendi satırını görmez;
+ * sıra numaraları anonimler çıkarıldıktan sonra hesaplanır.
  */
 
 /** Haftalık XP hedefi; oyunlaştırma kuralları `gamification-core` kararıdır. */
@@ -370,8 +373,20 @@ export function createPgGamificationRepo(db: GamiDb): GamificationRepo {
     async getSummary(query) {
       // Profil yoksa bile kurum+sim liderlik toplamı dönmelidir; bu yüzden
       // profil satırı `left join` ile okunur.
+      // T295: anonimler (leaderboard_visible=false) sıralamaya hiç girmez;
+      // görünümün rank'ı onları saydığı için sıra numarası görünür satırlar
+      // üzerinden yeniden numaralanır (boşluk kalmaz). Anonim izleyenin kendi
+      // sırası yoktur: `user_rank` null kalır, `rank = total + 1` raporlanır.
       const profileResult = await db.query(
-        `with board as (select count(*)::int as total, max(case when l.user_id = $1 then l.rank end)::int as user_rank from gami_leaderboard l where l.institution_id = $2 and l.sim_id = $3)
+        `with visible as (
+           select l.user_id, row_number() over (order by l.rank) as rank
+           from gami_leaderboard l
+           join users u on u.id = l.user_id
+           where l.institution_id = $2 and l.sim_id = $3 and u.leaderboard_visible
+         ), board as (
+           select (select count(*)::int from visible) as total,
+                  (select max(rank)::int from visible where user_id = $1) as user_rank
+         )
          select p.xp, p.level, p.streak_current, p.streak_best, p.streak_last_date::text as streak_last_date, board.total, board.user_rank
          from board left join gami_profiles p on p.user_id = $1 and p.sim_id = $3`,
         [query.userId, query.institutionId, query.simId],
@@ -571,17 +586,19 @@ export function createPgGamificationRepo(db: GamiDb): GamificationRepo {
     },
 
     async getLeaderboard(query) {
+      // T295: anonimler (leaderboard_visible=false) izleyenin kendisi olsa bile
+      // listeye girmez; sıralama yalnız görünür satırlar üzerinden kurulur.
       const rows = await db.query(
-        `select u.id as user_id, u.display_name, u.leaderboard_visible, unit.code as unit_code, p.xp, p.level,
+        `select u.id as user_id, u.display_name, unit.code as unit_code, p.xp, p.level,
                 a.finished_at, a.score
          from gami_profiles p
          join users u on u.id = p.user_id
          left join units unit on unit.id = u.unit_id and unit.deleted_at is null
          left join gami_attempts a on a.user_id = p.user_id and a.sim_id = p.sim_id and a.mode = 'assessment'
          where u.institution_id = $1 and p.sim_id = $2 and u.status = 'active' and u.deleted_at is null
-           and (u.leaderboard_visible or u.id = $3)
+           and u.leaderboard_visible
            and not exists (select 1 from user_roles r where r.user_id = u.id and r.role in ('ogretim_uyesi', 'uzmanlik_ogrencisi'))`,
-        [query.institutionId, query.simId, query.userId],
+        [query.institutionId, query.simId],
       );
       return assembleLeaderboardRecord(query, rows.rows as readonly PgLeaderboardSourceRow[]);
     },
@@ -668,7 +685,6 @@ async function awardPgBadges(db: GamiDb, target: { readonly userId: string; read
 interface PgLeaderboardSourceRow {
   readonly user_id: string;
   readonly display_name: string;
-  readonly leaderboard_visible?: boolean;
   readonly unit_code: string | null;
   readonly xp: number;
   readonly level: number;
@@ -939,10 +955,16 @@ export function createMemoryGamificationRepo(
   const repo: GamificationRepo = {
     async getSummary(query) {
       const profile = profiles.get(profileKey(query.userId, query.simId));
+      // T295: anonimler (tercih ya da profil) sıralamaya girmez; sıra numarası
+      // yalnız görünür satırlar üzerinden hesaplanır. Anonim izleyenin kendi
+      // sırası yoktur → `rank = total + 1`.
       const peers = [...profiles.values()]
         .filter(
           (candidate) =>
-            candidate.institutionId === query.institutionId && candidate.simId === query.simId,
+            candidate.institutionId === query.institutionId &&
+            candidate.simId === query.simId &&
+            candidate.public &&
+            !hiddenFromLeaderboard.has(candidate.userId),
         )
         .sort((a, b) => b.xp - a.xp || a.updatedAt - b.updatedAt);
       const position = peers.findIndex(
@@ -1144,12 +1166,14 @@ export function createMemoryGamificationRepo(
     },
 
     async getLeaderboard(query) {
+      // T295: anonimler izleyenin kendisi olsa bile listeye girmez.
       const peers = [...profiles.values()]
         .filter(
           (profile) =>
             profile.institutionId === query.institutionId &&
             profile.simId === query.simId &&
-            (!hiddenFromLeaderboard.has(profile.userId) || profile.userId === query.userId),
+            profile.public &&
+            !hiddenFromLeaderboard.has(profile.userId),
         )
         .map(
           (profile): LeaderboardPeerSeed => ({

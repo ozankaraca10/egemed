@@ -231,6 +231,8 @@ where users.status = 'active' and users.deleted_at is null
 `users.leaderboard_visible = false` olan kullanıcılar bu görünümde filtrelenmez
 (görünürlük API katmanında uygulanır, bkz. `apps/api/src/me/leaderboard.ts` — kod
 okuma kapsamı dışında bırakıldı, yalnız migration'daki view koda dayanır).
+T295 (1 Eki 2026): API anonimi izleyenin kendisi olsa bile listeye almaz ve özet
+sıralamasını görünür satırlar üzerinden yeniden numaralar (boşluksuz).
 
 ## 3. Sim oturumları ve Meydan Okuma
 

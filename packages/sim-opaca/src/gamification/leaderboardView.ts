@@ -87,8 +87,6 @@ export function meRewardStatus(
     const left = reward.eligibility.minAssessments - me.attemptsCount;
     return { tone: "gray", text: `Uygunluk için bu ay ${left} değerlendirme daha tamamla`, action: "assess" };
   }
-  if (me.reason === "private_profile")
-    return { tone: "gray", text: "Ödüle aday olmak için sıralamada adınla görünmelisin", action: "privacy" };
   if (me.reason === "cohort") {
     const c = reward.eligibility.cohorts;
     return { tone: "gray", text: `Bu ödül Dönem ${Math.min(...c)}–${Math.max(...c)} öğrencilerine açıktır` };

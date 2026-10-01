@@ -454,8 +454,8 @@ if (databaseUrl === "") {
       });
     });
 
-    describe("liderlik katılım tercihi (T100)", () => {
-      it("setPreferences false: başkasının toplamı 1 azalır; kişi kendi satırını görür", async () => {
+    describe("liderlik katılım tercihi (T100, T295)", () => {
+      it("setPreferences false: kişi başkasının listesinde de kendi listesinde de satır olarak yoktur", async () => {
         await seedProfiles();
         expect(await repo().getPreferences(ALI_ID)).toEqual({ leaderboardVisible: true });
 
@@ -470,12 +470,14 @@ if (databaseUrl === "") {
         const after = await repo().getLeaderboard(leaderboardQuery(MERT_ID));
         expect(after.total).toBe(before.total - 1);
         const names = after.rows.map((row) => row.displayName);
-        expect(names).not.toContain("AV");
-        expect(names).toContain("Mİ");
+        expect(names).not.toContain("Ali Veli");
+        expect(names).toContain("Mert İkinci");
 
+        // T295: anonim izleyen kendi satırını görmez; yalnız akranları kalır.
         const own = await repo().getLeaderboard(leaderboardQuery(ALI_ID));
-        expect(own.total).toBe(3);
-        expect(own.rows.some((row) => row.isMe)).toBe(true);
+        expect(own.total).toBe(2);
+        expect(own.rows.some((row) => row.isMe)).toBe(false);
+        expect(own.rows.map((row) => row.displayName).sort()).toEqual(["Bora Üçüncü", "Mert İkinci"]);
 
         await repo().setPreferences(ALI_ID, { leaderboardVisible: true }, FIXED_NOW);
         expect((await repo().getLeaderboard(leaderboardQuery(MERT_ID))).total).toBe(3);

@@ -257,8 +257,9 @@ kılavuz hukuki tavsiye değildir. Uygulama notları:
 - Yedekler kişisel veri içerir: erişimi sınırlı, şifreli ve süreli tutulur;
   imha kaydı tutulur.
 - Liderlik tablosu görünürlüğü kullanıcı tercihidir (`users.leaderboard_visible`,
-  migration 006): çıkan kullanıcı başkalarının listelerinde görünmez, kendi
-  satırını görür; tercih üç simde ortaktır ve yedeklerde de bulunur.
+  migration 006): çıkan kullanıcı hiçbir liderlik listesinde satır olarak görünmez
+  (T295; kendi XP/İlerlemem verisi etkilenmez); tercih üç simde ortaktır ve
+  yedeklerde de bulunur.
 - Silme/anonimleştirme akışı (yumuşak silme → erişim kesme → saklama
   penceresi → anonimleştirme) `docs/specs/E3-kullanici-yonetimi.md`
   ve ADR-007'de tanımlıdır; süreler insan kararıdır.

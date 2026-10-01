@@ -84,6 +84,20 @@ describe("liderlik görünürlüğü", () => {
     expect(html).toContain('checked=""');
   });
 
+  // T295: anonim izleyene satır yerine bilgi notu; tercih anahtarı yanında görünür.
+  it("kapalıyken sıralamada görünmediğini söyleyen bilgi notu çizilir", () => {
+    const html = renderToStaticMarkup(
+      createElement(LeaderboardVisibilityControl, {
+        error: false,
+        onToggle: () => undefined,
+        pending: false,
+        visible: false,
+      }),
+    );
+    expect(html).toContain(t("home.progress.leaderboardVisible.hiddenNote"));
+    expect(html).not.toContain(t("home.progress.leaderboardVisible.hint"));
+  });
+
   it("kayıt hatasında önceki durum geri gelir", async () => {
     const failed = await commitLeaderboardVisibility(true, false, () => Promise.reject(new Error("fail")));
     expect(failed).toEqual({ failed: true, visible: true });

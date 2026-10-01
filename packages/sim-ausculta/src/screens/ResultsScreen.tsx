@@ -183,7 +183,7 @@ export function ResultsScreen({ embedded = false, env = NOOP_RESULTS_ENV, reposi
     const daysLeft = Math.ceil((endOfMonthTr(at).getTime() + 1 - at.getTime()) / 86_400_000);
     const period = rewards?.current || daysLeft < 7 ? "month" : "week";
     const ranked = state.mode === "assessment"
-      ? localLeaderboardRows(repository.snapshot().attempts, AUSCULTA_RULES, at, period, "all", { public: false, displayName: null, cohort: null })
+      ? localLeaderboardRows(repository.snapshot().attempts, AUSCULTA_RULES, at, period, "all", { public: true, displayName: null, cohort: null })
       : null;
     const me = ranked?.find((row) => row.isMe);
     return auscultaSessionGains({

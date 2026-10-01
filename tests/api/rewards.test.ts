@@ -5,7 +5,7 @@ import {
   meRewardsOverviewResponseSchema,
 } from "../../packages/contracts/src/index";
 import { monthEndTr } from "../../apps/api/src/rewards";
-import { ALI_ID, FIXED_NOW, INSTITUTION_ID, UNIT_CODE, createAdminHarness, login, type AdminHarness } from "./admin-harness";
+import { ALI_ID, FIXED_NOW, INSTITUTION_ID, MERT_ID, UNIT_CODE, createAdminHarness, login, type AdminHarness } from "./admin-harness";
 
 // Aylık ödüller (26 Eyl 2026): admin sim × ay ödülünü yönetir, ay kapanınca
 // kazananları kesinleştirir; öğrenci kendi siminin ödülünü ve kazananları okur.
@@ -83,6 +83,43 @@ describe("admin aylık ödül yönetimi", () => {
     const body = adminRewardListResponseSchema.parse(await list.json());
     expect(body.data).toHaveLength(1);
     expect(body.data[0]).toMatchObject({ simId: "pulse", month: "2023-11", winnersCount: 5, finalizedAt: null });
+  });
+
+  // T295 (1 Eki 2026): anonim öğrenci liderlikte satır olmadığı için kesinleşen
+  // kazanan listesine de giremez; sıradaki uygun kişi onun yerini alır.
+  it("anonim öğrenci kesinleşen kazanan listesine girmez", async () => {
+    const scored = (userId: string, scores: readonly number[]) =>
+      scores.map((score, index) => ({
+        id: `00000000-0000-4000-8000-0000000001${userId === MERT_ID ? "9" : "8"}${index}`,
+        userId,
+        simId: "pulse" as const,
+        attemptNo: index + 1,
+        startedAt: FIXED_NOW - (index + 2) * HOUR,
+        finishedAt: FIXED_NOW - (index + 1) * HOUR,
+        score,
+        maxScore: 100,
+        passed: true,
+        xp: 120,
+        summary: { score },
+      }));
+    const h = createAdminHarness({
+      gamification: {
+        hiddenFromLeaderboard: [MERT_ID],
+        profiles: [
+          { userId: ALI_ID, institutionId: INSTITUTION_ID, simId: "pulse" as const, xp: 300, level: 2, displayName: "Ali Veli", unitCode: UNIT_CODE, updatedAt: FIXED_NOW - HOUR },
+          { userId: MERT_ID, institutionId: INSTITUTION_ID, simId: "pulse" as const, xp: 900, level: 5, displayName: "Mert İkinci", unitCode: UNIT_CODE, updatedAt: FIXED_NOW - HOUR },
+        ],
+        attempts: [...scored(ALI_ID, [88, 90, 86]), ...scored(MERT_ID, [97, 96, 95])],
+      },
+    });
+    const admin = await login(h, "ornek.yonetici");
+    await put(h, admin.headers, "/admin/rewards/pulse/2023-11", REWARD);
+    h.advance(20 * DAY);
+    const fresh = await login(h, "ornek.yonetici");
+    const finalized = await h.app.request("/admin/rewards/pulse/2023-11/finalize", { method: "POST", headers: fresh.headers });
+    expect(finalized.status).toBe(200);
+    const saved = (await finalized.json()) as { data: { winners: { month: string; rank: number; displayName: string; score: number; isMe: boolean }[] } };
+    expect(saved.data.winners).toEqual([{ month: "2023-11", rank: 1, displayName: "Ali Veli", score: 88, isMe: false }]);
   });
 
   it("açık ay kesinleştirilemez; kapanan ay sıralamadan kazanan yazar ve kilitlenir", async () => {

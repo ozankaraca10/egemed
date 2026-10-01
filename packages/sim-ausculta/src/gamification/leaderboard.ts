@@ -1,6 +1,10 @@
 import { attemptXp, levelForXp, periodRangeTr, periodScore, rankRows, type AttemptRecord, type Cohort, type CohortFilter, type GamiLeaderboardRow, type GamiRules, type Period } from "@egemed/gamification-core";
 
-/** Yerel depo sıralaması: yalnız oturum sahibi. Sunucu yokken demo bandı sayfada kalır. */
+/**
+ * Yerel depo sıralaması: yalnız oturum sahibi. Sunucu yokken demo bandı sayfada kalır.
+ * T295 (1 Eki 2026): görünmemeyi seçen (`public=false`) satır listelenmez; kendi
+ * XP/sıra hesabı çağıranda kalır (oturum kazanımı satır istemez, sıra okur).
+ */
 export function localLeaderboardRows<TDomain extends string, TExtra>(
   attempts: readonly AttemptRecord<TDomain, TExtra>[],
   rules: GamiRules,
@@ -17,7 +21,7 @@ export function localLeaderboardRows<TDomain extends string, TExtra>(
   const xp = attempts.reduce((sum, item) => sum + attemptXp(item, rules), 0);
   const row: GamiLeaderboardRow = {
     id: "me",
-    displayName: profile.public ? profile.displayName ?? "Sen" : "Anonim öğrenci",
+    displayName: profile.displayName ?? "Sen",
     isMe: true,
     isPublic: profile.public,
     cohort: profile.cohort,
@@ -28,6 +32,6 @@ export function localLeaderboardRows<TDomain extends string, TExtra>(
     level: levelForXp(xp, rules).level,
     rank: null,
   };
-  const visible = cohort === "all" || profile.cohort === cohort;
+  const visible = profile.public && (cohort === "all" || profile.cohort === cohort);
   return rankRows(visible ? [row] : [], rules);
 }
