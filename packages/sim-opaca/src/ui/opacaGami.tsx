@@ -30,7 +30,7 @@ export function toGamiBadge(v: OpacaBadgeView): GamiBadgeModel {
     rule: v.rule,
     studyKey: v.studyKey,
     iconName: v.def.icon ?? "Star",
-    lockedNote: v.def.id === "podium" ? "Sunucu bağlantısı gelince kazanılabilir (şu an demo sıralama)." : null,
+    lockedNote: null,
     assessmentOnly: v.def.category === "topic" || v.def.category === "skill",
   };
 }
