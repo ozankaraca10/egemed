@@ -7,7 +7,7 @@ import {
   type PulsePublicCase,
 } from "../../packages/contracts/src/index";
 import { pulse } from "../../packages/assessment-bank/src/index";
-import { createAdminHarness, login, type AdminHarness, type Login } from "./admin-harness";
+import { ALI_ID, FIXED_NOW, createAdminHarness, login, type AdminHarness, type Login } from "./admin-harness";
 
 // A3.2 (ADR-009): Pulse sunucu vaka oturumu — anahtarsız madde, jetonlu seçenekler,
 // uygulamada anında / değerlendirmede sonda geri bildirim; ipucu, ses ve görüntü ucu yok.
@@ -15,7 +15,10 @@ import { createAdminHarness, login, type AdminHarness, type Login } from "./admi
 const TELEMETRY = { visits: {}, order: [], headChanges: 0, headUse: { bell: 0, diaphragm: 0 }, replayCount: 0 };
 
 function harness(): AdminHarness {
-  return createAdminHarness();
+  const h = createAdminHarness();
+  // Öğrenme kilidi (T290): bu dosya oturum akışını test eder, kilidi değil; Pulse tamamlama kaydı baştan eklenir.
+  h.learn.records.set(`${ALI_ID}:pulse`, { userId: ALI_ID, simId: "pulse", completedAt: FIXED_NOW, contentVersion: "test.1" });
+  return h;
 }
 
 async function call(h: AdminHarness, who: Login, method: string, path: string, body?: unknown) {

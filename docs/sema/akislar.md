@@ -21,6 +21,7 @@ sequenceDiagram
 
   Sim->>API: POST /me/sims/:simId/sessions {mode: "assessment"}
   API->>API: sim erişimi kontrolü (meActor.simAccess)
+  API->>API: öğrenme kilidi (T290): gamified + admin değil ⇒ hasCompletedLearn(simId)?
   API->>Bank: selectCaseIds("assessment", random)
   API->>DB: sim_sessions INSERT (state jsonb: case_ids, shuffle, boş yanıtlar)
   API-->>Sim: 201 {sessionId, caseCount, süre sınırları} (cevap anahtarı YOK)
@@ -53,8 +54,13 @@ sequenceDiagram
 ```
 
 Notlar:
-- `POST /me/sims/:simId/sessions` API ucu öğrenme kilidini kontrol ETMEZ
-  (bkz. `urun.md` "Önemli bulgu"); yalnız `sim_access` kontrol edilir.
+- `POST /me/sims/:simId/sessions` API ucu öğrenme kilidini de kontrol EDER
+  (T290, 1 Eki 2026 düzeltildi; bkz. `urun.md`): `sim_access`'ten sonra,
+  `actor.gamified` ise ve aktör admin değilse (rol `getMeContext` ile okunur)
+  ilgili simin tamamlama kaydı yoksa 403 `forbidden` + `learn_required`
+  (Meydan Okuma ile aynı ortak yardımcı, `apps/api/src/me/learn.ts`
+  `hasCompletedLearn`/`learnRequiredError`). `ogretim_uyesi`/`uzmanlik_ogrencisi`
+  zaten `gamified=false` ile muaf; admin ayrıca rol kontrolüyle muaftır.
 - Uygulama modunda (`practice`) `answer` çağrısı hemen `result` döner
   (anında geri bildirim); değerlendirme (`assessment`) ve düello (`challenge`)
   modlarında sonuç yalnız `finish`te açılır.
