@@ -90,7 +90,7 @@ const bump = (x: number, w: number): number => (x > 0 && x < w ? Math.sin((Math.
 const mix = (t: number): string => `rgb(${MYO.map((v, i) => Math.round(v + ((ACT[i] ?? v) - v) * t)).join(",")})`;
 
 /** Ventrikül sistolü (0–1): R + 30 ms'de başlar, RR kısaldıkça hızlanır. */
-export function ventricularSystole(sinceR: number, rr: number): number {
+function ventricularSystole(sinceR: number, rr: number): number {
   const up = Math.min(0.22, rr * 0.3);
   const down = Math.min(0.2, rr * 0.28);
   if (sinceR < 0.03) return 0;
@@ -99,7 +99,7 @@ export function ventricularSystole(sinceR: number, rr: number): number {
   return 0;
 }
 
-export interface PulseHeartFrame {
+interface PulseHeartFrame {
   /** Kalbin altında gösterilen evre etiketi. */
   readonly label: string;
 }

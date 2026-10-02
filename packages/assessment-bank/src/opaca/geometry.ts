@@ -3,7 +3,7 @@ import type { Box, ImageRecord } from "./types";
 /** SUNUCU TARAFI kopya (A2.1, ADR-009); kaynak packages/sim-opaca/src/core/geometry.ts.
  *  Görüntü koordinat yardımcıları — tamamı normalize (0–1) uzayda çalışır, DOM'a bağımlı değildir. */
 
-export interface Point {
+interface Point {
   x: number;
   y: number;
 }
@@ -14,9 +14,9 @@ function inBox(p: Point, b: Box): boolean {
 
 /** İsabet ölçütü: merkez kutunun içinde OLMALI ve merkezin kutu merkezine uzaklığı,
  *  kutunun yarı köşegeninin %60'ını AŞMAMALI (sim ile birebir aynı davranış). */
-export const MARK_CENTER_DISTANCE_FRACTION = 0.6;
+const MARK_CENTER_DISTANCE_FRACTION = 0.6;
 
-export function markHitsBox(p: Point, b: Box): boolean {
+function markHitsBox(p: Point, b: Box): boolean {
   if (!inBox(p, b)) return false;
   const cx = b.x + b.w / 2;
   const cy = b.y + b.h / 2;

@@ -5,7 +5,7 @@ import { DEFAULT_WEIGHTS } from "./types";
  *  Deterministik skor hesaplama (§24). Tek hata için çifte ceza yok: her alan bağımsız ölçülür. */
 
 export const MASTERY_THRESHOLD = 80;
-export const HINT_PENALTY_PRACTICE = 5;
+const HINT_PENALTY_PRACTICE = 5;
 
 /** Tek bir vakanın sonucunu hesaplar.
  *  `presentedPoints` verilirse teknik rubriği yalnız bu noktaları ölçer (T233: izinli

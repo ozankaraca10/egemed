@@ -48,7 +48,7 @@ interface Controller {
   persist?(): void;
 }
 
-export interface PulseLearnWorkspaceOptions {
+interface PulseLearnWorkspaceOptions {
   /** `/sims/pulse/` gibi; sonda `/`. */
   readonly assetBase: string;
   /** Test ve sunucusuz kurulum için kayıt yükleyici. */
@@ -626,15 +626,4 @@ export function attachPulseLearnWorkspace(handle: PulseRuntimeHandle, options: P
     style.remove();
     simView.classList.remove("pl-active");
   };
-}
-
-/** Testler için: paternlerin listesi ve kilit sayısı. */
-export function pulseLearnPatterns(): { readonly all: number; readonly ready: number; readonly required: number } {
-  const ready = PATTERNS.filter((p) => p.status === "ready" && p.refs.length > 0);
-  return { all: PATTERNS.length, ready: ready.length, required: ready.filter((p) => PULSE_VENDOR_MODE[p.key] !== undefined).length };
-}
-
-/** Manifestteki patern kaydı (testler ve kabuk özetleri için). */
-export function pulseLearnPattern(key: string): ManifestPattern | undefined {
-  return PATTERNS.find((p) => p.key === key);
 }

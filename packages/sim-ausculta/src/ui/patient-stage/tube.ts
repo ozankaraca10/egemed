@@ -59,7 +59,7 @@ export function tubeTip(center: TubePoint, radius = TUBE_CHESTPIECE_RADIUS): Tub
 }
 
 /** T307: tüp, T228 temel eğrisinin bu katı uzunluktadır (gerçek stetoskop tüpü ~2×). */
-export const TUBE_LENGTH_FACTOR = 2;
+const TUBE_LENGTH_FACTOR = 2;
 
 interface Cubic {
   readonly c1: TubePoint;

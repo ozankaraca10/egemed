@@ -81,7 +81,7 @@ function lastRhythmStreak(state: PulseGamiState): number {
   return 0;
 }
 
-export interface PulseGamiBridgeOptions {
+interface PulseGamiBridgeOptions {
   readonly repo: PulseGamiRepo;
   readonly now: () => number;
   /**

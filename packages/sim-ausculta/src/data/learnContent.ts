@@ -4,7 +4,7 @@ import type { LibItem } from "./library";
  *  Crossref'te doğrulandı (1–2 Eki 2026). Yeni konular için metin elle yazıldı;
  *  diğerleri kütüphane kaydından türetilir. */
 
-export interface LearnRef {
+interface LearnRef {
   readonly label: string;
   readonly title: string;
   readonly doi: string;
@@ -20,7 +20,7 @@ export const LEARN_REFS: Readonly<Record<string, LearnRef>> = {
 /** Konu yanında yalnız "Acil" etiketi gösterilir (depo sahibi kararı). */
 export const URGENT_KEYS: ReadonlySet<string> = new Set(["heart.atrial_fibrillation", "heart.av_block", "lung.stridor"]);
 
-export interface LearnAbout {
+interface LearnAbout {
   readonly crit: string;
   readonly look: readonly string[];
   readonly mech: string;

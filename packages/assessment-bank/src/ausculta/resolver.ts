@@ -4,22 +4,16 @@ import { externalManifest, soundsManifest } from "./data";
 /** Kayıt çözümleyici (§2 konum-duyarlı ses, §14). Ses atamalarını deterministik olarak
  *  sounds.json kayıtlarına eşler. Varsayılan sıralama: kaynak konum eşleşmesi > cinsiyet "any" > id. */
 
-export const manifest = soundsManifest as unknown as SoundsManifest;
+const manifest = soundsManifest as unknown as SoundsManifest;
 /** Birincil (HLS-CMDS) + envanter kayıtları (CirCor — pediatrik, ODC-BY 1.0; KAUH v3 — gerçek hasta
  *  posterior, CC BY 4.0; SPRSound — pediatrik posterior, CC BY 4.0). CirCor ve SPRSound kayıtları
  *  yalnızca açıkça soundId ile hedeflenir; KAUH posterior kayıtları ise simulationLocation
  *  eşleşmesiyle (nokta bazlı) devreye girer. */
-export const RECORDS: SoundRecord[] = [
+const RECORDS: SoundRecord[] = [
   ...manifest.records,
   ...((externalManifest as unknown as { records?: SoundRecord[] }).records ?? []),
 ];
-export const EXTERNAL_RECORDS: SoundRecord[] = RECORDS.filter((r) => r.sourceDataset !== "hls-cmds-v3");
-
 const byId = new Map(RECORDS.map((r) => [r.id, r]));
-
-export function getSound(id: string): SoundRecord | undefined {
-  return byId.get(id);
-}
 
 const POSTERIOR_TO_ANTERIOR: Record<string, string> = {
   lung_right_upper_posterior: "lung_right_upper_anterior",
@@ -35,7 +29,7 @@ const POSTERIOR_TO_ANTERIOR: Record<string, string> = {
  *  soundId ile hedeflenir; pediatrik SPRSound kayıtları yetişkin vakalara ASLA sızmaz (T234). */
 const AUTO_MATCH_DATASETS = new Set(["hls-cmds-v3", "kauh-v3"]);
 
-export function resolveAssignment(a: SoundAssignment): SoundRecord | null {
+function resolveAssignment(a: SoundAssignment): SoundRecord | null {
   if (a.soundId) return byId.get(a.soundId) ?? null;
   const matches = RECORDS.filter(
     (r) =>
@@ -88,7 +82,7 @@ export function resolveAssignmentEx(a: SoundAssignment): {
   return { record: null };
 }
 
-export interface CaseSoundsResolution {
+interface CaseSoundsResolution {
   sounds: Record<string, SoundRecord | null>;
   /** pointId → kaydın gerçekten alındığı bölge (fallback durumunda dolu) */
   fallbacks: Record<string, string>;
@@ -110,19 +104,12 @@ export function resolveCaseSoundsEx(assignments: SoundAssignment[]): CaseSoundsR
   return { sounds, fallbacks, components };
 }
 
-/** Bir vaka için pointId → kayıt haritasını çözer. Eksikler `{pointId: null}`. */
-export function resolveCaseSounds(assignments: SoundAssignment[]): Record<string, SoundRecord | null> {
-  const out: Record<string, SoundRecord | null> = {};
-  for (const a of assignments) out[a.pointId] = resolveAssignment(a);
-  return out;
-}
-
 /** Kütüphanede konum eşleşmesiyle yer alabilen veri setleri: paket içi HLS-CMDS ve gerçek
  *  hastadan bölge etiketli posterior kayıtlar (KAUH v3). CirCor yalnız soundId ile hedeflenir. */
 const LIBRARY_LOCATION_DATASETS = new Set(["hls-cmds-v3", "kauh-v3"]);
 
 /** Öğrenme kütüphanesi sesi: kategori + akustik bulgu + tercihen odak noktası konumu. */
-export function resolveLibrarySound(category: string, finding: string, simLocation?: string): SoundRecord | null {
+function resolveLibrarySound(category: string, finding: string, simLocation?: string): SoundRecord | null {
   const pool = RECORDS.filter(
     (r) =>
       r.category === category &&
@@ -141,7 +128,7 @@ export function resolveLibrarySound(category: string, finding: string, simLocati
   return pool[0] ?? null;
 }
 
-export interface LibrarySoundResult {
+interface LibrarySoundResult {
   record: SoundRecord | null;
   /** Kayıt, istenen bölgede değil başka bir bölgeden alınmışsa kaynak bölge id'si */
   fallbackFrom?: string;
@@ -171,12 +158,6 @@ export function resolveLibrarySoundEx(category: string, finding: string, simLoca
   return { record: direct ?? null };
 }
 
-/** Sınıf başına mevcut (doğrulanmış) kayıt sayısı — UI "yok" gösterimi için. */
-export function availableCount(category: string, finding: string): number {
-  return RECORDS.filter((r) => r.category === category && r.acousticFinding === finding && r.validationStatus === "validated")
-    .length;
-}
-
 /** O7: değerlendirmede bildirimsiz posterior/fallback sunumu önlenir — kaydı gerçekten o
  *  bölgeden alınmamış (fallbackFrom ile bildirilen) noktalar değerlendirmede sunulmaz.
  *  Akciğer bileşeniyle çözülen posterior noktalar gerçek kayıt sayılır, dışlanmaz.
@@ -184,9 +165,4 @@ export function availableCount(category: string, finding: string): number {
 export function assessmentPointFilter(assignments: SoundAssignment[]): string[] {
   const { fallbacks } = resolveCaseSoundsEx(assignments);
   return assignments.map((a) => a.pointId).filter((id) => !fallbacks[id]);
-}
-
-/** Değerlendirme havuzu: yalnızca validated eşlemeli ve 'assessment' modlu vakalar (§19). */
-export function assessmentPool(cases: { modes: string[]; mappingValidation: string; clinicalDiagnosis: unknown }[]) {
-  return cases.filter((c) => c.modes.includes("assessment") && c.mappingValidation === "validated");
 }

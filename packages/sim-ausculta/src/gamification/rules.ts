@@ -3,7 +3,7 @@
 
 import { DEFAULT_RULES, type GamiRules } from "@egemed/gamification-core";
 
-export interface AuscultaBadgeRules {
+interface AuscultaBadgeRules {
   listenDiscipline: readonly [number, number, number];
   systematic: readonly [number, number, number];
   cardiacFoci: number;
@@ -21,7 +21,7 @@ export interface AuscultaBadgeRules {
   headChoice: number;
 }
 
-export interface AuscultaGamiRules extends GamiRules {
+interface AuscultaGamiRules extends GamiRules {
   badges: AuscultaBadgeRules;
 }
 

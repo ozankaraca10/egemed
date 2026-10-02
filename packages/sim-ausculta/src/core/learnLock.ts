@@ -26,7 +26,7 @@ export function exampleKey(key: string, index: number): string {
 }
 
 /** Konunun öğrenme örneği sayısı (sentetik + gerçek hastalar). */
-export function defaultExampleCount(key: string): number {
+function defaultExampleCount(key: string): number {
   return learnExamples(key).length;
 }
 

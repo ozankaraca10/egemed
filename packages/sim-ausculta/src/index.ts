@@ -301,7 +301,6 @@ export {
 export type {
   SimulationClock,
   SimulationListenerEnv,
-  SimulationPointerEvent,
   SimulationScreenEnv,
 } from "./screens/simulation/runtime";
 export {

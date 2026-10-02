@@ -31,7 +31,7 @@ const MARK_LABEL: Record<string, string> = {
   Ronküs: "Ronküs",
 };
 
-export interface LearnWaveProps {
+interface LearnWaveProps {
   readonly title: string;
   readonly meta: string;
   readonly wave: WaveView | null;

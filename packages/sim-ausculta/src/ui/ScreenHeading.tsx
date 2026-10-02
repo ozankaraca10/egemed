@@ -111,7 +111,7 @@ export function ScreenHeading({ className, id, children }: ScreenHeadingProps): 
   );
 }
 
-export interface SectionHeadingProps {
+interface SectionHeadingProps {
   readonly className?: string;
   readonly id?: string;
   readonly children: ReactNode;

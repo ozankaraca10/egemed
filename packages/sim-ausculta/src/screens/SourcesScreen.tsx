@@ -90,7 +90,7 @@ export interface SourcesScreenProps {
 }
 
 /** Eski Hakkında içeriği (mağazasız): sim içi Kaynaklar ekranı ve kabuğun `#/hakkinda` sayfası ortak kullanır. */
-export function AuscultaAboutContent(): JSX.Element {
+function AuscultaAboutContent(): JSX.Element {
   const inventoryById = new Map(data.inventory.map((item) => [item.id, item]));
   return (
     <>

@@ -12,7 +12,7 @@ import type { ModalEnv } from "./modal-env";
 
 const HIT = { minWidth: 44, minHeight: 44 } as const;
 
-export interface FooterProps {
+interface FooterProps {
   readonly embedded?: boolean;
 }
 
@@ -36,7 +36,7 @@ export function Footer({ embedded = false }: FooterProps): ReactNode {
   );
 }
 
-export interface EcgDecoProps {
+interface EcgDecoProps {
   readonly embedded?: boolean;
 }
 

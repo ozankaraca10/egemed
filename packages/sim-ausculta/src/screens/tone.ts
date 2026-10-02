@@ -1,12 +1,12 @@
 /** Nötr ses düzeyi kontrol tonu (kaynak StartScreen `playTone`). DOM ve `Date.now()` yok. */
 
-export interface ToneParam {
+interface ToneParam {
   value: number;
   setValueAtTime(value: number, time: number): void;
   linearRampToValueAtTime(value: number, time: number): void;
 }
 
-export interface VolumeToneNode {
+interface VolumeToneNode {
   connect(node: unknown): void;
 }
 
