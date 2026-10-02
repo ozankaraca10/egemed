@@ -5,14 +5,7 @@ import type { StethHead } from "../core/types";
 
 export type { StethHead };
 
-export interface HeadDsp {
-  /** Uygulanacak biquad zinciri; gerçek davranış: DSP her iki kafa (bell/diyafram) için de
-   *  her zaman uygulanır — kayıt hiçbir zaman bypass edilmez (engine.ts play()). */
-  highshelfDb: number;
-  lowshelfDb: number;
-}
-
-export interface HeadDspConfig {
+interface HeadDspConfig {
   lowshelfDb: number;
   lowshelfHz: number;
   highshelfDb: number;

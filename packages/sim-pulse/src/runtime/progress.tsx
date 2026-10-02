@@ -102,7 +102,7 @@ function localRows(attempts: readonly PulseAttemptRecord[], now: Date, period: P
   return rankRows(visible ? [row] : [], PULSE_RULES);
 }
 
-export interface PulseProgressActions {
+interface PulseProgressActions {
   /** Değerlendirmeye (kaynak sınav görünümü) geçer. */
   readonly onAssessment: () => void;
   /** İncelemeye (kaynak simülasyon görünümü) geçer. */
@@ -342,7 +342,7 @@ export function PulseProgressPage({
   );
 }
 
-export interface PulseProgressHandle {
+interface PulseProgressHandle {
   update(state: PulseGamiState, now: Date, tab?: GamiPageTab): void;
   dispose(): void;
 }

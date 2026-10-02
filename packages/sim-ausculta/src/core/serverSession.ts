@@ -9,7 +9,7 @@ import type { CaseDef, CaseResult, Question, SoundRecord } from "./types";
  */
 
 /** Sunucu vakası kimliği öneki (yerel vaka kimliğiyle karışmaz). */
-export const SERVER_CASE_PREFIX = "srv-";
+const SERVER_CASE_PREFIX = "srv-";
 /** Sunucu ses adresi işareti (SimModule `resolveAuscultaAssetUrl` aynen geçirir). */
 export const SESSION_AUDIO_PREFIX = "egemed-session:";
 /** Uygulamada ipucu var ama metni henüz istenmedi (araç çubuğu düğmesini göstermek için). */
@@ -66,10 +66,6 @@ export type ServerClientCase = CaseDef & {
 
 export function serverCaseId(index: number): string {
   return `${SERVER_CASE_PREFIX}${index}`;
-}
-
-export function isServerCaseId(id: string): boolean {
-  return id.startsWith(SERVER_CASE_PREFIX);
 }
 
 /** Anahtarsız vakayı ekranların beklediği `CaseDef` biçimine çevirir. */

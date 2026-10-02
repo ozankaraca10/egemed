@@ -29,7 +29,6 @@ import {
   bindDismissListeners,
   createNoopSimulationScreenEnv,
   rememberQuestionShown,
-  type SimulationPointerEvent,
   type SimulationScreenEnv,
 } from "./simulation/runtime";
 import { useSessions } from "../ui/ScreenHeading";
@@ -622,5 +621,3 @@ function KV({ k, v }: { k: string; v: string }): JSX.Element {
     </div>
   );
 }
-
-export type { SimulationPointerEvent };

@@ -16,7 +16,7 @@ export const ALL_CASES: readonly CaseDef[] = [
 ];
 
 const manifest = imagesJson as unknown as ImagesManifest;
-export const IMAGES: readonly ImageRecord[] = manifest.records ?? [];
+const IMAGES: readonly ImageRecord[] = manifest.records ?? [];
 const byId = new Map(IMAGES.map((record) => [record.id, record]));
 
 export function imageById(id: string | null | undefined): ImageRecord | undefined {

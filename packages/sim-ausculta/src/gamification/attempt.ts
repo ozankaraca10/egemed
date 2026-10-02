@@ -5,7 +5,7 @@ import { aggregateResults } from "../core/scoring";
 import type { CaseResult, ScoringWeights, SoundCategory } from "../core/types";
 import type { HeartTopic, LungTopic } from "./catalog";
 
-export type AuscultaDomain = keyof ScoringWeights;
+type AuscultaDomain = keyof ScoringWeights;
 
 export const CARDIAC_FOCI = ["cardiac_aortic", "cardiac_pulmonary", "cardiac_tricuspid", "cardiac_mitral"] as const;
 export const POSTERIOR_LUNG_POINTS = [
@@ -68,7 +68,7 @@ export interface AuscultaCompletedCase {
   headChoiceCorrect: number;
 }
 
-export interface AuscultaExtra {
+interface AuscultaExtra {
   listenDisciplineCases: number;
   systematicExams: number;
   cardiacFociExams: number;
@@ -80,9 +80,9 @@ export interface AuscultaExtra {
   headChoiceCorrect: number;
 }
 
-export type AuscultaAttemptRecord = AttemptRecord<AuscultaDomain, AuscultaExtra>;
+type AuscultaAttemptRecord = AttemptRecord<AuscultaDomain, AuscultaExtra>;
 
-export interface AuscultaAttemptInput {
+interface AuscultaAttemptInput {
   sessionId: string;
   mode: GamiMode;
   cases: readonly AuscultaCompletedCase[];

@@ -6,12 +6,12 @@
  * sınırlılık metni ve bankayla birebir eşit sayılar tutulur.
  */
 
-export interface PulseCurriculumPatternCount {
+interface PulseCurriculumPatternCount {
   readonly case: number;
   readonly quiz: number;
 }
 
-export interface PulseCurriculumData {
+interface PulseCurriculumData {
   readonly version: number;
   readonly sessionSize: number;
   readonly caseCount: number;

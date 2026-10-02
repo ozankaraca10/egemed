@@ -7,7 +7,7 @@ import { DEFAULT_WEIGHTS } from "./types";
  *  Deterministik skor hesaplama: tek hata için çifte ceza yok, her alan bağımsız ölçülür. */
 
 export const MASTERY_THRESHOLD = 80;
-export const HINT_PENALTY_PRACTICE = 5;
+const HINT_PENALTY_PRACTICE = 5;
 const STEP_ORDER = ["A", "B", "C", "D", "E"];
 
 /** Tek doğruluk kaynağı: seçmeli yanıt ya da lokalizasyon işareti doğru mu (sim `isAnswerCorrect`). */

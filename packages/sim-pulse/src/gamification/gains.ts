@@ -44,7 +44,7 @@ function toGamiBadge(view: BadgeView<PulseStats>): GamiBadgeModel {
   };
 }
 
-export interface PulseSessionGainsInput {
+interface PulseSessionGainsInput {
   /** Yazımdan sonraki durum (yeni deneme ve rozetler dahil). */
   readonly state: PulseGamiState;
   /** Yazımla yeni kazanılan rozet kimlikleri. */

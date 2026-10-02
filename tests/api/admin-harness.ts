@@ -36,7 +36,7 @@ import type { AuthMethod, Role, SimId, UserStatus } from "../../packages/contrac
 // sayaçlı kimlik üretimi. DB gerekmez; hiçbir test gerçek veri taşımaz.
 
 export const FIXED_NOW = 1_700_000_000_000;
-export const SEED_CREATED_AT = FIXED_NOW - 1000;
+const SEED_CREATED_AT = FIXED_NOW - 1000;
 export const INSTITUTION_ID = "00000000-0000-4000-8000-000000000010";
 export const OTHER_INSTITUTION_ID = "00000000-0000-4000-8000-000000000099";
 export const UNIT_ID = "00000000-0000-4000-8000-000000000020";
@@ -89,7 +89,7 @@ export const ADMIN_USER = user({
   roles: ["admin"],
   simAccess: ["pulse", "ausculta", "opaca"],
 });
-export const MERT = user({
+const MERT = user({
   id: MERT_ID,
   username: "mert.ikinci",
   email: "mert@example.invalid",
@@ -106,7 +106,7 @@ export const ALI = user({
   unitId: UNIT_ID,
   simAccess: ["pulse"],
 });
-export const BORA = user({
+const BORA = user({
   id: BORA_ID,
   username: "bora.kaya",
   email: "bora.kaya@example.invalid",
@@ -114,21 +114,21 @@ export const BORA = user({
   status: "suspended",
   simAccess: ["opaca"],
 });
-export const CEREN = user({
+const CEREN = user({
   id: CEREN_ID,
   username: "ceren.demir",
   email: "ceren.demir@example.invalid",
   displayName: "Ceren Demir",
   status: "invited",
 });
-export const EGE = user({
+const EGE = user({
   id: EGE_ID,
   username: "ege.olgun",
   email: "ege.olgun@example.invalid",
   displayName: "Ege Olgun",
   roles: [],
 });
-export const DERYA = user({
+const DERYA = user({
   id: DERYA_ID,
   username: "derya.uzak",
   email: "derya.uzak@example.invalid",
@@ -138,7 +138,7 @@ export const DERYA = user({
 
 /** Liste varsayılanı, T65 testleriyle aynı sırayı korur (alfabetik ad). */
 export const DEFAULT_USERS: readonly HarnessUser[] = [ADMIN_USER, MERT, ALI, BORA, CEREN, DERYA, EGE];
-export const UNITS = [
+const UNITS = [
   { id: UNIT_ID, institutionId: INSTITUTION_ID, code: UNIT_CODE, name: "3. Sınıf" },
 ];
 
@@ -294,7 +294,7 @@ interface CookieResponse {
   readonly headers: { getSetCookie(): string[] };
 }
 
-export function cookieValue(response: CookieResponse, name: string): string | undefined {
+function cookieValue(response: CookieResponse, name: string): string | undefined {
   const header = response.headers.getSetCookie().find((value) => value.startsWith(`${name}=`));
   return header === undefined ? undefined : header.slice(name.length + 1).split(";")[0];
 }

@@ -84,7 +84,7 @@ export interface QuestionViewSafety {
   readonly allowed: AuscultaView[];
 }
 
-export interface PublicCaseViewPlan extends QuestionViewSafety {
+interface PublicCaseViewPlan extends QuestionViewSafety {
   /** Public case'te gerçekten sunulacak noktalar (izinli görünüm süzgeci dahil). */
   readonly pointIds: string[];
 }

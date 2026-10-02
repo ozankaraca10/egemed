@@ -8,7 +8,7 @@
  */
 
 export const PULSE_ECG_FS = 250;
-export const PULSE_ECG_SAMPLES = 2500;
+const PULSE_ECG_SAMPLES = 2500;
 export const PULSE_ECG_LEADS = ["I", "II", "III", "aVR", "aVL", "aVF", "V1", "V2", "V3", "V4", "V5", "V6"] as const;
 
 export interface PulseEcgRecord {
@@ -53,7 +53,7 @@ function percentile(values: Float32Array, p: number): number {
  * yumuşatılır; eşiği aşan yerel tepeler 200 ms dirençli dönemle seçilir.
  * Çok derivasyonlu enerji tek derivasyondaki düşük genliğe karşı dayanıklıdır.
  */
-export function detectPulseRPeaks(leads: readonly Float32Array[], fs = PULSE_ECG_FS): number[] {
+function detectPulseRPeaks(leads: readonly Float32Array[], fs = PULSE_ECG_FS): number[] {
   const n = leads[0]?.length ?? 0;
   if (n < 3) return [];
   const slope = new Float32Array(n);
@@ -97,11 +97,11 @@ export function detectPulseRPeaks(leads: readonly Float32Array[], fs = PULSE_ECG
   return peaks.map((p) => p / fs);
 }
 
-export function rrIntervals(r: readonly number[]): number[] {
+function rrIntervals(r: readonly number[]): number[] {
   return r.slice(1).map((v, i) => v - (r[i] ?? v));
 }
 
-export function median(values: readonly number[]): number | null {
+function median(values: readonly number[]): number | null {
   if (values.length === 0) return null;
   const sorted = [...values].sort((a, b) => a - b);
   return sorted[Math.floor(sorted.length / 2)] ?? null;

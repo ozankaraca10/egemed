@@ -13,7 +13,7 @@
  * KVKK: ad, özgün dosya adı ve kaynak hasta numarası bu alanlara asla girmez.
  */
 
-export const DIAGNOSIS_SOURCE = {
+const DIAGNOSIS_SOURCE = {
   "kauh-v3": "KAUH tablosu",
   sprsound: "SPRSound hasta özeti",
 };
@@ -77,7 +77,7 @@ const CIRCOR_SITE_TR = {
 };
 
 /** T260 — CirCor tanı taşımaz; Outcome klinik sonuçtur, tanı olarak gösterilmez. */
-export const CIRCOR_DIAGNOSIS_SOURCE = "CirCor (tanı bilgisi yok)";
+const CIRCOR_DIAGNOSIS_SOURCE = "CirCor (tanı bilgisi yok)";
 
 const DIAGNOSIS_TABLES = { "kauh-v3": KAUH_DIAGNOSIS_TR, sprsound: SPRSOUND_DIAGNOSIS_TR };
 
@@ -159,7 +159,7 @@ export function circorSite(raw) {
 }
 
 /** T260 — CirCor ham ses tipi: "Üfürüm yok" ya da "<timing> <grading>"; boşsa null. */
-export function circorSoundType(murmur, timing, grading) {
+function circorSoundType(murmur, timing, grading) {
   if (normalized(murmur).toLowerCase() === "absent") return "Üfürüm yok";
   return [normalized(timing), normalized(grading)]
     .filter((part) => part !== "" && part.toLowerCase() !== "nan")

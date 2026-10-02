@@ -5,7 +5,7 @@ import type { SoundRecord } from "../core/types";
 const peaksCache = new Map<string, Float32Array>();
 
 /** `AudioBuffer.getChannelData` ile uyumlu sahte tampon. */
-export interface PeakAudioBuffer {
+interface PeakAudioBuffer {
   getChannelData(channel: number): ArrayLike<number>;
 }
 
@@ -26,13 +26,13 @@ export interface WaveCanvas {
   getContext(contextId: "2d"): WaveContext2D | null;
 }
 
-export interface WaveAnnotation {
+interface WaveAnnotation {
   at: number;
   label: string;
   color: string;
 }
 
-export interface DrawWaveOptions {
+interface DrawWaveOptions {
   color?: string;
   progress?: number;
   annotations?: WaveAnnotation[];
@@ -108,10 +108,4 @@ export function drawWave(canvas: WaveCanvas, peaks: Float32Array, opts: DrawWave
       ctx2d.fillText(a.label, Math.min(x + 4, w - 30), 12);
     }
   }
-}
-
-/** Aktif kanal başlangıcından geçen süre / toplam süre (döngüsel). `now` çağıran enjekte eder. */
-export function progressOf(startedAtMs: number, durationSec: number, nowMs: number): number {
-  const t = ((nowMs - startedAtMs) / 1000) % durationSec;
-  return t / durationSec;
 }

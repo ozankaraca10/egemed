@@ -10,7 +10,7 @@ import { createRoot, type Root } from "react-dom/client";
 import { GamiGainsView, defaultGamiIcons } from "@egemed/gami-ui";
 import type { GamiGainsModel } from "@egemed/gami-ui";
 
-export interface PulseGainsActions {
+interface PulseGainsActions {
   /** "Başarılarımı gör": İlerlemem sayfasını (Başarılarım) açar. */
   readonly onAchievements: () => void;
   /** API oturumunda veriler sunucudan: “Demo verisi” etiketi çizilmez. */
@@ -19,7 +19,7 @@ export interface PulseGainsActions {
   readonly onLeaderboard: () => void;
 }
 
-export interface PulseGainsHandle {
+interface PulseGainsHandle {
   update(model: GamiGainsModel): void;
   dispose(): void;
 }

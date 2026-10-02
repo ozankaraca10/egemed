@@ -20,7 +20,7 @@ interface PulseBankItem {
 const BANK = (pulseBank as { items: readonly PulseBankItem[] }).items;
 
 /** Ekranda görünen olgu + soru metninden doğru seçeneğin etiketini bulur. */
-export function pulseCorrectLabel(stem: string, question: string): string {
+function pulseCorrectLabel(stem: string, question: string): string {
   const wantedStem = stem.trim();
   const wantedQuestion = question.trim();
   const item = BANK.find((entry) => entry.stem.trim() === wantedStem && entry.question.trim() === wantedQuestion);
@@ -31,7 +31,7 @@ export function pulseCorrectLabel(stem: string, question: string): string {
 }
 
 /** Seçeneği etiketiyle işaretler (görünen sıra sunucuda karıştırılmıştır). */
-export async function selectPulseOption(card: Locator, label: string): Promise<void> {
+async function selectPulseOption(card: Locator, label: string): Promise<void> {
   const options = card.locator(".opt");
   const texts = await options.allInnerTexts();
   const index = texts.findIndex((text) => text.trim() === label.trim());
@@ -44,7 +44,7 @@ export async function selectPulseOption(card: Locator, label: string): Promise<v
  * Olgu metni GÖRÜNÜR bölümün kartından okunur (`#caseCard` / `#quizCaseCard`);
  * gizli bölümün kartı da DOM'da durduğu için kök taraması yanlış eşleşir.
  */
-export async function selectCorrectPulseOption(card: Locator, caseCard: Locator): Promise<void> {
+async function selectCorrectPulseOption(card: Locator, caseCard: Locator): Promise<void> {
   const stem = await caseCard.locator(".case-stem").innerText();
   const question = await card.locator("legend").first().innerText();
   await selectPulseOption(card, pulseCorrectLabel(stem, question));

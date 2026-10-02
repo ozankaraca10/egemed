@@ -111,7 +111,7 @@ export interface ToolbarProps {
 }
 
 /** İzinli olmayan görünümün kısa Türkçe açıklaması (renk dışı kilit imiyle birlikte). */
-export function viewLockReason(view: PatientView): string {
+function viewLockReason(view: PatientView): string {
   return `Bu vakada dinlenecek ${VIEW_LABEL[view].toLocaleLowerCase("tr")} bölge yok`;
 }
 
@@ -125,7 +125,7 @@ export const VIEW_LABEL: Record<PatientView, string> = {
 
 const VIEW_SHORT: Record<PatientView, string> = { front: "Anterior", back: "Posterior", left: "Sol lat.", right: "Sağ lat." };
 
-export interface ViewToggleProps {
+interface ViewToggleProps {
   /** Çizilecek görünüm düğmeleri (sıra korunur). */
   readonly views: readonly PatientView[];
   /** İzinli görünümler; diğerleri kilit imi + gerekçeyle devre dışı çizilir. */

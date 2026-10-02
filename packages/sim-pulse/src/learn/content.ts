@@ -7,7 +7,7 @@
  * standartları, 4. Evrensel MI Tanımı, ESC 2023 AKS kılavuzu.
  */
 
-export interface PulseLearnText {
+interface PulseLearnText {
   /** Rehber ölçütü (tek paragraf). */
   readonly crit: string;
   /** "Bu kayıtta bakın" maddeleri. */
@@ -36,7 +36,7 @@ export interface PulseHeartProfile {
 
 const SINUS: PulseHeartProfile = { atrial: "sinus", pr: 0.16, vent: "his" };
 
-export const PULSE_HEART_PROFILES: Readonly<Record<string, PulseHeartProfile>> = {
+const PULSE_HEART_PROFILES: Readonly<Record<string, PulseHeartProfile>> = {
   normal: SINUS,
   sintach: { ...SINUS, pr: 0.14 },
   sinbrady: { ...SINUS, pr: 0.18 },
@@ -85,7 +85,7 @@ export const PULSE_VENDOR_MODE: Readonly<Record<string, string>> = {
   mi_inferior: "inferior", pericarditis: "pericarditis", hyperk: "hyperk",
 };
 
-export const PULSE_LEARN_TEXT: Readonly<Record<string, PulseLearnText>> = {
+const PULSE_LEARN_TEXT: Readonly<Record<string, PulseLearnText>> = {
   normal: {
     crit: "Sinüs ritmi: her QRS'ten önce DII'de pozitif P, hız 60–100/dk, PR 120–200 ms, QRS <120 ms, RR düzenli.",
     look: ["Her QRS'ten önce P var mı; DII'de pozitif mi?", "PR aralığını kaliperle ölçün (120–200 ms).", "RR düzenli mi, hız 60–100/dk arasında mı?"],
@@ -234,7 +234,7 @@ export const PULSE_LEARN_TEXT: Readonly<Record<string, PulseLearnText>> = {
 };
 
 /** Ölçütlerin dayandığı kılavuz ve standartlar (DOI'ler Crossref'te doğrulandı, 1 Eki 2026). */
-export interface PulseGuideline {
+interface PulseGuideline {
   readonly label: string;
   readonly title: string;
   readonly doi: string;
@@ -256,7 +256,7 @@ export const PULSE_GUIDELINES: Readonly<Record<string, PulseGuideline>> = {
 };
 
 /** Patern başına ölçütün kaynakları (sıra: en doğrudan kaynak önce). */
-export const PULSE_LEARN_REFS: Readonly<Record<string, readonly string[]>> = {
+const PULSE_LEARN_REFS: Readonly<Record<string, readonly string[]>> = {
   normal: ["aha1"], sintach: ["aha1"], sinbrady: ["aha1", "accBrady"],
   pac: ["aha1", "escSvt"], pvc: ["aha1", "escVa"], junctional: ["accBrady", "aha1"],
   af: ["escAf"], flutter: ["escSvt", "escAf"], pat: ["escSvt"], svt: ["escSvt"],
