@@ -1,4 +1,4 @@
-import { expect, test, type Locator } from "@playwright/test";
+import { expect, test } from "@playwright/test";
 import { captureRouteScreenshot } from "./artifacts";
 import { openRoute, trackErrors } from "./helpers";
 import { unlockOpacaLearn } from "./sim-flows";
@@ -10,19 +10,6 @@ import { unlockOpacaLearn } from "./sim-flows";
  * ilerleme metni, öğrenme ekranı ilerlemesi, görüntü yüklenince "açıldı" kaydı
  * ve düello bağlamının öğrenmeye düşmesi.
  */
-
-/** Öğrenme ekranında "Bu konuda uygulama yap" eylemi olan ilk konuyu açar. */
-async function openTopicPracticeButton(root: Locator): Promise<Locator> {
-  const items = root.locator(".lib-item");
-  const count = await items.count();
-  for (let index = 0; index < count; index += 1) {
-    await items.nth(index).click();
-    await root.locator(".tabbar.info-tabs button").nth(2).click();
-    const startButton = root.getByRole("button", { name: /uygulama yap/ });
-    if ((await startButton.count()) > 0) return startButton.first();
-  }
-  throw new Error("Uygulama başlatan konu bulunamadı");
-}
 
 test.describe("Opaca öğrenme kilidi", () => {
   // Ortamdan bağımsızlık: XR çalışma zamanı görüntüleri git-dışıdır ve bazı makinelerde
@@ -47,12 +34,9 @@ test.describe("Opaca öğrenme kilidi", () => {
     await expect(assessment.locator("button.eg-gami-mode-cta")).toBeDisabled();
     await captureRouteScreenshot(page, testInfo.project.name, "#/sims/opaca kilitli mod seçimi");
 
-    // Öğrenme her zaman açıktır; ilerleme satırı ve kilitli odaklı uygulama düğmesi.
+    // Öğrenme her zaman açıktır; ray başlığı ilerlemeyi gösterir (T318: konu uygulaması düğmesi yok).
     await root.locator(".mode-card.learn button.eg-gami-mode-cta").click();
-    await expect(root.getByText("Öğrenme: 0/33 konu incelendi")).toBeVisible();
-    const startButton = await openTopicPracticeButton(root);
-    await expect(startButton).toBeDisabled();
-    await expect(root.getByText("Önce öğrenme modunu tamamlayın: 0/33 konu incelendi.").last()).toBeVisible();
+    await expect(root.getByRole("status", { name: "Öğrenme: 0/33 konu incelendi" })).toBeVisible();
     await captureRouteScreenshot(page, testInfo.project.name, "#/sims/opaca ogrenme kilidi");
 
     expect(errors, "konsol/sayfa hatası").toEqual([]);
@@ -67,16 +51,16 @@ test.describe("Opaca öğrenme kilidi", () => {
     // Gerçek dosyası olan BT konusu seçilir; görüntü yüklenince öğe "açıldı" işareti alır
     // (yalnız seçmek yetmez, E2E'de XR görüntüleri git-dışıdır; BT dosyaları depodadır).
     await root.locator(".lib-item", { hasText: "Aksiyel anatomi" }).click();
-    await expect(root.getByText("Öğrenme: 1/33 konu incelendi")).toBeVisible();
-    await expect(root.locator('.lib-item .lib-done[aria-label="açıldı"]')).toHaveCount(1);
+    await expect(root.getByRole("status", { name: "Öğrenme: 1/33 konu incelendi" })).toBeVisible();
+    await expect(root.locator(".lib-item.opened", { hasText: "açıldı" })).toHaveCount(1);
     await expect(root.locator(".lib-group", { hasText: "Toraks BT" }).locator(".g-count")).toHaveText("1/2");
 
     // Yalnız seçmek yetmez: ilk görüntü dosyası depoda olmayan (XR) konu seçilince
     // görüntü yüklenemez, kayıt büyümez ve işaret çizilmez.
     await root.locator(".lib-item", { hasText: "Pnömotoraks" }).click();
     await expect(root.locator(".film-empty", { hasText: "Görüntü dosyası yüklenemedi" })).toBeVisible();
-    await expect(root.getByText("Öğrenme: 1/33 konu incelendi")).toBeVisible();
-    await expect(root.locator('.lib-item .lib-done[aria-label="açıldı"]')).toHaveCount(1);
+    await expect(root.getByRole("status", { name: "Öğrenme: 1/33 konu incelendi" })).toBeVisible();
+    await expect(root.locator(".lib-item.opened", { hasText: "açıldı" })).toHaveCount(1);
     expect(errors, "konsol/sayfa hatası").toEqual([]);
   });
 

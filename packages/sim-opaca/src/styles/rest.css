@@ -186,7 +186,7 @@
 .eg-sim-opaca .report-table{ width: 100%; min-width: 520px; border-collapse: collapse; font-size: var(--fs-sm); text-align: left; }
 .eg-sim-opaca .report-table th, .eg-sim-opaca .report-table td{ border-bottom: 1px solid var(--border); padding: 8px 9px; }
 .eg-sim-opaca .report-table th{ color: var(--ink-600); font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: .6px; }
-.eg-sim-opaca .report-table td.ok{ color: var(--green-600); font-weight: 700; }
+.eg-sim-opaca .report-table td.ok{ color: var(--green-800); font-weight: 700; }
 /* A2.3: sunucu sonuçlarıyla 'Başarısız' hücreleri sık görünür; --red-500 AA altı (3.9:1). */
 .eg-sim-opaca .report-table td.no{ color: var(--red-600); font-weight: 700; }
 .eg-sim-opaca .report-table-v2 .report-row{ cursor: pointer; }
@@ -651,28 +651,112 @@
   .eg-sim-opaca .lib-head, .eg-sim-opaca .lib-scroll{ display: contents; }
 }
 
+
+/* ---------------- T318 — öğrenme modu yeniden tasarımı (Pulse/Ausculta zemini + hasta kartı maketi) ----------------
+   Düzen: konu rayı 264 px · film (esnek) · hasta kartı ve konu bilgisi (360–440 px).
+   Masaüstünde ızgara ekran yüksekliğinde; sütunlar kendi içinde kayar (T207 yapışkan rayın yerine). */
+.eg-sim-opaca .learn-body{ padding: 0; max-width: none; }
+.eg-sim-opaca .challenge-lock-notice{ margin: 8px 16px; }
+.eg-sim-opaca .learn-grid{ grid-template-columns: 264px minmax(0, 1fr) minmax(360px, 440px); gap: 0; padding: 0; }
+.eg-sim-opaca .learn-grid > .lib-col{ display: block; background: var(--card); border-right: 1px solid var(--border); padding: 14px 10px; }
+.eg-sim-opaca .learn-grid .lib-head{ margin: 4px 8px 10px; font-size: var(--fs-xs); font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-600); }
+.eg-sim-opaca .learn-grid .lib-group{ margin: 0; }
+.eg-sim-opaca .learn-grid .lib-group .g-title{ position: static; display: flex; align-items: center; gap: 6px; margin: 12px 8px 4px; padding: 0; background: none; backdrop-filter: none; font-size: 11px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-600); }
+.eg-sim-opaca .learn-grid .lib-group .g-title .g-count{ margin-left: auto; background: none; border: 0; padding: 0; font-variant-numeric: tabular-nums; }
+.eg-sim-opaca .learn-grid .lib-items{ display: flex; flex-direction: column; gap: 0; }
+.eg-sim-opaca .learn-grid .lib-item{ display: flex; align-items: center; gap: 8px; width: 100%; min-height: 44px; padding: 6px 10px; border: 0; border-radius: var(--r-md); background: none; box-shadow: none; text-align: left; color: var(--ink-700); }
+.eg-sim-opaca .learn-grid .lib-item:hover{ background: var(--card-soft); }
+.eg-sim-opaca .learn-grid .lib-item.active{ background: var(--blue-50); border: 0; box-shadow: none; padding-left: 10px; }
+.eg-sim-opaca .learn-grid .lib-item b{ flex: 1 1 auto; min-width: 0; font-weight: 500; font-size: var(--fs-sm); color: inherit; }
+.eg-sim-opaca .learn-grid .lib-item.active b{ font-weight: 700; color: var(--navy-900); }
+.eg-sim-opaca .learn-grid .lib-item .ck{ width: 16px; height: 16px; flex: none; border-radius: 50%; border: 1.5px solid var(--ink-300); display: grid; place-items: center; font-size: 10px; font-weight: 900; color: var(--card); line-height: 1; }
+.eg-sim-opaca .learn-grid .lib-item .ck.done{ background: var(--green-600); border-color: var(--green-600); }
+
+.eg-sim-opaca .learn-grid > .sim-main{ display: grid; gap: 12px; align-content: start; grid-auto-rows: max-content; padding: 16px; border-right: 1px solid var(--border); background: linear-gradient(180deg, var(--card), var(--card-soft)); }
+.eg-sim-opaca .learn-head{ display: grid; gap: 4px; }
+.eg-sim-opaca .learn-eb{ font-size: var(--fs-xs); font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: var(--blue-700); }
+.eg-sim-opaca .learn-title{ margin: 0; font-size: 22px; letter-spacing: -.02em; line-height: 1.15; color: var(--navy-900); }
+.eg-sim-opaca .learn-pills{ display: flex; flex-wrap: wrap; gap: 6px; }
+.eg-sim-opaca .lp{ font-size: var(--fs-xs); font-weight: 800; padding: 3px 9px; border-radius: var(--r-sm); }
+.eg-sim-opaca .lp.topic{ background: var(--blue-50); color: var(--blue-700); }
+.eg-sim-opaca .lp.real{ background: var(--blue-50); color: var(--blue-700); }
+.eg-sim-opaca .lp.none{ background: var(--card-soft); color: var(--ink-600); border: 1px solid var(--border); }
+.eg-sim-opaca .learn-study{ margin: 0; font-size: var(--fs-xs); color: var(--ink-600); }
+.eg-sim-opaca .learn-grid .stage-card.film-card{ flex: none; }
+.eg-sim-opaca .learn-grid .film-stage{ max-height: min(54dvh, 560px); }
+.eg-sim-opaca .learn-grid .zone-chips{ max-height: calc(3 * 44px + 2 * var(--sp-2) + var(--sp-1)); overflow-y: auto; }
+.eg-sim-opaca .learn-lbl{ font-size: var(--fs-xs); font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-600); }
+.eg-sim-opaca .learn-examples{ display: grid; gap: 6px; }
+.eg-sim-opaca .ex-row{ display: flex; flex-wrap: wrap; gap: 6px; }
+.eg-sim-opaca .ex-btn{ flex: 1 1 0; min-width: 72px; min-height: 44px; padding: 4px 8px; border-radius: 10px; border: 1.5px solid var(--border); background: var(--card); font-weight: 700; font-size: var(--fs-xs); color: var(--ink-700); display: grid; place-items: center; line-height: 1.2; }
+.eg-sim-opaca .ex-btn small{ display: block; font-size: 11px; font-weight: 600; color: var(--ink-600); }
+.eg-sim-opaca .ex-btn.active{ border-color: var(--blue-700); background: var(--blue-50); color: var(--navy-900); }
+
+.eg-sim-opaca .learn-grid > .sim-side{ display: grid; gap: 12px; align-content: start; grid-auto-rows: max-content; padding: 14px; background: var(--card-soft); }
+.eg-sim-opaca .pcard{ background: var(--card); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; box-shadow: var(--shadow-card); }
+.eg-sim-opaca .pcard-h{ padding: 14px 16px 10px; border-bottom: 1px solid var(--border); display: grid; gap: 4px; }
+.eg-sim-opaca .pcard-topic{ font-size: var(--fs-xs); font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--blue-700); }
+.eg-sim-opaca .pcard-h h3{ margin: 0; font-size: var(--fs-lg); line-height: 1.25; color: var(--navy-900); }
+.eg-sim-opaca .pcard-id{ margin: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); border-bottom: 1px solid var(--border); }
+.eg-sim-opaca .pcard-id div{ padding: 9px 10px; border-right: 1px solid var(--border); display: grid; gap: 2px; min-width: 0; }
+.eg-sim-opaca .pcard-id div:last-child{ border-right: 0; }
+.eg-sim-opaca .pcard-id dt{ font-size: 11px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; color: var(--ink-600); }
+.eg-sim-opaca .pcard-id dd{ margin: 0; font-weight: 600; font-size: var(--fs-sm); color: var(--ink-900); overflow-wrap: break-word; }
+.eg-sim-opaca .pcard-sec{ padding: 12px 16px; border-bottom: 1px solid var(--border); display: grid; gap: 9px; }
+.eg-sim-opaca .pcard-sec-h{ display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; }
+.eg-sim-opaca .pcard-sec-h h4{ margin: 0; font-size: var(--fs-sm); color: var(--ink-900); }
+.eg-sim-opaca .ptag{ display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; padding: 4px 8px; border-radius: 6px; white-space: nowrap; }
+.eg-sim-opaca .ptag i{ width: 7px; height: 7px; border-radius: 50%; background: currentColor; display: inline-block; }
+.eg-sim-opaca .ptag.real{ background: var(--blue-50); color: var(--blue-700); }
+.eg-sim-opaca .ptag.fic{ background: var(--orange-100); color: var(--amber-700); }
+.eg-sim-opaca .ptag.note{ background: var(--purple-50); color: var(--purple-700); }
+.eg-sim-opaca .ptag.none{ background: var(--card-soft); color: var(--ink-600); }
+.eg-sim-opaca .pcard-rows{ list-style: none; margin: 0; padding: 0; display: grid; gap: 7px; }
+.eg-sim-opaca .pcard-rows li{ display: grid; grid-template-columns: 20px auto 1fr; gap: 8px; align-items: center; font-size: var(--fs-sm); }
+.eg-sim-opaca .pcard-rows li svg{ color: var(--blue-700); }
+.eg-sim-opaca .pcard-rows .k{ color: var(--ink-600); }
+.eg-sim-opaca .pcard-rows b{ font-weight: 600; text-align: right; color: var(--ink-900); }
+.eg-sim-opaca .pcard-note{ margin: 0; font-size: var(--fs-xs); color: var(--ink-600); }
+.eg-sim-opaca .pcard-labels{ list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.eg-sim-opaca .pcard-labels li{ display: flex; justify-content: space-between; gap: 10px; font-size: var(--fs-sm); }
+.eg-sim-opaca .pcard-labels li b{ font-weight: 600; color: var(--ink-900); }
+.eg-sim-opaca .pcard-labels li span{ font-size: var(--fs-xs); color: var(--ink-600); text-align: right; }
+.eg-sim-opaca .pcard-labels li.expert span{ color: var(--blue-700); font-weight: 600; }
+.eg-sim-opaca .pcard-src{ padding: 10px 16px 12px; font-size: var(--fs-xs); color: var(--ink-600); }
+.eg-sim-opaca .pcard-src a{ color: var(--blue-700); }
+.eg-sim-opaca .learn-about{ display: grid; gap: 10px; }
+.eg-sim-opaca .la-head{ display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 10px; }
+.eg-sim-opaca .la-head h3{ margin: 0; font-size: 17px; color: var(--navy-900); }
+.eg-sim-opaca .la-head .la-tag{ margin-left: auto; }
+.eg-sim-opaca .la-grid{ display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; }
+.eg-sim-opaca .la-card{ border: 1px solid var(--border); border-radius: 12px; background: var(--card); padding: 12px; display: grid; gap: 8px; align-content: start; }
+.eg-sim-opaca .la-crit{ margin: 0; background: var(--orange-100); border-left: 3px solid var(--orange-500); padding: 8px 10px; border-radius: 0 var(--r-sm) var(--r-sm) 0; font-size: var(--fs-sm); color: var(--ink-900); }
+.eg-sim-opaca .la-mech{ margin: 0; font-size: var(--fs-sm); color: var(--ink-700); }
+
 @media (min-width: 1024px) {
-  /* Yapışkan kütüphane paneli için kaydırma kabı belge olmalı: kökün/app-shell'in
-     `overflow-x: hidden`ı ve gövdenin `no-scroll`u öğrenme ekranında kalkar.
-     `clip` kaydırma kabı yaratmaz; yatay kırpma davranışı korunur. */
-  .eg-sim-opaca:has(.learn-grid){ overflow-x: clip; overflow-y: visible; }
-  .eg-sim-opaca .screen-body.no-scroll:has(.learn-grid){ overflow: visible; }
-  .eg-sim-opaca .learn-grid{ display: grid; align-items: start; }
-  .eg-sim-opaca .learn-grid > * + *{ margin-top: 0; }
-  .eg-sim-opaca .learn-grid .lib-col{
-    position: sticky;
-    top: calc(var(--head-h) + var(--sp-2));
-    max-height: calc(100dvh - var(--head-h) - var(--sp-5));
-    display: flex; flex-direction: column; overflow: hidden; padding-right: 0;
-  }
-  .eg-sim-opaca .lib-head{ flex: 0 0 auto; }
-  .eg-sim-opaca .lib-scroll{ flex: 1 1 auto; min-height: 0; overflow-y: auto; padding-right: 4px; }
-  .eg-sim-opaca .lib-scroll::-webkit-scrollbar{ width: 8px; }
-  .eg-sim-opaca .lib-scroll::-webkit-scrollbar-thumb{ background: var(--border-strong); border-radius: var(--r-pill); }
-  .eg-sim-opaca .learn-grid .lib-group .lib-items{ display: flex; flex-direction: column; gap: 6px; }
-  .eg-sim-opaca .learn-grid .sim-main > .stage-card{ flex: 0 0 auto; }
-  .eg-sim-opaca .learn-grid .film-viewer{ flex: 0 0 auto; }
-  .eg-sim-opaca .learn-grid .film-stage{ flex: 0 0 auto; max-height: min(72dvh, 700px); }
-  /* Bölge çipleri en çok üç satır: dar/geniş ekranda kartı şişirmez, kendi içinde kayar. */
-  .eg-sim-opaca .learn-grid .zone-chips{ max-height: calc(3 * 44px + 2 * var(--sp-2) + var(--sp-1)); overflow-y: auto; }
+  .eg-sim-opaca:has(.learn-body){ overflow: hidden; }
+  .eg-sim-opaca .screen-body.no-scroll.learn-body{ overflow: hidden; }
+  /* Kabuk birleşik barı (3.3125rem) ve alt bilgisi (2.5625rem) düşülür (Ausculta T309 ile aynı). */
+  .eg-sim-opaca .learn-grid{ display: grid; flex: none; height: calc(100dvh - 3.3125rem - 2.5625rem); min-height: 560px; grid-template-rows: minmax(0, 1fr); align-items: stretch; }
+  .eg-sim-opaca .learn-grid > .lib-col, .eg-sim-opaca .learn-grid > .sim-main, .eg-sim-opaca .learn-grid > .sim-side{ min-height: 0; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; }
+}
+@media (min-width: 1024px) and (max-width: 1280px) {
+  .eg-sim-opaca .learn-grid{ grid-template-columns: 232px minmax(0, 1fr) minmax(320px, 380px); }
+}
+@media (max-width: 1023.98px) {
+  .eg-sim-opaca .learn-grid > .lib-col, .eg-sim-opaca .learn-grid > .sim-main, .eg-sim-opaca .learn-grid > .sim-side{ border-right: 0; }
+  .eg-sim-opaca .learn-grid > .lib-col{ border-bottom: 1px solid var(--border); }
+  .eg-sim-opaca .learn-grid .lib-col .lib-head{ display: block; }
+  .eg-sim-opaca .learn-grid .lib-group .lib-items{ display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 720px) {
+  .eg-sim-opaca .learn-grid > .lib-col{ position: static; display: flex; flex-direction: row; align-items: center; gap: 10px; overflow-x: auto; overflow-y: hidden; padding: 8px 12px; }
+  .eg-sim-opaca .learn-grid .lib-col .lib-head{ display: block; margin: 0; align-self: center; white-space: nowrap; flex: none; }
+  .eg-sim-opaca .learn-grid .lib-group .g-title{ margin: 0; white-space: nowrap; background: var(--blue-50); border-radius: var(--r-pill); padding: 5px 10px; }
+  .eg-sim-opaca .learn-grid .lib-group .lib-items{ display: flex; flex-direction: row; gap: 6px; }
+  .eg-sim-opaca .learn-grid .lib-item{ width: auto; min-width: 0; white-space: nowrap; border: 1px solid var(--border); }
+  .eg-sim-opaca .learn-grid > .sim-main, .eg-sim-opaca .learn-grid > .sim-side{ padding: 12px; }
+  .eg-sim-opaca .pcard-id{ grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .eg-sim-opaca .pcard-id div:nth-child(2){ border-right: 0; }
+  .eg-sim-opaca .pcard-id div:nth-child(-n+2){ border-bottom: 1px solid var(--border); }
 }

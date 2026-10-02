@@ -51,8 +51,11 @@ describe("LearnScreen (statik render)", () => {
     const html = renderInStore(createElement(LearnScreen));
     expect(html).toContain('aria-label="Öğrenme kütüphanesi"');
     expect(html).toContain("<h2");
-    expect(html).toContain("Kütüphane");
-    expect(html).toContain("Konu seçin, filmi okuyun.");
+    expect(html).toContain("Konular · 0/33");
+    // T318 sağ çerçeve: hasta kartı kayıt durumunu metinle bildirir (renk dışında işaret).
+    expect(html).toContain('aria-label="Hasta kartı ve konu bilgisi"');
+    expect(html).toContain("Klinik kayıt");
+    expect(html).toMatch(/Gerçek hasta verisi|Kayıt yok/);
     expect(sampleTopic).toBeDefined();
     expect(html).toContain(sampleTopic!.short);
     expect(html).toContain(esc(sampleTopic!.title));
