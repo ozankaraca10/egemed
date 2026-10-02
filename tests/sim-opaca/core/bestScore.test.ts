@@ -6,10 +6,9 @@ import {
   initialState,
   initialTelemetry,
   loadBestScore,
-  reducer,
   saveBestScore,
-  scoreCase,
 } from "../../../packages/sim-opaca/src/index";
+import { finishWithServerResults, scoredResult } from "../score-fixture";
 import type {
   AppState,
   CaseDef,
@@ -132,22 +131,20 @@ const ZONES: ReadingZone[] = [
 describe("en iyi puan (bestScore) (kaynak davranışı)", () => {
   const c = mkCase();
   const allRight = { q1: ["a"], q2: [encodeMark({ x: 0.7, y: 0.2 })], q3: ["a"] };
-  const high = scoreCase(c, allRight, tele(REQUIRED), 0, img(), ZONES); // total 100
-  const low = scoreCase(c, {}, initialTelemetry(), 0, img(), ZONES); // total 0
+  const high = scoredResult(c, allRight, tele(REQUIRED), 0, img(), ZONES); // total 100
+  const low = scoredResult(c, {}, initialTelemetry(), 0, img(), ZONES); // total 0
 
-  it("setResults mod başına en iyi puanı yalnız daha yüksekse günceller", () => {
-    const s0: AppState = { ...initialState, mode: "practice" };
-    let s = reducer(s0, { type: "setResults", results: [high] });
+  it("sunucu oturum sonucu mod başına en iyi puanı yalnız daha yüksekse günceller", () => {
+    let s = finishWithServerResults(initialState, "practice", [high]);
     expect(s.bestScore.practice).toBe(100);
     // daha düşük bir sonraki deneme en iyi puanı düşürmez
-    s = reducer(s, { type: "setResults", results: [low] });
+    s = finishWithServerResults(s, "practice", [low]);
     expect(s.bestScore.practice).toBe(100);
   });
 
   it("mod başına ayrı tutulur (practice/assessment birbirini etkilemez)", () => {
-    let s: AppState = { ...initialState, mode: "practice" };
-    s = reducer(s, { type: "setResults", results: [high] });
-    s = reducer({ ...s, mode: "assessment" }, { type: "setResults", results: [low] });
+    let s: AppState = finishWithServerResults(initialState, "practice", [high]);
+    s = finishWithServerResults(s, "assessment", [low]);
     expect(s.bestScore.practice).toBe(100);
     expect(s.bestScore.assessment).toBe(0);
   });

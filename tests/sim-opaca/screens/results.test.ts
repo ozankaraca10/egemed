@@ -2,7 +2,8 @@ import { createElement } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { describe, expect, it, vi } from 'vitest'
 import { EmbeddedProvider } from '../../../packages/sim-opaca/src/EmbeddedContext'
-import { DEFAULT_WEIGHTS, MASTERY_THRESHOLD, ResultsScreen, StoreProvider, aggregateResults, createMemoryRuntimeAdapter, encodeMark, initialState, initialTelemetry, reducer, scoreCase } from '../../../packages/sim-opaca/src/index'
+import { DEFAULT_WEIGHTS, MASTERY_THRESHOLD, ResultsScreen, StoreProvider, aggregateResults, createMemoryRuntimeAdapter, encodeMark, initialState, initialTelemetry } from '../../../packages/sim-opaca/src/index'
+import { finishWithServerResults, scoredResult } from '../score-fixture'
 import type {
   AppState,
   CaseDef,
@@ -149,18 +150,15 @@ const tele = (order: string[], dwell = 1000): Telemetry => ({
 function highResult(): CaseResult {
   const c = mkCase()
   const allRight = { rq1: ['a'], rq2: [encodeMark({ x: 0.7, y: 0.2 })] }
-  return scoreCase(c, allRight, tele(REQUIRED), 0, img(), ZONES)
+  return scoredResult(c, allRight, tele(REQUIRED), 0, img(), ZONES)
 }
 
 function lowResult(): CaseResult {
-  return scoreCase(mkCase(), {}, initialTelemetry(), 0, img(), ZONES)
+  return scoredResult(mkCase(), {}, initialTelemetry(), 0, img(), ZONES)
 }
 
 function preparedState(results: CaseResult[], mode: 'practice' | 'assessment'): AppState {
-  const noopSeam = { emit: () => undefined }
-  let s: AppState = { ...initialState, mode, screen: 'simulation', assessmentTimer: 125_000 }
-  s = reducer(s, { type: 'setResults', results }, noopSeam)
-  return s
+  return finishWithServerResults({ ...initialState, screen: 'simulation', assessmentTimer: 125_000 }, mode, results)
 }
 
 describe('ResultsScreen (statik render)', () => {

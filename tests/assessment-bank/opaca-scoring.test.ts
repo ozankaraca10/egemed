@@ -1,15 +1,12 @@
 import { describe, expect, it } from "vitest";
-import {
-  DEFAULT_WEIGHTS,
-  aggregateResults,
-  encodeMark,
-  practiceAdjusted,
-  scoreCase,
-  zonesForImage,
-} from "../../../packages/sim-opaca/src/index";
-import type { CaseDef, ImageRecord, Question, ReadingZone, Telemetry, ZoneVisit } from "../../../packages/sim-opaca/src/index";
+import { aggregateResults, practiceAdjusted, scoreCase } from "../../packages/assessment-bank/src/opaca/scoring";
+import { zonesForImage } from "../../packages/assessment-bank/src/opaca/data";
+import { DEFAULT_WEIGHTS } from "../../packages/assessment-bank/src/opaca/types";
+import type { CaseDef, ImageRecord, Question, ReadingZone, Telemetry, ZoneVisit } from "../../packages/assessment-bank/src/opaca/types";
+import { encodeMark } from "../../packages/sim-opaca/src/index";
 
-/** Skor grubu — kaynak egemed-opaca tests/core.test.ts `describe('skor')` portu (8 test).
+/** Sunucu notlandırması (ADR-009): vaka puanı yalnız bankada hesaplanır; T316 ile istemci kopyası
+ *  silindi, kurallar buradan sınanır. Kaynak egemed-opaca tests/core.test.ts `describe('skor')` portu (8 test).
  *  Bölge fixture'ı küçük sentetiktir; REQUIRED kimlikleri ABCDE adımlarıyla eşlenir,
  *  `scoreCase` yalnız id→adım haritasını kullanır. `initialTelemetry` kaynak
  *  store.tsx:50 ile birebir aynı boş telemetriyi üretir. */

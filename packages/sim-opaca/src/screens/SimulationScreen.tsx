@@ -227,20 +227,18 @@ function CaseView({
     setBusy(true)
     try {
       const index = serverCase.serverIndex
-      let dispatches = plan.dispatches
-      const submit = dispatches.find((action) => action.type === 'submitAnswer')
-      if (submit && submit.type === 'submitAnswer') {
+      if (plan.submitQid !== null) {
+        // Uygulamada doğruluk sunucuda kontrol edilir; değerlendirmede geri bildirim oturum sonunda gelir.
         let correct = false
         if (state.mode === 'practice') {
-          const checked = await checkServerQuestion(binding.sessions, dispatch, binding.server.sessionId, index, submit.qid, state.answers[submit.qid] ?? [])
+          const checked = await checkServerQuestion(binding.sessions, dispatch, binding.server.sessionId, index, plan.submitQid, state.answers[plan.submitQid] ?? [])
           if (checked === null) return
           correct = checked
         }
-        dispatches = dispatches.map((action) => (action.type === 'submitAnswer' ? { ...action, correct } : action))
+        dispatch({ type: 'submitAnswer', qid: plan.submitQid, correct })
       }
-      const finishing = dispatches.some((action) => action.type === 'finishCase')
-      for (const action of dispatches) if (action.type !== 'finishCase') dispatch(action)
-      if (finishing) {
+      if (plan.advance) dispatch({ type: 'advance' })
+      if (plan.finish) {
         dispatch({ type: 'serverSnapshot', caseId: serverCase.id, snapshot: snapshotOf(serverCase, state.answers) })
         await submitServerCase(binding.sessions, dispatch, binding.server.sessionId, index, state.answers, state.telemetry)
       }
@@ -258,8 +256,6 @@ function CaseView({
       questions: caseDef.questions,
       revealed,
       canSubmit,
-      given,
-      image,
     })
     void runServerPrimary(plan)
   }

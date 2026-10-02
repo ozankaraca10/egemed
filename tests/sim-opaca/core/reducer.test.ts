@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { buildSuspend, computeCaseResult, fromServerResult, initialState, initialTelemetry, reducer } from "../../../packages/sim-opaca/src/index";
+import { buildSuspend, fromServerResult, initialState, reducer } from "../../../packages/sim-opaca/src/index";
 import type { AppState, ServerClientCase } from "../../../packages/sim-opaca/src/index";
-import { ALL_CASES } from "../bank-cases";
 import { caseResult, publicCase, SESSION_OPENED_AT } from "../session-fixture";
 import { toClientCase } from "../../../packages/sim-opaca/src/index";
 
@@ -77,18 +76,6 @@ describe("reducer (kaynak davranışı)", () => {
     let s = reducer(s0, { type: "serverCaseLoaded", index: 1, clientCase });
     for (let i = 0; i < clientCase.questions.length + 2; i++) s = reducer(s, { type: "advance" });
     expect(s.step).toBe(clientCase.questions.length - 1);
-  });
-
-  it("uygulamada ipucu cezası vaka sonucuna yansır", () => {
-    const def = ALL_CASES[0];
-    expect(def).toBeDefined();
-    if (!def) return;
-    const correct = Object.fromEntries(def.questions.map((q) => [q.id, q.correct]));
-    const full = computeCaseResult(def, { answers: correct, telemetry: initialTelemetry(), hintsUsed: 0, mode: "practice" });
-    const hinted = computeCaseResult(def, { answers: correct, telemetry: initialTelemetry(), hintsUsed: 1, mode: "practice" });
-    const assess = computeCaseResult(def, { answers: correct, telemetry: initialTelemetry(), hintsUsed: 1, mode: "assessment" });
-    expect(hinted.total).toBe(Math.max(0, full.total - 5));
-    expect(assess.total).toBe(full.total);
   });
 
   it("openedAt public vakadan gelir; yerel vaka kimliği sızmaz", () => {

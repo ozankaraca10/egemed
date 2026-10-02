@@ -92,7 +92,6 @@ export {
   BEST_SCORE_KEY,
   FS_PROMPT_KEY,
   buildSuspend,
-  computeCaseResult,
   initialState,
   initialTelemetry,
   loadBestScore,
@@ -265,7 +264,7 @@ export type {
   SimRuntime,
   SuspendWrite,
 } from "./core/runtime";
-export { HINT_PENALTY_PRACTICE, MASTERY_THRESHOLD, aggregateResults, practiceAdjusted, scoreCase } from "./core/scoring";
+export { MASTERY_THRESHOLD, aggregateResults } from "./core/scoring";
 export {
   IMAGE_DEPENDENT_QUESTION_TYPES,
   SESSION_SIZE,
@@ -349,7 +348,7 @@ export {
   patientLine,
   planPrimaryAction,
 } from "./screens/simulation-core";
-export type { PrimaryActionPlan, SimulationDispatch } from "./screens/simulation-core";
+export type { PrimaryActionPlan } from "./screens/simulation-core";
 export { SimulationScreen } from "./screens/SimulationScreen";
 export type { SimulationScreenProps } from "./screens/SimulationScreen";
 export {
