@@ -1,6 +1,6 @@
 # T308-ausculta-examples
 
-- Tarih: 2026-10-02 10:17
+- Tarih: 2026-10-02 11:26
 - Commit: T308: Ausculta öğrenme ölçütü — konunun tüm örnekleri (sentetik + gerçek) 5'er sn dinlenince tamam
 - Dal: task/T308-ausculta-examples
 
