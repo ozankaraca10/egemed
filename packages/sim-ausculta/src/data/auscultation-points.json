@@ -301,6 +301,96 @@
       "yf": 0.56,
       "xp": 0.4,
       "yp": 0.56
+    },
+    {
+      "id": "lung_left_upper_lateral",
+      "view": "left",
+      "group": "lung",
+      "label": "Sol üst",
+      "fullLabel": "Sol üst bölge (lateral)",
+      "detail": "Orta aksiller hat",
+      "side": "left",
+      "x": 0.53,
+      "y": 0.42,
+      "color": "lat",
+      "tagSide": "right",
+      "xf": 0.49,
+      "yf": 0.42
+    },
+    {
+      "id": "lung_left_middle_lateral",
+      "view": "left",
+      "group": "lung",
+      "label": "Sol orta",
+      "fullLabel": "Sol orta bölge (lateral)",
+      "detail": "Orta aksiller hat",
+      "side": "left",
+      "x": 0.53,
+      "y": 0.55,
+      "color": "lat",
+      "tagSide": "right",
+      "xf": 0.49,
+      "yf": 0.55
+    },
+    {
+      "id": "lung_left_lower_lateral",
+      "view": "left",
+      "group": "lung",
+      "label": "Sol alt",
+      "fullLabel": "Sol alt bölge (lateral)",
+      "detail": "Orta aksiller hat",
+      "side": "left",
+      "x": 0.53,
+      "y": 0.68,
+      "color": "lat",
+      "tagSide": "right",
+      "xf": 0.49,
+      "yf": 0.68
+    },
+    {
+      "id": "lung_right_upper_lateral",
+      "view": "right",
+      "group": "lung",
+      "label": "Sağ üst",
+      "fullLabel": "Sağ üst bölge (lateral)",
+      "detail": "Orta aksiller hat",
+      "side": "right",
+      "x": 0.465,
+      "y": 0.42,
+      "color": "lat",
+      "tagSide": "left",
+      "xf": 0.505,
+      "yf": 0.42
+    },
+    {
+      "id": "lung_right_middle_lateral",
+      "view": "right",
+      "group": "lung",
+      "label": "Sağ orta",
+      "fullLabel": "Sağ orta bölge (lateral)",
+      "detail": "Orta aksiller hat",
+      "side": "right",
+      "x": 0.465,
+      "y": 0.55,
+      "color": "lat",
+      "tagSide": "left",
+      "xf": 0.505,
+      "yf": 0.55
+    },
+    {
+      "id": "lung_right_lower_lateral",
+      "view": "right",
+      "group": "lung",
+      "label": "Sağ alt",
+      "fullLabel": "Sağ alt bölge (lateral)",
+      "detail": "Orta aksiller hat",
+      "side": "right",
+      "x": 0.465,
+      "y": 0.68,
+      "color": "lat",
+      "tagSide": "left",
+      "xf": 0.505,
+      "yf": 0.68
     }
   ],
   "images": {
@@ -336,6 +426,30 @@
         "svg": "pediatric-back",
         "width": 1000,
         "height": 900
+      }
+    },
+    "left": {
+      "male": {
+        "image": "assets/body/lateral-left.jpg",
+        "width": 1000,
+        "height": 940
+      },
+      "female": {
+        "image": "assets/body/lateral-left-female.jpg",
+        "width": 1000,
+        "height": 940
+      }
+    },
+    "right": {
+      "male": {
+        "image": "assets/body/lateral-right.jpg",
+        "width": 1000,
+        "height": 940
+      },
+      "female": {
+        "image": "assets/body/lateral-right-female.jpg",
+        "width": 1000,
+        "height": 940
       }
     }
   }

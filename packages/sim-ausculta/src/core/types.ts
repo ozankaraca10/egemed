@@ -10,7 +10,7 @@ export type Screen =
   | "results"
   | "progress"
   | "sources";
-export type PatientView = "front" | "back";
+export type PatientView = "front" | "back" | "left" | "right";
 export type StethHead = "bell" | "diaphragm";
 export type ValidationStatus = "validated" | "educational_mapping" | "experimental";
 export type SoundCategory = "heart" | "lung" | "mixed";

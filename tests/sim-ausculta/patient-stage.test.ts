@@ -68,7 +68,7 @@ describe("PatientStage", () => {
     const html = render();
     expect(html).toContain('class="stage "');
     expect(html).toContain('src="assets/body/front.jpg"');
-    expect(html).toContain('alt="Hasta ön gövde görünümü"');
+    expect(html).toContain('alt="Hasta anterior gövde görünümü"');
     expect(html).toContain("hotspot s1");
     expect(html).toContain("Aort");
     expect(html).not.toContain("Sol akciğer");

@@ -4,7 +4,6 @@ import { describe, expect, it } from "vitest";
 const DATA_DIR = "packages/sim-ausculta/src/data";
 const JSON_NAMES = [
   "auscultation-points.json",
-  "learning-samples.json",
   "library.json",
   "pediatric-reference.json",
   "sounds-external.json",
@@ -28,7 +27,6 @@ function recordsOf(value: unknown): readonly { id?: unknown; runtimeUrl?: unknow
 
 const sounds = load("sounds.json") as { count?: unknown; records?: unknown };
 const external = load("sounds-external.json") as { count?: unknown; records?: unknown };
-const samples = load("learning-samples.json") as { version?: unknown; topics?: Record<string, unknown> };
 const cases = load("cases.json") as { cases?: unknown };
 const casesAuto = load("cases-auto.json") as { count?: unknown; cases?: unknown };
 const points = load("auscultation-points.json") as { points?: unknown };
@@ -127,14 +125,12 @@ describe("Ausculta veri envanteri", () => {
     expect(cases.cases).toHaveLength(24);
     expect(casesAuto.count).toBe(176);
     expect(casesAuto.cases).toHaveLength(176);
-    expect(points.points).toHaveLength(17);
+    expect(points.points).toHaveLength(23); // T307: 17 + 6 lateral
     expect(library.groups).toHaveLength(3);
-    expect(libraryItems).toHaveLength(20);
+    expect(libraryItems).toHaveLength(24); // T307: holosistolik, erken diyastolik, stridor, wheezing+raller
     expect(pediatric.rows).toHaveLength(6);
-    expect(sources.datasets).toHaveLength(4);
+    expect(sources.datasets).toHaveLength(6); // T307: ICBHI 2017, Mendeley kapak yetersizliği
     expect(sources.inventory).toHaveLength(2);
-    expect(samples.version).toBe(1);
-    expect(Object.keys(samples.topics ?? {})).toHaveLength(libraryItems.length);
   });
 
   it("KAUH posterior kayıtları KVKK'ya uygun, nokta eşlemeli ve onay bekler (T227)", () => {

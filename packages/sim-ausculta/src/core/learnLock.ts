@@ -4,13 +4,18 @@ import type { StoragePort } from "./reducer";
 import type { Mode } from "./types";
 
 /** T209 — öğrenme tamamlama tespiti ve mod kilidi (depo sahibi kararı, 27 Eyl 2026):
- *  öğrenme kütüphanesindeki HER ses öğesi en az bir kez dinlenmeden uygulama ve
- *  değerlendirme kilitlidir. Kayıt, simin kullanıcı×sim ad alanlı deposunda tutulur
- *  (`ausculta.learn.listened`); host kanalı (`SimLearnPort`) varsa tamamlanma sunucuya
- *  da yazılır. Saf modül: React/DOM yok, `Date.now()` yok. */
+ *  öğrenme kütüphanesindeki HER ses öğesi dinlenmeden uygulama ve değerlendirme kilitlidir.
+ *  T307 (2 Eki 2026, Pulse ile aynı kural): öğe ancak sahnede ses gerçekten çalarken
+ *  toplam `LEARN_SECONDS` saniye dinlenince tamamlanır; tıklama sayılmaz. Kayıt, simin
+ *  kullanıcı×sim ad alanlı deposunda tutulur (`ausculta.learn.seconds`); host kanalı
+ *  (`SimLearnPort`) varsa tamamlanma sunucuya da yazılır. Saf modül: React/DOM yok. */
 
-/** Dinlenen kütüphane anahtarlarının kalıcı listesi (JSON dizi). */
-export const LEARN_LISTENED_KEY = "ausculta.learn.listened";
+/** Öğe başına gereken dinleme süresi (saniye). */
+export const LEARN_SECONDS = 60;
+
+/** Öğe → dinlenen saniye haritası (JSON nesne). Eski `ausculta.learn.listened` kümesi
+ *  60 sn kuralını karşılamadığı için okunmaz. */
+export const LEARN_LISTENED_KEY = "ausculta.learn.seconds";
 
 /** Kütüphane listesinden türetilen kısa, deterministik içerik sürümü.
  *  Sözleşme deseni `^[a-z0-9._-]{1,40}$` (packages/contracts/src/schemas/learn.ts). */
@@ -26,32 +31,40 @@ export function contentVersion(keys: readonly string[] = LIBRARY_ITEM_KEYS): str
 
 export const AUSCULTA_CONTENT_VERSION = contentVersion(LIBRARY_ITEM_KEYS);
 
-/** Bozuk/eksik kayıt güvenle boş küme sayılır; kütüphanede artık olmayan anahtarlar yok sayılır. */
-export function parseListened(raw: string | null, libraryKeys: readonly string[] = LIBRARY_ITEM_KEYS): Set<string> {
-  if (raw === null) return new Set();
+/** Bozuk/eksik kayıt güvenle boş harita sayılır; kütüphanede olmayan anahtar ve geçersiz
+ *  değerler yok sayılır, değerler [0, LEARN_SECONDS] aralığına kırpılır. */
+export function parseListened(raw: string | null, libraryKeys: readonly string[] = LIBRARY_ITEM_KEYS): Map<string, number> {
+  const out = new Map<string, number>();
+  if (raw === null) return out;
   try {
     const parsed: unknown = JSON.parse(raw);
-    if (!Array.isArray(parsed)) return new Set();
+    if (parsed === null || typeof parsed !== "object" || Array.isArray(parsed)) return out;
     const allowed = new Set(libraryKeys);
-    return new Set(parsed.filter((key): key is string => typeof key === "string" && allowed.has(key)));
+    for (const [key, value] of Object.entries(parsed as Record<string, unknown>)) {
+      if (allowed.has(key) && typeof value === "number" && Number.isFinite(value) && value > 0) {
+        out.set(key, Math.min(LEARN_SECONDS, value));
+      }
+    }
+    return out;
   } catch {
-    return new Set();
+    return out;
   }
 }
 
-export function loadListened(storage: StoragePort, libraryKeys: readonly string[] = LIBRARY_ITEM_KEYS): Set<string> {
+export function loadListened(storage: StoragePort, libraryKeys: readonly string[] = LIBRARY_ITEM_KEYS): Map<string, number> {
   try {
     return parseListened(storage.get(LEARN_LISTENED_KEY), libraryKeys);
   } catch {
-    return new Set();
+    return new Map();
   }
 }
 
-export function saveListened(storage: StoragePort, listened: ReadonlySet<string>): void {
+export function saveListened(storage: StoragePort, seconds: ReadonlyMap<string, number>): void {
   try {
-    storage.set(LEARN_LISTENED_KEY, JSON.stringify([...listened].sort()));
+    const sorted = [...seconds.entries()].sort(([a], [b]) => a.localeCompare(b));
+    storage.set(LEARN_LISTENED_KEY, JSON.stringify(Object.fromEntries(sorted.map(([key, value]) => [key, Math.round(value * 10) / 10]))));
   } catch {
-    /* depolama kapalı/dolu: kayıt yazılamaz, kilit yerel kümeye göre yine açılır */
+    /* depolama kapalı/dolu: kayıt yazılamaz, kilit oturum içi haritaya göre yine açılır */
   }
 }
 
@@ -75,9 +88,8 @@ export function canStartMode(mode: Mode, complete: boolean): boolean {
   return mode === "learn" || complete;
 }
 
-/** Oynatma başarısı → dinlenen anahtar eşlemesi: yalnız sahada gerçekten oynayan
- *  (playing) ve öğenin dinleme noktalarından birine yerleşmiş stetoskop öğeyi işaretler;
- *  yalnız seçmek (playing false) yetmez. */
+/** Dinleme tıkı → öğe eşlemesi: yalnız ses çalarken ve stetoskop öğenin dinleme
+ *  noktalarından birindeyken süre sayılır; yalnız seçmek ya da tıklamak yetmez. */
 export function listenedKeyOnPlay(
   playing: boolean,
   pointId: string | null,
@@ -113,7 +125,10 @@ export function createLearnCompletionNotifier(
 }
 
 export interface LearnSnapshot {
+  /** En az `LEARN_SECONDS` dinlenmiş öğeler. */
   readonly listened: ReadonlySet<string>;
+  /** Öğe başına dinlenen saniye (0–LEARN_SECONDS). */
+  readonly seconds: ReadonlyMap<string, number>;
   readonly listenedCount: number;
   readonly total: number;
   readonly hostComplete: boolean;
@@ -135,7 +150,8 @@ export interface LearnTrackerDeps {
  *  React dışıdır; `LearnGate` sağlayıcısı bunu abonelikle yüzeye taşır. */
 export interface LearnTracker {
   snapshot(): LearnSnapshot;
-  markListened(key: string): LearnSnapshot;
+  /** Ses çalarken geçen süreyi öğeye ekler; eşik aşılınca öğe tamamlanır. */
+  addListen(key: string, ms: number): LearnSnapshot;
   /** Açılışta bir kez: yerel küme zaten tamamsa (önceki hata/eksik sürüm) kaydı tazeler. */
   notify(): void;
   subscribe(listener: () => void): () => void;
@@ -149,15 +165,18 @@ export function createLearnTracker(deps: LearnTrackerDeps): LearnTracker {
   const allowed = new Set(libraryKeys);
   const notifier = createLearnCompletionNotifier(deps.learn, version);
   const listeners = new Set<() => void>();
-  let listened = loadListened(deps.storage, libraryKeys);
+  let seconds = loadListened(deps.storage, libraryKeys);
+  let unsavedMs = 0;
   let cached: LearnSnapshot | null = null;
 
   const snapshot = (): LearnSnapshot => {
     if (cached !== null) return cached;
-    const listenedCount = libraryKeys.reduce((sum, key) => (listened.has(key) ? sum + 1 : sum), 0);
+    const listened = new Set(libraryKeys.filter((key) => (seconds.get(key) ?? 0) >= LEARN_SECONDS));
+    const listenedCount = listened.size;
     const localComplete = total > 0 && listenedCount === total;
     cached = {
       listened,
+      seconds,
       listenedCount,
       total,
       hostComplete,
@@ -174,13 +193,21 @@ export function createLearnTracker(deps: LearnTrackerDeps): LearnTracker {
     notify(): void {
       notifier.notify(snapshot().localComplete);
     },
-    markListened(key: string): LearnSnapshot {
-      if (!allowed.has(key) || listened.has(key)) return snapshot();
-      listened = new Set(listened).add(key);
-      saveListened(deps.storage, listened);
+    addListen(key: string, ms: number): LearnSnapshot {
+      const before = seconds.get(key) ?? 0;
+      if (!allowed.has(key) || !(ms > 0) || before >= LEARN_SECONDS) return snapshot();
+      const after = Math.min(LEARN_SECONDS, before + ms / 1000);
+      seconds = new Map(seconds).set(key, after);
+      unsavedMs += ms;
+      const crossed = after >= LEARN_SECONDS;
+      // Depoya yaklaşık 2 sn'de bir ve eşik aşılınca yazılır.
+      if (crossed || unsavedMs >= 2000) {
+        unsavedMs = 0;
+        saveListened(deps.storage, seconds);
+      }
       cached = null;
       const next = snapshot();
-      notifier.notify(next.localComplete);
+      if (crossed) notifier.notify(next.localComplete);
       for (const listener of [...listeners]) listener();
       return next;
     },
@@ -196,6 +223,7 @@ export function createLearnTracker(deps: LearnTrackerDeps): LearnTracker {
 /** Sağlayıcı olmadan (bağımsız/eksik kurulum) güvenli varsayılan: kilitli. */
 export const LOCKED_LEARN_SNAPSHOT: LearnSnapshot = {
   listened: new Set(),
+  seconds: new Map(),
   listenedCount: 0,
   total: LIBRARY_ITEM_COUNT,
   hostComplete: false,

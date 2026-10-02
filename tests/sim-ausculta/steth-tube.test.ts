@@ -75,6 +75,27 @@ describe("stetoskop tüpü geometrisi (T228)", () => {
     expect(parsed.c2.y).toBeLessThanOrEqual(size.h);
   });
 
+  it("T307: geniş sahnede tüp, uçlar arası düz mesafenin ~2 katından kısa değildir", () => {
+    const stage = { w: 1000, h: 940 };
+    const anchor = tubeAnchor(stage);
+    const tip = tubeTip({ x: 520, y: 420 });
+    const { start, c1, c2, end } = parseTube(tubePath(anchor, tip, stage));
+    let length = 0;
+    let prev = start;
+    for (let i = 1; i <= 64; i += 1) {
+      const t = i / 64;
+      const u = 1 - t;
+      const point = {
+        x: u * u * u * start.x + 3 * u * u * t * c1.x + 3 * u * t * t * c2.x + t * t * t * end.x,
+        y: u * u * u * start.y + 3 * u * u * t * c1.y + 3 * u * t * t * c2.y + t * t * t * end.y,
+      };
+      length += Math.hypot(point.x - prev.x, point.y - prev.y);
+      prev = point;
+    }
+    expect(length).toBeGreaterThan(1.9 * Math.hypot(tip.x - anchor.x, tip.y - anchor.y));
+    expect(c1.y).toBeLessThanOrEqual(stage.h);
+  });
+
   it("yakın uçlar NaN üretmez", () => {
     const anchor = tubeAnchor(size);
     const center = { x: anchor.x + 6, y: anchor.y + 8 };

@@ -56,6 +56,18 @@ export const TERMINOLOGY = {
         librarySub: "Geç sistolikte üfürüm",
         finding: "Geç sistolik üfürüm",
       },
+      holosystolic: {
+        title: "Sistolik Üfürüm (Holosistolik)",
+        short: "Holosistolik üfürüm",
+        librarySub: "S1'den S2'ye sabit şiddette üfürüm",
+        finding: "Holosistolik üfürüm",
+      },
+      early_diastolic: {
+        title: "Diyastolik Üfürüm (Erken Diyastolik)",
+        short: "Erken diyastolik üfürüm",
+        librarySub: "S2 sonrası azalan üfleyici üfürüm",
+        finding: "Erken diyastolik üfürüm",
+      },
       late_diastolic: {
         title: "Diyastolik Üfürüm (Geç Diyastolik)",
         short: "Geç diyastolik üfürüm",
@@ -101,12 +113,26 @@ export const TERMINOLOGY = {
       librarySub: "Plevral yüzeylerin sürtünme sesi",
       finding: "Plevral frotman (pleural friction rub)",
     },
+    stridor: {
+      title: "Stridor",
+      short: "Stridor",
+      librarySub: "Üst hava yolu daralması, inspiratuvar",
+      finding: "Stridor",
+    },
+    wheeze_crackle: {
+      title: "Wheezing + Raller",
+      short: "Wheezing + raller",
+      librarySub: "Hışıltı ile birlikte raller",
+      finding: "Wheezing ve raller birlikte",
+    },
   },
   misc: {
     bell: "Bell",
     diaphragm: "Diyafram",
-    front: "Ön Görünüm",
-    back: "Arka Görünüm",
+    front: "Anterior",
+    back: "Posterior",
+    left: "Sol lateral",
+    right: "Sağ lateral",
   },
 } as const;
 
@@ -120,6 +146,8 @@ export type HeartFindingKey =
   | "murmur.early_systolic"
   | "murmur.mid_systolic"
   | "murmur.late_systolic"
+  | "murmur.holosystolic"
+  | "murmur.early_diastolic"
   | "murmur.late_diastolic";
 
 export type LungFindingKey =
@@ -128,7 +156,9 @@ export type LungFindingKey =
   | "rhonchi"
   | "fine_crackles"
   | "coarse_crackles"
-  | "pleural_rub";
+  | "pleural_rub"
+  | "stridor"
+  | "wheeze_crackle";
 
 /** kütüphana anahtarları 'heart.normal' gibi prefixli gelir; düz bulgu anahtarına indir */
 function bare(key: string): string {

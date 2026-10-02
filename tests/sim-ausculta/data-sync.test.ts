@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { RECORDS } from "../../packages/sim-ausculta/src/index";
+import { learnExamples } from "../../packages/sim-ausculta/src/data/learnSets";
 import { AUTO_CASES, CORE_CASES, poolFor } from "./bank-cases";
 import type { CaseDef } from "../../packages/sim-ausculta/src/index";
 
@@ -37,9 +38,13 @@ describe("veri seti ↔ kütüphane ↔ vaka senkronizasyonu", () => {
     for (const f of [...heartClasses, ...lungClasses]) expect(assessment.has(f), `değerlendirme: ${f}`).toBe(true);
   });
   it("kütüphanedeki her ses sınıfı için en az bir çalınabilir kayıt var", () => {
-    for (const f of libFindings) {
-      const playable = RECORDS.some((r) => r.acousticFinding === f && r.validationStatus === "validated");
-      expect(playable, `kayıt: ${f}`).toBe(true);
+    // T307: yeni 4 konunun sentetik seti HLS-CMDS'de değil, öğrenme setlerindeki bölgesel modelde.
+    const items = libraryData.groups.flatMap((g) => g.items);
+    for (const item of items) {
+      const playable =
+        RECORDS.some((r) => r.acousticFinding === item.acousticFinding && r.validationStatus === "validated") ||
+        learnExamples(item.key).some((example) => example.kind !== "library" && Object.keys(example.points).length > 0);
+      expect(playable, `kayıt: ${item.acousticFinding}`).toBe(true);
     }
   });
   it("kombine (mixed) sesler kütüphanede ve uygulamada temsil ediliyor", () => {

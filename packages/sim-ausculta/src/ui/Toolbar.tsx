@@ -112,8 +112,18 @@ export interface ToolbarProps {
 
 /** İzinli olmayan görünümün kısa Türkçe açıklaması (renk dışı kilit imiyle birlikte). */
 export function viewLockReason(view: PatientView): string {
-  return view === "front" ? "Bu vakada dinlenecek ön bölge yok" : "Bu vakada dinlenecek arka bölge yok";
+  return `Bu vakada dinlenecek ${VIEW_LABEL[view].toLocaleLowerCase("tr")} bölge yok`;
 }
+
+/** Görünüm adları (depo sahibi, 2 Eki 2026: "ön/arka" yerine anterior/posterior). */
+export const VIEW_LABEL: Record<PatientView, string> = {
+  front: "Anterior",
+  back: "Posterior",
+  left: "Sol lateral",
+  right: "Sağ lateral",
+};
+
+const VIEW_SHORT: Record<PatientView, string> = { front: "Anterior", back: "Posterior", left: "Sol lat.", right: "Sağ lat." };
 
 function rangeVolume(target: unknown): number {
   if (!target || typeof target !== "object" || !("value" in target)) return 0;
@@ -151,6 +161,12 @@ export function Toolbar({
   const allowedViews: readonly PatientView[] =
     declaredViews !== undefined && declaredViews.length > 0 ? declaredViews : ["front", "back"];
   const lockedViews = (["front", "back"] as const).filter((view) => !allowedViews.includes(view));
+  // Lateral görünümler yalnız izinliyse gösterilir (vakalarda yok; öğrenmede gerçek lateral kayıt).
+  const shownViews: PatientView[] = [
+    "front",
+    "back",
+    ...(["left", "right"] as const).filter((view) => allowedViews.includes(view)),
+  ];
   const [hintOpen, setHintOpen] = useState(initialHintOpen);
   const showHint = showHintControl(strict, question?.hint, hintOpen, state.hintsUsed);
   const ports: ToolbarPorts = {
@@ -198,10 +214,10 @@ export function Toolbar({
         </div>
         <div className="tool-sep" />
         <div className="view-toggle" role="group" aria-label="Gövde görünümü">
-          {(["front", "back"] as const).map((view) => {
+          {shownViews.map((view) => {
             const selected = state.view === view;
             const enabled = allowedViews.includes(view);
-            const label = view === "front" ? "Ön" : "Arka";
+            const label = VIEW_SHORT[view];
             const reason = viewLockReason(view);
             return (
               <button
@@ -216,7 +232,7 @@ export function Toolbar({
                 title={enabled ? undefined : reason}
                 onClick={() => performToolbar(ports, { kind: "view", view })}
               >
-                {view === "front" ? <IconBodyFront /> : <IconBodyBack />} {label}
+                {view === "back" ? <IconBodyBack /> : <IconBodyFront />} {label}
                 <SelectedMark on={selected} />
                 {!enabled && (
                   <span className="view-locked" aria-hidden="true">
@@ -278,7 +294,7 @@ export function Toolbar({
       {lockedViews.length > 0 && (
         <p className="view-note">
           <IconLock width={13} height={13} aria-hidden="true" />{" "}
-          {lockedViews.map((view) => `${view === "front" ? "Ön" : "Arka"} görünüm kapalı: ${viewLockReason(view).toLocaleLowerCase("tr")}.`).join(" ")}
+          {lockedViews.map((view) => `${VIEW_LABEL[view]} görünüm kapalı: ${viewLockReason(view).toLocaleLowerCase("tr")}.`).join(" ")}
         </p>
       )}
     </>
