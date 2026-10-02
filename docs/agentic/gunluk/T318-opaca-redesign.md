@@ -1,6 +1,6 @@
 # T318-opaca-redesign
 
-- Tarih: 2026-10-02 21:17
+- Tarih: 2026-10-02 21:55
 - Commit: T318: Opaca öğrenme modu yeniden tasarımı — hasta kartı sağ çerçeve, konu başına 1–4 klinik öncelikli örnek
 
 Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>

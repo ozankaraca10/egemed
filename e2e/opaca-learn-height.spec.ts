@@ -8,7 +8,7 @@ import { openRoute, trackErrors } from "./helpers";
  * Hata (27 Eyl 2026): 3 sütunlu öğrenme ızgarasında satır yüksekliği uzun
  * kütüphane listesine göre büyüyor, gerilen orta sütun film tuvalini
  * şişiriyordu (1440×900'de scrollHeight ≈2551). Düzeltme sonrası sayfa kısa
- * kalır ve kütüphane kendi içinde kayar. Tek ölçüm noktası masaüstü 3 sütun
+ * kalır ve kütüphane kendi içinde kayar (T318: kaydırıcı rayın kendisi). Tek ölçüm noktası masaüstü 3 sütun
  * düzenidir; <1024 px akışı bu testin kapsamı dışındadır (mevcut davranış).
  */
 test.describe("Opaca öğrenme ekranı dikey yerleşimi (T207)", () => {
@@ -21,7 +21,7 @@ test.describe("Opaca öğrenme ekranı dikey yerleşimi (T207)", () => {
     await expect(root.locator(".lib-col")).toBeVisible();
 
     const metrics = await page.evaluate(() => {
-      const scroller = document.querySelector(".lib-col .lib-scroll");
+      const scroller = document.querySelector(".learn-grid > .lib-col");
       const heading = document.querySelector(".lib-col h2");
       const headingRect = heading?.getBoundingClientRect() ?? null;
       return {

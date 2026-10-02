@@ -150,7 +150,14 @@ async function answerCurrentQuestion(root: Locator, sim: SimId): Promise<void> {
   const filmStage = root.locator(".film-stage");
   const primary = root.locator(".q-nav button.btn.primary");
   if ((await options.count()) > 0) await options.first().click({ timeout: 2_000 });
-  else if (sim === "opaca" && (await filmStage.count()) > 0) await filmStage.click({ timeout: 2_000 });
+  else if (sim === "opaca" && (await filmStage.count()) > 0) {
+    // İşaretleme sorusu: görüntü dosyası yoksa (CI) tıklama işaret bırakmaz; klavye yolu (odak + Enter) görünüm merkezini işaretler.
+    await filmStage.first().click({ timeout: 2_000 });
+    if (await primary.isDisabled()) {
+      await filmStage.first().focus();
+      await filmStage.first().press("Enter");
+    }
+  }
   else return;
   await primary.click({ timeout: 5_000 });
   await expect(root.locator(".feedback-head").first()).toBeVisible({ timeout: 5_000 });
