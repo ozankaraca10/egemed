@@ -1,4 +1,4 @@
-import type { JSX } from "react";
+import type { JSX, ReactNode } from "react";
 import type { WaveView } from "../data/learnSets";
 
 /** T307 — öğrenme modu dalga paneli: çalan kaydın zarfı ve kaynağın uzman
@@ -33,11 +33,13 @@ export interface LearnWaveProps {
   readonly wave: WaveView | null;
   readonly markSource: string | null;
   readonly emptyText: string;
+  /** T309: oynatıcı denetimleri (dinle/durdur, göğüs başlığı). */
+  readonly controls?: ReactNode;
 }
 
-export function LearnWave({ title, meta, wave, markSource, emptyText }: LearnWaveProps): JSX.Element {
+export function LearnWave({ title, meta, wave, markSource, emptyText, controls }: LearnWaveProps): JSX.Element {
   const W = 600;
-  const H = 150;
+  const H = 190;
   const mid = H / 2 - 8;
   const types = wave ? [...new Set(wave.marks.map((mark) => mark.k))] : [];
   return (
@@ -86,6 +88,7 @@ export function LearnWave({ title, meta, wave, markSource, emptyText }: LearnWav
         {wave && types.length > 0 && markSource ? <span>Etiketler: {markSource}</span> : null}
         {wave && types.length === 0 ? <span>Bu kayıtta olay zamanı etiketi yok; dalga formu kaydın kendisi.</span> : null}
       </div>
+      {controls ? <div className="lw-ctrls">{controls}</div> : null}
     </section>
   );
 }

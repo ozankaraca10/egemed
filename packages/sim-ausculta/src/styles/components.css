@@ -293,7 +293,6 @@
 .eg-sim-ausculta .dot-live { width: 8px; height: 8px; border-radius: 50%; background: var(--green-600); box-shadow: 0 0 0 3px rgba(22,163,74,.18); animation: eg-ausculta-dotpulse 1.4s ease-in-out infinite; flex-shrink: 0; }
 @keyframes eg-ausculta-dotpulse { 0%, 100% { opacity: 1; } 50% { opacity: .4; } }
 @keyframes eg-ausculta-eq { 0%,100% { transform: scaleY(.4); } 50% { transform: scaleY(1); } }
-.eg-sim-ausculta .learn-grid { display: grid; grid-template-columns: 22fr 47fr 31fr; gap: 14px; flex: 1; min-height: 0; padding: 12px 0 14px; align-items: stretch; }
 .eg-sim-ausculta .learn-grid > * { min-width: 0; }
 .eg-sim-ausculta .sim-grid > * { min-width: 0; }
 .eg-sim-ausculta .lib-col { display: flex; flex-direction: column; min-width: 0; min-height: 0; overflow-y: auto; padding-right: 4px; }
@@ -302,8 +301,6 @@
 .eg-sim-ausculta .lib-col h2 { font-size: var(--fs-2xl); color: var(--navy-800); margin: 0 0 2px; }
 .eg-sim-ausculta .lib-col .lib-sub { color: var(--ink-600); margin: 0 0 12px; font-size: var(--fs-sm); }
 /* T209: öğrenme ilerlemesi ve "dinlendi" işaretleri (renk dışında ✓ + aria-label). */
-.eg-sim-ausculta .learn-progress { margin: 10px 0 0; font-size: var(--fs-sm); font-weight: 700; color: var(--navy-800); }
-.eg-sim-ausculta .challenge-lock-notice { margin: 6px 0 0; }
 .eg-sim-ausculta .lib-group .g-title .g-count { margin-left: auto; font-size: var(--fs-xs); font-weight: 700; color: var(--ink-600); background: var(--card); border: 1px solid var(--border); border-radius: var(--r-pill); padding: 1px 8px; }
 .eg-sim-ausculta .lib-item .lib-done { color: var(--green-600); font-weight: 800; font-size: var(--fs-xs); }
 .eg-sim-ausculta .lib-item.listened .ic { background: var(--green-50); color: var(--green-600); }
@@ -653,10 +650,6 @@
 }
 @media (max-height: 860px) {
   .eg-sim-ausculta { --head-h: 56px; --foot-h: 44px; }
-  .eg-sim-ausculta .learn-grid { grid-template-columns: 22fr 47fr 31fr; }
-}
-@media (max-width: 1280px) {
-  .eg-sim-ausculta .learn-grid { grid-template-columns: 25fr 40fr 35fr; gap: 12px; }
 }
 @media (max-width: 1080px) {
   .eg-sim-ausculta .app-shell { height: auto; min-height: 100dvh; overflow: visible; }
@@ -794,41 +787,7 @@
   .eg-sim-ausculta .kv { flex: 1 1 84px; }
 }
 
-/* T206: 3 sütunlu öğrenme ızgarasında sol kütüphane sütunu satır yüksekliğini
-   belirliyor, ızgara onun içerik boyuna uzuyor ve orta sahne bu yüksekliğe
-   gerildiği için görüntünün üstünde/altında boş alan kalıyordu (1440×900'de
-   scrollHeight ≈1480). Düzeltme: satırlar içerik yüksekliğinde hizalanır
-   (align-items: start — orta sütun ve bilgi kartı gerilmez), kütüphane paneli
-   sim çubuğunun altına yapışır ve kendi içinde kayar (max-height + mevcut
-   overflow-y: auto), sahne ise gövde görselinin en-boy oranında kalır. Oranlar
-   auscultation-points.json `images.male` (ön 1000×933, arka 1000×915) ile
-   eşleşir; `data-view` LearnScreen'deki sahne kartına yazılır. 3 sütun yalnız
-   >1080 px'te etkindir (`max-width: 1080px` bloğu tek sütuna indirir); bu
-   yüzden kurallar `min-width: 1081px` ile sınırlanır, 768/390 akışı değişmez. */
-@media (min-width: 1081px) {
-  /* Kabuk sim kökünü ve gövdeyi `overflow: hidden` ile kırpıyor; bu, yapışkan
-     panelin en yakın kaydırma kabı olup sticky'yi etkisiz bırakıyordu. Öğrenme
-     ekranında (`.learn-body`) kaydırma belgeye bırakılır: içerik zaten sınırlı,
-     yatay taşma yok. `:has` yalnız bu ekranı hedefler; diğer ekranlar değişmez. */
-  .eg-sim-ausculta:has(.learn-body) { overflow: visible; }
-  .eg-sim-ausculta .screen-body.no-scroll.learn-body { overflow: visible; }
-  .eg-sim-ausculta .learn-grid { align-items: start; }
-  .eg-sim-ausculta .learn-grid > .lib-col {
-    position: sticky;
-    top: calc(var(--head-h) + var(--sp-2));
-    max-height: calc(100dvh - var(--head-h) - var(--sp-5));
-  }
-  .eg-sim-ausculta .learn-grid .stage-card { flex: 0 0 auto; }
-  .eg-sim-ausculta .learn-grid .stage-card .stage { flex: 0 0 auto; aspect-ratio: 1000 / 933; }
-  .eg-sim-ausculta .learn-grid .stage-card[data-view="left"] .stage,
-  .eg-sim-ausculta .learn-grid .stage-card[data-view="right"] .stage { aspect-ratio: 1000 / 940; }
-  .eg-sim-ausculta .learn-grid .stage-card[data-view="back"] .stage { aspect-ratio: 1000 / 915; }
-}
-
 /* ---------------- T307 — öğrenme modu (depo sahibi onayı 2 Eki 2026) ---------------- */
-.eg-sim-ausculta .learn-grid .sim-main { overflow-y: auto; padding-right: 2px; }
-.eg-sim-ausculta .learn-grid .sim-main > .stage-card { flex: 0 0 auto; }
-.eg-sim-ausculta .learn-grid .toolbar { flex-wrap: wrap; }
 .eg-sim-ausculta .learn-head { display: grid; gap: 4px; }
 .eg-sim-ausculta .learn-eb { font-size: var(--fs-xs); font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: var(--blue-700); }
 .eg-sim-ausculta .learn-title { margin: 0; font-size: var(--fs-xl); color: var(--navy-900); line-height: 1.2; }
@@ -892,3 +851,120 @@
 .eg-sim-ausculta .la-refs { margin: 0; display: flex; flex-wrap: wrap; align-items: center; column-gap: 10px; font-size: var(--fs-xs); color: var(--ink-600); }
 .eg-sim-ausculta .la-refs a { display: inline-flex; align-items: center; min-height: 44px; color: var(--blue-700); text-decoration: underline; text-underline-offset: 2px; }
 @media (prefers-reduced-motion: reduce) { .eg-sim-ausculta .learn-study i b { transition: none; } }
+
+/* ---------------- T309 — öğrenme modu, onaylı yeniden tasarım maketi (2 Eki 2026) ----------------
+   Düzen: konu rayı 264 px · manken ve hasta (en çok 424 px) · kayıt + açıklama (kalan).
+   Sütunlar kenar kenara, her biri kendi içinde kayar; renkler `packages/tokens/ausculta.css`. */
+.eg-sim-ausculta .learn-body { padding: 0; max-width: none; }
+.eg-sim-ausculta .learn-grid { display: grid; grid-template-columns: 264px minmax(344px, 424px) minmax(0, 1fr); gap: 0; padding: 0; align-items: stretch; flex: 1; min-height: 0; }
+.eg-sim-ausculta .learn-grid > .lib-col,
+.eg-sim-ausculta .learn-grid > .sim-main,
+.eg-sim-ausculta .learn-grid > .sim-side { min-height: 0; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; }
+.eg-sim-ausculta .challenge-lock-notice { margin: 8px 16px; }
+
+/* Konu rayı */
+.eg-sim-ausculta .learn-grid > .lib-col { background: var(--card); border-right: 1px solid var(--border); padding: 14px 10px; display: block; }
+.eg-sim-ausculta .lib-col .lib-head { margin: 4px 8px 10px; font-size: var(--fs-xs); font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-600); }
+.eg-sim-ausculta .learn-grid .lib-group { margin: 0; }
+.eg-sim-ausculta .learn-grid .lib-group .g-title { position: static; display: flex; align-items: center; gap: 6px; margin: 12px 8px 4px; padding: 0; background: none; backdrop-filter: none; font-size: 11px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-600); }
+.eg-sim-ausculta .learn-grid .lib-group .g-title .g-count { margin-left: auto; background: none; border: 0; padding: 0; font-variant-numeric: tabular-nums; }
+.eg-sim-ausculta .learn-grid .lib-items { display: flex; flex-direction: column; gap: 0; }
+.eg-sim-ausculta .learn-grid .lib-item { display: flex; align-items: center; gap: 8px; width: 100%; min-height: 44px; padding: 6px 10px; border: 0; border-radius: var(--r-md); background: none; box-shadow: none; font-size: var(--fs-sm); color: var(--ink-700); text-align: left; }
+.eg-sim-ausculta .learn-grid .lib-item:hover { background: var(--card-soft); }
+.eg-sim-ausculta .learn-grid .lib-item.active { background: var(--aus-50); border: 0; box-shadow: none; padding-left: 10px; }
+.eg-sim-ausculta .learn-grid .lib-item b { font-weight: 500; font-size: var(--fs-sm); color: inherit; flex: 1 1 auto; min-width: 0; }
+.eg-sim-ausculta .learn-grid .lib-item.active b { font-weight: 700; color: var(--aus-900); }
+.eg-sim-ausculta .learn-grid .lib-item .ck { width: 16px; height: 16px; flex: none; border-radius: 50%; border: 1.5px solid var(--ink-300); display: grid; place-items: center; font-size: 10px; font-weight: 900; color: var(--card); line-height: 1; }
+.eg-sim-ausculta .learn-grid .lib-item .ck.done { background: var(--green-600); border-color: var(--green-600); }
+.eg-sim-ausculta .learn-grid .lib-item .lib-urgent { flex: none; }
+
+/* Orta sütun */
+.eg-sim-ausculta .learn-grid > .sim-main { display: grid; gap: 12px; align-content: start; grid-auto-rows: max-content; padding: 16px; border-right: 1px solid var(--border); background: linear-gradient(180deg, var(--card), var(--card-soft)); }
+.eg-sim-ausculta .learn-eb { color: var(--aus-700); }
+.eg-sim-ausculta .learn-title { font-size: 22px; letter-spacing: -.02em; line-height: 1.15; }
+.eg-sim-ausculta .learn-study i b { background: var(--green-600); }
+.eg-sim-ausculta .learn-grid .stage-card { position: relative; padding: 0; border: 0; border-radius: 16px; overflow: hidden; background: var(--card); box-shadow: var(--shadow-card); flex: none; gap: 0; }
+.eg-sim-ausculta .learn-grid .stage-card .stage { flex: none; aspect-ratio: 1000 / 933; min-height: 0; border-radius: 0; }
+.eg-sim-ausculta .learn-grid .stage-card[data-view="back"] .stage { aspect-ratio: 1000 / 915; }
+.eg-sim-ausculta .learn-grid .stage-card[data-view="left"] .stage,
+.eg-sim-ausculta .learn-grid .stage-card[data-view="right"] .stage { aspect-ratio: 1000 / 940; }
+.eg-sim-ausculta .stage-card .stage-views { position: absolute; top: 10px; right: 10px; z-index: 8; padding: 0; gap: 0; border: 0; border-radius: 10px; overflow: hidden; background: var(--overlay-94); box-shadow: var(--shadow-card); }
+.eg-sim-ausculta .stage-card .stage-views button { min-height: 36px; min-width: 0 !important; padding: 0 6px; gap: 2px; border-radius: 0; font-size: 11px; font-weight: 700; color: var(--ink-600); }
+.eg-sim-ausculta .stage-card .stage-views button .view-locked svg { width: 11px; height: 11px; }
+.eg-sim-ausculta .stage-card .stage-views button.active { background: var(--aus-700); color: var(--card); box-shadow: none; }
+.eg-sim-ausculta .stage-card .stage-views button .tool-mark { display: none; }
+.eg-sim-ausculta .stage-card .stage-views button:disabled { opacity: .45; }
+.eg-sim-ausculta .stage-card .layer-toggle { position: absolute; right: 10px; bottom: 10px; z-index: 8; border: 0; border-radius: 10px; background: var(--overlay-94); box-shadow: var(--shadow-card); }
+.eg-sim-ausculta .stage-card .layer-toggle button { min-height: 36px; font-size: var(--fs-xs); }
+.eg-sim-ausculta .stage-card .layer-toggle button.active { background: var(--aus-700); }
+.eg-sim-ausculta .stage-fig { position: absolute; left: 10px; bottom: 10px; z-index: 8; font-size: 11px; font-weight: 800; color: var(--aus-900); background: var(--overlay-94); padding: 4px 9px; border-radius: var(--r-pill); box-shadow: var(--shadow-card); }
+.eg-sim-ausculta .learn-grid .stage-card .stage-fit { inset: 0; }
+/* Maket: sürükleme ipucu sahnede değil, oynatıcıda ("▶ Dinle" / boş dalga metni). */
+.eg-sim-ausculta .learn-grid .stage-card .dwell-hint:not(.dwell-error) { display: none; }
+.eg-sim-ausculta .learn-grid .note-strip { margin: 0; }
+.eg-sim-ausculta .learn-examples { gap: 6px; }
+.eg-sim-ausculta .ex-row { flex-wrap: wrap; }
+.eg-sim-ausculta .ex-btn { flex: 1 1 0; min-width: 52px; min-height: 44px; padding: 4px 8px; border-radius: 10px; font-size: var(--fs-xs); display: grid; place-items: center; line-height: 1.2; }
+.eg-sim-ausculta .ex-btn small { display: block; font-size: 11px; font-weight: 600; }
+.eg-sim-ausculta .ex-btn.real.active { border-color: var(--aus-500); background: var(--aus-50); color: var(--aus-900); }
+.eg-sim-ausculta .ex-btn.syn.active { border-color: var(--purple-700); background: var(--purple-50); color: var(--purple-700); }
+.eg-sim-ausculta .patient-card { border-radius: 14px; }
+.eg-sim-ausculta .pc-row { grid-template-columns: auto 1fr; }
+
+/* Sağ sütun: oynatıcı + açıklama */
+.eg-sim-ausculta .learn-grid > .sim-side { display: grid; gap: 12px; align-content: start; grid-auto-rows: max-content; padding: 14px; background: var(--card-soft); }
+.eg-sim-ausculta .lw { background: linear-gradient(180deg, var(--aus-player-a), var(--aus-player-b)); border-radius: 16px; padding: 14px; gap: 10px; box-shadow: var(--shadow-card); }
+.eg-sim-ausculta .lw-top b { font-size: var(--fs-md); }
+.eg-sim-ausculta .lw-svg { height: 190px; border-radius: 10px; }
+.eg-sim-ausculta .lw-bg { fill: var(--aus-player-bg); }
+.eg-sim-ausculta .lw-grid { stroke: var(--navy-800); }
+.eg-sim-ausculta .lw-env { stroke: var(--aus-wave); stroke-width: 2.2; }
+.eg-sim-ausculta .lw-empty { min-height: 190px; display: grid; place-items: center; background: var(--aus-player-bg); border-radius: 10px; }
+.eg-sim-ausculta .lw-ctrls { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.eg-sim-ausculta .lw-play { min-height: 44px; min-width: 120px; padding: 0 14px; border-radius: 10px; border: 1.5px solid var(--aus-500); background: var(--aus-700); color: var(--card); font-weight: 700; font-size: var(--fs-sm); }
+.eg-sim-ausculta .lw-play:disabled { opacity: .5; cursor: not-allowed; }
+.eg-sim-ausculta .lw-lbl { font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--blue-200); margin-left: 6px; }
+.eg-sim-ausculta .lw-seg { display: inline-flex; border: 1.5px solid var(--navy-700); border-radius: 10px; overflow: hidden; }
+.eg-sim-ausculta .lw-seg button { min-height: 44px; min-width: 44px; padding: 0 12px; border: 0; background: none; color: var(--blue-200); font-weight: 700; font-size: var(--fs-xs); }
+.eg-sim-ausculta .lw-seg button[aria-pressed="true"] { background: var(--aus-700); color: var(--card); }
+.eg-sim-ausculta .lw-play:focus-visible, .eg-sim-ausculta .lw-seg button:focus-visible { outline: 3px solid var(--blue-300); outline-offset: 2px; }
+.eg-sim-ausculta .la-head { align-items: baseline; }
+.eg-sim-ausculta .la-head h3 { font-size: 17px; }
+.eg-sim-ausculta .la-head .la-tag { margin-left: auto; }
+.eg-sim-ausculta .la-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; }
+.eg-sim-ausculta .la-card { border-radius: 12px; align-content: start; gap: 8px; }
+.eg-sim-ausculta .la-crit { background: var(--aus-gold-50); border-left-color: var(--aus-gold-500); }
+.eg-sim-ausculta .la-refs { column-gap: 8px; }
+.eg-sim-ausculta .la-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
+.eg-sim-ausculta .la-actions .src-line { margin: 0 auto 0 0; color: var(--ink-600); }
+
+/* Masaüstü: sayfa kaymaz, sütunlar ekran yüksekliğinde kendi içinde kayar. */
+@media (min-width: 1081px) {
+  .eg-sim-ausculta:has(.learn-body) { overflow: hidden; }
+  .eg-sim-ausculta .screen-body.no-scroll.learn-body { overflow: hidden; }
+  /* Kabuk birleşik barı (3.3125rem) ve alt bilgisi (2.5625rem, Pulse ile aynı) düşülür;
+     `flex: 1` taban boyutu %0 yaptığı için yükseklik yok sayılıyordu (T309). */
+  .eg-sim-ausculta .learn-grid { flex: none; height: calc(100dvh - 3.3125rem - 2.5625rem); min-height: 560px; grid-template-rows: minmax(0, 1fr); }
+  .eg-sim-ausculta .learn-grid > .lib-col { position: static; max-height: none; }
+}
+@media (min-width: 1081px) and (max-width: 1280px) {
+  .eg-sim-ausculta .learn-grid { grid-template-columns: 232px minmax(320px, 380px) minmax(0, 1fr); }
+}
+/* Tablet/mobil: tek sütun; ray yatay şerit (maket ≤1180). */
+@media (max-width: 1080px) {
+  .eg-sim-ausculta .learn-grid { display: block; }
+  .eg-sim-ausculta .learn-grid > .lib-col, .eg-sim-ausculta .learn-grid > .sim-main, .eg-sim-ausculta .learn-grid > .sim-side { overflow: visible; border-right: 0; }
+  .eg-sim-ausculta .learn-grid > .lib-col { border-bottom: 1px solid var(--border); }
+  .eg-sim-ausculta .learn-grid > * + * { margin-top: 0; }
+  .eg-sim-ausculta .learn-grid .stage-card { max-width: 520px; width: 100%; justify-self: center; }
+  .eg-sim-ausculta .learn-grid .lib-group .lib-items { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 720px) {
+  .eg-sim-ausculta .learn-grid > .lib-col { display: flex; position: static; padding: 8px 12px; }
+  .eg-sim-ausculta .learn-grid .lib-col .lib-head { display: block; margin: 0; align-self: center; white-space: nowrap; flex: none; }
+  .eg-sim-ausculta .learn-grid .lib-group .g-title { margin: 0; white-space: nowrap; background: var(--aus-50); border-radius: var(--r-pill); padding: 5px 10px; }
+  .eg-sim-ausculta .learn-grid .lib-group .lib-items { display: flex; flex-direction: row; gap: 6px; }
+  .eg-sim-ausculta .learn-grid .lib-item { width: auto; min-width: 0; white-space: nowrap; border: 1px solid var(--border); }
+  .eg-sim-ausculta .learn-grid > .sim-main, .eg-sim-ausculta .learn-grid > .sim-side { padding: 12px; }
+  .eg-sim-ausculta .stage-card .stage-views button { padding: 0 7px; }
+}

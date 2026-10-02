@@ -28,7 +28,7 @@ test.describe("Ausculta öğrenme kilidi", () => {
 
     // Öğrenme her zaman açıktır; ilerleme satırı ve kilitli odaklı uygulama düğmesi.
     await root.locator(".mode-card.learn button.eg-gami-mode-cta").click();
-    await expect(root.getByText("Öğrenme: 0/24 ses dinlendi")).toBeVisible();
+    await expect(root.getByRole("status", { name: "Öğrenme: 0/24 ses dinlendi" })).toHaveText("Konular · 0/24");
     await expect(root.getByRole("button", { name: /uygulama yap/ })).toBeDisabled();
     await expect(root.getByText("Önce öğrenme modunu tamamlayın: 0/24 ses dinlendi.").last()).toBeVisible();
     await captureRouteScreenshot(page, testInfo.project.name, "#/sims/ausculta ogrenme kilidi");
