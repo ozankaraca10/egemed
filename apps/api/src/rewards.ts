@@ -128,7 +128,7 @@ function readJson(c: Context<AppEnv>): Promise<unknown> {
   return c.req.json().catch(() => null);
 }
 
-export interface RewardsDeps {
+interface RewardsDeps {
   readonly admin: AdminDeps;
   readonly gamification: GamificationRepo;
   readonly rewards: RewardsRepo;
@@ -311,7 +311,7 @@ interface PgWinnerRow {
   readonly score: string | number;
 }
 
-export interface RewardsDb {
+interface RewardsDb {
   query(text: string, params: readonly unknown[]): Promise<{ readonly rows: readonly unknown[]; readonly rowCount?: number | null }>;
 }
 

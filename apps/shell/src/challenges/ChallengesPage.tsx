@@ -254,7 +254,7 @@ export function ChallengeWorkspace({
   );
 }
 
-export interface ChallengesPageProps {
+interface ChallengesPageProps {
   readonly session?: ShellSession | null;
   /** Merkezin sabit simi (`#/sims/<id>/meydan-okuma`); seçici yoktur. */
   readonly simId: SimId;

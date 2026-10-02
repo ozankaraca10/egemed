@@ -1,6 +1,5 @@
 import { useEffect, useRef, type ReactNode } from "react";
 import { NOOP_GAMI_MODAL_ENV, gamiTabTrapTarget, type GamiFocusable, type GamiKeyEvent, type GamiModalEnv } from "./modal";
-import type { GamiIcon } from "./types";
 
 const FOCUSABLE_SELECTOR = "button, [href], input, select, [tabindex]:not([tabindex=\"-1\"])";
 
@@ -44,5 +43,3 @@ export function GamiModal({ title, onClose, returnTo, children, env = NOOP_GAMI_
     </div>
   );
 }
-
-export type { GamiIcon };

@@ -9,14 +9,14 @@ import { escapeHtml, joinTextLines, renderMailLayout } from "../layout";
 import { INSTITUTION_LINE, mailColors, mailFontFamily } from "../theme";
 import type { MailRenderResult } from "../types";
 
-export interface MonthlySummarySimBlock {
+interface MonthlySummarySimBlock {
   readonly simName: string;
   readonly sessionCount: number;
   readonly bestScoreLabel: string;
   readonly badges: readonly string[];
 }
 
-export interface MonthlySummaryData {
+interface MonthlySummaryData {
   readonly recipientName: string;
   readonly monthLabel: string;
   readonly sims: readonly MonthlySummarySimBlock[];

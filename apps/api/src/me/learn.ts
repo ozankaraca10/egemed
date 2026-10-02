@@ -27,7 +27,7 @@ export interface LearnRepo {
   upsert(record: LearnRecord): Promise<LearnRecord>;
 }
 
-export interface LearnDeps {
+interface LearnDeps {
   readonly learn: LearnRepo;
 }
 
@@ -36,7 +36,7 @@ function readJson(c: Context<AppEnv>): Promise<unknown> {
 }
 
 /** Üç simin durumu: kaydı olmayan sim `complete: false` ve `completedAt: null` taşır. */
-export function learnStatusBody(records: readonly LearnRecord[]) {
+function learnStatusBody(records: readonly LearnRecord[]) {
   const bySim = new Map(records.map((record) => [record.simId, record]));
   return {
     sims: Object.fromEntries(
@@ -94,7 +94,7 @@ export function registerLearnRoutes(app: Hono<AppEnv>, deps: LearnDeps, now: () 
 
 // --- Depolar -------------------------------------------------------------------
 
-export interface LearnDb {
+interface LearnDb {
   query(text: string, params: readonly unknown[]): Promise<{ readonly rows: readonly unknown[] }>;
 }
 

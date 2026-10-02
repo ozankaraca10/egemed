@@ -1,7 +1,7 @@
 import type { JSX } from "react";
 import { t } from "@egemed/ui/i18n";
 
-export interface ShellFooterProps {
+interface ShellFooterProps {
   /** Giriş ekranında sağ panel altında kullanılan küçük varyant. */
   readonly small?: boolean;
 }

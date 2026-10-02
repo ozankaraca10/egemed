@@ -17,7 +17,7 @@ import type { IntegrityFlagListItem, IntegrityRepo } from "./repo";
  * (`adminActor.institutionId`); başka kurumun işareti `not_found` döner.
  */
 
-export interface IntegrityAdminDeps {
+interface IntegrityAdminDeps {
   readonly integrity: IntegrityRepo;
   readonly bans: CompetitionBansRepo;
   readonly auth: AuthDeps;
@@ -25,13 +25,13 @@ export interface IntegrityAdminDeps {
   readonly newId: () => string;
 }
 
-export const integrityListQuerySchema = z.object({
+const integrityListQuerySchema = z.object({
   status: z.enum(["pending", "cleared", "confirmed"]).optional(),
   page: z.coerce.number().int().min(1).optional(),
   pageSize: pageSizeSchema.optional(),
 });
 
-export const DEFAULT_INTEGRITY_PAGE_SIZE = 20;
+const DEFAULT_INTEGRITY_PAGE_SIZE = 20;
 
 function integrityRowBody(row: IntegrityFlagListItem, banned: boolean) {
   return {

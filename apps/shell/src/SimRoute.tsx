@@ -59,7 +59,7 @@ interface SimContainer {
 /** Sim rotasının görünür durumu: yükleniyor → hazır | hata. */
 type SimRouteStatus = "loading" | "ready" | "error";
 
-export interface SimRouteProps {
+interface SimRouteProps {
   readonly simId: SimulatorId;
   /** Oturumdaki kullanıcının takma kimliği; sim kayıtlarını kullanıcıya ayırır (PULSE-08). */
   readonly actorId?: string | undefined;
@@ -142,7 +142,7 @@ function SimAccessDenied(): JSX.Element {
   );
 }
 
-export interface SimErrorNoticeProps {
+interface SimErrorNoticeProps {
   /** "Tekrar dene": aynı sim oturumunu yeniden kurar. */
   readonly onRetry: () => void;
 }

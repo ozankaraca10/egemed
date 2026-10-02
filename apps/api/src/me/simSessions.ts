@@ -37,16 +37,16 @@ import type { CompetitionBansRepo } from "../integrity/bans";
  * (oturum + CSRF, `meActor`) SONRA kaydedilmelidir.
  */
 
-export const SIM_SESSION_TTL_MS = 2 * 60 * 60 * 1000;
-export const ASSESSMENT_PER_CASE_MS = 10 * 60 * 1000;
-export const ASSESSMENT_TOTAL_MS = 60 * 60 * 1000;
-export const TIME_GRACE_MS = 5_000;
-export const SESSION_START_RATE_MAX = 30;
+const SIM_SESSION_TTL_MS = 2 * 60 * 60 * 1000;
+const ASSESSMENT_PER_CASE_MS = 10 * 60 * 1000;
+const ASSESSMENT_TOTAL_MS = 60 * 60 * 1000;
+const TIME_GRACE_MS = 5_000;
+const SESSION_START_RATE_MAX = 30;
 /** ADR-010: düello — vaka başı 2 dk, toplam 8 dk. */
 export const CHALLENGE_PER_CASE_MS = 2 * 60 * 1000;
 export const CHALLENGE_TOTAL_MS = 8 * 60 * 1000;
 
-export function limitsFor(mode: SimSessionMode): { readonly perCaseMs: number | null; readonly totalMs: number | null } {
+function limitsFor(mode: SimSessionMode): { readonly perCaseMs: number | null; readonly totalMs: number | null } {
   if (mode === "challenge") return { perCaseMs: CHALLENGE_PER_CASE_MS, totalMs: CHALLENGE_TOTAL_MS };
   if (mode === "assessment") return { perCaseMs: ASSESSMENT_PER_CASE_MS, totalMs: ASSESSMENT_TOTAL_MS };
   return { perCaseMs: null, totalMs: null };
@@ -758,7 +758,7 @@ export function registerSimSessionRoutes(app: Hono<AppEnv>, deps: SimSessionDeps
 
 // --- Depolar -------------------------------------------------------------------
 
-export interface SimSessionDb {
+interface SimSessionDb {
   query(text: string, params: readonly unknown[]): Promise<{ readonly rows: readonly unknown[] }>;
 }
 

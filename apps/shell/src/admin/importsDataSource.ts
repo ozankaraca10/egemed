@@ -25,7 +25,6 @@ import {
 } from "./usersDataSource";
 
 export type ImportMode = "ekle" | "guncelle";
-export const IMPORT_MODES: readonly ImportMode[] = ["ekle", "guncelle"];
 
 /** E3 §f sütun sırası; şablon başlığı ve eşleme adayları bu sıradadır. */
 export const TEMPLATE_COLUMNS = [
@@ -40,10 +39,10 @@ export const TEMPLATE_COLUMNS = [
 export type TemplateColumn = (typeof TEMPLATE_COLUMNS)[number];
 
 /** Şablon sürümü; `import_batches.template_version` karşılığı (E3 §c). */
-export const TEMPLATE_VERSION = "2026-09";
+const TEMPLATE_VERSION = "2026-09";
 
-export const MAX_IMPORT_ROWS = 5_000;
-export const MAX_IMPORT_FILE_BYTES = 2 * 1024 * 1024;
+const MAX_IMPORT_ROWS = 5_000;
+const MAX_IMPORT_FILE_BYTES = 2 * 1024 * 1024;
 
 /** CSV başlığı → hedef sütun eşlemesi; eşleşmeyen sütun için değer yoktur. */
 export type ColumnMapping = Partial<Record<TemplateColumn, string>>;
@@ -85,7 +84,7 @@ export interface ImportApplyResult {
 }
 
 /** `POST /admin/imports` (400) sınıfında istemci tarafı reddedilme kodları. */
-export type ImportUploadErrorCode = "empty_file" | "too_many_rows" | "file_too_large" | "header_mismatch";
+type ImportUploadErrorCode = "empty_file" | "too_many_rows" | "file_too_large" | "header_mismatch";
 
 // ---------------------------------------------------------------------------
 // CSV ayrıştırma/üretme (RFC 4180 benzeri; küçük yüzey, yeni bağımlılık yok)
@@ -294,7 +293,7 @@ export function validateImportRow(
   return { errors, raw, rowNo, status: errors.length === 0 ? "valid" : "error" };
 }
 
-export interface ValidateRowsResult {
+interface ValidateRowsResult {
   readonly rows: readonly ImportRow[];
   readonly validCount: number;
   readonly errorCount: number;

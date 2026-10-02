@@ -47,16 +47,16 @@ import {
  * güvenen `registerAdminUserRoutes` çağrısından SONRA kaydedilmelidir.
  */
 
-export const IMPORT_TEMPLATE_VERSION = "1";
-export const IMPORT_PREVIEW_SIZE = 20;
+const IMPORT_TEMPLATE_VERSION = "1";
+const IMPORT_PREVIEW_SIZE = 20;
 const DEFAULT_PAGE_SIZE = 20;
 
-export const IMPORT_MODES = ["ekle", "guncelle"] as const;
-export type ImportMode = (typeof IMPORT_MODES)[number];
+const IMPORT_MODES = ["ekle", "guncelle"] as const;
+type ImportMode = (typeof IMPORT_MODES)[number];
 
-export type ImportBatchStatus = "uploaded" | "validated" | "applied" | "failed" | "expired";
+type ImportBatchStatus = "uploaded" | "validated" | "applied" | "failed" | "expired";
 
-export const IMPORT_ROW_STATUSES = ["valid", "error", "applied", "skipped"] as const;
+const IMPORT_ROW_STATUSES = ["valid", "error", "applied", "skipped"] as const;
 export type ImportRowStatus = (typeof IMPORT_ROW_STATUSES)[number];
 
 /** E3 §c `errors` jsonb biçimi. */
@@ -102,7 +102,7 @@ export interface ImportRowRecord {
   readonly appliedAt: number | null;
 }
 
-export interface ImportRowDraft {
+interface ImportRowDraft {
   readonly rowNo: number;
   readonly status: "valid" | "error";
   readonly normalized: ImportNormalizedRow | null;
@@ -169,7 +169,7 @@ export interface AdminImportRepo {
 }
 
 /** Havuzun içe aktarma deposuna görünen dar yüzeyi; `apply` tek transaction ister. */
-export interface AdminImportDb extends AdminDb {
+interface AdminImportDb extends AdminDb {
   transaction<T>(work: (query: AdminDb["query"]) => Promise<T>): Promise<T>;
 }
 
@@ -177,14 +177,14 @@ export interface AdminImportDb extends AdminDb {
 // CSV ayrıştırma (elle RFC 4180; yeni bağımlılık yok)
 // ---------------------------------------------------------------------------
 
-export interface CsvRecord {
+interface CsvRecord {
   /** Başlık hariç, 1 tabanlı ve boş satırlar atlanmış sıra numarası. */
   readonly rowNo: number;
   readonly fields: readonly string[];
 }
 
 /** Bozuk tırnaklama; mesaj hiçbir hücre değerini taşımaz. */
-export class CsvParseError extends Error {
+class CsvParseError extends Error {
   constructor(message: string) {
     super(message);
     this.name = "CsvParseError";
@@ -192,7 +192,7 @@ export class CsvParseError extends Error {
 }
 
 /** UTF-8 bayt uzunluğu; `Buffer`/`TextEncoder` olmadan (lib ES2022). */
-export function utf8ByteLength(value: string): number {
+function utf8ByteLength(value: string): number {
   let bytes = 0;
   for (const char of value) {
     const code = char.codePointAt(0) ?? 0;
@@ -206,7 +206,7 @@ export function utf8ByteLength(value: string): number {
  * sayılır; tırnaklı hücreler ayraç ve satır sonu taşıyabilir; yalnız ayraç
  * içermeyen boş satırlar atlanır.
  */
-export function parseCsv(text: string): {
+function parseCsv(text: string): {
   readonly header: readonly string[];
   readonly records: readonly CsvRecord[];
 } {
@@ -385,7 +385,7 @@ interface MutableDraft {
   matchedUserId: string | null;
 }
 
-export interface ImportValidationContext {
+interface ImportValidationContext {
   readonly repo: Pick<AdminImportRepo, "findUsersByMappingKeys" | "findUnitByCode">;
   readonly institutionId: string;
   readonly nodeEnv: "development" | "test" | "production";

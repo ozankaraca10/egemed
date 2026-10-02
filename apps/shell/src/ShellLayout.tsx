@@ -8,7 +8,7 @@ import type { SimChrome } from "@egemed/sim-host";
 import { AccountMenu } from "./AccountMenu";
 import { SimBar } from "./SimBar";
 
-export interface ShellLayoutProps {
+interface ShellLayoutProps {
   /** Çözümlenmiş rota; etkin bağlantı işaretlemesi bundan türetilir. */
   route: ResolvedRoute;
   /** Geçerli oturum (sahte ya da API); yoksa oturum göstergesi çizilmez. */

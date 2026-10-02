@@ -7,7 +7,7 @@ import { escapeHtml, joinTextLines, renderMailLayout } from "../layout";
 import { INSTITUTION_LINE, mailColors, mailFontFamily } from "../theme";
 import type { MailRenderResult } from "../types";
 
-export interface ChallengeInviteData {
+interface ChallengeInviteData {
   readonly recipientName: string;
   readonly inviterDisplayName: string;
   readonly simName: string;

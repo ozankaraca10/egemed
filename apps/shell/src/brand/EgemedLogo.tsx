@@ -1,7 +1,7 @@
 import type { JSX } from "react";
 import { t } from "@egemed/ui/i18n";
 
-export interface EgemedLogoProps {
+interface EgemedLogoProps {
   readonly variant: "on-dark" | "on-light";
   readonly compact?: boolean;
 }

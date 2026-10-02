@@ -62,7 +62,7 @@ function slotOf(action: SimChromeAction): number {
 }
 
 /** Sim eylemlerini sabit sıraya dizer; tam ekranı kabuk verir. */
-export function orderBarActions(
+function orderBarActions(
   simActions: readonly SimChromeAction[],
   shell: { readonly fullscreen: boolean; readonly toggleFullscreen: () => void },
 ): BarAction[] {
@@ -112,7 +112,7 @@ function navigate(href: `#${string}`): void {
   if (scope.location !== undefined) scope.location.hash = href;
 }
 
-export interface SimBarProps {
+interface SimBarProps {
   readonly simId: SimulatorId;
   readonly title: string;
   readonly chrome: SimChrome | null;

@@ -366,7 +366,7 @@ export function ImportWizardView(props: ImportWizardViewProps): JSX.Element {
   );
 }
 
-export interface ImportWizardPageProps {
+interface ImportWizardPageProps {
   /** Testte/gelecekte gerçek API kaynağıyla değiştirmek için enjekte edilir. */
   readonly dataSource?: ImportsDataSource;
 }

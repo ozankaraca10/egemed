@@ -67,7 +67,7 @@ const ATTEMPT_LIMIT = 20;
 const TR_OFFSET_MS = 3 * 60 * 60 * 1000;
 
 /** Anın Türkiye takvim günü (`YYYY-MM-DD`); seri bu günlerle sayılır. */
-export function trDate(at: number): string {
+function trDate(at: number): string {
   return new Date(at + TR_OFFSET_MS).toISOString().slice(0, 10);
 }
 
@@ -122,7 +122,7 @@ export function nextStreak(previous: GamiStreakRecord, day: string): GamiStreakR
 }
 
 /** Enjekte edilen anın içinde bulunduğu haftanın Pazartesi 00:00 (UTC+3) anı. */
-export function startOfWeekTr(at: number): number {
+function startOfWeekTr(at: number): number {
   const wallClock = new Date(at + TR_OFFSET_MS);
   const dayOfWeek = wallClock.getUTCDay(); // 0 = Pazar
   const deltaToMonday = (dayOfWeek + 6) % 7;
@@ -217,7 +217,7 @@ export interface GamiAttemptInput {
   readonly competitionBanned?: boolean;
 }
 
-export interface GamiAttemptRecord {
+interface GamiAttemptRecord {
   readonly id: string;
   readonly simId: SimId;
   readonly attemptNo: number;
@@ -249,7 +249,7 @@ export interface GamiLearnInput {
   readonly institutionId: string;
 }
 
-export interface GamiLearnRecord {
+interface GamiLearnRecord {
   readonly simId: SimId;
   readonly topic: string;
   readonly learnedAt: number;
@@ -294,7 +294,7 @@ export interface GamiBadgeAwardInput {
 }
 
 /** Havuzun depo katmanına görünen dar yüzeyi; `db.ts` çıktısı bunu karşılar. */
-export interface GamiDb {
+interface GamiDb {
   query(text: string, params: readonly unknown[]): Promise<{ readonly rows: readonly unknown[] }>;
 }
 
@@ -819,7 +819,7 @@ export interface MemoryGamificationSeed {
   readonly attempts?: readonly MemoryGamiAttemptSeed[];
 }
 
-export interface MemoryGamiProfileState {
+interface MemoryGamiProfileState {
   readonly userId: string;
   readonly institutionId: string;
   readonly simId: SimId;
@@ -832,7 +832,7 @@ export interface MemoryGamiProfileState {
   public: boolean;
 }
 
-export interface MemoryGamiAttemptState {
+interface MemoryGamiAttemptState {
   readonly id: string;
   readonly userId: string;
   readonly simId: SimId;
@@ -850,7 +850,7 @@ export interface MemoryGamiAttemptState {
 }
 
 /** A4: puansız öğrenme kaydı durumu; (kullanıcı, sim, konu) başına tek satır. */
-export interface MemoryGamiLearnState {
+interface MemoryGamiLearnState {
   readonly userId: string;
   readonly institutionId: string;
   readonly simId: SimId;
@@ -861,7 +861,7 @@ export interface MemoryGamiLearnState {
 }
 
 /** Testlerin durum okuduğu bellek deposu (DB gerekmez). */
-export interface MemoryGamificationStore {
+interface MemoryGamificationStore {
   readonly repo: GamificationRepo;
   readonly profiles: Map<string, MemoryGamiProfileState>;
   readonly attempts: Map<string, MemoryGamiAttemptState>;
@@ -869,7 +869,7 @@ export interface MemoryGamificationStore {
   readonly badges: MemoryGamiBadgeState[];
 }
 
-export interface MemoryGamiBadgeState {
+interface MemoryGamiBadgeState {
   readonly userId: string;
   readonly simId: SimId;
   readonly key: string;
@@ -1223,7 +1223,7 @@ export function createMemoryGamificationRepo(
   return { repo, profiles, attempts, learn, badges };
 }
 
-export interface MeGamificationDeps {
+interface MeGamificationDeps {
   readonly auth: AuthDeps;
   readonly gamification: GamificationRepo;
   /** T283b: profildeki `competitionBanned` bilgisi ve liderlik süzgeci için. */
@@ -1298,7 +1298,7 @@ function leaderboardBody(record: GamiLeaderboardRecord) {
 
 /** T149: kullanıcı başına saatlik yazım üst sınırı (XP şişirmesine karşı). */
 export const ATTEMPT_RATE_MAX = 60;
-export const ATTEMPT_RATE_WINDOW_MS = 60 * 60 * 1000;
+const ATTEMPT_RATE_WINDOW_MS = 60 * 60 * 1000;
 
 /**
  * A4: puanlı deneme gövdesinin alan imzaları. Eski istemci yolu kapandığında
@@ -1319,7 +1319,7 @@ const SCORED_ATTEMPT_KEYS: readonly string[] = [
 ];
 
 /** Gövde puanlı deneme alanlarından birini taşıyorsa eski istemci yoludur. */
-export function isScoredAttemptBody(value: unknown): boolean {
+function isScoredAttemptBody(value: unknown): boolean {
   if (typeof value !== "object" || value === null || Array.isArray(value)) return false;
   const record = value as Record<string, unknown>;
   return SCORED_ATTEMPT_KEYS.some((key) => key in record);

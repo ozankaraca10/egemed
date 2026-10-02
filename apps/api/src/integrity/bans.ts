@@ -11,7 +11,7 @@ import type { IntegrityUserLookup } from "./repo";
  * `me/gamification.ts`, `me/simSessions.ts`).
  */
 
-export interface CompetitionBanRecord {
+interface CompetitionBanRecord {
   readonly id: string;
   readonly userId: string;
   readonly flagId: string | null;
@@ -39,7 +39,7 @@ export interface CompetitionBansRepo {
   activeUserIds(institutionId: string): Promise<ReadonlySet<string>>;
 }
 
-export interface CompetitionBansDb {
+interface CompetitionBansDb {
   query(text: string, params: readonly unknown[]): Promise<{ readonly rows: readonly unknown[] }>;
 }
 

@@ -8,7 +8,7 @@ export interface SimNavigationEnvironment {
   removeListener(event: "hashchange" | "popstate", listener: () => void): void;
 }
 
-export interface SimNavigationController {
+interface SimNavigationController {
   readonly navigation: SimNavigation;
   dispose(): void;
 }

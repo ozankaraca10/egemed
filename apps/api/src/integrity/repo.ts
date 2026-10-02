@@ -52,7 +52,7 @@ export interface IntegrityDecisionInput {
   readonly at: number;
 }
 
-export interface IntegrityDecisionRecord {
+interface IntegrityDecisionRecord {
   readonly id: string;
   readonly userId: string;
   readonly status: IntegrityFlagStatus;
@@ -70,7 +70,7 @@ export interface IntegrityRepo {
   decide(input: IntegrityDecisionInput): Promise<IntegrityDecisionOutcome>;
 }
 
-export interface IntegrityDb {
+interface IntegrityDb {
   query(text: string, params: readonly unknown[]): Promise<{ readonly rows: readonly unknown[] }>;
 }
 

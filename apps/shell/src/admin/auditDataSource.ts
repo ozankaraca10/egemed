@@ -176,8 +176,8 @@ export interface AuditDataSource {
   list(query: AuditListQuery): Promise<AuditListResult>;
 }
 
-export const DEFAULT_AUDIT_SEED = 91;
-export const DEFAULT_AUDIT_SIZE = 140;
+const DEFAULT_AUDIT_SEED = 91;
+const DEFAULT_AUDIT_SIZE = 140;
 
 /** Sentetik, tohumlu `AuditDataSource`; API bağlanana dek `AuditPage` bunu kullanır. */
 export function createMockAuditSource(seed: number = DEFAULT_AUDIT_SEED, size: number = DEFAULT_AUDIT_SIZE): AuditDataSource {

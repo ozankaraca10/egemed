@@ -37,7 +37,7 @@ const BANNER: Record<ReturnType<typeof outcomeFor>, TrKey> = {
   pending: "challenges.result.pending",
 };
 
-export interface ChallengeDetailPageProps {
+interface ChallengeDetailPageProps {
   readonly challengeId: string;
   readonly session?: ShellSession | null;
   /** Sim içi ayrıntıda düellonun simi; verilmezse eski adres çözümü yapılır. */

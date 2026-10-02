@@ -20,7 +20,7 @@ interface DevWindow {
   sessionStorage: DevSessionStorage;
 }
 
-export interface EntryPageProps {
+interface EntryPageProps {
   role: EntryRole;
   /** Geliştirmeye özel sahte kimlik doğrulama; `App` bunu `import.meta.env.DEV` ile besler. */
   devEnabled?: boolean;
@@ -32,7 +32,7 @@ export interface EntryPageProps {
   onBrowseAsVisitor?: () => void;
 }
 
-export interface EntryFormValues {
+interface EntryFormValues {
   username: string;
   password: string;
 }

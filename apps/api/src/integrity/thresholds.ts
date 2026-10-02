@@ -40,7 +40,6 @@ export const SIGNAL_WEIGHTS = {
 } as const;
 
 export type IntegritySignalName = keyof typeof SIGNAL_WEIGHTS;
-export const INTEGRITY_SIGNAL_NAMES = Object.keys(SIGNAL_WEIGHTS) as IntegritySignalName[];
 
 /** Bu skoru eşitleyen/aşan oturum `unverified` işaretlenir ve `integrity_flags`'e yazılır. */
 /** Skor 10 vaka başınadır: ör. 10 vakanın 3'ünde too_fast (9) ya da tutarlılık sinyali (8) işaretler;

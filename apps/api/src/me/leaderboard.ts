@@ -17,7 +17,7 @@ export interface LeaderboardAttemptSeed {
   readonly score: number | null;
 }
 
-export interface LeaderboardRowDraft {
+interface LeaderboardRowDraft {
   readonly userId: string;
   readonly displayName: string;
   readonly isPublic: boolean;
@@ -30,7 +30,7 @@ export interface LeaderboardRowDraft {
   readonly rank: number | null;
 }
 
-export function formatLmsDisplayName(raw: string): string {
+function formatLmsDisplayName(raw: string): string {
   const trimmed = raw.trim();
   if (trimmed.length === 0) return "";
   const commaIdx = trimmed.indexOf(",");
@@ -58,7 +58,7 @@ export function cohortFromUnitCode(code: string | null | undefined): Cohort | nu
  * hiç girmez; bu yüzden `null` döner ve çağıran satırı atlar.
  * E-posta/kullanıcı adı asla dönmez.
  */
-export function resolveLeaderboardDisplayName(input: {
+function resolveLeaderboardDisplayName(input: {
   readonly displayName: string;
   readonly isPublic: boolean;
 }): { readonly displayName: string; readonly isPublic: boolean } | null {
@@ -164,7 +164,7 @@ export function buildLeaderboardRows(input: {
   }));
 }
 
-export interface LeaderboardRowResponse {
+interface LeaderboardRowResponse {
   readonly id: string;
   readonly displayName: string;
   readonly isMe: boolean;

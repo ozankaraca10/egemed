@@ -122,7 +122,7 @@ export interface AuthDb {
   query(text: string, params: readonly unknown[]): Promise<{ readonly rows: readonly unknown[] }>;
 }
 
-export interface PgAuthRepos {
+interface PgAuthRepos {
   readonly sessions: SessionRepo;
   readonly users: UserRepo;
   readonly audit: AuditRepo;
@@ -433,7 +433,7 @@ export interface MemoryUserSeed {
   readonly simAccess?: readonly SimId[];
 }
 
-export interface MemoryUserState {
+interface MemoryUserState {
   readonly id: string;
   readonly username: string | null;
   readonly email: string | null;
@@ -449,7 +449,7 @@ export interface MemoryUserState {
 }
 
 /** Testlerin durum okuduğu/ayarladığı bellek deposu (DB gerekmez). */
-export interface MemoryAuthStore {
+interface MemoryAuthStore {
   readonly repos: PgAuthRepos;
   readonly sessionRecords: Map<string, SessionRecord>;
   readonly auditEntries: AuditEntry[];

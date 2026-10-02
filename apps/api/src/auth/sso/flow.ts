@@ -15,12 +15,12 @@ import type { SsoIdentity } from "./types";
 export const SSO_STATE_COOKIE = "egemed_sso_state";
 /** state/nonce çerezi kısa ömürlüdür; IdP dönüşü bu pencereye sığmalıdır. */
 export const DEFAULT_SSO_STATE_TTL_MS = 5 * 60 * 1000;
-export const SSO_STATE_TOKEN_BYTES = 32; // 256 bit
+const SSO_STATE_TOKEN_BYTES = 32; // 256 bit
 
 const STATE_VERSION = "v1";
 const STATE_DOMAIN_SEPARATOR = "egemed.sso.state.v1:";
 
-export interface SsoStatePayload {
+interface SsoStatePayload {
   readonly state: string;
   readonly nonce: string;
   readonly returnTo: string;
@@ -120,11 +120,11 @@ export interface SsoLoginDeps {
   readonly requestId: string | null;
 }
 
-export type SsoLoginOutcome =
+type SsoLoginOutcome =
   | { readonly ok: true; readonly token: string }
   | { readonly ok: false; readonly code: ErrorCode };
 
-export interface SsoDenial {
+interface SsoDenial {
   readonly reason: string;
   readonly actorUserId: string | null;
   readonly institutionId: string | null;

@@ -18,7 +18,7 @@ export interface ReportedLearnActivity {
 }
 
 /** Rapor hattının gerektirdiği en dar istemci yüzeyi (testler sahte enjekte eder). */
-export interface LearnWriteClient {
+interface LearnWriteClient {
   readonly gamification: {
     writeLearn(simId: SimId, input: LearnWriteRequest): Promise<unknown>;
   };

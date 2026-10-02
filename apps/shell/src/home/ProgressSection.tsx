@@ -288,7 +288,7 @@ export function ProgressSectionView({
   );
 }
 
-export interface ProgressSectionProps {
+interface ProgressSectionProps {
   /** Geçerli oturum (sahte ya da API); `null`/verilmezse veri kaynağı boş durum döner. */
   readonly session?: ShellSession | null;
   /** Testte/gelecekte gerçek API kaynağıyla değiştirmek için enjekte edilir. */

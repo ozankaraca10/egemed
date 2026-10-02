@@ -46,7 +46,7 @@ export const DEMO_NOW = Date.parse("2026-09-30T12:00:00+03:00");
 
 /** Kendi kayıtlarımızı tanıyan işaretler; başka tohumların verisine dokunulmaz. */
 export const DEMO_USERNAME_PREFIX = "demo.";
-export const DEMO_BATCH_PREFIX = "demo-";
+const DEMO_BATCH_PREFIX = "demo-";
 
 const DEMO_INSTITUTION_ID = "d0000000-0000-4000-8000-000000000000";
 const DAY_MS = 86_400_000;
@@ -60,14 +60,14 @@ const RESIDENT_COUNT = 6;
 const FACULTY_COUNT = 4;
 const LEARN_CONTENT_VERSION = "lib-demo-1";
 
-export interface DemoUnit {
+interface DemoUnit {
   readonly code: string;
   readonly name: string;
   readonly parentCode: string | null;
 }
 
 /** Dönem birimleri kohort türetiminin sözleşmesidir: kod `^(\d)-sinif$` olmalıdır. */
-export const DEMO_UNITS: readonly DemoUnit[] = [
+const DEMO_UNITS: readonly DemoUnit[] = [
   { code: "tip-fakultesi", name: "Tıp Fakültesi", parentCode: null },
   ...COHORTS.map((cohort) => ({ code: `${cohort}-sinif`, name: `Dönem ${cohort}`, parentCode: "tip-fakultesi" })),
   { code: "arastirma-gorevlileri", name: "Araştırma Görevlileri", parentCode: "tip-fakultesi" },
@@ -102,9 +102,9 @@ const OPACA_STACK_IDS = [
   "commons_ct_axial_lung_window", "commons_ct_axial_mediastinal_window", "commons_pneumothorax_ct",
 ] as const;
 
-export type DemoUserKind = "student" | "resident" | "faculty";
+type DemoUserKind = "student" | "resident" | "faculty";
 
-export interface DemoUser {
+interface DemoUser {
   readonly id: string;
   readonly kind: DemoUserKind;
   readonly unitCode: string;
@@ -120,7 +120,7 @@ export interface DemoUser {
   readonly leaderboardVisible: boolean;
 }
 
-export interface DemoAttempt {
+interface DemoAttempt {
   readonly id: string;
   readonly userId: string;
   readonly simId: SimId;
@@ -137,7 +137,7 @@ export interface DemoAttempt {
   readonly xp: number;
 }
 
-export interface DemoProfile {
+interface DemoProfile {
   readonly userId: string;
   readonly simId: SimId;
   readonly xp: number;
@@ -148,14 +148,14 @@ export interface DemoProfile {
   readonly updatedAt: number;
 }
 
-export interface DemoBadge {
+interface DemoBadge {
   readonly userId: string;
   readonly simId: SimId;
   readonly badgeKey: string;
   readonly awardedAt: number;
 }
 
-export interface DemoLearn {
+interface DemoLearn {
   readonly userId: string;
   readonly simId: SimId;
   readonly topic: string;
@@ -163,16 +163,16 @@ export interface DemoLearn {
   readonly learnedAt: number;
 }
 
-export interface DemoCompletion {
+interface DemoCompletion {
   readonly userId: string;
   readonly simId: SimId;
   readonly completedAt: number;
   readonly contentVersion: string;
 }
 
-export type DemoChallengeStatus = "open" | "accepted" | "finished" | "expired";
+type DemoChallengeStatus = "open" | "accepted" | "finished" | "expired";
 
-export interface DemoChallenge {
+interface DemoChallenge {
   readonly id: string;
   readonly simId: SimId;
   readonly inviterId: string;
@@ -189,7 +189,7 @@ export interface DemoChallenge {
   readonly finishedAt: number | null;
 }
 
-export interface DemoSession {
+interface DemoSession {
   readonly id: string;
   readonly userId: string;
   readonly institutionId: string;
@@ -202,13 +202,13 @@ export interface DemoSession {
   readonly state: SimSessionRow["state"];
 }
 
-export interface DemoImportError {
+interface DemoImportError {
   readonly column: string;
   readonly code: string;
   readonly message: string;
 }
 
-export interface DemoImportRow {
+interface DemoImportRow {
   readonly id: string;
   readonly rowNo: number;
   readonly username: string | null;
@@ -225,7 +225,7 @@ export interface DemoImportRow {
   readonly appliedAt: number | null;
 }
 
-export interface DemoImportBatch {
+interface DemoImportBatch {
   readonly id: string;
   readonly fileName: string;
   readonly mode: "ekle" | "guncelle";
@@ -237,7 +237,7 @@ export interface DemoImportBatch {
   readonly appliedAt: number | null;
 }
 
-export interface DemoAudit {
+interface DemoAudit {
   readonly occurredAt: number;
   readonly action: string;
   readonly targetType: string;
@@ -245,7 +245,7 @@ export interface DemoAudit {
   readonly summaryAfter: Readonly<Record<string, string>>;
 }
 
-export interface DemoPlan {
+interface DemoPlan {
   readonly seed: number;
   readonly now: number;
   readonly institutionId: string;
@@ -262,7 +262,7 @@ export interface DemoPlan {
   readonly audits: readonly DemoAudit[];
 }
 
-export interface DemoSeedInput {
+interface DemoSeedInput {
   readonly now: number;
   readonly seed?: number;
   /** Oturum satırları kurum kimliği taşır; DB yazıcısı gerçek kimliği geçirir. */
@@ -939,9 +939,9 @@ export interface DemoDb {
   transaction<T>(work: (query: DemoDb["query"]) => Promise<T>): Promise<T>;
 }
 
-export type DemoQuery = DemoDb["query"];
+type DemoQuery = DemoDb["query"];
 
-export interface DemoSeedDatabaseInput {
+interface DemoSeedDatabaseInput {
   readonly nodeEnv: "development" | "test" | "production";
   readonly institutionCode: string;
   readonly now: number;

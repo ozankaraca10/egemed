@@ -23,12 +23,12 @@ export function joinTextLines(lines: readonly string[]): string {
   return lines.filter((line) => line.length > 0).join("\n\n");
 }
 
-export interface MailButton {
+interface MailButton {
   readonly label: string;
   readonly url: string;
 }
 
-export interface MailLayoutOptions {
+interface MailLayoutOptions {
   /** Gelen kutusunda görünen önizleme metni; e-posta içinde gizli span'e yazılır. */
   readonly preheader: string;
   /** Marka bandındaki başlık (varsayılan: kurum satırı). */

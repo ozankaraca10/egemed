@@ -19,7 +19,7 @@
 import type { ApiClient } from "@egemed/api-client";
 import type { GamiSimSummary, SimId } from "@egemed/contracts";
 
-export type { GamiSimSummary, SimId };
+export type { GamiSimSummary };
 
 export interface GamificationSource {
   /** E3 §d `GET /me/gamification`: üç simin ayrı özeti; dizi 0-3 kayıt taşır. */

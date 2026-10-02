@@ -259,7 +259,7 @@ export function AuditView({
   );
 }
 
-export interface AuditPageProps {
+interface AuditPageProps {
   /** Testte/gelecekte gerçek API kaynağıyla değiştirmek için enjekte edilir. */
   readonly dataSource?: AuditDataSource;
 }

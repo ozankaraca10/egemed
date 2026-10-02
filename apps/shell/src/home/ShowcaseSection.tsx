@@ -101,7 +101,7 @@ function SimColumn({ sim, now }: { readonly sim: ShowcaseSim; readonly now: numb
   );
 }
 
-export interface ShowcaseSectionProps {
+interface ShowcaseSectionProps {
   readonly source: ShowcaseSource | null;
   /** Geçerli ay ('YYYY-MM'); başlıkta ay adı olarak görünür. */
   readonly month: string;

@@ -28,7 +28,7 @@ async function guarded<T>(run: () => Promise<T>): Promise<T> {
   }
 }
 
-export function createApiSessionSource(client: Pick<ApiClient, "simSessions" | "challenges">, simId: SimId): SimSessionSource {
+function createApiSessionSource(client: Pick<ApiClient, "simSessions" | "challenges">, simId: SimId): SimSessionSource {
   const api = client.simSessions;
   return {
     start: (mode, options) => guarded(async () => (await api.start(simId, mode, options?.focusFinding === undefined ? {} : { focusFinding: options.focusFinding })).data),

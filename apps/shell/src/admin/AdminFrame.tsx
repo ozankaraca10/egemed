@@ -3,7 +3,7 @@ import { icons } from "@egemed/ui";
 import { t, type TrKey } from "@egemed/ui/i18n";
 import { ADMIN_PATH, adminAuditHref, adminImportHref, adminRewardsHref, adminRolesHref, adminUsersHref } from "../routes";
 
-export type AdminSection = "overview" | "users" | "import" | "roles" | "audit" | "rewards";
+type AdminSection = "overview" | "users" | "import" | "roles" | "audit" | "rewards";
 
 interface AdminLink {
   readonly id: AdminSection;

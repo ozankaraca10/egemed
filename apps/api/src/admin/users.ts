@@ -55,7 +55,7 @@ export interface AdminUnit {
 }
 
 /** Liste satırı (E3 §d): yaşayan kullanıcılar; `deleted` listelenmez. */
-export interface AdminUserListItem {
+interface AdminUserListItem {
   readonly id: string;
   readonly displayName: string;
   readonly username: string | null;
@@ -78,7 +78,7 @@ export interface AdminUserRecord extends AdminUserListItem {
 }
 
 /** Liste sorgusu: filtreler ve sayfalama sunucuda uygulanır (E3 §d). */
-export interface AdminUsersListQuery {
+interface AdminUsersListQuery {
   readonly institutionId: string;
   readonly q?: string | undefined;
   readonly role?: Role | undefined;
@@ -107,7 +107,7 @@ export interface NewAdminUser {
 }
 
 /** PATCH sonrası çözülmüş tam değerler; eşleme anahtarı boş kalamaz. */
-export interface AdminUserUpdate {
+interface AdminUserUpdate {
   readonly displayName: string;
   readonly username: string | null;
   readonly email: string | null;
@@ -115,7 +115,7 @@ export interface AdminUserUpdate {
   readonly at: number;
 }
 
-export interface AdminStatusChange {
+interface AdminStatusChange {
   readonly status: UserStatus;
   readonly deletedAt: number | null;
   readonly at: number;
@@ -445,7 +445,7 @@ export interface MemoryAdminUserSeed {
   readonly lastLoginAt?: number | null;
 }
 
-export interface MemoryAdminStoreSeed {
+interface MemoryAdminStoreSeed {
   readonly users?: readonly MemoryAdminUserSeed[];
   readonly units?: readonly (AdminUnit & { readonly institutionId: string })[];
 }
@@ -735,7 +735,7 @@ function userSummary(record: AdminUserRecord): Record<string, string> {
 }
 
 /** Admin uçlarının paylaştığı denetim yazımı; aktör ve request_id bağlamdan gelir. */
-export interface AdminAuditInput {
+interface AdminAuditInput {
   readonly action: string;
   readonly targetType: string;
   readonly targetId: string;

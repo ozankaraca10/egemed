@@ -14,7 +14,7 @@ import { t } from "@egemed/ui/i18n";
  * varsa ilk harfleri, tek sözcükte ilk iki harfi alır ve tr-TR büyük harf
  * kuralını uygular ("Sahte test öğrencisi" → "ST", "ışık" → "IŞ").
  */
-export function accountInitials(label: string): string {
+function accountInitials(label: string): string {
   const words = label.trim().split(/\s+/).filter((word) => word.length > 0);
   const head = words[0] ?? "";
   const initials =
@@ -24,7 +24,7 @@ export function accountInitials(label: string): string {
   return initials === "" ? "?" : initials.toLocaleUpperCase("tr-TR");
 }
 
-export interface AccountMenuProps {
+interface AccountMenuProps {
   /** Menüde ve baş harflerde gösterilen ad; sahte oturumda rol etiketidir. */
   readonly displayName: string;
   /** Ad altında gösterilen rol ("Öğrenci" / "Yönetici"); sahte oturumda ad zaten rol olduğundan boş. */

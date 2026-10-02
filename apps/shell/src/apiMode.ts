@@ -3,7 +3,7 @@
  * modunda açılır (E3 §a dev sağlayıcısı). Yapılandırma yoksa kabuk T35b sahte
  * oturumunda kalır; bu yüzden mevcut e2e akışları değişmez.
  */
-export interface ApiEnvLike {
+interface ApiEnvLike {
   readonly DEV: boolean;
   readonly VITE_API_BASE_URL?: string | undefined;
 }
