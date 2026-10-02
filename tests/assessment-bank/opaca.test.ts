@@ -5,9 +5,7 @@ import { opaca } from "../../packages/assessment-bank/src/index";
 import { nearestFindingBoxCenter } from "../../packages/assessment-bank/src/opaca/geometry";
 import { getImage } from "../../packages/sim-opaca/src/core/images";
 import { encodeMark } from "../../packages/sim-opaca/src/core/geometry";
-import { scoreCase as simScoreCase } from "../../packages/sim-opaca/src/core/scoring";
 import type { CaseResult as ClientCaseResult } from "../../packages/sim-opaca/src/core/types";
-import { zonesForImage as simZonesForImage } from "../../packages/sim-opaca/src/data/zones";
 import { buildAttemptRecord } from "../../packages/sim-opaca/src/gamification/attempt";
 import { TOPIC_BADGE_MATCH } from "../../packages/sim-opaca/src/gamification/stats";
 import { FINDINGS } from "../../packages/sim-opaca/src/data/terminology";
@@ -127,16 +125,16 @@ describe("sunucu notlandırması", () => {
   const caseDef = allCases.find((c) => c.questions.length >= 2 && c.mappingValidation === "validated" && c.questions.every((q) => q.type !== "localization"));
   if (caseDef === undefined) throw new Error("uygun vaka yok");
 
-  it("gradeCase toplamı ve alanları sim-opaca scoreCase ile birebir aynı", () => {
+  it("gradeCase jetonları çözer: toplam ve alanlar anahtarlı scoreCase ile birebir aynı", () => {
     const { publicCase, keys } = opaca.buildPublicCase(caseDef, { index: 2, mode: "practice", openedAt: OPENED_AT, newToken, random });
     // Anahtarlı gerçek yanıtlar; istemci jetonlarla gönderir (gradeCase çözer).
     const decoded = Object.fromEntries(caseDef.questions.map((q) => [q.id, [...q.correct]]));
     const tokens = Object.fromEntries(caseDef.questions.map((q) => [q.id, q.correct.map((optionId) => tokenFor(keys, q.id, optionId))]));
-    const zones = simZonesForImage(caseDef.imageId) ?? [];
+    const zones = bankZonesForImage(caseDef.imageId) ?? [];
     const order = zones.map((zone) => zone.id);
     const visits = Object.fromEntries(order.map((id, index) => [id, { dwellMs: 5000, listenMs: 0, visits: 1, firstOrder: index }]));
     const bank = opaca.gradeCase(caseDef, keys, { index: 2, mode: "practice", answers: tokens, telemetry: { ...EMPTY_TELEMETRY, visits, order }, hintsUsed: 0 });
-    const sim = simScoreCase(caseDef, decoded, { visits, order, toolUse: TOOL_USE }, 0, imageFor(caseDef), zones);
+    const sim = bankScoreCase(caseDef, decoded, { visits, order, toolUse: TOOL_USE }, 0, imageFor(caseDef), zones);
     expect(bank.total).toBe(sim.total);
     expect(bank.max).toBe(sim.max);
     expect(bank.mastery).toBe(sim.mastery);
@@ -156,7 +154,7 @@ describe("sunucu notlandırması", () => {
     expect(publicCase.questions).toHaveLength(caseDef.questions.length);
   });
 
-  it("tüm havuzda banka puanı sim-opaca scoreCase ile birebir aynı (diferansiyel)", () => {
+  it("tüm havuzda gradeCase puanı anahtarlı scoreCase ile birebir aynı (jeton çözümü)", () => {
     let seed = 7;
     const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
     for (const def of allCases) {
@@ -172,7 +170,7 @@ describe("sunucu notlandırması", () => {
           }),
         ]),
       );
-      const zones = simZonesForImage(def.imageId) ?? [];
+      const zones = bankZonesForImage(def.imageId) ?? [];
       const order = zones.map((zone) => zone.id);
       const visits = Object.fromEntries(order.map((id, index) => [id, { dwellMs: 5000, listenMs: 3000, visits: 1, firstOrder: index }]));
       const bank = opaca.gradeCase(def, keys, {
@@ -182,7 +180,7 @@ describe("sunucu notlandırması", () => {
         telemetry: { ...EMPTY_TELEMETRY, visits, order },
         hintsUsed: 0,
       });
-      const sim = simScoreCase(def, decoded, { visits, order, toolUse: TOOL_USE }, 0, imageFor(def), zones);
+      const sim = bankScoreCase(def, decoded, { visits, order, toolUse: TOOL_USE }, 0, imageFor(def), zones);
       expect(bank.total, def.id).toBe(sim.total);
       expect(bank.mastery, def.id).toBe(sim.mastery);
       for (const q of def.questions) {

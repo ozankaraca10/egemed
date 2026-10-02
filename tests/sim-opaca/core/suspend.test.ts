@@ -4,9 +4,9 @@ import {
   SUSPEND_LIMIT_12,
   ZONES,
   deserializeSuspend,
-  scoreCase,
   serializeSuspend,
 } from "../../../packages/sim-opaca/src/index";
+import { scoredResult } from "../score-fixture";
 import type { CaseDef, ImageRecord, Question, SuspendPayload, Telemetry, ZoneVisit } from "../../../packages/sim-opaca/src/index";
 
 /** Suspend grubu — kaynak egemed-opaca tests/core.test.ts `describe('suspend')` portu (3 test).
@@ -110,7 +110,7 @@ const tele = (order: string[], dwell = 1000): Telemetry => ({
 });
 
 describe("suspend (kaynak davranışı)", () => {
-  const scored = scoreCase(mkCase(), { q1: ["a"] }, tele(REQUIRED), 0, img(), ZONES);
+  const scored = scoredResult(mkCase(), { q1: ["a"] }, tele(REQUIRED), 0, img(), ZONES);
   const base: SuspendPayload = {
     v: 1,
     mode: "assessment",

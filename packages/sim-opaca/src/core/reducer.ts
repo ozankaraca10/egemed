@@ -1,8 +1,6 @@
 import type { CaseDef, CaseResult, Mode, Screen, SuspendPayload, Telemetry, ViewerTool } from "./types";
 import type { SimEventDraft } from "./events";
-import { aggregateResults, practiceAdjusted, scoreCase, MASTERY_THRESHOLD } from "./scoring";
-import { getImage } from "./images";
-import { zonesForImage } from "../data/zones";
+import { aggregateResults } from "./scoring";
 import type { ServerCaseMeta, ServerCaseSnapshot, ServerClientCase, ServerQuestionFeedback, ServerSessionState } from "./serverSession";
 
 /** Opaca durum iskeleti ve saf reducer (kaynak: `core/store.tsx:1-255`).
@@ -139,7 +137,6 @@ export type Action =
   | { type: "goto"; screen: Screen }
   | { type: "startMode"; mode: Mode; focusFinding?: string; challengeId?: string }
   | { type: "caseMount"; caseDef: CaseDef }
-  | { type: "startSession"; practiceIds: string[]; assessmentIds: string[]; seed: number }
   | { type: "toggleZones"; show?: boolean }
   | { type: "zoneEnter"; zoneIds: string[] }
   | { type: "zoneDwell"; zoneIds: string[]; dwellMs: number }
@@ -149,13 +146,11 @@ export type Action =
   | { type: "useHint" }
   | { type: "timer"; deltaMs: number }
   | { type: "advance" }
-  | { type: "finishCase" }
   | { type: "nextCase" }
   | { type: "tutorialDone"; done: boolean }
   | { type: "tutorialSeen" }
   | { type: "restore"; payload: SuspendPayload }
   | { type: "resetCase" }
-  | { type: "setResults"; results: CaseResult[] }
   | { type: "setLearnFocus"; key: string | null; idx?: number | null }
   | { type: "startTopicPractice"; key: string; exampleIdx: number; title: string; focusFinding: string | null }
   | { type: "returnToTopic" }
@@ -182,16 +177,6 @@ function findCase(s: AppState, id: string): CaseDef | undefined {
   return s.server?.currentCase?.id === id ? s.server.currentCase : undefined;
 }
 
-/** Vaka puanı (store dışı da kullanılır: testler, sonuç ekranı). */
-export function computeCaseResult(def: CaseDef, s: Pick<AppState, "answers" | "telemetry" | "hintsUsed" | "mode">): CaseResult {
-  let result = scoreCase(def, s.answers, s.telemetry, s.hintsUsed, getImage(def.imageId), zonesForImage(def.imageId) ?? []);
-  if (s.mode === "practice" && s.hintsUsed > 0) {
-    const adjusted = practiceAdjusted(result.total, s.hintsUsed);
-    result = { ...result, total: adjusted, mastery: adjusted >= (def.masteryThreshold ?? MASTERY_THRESHOLD) };
-  }
-  return result;
-}
-
 export function reducer(s: AppState, a: Action, seam: ReducerSeam = noopSeam): AppState {
   switch (a.type) {
     case "goto":
@@ -211,8 +196,6 @@ export function reducer(s: AppState, a: Action, seam: ReducerSeam = noopSeam): A
         serverFocus: a.mode === "practice" ? (a.focusFinding ?? null) : null,
         serverChallengeId: a.mode === "assessment" ? (a.challengeId ?? null) : null,
       };
-    case "startSession":
-      return { ...s, session: { practiceIds: a.practiceIds, assessmentIds: a.assessmentIds, seed: a.seed }, topicReturn: null };
     case "startTopicPractice": {
       // A2.3: konu uygulaması da sunucudan açılır; odak bulgusu oturum isteğine girer.
       const started = reducer(s, { type: "startMode", mode: "practice", ...(a.focusFinding === null ? {} : { focusFinding: a.focusFinding }) }, seam);
@@ -271,13 +254,6 @@ export function reducer(s: AppState, a: Action, seam: ReducerSeam = noopSeam): A
       if (!def || def.questions[s.step + 1] == null) return s;
       return { ...s, step: s.step + 1, lastFeedback: null };
     }
-    case "finishCase": {
-      const def = findCase(s, s.currentCaseId);
-      if (!def || s.pendingSummary) return s;
-      const result = computeCaseResult(def, s);
-      seam.emit({ type: "case_completed", caseId: def.id, mode: s.mode });
-      return { ...s, caseResults: [...s.caseResults, result], pendingSummary: result, lastFeedback: null };
-    }
     case "nextCase":
       return {
         ...s, pendingSummary: null, step: 0, answers: {}, revealed: {}, hintsUsed: 0,
@@ -306,15 +282,6 @@ export function reducer(s: AppState, a: Action, seam: ReducerSeam = noopSeam): A
     }
     case "resetCase":
       return { ...s, step: 0, answers: {}, revealed: {}, hintsUsed: 0, telemetry: initialTelemetry(), lastFeedback: null, pendingSummary: null };
-    case "setResults": {
-      // A4: oturum bitince mod başına en iyi toplam puanı güncelle (yalnız practice/assessment;
-      // learn modu setResults dispatch etmez). Yeni örneklem/oturum sıfırlansa da korunur.
-      const modeKey: "practice" | "assessment" = s.mode === "assessment" ? "assessment" : "practice";
-      const agg = aggregateResults(a.results);
-      const prevBest = s.bestScore[modeKey] ?? 0;
-      const bestScore = agg.total > prevBest ? { ...s.bestScore, [modeKey]: agg.total } : s.bestScore;
-      return { ...s, caseResults: a.results, screen: "results", bestScore };
-    }
     case "setLearnFocus":
       return { ...s, learnFocusKey: a.key, learnFocusIdx: a.idx ?? null };
     case "serverStarted":
@@ -365,7 +332,7 @@ export function reducer(s: AppState, a: Action, seam: ReducerSeam = noopSeam): A
       if (!s.server) return s;
       return { ...s, server: { ...s.server, status: "submitting" } };
     case "serverCaseResult": {
-      // Yerel `finishCase` karşılığı; `case_completed` YAYINLANMAZ (denemeyi sunucu yazar).
+      // Vaka sonucu yalnız sunucudan gelir (ADR-009); `case_completed` YAYINLANMAZ (denemeyi sunucu yazar).
       if (!s.server) return s;
       const metas = a.meta === null ? s.server.metas : { ...s.server.metas, [a.result.caseId]: a.meta };
       const given = s.server.snapshots[a.result.caseId]?.given ?? {};

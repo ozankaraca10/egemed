@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { fmtSec, planPrimaryAction } from '../../../packages/sim-opaca/src/index'
-import type { ImageRecord, Question } from '../../../packages/sim-opaca/src/index'
+import type { Question } from '../../../packages/sim-opaca/src/index'
 
 function question(over: Partial<Question> = {}): Question {
   return {
@@ -14,29 +14,6 @@ function question(over: Partial<Question> = {}): Question {
     feedbackIncorrect: 'Yanlış',
     ...over,
   }
-}
-
-const syntheticImage: ImageRecord = {
-  id: 'img_fixture',
-  sourceDataset: 'nih-cxr14',
-  sourceFile: 'fixture.png',
-  viewPosition: 'PA',
-  ageYears: 45,
-  sex: 'F',
-  population: 'yetiskin',
-  width: 512,
-  height: 512,
-  originalWidth: 512,
-  originalHeight: 512,
-  findings: { nodule: 'expert_bbox' },
-  negatives: {},
-  annotations: [],
-  quality: null,
-  runtimeUrl: 'assets/fixture.webp',
-  bytes: 1,
-  validationStatus: 'validated',
-  clinicalReview: 'onayli',
-  issues: [],
 }
 
 describe('simulation-core (S15 saf çekirdek)', () => {
@@ -58,10 +35,8 @@ describe('simulation-core (S15 saf çekirdek)', () => {
         questions: qs,
         revealed: true,
         canSubmit: true,
-        given: ['a'],
-        image: syntheticImage,
-      }).dispatches,
-    ).toEqual([{ type: 'advance' }])
+      }),
+    ).toEqual({ submitQid: null, advance: true, finish: false })
     expect(
       planPrimaryAction({
         mode: 'practice',
@@ -69,10 +44,8 @@ describe('simulation-core (S15 saf çekirdek)', () => {
         questions: qs,
         revealed: true,
         canSubmit: true,
-        given: ['a'],
-        image: syntheticImage,
       }),
-    ).toEqual({ dispatches: [{ type: 'finishCase' }], saveInteractions: false })
+    ).toEqual({ submitQid: null, advance: false, finish: true })
   })
 
   it('planPrimaryAction değerlendirmede submit-then-advance/finish planlar', () => {
@@ -83,14 +56,9 @@ describe('simulation-core (S15 saf çekirdek)', () => {
       questions: qs,
       revealed: false,
       canSubmit: true,
-      given: ['a'],
-      image: syntheticImage,
     })
-    expect(mid.dispatches).toEqual([
-      { type: 'submitAnswer', qid: 'q1', correct: true },
-      { type: 'advance' },
-    ])
-    expect(mid.saveInteractions).toBe(false)
+    // ADR-009: doğruluk sunucudan gelir; plan yalnız gönderilecek soruyu ve sonraki adımı söyler.
+    expect(mid).toEqual({ submitQid: 'q1', advance: true, finish: false })
 
     const last = planPrimaryAction({
       mode: 'assessment',
@@ -98,13 +66,7 @@ describe('simulation-core (S15 saf çekirdek)', () => {
       questions: qs,
       revealed: false,
       canSubmit: true,
-      given: ['a'],
-      image: syntheticImage,
     })
-    expect(last.dispatches).toEqual([
-      { type: 'submitAnswer', qid: 'q2', correct: true },
-      { type: 'finishCase' },
-    ])
-    expect(last.saveInteractions).toBe(true)
+    expect(last).toEqual({ submitQid: 'q2', advance: false, finish: true })
   })
 })
