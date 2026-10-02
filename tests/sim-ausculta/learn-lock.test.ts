@@ -7,7 +7,8 @@ import {
   EmbeddedProvider,
   LearnGateProvider,
   LEARN_LISTENED_KEY,
-  LEARN_SECONDS,
+  LEARN_EXAMPLE_SECONDS,
+  exampleKey,
   LIBRARY_GROUPS,
   LIBRARY_ITEM_COUNT,
   LIBRARY_ITEM_KEYS,
@@ -111,9 +112,14 @@ describe("parseListened", () => {
     expect(parseListened('["heart.normal"]').size).toBe(0);
   });
 
-  it("bilinmeyen anahtar ve geçersiz değer yok sayılır, süre 60 sn'ye kırpılır", () => {
-    const parsed = parseListened('{"heart.normal":30,"bilinmeyen":5,"heart.s3":"x","lung.normal":600}');
-    expect([...parsed]).toEqual([["heart.normal", 30], ["lung.normal", LEARN_SECONDS]]);
+  it("yalnız var olan örnek anahtarları okunur, süre örnek eşiğine kırpılır", () => {
+    const countOf = (key: string) => (key === "lung.normal" ? 4 : 1);
+    const parsed = parseListened(
+      '{"heart.normal#0":3,"heart.normal#1":5,"heart.normal":5,"bilinmeyen#0":5,"heart.s3#0":"x","lung.normal#3":600}',
+      LIBRARY_ITEM_KEYS,
+      countOf,
+    );
+    expect([...parsed]).toEqual([["heart.normal#0", 3], ["lung.normal#3", LEARN_EXAMPLE_SECONDS]]);
   });
 });
 
@@ -168,39 +174,52 @@ describe("öğrenme tamamlanabilirliği", () => {
   });
 });
 
-const FULL = JSON.stringify(Object.fromEntries(LIBRARY_ITEM_KEYS.map((key) => [key, LEARN_SECONDS])));
+const FULL = JSON.stringify(
+  Object.fromEntries(
+    LIBRARY_ITEM_KEYS.flatMap((key) => learnExamples(key).map((_, index) => [exampleKey(key, index), LEARN_EXAMPLE_SECONDS])),
+  ),
+);
 
 function listenFully(tracker: ReturnType<typeof createLearnTracker>, key: string): void {
-  for (let ms = 0; ms < LEARN_SECONDS * 1000; ms += 250) tracker.addListen(key, 250);
+  for (let index = 0; index < learnExamples(key).length; index += 1) {
+    for (let ms = 0; ms < LEARN_EXAMPLE_SECONDS * 1000; ms += 250) tracker.addListen(key, index, 250);
+  }
 }
 
 describe("createLearnTracker", () => {
-  it("öğe ancak 60 sn çalan sesle dinlendi sayılır; süre kalıcıdır", () => {
+  it("konu ancak TÜM örnekleri (gerçekler dahil) 5'er sn çalan sesle dinlenince tamamlanır; süre kalıcıdır", () => {
     const storage = memoryStorage();
-    const tracker = createLearnTracker({ storage });
-    expect(tracker.snapshot().listenedCount).toBe(0);
+    const exampleCount = (key: string) => (key === "heart.normal" ? 2 : 1);
+    const tracker = createLearnTracker({ storage, exampleCount });
     expect(tracker.snapshot().lockText).toBe(learnLockText(0, LIBRARY_ITEM_COUNT));
 
-    // 59,75 sn henüz yetmez; ara kayıt depoya yazılır.
-    for (let ms = 0; ms < 59_750; ms += 250) tracker.addListen("heart.normal", 250);
+    // Sentetik örnek tam dinlendi, gerçek örnek 4,75 sn: konu henüz bitmedi.
+    for (let ms = 0; ms < 5_000; ms += 250) tracker.addListen("heart.normal", 0, 250);
+    for (let ms = 0; ms < 4_750; ms += 250) tracker.addListen("heart.normal", 1, 250);
     expect(tracker.snapshot().listenedCount).toBe(0);
-    expect(tracker.snapshot().seconds.get("heart.normal")).toBeCloseTo(59.75, 5);
-    expect(createLearnTracker({ storage }).snapshot().seconds.get("heart.normal") ?? 0).toBeGreaterThanOrEqual(58);
+    expect(tracker.snapshot().seconds.get(exampleKey("heart.normal", 1))).toBeCloseTo(4.75, 5);
 
-    tracker.addListen("heart.normal", 250);
+    tracker.addListen("heart.normal", 1, 250);
     expect(tracker.snapshot().listenedCount).toBe(1);
     expect(tracker.snapshot().progressText).toBe(learnProgressText(1, LIBRARY_ITEM_COUNT));
-    expect(JSON.parse(storage.entries.get(LEARN_LISTENED_KEY) ?? "{}")).toEqual({ "heart.normal": LEARN_SECONDS });
+    expect(JSON.parse(storage.entries.get(LEARN_LISTENED_KEY) ?? "{}")).toEqual({
+      [exampleKey("heart.normal", 0)]: LEARN_EXAMPLE_SECONDS,
+      [exampleKey("heart.normal", 1)]: LEARN_EXAMPLE_SECONDS,
+    });
 
-    const reopened = createLearnTracker({ storage });
+    // Var olmayan örnek sırası sayılmaz.
+    tracker.addListen("heart.s3", 5, 10_000);
+    expect(tracker.snapshot().seconds.has(exampleKey("heart.s3", 5))).toBe(false);
+
+    const reopened = createLearnTracker({ storage, exampleCount });
     expect(reopened.snapshot().listened.has("heart.normal")).toBe(true);
   });
 
   it("tıklama sayılmaz: çalmayan seçim süre eklemez, sıfır/negatif süre yok sayılır", () => {
     const tracker = createLearnTracker({ storage: memoryStorage() });
     expect(listenedKeyOnPlay(false, "cardiac_aortic", "heart.normal", ["cardiac_aortic"])).toBeNull();
-    tracker.addListen("heart.normal", 0);
-    tracker.addListen("heart.normal", -500);
+    tracker.addListen("heart.normal", 0, 0);
+    tracker.addListen("heart.normal", 0, -500);
     expect(tracker.snapshot().seconds.size).toBe(0);
   });
 
@@ -220,7 +239,7 @@ describe("createLearnTracker", () => {
     expect(tracker.snapshot().localComplete).toBe(true);
     expect(tracker.snapshot().complete).toBe(true);
     expect(calls).toEqual([AUSCULTA_CONTENT_VERSION]);
-    tracker.addListen(LIBRARY_ITEM_KEYS[0] ?? "", 250);
+    tracker.addListen(LIBRARY_ITEM_KEYS[0] ?? "", 0, 250);
     tracker.notify();
     expect(calls).toEqual([AUSCULTA_CONTENT_VERSION]);
   });

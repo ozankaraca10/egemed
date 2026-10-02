@@ -851,6 +851,7 @@
 .eg-sim-ausculta .ex-btn { flex: 1 1 auto; min-height: 44px; padding: 0 10px; border-radius: var(--r-md); border: 1.5px solid var(--border); background: var(--card); font-weight: 700; font-size: var(--fs-sm); color: var(--ink-700); }
 .eg-sim-ausculta .ex-btn.syn.active { border-color: var(--purple-600); background: var(--purple-50); color: var(--purple-700); }
 .eg-sim-ausculta .ex-btn.real.active { border-color: var(--green-600); background: var(--green-50); color: var(--green-700); }
+.eg-sim-ausculta .ex-btn .ex-done { color: var(--green-700); }
 .eg-sim-ausculta .ex-note { margin: 0; font-size: var(--fs-xs); color: var(--ink-600); }
 .eg-sim-ausculta .patient-card { border: 1px solid var(--border); border-radius: var(--r-lg); background: var(--card); padding: 12px; display: grid; gap: 8px; }
 .eg-sim-ausculta .pc-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }

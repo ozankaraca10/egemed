@@ -8,8 +8,8 @@ import type { Mode } from "./types";
  *  KİLİTLİdir (fail-safe): kilit yalnız gerçek ilerleme kanalıyla açılır. */
 
 export interface LearnGateValue extends LearnSnapshot {
-  /** Ses çalarken geçen süreyi öğeye ekler (T307: 60 sn kuralı). */
-  addListen(key: string, ms: number): void;
+  /** Ses çalarken geçen süreyi konunun örneğine ekler (T308: her örnek 5 sn). */
+  addListen(key: string, exampleIndex: number, ms: number): void;
 }
 
 const LearnGateContext = createContext<LearnGateValue>({
@@ -42,7 +42,7 @@ export function LearnGateProvider({ learn, children }: LearnGateProviderProps): 
     tracker.notify();
   }, [tracker]);
   const value = useMemo<LearnGateValue>(
-    () => ({ ...snapshot, addListen: (key: string, ms: number) => tracker.addListen(key, ms) }),
+    () => ({ ...snapshot, addListen: (key: string, exampleIndex: number, ms: number) => tracker.addListen(key, exampleIndex, ms) }),
     [snapshot, tracker],
   );
   return <LearnGateContext.Provider value={value}>{children}</LearnGateContext.Provider>;

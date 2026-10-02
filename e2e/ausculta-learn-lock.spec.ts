@@ -5,7 +5,7 @@ import { unlockAuscultaLearn } from "./sim-flows";
 
 /**
  * T209 — Ausculta öğrenme kilidi (depo sahibi kararı, 27 Eyl 2026): öğrenme
- * kütüphanesindeki her ses (T307: konu başına 60 sn çalarak) dinlenmeden uygulama/değerlendirme KİLİTLİDİR.
+ * kütüphanesindeki her ses (T308: konunun tüm örnekleri 5'er sn çalarak) dinlenmeden uygulama/değerlendirme KİLİTLİDİR.
  * Bu spec kilidin kullanıcıya görünen yüzünü doğrular: pasif kart + ilerleme
  * metni, öğrenme ekranı ilerlemesi ve düello bağlamının öğrenmeye düşmesi.
  */

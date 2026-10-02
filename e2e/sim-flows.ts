@@ -62,20 +62,20 @@ const AUSCULTA_CORRECT_BY_PROMPT = practiceQuestions(
 
 /**
  * T209 — öğrenme kilidi tohumu: uygulama/değerlendirme akışından önce Ausculta
- * öğrenmesini tamamlanmış sayar. İki yol birlikte açılır: yerel dinleme süresi
- * haritası tüm kütüphane anahtarları için 60 sn yazılır (T307) ve DEV kabuğun sekme deposu öğrenme kaydı
+ * öğrenmesini tamamlanmış sayar. İki yol birlikte açılır: yerel örnek dinleme
+ * haritası her konunun 0–3. örnekleri için 5 sn yazılır (T308; fazla sıralar yok sayılır) ve DEV kabuğun sekme deposu öğrenme kaydı
  * (`egemed.learn.ausculta`) işaretlenir. `addInitScript` her gezinmeden önce koşar.
  */
 export async function unlockAuscultaLearn(page: Page): Promise<void> {
   const listened = JSON.stringify(
     Object.fromEntries(
-      (auscultaLibrary.groups as { items: { key: string }[] }[]).flatMap((group) => group.items.map((item) => [item.key, 60])),
+      (auscultaLibrary.groups as { items: { key: string }[] }[]).flatMap((group) => group.items.flatMap((item) => [0, 1, 2, 3].map((index) => [`${item.key}#${index}`, 5]))),
     ),
   );
   const namespaces = ["egemed:anon:ausculta:", "egemed:u:dev-student-0001:ausculta:", "egemed:u:dev-admin-0001:ausculta:"];
   await page.addInitScript(
     (seed: { listened: string; namespaces: string[] }) => {
-      for (const namespace of seed.namespaces) localStorage.setItem(`${namespace}ausculta.learn.seconds`, seed.listened);
+      for (const namespace of seed.namespaces) localStorage.setItem(`${namespace}ausculta.learn.examples`, seed.listened);
       sessionStorage.setItem("egemed.learn.ausculta", "1");
     },
     { listened, namespaces },

@@ -146,11 +146,12 @@ Demo/mock liderlik verisi de anonim satır listelemez.
   `uzmanlik_ogrencisi` sime verilen öğrenme portu her zaman "tamamlanmış"
   sayılır (`createUnlockedLearnPort`); yalnız `kullanici` (öğrenci) gerçek
   `sim_learn_completions` kaydına bağlıdır.
-- **Ausculta öğrenme tamamlama ölçütü (T307, 2 Eki 2026):** her kütüphane konusu
-  ses ÇALARKEN ve stetoskop konunun bir dinleme noktasındayken toplam 60 sn
-  dinlenince sayılır; tıklama/seçim sayılmaz. Süre haritası yerel depoda
-  (`ausculta.learn.seconds`, `{konu: saniye}`); tüm konular tamamlanınca
-  `markComplete` ile `sim_learn_completions` yazılır.
+- **Ausculta öğrenme tamamlama ölçütü (T308, 2 Eki 2026):** her kütüphane konusunun
+  TÜM örnekleri (1 sentetik + varsa gerçek hastalar; sayı konuya göre değişir) ses
+  ÇALARKEN ve stetoskop örneğin bir noktasındayken en az 5'er sn dinlenince konu
+  sayılır; tıklama/seçim sayılmaz. Kayıt yerel depoda (`ausculta.learn.examples`,
+  `{"konu#örnekSırası": saniye}`); tüm konular tamamlanınca `markComplete` ile
+  `sim_learn_completions` yazılır.
 - **Kilidin uygulama katmanı (T290, 1 Eki 2026 düzeltildi):** Uygulama/Değerlendirme
   modu için öğrenme kilidi artık hem **istemci tarafında** (`apps/shell`,
   `audienceCanUseMode` / `isLearnUnlocked`) hem **sunucu tarafında** uygulanıyor.

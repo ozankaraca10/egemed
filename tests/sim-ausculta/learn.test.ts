@@ -58,10 +58,10 @@ describe("LearnScreen", () => {
     expect(html).toContain(esc("Tüm içerik yalnızca Ege Üniversitesi Tıp Fakültesi öğrencilerine açıktır."));
   });
 
-  it("T307: akciğer öğesinde sentetik + 3 gerçek örnek ve 60 sn dinleme sayacı çizilir", () => {
+  it("T307/T308: akciğer öğesinde sentetik + 3 gerçek örnek ve örnek sayacı çizilir", () => {
     const html = renderInStore(createElement(LearnScreen), "lung.normal");
     expect(html).toContain('data-view="front"');
-    expect(html).toContain("Dinleme 0/60 sn · yalnız ses çalarken sayılır");
+    expect(html).toContain("Örnekler 0/4 dinlendi · bu örnek 0/5 sn · yalnız ses çalarken sayılır");
     expect(html).toContain(">Sentetik<");
     expect(html.match(/Gerçek \d · \d+ bölge/g)).toHaveLength(3);
   });
