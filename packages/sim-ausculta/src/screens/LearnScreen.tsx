@@ -1,14 +1,13 @@
-import { useAudience, useChallenge, useRequestSignIn, useSessions } from "../ui/ScreenHeading";
+import { useAudience, useChallenge } from "../ui/ScreenHeading";
 import { createContext, useContext, useEffect, useMemo, useRef, useState, type JSX, type ReactNode } from "react";
 import { VISITOR_LOCK_TEXT } from "@egemed/sim-host";
-import { useLearnGate, useStartMode } from "../core/LearnGate";
+import { useLearnGate } from "../core/LearnGate";
 import { LEARN_EXAMPLE_SECONDS, challengeLearnLockText, exampleKey, listenedKeyOnPlay } from "../core/learnLock";
 import { resolveLibrarySoundEx, type LibrarySoundResult } from "../core/resolver";
 import { useStore } from "../core/StoreProvider";
 import type { AuscultationPoint, PatientView, SoundCategory, SoundRecord } from "../core/types";
 import { isVisitorUnlocked } from "../core/visitorAccess";
 import pointsData from "../data/auscultation-points.json";
-import { CASE_INVENTORY } from "../data/inventory";
 import { learnAbout, LEARN_REFS, URGENT_KEYS } from "../data/learnContent";
 import { clipRecord, exampleClipFor, learnExamples, waveForSound, type LearnExample } from "../data/learnSets";
 import { FIRST_LIBRARY_ITEM, LIBRARY_GROUPS, findLibraryItem } from "../data/library";
@@ -17,10 +16,9 @@ import { libraryShortTitle, libraryTitle } from "../data/terminology";
 import { LearnWave } from "../ui/LearnWave";
 import { PatientStage, StageAudioProvider, type StageAudio, type StageHandle } from "../ui/PatientStage";
 import type { BodyType } from "../ui/patient-stage/geometry";
-import { PediatricRefModal } from "../ui/PediatricRefModal";
 import { ToolbarAudioProvider, VIEW_LABEL, ViewToggle, type ToolbarAudio } from "../ui/Toolbar";
 import { EcgDeco, Footer } from "../ui/chrome";
-import { IconArrowRight, IconCompare, IconInfo, IconLock } from "../ui/icons";
+import { IconInfo, IconLock } from "../ui/icons";
 
 /** Öğrenme modu (T307, depo sahibi onayı 2 Eki 2026): konu başına önce çok noktalı
  *  sentetik set, ardından bulgunun en çok noktada duyulduğu gerçek hastalar. Konu,
@@ -32,6 +30,9 @@ import { IconArrowRight, IconCompare, IconInfo, IconLock } from "../ui/icons";
 const POINTS = pointsData.points as AuscultationPoint[];
 const POINT_BY_ID = new Map(POINTS.map((point) => [point.id, point]));
 const VIEW_ORDER: readonly PatientView[] = ["front", "back", "left", "right"];
+/** T310 (depo sahibi): öğrenme sahnesinde stetoskop %25 küçük ve boşta daha aşağıda. */
+const LEARN_STETH_SCALE = 0.75;
+const LEARN_STETH_REST = { x: 0.5, y: 0.88 } as const;
 
 interface SourceEntry {
   readonly id: string;
@@ -115,9 +116,7 @@ export function LearnScreen({
   const audience = useAudience();
   const isVisitor = audience === "visitor";
   const gate = useLearnGate();
-  const startMode = useStartMode();
   const challenge = useChallenge();
-  const requestSignIn = useRequestSignIn();
   const [selectedKey, setSelectedKey] = useState<string>(() => {
     const wanted = state.learnFocusKey ?? FIRST_LIBRARY_ITEM.key;
     if (isVisitor && !isVisitorUnlocked(wanted)) return FIRST_LIBRARY_ITEM.key;
@@ -128,7 +127,8 @@ export function LearnScreen({
   const stageRef = useRef<StageHandle>(null);
   const [activePoint, setActivePoint] = useState<string | null>(null);
   const [playing, setPlaying] = useState(false);
-  const [pedModalOpen, setPedModalOpen] = useState(false);
+  // T310: her çalma başlangıcında artar; dalga panelindeki konum çubuğunu sıfırlar.
+  const [playToken, setPlayToken] = useState(0);
   const [lockNotice, setLockNotice] = useState(false);
   const initialFocus = useRef(state.learnFocusKey);
 
@@ -136,28 +136,15 @@ export function LearnScreen({
     if (initialFocus.current) dispatch({ type: "setLearnFocus", key: null });
   }, [dispatch]);
 
-  const sessions = useSessions();
   const item = findLibraryItem(selectedKey);
   const isHeart = item.group === "heart";
   const isMixed = item.group === "mixed";
   const category = item.category as SoundCategory;
-  const cov = CASE_INVENTORY.coverage[item.acousticFinding] ?? { p: 0, a: 0 };
   const examples = useMemo(() => learnExamples(item.key), [item.key]);
   const exIndex = Math.max(0, Math.min(exampleIndex, examples.length - 1));
   const example = examples[exIndex] ?? examples[0]!;
   const realOrdinal = examples.slice(0, exampleIndex + 1).filter((entry) => entry.kind === "real").length;
 
-  const startPracticeForFinding = () => {
-    // T196: odaklı uygulama oturumu (bulgu başına ≤5 vaka) yalnız sunucudan açılır.
-    // T209: öğrenme tamamlanmadan odaklı uygulama da kilitlidir; koruma tek noktada.
-    if (sessions === undefined || cov.p === 0) return;
-    startMode("practice", { focusFinding: item.acousticFinding });
-  };
-
-  // T209: kilit metni ziyaretçide ziyaretçi kilidini korur (öncelik ziyaretçide).
-  const practiceLocked = !isVisitor && !gate.complete;
-  const practiceDisabled = isVisitor ? requestSignIn === undefined : practiceLocked;
-  const practiceLockText = isVisitor ? VISITOR_LOCK_TEXT.modeLocked : gate.lockText;
   const challengeLocked = challenge.challengeId !== undefined && !gate.complete;
 
   useEffect(() => {
@@ -342,6 +329,15 @@ export function LearnScreen({
                 {/* T206/T309: sahne, `data-view` ile seçilen gövde görselinin en-boy
                     oranında; görünüm ve katman düğmeleri maketteki gibi sahnenin üstünde. */}
                 <div className="stage-card" data-view={view}>
+                  <ViewToggle
+                    className="stage-views"
+                    views={VIEW_ORDER}
+                    allowed={views}
+                    selected={view}
+                    onSelect={selectView}
+                    icons={false}
+                    lockReason={(entry) => `Bu örnekte ${VIEW_LABEL[entry].toLocaleLowerCase("tr")} kayıt yok`}
+                  />
                   <PatientStage
                     key={`${item.key}:${exampleIndex}`}
                     ref={stageRef}
@@ -354,6 +350,8 @@ export function LearnScreen({
                     showLabels
                     bodyType={bodyType}
                     mode="learn"
+                    stethScale={LEARN_STETH_SCALE}
+                    restPosition={LEARN_STETH_REST}
                     soundFor={soundFor}
                     onVisit={(pointId) => dispatch({ type: "visit", pointId })}
                     onDwell={(pointId, dwellMs) => dispatch({ type: "dwell", pointId, dwellMs })}
@@ -364,18 +362,10 @@ export function LearnScreen({
                       if (key !== null) gate.addListen(key, exIndex, ms);
                     }}
                     onPlayingChange={(isPlaying, pointId) => {
+                      if (isPlaying) setPlayToken((token) => token + 1);
                       setPlaying(isPlaying);
                       setActivePoint(pointId);
                     }}
-                  />
-                  <ViewToggle
-                    className="stage-views"
-                    views={VIEW_ORDER}
-                    allowed={views}
-                    selected={view}
-                    onSelect={selectView}
-                    icons={false}
-                    lockReason={(entry) => `Bu örnekte ${VIEW_LABEL[entry].toLocaleLowerCase("tr")} kayıt yok`}
                   />
                   {isMixed && view === "front" ? (
                     <div className="layer-toggle" role="group" aria-label="Oskültasyon katmanı">
@@ -451,6 +441,7 @@ export function LearnScreen({
                   wave={wave}
                   markSource={markSource}
                   emptyText="Stetoskobu bir oskültasyon bölgesine sürükleyin; çalan kaydın dalga formu burada görünür."
+                  playhead={playing && waveSound && activePoint === shownPoint ? { periodSec: waveSound.durationSec, token: playToken } : null}
                   controls={
                     <>
                       <button
@@ -472,7 +463,11 @@ export function LearnScreen({
                             type="button"
                             aria-pressed={state.head === entry}
                             title={entry === "bell" ? "Bell — düşük frekans vurgusu" : "Diyafram — orta/yüksek frekans vurgusu"}
-                            onClick={() => dispatch({ type: "setHead", head: entry })}
+                            onClick={() => {
+                              // Göğüs başlığı değişince motor kaydı baştan çalar; çubuk da sıfırlanır.
+                              if (playing && state.head !== entry) setPlayToken((token) => token + 1);
+                              dispatch({ type: "setHead", head: entry });
+                            }}
                           >
                             {entry === "bell" ? "Bell" : "Diyafram"}
                           </button>
@@ -514,38 +509,12 @@ export function LearnScreen({
                       <p className="la-mech">{about.mech}</p>
                     </div>
                   </div>
-                  <div className="la-actions">
-                    <p className="src-line">
-                      <IconCompare />
-                      Vaka kapsamı: {cov.p > 0 ? `${cov.p} uygulama vakası` : "vaka yok"}
-                      {cov.a > 0 ? `, ${cov.a} değerlendirme vakası` : ""}
-                    </p>
-                    <button type="button" className="btn outline small ped-ref-btn" onClick={() => setPedModalOpen(true)}>
-                      <IconInfo width={14} height={14} /> Pediatrik referans
-                    </button>
-                    {cov.p > 0 && (
-                      <button
-                        type="button"
-                        className="btn outline small"
-                        onClick={() => (isVisitor ? requestSignIn?.() : startPracticeForFinding())}
-                        disabled={practiceDisabled}
-                      >
-                        Bu sesle uygulama yap <IconArrowRight width={14} height={14} />
-                      </button>
-                    )}
-                  </div>
-                  {cov.p > 0 && (isVisitor || practiceLocked) ? (
-                    <p className="lib-lock-notice" role="status">
-                      <IconLock width={14} height={14} aria-hidden="true" /> {practiceLockText}
-                    </p>
-                  ) : null}
                 </section>
               </section>
             </div>
           </div>
         </div>
         <Footer embedded={embedded} />
-        <PediatricRefModal open={pedModalOpen} onClose={() => setPedModalOpen(false)} />
       </ToolbarAudioProvider>
     </StageAudioProvider>
   );
