@@ -1,7 +1,7 @@
 # T309-ausculta-maket
 
-- Tarih: 2026-10-02 15:43
-- Commit: T309: Ausculta öğrenme modu onaylı maket düzeninde — 3 sütun, sahne üstü görünümler, oynatıcı paneli, camgöbeği tokenları
+- Tarih: 2026-10-02 16:03
+- Commit: T309: öğrenme ilerleme başlığı .learn-progress işaretini taşır (e2e rota testleri)
 - Dal: task/T309-ausculta-maket
 
 ---

@@ -262,7 +262,7 @@ export function LearnScreen({
             <div className="learn-grid">
               <nav className="lib-col" aria-label="Ses konuları">
                 {/* T209: öğrenme tamamlanma göstergesi (kilidin ilerleme metni). */}
-                <h2 className="lib-head" role="status" aria-label={gate.progressText}>
+                <h2 className="lib-head learn-progress" role="status" aria-label={gate.progressText}>
                   Konular · {gate.listenedCount}/{gate.total}
                 </h2>
                 {isVisitor && lockNotice ? (
