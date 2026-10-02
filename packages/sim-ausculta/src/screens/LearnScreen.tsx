@@ -3,7 +3,7 @@ import { createContext, useContext, useEffect, useMemo, useRef, useState, type J
 import { VISITOR_LOCK_TEXT } from "@egemed/sim-host";
 import { countUnlistenedInOtherView, otherViewHintText } from "../core/flow";
 import { useLearnGate, useStartMode } from "../core/LearnGate";
-import { LEARN_SECONDS, challengeLearnLockText, listenedKeyOnPlay } from "../core/learnLock";
+import { LEARN_EXAMPLE_SECONDS, challengeLearnLockText, exampleKey, listenedKeyOnPlay } from "../core/learnLock";
 import { resolveLibrarySoundEx, type LibrarySoundResult } from "../core/resolver";
 import { useStore } from "../core/StoreProvider";
 import type { AuscultationPoint, PatientView, SoundCategory, SoundRecord } from "../core/types";
@@ -26,7 +26,8 @@ import { IconArrowRight, IconCompare, IconHeart, IconInfo, IconLock, IconLungs }
 
 /** Öğrenme modu (T307, depo sahibi onayı 2 Eki 2026): konu başına önce çok noktalı
  *  sentetik set, ardından bulgunun en çok noktada duyulduğu gerçek hastalar. Konu,
- *  ses çalarken toplam `LEARN_SECONDS` dinlenince tamamlanır. Skor yok.
+ *  tüm örnekleri (sentetik + gerçek) ses çalarken `LEARN_EXAMPLE_SECONDS`'er saniye
+ *  dinlenince tamamlanır (T308). Skor yok.
  *  Port (E2 §9 S14): `document`/`Date.now` yok; kaydırma `LearnScreenEnv`, ses motoru
  *  bağlamdan gelir. */
 
@@ -143,7 +144,8 @@ export function LearnScreen({
   const category = item.category as SoundCategory;
   const cov = CASE_INVENTORY.coverage[item.acousticFinding] ?? { p: 0, a: 0 };
   const examples = useMemo(() => learnExamples(item.key), [item.key]);
-  const example = examples[Math.min(exampleIndex, examples.length - 1)] ?? examples[0]!;
+  const exIndex = Math.max(0, Math.min(exampleIndex, examples.length - 1));
+  const example = examples[exIndex] ?? examples[0]!;
   const realOrdinal = examples.slice(0, exampleIndex + 1).filter((entry) => entry.kind === "real").length;
 
   const startPracticeForFinding = () => {
@@ -205,7 +207,10 @@ export function LearnScreen({
     view,
     countUnlistenedInOtherView(POINTS, pointIds, view, state.telemetry.visits),
   );
-  const seconds = Math.floor(gate.seconds.get(item.key) ?? 0);
+  const exampleSeconds = (index: number): number => gate.seconds.get(exampleKey(item.key, index)) ?? 0;
+  const exampleDone = (index: number): boolean => exampleSeconds(index) >= LEARN_EXAMPLE_SECONDS;
+  const doneExamples = examples.filter((_, index) => exampleDone(index)).length;
+  const seconds = Math.floor(exampleSeconds(exIndex));
   const done = gate.listened.has(item.key);
 
   const waveSound = activePoint ? soundFor(activePoint) : null;
@@ -321,9 +326,13 @@ export function LearnScreen({
                     </span>
                   </div>
                   <div className="learn-study" role="status">
-                    <span>{done ? "Dinlendi ✓" : `Dinleme ${seconds}/${LEARN_SECONDS} sn · yalnız ses çalarken sayılır`}</span>
+                    <span>
+                      {done
+                        ? "Tüm örnekler dinlendi ✓"
+                        : `Örnekler ${doneExamples}/${examples.length} dinlendi · bu örnek ${exampleDone(exIndex) ? "✓" : `${seconds}/${LEARN_EXAMPLE_SECONDS} sn`} · yalnız ses çalarken sayılır`}
+                    </span>
                     <i aria-hidden="true">
-                      <b style={{ width: `${Math.min(100, (seconds / LEARN_SECONDS) * 100)}%` }} />
+                      <b style={{ width: `${Math.min(100, (doneExamples / Math.max(1, examples.length)) * 100)}%` }} />
                     </i>
                   </div>
                 </div>
@@ -349,7 +358,7 @@ export function LearnScreen({
                     onListenTick={(pointId, ms) => {
                       // T307: yalnız ses çalarken ve konunun noktasındayken süre sayılır.
                       const key = listenedKeyOnPlay(true, pointId, item.key, pointIds);
-                      if (key !== null) gate.addListen(key, ms);
+                      if (key !== null) gate.addListen(key, exIndex, ms);
                     }}
                     onPlayingChange={(_playing, pointId) => setActivePoint(pointId)}
                   />
@@ -407,14 +416,15 @@ export function LearnScreen({
                           }}
                         >
                           {entry.kind === "real" ? `Gerçek ${ordinal} · ${regions} bölge` : "Sentetik"}
+                          {exampleDone(index) ? <span className="ex-done"> ✓<span className="sr-only"> dinlendi</span></span> : null}
                         </button>
                       );
                     })}
                   </div>
                   <p className="ex-note">
                     {examples.length > 1
-                      ? "Önce sentetik sette odakları gezin; ardından bulgunun en çok bölgede duyulduğu gerçek hastaları dinleyin."
-                      : "Bu bulgu için açık veri kümelerinde bölge etiketli gerçek hasta kaydı yok; yalnız sentetik set."}
+                      ? `Önce sentetik sette odakları gezin; ardından bulgunun en çok bölgede duyulduğu gerçek hastaları dinleyin. Konu, ${examples.length} örneğin her biri en az ${LEARN_EXAMPLE_SECONDS} sn dinlenince tamamlanır.`
+                      : `Bu bulgu için açık veri kümelerinde bölge etiketli gerçek hasta kaydı yok; yalnız sentetik set (en az ${LEARN_EXAMPLE_SECONDS} sn dinleyin).`}
                   </p>
                 </div>
                 <PatientCard example={example} ordinal={realOrdinal} regions={pointIds.length} />

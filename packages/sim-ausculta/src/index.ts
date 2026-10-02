@@ -77,7 +77,8 @@ export type { LibGroup, LibItem } from "./data/library";
 export {
   AUSCULTA_CONTENT_VERSION,
   LEARN_LISTENED_KEY,
-  LEARN_SECONDS,
+  LEARN_EXAMPLE_SECONDS,
+  exampleKey,
   LOCKED_LEARN_SNAPSHOT,
   canStartMode,
   challengeLearnLockText,
