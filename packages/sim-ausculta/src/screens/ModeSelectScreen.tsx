@@ -11,7 +11,7 @@ import { EcgDeco, Footer, touchTarget } from "../ui/chrome";
 import { useAudience, useOpenChallenges, useRequestSignIn, useSessions, useSetChrome } from "../ui/ScreenHeading";
 import { IconLock } from "../ui/icons";
 import type { SimRewardsSnapshot } from "@egemed/sim-host";
-import { modeLearnLocked, modePickTarget, sessionSeed } from "./entry";
+import { modeLearnLocked, modePickTarget } from "./entry";
 
 const practiceCases = { length: CASE_INVENTORY.practicePoolSize };
 const assessmentCases = { length: CASE_INVENTORY.assessmentPoolSize };
@@ -36,7 +36,6 @@ export function ModeSelectScreen({ embedded = false, rewards = null, onLeaderboa
   const serverReady = useSessions() !== undefined;
   const pick = (mode: Mode) => {
     const target = modePickTarget(mode, gate.complete, poolReady(mode));
-    if (target !== "learn") dispatch({ type: "startSession", practiceIds: [], assessmentIds: [], seed: sessionSeed(now()) });
     startMode(target);
     if (target === "learn") dispatch({ type: "goto", screen: "learn" });
   };

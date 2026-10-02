@@ -24,11 +24,8 @@ export type { ScreenHeadingProps } from "./ui/ScreenHeading";
 
 export { DEFAULT_WEIGHTS } from "./core/types";
 export {
-  HINT_PENALTY_PRACTICE,
   MASTERY_THRESHOLD,
   aggregateResults,
-  practiceAdjusted,
-  scoreCase,
 } from "./core/scoring";
 export {
   countUnlistenedInOtherView,
@@ -278,7 +275,7 @@ export { EcgDeco, Footer, needsExitConfirm, resolveStepSelect } from "./ui/chrom
 export type { StepSelectOutcome } from "./ui/chrome";
 export { EntryScreens } from "./screens/EntryScreens";
 export type { EntryScreensProps } from "./screens/EntryScreens";
-export { modeLearnLocked, modePickTarget, resolveEntryScreen, sessionSeed } from "./screens/entry";
+export { modeLearnLocked, modePickTarget, resolveEntryScreen } from "./screens/entry";
 export { ModeSelectScreen, Stepper } from "./screens/ModeSelectScreen";
 export type { ModeSelectScreenProps } from "./screens/ModeSelectScreen";
 export { StartScreen } from "./screens/StartScreen";
@@ -312,7 +309,6 @@ export {
   CASE_TRANSITION_MS,
   computeQuestionLatency,
   hasSessionProgress,
-  isAnswerCorrect,
   isLastQuestion,
   planAssessmentAutoAdvance,
   planPrimaryAction,

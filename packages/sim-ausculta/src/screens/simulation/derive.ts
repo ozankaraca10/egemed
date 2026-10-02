@@ -8,20 +8,20 @@ import type { CaseResult, Mode, Question } from "../../core/types";
 export const CASE_FLASH_MS = 600;
 export const CASE_TRANSITION_MS = 1400;
 
-export type SimulationDispatch =
-  | { type: "advance" }
-  | { type: "finishCase" }
-  | { type: "nextCase" }
-  | { type: "submitAnswer"; qid: string; correct: boolean }
-  | { type: "startSession"; practiceIds: string[]; assessmentIds: string[]; seed: number }
-  | { type: "startMode"; mode: Mode }
-  | { type: "setResults"; results: CaseResult[] };
+export type SimulationDispatch = { type: "nextCase" };
 
+/** Birincil düğmenin planı (ADR-009): doğruluk ve vaka sonucu sunucudan gelir; plan
+ *  yalnız ne yapılacağını söyler — hangi soru gönderilecek, ilerlenecek mi, vaka bitecek mi. */
 export interface PrimaryActionPlan {
-  dispatches: SimulationDispatch[];
+  /** Sunucuya gönderilecek soru (yoksa null). */
+  submitQid: string | null;
+  advance: boolean;
+  finish: boolean;
   saveInteractions: boolean;
   latency: Record<string, number> | null;
 }
+
+const NO_ACTION: PrimaryActionPlan = { submitQid: null, advance: false, finish: false, saveInteractions: false, latency: null };
 
 export interface QuestionCursor {
   question: Question | undefined;
@@ -42,11 +42,6 @@ export function questionCursor(
     canSubmit: !!question && (answers[question.id]?.length ?? 0) > 0,
     revealed: question ? !!revealed[question.id] : false,
   };
-}
-
-/** Kaynak satır 546–548. */
-export function isAnswerCorrect(q: Question, given: readonly string[]): boolean {
-  return given.length > 0 && q.correct.length === given.length && given.every((g) => q.correct.includes(g));
 }
 
 /** Kaynak satır 550–552. */
@@ -75,22 +70,20 @@ export function planPrimaryAction(params: {
   questions: readonly Question[];
   revealed: boolean;
   canSubmit: boolean;
-  given: readonly string[];
   shownAt: Readonly<Record<string, number>>;
   now: number;
 }): PrimaryActionPlan {
   const q = params.question;
-  if (!q) return { dispatches: [], saveInteractions: false, latency: null };
+  if (!q) return NO_ACTION;
   const last = isLastQuestion(params.questions, q);
   const action = nextActionForSubmit(params.mode, params.revealed, last);
-  if (action === "advance") return { dispatches: [{ type: "advance" }], saveInteractions: false, latency: null };
-  if (action === "finish") return { dispatches: [{ type: "finishCase" }], saveInteractions: false, latency: null };
-  if (!params.canSubmit) return { dispatches: [], saveInteractions: false, latency: null };
-  const dispatches: SimulationDispatch[] = [{ type: "submitAnswer", qid: q.id, correct: isAnswerCorrect(q, params.given) }];
-  if (action === "submit-then-finish") dispatches.push({ type: "finishCase" });
-  else if (action === "submit-then-advance") dispatches.push({ type: "advance" });
+  if (action === "advance") return { ...NO_ACTION, advance: true };
+  if (action === "finish") return { ...NO_ACTION, finish: true };
+  if (!params.canSubmit) return NO_ACTION;
   return {
-    dispatches,
+    submitQid: q.id,
+    advance: action === "submit-then-advance",
+    finish: action === "submit-then-finish",
     saveInteractions: last,
     latency: last ? computeQuestionLatency(params.questions, params.shownAt, params.now) : null,
   };

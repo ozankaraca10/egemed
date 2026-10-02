@@ -1,6 +1,6 @@
 import type { CaseDef, CaseResult, Mode, PatientView, Screen, StethHead, SuspendPayload, Telemetry } from "./types";
 import type { SimEventDraft } from "./events";
-import { aggregateResults, practiceAdjusted, scoreCase, MASTERY_THRESHOLD } from "./scoring";
+import { aggregateResults } from "./scoring";
 import type { ServerCaseMeta, ServerCaseSnapshot, ServerClientCase, ServerQuestionFeedback, ServerSessionState } from "./serverSession";
 
 /** Ausculta durum iskeleti ve saf reducer (kaynak: `core/store.tsx:106-299`, `buildSuspend`).
@@ -131,7 +131,6 @@ export type Action =
   | { type: "startMode"; mode: Mode; focusFinding?: string; challengeId?: string }
   | { type: "caseMount"; caseDef: CaseDef }
   | { type: "setBodySex"; sex: BodySex }
-  | { type: "startSession"; practiceIds: string[]; assessmentIds: string[]; seed: number }
   | { type: "setView"; view: PatientView }
   | { type: "setHead"; head: StethHead }
   | { type: "setVolume"; volume: number }
@@ -146,7 +145,6 @@ export type Action =
   | { type: "useHint" }
   | { type: "timer"; deltaMs: number }
   | { type: "advance" }
-  | { type: "finishCase" }
   | { type: "nextCase" }
   | { type: "tutorialDone"; done: boolean }
   | { type: "tutorialSeen" }
@@ -154,7 +152,6 @@ export type Action =
   | { type: "restore"; payload: SuspendPayload }
   | { type: "startDrag" }
   | { type: "resetCase" }
-  | { type: "setResults"; results: CaseResult[] }
   | { type: "setLearnFocus"; key: string | null }
   | { type: "serverStarted"; sessionId: string; mode: "practice" | "assessment" | "challenge"; caseCount: number }
   | { type: "serverCaseLoaded"; index: number; clientCase: ServerClientCase }
@@ -222,8 +219,6 @@ export function reducer(s: AppState, a: Action, seam: ReducerSeam = noopSeam): A
       return { ...s, view: a.view };
     case "setBodySex":
       return { ...s, bodySex: a.sex };
-    case "startSession":
-      return { ...s, session: { practiceIds: a.practiceIds, assessmentIds: a.assessmentIds, seed: a.seed } };
     case "setHead":
       if (s.head === a.head) return s;
       seam.emit({ type: "filter_changed", head: a.head });
@@ -291,27 +286,6 @@ export function reducer(s: AppState, a: Action, seam: ReducerSeam = noopSeam): A
       if (def.questions[s.step + 1] == null) return s;
       return { ...s, step: s.step + 1, lastFeedback: null };
     }
-    case "finishCase": {
-      const def = findCase(s, s.currentCaseId);
-      if (!def) return s;
-      let result = scoreCase(def, s.answers, s.telemetry, s.hintsUsed);
-      if (s.mode === "practice" && s.hintsUsed > 0) {
-        const adjustedTotal = practiceAdjusted(result.total, s.hintsUsed);
-        const threshold = def.masteryThreshold ?? MASTERY_THRESHOLD;
-        result = { ...result, total: adjustedTotal, mastery: adjustedTotal >= threshold };
-      }
-      const domainPercents: Partial<Record<string, number>> = {};
-      for (const [key, value] of Object.entries(result.domains)) {
-        if (value.max > 0) domainPercents[key] = Math.round((value.earned / value.max) * 100);
-      }
-      if (s.mode !== "learn") seam.emit({ type: "case_completed", caseId: def.id, mode: s.mode, score: result.total, mastery: result.mastery, hintsUsed: result.hintsUsed, domains: domainPercents });
-      return {
-        ...s,
-        caseResults: [...s.caseResults, result],
-        pendingSummary: result,
-        lastFeedback: null,
-      };
-    }
     case "nextCase":
       return {
         ...s,
@@ -366,13 +340,6 @@ export function reducer(s: AppState, a: Action, seam: ReducerSeam = noopSeam): A
         lastFeedback: null,
         pendingSummary: null,
       };
-    case "setResults": {
-      const modeKey: "practice" | "assessment" = s.mode === "assessment" ? "assessment" : "practice";
-      const agg = aggregateResults(a.results);
-      const prevBest = s.bestScore[modeKey] ?? 0;
-      const bestScore = agg.total > prevBest ? { ...s.bestScore, [modeKey]: agg.total } : s.bestScore;
-      return { ...s, caseResults: a.results, screen: "results", bestScore };
-    }
     case "setLearnFocus":
       return { ...s, learnFocusKey: a.key };
     case "serverStarted":
@@ -412,7 +379,7 @@ export function reducer(s: AppState, a: Action, seam: ReducerSeam = noopSeam): A
       if (!s.server) return s;
       return { ...s, server: { ...s.server, status: "submitting" } };
     case "serverCaseResult": {
-      // Yerel `finishCase` karşılığı; `case_completed` YAYINLANMAZ (denemeyi sunucu yazar).
+      // Vaka sonucu yalnız sunucudan gelir (ADR-009); `case_completed` YAYINLANMAZ (denemeyi sunucu yazar).
       if (!s.server) return s;
       const metas = a.meta === null ? s.server.metas : { ...s.server.metas, [a.result.caseId]: a.meta };
       const given = s.server.snapshots[a.result.caseId]?.given ?? {};

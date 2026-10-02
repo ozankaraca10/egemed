@@ -4,7 +4,7 @@ import type { AchievementsPeriod, Cohort, CohortFilter, Period, WeeklyGoal } fro
 import type { SimRewardsSnapshot } from "@egemed/sim-host";
 import { periodRangeTr } from "@egemed/gamification-core";
 import { buildAchievementsModel, buildLeaderboardModel, defaultGamiIcons, earnedFromServer, GamiAchievementsView, GamiLeaderboardView, GamiProgressPage, GamiServerFrame, gamiLoadingStatus, levelFromServer, serverHasActivity, streakFromServer, type GamiModalEnv, type GamiPageTab, type GamiServerSource, type ServerGamiData } from "@egemed/gami-ui";
-import { useLearnGate, useStartMode } from "../core/LearnGate";
+import { useStartMode } from "../core/LearnGate";
 import { useStore } from "../core/StoreProvider";
 import type { ScoringWeights } from "../core/types";
 import { AUSCULTA_BADGES } from "../gamification/catalog";
@@ -12,7 +12,6 @@ import { localLeaderboardRows } from "../gamification/leaderboard";
 import type { LocalGamiRepository } from "../gamification/repo";
 import { AUSCULTA_RULES } from "../gamification/rules";
 import { useGamiProgress } from "../gamification/useGami";
-import { sessionSeed } from "./entry";
 import { Footer } from "../ui/chrome";
 import { IconCheckCircle, IconDoc, IconLungs, IconStethoscope, IconWave } from "../ui/icons";
 import type { ModalEnv } from "../ui/modal-env";
@@ -78,7 +77,6 @@ function ProgressBody({
   setPrivacy: (update: (current: { public: boolean; displayName: string | null; cohort: Cohort | null }) => { public: boolean; displayName: string | null; cohort: Cohort | null }) => void;
 }): JSX.Element {
   const { dispatch, now } = useStore();
-  const gate = useLearnGate();
   const startMode = useStartMode();
   const at = new Date(now());
   const progress = useGamiProgress(at, repository);
@@ -140,7 +138,6 @@ function ProgressBody({
 
   // T209: öğrenme tamamlanmadan değerlendirme başlatılamaz; kilitliyse istek öğrenmeye düşer.
   const startAssessment = () => {
-    if (gate.complete) dispatch({ type: "startSession", practiceIds: [], assessmentIds: [], seed: sessionSeed(now()) });
     startMode("assessment");
   };
 

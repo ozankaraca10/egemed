@@ -1,7 +1,7 @@
 import { createElement, type ReactNode } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
-import { BEST_SCORE_KEY, EmbeddedProvider, LocalGamiRepository, MASTERY_THRESHOLD, ResultsScreen, StoreProvider, buildSuspend, createMemoryRuntimeAdapter, createNoopResultsScreenEnv, createSimRuntime, exitResults, firstWeakLibraryKeyFromServer, gamiStoragePort, initialState, sessionSeed, studyLearnFromResults } from "../../packages/sim-ausculta/src/index";
+import { BEST_SCORE_KEY, EmbeddedProvider, LocalGamiRepository, MASTERY_THRESHOLD, ResultsScreen, StoreProvider, buildSuspend, createMemoryRuntimeAdapter, createNoopResultsScreenEnv, createSimRuntime, exitResults, firstWeakLibraryKeyFromServer, gamiStoragePort, initialState, studyLearnFromResults } from "../../packages/sim-ausculta/src/index";
 import { poolFor } from "./bank-cases";
 import type { SimAudience } from "../../packages/sim-host/src/index";
 import type { AppState, CaseResult, ScoringWeights, StoragePort, WindowLike } from "../../packages/sim-ausculta/src/index";
@@ -158,7 +158,6 @@ describe("ResultsScreen", () => {
     for (const value of storage.entries.values()) {
       expect(value).not.toMatch(/learner_name|learner_id|Öğrenci Adı|displayName/i);
     }
-    expect(sessionSeed(NOW)).toBe((NOW % 2147483647) | 0);
   });
 });
 
