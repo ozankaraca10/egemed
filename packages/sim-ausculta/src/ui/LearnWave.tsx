@@ -3,7 +3,11 @@ import type { WaveView } from "../data/learnSets";
 
 /** T307 — öğrenme modu dalga paneli: çalan kaydın zarfı ve kaynağın uzman
  *  işaretleri (CirCor S1/S2, SPRSound olayları, ICBHI döngüleri). SVG; tuval,
- *  RAF ve zaman okuması yoktur (sunucuda da çizilir). */
+ *  RAF ve zaman okuması yoktur (sunucuda da çizilir).
+ *  T310: çalarken dikey konum çubuğu CSS animasyonuyla kaydın gerçek süresinde soldan
+ *  sağa ilerler; motor kaydı döngüyle çaldığı için animasyon da döner. Çalma her
+ *  başladığında üst bileşen `playhead.token`'ı artırır, çubuk yeniden kurulur ve
+ *  animasyon sıfırdan (sesle birlikte) başlar. */
 
 const MARK_CLASS: Record<string, string> = {
   S1: "s1",
@@ -35,9 +39,11 @@ export interface LearnWaveProps {
   readonly emptyText: string;
   /** T309: oynatıcı denetimleri (dinle/durdur, göğüs başlığı). */
   readonly controls?: ReactNode;
+  /** T310: çalarken konum çubuğu — kaydın döngü süresi (sn) ve çalma başlangıcı jetonu. */
+  readonly playhead?: { readonly periodSec: number; readonly token: number } | null;
 }
 
-export function LearnWave({ title, meta, wave, markSource, emptyText, controls }: LearnWaveProps): JSX.Element {
+export function LearnWave({ title, meta, wave, markSource, emptyText, controls, playhead }: LearnWaveProps): JSX.Element {
   const W = 600;
   const H = 190;
   const mid = H / 2 - 8;
@@ -49,6 +55,7 @@ export function LearnWave({ title, meta, wave, markSource, emptyText, controls }
         <span className="lw-meta">{meta}</span>
       </div>
       {wave ? (
+        <div className="lw-plot">
         <svg className="lw-svg" viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" role="img" aria-label={`${title} dalga formu`}>
           <rect x={0} y={0} width={W} height={H} className="lw-bg" />
           {wave.marks.map((mark, index) => {
@@ -75,6 +82,10 @@ export function LearnWave({ title, meta, wave, markSource, emptyText, controls }
               .join("")}
           />
         </svg>
+          {playhead && playhead.periodSec > 0 ? (
+            <Playhead key={playhead.token} windowSec={wave.durationSec} periodSec={playhead.periodSec} />
+          ) : null}
+        </div>
       ) : (
         <p className="lw-empty">{emptyText}</p>
       )}
@@ -90,5 +101,17 @@ export function LearnWave({ title, meta, wave, markSource, emptyText, controls }
       </div>
       {controls ? <div className="lw-ctrls">{controls}</div> : null}
     </section>
+  );
+}
+
+/** Konum çubuğu: iz, kaydın tamamını temsil edecek kadar geniştir (pencere / süre
+ *  oranında); gösterilen pencere (`windowSec`) kaydın tamamından (`periodSec`) kısaysa
+ *  çubuk pencereyi geçince kırpılır ve döngü başında yeniden görünür. */
+function Playhead({ windowSec, periodSec }: { windowSec: number; periodSec: number }): JSX.Element {
+  const frac = Math.min(1, windowSec / periodSec);
+  return (
+    <span className="lw-track" style={{ width: `${(100 / frac).toFixed(3)}%` }} aria-hidden="true">
+      <i className="lw-head" style={{ animationDuration: `${periodSec}s` }} />
+    </span>
   );
 }

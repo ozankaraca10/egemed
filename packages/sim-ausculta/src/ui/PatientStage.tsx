@@ -36,7 +36,7 @@ import {
   type StageCoordPoint,
   type StageRect,
 } from "./patient-stage/geometry";
-import { tubeAnchor, tubeHeadsetHeight, tubePath, tubeTip } from "./patient-stage/tube";
+import { TUBE_CHESTPIECE_RADIUS, tubeAnchor, tubeHeadsetHeight, tubePath, tubeTip } from "./patient-stage/tube";
 
 export interface StagePoint extends StageCoordPoint {
   readonly label: string;
@@ -373,6 +373,10 @@ export interface PatientStageProps {
   onListenTick?: (pointId: string, ms: number) => void;
   onPlayingChange: (playing: boolean, pointId: string | null) => void;
   onDragStart?: () => void;
+  /** T310: stetoskop ölçeği (kulaklık, göğüs parçası, tüp bağlantısı); varsayılan 1. */
+  stethScale?: number;
+  /** T310: göğüs parçasının başlangıç (boşta) konumu; varsayılan `INITIAL_STAGE_POSITION`. */
+  restPosition?: NormPoint;
 }
 
 interface StethElement {
@@ -435,7 +439,8 @@ export const PatientStage = forwardRef<StageHandle, PatientStageProps>(function 
   const stethRef = useRef<unknown>(null);
   const tubeRef = useRef<unknown>(null);
   const tubeShineRef = useRef<unknown>(null);
-  const posRef = useRef<NormPoint>({ ...INITIAL_STAGE_POSITION });
+  const posRef = useRef<NormPoint>({ ...(props.restPosition ?? INITIAL_STAGE_POSITION) });
+  const stethScale = props.stethScale ?? 1;
   const [box, setBox] = useState<{ w: number; h: number }>({ w: 0, h: 0 });
   const [snapped, setSnapped] = useState<string | null>(null);
   const [playing, setPlaying] = useState(false);
@@ -456,8 +461,8 @@ export const PatientStage = forwardRef<StageHandle, PatientStageProps>(function 
     const path = asPath(tubeRef.current);
     if (!path || box.w <= 0 || box.h <= 0) return;
     const size = { w: box.w, h: box.h };
-    const anchor = tubeAnchor(size);
-    const tip = tubeTip({ x: posRef.current.x * size.w, y: posRef.current.y * size.h });
+    const anchor = tubeAnchor(size, stethScale);
+    const tip = tubeTip({ x: posRef.current.x * size.w, y: posRef.current.y * size.h }, TUBE_CHESTPIECE_RADIUS * stethScale);
     const d = tubePath(anchor, tip, size);
     path.setAttribute("d", d);
     asPath(tubeShineRef.current)?.setAttribute("d", d);
@@ -658,7 +663,7 @@ export const PatientStage = forwardRef<StageHandle, PatientStageProps>(function 
               className="tube-line"
               fill="none"
               stroke="#1f2b38"
-              strokeWidth={7}
+              strokeWidth={7 * stethScale}
               strokeLinecap="round"
             />
             <path
@@ -668,23 +673,23 @@ export const PatientStage = forwardRef<StageHandle, PatientStageProps>(function 
               className="tube-shine"
               fill="none"
               stroke="#8ba0b3"
-              strokeWidth={2.4}
+              strokeWidth={2.4 * stethScale}
               strokeLinecap="round"
               opacity={0.45}
               transform="translate(-1.4 -1.4)"
             />
             {(() => {
               const size = { w: box.w || 0, h: box.h || 0 };
-              const at = tubeAnchor(size);
-              const k = tubeHeadsetHeight(size) / 100;
+              const at = tubeAnchor(size, stethScale);
+              const k = tubeHeadsetHeight(size, stethScale) / 100;
               return (
                 <g className="tube-fork" transform={`translate(${at.x.toFixed(1)} ${at.y.toFixed(1)}) scale(${k.toFixed(3)})`}>
                   {/* Gerçek oranlı kulaklık (birim yükseklik 100): Y-parça lastik kolları,
                       metal kulak boruları, yay köprüsü ve kulak uçları. */}
-                  <path d="M 0 0 L -12 -26 M 0 0 L 12 -26" fill="none" stroke="#1f2b38" strokeWidth={7} strokeLinecap="round" vectorEffect="non-scaling-stroke" />
-                  <path d="M -12 -26 C -20 -50 -34 -78 -26 -95 M 12 -26 C 20 -50 34 -78 26 -95" fill="none" stroke="#98a6b3" strokeWidth={4.5} strokeLinecap="round" vectorEffect="non-scaling-stroke" />
-                  <path d="M -12 -26 C -20 -50 -34 -78 -26 -95 M 12 -26 C 20 -50 34 -78 26 -95" fill="none" stroke="#eef1f4" strokeWidth={1.4} strokeLinecap="round" opacity={0.7} vectorEffect="non-scaling-stroke" />
-                  <path d="M -17 -40 Q 0 -44 17 -40" fill="none" stroke="#7d8b98" strokeWidth={3} strokeLinecap="round" vectorEffect="non-scaling-stroke" />
+                  <path d="M 0 0 L -12 -26 M 0 0 L 12 -26" fill="none" stroke="#1f2b38" strokeWidth={7 * stethScale} strokeLinecap="round" vectorEffect="non-scaling-stroke" />
+                  <path d="M -12 -26 C -20 -50 -34 -78 -26 -95 M 12 -26 C 20 -50 34 -78 26 -95" fill="none" stroke="#98a6b3" strokeWidth={4.5 * stethScale} strokeLinecap="round" vectorEffect="non-scaling-stroke" />
+                  <path d="M -12 -26 C -20 -50 -34 -78 -26 -95 M 12 -26 C 20 -50 34 -78 26 -95" fill="none" stroke="#eef1f4" strokeWidth={1.4 * stethScale} strokeLinecap="round" opacity={0.7} vectorEffect="non-scaling-stroke" />
+                  <path d="M -17 -40 Q 0 -44 17 -40" fill="none" stroke="#7d8b98" strokeWidth={3 * stethScale} strokeLinecap="round" vectorEffect="non-scaling-stroke" />
                   <ellipse cx={-23} cy={-97} rx={6.5} ry={4.6} transform="rotate(-25 -23 -97)" fill="#2b3642" />
                   <ellipse cx={23} cy={-97} rx={6.5} ry={4.6} transform="rotate(25 23 -97)" fill="#2b3642" />
                   <rect x={-5} y={-6} width={10} height={12} rx={3} fill="#3d4854" />
@@ -705,7 +710,17 @@ export const PatientStage = forwardRef<StageHandle, PatientStageProps>(function 
             role="button"
             aria-label="Stetoskop göğüs parçası — sürükleyerek veya ok tuşlarıyla oskültasyon bölgesine taşıyın, Enter/Space ile yerleştirin"
             tabIndex={0}
-            style={{ minWidth: 44, minHeight: 44 }}
+            style={{
+              minWidth: 44,
+              minHeight: 44,
+              ...(stethScale === 1
+                ? {}
+                : {
+                    width: 2 * TUBE_CHESTPIECE_RADIUS * stethScale,
+                    height: 2 * TUBE_CHESTPIECE_RADIUS * stethScale,
+                    margin: `${-TUBE_CHESTPIECE_RADIUS * stethScale}px 0 0 ${-TUBE_CHESTPIECE_RADIUS * stethScale}px`,
+                  }),
+            }}
           >
             <span className="contact-pulse" key={pulseKey} />
             <Chestpiece />

@@ -734,7 +734,7 @@
   .eg-sim-ausculta .region-list button, .eg-sim-ausculta .head-toggle button, .eg-sim-ausculta .view-toggle button, .eg-sim-ausculta .body-toggle button, .eg-sim-ausculta .toolbar .btn.small, .eg-sim-ausculta .opt, .eg-sim-ausculta .lib-item { min-height: 44px; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .eg-sim-ausculta *, .eg-sim-ausculta *::before, .eg-sim-ausculta *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
+  .eg-sim-ausculta *:not(.lw-head), .eg-sim-ausculta *::before, .eg-sim-ausculta *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
   .eg-sim-ausculta .eq i { animation: none !important; height: 3px !important; }
 }
 @media (max-width: 480px) {
@@ -842,7 +842,6 @@
 .eg-sim-ausculta .learn-about { display: grid; gap: 10px; }
 .eg-sim-ausculta .la-head { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; }
 .eg-sim-ausculta .la-head h3 { margin: 0; font-size: var(--fs-lg); color: var(--navy-900); }
-.eg-sim-ausculta .la-head .ped-ref-btn { margin-left: auto; }
 .eg-sim-ausculta .la-alert { margin: 0; background: var(--red-100); color: var(--red-600); border-radius: var(--r-md); padding: 10px 12px; font-size: var(--fs-sm); font-weight: 700; }
 .eg-sim-ausculta .la-card { border: 1px solid var(--border); border-radius: var(--r-md); background: var(--card); padding: 12px; display: grid; gap: 6px; }
 .eg-sim-ausculta .la-crit { margin: 0; background: var(--orange-50); border-left: 3px solid var(--orange-500); padding: 8px 10px; border-radius: 0 var(--r-sm) var(--r-sm) 0; font-size: var(--fs-sm); color: var(--ink-900); }
@@ -883,18 +882,18 @@
 .eg-sim-ausculta .learn-eb { color: var(--aus-700); }
 .eg-sim-ausculta .learn-title { font-size: 22px; letter-spacing: -.02em; line-height: 1.15; }
 .eg-sim-ausculta .learn-study i b { background: var(--green-600); }
-.eg-sim-ausculta .learn-grid .stage-card { position: relative; padding: 0; border: 0; border-radius: 16px; overflow: hidden; background: var(--card); box-shadow: var(--shadow-card); flex: none; gap: 0; }
+.eg-sim-ausculta .learn-grid .stage-card { position: relative; padding: 0; border: 0; border-radius: 16px; overflow: hidden; background: var(--card); box-shadow: var(--shadow-card); flex: none; gap: 0; display: flex; flex-direction: column; }
 .eg-sim-ausculta .learn-grid .stage-card .stage { flex: none; aspect-ratio: 1000 / 933; min-height: 0; border-radius: 0; }
 .eg-sim-ausculta .learn-grid .stage-card[data-view="back"] .stage { aspect-ratio: 1000 / 915; }
 .eg-sim-ausculta .learn-grid .stage-card[data-view="left"] .stage,
 .eg-sim-ausculta .learn-grid .stage-card[data-view="right"] .stage { aspect-ratio: 1000 / 940; }
-.eg-sim-ausculta .stage-card .stage-views { position: absolute; top: 10px; right: 10px; z-index: 8; padding: 0; gap: 0; border: 0; border-radius: 10px; overflow: hidden; background: var(--overlay-94); box-shadow: var(--shadow-card); }
+.eg-sim-ausculta .stage-card .stage-views { position: relative; align-self: center; margin: 8px auto; z-index: 8; padding: 0; gap: 0; border: 0; border-radius: 10px; overflow: hidden; background: var(--overlay-94); box-shadow: var(--shadow-card); }
 .eg-sim-ausculta .stage-card .stage-views button { min-height: 36px; min-width: 0 !important; padding: 0 6px; gap: 2px; border-radius: 0; font-size: 11px; font-weight: 700; color: var(--ink-600); }
 .eg-sim-ausculta .stage-card .stage-views button .view-locked svg { width: 11px; height: 11px; }
 .eg-sim-ausculta .stage-card .stage-views button.active { background: var(--aus-700); color: var(--card); box-shadow: none; }
 .eg-sim-ausculta .stage-card .stage-views button .tool-mark { display: none; }
 .eg-sim-ausculta .stage-card .stage-views button:disabled { opacity: .45; }
-.eg-sim-ausculta .stage-card .layer-toggle { position: absolute; right: 10px; bottom: 10px; z-index: 8; border: 0; border-radius: 10px; background: var(--overlay-94); box-shadow: var(--shadow-card); }
+.eg-sim-ausculta .stage-card .layer-toggle { position: absolute; right: 10px; top: 62px; z-index: 8; border: 0; border-radius: 10px; background: var(--overlay-94); box-shadow: var(--shadow-card); }
 .eg-sim-ausculta .stage-card .layer-toggle button { min-height: 36px; font-size: var(--fs-xs); }
 .eg-sim-ausculta .stage-card .layer-toggle button.active { background: var(--aus-700); }
 .eg-sim-ausculta .stage-fig { position: absolute; left: 10px; bottom: 10px; z-index: 8; font-size: 11px; font-weight: 800; color: var(--aus-900); background: var(--overlay-94); padding: 4px 9px; border-radius: var(--r-pill); box-shadow: var(--shadow-card); }
@@ -919,6 +918,11 @@
 .eg-sim-ausculta .lw-bg { fill: var(--aus-player-bg); }
 .eg-sim-ausculta .lw-grid { stroke: var(--navy-800); }
 .eg-sim-ausculta .lw-env { stroke: var(--aus-wave); stroke-width: 2.2; }
+.eg-sim-ausculta .lw-plot { position: relative; overflow: hidden; border-radius: 10px; }
+.eg-sim-ausculta .lw-track { position: absolute; top: 0; bottom: 0; left: 0; pointer-events: none; }
+.eg-sim-ausculta .lw-head { position: absolute; top: 0; bottom: 18px; left: 0; width: 3px; margin-left: -1px; background: var(--aus-gold-500); border-radius: 2px; box-shadow: 0 0 6px var(--aus-gold-500); animation-name: eg-ausculta-lw-head; animation-timing-function: linear; animation-iteration-count: infinite; }
+@keyframes eg-ausculta-lw-head { from { left: 0; } to { left: 100%; } }
+/* Konum çubuğu bilgi taşır: azaltılmış hareket kuralından hariç tutulur (aşağıda :not(.lw-head)). */
 .eg-sim-ausculta .lw-empty { min-height: 190px; display: grid; place-items: center; background: var(--aus-player-bg); border-radius: 10px; }
 .eg-sim-ausculta .lw-ctrls { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
 .eg-sim-ausculta .lw-play { min-height: 44px; min-width: 120px; padding: 0 14px; border-radius: 10px; border: 1.5px solid var(--aus-500); background: var(--aus-700); color: var(--card); font-weight: 700; font-size: var(--fs-sm); }
@@ -935,8 +939,6 @@
 .eg-sim-ausculta .la-card { border-radius: 12px; align-content: start; gap: 8px; }
 .eg-sim-ausculta .la-crit { background: var(--aus-gold-50); border-left-color: var(--aus-gold-500); }
 .eg-sim-ausculta .la-refs { column-gap: 8px; }
-.eg-sim-ausculta .la-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
-.eg-sim-ausculta .la-actions .src-line { margin: 0 auto 0 0; color: var(--ink-600); }
 
 /* Masaüstü: sayfa kaymaz, sütunlar ekran yüksekliğinde kendi içinde kayar. */
 @media (min-width: 1081px) {

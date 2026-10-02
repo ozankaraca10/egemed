@@ -20,9 +20,10 @@ export const HEADSET_TO_CHESTPIECE = 3.2;
 /** Küçük sahnede kulaklık sahne yüksekliğinin bu oranını aşmaz. */
 const HEADSET_MAX_STAGE_RATIO = 0.42;
 
-/** Kulaklık yüksekliği (px): gerçek oran, sahneye sığacak şekilde sınırlı. */
-export function tubeHeadsetHeight(size: TubeSize): number {
-  const real = HEADSET_TO_CHESTPIECE * 2 * TUBE_CHESTPIECE_RADIUS;
+/** Kulaklık yüksekliği (px): gerçek oran, sahneye sığacak şekilde sınırlı.
+ *  `scale` (T310): stetoskobun tamamı için ölçek (öğrenme sahnesinde 0,75). */
+export function tubeHeadsetHeight(size: TubeSize, scale = 1): number {
+  const real = HEADSET_TO_CHESTPIECE * 2 * TUBE_CHESTPIECE_RADIUS * scale;
   return Math.max(0, Math.min(real, size.h * HEADSET_MAX_STAGE_RATIO));
 }
 
@@ -47,8 +48,8 @@ function clamp(value: number, min: number, max: number): number {
 }
 
 /** Sabit bağlantı (Y-parça) noktası: sol kenarda, kulaklığın hemen altında. */
-export function tubeAnchor(size: TubeSize): TubePoint {
-  const head = tubeHeadsetHeight(size);
+export function tubeAnchor(size: TubeSize, scale = 1): TubePoint {
+  const head = tubeHeadsetHeight(size, scale);
   return { x: Math.max(size.w * 0.06, head * 0.34 + 8), y: head + 10 };
 }
 

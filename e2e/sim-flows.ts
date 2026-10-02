@@ -108,6 +108,14 @@ export async function unlockOpacaLearn(page: Page): Promise<void> {
  * denemez; "uygulama yap" eylemi olan ilk konu veri tarafında sabittir).
  */
 export async function startTopicPractice(root: Locator): Promise<void> {
+  // T310: Ausculta öğrenme ekranında konu uygulaması düğmesi yok (depo sahibi);
+  // uygulama mod seçimindeki karttan (10 vakalık oturum) başlar.
+  const auscultaPractice = root.locator(".mode-card.practice button.eg-gami-mode-cta").first();
+  if ((await root.evaluate((node) => node.classList.contains("eg-sim-ausculta"))) && (await auscultaPractice.count()) > 0) {
+    await auscultaPractice.click();
+    await expect(root.locator(".q-card-dark").first()).toBeVisible();
+    return;
+  }
   await root.locator(".mode-card.learn button.eg-gami-mode-cta").first().click();
   // Opaca öğrenmesi sekmeli; Ausculta (T307) sekmesiz tek sayfa (.learn-head).
   await expect(root.locator(".tabbar.info-tabs, .learn-head").first()).toBeVisible();
