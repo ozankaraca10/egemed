@@ -26,6 +26,8 @@ import {
   zonesForImage,
 } from "../../../packages/sim-opaca/src/index";
 import type { StoragePort, WindowLike } from "../../../packages/sim-opaca/src/index";
+import { LEARN_EXAMPLE_LIMIT } from "../../../packages/sim-opaca/src/core/examples";
+import { hasClinicalContext } from "../../../packages/sim-opaca/src/data/clinicalContext";
 import { fakeSessions } from "../session-fixture";
 
 /** T218 — öğrenme tamamlama tespiti ve mod kilidi: saf hesap + statik işaretleme.
@@ -144,6 +146,15 @@ describe("öğrenme tamamlanabilirliği", () => {
       expect(examples.length, `${item.key}: örnek film yok`).toBeGreaterThan(0);
       expect(examples[0]?.runtimeUrl, `${item.key}: görüntü adresi yok`).toBeTruthy();
       expect(libraryExampleCount(item), `${item.key}: sayaç`).toBeGreaterThan(0);
+    }
+  });
+
+  it("T318: konu başına en çok 4 örnek; klinik kayıtlı görüntü varsa yalnız onlar gösterilir", () => {
+    for (const item of LIBRARY_ITEMS) {
+      const examples = libraryExamples(item);
+      expect(examples.length, item.key).toBeLessThanOrEqual(LEARN_EXAMPLE_LIMIT);
+      const withText = examples.filter((image) => hasClinicalContext(image.id)).length;
+      expect([0, examples.length], `${item.key}: kayıtlı ve kayıtsız karışık`).toContain(withText);
     }
   });
 

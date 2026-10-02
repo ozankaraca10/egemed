@@ -127,17 +127,14 @@ test.describe("T155 UAT yolculukları", () => {
     // (T14c, `.eg-sim-opaca` iç içe iki kez eşleşir; bkz. helpers.ts `openRoute`
     // yorum satırı); referans temel sayı ilk açılışta alınır.
     const baselineRootCount = await page.locator(".eg-sim-opaca").count();
-    // Oturum ortasına gir (mod seçimi + öğrenme ekranından bir soru).
+    // Oturum ortasına gir (mod seçimindeki uygulama kartından bir soru).
     await startTopicPractice(root);
     await expect(root.locator(".q-card-dark").first()).toBeVisible();
 
-    await page.goBack();
-    await expect(page).toHaveURL(/#\/sims\/opaca\/ogrenme$/);
-    await expect(page.locator(".eg-sim-opaca")).toHaveCount(baselineRootCount);
-    await expect(root.locator(".learn-progress")).toBeVisible();
-
+    // T318: uygulama mod seçiminden başlar (öğrenme ekranından geçilmez).
     await page.goBack();
     await expect(page).toHaveURL(/#\/sims\/opaca$/);
+    await expect(page.locator(".eg-sim-opaca")).toHaveCount(baselineRootCount);
     await expect(page.getByRole("heading", { name: "Çalışma Modunu Seçin" })).toBeVisible();
 
     await page.goBack();

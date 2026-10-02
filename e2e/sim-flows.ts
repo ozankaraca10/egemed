@@ -104,35 +104,12 @@ export async function unlockOpacaLearn(page: Page): Promise<void> {
 }
 
 /**
- * Öğrenme ekranından konu uygulaması başlatır (kütüphane öğeleri sırayla
- * denemez; "uygulama yap" eylemi olan ilk konu veri tarafında sabittir).
+ * Uygulama oturumunu mod seçimindeki karttan başlatır. Öğrenme ekranlarında konu
+ * uygulaması düğmesi yok (Ausculta T310, Opaca T318 — depo sahibi kararı).
  */
 export async function startTopicPractice(root: Locator): Promise<void> {
-  // T310: Ausculta öğrenme ekranında konu uygulaması düğmesi yok (depo sahibi);
-  // uygulama mod seçimindeki karttan (10 vakalık oturum) başlar.
-  const auscultaPractice = root.locator(".mode-card.practice button.eg-gami-mode-cta").first();
-  if ((await root.evaluate((node) => node.classList.contains("eg-sim-ausculta"))) && (await auscultaPractice.count()) > 0) {
-    await auscultaPractice.click();
-    await expect(root.locator(".q-card-dark").first()).toBeVisible();
-    return;
-  }
-  await root.locator(".mode-card.learn button.eg-gami-mode-cta").first().click();
-  // Opaca öğrenmesi sekmeli; Ausculta (T307) sekmesiz tek sayfa (.learn-head).
-  await expect(root.locator(".tabbar.info-tabs, .learn-head").first()).toBeVisible();
-  const tabbed = (await root.locator(".tabbar.info-tabs").count()) > 0;
-  const items = root.locator(".lib-item");
-  const count = await items.count();
-  for (let index = 0; index < count; index += 1) {
-    await items.nth(index).click();
-    if (tabbed) await root.locator(".tabbar.info-tabs button").nth(2).click();
-    const startButton = root.getByRole("button", { name: /uygulama yap/ });
-    if ((await startButton.count()) > 0) {
-      await startButton.first().click();
-      await expect(root.locator(".q-card-dark").first()).toBeVisible();
-      return;
-    }
-  }
-  throw new Error("Uygulama başlatan konu bulunamadı");
+  await root.locator(".mode-card.practice button.eg-gami-mode-cta").first().click();
+  await expect(root.locator(".q-card-dark").first()).toBeVisible();
 }
 
 /**
@@ -173,7 +150,14 @@ async function answerCurrentQuestion(root: Locator, sim: SimId): Promise<void> {
   const filmStage = root.locator(".film-stage");
   const primary = root.locator(".q-nav button.btn.primary");
   if ((await options.count()) > 0) await options.first().click({ timeout: 2_000 });
-  else if (sim === "opaca" && (await filmStage.count()) > 0) await filmStage.click({ timeout: 2_000 });
+  else if (sim === "opaca" && (await filmStage.count()) > 0) {
+    // İşaretleme sorusu: görüntü dosyası yoksa (CI) tıklama işaret bırakmaz; klavye yolu (odak + Enter) görünüm merkezini işaretler.
+    await filmStage.first().click({ timeout: 2_000 });
+    if (await primary.isDisabled()) {
+      await filmStage.first().focus();
+      await filmStage.first().press("Enter");
+    }
+  }
   else return;
   await primary.click({ timeout: 5_000 });
   await expect(root.locator(".feedback-head").first()).toBeVisible({ timeout: 5_000 });
