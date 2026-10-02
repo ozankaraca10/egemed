@@ -9,6 +9,8 @@ import { openRoute } from "./helpers";
  * hizalanır, kütüphane paneli kendi içinde kayar ve sahne gövde görselinin
  * en-boy oranında kalır. Ölçüm yalnız 1440×900 masaüstü projesinde anlamlıdır;
  * 768/390 akışı bu görevde değişmez.
+ * T307: orta sütuna örnek seçimi ve hasta kartı eklendiği için sabit 1200 px
+ * sınırı yerine "belge, en uzun sütunun içeriğinden uzun değil" (boş alan yok) ölçülür.
  */
 test.describe("Ausculta öğrenme düzeni (T206)", () => {
   test("1440×900: sayfa hedef yüksekliği aşmaz, kütüphane kendi içinde kayar", async ({
@@ -27,7 +29,14 @@ test.describe("Ausculta öğrenme düzeni (T206)", () => {
     await expect(lib).toHaveCSS("overflow-y", "auto");
     await expect(lib).toHaveCSS("position", "sticky");
 
-    const scrollHeight = await page.evaluate(() => document.documentElement.scrollHeight);
-    expect(scrollHeight, "öğrenme ekranı dikey uzaması").toBeLessThanOrEqual(1200);
+    const { scrollHeight, contentBottom } = await page.evaluate(() => {
+      const bottoms = [".learn-grid .sim-main > :last-child", ".learn-grid .sim-side > :last-child"].map((selector) => {
+        const node = document.querySelector(selector);
+        return node ? node.getBoundingClientRect().bottom + window.scrollY : 0;
+      });
+      return { scrollHeight: document.documentElement.scrollHeight, contentBottom: Math.max(...bottoms) };
+    });
+    expect(contentBottom, "içerik ölçülebilir").toBeGreaterThan(0);
+    expect(scrollHeight - contentBottom, "öğrenme ekranında içerik altı boş alan").toBeLessThanOrEqual(64);
   });
 });

@@ -57,19 +57,63 @@ export function tubeTip(center: TubePoint, radius = TUBE_CHESTPIECE_RADIUS): Tub
   return { x: center.x + TUBE_ATTACH_DIR.x * radius, y: center.y + TUBE_ATTACH_DIR.y * radius };
 }
 
+/** T307: tüp, T228 temel eğrisinin bu katı uzunluktadır (gerçek stetoskop tüpü ~2×). */
+export const TUBE_LENGTH_FACTOR = 2;
+
+interface Cubic {
+  readonly c1: TubePoint;
+  readonly c2: TubePoint;
+}
+
+function cubicLength(a: TubePoint, c: Cubic, b: TubePoint): number {
+  let length = 0;
+  let prev = a;
+  for (let i = 1; i <= 32; i += 1) {
+    const t = i / 32;
+    const u = 1 - t;
+    const point = {
+      x: u * u * u * a.x + 3 * u * u * t * c.c1.x + 3 * u * t * t * c.c2.x + t * t * t * b.x,
+      y: u * u * u * a.y + 3 * u * u * t * c.c1.y + 3 * u * t * t * c.c2.y + t * t * t * b.y,
+    };
+    length += Math.hypot(point.x - prev.x, point.y - prev.y);
+    prev = point;
+  }
+  return length;
+}
+
 /** Kübik Bézier yol verisi. Başlangıç ve bitiş uçlarla birebir aynıdır; tüp
- *  bağlantıdan dikey sarkar ve uca 45° doğrultusunda girer; kontroller sahnede kalır. */
+ *  bağlantıdan dikey sarkar ve uca 45° doğrultusunda girer; kontroller sahnede kalır.
+ *  Sarkma derinliği, uzunluk temel eğrinin `TUBE_LENGTH_FACTOR` katı olana dek
+ *  (sahne tabanını aşmadan) ikili aramayla artırılır. */
 export function tubePath(anchor: TubePoint, tip: TubePoint, size: TubeSize): string {
   const distance = Math.hypot(tip.x - anchor.x, tip.y - anchor.y);
   const maxY = Math.max(size.h - 2, 0);
   const maxX = Math.max(size.w - 2, 0);
-  const c1x = anchor.x;
-  const c1y = clamp(anchor.y + Math.max(tip.y - anchor.y, 0) * DROP_RATIO + distance * 0.2, anchor.y, maxY);
   // Kol, 45° doğrultusu bozulmadan sahne içinde kalacak kadar kısaltılır.
   const roomX = TUBE_ATTACH_DIR.x < 0 ? tip.x : maxX - tip.x;
   const roomY = TUBE_ATTACH_DIR.y > 0 ? maxY - tip.y : tip.y;
-  const arm = Math.max(0, Math.min(distance * ATTACH_ARM_RATIO, roomX / Math.SQRT1_2, roomY / Math.SQRT1_2));
-  const c2x = tip.x + TUBE_ATTACH_DIR.x * arm;
-  const c2y = tip.y + TUBE_ATTACH_DIR.y * arm;
-  return `M ${round(anchor.x)} ${round(anchor.y)} C ${round(c1x)} ${round(c1y)} ${round(c2x)} ${round(c2y)} ${round(tip.x)} ${round(tip.y)}`;
+  const armCap = Math.max(0, Math.min(roomX / Math.SQRT1_2, roomY / Math.SQRT1_2));
+  const baseDrop = clamp(anchor.y + Math.max(tip.y - anchor.y, 0) * DROP_RATIO + distance * 0.2, anchor.y, maxY);
+  const baseArm = Math.min(distance * ATTACH_ARM_RATIO, armCap);
+  const curve = (s: number): Cubic => {
+    const c1y = baseDrop + (maxY - baseDrop) * s;
+    const arm = baseArm + (armCap - baseArm) * s;
+    return {
+      c1: { x: anchor.x, y: clamp(c1y, anchor.y, maxY) },
+      c2: { x: tip.x + TUBE_ATTACH_DIR.x * arm, y: tip.y + TUBE_ATTACH_DIR.y * arm },
+    };
+  };
+  const target = cubicLength(anchor, curve(0), tip) * TUBE_LENGTH_FACTOR;
+  let lo = 0;
+  let hi = 1;
+  if (cubicLength(anchor, curve(1), tip) <= target) lo = 1;
+  else {
+    for (let i = 0; i < 20; i += 1) {
+      const mid = (lo + hi) / 2;
+      if (cubicLength(anchor, curve(mid), tip) < target) lo = mid;
+      else hi = mid;
+    }
+  }
+  const { c1, c2 } = curve(lo);
+  return `M ${round(anchor.x)} ${round(anchor.y)} C ${round(c1.x)} ${round(c1.y)} ${round(c2.x)} ${round(c2.y)} ${round(tip.x)} ${round(tip.y)}`;
 }

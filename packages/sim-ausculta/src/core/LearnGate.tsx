@@ -8,13 +8,13 @@ import type { Mode } from "./types";
  *  KİLİTLİdir (fail-safe): kilit yalnız gerçek ilerleme kanalıyla açılır. */
 
 export interface LearnGateValue extends LearnSnapshot {
-  /** Öğe sesi gerçekten oynatıldığında çağrılır; kalıcı kümeye yazar. */
-  markListened(key: string): void;
+  /** Ses çalarken geçen süreyi öğeye ekler (T307: 60 sn kuralı). */
+  addListen(key: string, ms: number): void;
 }
 
 const LearnGateContext = createContext<LearnGateValue>({
   ...LOCKED_LEARN_SNAPSHOT,
-  markListened: () => undefined,
+  addListen: () => undefined,
 });
 
 export function useLearnGate(): LearnGateValue {
@@ -42,7 +42,7 @@ export function LearnGateProvider({ learn, children }: LearnGateProviderProps): 
     tracker.notify();
   }, [tracker]);
   const value = useMemo<LearnGateValue>(
-    () => ({ ...snapshot, markListened: (key: string) => tracker.markListened(key) }),
+    () => ({ ...snapshot, addListen: (key: string, ms: number) => tracker.addListen(key, ms) }),
     [snapshot, tracker],
   );
   return <LearnGateContext.Provider value={value}>{children}</LearnGateContext.Provider>;

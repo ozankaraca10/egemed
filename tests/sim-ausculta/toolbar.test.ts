@@ -212,8 +212,8 @@ describe("araç çubuğu (statik render)", () => {
     expect(button(html, "Diyafram")).toContain('aria-pressed="true"');
     expect(html.match(/class="tool-mark"/g)).toHaveLength(2);
     expect(button(html, "Bell")).toContain('aria-pressed="false"');
-    expect(button(html, "Ön")).toContain('aria-pressed="true"');
-    expect(button(html, "Arka")).toContain('aria-pressed="false"');
+    expect(button(html, "Anterior")).toContain('aria-pressed="true"');
+    expect(button(html, "Posterior")).toContain('aria-pressed="false"');
     expect(html).toContain('aria-label="Ses düzeyi"');
     expect(html).toContain('value="85"');
     expect(html).toContain(">%85<");
@@ -259,26 +259,31 @@ describe("araç çubuğu (statik render)", () => {
 
   it("T233: izinli olmayan görünüm devre dışı, kilit imli ve açıklamalı çizilir", () => {
     const lung = renderToolbar({}, { caseViews: ["back"] });
-    const front = buttonMarkup(lung, "Ön");
+    const front = buttonMarkup(lung, "Anterior");
     expect(front).toContain('disabled=""');
     expect(front).toContain('aria-disabled="true"');
     expect(front).toContain("view-locked");
-    expect(front).toContain("Bu vakada dinlenecek ön bölge yok");
-    expect(lung).toContain("Ön görünüm kapalı");
-    expect(buttonMarkup(lung, "Arka")).not.toContain('disabled=""');
+    expect(front).toContain("Bu vakada dinlenecek anterior bölge yok");
+    expect(lung).toContain("Anterior görünüm kapalı");
+    expect(buttonMarkup(lung, "Posterior")).not.toContain('disabled=""');
 
     const heart = renderToolbar({}, { allowedViews: ["front"], caseViews: ["front"] });
-    const back = buttonMarkup(heart, "Arka");
+    const back = buttonMarkup(heart, "Posterior");
     expect(back).toContain('disabled=""');
     expect(back).toContain('aria-disabled="true"');
-    expect(back).toContain("Bu vakada dinlenecek arka bölge yok");
-    expect(buttonMarkup(heart, "Ön")).not.toContain('disabled=""');
+    expect(back).toContain("Bu vakada dinlenecek posterior bölge yok");
+    expect(buttonMarkup(heart, "Anterior")).not.toContain('disabled=""');
 
     // İki görünüm de izinliyse kilit yok.
     const mixed = renderToolbar();
-    expect(buttonMarkup(mixed, "Ön")).not.toContain('disabled=""');
-    expect(buttonMarkup(mixed, "Arka")).not.toContain('disabled=""');
+    expect(buttonMarkup(mixed, "Anterior")).not.toContain('disabled=""');
+    expect(buttonMarkup(mixed, "Posterior")).not.toContain('disabled=""');
     expect(mixed).not.toContain("view-note");
+    // Lateral düğmeler yalnız izinliyse çizilir (T307 öğrenme).
+    expect(mixed).not.toContain("Sol lat.");
+    const lateral = renderToolbar({}, { allowedViews: ["back", "left"] });
+    expect(buttonMarkup(lateral, "Sol lat.")).not.toContain('disabled=""');
+    expect(lateral).not.toContain("Sağ lat.");
   });
 });
 

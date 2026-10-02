@@ -62,18 +62,20 @@ const AUSCULTA_CORRECT_BY_PROMPT = practiceQuestions(
 
 /**
  * T209 — öğrenme kilidi tohumu: uygulama/değerlendirme akışından önce Ausculta
- * öğrenmesini tamamlanmış sayar. İki yol birlikte açılır: yerel dinlendi kümesi
- * tüm kütüphane anahtarlarıyla yazılır ve DEV kabuğun sekme deposu öğrenme kaydı
+ * öğrenmesini tamamlanmış sayar. İki yol birlikte açılır: yerel dinleme süresi
+ * haritası tüm kütüphane anahtarları için 60 sn yazılır (T307) ve DEV kabuğun sekme deposu öğrenme kaydı
  * (`egemed.learn.ausculta`) işaretlenir. `addInitScript` her gezinmeden önce koşar.
  */
 export async function unlockAuscultaLearn(page: Page): Promise<void> {
   const listened = JSON.stringify(
-    (auscultaLibrary.groups as { items: { key: string }[] }[]).flatMap((group) => group.items.map((item) => item.key)),
+    Object.fromEntries(
+      (auscultaLibrary.groups as { items: { key: string }[] }[]).flatMap((group) => group.items.map((item) => [item.key, 60])),
+    ),
   );
   const namespaces = ["egemed:anon:ausculta:", "egemed:u:dev-student-0001:ausculta:", "egemed:u:dev-admin-0001:ausculta:"];
   await page.addInitScript(
     (seed: { listened: string; namespaces: string[] }) => {
-      for (const namespace of seed.namespaces) localStorage.setItem(`${namespace}ausculta.learn.listened`, seed.listened);
+      for (const namespace of seed.namespaces) localStorage.setItem(`${namespace}ausculta.learn.seconds`, seed.listened);
       sessionStorage.setItem("egemed.learn.ausculta", "1");
     },
     { listened, namespaces },
@@ -107,12 +109,14 @@ export async function unlockOpacaLearn(page: Page): Promise<void> {
  */
 export async function startTopicPractice(root: Locator): Promise<void> {
   await root.locator(".mode-card.learn button.eg-gami-mode-cta").first().click();
-  await expect(root.locator(".tabbar.info-tabs")).toBeVisible();
+  // Opaca öğrenmesi sekmeli; Ausculta (T307) sekmesiz tek sayfa (.learn-head).
+  await expect(root.locator(".tabbar.info-tabs, .learn-head").first()).toBeVisible();
+  const tabbed = (await root.locator(".tabbar.info-tabs").count()) > 0;
   const items = root.locator(".lib-item");
   const count = await items.count();
   for (let index = 0; index < count; index += 1) {
     await items.nth(index).click();
-    await root.locator(".tabbar.info-tabs button").nth(2).click();
+    if (tabbed) await root.locator(".tabbar.info-tabs button").nth(2).click();
     const startButton = root.getByRole("button", { name: /uygulama yap/ });
     if ((await startButton.count()) > 0) {
       await startButton.first().click();

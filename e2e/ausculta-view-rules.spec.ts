@@ -3,10 +3,10 @@ import { captureRouteScreenshot } from "./artifacts";
 import { openRoute, trackErrors } from "./helpers";
 
 /**
- * T233 — Ausculta gövde görünümü izin kuralı (depo sahibi kararı, 28 Eyl 2026):
- * yalnız akciğer sesi → sahne arkada, Ön devre dışı; yalnız kalp sesi → sahne önde,
- * Arka devre dışı; karma içerikte iki görünüm açık. İzinli olmayan görünüm devre dışı
- * çizilir (kilit imi + kısa açıklama) ve 360 px'de yatay kaydırma oluşmaz.
+ * T233/T307 — Ausculta öğrenme görünüm kuralı: her örnek yalnız kaydı olan
+ * noktaların görünümlerini açar (anterior/posterior; gerçek lateral kayıtta sol/sağ
+ * lateral). Kaydı olmayan görünüm devre dışı çizilir (kilit imi + kısa açıklama) ve
+ * 360 px'de yatay kaydırma oluşmaz.
  */
 
 async function signInAsStudent(page: Page): Promise<void> {
@@ -22,7 +22,7 @@ async function openLearn(page: Page): Promise<Locator> {
   await openRoute(page, "#/sims/ausculta");
   const root = page.locator(".eg-sim-ausculta").first();
   await root.locator(".mode-card.learn button.eg-gami-mode-cta").first().click();
-  await expect(root.locator(".tabbar.info-tabs")).toBeVisible();
+  await expect(root.locator(".learn-head")).toBeVisible();
   return root;
 }
 
@@ -31,7 +31,7 @@ async function expectNoHorizontalScroll(page: Page): Promise<void> {
   expect(overflow, "yatay kaydırma").toBeLessThanOrEqual(1);
 }
 
-function viewButton(root: Locator, label: "Ön" | "Arka"): Locator {
+function viewButton(root: Locator, label: "Anterior" | "Posterior" | "Sol lat." | "Sağ lat."): Locator {
   return root.locator(".view-toggle button", { hasText: label });
 }
 
@@ -41,69 +41,50 @@ async function selectItem(root: Locator, shortTitle: string): Promise<void> {
   await root.locator(".lib-item b").filter({ hasText: new RegExp(`^${escaped}$`) }).click();
 }
 
-test.describe("Ausculta görünüm kuralı (T233)", () => {
-  test("akciğer öğesinde sahne arkada; Ön devre dışı ve açıklamalı", async ({ page }, testInfo) => {
-    const errors = trackErrors(page);
-    const root = await openLearn(page);
-
-    await selectItem(root, "Normal Solunum");
-    await expect(root.locator(".learn-grid .stage-card")).toHaveAttribute("data-view", "back");
-    const front = viewButton(root, "Ön");
-    await expect(front).toBeDisabled();
-    await expect(front).toHaveAttribute("aria-disabled", "true");
-    await expect(viewButton(root, "Arka")).toBeEnabled();
-    await expect(root.getByText("Ön görünüm kapalı")).toBeVisible();
-    // Devre dışı görünüm klavye sırasına girmez (native disabled).
-    await expect(front).toHaveAttribute("disabled", "");
-    await expectNoHorizontalScroll(page);
-
-    await captureRouteScreenshot(page, testInfo.project.name, "#/sims/ausculta ogrenme akciger arkada");
-    expect(errors, "konsol/sayfa hatası").toEqual([]);
-  });
-
-  test("kalp öğesinde sahne önde; Arka devre dışı ve açıklamalı", async ({ page }, testInfo) => {
+test.describe("Ausculta öğrenme görünüm kuralı (T233/T307)", () => {
+  test("kalp öğesinde sahne anterior; Posterior devre dışı ve açıklamalı", async ({ page }, testInfo) => {
     const errors = trackErrors(page);
     const root = await openLearn(page);
 
     await selectItem(root, "Normal S1–S2");
     await expect(root.locator(".learn-grid .stage-card")).toHaveAttribute("data-view", "front");
-    const back = viewButton(root, "Arka");
+    const back = viewButton(root, "Posterior");
     await expect(back).toBeDisabled();
     await expect(back).toHaveAttribute("aria-disabled", "true");
-    await expect(viewButton(root, "Ön")).toBeEnabled();
-    await expect(root.getByText("Arka görünüm kapalı")).toBeVisible();
+    await expect(viewButton(root, "Anterior")).toBeEnabled();
+    await expect(root.getByText("Posterior görünüm kapalı")).toBeVisible();
     await expectNoHorizontalScroll(page);
 
-    await captureRouteScreenshot(page, testInfo.project.name, "#/sims/ausculta ogrenme kalp onde");
+    await captureRouteScreenshot(page, testInfo.project.name, "#/sims/ausculta ogrenme kalp anterior");
     expect(errors, "konsol/sayfa hatası").toEqual([]);
   });
 
-  test("karma öğede iki görünüm de açık", async ({ page }, testInfo) => {
+  test("gerçek hasta örneği lateral görünümü açar; kaydı olmayan anterior kapalı", async ({ page }, testInfo) => {
     const errors = trackErrors(page);
     const root = await openLearn(page);
 
-    await selectItem(root, "Üfürüm + Wheezing");
-    await expect(root.locator(".learn-grid .stage-card")).toHaveAttribute("data-view", "front");
-    await expect(viewButton(root, "Ön")).toBeEnabled();
-    await expect(viewButton(root, "Arka")).toBeEnabled();
-    await expect(root.getByText("görünüm kapalı")).toHaveCount(0);
+    await selectItem(root, "Ronküs");
+    await root.locator(".ex-btn").nth(1).click();
+    const stage = root.locator(".learn-grid .stage-card");
+    await expect(viewButton(root, "Anterior")).toBeDisabled();
+    await expect(stage).toHaveAttribute("data-view", "back");
+    await viewButton(root, "Sol lat.").click();
+    await expect(stage).toHaveAttribute("data-view", "left");
     await expectNoHorizontalScroll(page);
 
-    await captureRouteScreenshot(page, testInfo.project.name, "#/sims/ausculta ogrenme karma acik");
+    await captureRouteScreenshot(page, testInfo.project.name, "#/sims/ausculta ogrenme ronkus lateral");
     expect(errors, "konsol/sayfa hatası").toEqual([]);
   });
 
-  test("görünüm değiştirilebilir: karma öğede Arka'ya geçiş sahneyi çevirir", async ({ page }) => {
+  test("karma öğede iki görünüm açık; Posterior'a geçiş sahneyi çevirir", async ({ page }) => {
     const errors = trackErrors(page);
     const root = await openLearn(page);
     await selectItem(root, "Üfürüm + Wheezing");
     const stage = root.locator(".learn-grid .stage-card");
-    await viewButton(root, "Arka").click();
+    await expect(stage).toHaveAttribute("data-view", "front");
+    await expect(root.getByText("görünüm kapalı")).toHaveCount(0);
+    await viewButton(root, "Posterior").click();
     await expect(stage).toHaveAttribute("data-view", "back");
-    // Akciğer öğesine dönünce kilitli ön yerine izinli arka görünüm korunur.
-    await selectItem(root, "Normal Solunum");
-    await expect(stage).toHaveAttribute("data-view", "back");
-    await expect(viewButton(root, "Arka")).toBeEnabled();
     expect(errors, "konsol/sayfa hatası").toEqual([]);
   });
 });

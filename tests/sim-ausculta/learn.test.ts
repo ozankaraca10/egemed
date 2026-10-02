@@ -58,20 +58,19 @@ describe("LearnScreen", () => {
     expect(html).toContain(esc("Tüm içerik yalnızca Ege Üniversitesi Tıp Fakültesi öğrencilerine açıktır."));
   });
 
-  it("T233: akciğer öğesinde sahne arkada ve Ön görünüm kapalı", () => {
+  it("T307: akciğer öğesinde sentetik + 3 gerçek örnek ve 60 sn dinleme sayacı çizilir", () => {
     const html = renderInStore(createElement(LearnScreen), "lung.normal");
-    expect(html).toContain('data-view="back"');
-    expect(html).toContain("Ön görünüm kapalı");
-    expect(html).toContain("Bu vakada dinlenecek ön bölge yok");
-    expect(html).toContain('aria-disabled="true"');
-    expect(html).toContain("view-locked");
+    expect(html).toContain('data-view="front"');
+    expect(html).toContain("Dinleme 0/60 sn · yalnız ses çalarken sayılır");
+    expect(html).toContain(">Sentetik<");
+    expect(html.match(/Gerçek \d · \d+ bölge/g)).toHaveLength(3);
   });
 
-  it("T233: kalp öğesinde sahne önde ve Arka görünüm kapalı", () => {
+  it("T307: kalp öğesinde posterior görünüm kapalı ve gerekçeli", () => {
     const html = renderInStore(createElement(LearnScreen), "heart.s3");
     expect(html).toContain('data-view="front"');
-    expect(html).toContain("Arka görünüm kapalı");
-    expect(html).toContain("Bu vakada dinlenecek arka bölge yok");
+    expect(html).toContain("Posterior görünüm kapalı");
+    expect(html).toContain("Bu vakada dinlenecek posterior bölge yok");
   });
 
   it("T233: karma öğede iki görünüm de açık", () => {

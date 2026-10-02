@@ -121,6 +121,8 @@ export interface StageSessionBindings {
   onVisit: (pointId: string) => void;
   onDwell: (pointId: string, ms: number) => void;
   onListen: (pointId: string, ms: number) => void;
+  /** T307: ses çalarken her tıkta (DWELL_TICK_MS) çağrılır; öğrenme süresi sayacı. */
+  onListenTick?: (pointId: string, ms: number) => void;
   onPlayingChange: (playing: boolean, pointId: string | null) => void;
   onDragStart?: () => void;
   onSnapped: (pointId: string | null) => void;
@@ -235,7 +237,10 @@ export function createStageSession(bindings: StageSessionBindings): StageSession
       dwellHandle = bindings.env.setInterval(() => {
         dwellAcc += DWELL_TICK_MS;
         if (snapped) bindings.onDwell(snapped, DWELL_TICK_MS);
-        if (playing) listenAcc += DWELL_TICK_MS;
+        if (playing) {
+          listenAcc += DWELL_TICK_MS;
+          if (snapped) bindings.onListenTick?.(snapped, DWELL_TICK_MS);
+        }
       }, DWELL_TICK_MS);
       if (bindings.strict && listened.has(pointId)) {
         bindings.onSpent(true);
@@ -365,6 +370,7 @@ export interface PatientStageProps {
   onVisit: (pointId: string) => void;
   onDwell: (pointId: string, ms: number) => void;
   onListen: (pointId: string, ms: number) => void;
+  onListenTick?: (pointId: string, ms: number) => void;
   onPlayingChange: (playing: boolean, pointId: string | null) => void;
   onDragStart?: () => void;
 }
@@ -408,6 +414,13 @@ function asObserve(value: unknown): StageObserveTarget | null {
   if (typeof node.getBoundingClientRect !== "function") return null;
   return node as StageObserveTarget;
 }
+
+const BODY_ALT: Record<PatientView, string> = {
+  front: "Hasta anterior gövde görünümü",
+  back: "Hasta posterior gövde görünümü",
+  left: "Sol lateral gövde görünümü (manken)",
+  right: "Sağ lateral gövde görünümü (manken)",
+};
 
 export const PatientStage = forwardRef<StageHandle, PatientStageProps>(function PatientStage(props, ref) {
   const contextual = useContext(StageAudioContext);
@@ -463,6 +476,7 @@ export const PatientStage = forwardRef<StageHandle, PatientStageProps>(function 
       onVisit: props.onVisit,
       onDwell: props.onDwell,
       onListen: props.onListen,
+      ...(props.onListenTick ? { onListenTick: props.onListenTick } : {}),
       onPlayingChange: props.onPlayingChange,
       onSnapped: setSnapped,
       onPlaying: setPlaying,
@@ -489,6 +503,7 @@ export const PatientStage = forwardRef<StageHandle, PatientStageProps>(function 
   live.onVisit = props.onVisit;
   live.onDwell = props.onDwell;
   live.onListen = props.onListen;
+  if (props.onListenTick) live.onListenTick = props.onListenTick;
   live.onPlayingChange = props.onPlayingChange;
   live.applyPos = applyPos;
   if (props.filterIds) live.filterIds = props.filterIds;
@@ -601,7 +616,7 @@ export const PatientStage = forwardRef<StageHandle, PatientStageProps>(function 
           ) : (
             <img
               src={cfg.image ?? "assets/body/front.jpg"}
-              alt={props.view === "front" ? "Hasta ön gövde görünümü" : "Hasta arka gövde görünümü"}
+              alt={BODY_ALT[props.view]}
               draggable={false}
               className="body-img"
             />

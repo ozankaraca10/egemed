@@ -11,7 +11,6 @@
     "import:circor": "node tools/import-circor.mjs",
     "import:kauh": "node tools/import-kauh.mjs",
     "import:sprsound": "node tools/import-sprsound.mjs",
-    "learning:samples": "node tools/build-learning-samples.mjs",
     "sync:audio": "node tools/sync-audio.mjs",
     "typecheck": "tsc --noEmit"
   },

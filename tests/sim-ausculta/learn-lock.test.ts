@@ -7,6 +7,7 @@ import {
   EmbeddedProvider,
   LearnGateProvider,
   LEARN_LISTENED_KEY,
+  LEARN_SECONDS,
   LIBRARY_GROUPS,
   LIBRARY_ITEM_COUNT,
   LIBRARY_ITEM_KEYS,
@@ -26,6 +27,8 @@ import {
   parseListened,
   resolveLibrarySoundEx,
 } from "../../packages/sim-ausculta/src/index";
+import { learnExamples } from "../../packages/sim-ausculta/src/data/learnSets";
+import { examplePointIds } from "../../packages/sim-ausculta/src/screens/LearnScreen";
 import type {
   StageAudio,
   StageEnv,
@@ -100,24 +103,25 @@ describe("contentVersion", () => {
 });
 
 describe("parseListened", () => {
-  it("bozuk/eksik veri boş küme sayılır", () => {
+  it("bozuk/eksik/dizi veri boş harita sayılır", () => {
     expect(parseListened(null).size).toBe(0);
     expect(parseListened("{bozuk").size).toBe(0);
     expect(parseListened('"heart.normal"').size).toBe(0);
     expect(parseListened("{}").size).toBe(0);
+    expect(parseListened('["heart.normal"]').size).toBe(0);
   });
 
-  it("kütüphanede olmayan anahtarlar yok sayılır, geçerli olanlar tekilleşir", () => {
-    const parsed = parseListened('["heart.normal","bilinmeyen","heart.normal",3]');
-    expect([...parsed]).toEqual(["heart.normal"]);
+  it("bilinmeyen anahtar ve geçersiz değer yok sayılır, süre 60 sn'ye kırpılır", () => {
+    const parsed = parseListened('{"heart.normal":30,"bilinmeyen":5,"heart.s3":"x","lung.normal":600}');
+    expect([...parsed]).toEqual([["heart.normal", 30], ["lung.normal", LEARN_SECONDS]]);
   });
 });
 
 describe("learnLock metinleri", () => {
   it("ilerleme, kilit ve düello metinleri ilerlemeyi taşır", () => {
-    expect(learnProgressText(3, 20)).toBe("Öğrenme: 3/20 ses dinlendi");
-    expect(learnLockText(3, 20)).toBe("Önce öğrenme modunu tamamlayın: 3/20 ses dinlendi.");
-    expect(challengeLearnLockText(0, 20)).toBe("Meydan okuma için önce öğrenme modunu tamamlayın: 0/20 ses dinlendi.");
+    expect(learnProgressText(3, 24)).toBe("Öğrenme: 3/24 ses dinlendi");
+    expect(learnLockText(3, 24)).toBe("Önce öğrenme modunu tamamlayın: 3/24 ses dinlendi.");
+    expect(challengeLearnLockText(0, 24)).toBe("Meydan okuma için önce öğrenme modunu tamamlayın: 0/24 ses dinlendi.");
   });
 });
 
@@ -147,47 +151,64 @@ describe("listenedKeyOnPlay", () => {
 });
 
 describe("öğrenme tamamlanabilirliği", () => {
-  it("her kütüphane öğesi en az bir dinleme noktasında çözülebilir (kilit açılabilir olmalı)", () => {
+  it("her kütüphane öğesinin ilk örneğinde çalınabilir ses noktası var (kilit açılabilir olmalı)", () => {
     for (const group of LIBRARY_GROUPS) {
       for (const item of group.items) {
-        const resolvable = item.bestPoints.some(
+        const [first] = learnExamples(item.key);
+        expect(first, `${item.key}: örnek yok`).toBeDefined();
+        if (!first) continue;
+        const points = examplePointIds(
+          first,
+          item.category,
           (pointId) => resolveLibrarySoundEx(item.category, item.acousticFinding, pointId).record !== null,
         );
-        expect(resolvable, `${item.key}: çözülebilir ses kaydı yok`).toBe(true);
+        expect(points.length, `${item.key}: çalınabilir ses noktası yok`).toBeGreaterThan(0);
       }
     }
   });
 });
 
+const FULL = JSON.stringify(Object.fromEntries(LIBRARY_ITEM_KEYS.map((key) => [key, LEARN_SECONDS])));
+
+function listenFully(tracker: ReturnType<typeof createLearnTracker>, key: string): void {
+  for (let ms = 0; ms < LEARN_SECONDS * 1000; ms += 250) tracker.addListen(key, 250);
+}
+
 describe("createLearnTracker", () => {
-  it("dinleme kaydı kalıcıdır; yalnız seçmek kaydı büyütmez", () => {
+  it("öğe ancak 60 sn çalan sesle dinlendi sayılır; süre kalıcıdır", () => {
     const storage = memoryStorage();
     const tracker = createLearnTracker({ storage });
     expect(tracker.snapshot().listenedCount).toBe(0);
-    expect(tracker.snapshot().complete).toBe(false);
     expect(tracker.snapshot().lockText).toBe(learnLockText(0, LIBRARY_ITEM_COUNT));
 
-    tracker.markListened("heart.normal");
+    // 59,75 sn henüz yetmez; ara kayıt depoya yazılır.
+    for (let ms = 0; ms < 59_750; ms += 250) tracker.addListen("heart.normal", 250);
+    expect(tracker.snapshot().listenedCount).toBe(0);
+    expect(tracker.snapshot().seconds.get("heart.normal")).toBeCloseTo(59.75, 5);
+    expect(createLearnTracker({ storage }).snapshot().seconds.get("heart.normal") ?? 0).toBeGreaterThanOrEqual(58);
+
+    tracker.addListen("heart.normal", 250);
     expect(tracker.snapshot().listenedCount).toBe(1);
     expect(tracker.snapshot().progressText).toBe(learnProgressText(1, LIBRARY_ITEM_COUNT));
-    expect(JSON.parse(storage.entries.get(LEARN_LISTENED_KEY) ?? "[]")).toEqual(["heart.normal"]);
+    expect(JSON.parse(storage.entries.get(LEARN_LISTENED_KEY) ?? "{}")).toEqual({ "heart.normal": LEARN_SECONDS });
 
-    // Yalnız seçmek (playing=false) kaydı büyütmez.
-    const selected = listenedKeyOnPlay(false, "cardiac_aortic", "heart.normal", ["cardiac_aortic"]);
-    expect(selected).toBeNull();
-    expect(tracker.snapshot().listenedCount).toBe(1);
-
-    // Aynı depoyla yeni mount (açılış) kaydı korur.
     const reopened = createLearnTracker({ storage });
-    expect(reopened.snapshot().listenedCount).toBe(1);
     expect(reopened.snapshot().listened.has("heart.normal")).toBe(true);
   });
 
-  it("bozuk kayıt boş küme sayılır; bilinmeyen anahtar yok sayılır", () => {
+  it("tıklama sayılmaz: çalmayan seçim süre eklemez, sıfır/negatif süre yok sayılır", () => {
+    const tracker = createLearnTracker({ storage: memoryStorage() });
+    expect(listenedKeyOnPlay(false, "cardiac_aortic", "heart.normal", ["cardiac_aortic"])).toBeNull();
+    tracker.addListen("heart.normal", 0);
+    tracker.addListen("heart.normal", -500);
+    expect(tracker.snapshot().seconds.size).toBe(0);
+  });
+
+  it("bozuk kayıt boş sayılır; bilinmeyen anahtar yok sayılır", () => {
     const storage = memoryStorage({ [LEARN_LISTENED_KEY]: "{bozuk" });
     const tracker = createLearnTracker({ storage });
     expect(tracker.snapshot().listenedCount).toBe(0);
-    tracker.markListened("bilinmeyen.ses");
+    listenFully(tracker, "bilinmeyen.ses");
     expect(tracker.snapshot().listenedCount).toBe(0);
     expect(storage.entries.get(LEARN_LISTENED_KEY)).toBe("{bozuk");
   });
@@ -195,19 +216,18 @@ describe("createLearnTracker", () => {
   it("yerel küme tamamlanınca complete olur ve markComplete bir kez doğru sürümle çağrılır", () => {
     const calls: string[] = [];
     const tracker = createLearnTracker({ storage: memoryStorage(), learn: learnPort(false, calls) });
-    for (const key of LIBRARY_ITEM_KEYS) tracker.markListened(key);
+    for (const key of LIBRARY_ITEM_KEYS) listenFully(tracker, key);
     expect(tracker.snapshot().localComplete).toBe(true);
     expect(tracker.snapshot().complete).toBe(true);
     expect(calls).toEqual([AUSCULTA_CONTENT_VERSION]);
-    // Fazladan markListened/notify yeni çağrı üretmez.
-    tracker.markListened(LIBRARY_ITEM_KEYS[0] ?? "");
+    tracker.addListen(LIBRARY_ITEM_KEYS[0] ?? "", 250);
     tracker.notify();
     expect(calls).toEqual([AUSCULTA_CONTENT_VERSION]);
   });
 
   it("açılışta küme zaten tamamsa notify kaydı tazeler (bir kez)", () => {
     const calls: string[] = [];
-    const storage = memoryStorage({ [LEARN_LISTENED_KEY]: JSON.stringify(LIBRARY_ITEM_KEYS) });
+    const storage = memoryStorage({ [LEARN_LISTENED_KEY]: FULL });
     const tracker = createLearnTracker({ storage, learn: learnPort(false, calls) });
     tracker.notify();
     tracker.notify();
@@ -229,7 +249,7 @@ describe("createLearnTracker", () => {
       },
     };
     const tracker = createLearnTracker({ storage: memoryStorage(), learn: failing });
-    for (const key of LIBRARY_ITEM_KEYS) tracker.markListened(key);
+    for (const key of LIBRARY_ITEM_KEYS) listenFully(tracker, key);
     expect(tracker.snapshot().complete).toBe(true);
     await Promise.resolve();
   });
@@ -369,7 +389,7 @@ describe("ModeSelectScreen öğrenme kilidi", () => {
     expect(html).toContain("mode-card practice learn-locked");
     expect(html).toContain("mode-card assessment learn-locked");
     expect(html).toContain('data-learn-locked="true"');
-    expect(html).toContain("Önce öğrenme modunu tamamlayın: 0/20 ses dinlendi.");
+    expect(html).toContain("Önce öğrenme modunu tamamlayın: 0/24 ses dinlendi.");
     // T289: kilitli düğmede metnin önünde kilit simgesi (svg) bulunur.
     expect(html).toMatch(/disabled=""[^>]*>(?:<svg[\s\S]*?<\/svg>)?Önce öğrenme modunu tamamlayın/);
   });
@@ -383,7 +403,7 @@ describe("ModeSelectScreen öğrenme kilidi", () => {
   });
 
   it("yerel küme tamamsa kartlar açıktır", () => {
-    const storage = memoryStorage({ [LEARN_LISTENED_KEY]: JSON.stringify(LIBRARY_ITEM_KEYS) });
+    const storage = memoryStorage({ [LEARN_LISTENED_KEY]: FULL });
     const html = renderInGate(createElement(ModeSelectScreen, { embedded: true }), { storage });
     expect(html).toContain('data-learn-locked="false"');
     expect(html).toContain("Vakaları çöz");

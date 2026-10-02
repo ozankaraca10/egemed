@@ -48,10 +48,18 @@
     {
       "role": "Tıbbi İçerik Validasyonu",
       "people": [
-        { "name": "Doç. Dr." },
-        { "name": "Doç. Dr." },
-        { "name": "Doç. Dr." },
-        { "name": "Doç. Dr." }
+        {
+          "name": "Doç. Dr."
+        },
+        {
+          "name": "Doç. Dr."
+        },
+        {
+          "name": "Doç. Dr."
+        },
+        {
+          "name": "Doç. Dr."
+        }
       ]
     }
   ],
@@ -144,6 +152,38 @@
       "licenseUrl": "https://creativecommons.org/licenses/by/4.0/",
       "usage": "Shanghai Children's Medical Center'da pediatrik hastalardan Yunting model II stetoskopla alınmış sol/sağ posterior (p1/p3) akciğer kayıtları. Yalnız kayıt düzeyi Poor Quality olmayan, Normal dışı olayları tek tür (ronküs ya da wheezing) olan ve kapsamı %30 ve üzeri kayıtlar alınır; kaynakta seviye bilgisi yoktur, üst/alt ataması eğitim amaçlıdır ve öğretim üyesi onayı bekler.",
       "attributionText": "Zhang, Q., et al. (2022). SPRSound: Open-Source SJTU Paediatric Respiratory Sound Database. IEEE Transactions on Biomedical Circuits and Systems, 16(5), 867–881. https://doi.org/10.1109/TBCAS.2022.3204910 (veri kümesi: IEEE DataPort, https://doi.org/10.21227/nfkk-1x47) — CC BY 4.0"
+    },
+    {
+      "id": "icbhi-2017",
+      "title": "ICBHI 2017 Respiratory Sound Database",
+      "authors": [
+        "Bruno M. Rocha",
+        "Dimitris Filos",
+        "Luís Mendes",
+        "Gorkem Serbes",
+        "Sezer Ulukaya",
+        "Yasemin P. Kahya"
+      ],
+      "datasetDoi": "10.7910/DVN/HT6PKI",
+      "articleDoi": "10.1088/1361-6579/ab03ea",
+      "license": "Creative Commons Zero (CC0 1.0)",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "usage": "Öğrenme modunda çok bölgeli gerçek hasta akciğer sesleri (anterior/posterior/lateral; seviye kaynakta yok, orta noktaya yerleştirilir). Solunum döngüsü başına ral/wheeze uzman etiketleri dalga formunda gösterilir. Demografi/tanı dosyası elimizde yok.",
+      "attributionText": "Rocha, B. M., et al. (2019). An open access database for the evaluation of respiratory sound classification algorithms. Physiological Measurement, 40(3), 035001. https://doi.org/10.1088/1361-6579/ab03ea — veri kümesi CC0"
+    },
+    {
+      "id": "mendeley-regurg",
+      "title": "A Dataset of Heart Sound Regurgitation of Patients with Heart Valve Disorders",
+      "authors": [
+        "Mohammad Fraiwan",
+        "Ali Ibnian",
+        "Nishi Haider"
+      ],
+      "datasetDoi": "10.17632/jfbdvjw6sf.1",
+      "license": "Creative Commons Attribution 4.0 International (CC BY 4.0)",
+      "licenseUrl": "https://creativecommons.org/licenses/by/4.0/",
+      "usage": "Öğrenme modunda 4 odaklı (aort, pulmoner, triküspit, mitral) gerçek hasta kalp sesleri; stetoskop ve eko bulgusu kayıttan.",
+      "attributionText": "Fraiwan, M., Ibnian, A., Haider, N. (2025). A Dataset of Heart Sound Regurgitation of Patients with Heart Valve Disorders. Mendeley Data, V1. https://doi.org/10.17632/jfbdvjw6sf.1 — CC BY 4.0"
     }
   ],
   "assets": [

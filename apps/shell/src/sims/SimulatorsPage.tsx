@@ -21,7 +21,7 @@ export const SIM_FACTS: Record<SimId, readonly { readonly value: number; readonl
     { value: 300, labelKey: "sims.page.fact.quiz" },
   ],
   ausculta: [
-    { value: 20, labelKey: "sims.page.fact.sounds" },
+    { value: 24, labelKey: "sims.page.fact.sounds" },
     { value: 200, labelKey: "sims.page.fact.practice" },
     { value: 85, labelKey: "sims.page.fact.assessment" },
   ],

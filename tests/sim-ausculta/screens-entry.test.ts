@@ -86,7 +86,7 @@ describe("ModeSelectScreen", () => {
     expect(html).toContain("Öğrenmeye başla");
     expect(html).toContain("Önce öğrenme modunu tamamlayın");
     expect(html).toContain("mode-lock-hint");
-    expect(html).toContain("Önce öğrenme modunu tamamlayın: 0/20 ses dinlendi.");
+    expect(html).toContain("Önce öğrenme modunu tamamlayın: 0/24 ses dinlendi.");
     expect(html).toContain("Henüz denenmedi");
     // Kilit gönderimi kapatır: düğme pasiftir.
     // T289: kilitli düğmede metnin önünde kilit simgesi (svg) bulunur.

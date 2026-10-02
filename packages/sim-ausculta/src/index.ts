@@ -37,13 +37,12 @@ export {
   libraryKeyForCase,
   nextActionForSubmit,
   otherViewHintText,
-  planLibraryViews,
   regionChipState,
   resampleActiveMode,
   tutorialProgress,
   weakDomainKeys,
 } from "./core/flow";
-export type { LibraryViewPlan, RegionChipVisualState, SubmitAction, TutorialEvent, TutorialProgress } from "./core/flow";
+export type { RegionChipVisualState, SubmitAction, TutorialEvent, TutorialProgress } from "./core/flow";
 export { SUSPEND_LIMIT_12, SUSPEND_LIMIT_2004, deserializeSuspend, serializeSuspend } from "./core/suspend";
 export { filterAssessmentPool, validateCase } from "./core/validation";
 export type { ValidationIssue } from "./core/validation";
@@ -75,11 +74,10 @@ export {
   findLibraryItem,
 } from "./data/library";
 export type { LibGroup, LibItem } from "./data/library";
-export { LEARNING_SAMPLES, learningSamplesFor } from "./data/learningSamples";
-export type { LearningSamplesFile } from "./data/learningSamples";
 export {
   AUSCULTA_CONTENT_VERSION,
   LEARN_LISTENED_KEY,
+  LEARN_SECONDS,
   LOCKED_LEARN_SNAPSHOT,
   canStartMode,
   challengeLearnLockText,

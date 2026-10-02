@@ -5,7 +5,7 @@ import { unlockAuscultaLearn } from "./sim-flows";
 
 /**
  * T209 — Ausculta öğrenme kilidi (depo sahibi kararı, 27 Eyl 2026): öğrenme
- * kütüphanesindeki her ses dinlenmeden uygulama/değerlendirme KİLİTLİDİR.
+ * kütüphanesindeki her ses (T307: konu başına 60 sn çalarak) dinlenmeden uygulama/değerlendirme KİLİTLİDİR.
  * Bu spec kilidin kullanıcıya görünen yüzünü doğrular: pasif kart + ilerleme
  * metni, öğrenme ekranı ilerlemesi ve düello bağlamının öğrenmeye düşmesi.
  */
@@ -19,7 +19,7 @@ test.describe("Ausculta öğrenme kilidi", () => {
     const practice = root.locator(".mode-card.practice");
     await expect(practice).toHaveClass(/learn-locked/);
     await expect(practice.locator("button.eg-gami-mode-cta")).toBeDisabled();
-    await expect(practice.getByText("Önce öğrenme modunu tamamlayın: 0/20 ses dinlendi.")).toBeVisible();
+    await expect(practice.getByText("Önce öğrenme modunu tamamlayın: 0/24 ses dinlendi.")).toBeVisible();
 
     const assessment = root.locator(".mode-card.assessment");
     await expect(assessment).toHaveClass(/learn-locked/);
@@ -28,10 +28,9 @@ test.describe("Ausculta öğrenme kilidi", () => {
 
     // Öğrenme her zaman açıktır; ilerleme satırı ve kilitli odaklı uygulama düğmesi.
     await root.locator(".mode-card.learn button.eg-gami-mode-cta").click();
-    await expect(root.getByText("Öğrenme: 0/20 ses dinlendi")).toBeVisible();
-    await root.locator(".tabbar.info-tabs button").nth(2).click();
+    await expect(root.getByText("Öğrenme: 0/24 ses dinlendi")).toBeVisible();
     await expect(root.getByRole("button", { name: /uygulama yap/ })).toBeDisabled();
-    await expect(root.getByText("Önce öğrenme modunu tamamlayın: 0/20 ses dinlendi.").last()).toBeVisible();
+    await expect(root.getByText("Önce öğrenme modunu tamamlayın: 0/24 ses dinlendi.").last()).toBeVisible();
     await captureRouteScreenshot(page, testInfo.project.name, "#/sims/ausculta ogrenme kilidi");
 
     expect(errors, "konsol/sayfa hatası").toEqual([]);
@@ -59,7 +58,7 @@ test.describe("Ausculta öğrenme kilidi", () => {
     await expect(root).toBeVisible({ timeout: 20_000 });
     await expect(root.locator(".lib-col .lib-item").first()).toBeVisible();
     await expect(
-      root.getByText("Meydan okuma için önce öğrenme modunu tamamlayın: 0/20 ses dinlendi."),
+      root.getByText("Meydan okuma için önce öğrenme modunu tamamlayın: 0/24 ses dinlendi."),
     ).toBeVisible();
     expect(errors, "konsol/sayfa hatası").toEqual([]);
   });

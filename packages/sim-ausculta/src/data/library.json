@@ -14,7 +14,12 @@
           "s1": "Mitral ve triküspit kapakçıkların kapanmasıyla oluşur. Sistol başlangıcını gösterir. Genellikle daha uzun ve düşük frekanslıdır.",
           "s2": "Aort ve pulmoner kapakçıkların kapanmasıyla oluşur. Diyastol başlangıcını gösterir. Daha kısa ve yüksek frekanslıdır.",
           "clinical": "Normal S1–S2 ritmi düzenlidir; ek ses ve üfürüm yoktur. S1 en iyi apekste, S2 üst sternal kenarlarda duyulur.",
-          "bestPoints": ["cardiac_mitral", "cardiac_pulmonary", "cardiac_aortic", "cardiac_tricuspid"]
+          "bestPoints": [
+            "cardiac_mitral",
+            "cardiac_pulmonary",
+            "cardiac_aortic",
+            "cardiac_tricuspid"
+          ]
         },
         {
           "key": "heart.s3",
@@ -25,7 +30,11 @@
           "s1": "Sistol başında normal olarak duyulur.",
           "s2": "Diyastol başında duyulur; S3, S2'den hemen sonra gelir.",
           "clinical": "S3 apekste en belirgindir. Gençlerde fizyolojik olabilir; ileri yaşta ventriküler disfonksiyonla ilişkilendirilir.",
-          "bestPoints": ["cardiac_mitral", "cardiac_tricuspid", "cardiac_pulmonary"]
+          "bestPoints": [
+            "cardiac_mitral",
+            "cardiac_tricuspid",
+            "cardiac_pulmonary"
+          ]
         },
         {
           "key": "heart.s4",
@@ -36,7 +45,10 @@
           "s1": "Sistol başında duyulur; S4, S1'den hemen önce gelir.",
           "s2": "Diyastol başında normal olarak duyulur.",
           "clinical": "S4 ventrikül sertliğinin arttığı durumlarda (ileri yaş, hipertansiyon, aort darlığı, hipertrofik kardiyomiyopati) duyulur. Atriyal fibrilasyonda duyulmaz.",
-          "bestPoints": ["cardiac_pulmonary", "cardiac_mitral"]
+          "bestPoints": [
+            "cardiac_pulmonary",
+            "cardiac_mitral"
+          ]
         },
         {
           "key": "heart.murmur.early_systolic",
@@ -47,7 +59,12 @@
           "s1": "Üfürüm S1 ile birlikte başlar.",
           "s2": "Üfürüm S2'ye ulaşmadan biter.",
           "clinical": "Erken sistolik üfürümde başlangıç noktası ve kısa süre karakteristiktir; nedeni klinik bağlamla değerlendirilir.",
-          "bestPoints": ["cardiac_pulmonary", "cardiac_aortic", "cardiac_mitral", "cardiac_tricuspid"]
+          "bestPoints": [
+            "cardiac_pulmonary",
+            "cardiac_aortic",
+            "cardiac_mitral",
+            "cardiac_tricuspid"
+          ]
         },
         {
           "key": "heart.murmur.mid_systolic",
@@ -58,7 +75,12 @@
           "s1": "S1 düz başlar; üfürüm S1'i izler.",
           "s2": "Üfürüm S2'den önce söner.",
           "clinical": "Sistolik üfürümde zamanlama, en belirgin odak, şiddet ve karakter değerlendirilir. Akustik bulgu ile kapak lezyonu tanımı ayrı tutulur.",
-          "bestPoints": ["cardiac_mitral", "cardiac_aortic", "cardiac_pulmonary", "cardiac_tricuspid"]
+          "bestPoints": [
+            "cardiac_mitral",
+            "cardiac_aortic",
+            "cardiac_pulmonary",
+            "cardiac_tricuspid"
+          ]
         },
         {
           "key": "heart.murmur.late_systolic",
@@ -69,7 +91,46 @@
           "s1": "Üfürüm S1'den sonra, sistolün ortasında başlar.",
           "s2": "Üfürüm S2'ye kadar sürer.",
           "clinical": "Geç sistolik üfürüm, klik varlığı açısından ayrıca değerlendirilir; nedeni klinik bağlamla ilişkilendirilir.",
-          "bestPoints": ["cardiac_mitral", "cardiac_pulmonary", "cardiac_aortic", "cardiac_tricuspid"]
+          "bestPoints": [
+            "cardiac_mitral",
+            "cardiac_pulmonary",
+            "cardiac_aortic",
+            "cardiac_tricuspid"
+          ]
+        },
+        {
+          "key": "heart.murmur.holosystolic",
+          "category": "heart",
+          "acousticFinding": "holosystolic_murmur",
+          "description": "S1 ile başlayıp S2'ye kadar süren, şiddeti sistol boyunca sabit (plato) sistolik üfürüm.",
+          "metaphor": "Sistol boyunca kesintisiz, düz bir üfleme — S1'den S2'ye aynı şiddette.",
+          "s1": "S1 üfürümün içinde kaybolabilir; üfürüm S1 ile aynı anda başlar.",
+          "s2": "Üfürüm S2'ye kadar sürer.",
+          "clinical": "Mitral ya da triküspit yetersizliği ve VSD düşündürür. Mitral yetersizliğinde apekste en güçlüdür ve aksillaya yayılır.",
+          "bestPoints": [
+            "cardiac_mitral",
+            "cardiac_tricuspid",
+            "cardiac_erb",
+            "cardiac_pulmonary",
+            "cardiac_aortic"
+          ]
+        },
+        {
+          "key": "heart.murmur.early_diastolic",
+          "category": "heart",
+          "acousticFinding": "early_diastolic_murmur",
+          "description": "S2'den hemen sonra başlayan, giderek azalan (dekreşendo), yüksek perdeli, üfleyici diyastolik üfürüm.",
+          "metaphor": "S2'nin hemen ardından yumuşak, azalan bir 'haaa' üflemesi.",
+          "s1": "S1 normaldir.",
+          "s2": "Üfürüm S2'nin hemen ardından başlar.",
+          "clinical": "Aort (ya da pulmoner) yetersizliği düşündürür. Sol sternal kenarda (Erb), hasta öne eğik ve ekspiryum sonunda daha iyi duyulur.",
+          "bestPoints": [
+            "cardiac_erb",
+            "cardiac_aortic",
+            "cardiac_tricuspid",
+            "cardiac_pulmonary",
+            "cardiac_mitral"
+          ]
         },
         {
           "key": "heart.murmur.late_diastolic",
@@ -80,7 +141,11 @@
           "s1": "Üfürüm S1'e kadar sürer ve S1 ile kesilir.",
           "s2": "Üfürüm geç diyastolde, S2'den belirgin bir sessizlik sonrası başlar.",
           "clinical": "Presistolik üfürümler zamanlama ve karakter ile değerlendirilir; atriyal fibrilasyonda duyulmaz.",
-          "bestPoints": ["cardiac_mitral", "cardiac_pulmonary", "cardiac_tricuspid"]
+          "bestPoints": [
+            "cardiac_mitral",
+            "cardiac_pulmonary",
+            "cardiac_tricuspid"
+          ]
         },
         {
           "key": "heart.atrial_fibrillation",
@@ -91,7 +156,11 @@
           "s1": "Şiddeti değişkendir.",
           "s2": "Değişken aralıklarla duyulur.",
           "clinical": "Düzensiz düzensiz ritim AF'nin akustik karşılığıdır; tanı EKG ile doğrulanır.",
-          "bestPoints": ["cardiac_mitral", "cardiac_pulmonary", "cardiac_aortic"]
+          "bestPoints": [
+            "cardiac_mitral",
+            "cardiac_pulmonary",
+            "cardiac_aortic"
+          ]
         },
         {
           "key": "heart.tachycardia",
@@ -102,7 +171,10 @@
           "s1": "Belirgin biçimde sıklaşır.",
           "s2": "Diyastolik aralık kısalır.",
           "clinical": "Düzenli taşikardide diyastol önce kısalır; nedeni ayrıca değerlendirilir.",
-          "bestPoints": ["cardiac_mitral", "cardiac_pulmonary"]
+          "bestPoints": [
+            "cardiac_mitral",
+            "cardiac_pulmonary"
+          ]
         },
         {
           "key": "heart.av_block",
@@ -113,7 +185,10 @@
           "s1": "Şiddeti değişken olabilir.",
           "s2": "Aralıklar değişkendir.",
           "clinical": "Kesin blok derecesi EKG ile saptanır; oskültasyon destekleyici bulgu verir.",
-          "bestPoints": ["cardiac_tricuspid", "cardiac_mitral"]
+          "bestPoints": [
+            "cardiac_tricuspid",
+            "cardiac_mitral"
+          ]
         }
       ]
     },
@@ -129,7 +204,20 @@
           "metaphor": "Hafif deniz dalgası hışırtısı — yumuşak ve sürekli.",
           "phase": "İnspirasyon ekspirasyondan uzun; ekspirasyon sesi kısa sürede söner.",
           "clinical": "Bilateral simetri esastır; asimetri patolojiye işaret edebilir.",
-          "bestPoints": ["lung_right_upper_anterior", "lung_left_upper_anterior", "lung_right_middle_anterior", "lung_left_middle_anterior", "lung_right_lower_anterior", "lung_left_lower_anterior", "lung_right_upper_posterior", "lung_left_upper_posterior", "lung_right_middle_posterior", "lung_left_middle_posterior", "lung_right_lower_posterior", "lung_left_lower_posterior"]
+          "bestPoints": [
+            "lung_right_upper_anterior",
+            "lung_left_upper_anterior",
+            "lung_right_middle_anterior",
+            "lung_left_middle_anterior",
+            "lung_right_lower_anterior",
+            "lung_left_lower_anterior",
+            "lung_right_upper_posterior",
+            "lung_left_upper_posterior",
+            "lung_right_middle_posterior",
+            "lung_left_middle_posterior",
+            "lung_right_lower_posterior",
+            "lung_left_lower_posterior"
+          ]
         },
         {
           "key": "lung.wheezing",
@@ -139,7 +227,20 @@
           "metaphor": "Çaydanlık düdüğü / ıslık — müzikal, ekspirasyonda belirgin.",
           "phase": "Ekspirasyonda belirgin; geniş yaygın daralmada iki faza yayılır.",
           "clinical": "Küçük hava yollarında daralma, obstrüksiyon veya bronkospazm ile ilişkilidir.",
-          "bestPoints": ["lung_right_upper_anterior", "lung_left_upper_anterior", "lung_right_middle_anterior", "lung_left_middle_anterior", "lung_right_lower_anterior", "lung_left_lower_anterior", "lung_right_upper_posterior", "lung_left_upper_posterior", "lung_right_middle_posterior", "lung_left_middle_posterior", "lung_right_lower_posterior", "lung_left_lower_posterior"]
+          "bestPoints": [
+            "lung_right_upper_anterior",
+            "lung_left_upper_anterior",
+            "lung_right_middle_anterior",
+            "lung_left_middle_anterior",
+            "lung_right_lower_anterior",
+            "lung_left_lower_anterior",
+            "lung_right_upper_posterior",
+            "lung_left_upper_posterior",
+            "lung_right_middle_posterior",
+            "lung_left_middle_posterior",
+            "lung_right_lower_posterior",
+            "lung_left_lower_posterior"
+          ]
         },
         {
           "key": "lung.rhonchi",
@@ -149,7 +250,14 @@
           "metaphor": "Uykuda horlama sesi — kaba, düşük frekanslı; öksürükle değişebilir.",
           "phase": "Her iki fazda duyulabilir; öksürükle değişebilir.",
           "clinical": "Büyük hava yollarında sekresyon veya daralmayla ilişkilidir.",
-          "bestPoints": ["lung_left_upper_anterior", "lung_right_middle_anterior", "lung_left_lower_anterior", "lung_left_upper_posterior", "lung_right_middle_posterior", "lung_left_lower_posterior"]
+          "bestPoints": [
+            "lung_left_upper_anterior",
+            "lung_right_middle_anterior",
+            "lung_left_lower_anterior",
+            "lung_left_upper_posterior",
+            "lung_right_middle_posterior",
+            "lung_left_lower_posterior"
+          ]
         },
         {
           "key": "lung.fine_crackles",
@@ -159,7 +267,14 @@
           "metaphor": "Karda yürüme sesi / saç ovuşturma — ince ve kuru; inspirasyon sonunda.",
           "phase": "İnspirasyon sonunda yoğunlaşır.",
           "clinical": "Alveollerin açılmasına bağlıdır; öksürükle genellikle değişmez.",
-          "bestPoints": ["lung_left_upper_anterior", "lung_right_lower_anterior", "lung_right_upper_anterior", "lung_left_upper_posterior", "lung_right_lower_posterior", "lung_right_upper_posterior"]
+          "bestPoints": [
+            "lung_left_upper_anterior",
+            "lung_right_lower_anterior",
+            "lung_right_upper_anterior",
+            "lung_left_upper_posterior",
+            "lung_right_lower_posterior",
+            "lung_right_upper_posterior"
+          ]
         },
         {
           "key": "lung.coarse_crackles",
@@ -169,7 +284,14 @@
           "metaphor": "Suyun içinde balon patlaması / kaynama fokurtusu — daha kaba ve nemli.",
           "phase": "İnspirasyon boyunca (bazen ekspirasyon başında) duyulur.",
           "clinical": "Büyük hava yollarındaki sekresyonla ilişkilidir; öksürükle değişebilir.",
-          "bestPoints": ["lung_right_lower_anterior", "lung_left_lower_anterior", "lung_left_middle_anterior", "lung_right_lower_posterior", "lung_left_lower_posterior", "lung_left_middle_posterior"]
+          "bestPoints": [
+            "lung_right_lower_anterior",
+            "lung_left_lower_anterior",
+            "lung_left_middle_anterior",
+            "lung_right_lower_posterior",
+            "lung_left_lower_posterior",
+            "lung_left_middle_posterior"
+          ]
         },
         {
           "key": "lung.pleural_rub",
@@ -179,7 +301,72 @@
           "metaphor": "Kar gıcırtısı / deri sürtünmesi — iki fazlı gıcırtı.",
           "phase": "İnspirasyon ve ekspirasyonun her ikisinde duyulur (iki fazlı).",
           "clinical": "Plevral enflamasyonla ilişkilidir; lokalizedir ve hastanın tuttuğu yerde belirgindir.",
-          "bestPoints": ["lung_left_middle_anterior", "lung_right_middle_anterior", "lung_left_upper_anterior", "lung_left_middle_posterior", "lung_right_middle_posterior", "lung_left_upper_posterior"]
+          "bestPoints": [
+            "lung_left_middle_anterior",
+            "lung_right_middle_anterior",
+            "lung_left_upper_anterior",
+            "lung_left_middle_posterior",
+            "lung_right_middle_posterior",
+            "lung_left_upper_posterior"
+          ]
+        },
+        {
+          "key": "lung.stridor",
+          "category": "lung",
+          "acousticFinding": "stridor",
+          "description": "Üst hava yolu daralmasında oluşan, çoğunlukla inspiratuvar, yüksek perdeli, sürekli müzikal ses; boyunda göğüsten daha yüksek duyulur.",
+          "metaphor": "İnspiryumda keskin, tiz bir ıslık — boyuna yaklaştıkça güçlenir.",
+          "phase": "Çoğunlukla inspiratuvar (ekstratorasik daralma); bifazik olabilir.",
+          "clinical": "Üst hava yolu tıkanıklığının işaretidir (krup, larengomalazi, yabancı cisim). Solunum sıkıntısıyla birlikteyse acil değerlendirme gerekir.",
+          "bestPoints": [
+            "lung_right_upper_anterior",
+            "lung_right_middle_anterior",
+            "lung_right_lower_anterior",
+            "lung_left_upper_anterior",
+            "lung_left_middle_anterior",
+            "lung_left_lower_anterior",
+            "lung_right_upper_posterior",
+            "lung_right_middle_posterior",
+            "lung_right_lower_posterior",
+            "lung_left_upper_posterior",
+            "lung_left_middle_posterior",
+            "lung_left_lower_posterior",
+            "lung_right_upper_lateral",
+            "lung_right_middle_lateral",
+            "lung_right_lower_lateral",
+            "lung_left_upper_lateral",
+            "lung_left_middle_lateral",
+            "lung_left_lower_lateral"
+          ]
+        },
+        {
+          "key": "lung.wheeze_crackle",
+          "category": "lung",
+          "acousticFinding": "wheeze_crackle",
+          "description": "Aynı kayıtta hem sürekli müzikal (wheeze) hem süreksiz patlayıcı (ral) ek sesler.",
+          "metaphor": "Hışıltının üstüne serpiştirilmiş kısa çıtırtılar.",
+          "phase": "Wheeze çoğunlukla ekspiryumda, raller inspiryumda.",
+          "clinical": "Hava yolu daralması ile küçük hava yolu/alveol tutulumu birlikte; çocuklarda bronşiolit ve pnömonide sık.",
+          "bestPoints": [
+            "lung_right_upper_anterior",
+            "lung_right_middle_anterior",
+            "lung_right_lower_anterior",
+            "lung_left_upper_anterior",
+            "lung_left_middle_anterior",
+            "lung_left_lower_anterior",
+            "lung_right_upper_posterior",
+            "lung_right_middle_posterior",
+            "lung_right_lower_posterior",
+            "lung_left_upper_posterior",
+            "lung_left_middle_posterior",
+            "lung_left_lower_posterior",
+            "lung_right_upper_lateral",
+            "lung_right_middle_lateral",
+            "lung_right_lower_lateral",
+            "lung_left_upper_lateral",
+            "lung_left_middle_lateral",
+            "lung_left_lower_lateral"
+          ]
         }
       ]
     },
@@ -195,7 +382,10 @@
           "metaphor": "Rüzgâr esintisi (üfürüm) ile çaydanlık düdüğünün (wheezing) aynı anda duyulması.",
           "phase": "Kalp bileşeni sistolde, akciğer bileşeni ekspirasyonda belirgindir.",
           "clinical": "Gerçek hastada kalp ve akciğer sesleri aynı bölgede üst üste gelir; odak değiştirerek ayrıştırma öğretilir.",
-          "bestPoints": ["lung_left_upper_anterior", "lung_left_upper_posterior"]
+          "bestPoints": [
+            "lung_left_upper_anterior",
+            "lung_left_upper_posterior"
+          ]
         },
         {
           "key": "mixed.esm_coarse",
@@ -205,7 +395,10 @@
           "metaphor": "Kısa bir 'fış' (üfürüm) ile kaynama fokurtusunun (kaba raller) birlikteliği.",
           "phase": "Üfürüm erken sistolde; kaba raller inspirasyonda.",
           "clinical": "Kombine kayıtlarda her iki bileşen ayrı ayrı tanımlanmalıdır.",
-          "bestPoints": ["lung_left_upper_anterior", "lung_left_upper_posterior"]
+          "bestPoints": [
+            "lung_left_upper_anterior",
+            "lung_left_upper_posterior"
+          ]
         },
         {
           "key": "mixed.s3_normal",
@@ -215,7 +408,10 @@
           "metaphor": "Ken-ta-ta dörtnal ritmi üzerine hafif dalga hışırtısı.",
           "phase": "S3 erken diyastolde; solunum sesi ekspirasyonda söner.",
           "clinical": "Beklenen kombinasyon; solunum sesi kalp sesini maskeleyebilir.",
-          "bestPoints": ["lung_right_lower_anterior", "lung_right_lower_posterior"]
+          "bestPoints": [
+            "lung_right_lower_anterior",
+            "lung_right_lower_posterior"
+          ]
         },
         {
           "key": "mixed.af_rhonchi",
@@ -225,7 +421,10 @@
           "metaphor": "Düzensiz davul vuruşları üzerine horlama benzeri kaba hırıltı.",
           "phase": "Ritim düzensiz; ronküs her iki fazda duyulabilir.",
           "clinical": "Ritim analizi ile akciğer sesi ayrıştırması birlikte yapılır.",
-          "bestPoints": ["lung_right_lower_anterior", "lung_right_lower_posterior"]
+          "bestPoints": [
+            "lung_right_lower_anterior",
+            "lung_right_lower_posterior"
+          ]
         }
       ]
     }
