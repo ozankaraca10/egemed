@@ -52,7 +52,7 @@ test.describe("Ausculta öğrenme görünüm kuralı (T233/T307)", () => {
     await expect(back).toBeDisabled();
     await expect(back).toHaveAttribute("aria-disabled", "true");
     await expect(viewButton(root, "Anterior")).toBeEnabled();
-    await expect(root.getByText("Posterior görünüm kapalı")).toBeVisible();
+    await expect(back).toHaveAttribute("title", "Bu örnekte posterior kayıt yok");
     await expectNoHorizontalScroll(page);
 
     await captureRouteScreenshot(page, testInfo.project.name, "#/sims/ausculta ogrenme kalp anterior");
@@ -82,7 +82,7 @@ test.describe("Ausculta öğrenme görünüm kuralı (T233/T307)", () => {
     await selectItem(root, "Üfürüm + Wheezing");
     const stage = root.locator(".learn-grid .stage-card");
     await expect(stage).toHaveAttribute("data-view", "front");
-    await expect(root.getByText("görünüm kapalı")).toHaveCount(0);
+    await expect(viewButton(root, "Posterior")).toBeEnabled();
     await viewButton(root, "Posterior").click();
     await expect(stage).toHaveAttribute("data-view", "back");
     expect(errors, "konsol/sayfa hatası").toEqual([]);

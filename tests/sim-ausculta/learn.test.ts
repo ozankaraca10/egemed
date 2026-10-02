@@ -63,20 +63,28 @@ describe("LearnScreen", () => {
     expect(html).toContain('data-view="front"');
     expect(html).toContain("Örnekler 0/4 dinlendi · bu örnek 0/5 sn · yalnız ses çalarken sayılır");
     expect(html).toContain(">Sentetik<");
-    expect(html.match(/Gerçek \d · \d+ bölge/g)).toHaveLength(3);
+    expect(html.match(/Gerçek \d<small>\d+ bölge<\/small>/g)).toHaveLength(3);
   });
 
-  it("T307: kalp öğesinde posterior görünüm kapalı ve gerekçeli", () => {
+  /** Sahne üstü görünüm düğmesinin işaretlemesi (T309: dört görünüm hep çizilir). */
+  const viewButton = (html: string, label: string): string =>
+    [...html.matchAll(/<button\b[^>]*>([\s\S]*?)<\/button>/g)].find((match) => (match[1] ?? "").replace(/<[^>]*>/g, "").startsWith(label))?.[0] ?? "";
+
+  it("T307/T309: kalp öğesinde posterior ve lateral kapalı, gerekçe örneğe göre", () => {
     const html = renderInStore(createElement(LearnScreen), "heart.s3");
     expect(html).toContain('data-view="front"');
-    expect(html).toContain("Posterior görünüm kapalı");
-    expect(html).toContain("Bu vakada dinlenecek posterior bölge yok");
+    expect(viewButton(html, "Anterior")).not.toContain('disabled=""');
+    expect(viewButton(html, "Posterior")).toContain('disabled=""');
+    expect(viewButton(html, "Posterior")).toContain("Bu örnekte posterior kayıt yok");
+    expect(viewButton(html, "Sol lat.")).toContain('disabled=""');
   });
 
-  it("T233: karma öğede iki görünüm de açık", () => {
+  it("T233/T309: karma öğede anterior ve posterior açık, katman düğmesi çizilir", () => {
     const html = renderInStore(createElement(LearnScreen), "mixed.msm_wheezing");
     expect(html).toContain('data-view="front"');
-    expect(html).not.toContain("görünüm kapalı");
-    expect(html).not.toContain('aria-disabled="true"');
+    expect(viewButton(html, "Anterior")).not.toContain('disabled=""');
+    expect(viewButton(html, "Posterior")).not.toContain('disabled=""');
+    expect(html).toContain("Kalp odakları");
+    expect(html).toContain("Akciğer alanları");
   });
 });

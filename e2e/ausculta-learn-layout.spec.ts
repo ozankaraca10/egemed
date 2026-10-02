@@ -9,11 +9,10 @@ import { openRoute } from "./helpers";
  * hizalanır, kütüphane paneli kendi içinde kayar ve sahne gövde görselinin
  * en-boy oranında kalır. Ölçüm yalnız 1440×900 masaüstü projesinde anlamlıdır;
  * 768/390 akışı bu görevde değişmez.
- * T307: orta sütuna örnek seçimi ve hasta kartı eklendiği için sabit 1200 px
- * sınırı yerine "belge, en uzun sütunun içeriğinden uzun değil" (boş alan yok) ölçülür.
+ * T309: onaylı maket düzeni — belge ekran yüksekliğinde kalır, sütunlar kendi içinde kayar.
  */
 test.describe("Ausculta öğrenme düzeni (T206)", () => {
-  test("1440×900: sayfa hedef yüksekliği aşmaz, kütüphane kendi içinde kayar", async ({
+  test("1440×900: belge ekranı aşmaz, üç sütun kendi içinde kayar", async ({
     page,
   }, testInfo) => {
     test.skip(testInfo.project.name !== "desktop-1440", "ölçüm yalnız 1440×900 projesinde");
@@ -25,18 +24,15 @@ test.describe("Ausculta öğrenme düzeni (T206)", () => {
     await expect(stage).toBeVisible();
     const lib = page.locator(".learn-grid > .lib-col");
     await expect(lib).toBeVisible();
-    // Kütüphane paneli ekran yüksekliğine sığar ve kendi içinde kayar.
-    await expect(lib).toHaveCSS("overflow-y", "auto");
-    await expect(lib).toHaveCSS("position", "sticky");
+    // T309 (maket): üç sütun da ekran yüksekliğinde, her biri kendi içinde kayar.
+    for (const column of [lib, page.locator(".learn-grid > .sim-main"), page.locator(".learn-grid > .sim-side")]) {
+      await expect(column).toHaveCSS("overflow-y", "auto");
+    }
 
-    const { scrollHeight, contentBottom } = await page.evaluate(() => {
-      const bottoms = [".learn-grid .sim-main > :last-child", ".learn-grid .sim-side > :last-child"].map((selector) => {
-        const node = document.querySelector(selector);
-        return node ? node.getBoundingClientRect().bottom + window.scrollY : 0;
-      });
-      return { scrollHeight: document.documentElement.scrollHeight, contentBottom: Math.max(...bottoms) };
-    });
-    expect(contentBottom, "içerik ölçülebilir").toBeGreaterThan(0);
-    expect(scrollHeight - contentBottom, "öğrenme ekranında içerik altı boş alan").toBeLessThanOrEqual(64);
+    const { scrollHeight, viewport } = await page.evaluate(() => ({
+      scrollHeight: document.documentElement.scrollHeight,
+      viewport: window.innerHeight,
+    }));
+    expect(scrollHeight - viewport, "öğrenme ekranı belgeyi kaydırmaz").toBeLessThanOrEqual(1);
   });
 });

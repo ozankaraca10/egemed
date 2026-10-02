@@ -125,6 +125,57 @@ export const VIEW_LABEL: Record<PatientView, string> = {
 
 const VIEW_SHORT: Record<PatientView, string> = { front: "Anterior", back: "Posterior", left: "Sol lat.", right: "Sağ lat." };
 
+export interface ViewToggleProps {
+  /** Çizilecek görünüm düğmeleri (sıra korunur). */
+  readonly views: readonly PatientView[];
+  /** İzinli görünümler; diğerleri kilit imi + gerekçeyle devre dışı çizilir. */
+  readonly allowed: readonly PatientView[];
+  readonly selected: PatientView;
+  readonly onSelect: (view: PatientView) => void;
+  /** Gövde simgeleri (araç çubuğunda açık; öğrenme sahnesi üstünde yalın). */
+  readonly icons?: boolean;
+  readonly className?: string;
+  /** Kilit gerekçesi; verilmezse vaka metni (`viewLockReason`). */
+  readonly lockReason?: (view: PatientView) => string;
+}
+
+/** Görünüm düğme grubu: araç çubuğu ve öğrenme sahnesi (T309) ortak kullanır. */
+export function ViewToggle({ views, allowed, selected, onSelect, icons = true, className, lockReason = viewLockReason }: ViewToggleProps) {
+  return (
+    <div className={["view-toggle", className].filter(Boolean).join(" ")} role="group" aria-label="Gövde görünümü">
+      {views.map((view) => {
+        const isSelected = selected === view;
+        const enabled = allowed.includes(view);
+        const reason = lockReason(view);
+        return (
+          <button
+            key={view}
+            type="button"
+            className={isSelected ? "active" : ""}
+            style={HIT}
+            aria-pressed={isSelected}
+            // Devre dışı görünüm klavye sırasına girmez; neden ikon + gizli metinle taşınır.
+            disabled={!enabled}
+            aria-disabled={!enabled}
+            title={enabled ? undefined : reason}
+            onClick={() => onSelect(view)}
+          >
+            {icons ? <>{view === "back" ? <IconBodyBack /> : <IconBodyFront />} </> : null}
+            {VIEW_SHORT[view]}
+            <SelectedMark on={isSelected} />
+            {!enabled && (
+              <span className="view-locked" aria-hidden="true">
+                <IconLock width={13} height={13} />
+              </span>
+            )}
+            {!enabled && <span className="sr-only"> — {reason}</span>}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
 function rangeVolume(target: unknown): number {
   if (!target || typeof target !== "object" || !("value" in target)) return 0;
   return Number((target as { value: string }).value) / 100;
@@ -213,37 +264,12 @@ export function Toolbar({
           })}
         </div>
         <div className="tool-sep" />
-        <div className="view-toggle" role="group" aria-label="Gövde görünümü">
-          {shownViews.map((view) => {
-            const selected = state.view === view;
-            const enabled = allowedViews.includes(view);
-            const label = VIEW_SHORT[view];
-            const reason = viewLockReason(view);
-            return (
-              <button
-                key={view}
-                type="button"
-                className={selected ? "active" : ""}
-                style={HIT}
-                aria-pressed={selected}
-                // Devre dışı görünüm klavye sırasına girmez; neden ikon + gizli metinle taşınır.
-                disabled={!enabled}
-                aria-disabled={!enabled}
-                title={enabled ? undefined : reason}
-                onClick={() => performToolbar(ports, { kind: "view", view })}
-              >
-                {view === "back" ? <IconBodyBack /> : <IconBodyFront />} {label}
-                <SelectedMark on={selected} />
-                {!enabled && (
-                  <span className="view-locked" aria-hidden="true">
-                    <IconLock width={13} height={13} />
-                  </span>
-                )}
-                {!enabled && <span className="sr-only"> — {reason}</span>}
-              </button>
-            );
-          })}
-        </div>
+        <ViewToggle
+          views={shownViews}
+          allowed={allowedViews}
+          selected={state.view}
+          onSelect={(view) => performToolbar(ports, { kind: "view", view })}
+        />
         <div className="tool-sep" />
         <div className="vol-group">
           <input

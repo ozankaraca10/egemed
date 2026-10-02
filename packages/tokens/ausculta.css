@@ -11,4 +11,15 @@
   --green-700: var(--green-600);
   --orange-50: var(--orange-100);
   --amber-900: var(--ink-800);
+  /* T309: öğrenme modu yeniden tasarımı (depo sahibi onaylı maket) — Ausculta camgöbeği. */
+  --aus-500: #0e9384;
+  --aus-700: #0b6b60;
+  --aus-900: #08423b;
+  --aus-50: #e0f5f2;
+  --aus-wave: #5eead4;
+  --aus-gold-50: #fff3d6;
+  --aus-gold-500: #f5a524;
+  --aus-player-a: #071a33;
+  --aus-player-b: #0b2447;
+  --aus-player-bg: #061529;
 }

@@ -1,7 +1,6 @@
 import { useAudience, useChallenge, useRequestSignIn, useSessions } from "../ui/ScreenHeading";
 import { createContext, useContext, useEffect, useMemo, useRef, useState, type JSX, type ReactNode } from "react";
 import { VISITOR_LOCK_TEXT } from "@egemed/sim-host";
-import { countUnlistenedInOtherView, otherViewHintText } from "../core/flow";
 import { useLearnGate, useStartMode } from "../core/LearnGate";
 import { LEARN_EXAMPLE_SECONDS, challengeLearnLockText, exampleKey, listenedKeyOnPlay } from "../core/learnLock";
 import { resolveLibrarySoundEx, type LibrarySoundResult } from "../core/resolver";
@@ -14,15 +13,14 @@ import { learnAbout, LEARN_REFS, URGENT_KEYS } from "../data/learnContent";
 import { clipRecord, exampleClipFor, learnExamples, waveForSound, type LearnExample } from "../data/learnSets";
 import { FIRST_LIBRARY_ITEM, LIBRARY_GROUPS, findLibraryItem } from "../data/library";
 import sourcesData from "../data/sources.json";
-import { libraryShortTitle, librarySub, libraryTitle } from "../data/terminology";
+import { libraryShortTitle, libraryTitle } from "../data/terminology";
 import { LearnWave } from "../ui/LearnWave";
 import { PatientStage, StageAudioProvider, type StageAudio, type StageHandle } from "../ui/PatientStage";
 import type { BodyType } from "../ui/patient-stage/geometry";
 import { PediatricRefModal } from "../ui/PediatricRefModal";
-import { RegionChipList } from "../ui/RegionChips";
-import { Toolbar, ToolbarAudioProvider, VIEW_LABEL, type ToolbarAudio } from "../ui/Toolbar";
+import { ToolbarAudioProvider, VIEW_LABEL, ViewToggle, type ToolbarAudio } from "../ui/Toolbar";
 import { EcgDeco, Footer } from "../ui/chrome";
-import { IconArrowRight, IconCompare, IconHeart, IconInfo, IconLock, IconLungs } from "../ui/icons";
+import { IconArrowRight, IconCompare, IconInfo, IconLock } from "../ui/icons";
 
 /** Öğrenme modu (T307, depo sahibi onayı 2 Eki 2026): konu başına önce çok noktalı
  *  sentetik set, ardından bulgunun en çok noktada duyulduğu gerçek hastalar. Konu,
@@ -111,7 +109,7 @@ export function LearnScreen({
   env = NOOP_LEARN_ENV,
   audio,
 }: LearnScreenProps): JSX.Element {
-  const { state, dispatch } = useStore();
+  const { state, dispatch, bus } = useStore();
   const contextual = useContext(LearnAudioContext);
   const engine = audio ?? contextual ?? NOOP_LEARN_AUDIO;
   const audience = useAudience();
@@ -129,6 +127,7 @@ export function LearnScreen({
   const [layer, setLayer] = useState<"heart" | "lung">("heart");
   const stageRef = useRef<StageHandle>(null);
   const [activePoint, setActivePoint] = useState<string | null>(null);
+  const [playing, setPlaying] = useState(false);
   const [pedModalOpen, setPedModalOpen] = useState(false);
   const [lockNotice, setLockNotice] = useState(false);
   const initialFocus = useRef(state.learnFocusKey);
@@ -203,19 +202,20 @@ export function LearnScreen({
   const activeFallback = activeLibrary?.fallbackFrom;
   const fallbackPoint = activeFallback ? POINT_BY_ID.get(activeFallback) : undefined;
   const activeLungComponent = activeLibrary?.lungComponentOf !== undefined;
-  const otherHint = otherViewHintText(
-    view,
-    countUnlistenedInOtherView(POINTS, pointIds, view, state.telemetry.visits),
-  );
   const exampleSeconds = (index: number): number => gate.seconds.get(exampleKey(item.key, index)) ?? 0;
   const exampleDone = (index: number): boolean => exampleSeconds(index) >= LEARN_EXAMPLE_SECONDS;
   const doneExamples = examples.filter((_, index) => exampleDone(index)).length;
   const seconds = Math.floor(exampleSeconds(exIndex));
   const done = gate.listened.has(item.key);
 
-  const waveSound = activePoint ? soundFor(activePoint) : null;
+  // Maket (T309): oynatıcı boş kalmaz — stetoskop yerleşmeden önce bu görünümün ilk
+  // (kalpte mitral) odağının kaydı önizlenir; ▶ Dinle stetoskobu oraya yerleştirir.
+  const viewPointIds = stagePointIds.filter((id) => POINT_BY_ID.get(id)?.view === view);
+  const previewPoint = viewPointIds.includes("cardiac_mitral") ? "cardiac_mitral" : (viewPointIds[0] ?? null);
+  const shownPoint = activePoint ?? previewPoint;
+  const waveSound = shownPoint ? soundFor(shownPoint) : null;
   const wave = waveSound ? waveForSound(waveSound) : null;
-  const activeLabel = activePoint ? POINT_BY_ID.get(activePoint)?.fullLabel : undefined;
+  const activeLabel = shownPoint ? POINT_BY_ID.get(shownPoint)?.fullLabel : undefined;
   const markSource = example.kind === "library" ? null : SOURCE_TITLE.get(example.source) ?? example.source;
   const about = learnAbout(item);
   const refs = (about.refs ?? (isHeart ? ["accVhd", "escVhd"] : isMixed ? ["accVhd", "ers"] : ["ers", "bohadana"]))
@@ -227,7 +227,25 @@ export function LearnScreen({
     setExampleIndex(0);
     setLayer("heart");
     setActivePoint(null);
+    setPlaying(false);
   };
+  const selectView = (next: PatientView) => {
+    dispatch({ type: "setView", view: next });
+    bus.emit({ type: "view_changed", view: next });
+    setActivePoint(null);
+    setPlaying(false);
+  };
+  const togglePlay = () => {
+    if (playing) {
+      stageRef.current?.stop();
+      return;
+    }
+    // Yeniden yerleştirme sahnenin kendi çalma akışını başlatır (dinleme süresi sayılır).
+    const target = activePoint ?? previewPoint;
+    if (target) stageRef.current?.placeAt(target);
+  };
+  const groupLabel = isMixed ? "Kombine sesler" : isHeart ? "Kalp sesleri" : "Akciğer sesleri";
+  const figure = bodyType === "kadin" ? "Kadın" : "Erkek";
 
   return (
     <StageAudioProvider engine={engine}>
@@ -235,10 +253,6 @@ export function LearnScreen({
         <EcgDeco embedded={embedded} />
         <div className="screen" style={{ position: "relative", zIndex: 1 }}>
           <div className="container tall screen-body no-scroll learn-body">
-            {/* T209: öğrenme tamamlanma göstergesi (kilidin ilerleme metni). */}
-            <p className="learn-progress" role="status">
-              {gate.progressText}
-            </p>
             {challengeLocked ? (
               <p className="lib-lock-notice challenge-lock-notice" role="status">
                 <IconLock width={14} height={14} aria-hidden="true" />{" "}
@@ -246,9 +260,11 @@ export function LearnScreen({
               </p>
             ) : null}
             <div className="learn-grid">
-              <div className="lib-col">
-                <h2>{isMixed ? "Kombine Sesler" : isHeart ? "Kalp Sesleri" : "Akciğer Sesleri"}</h2>
-                <p className="lib-sub">Dinle, tanı, öğren.</p>
+              <nav className="lib-col" aria-label="Ses konuları">
+                {/* T209: öğrenme tamamlanma göstergesi (kilidin ilerleme metni). */}
+                <h2 className="lib-head" role="status" aria-label={gate.progressText}>
+                  Konular · {gate.listenedCount}/{gate.total}
+                </h2>
                 {isVisitor && lockNotice ? (
                   <p className="lib-lock-notice" role="status">
                     <IconLock width={14} height={14} aria-hidden="true" /> {VISITOR_LOCK_TEXT.itemLocked}
@@ -257,7 +273,6 @@ export function LearnScreen({
                 {LIBRARY_GROUPS.map((group) => (
                   <div className="lib-group" key={group.id}>
                     <div className="g-title">
-                      <GroupIcon group={group.id} />
                       {group.title}
                       <span className="g-count">
                         {group.items.filter((entry) => gate.listened.has(entry.key)).length}/{group.items.length}
@@ -275,6 +290,7 @@ export function LearnScreen({
                             className={["lib-item", entry.key === selectedKey ? "active" : "", locked ? "locked" : "", listened ? "listened" : ""]
                               .filter(Boolean)
                               .join(" ")}
+                            aria-current={entry.key === selectedKey ? "true" : undefined}
                             aria-disabled={locked}
                             aria-label={locked ? `${libraryTitle(entry.key)} — ${VISITOR_LOCK_TEXT.itemLocked}` : undefined}
                             onClick={() => {
@@ -287,37 +303,24 @@ export function LearnScreen({
                             }}
                             title={locked ? VISITOR_LOCK_TEXT.itemLocked : libraryTitle(entry.key)}
                           >
-                            <span className="ic">
-                              <GroupIcon group={group.id} />
+                            <span className={`ck${listened ? " done" : ""}`} aria-hidden="true">
+                              {listened ? "✓" : ""}
                             </span>
-                            <span className="lib-main">
-                              <b>{libraryShortTitle(entry.key)}</b>
-                              <span>{librarySub(entry.key)}</span>
-                            </span>
-                            <span className="lib-right">
-                              {urgent ? <span className="lib-urgent">Acil</span> : null}
-                              {listened ? (
-                                <span className="lib-done" aria-label="dinlendi" title="dinlendi">
-                                  ✓
-                                </span>
-                              ) : null}
-                              {locked ? (
-                                <IconLock width={14} height={14} aria-hidden="true" />
-                              ) : (
-                                <span className="chev">›</span>
-                              )}
-                            </span>
+                            <b>{libraryShortTitle(entry.key)}</b>
+                            {listened ? <span className="sr-only"> — dinlendi</span> : null}
+                            {urgent ? <span className="lib-urgent">Acil</span> : null}
+                            {locked ? <IconLock width={14} height={14} aria-hidden="true" /> : null}
                           </button>
                         );
                       })}
                     </div>
                   </div>
                 ))}
-              </div>
+              </nav>
 
-              <div className="sim-main">
+              <section className="sim-main" aria-label="Manken ve hasta">
                 <div className="learn-head">
-                  <span className="learn-eb">{isMixed ? "Kombine sesler" : isHeart ? "Kalp sesleri" : "Akciğer sesleri"}</span>
+                  <span className="learn-eb">{groupLabel}</span>
                   <h3 className="learn-title">{libraryTitle(item.key)}</h3>
                   <div className="learn-pills">
                     {URGENT_KEYS.has(item.key) ? <span className="lp urgent">⚠ Acil</span> : null}
@@ -336,8 +339,8 @@ export function LearnScreen({
                     </i>
                   </div>
                 </div>
-                {/* T206: masaüstünde sahne, `data-view` ile seçilen gövde görselinin
-                    en-boy oranında kalır (CSS: .learn-grid .stage-card .stage). */}
+                {/* T206/T309: sahne, `data-view` ile seçilen gövde görselinin en-boy
+                    oranında; görünüm ve katman düğmeleri maketteki gibi sahnenin üstünde. */}
                 <div className="stage-card" data-view={view}>
                   <PatientStage
                     key={`${item.key}:${exampleIndex}`}
@@ -360,7 +363,19 @@ export function LearnScreen({
                       const key = listenedKeyOnPlay(true, pointId, item.key, pointIds);
                       if (key !== null) gate.addListen(key, exIndex, ms);
                     }}
-                    onPlayingChange={(_playing, pointId) => setActivePoint(pointId)}
+                    onPlayingChange={(isPlaying, pointId) => {
+                      setPlaying(isPlaying);
+                      setActivePoint(pointId);
+                    }}
+                  />
+                  <ViewToggle
+                    className="stage-views"
+                    views={VIEW_ORDER}
+                    allowed={views}
+                    selected={view}
+                    onSelect={selectView}
+                    icons={false}
+                    lockReason={(entry) => `Bu örnekte ${VIEW_LABEL[entry].toLocaleLowerCase("tr")} kayıt yok`}
                   />
                   {isMixed && view === "front" ? (
                     <div className="layer-toggle" role="group" aria-label="Oskültasyon katmanı">
@@ -371,33 +386,24 @@ export function LearnScreen({
                       ))}
                     </div>
                   ) : null}
-                  <RegionChipList
-                    points={POINTS}
-                    view={view}
-                    pointIds={stagePointIds}
-                    activePoint={activePoint}
-                    visits={state.telemetry.visits}
-                    onSelect={(pointId) => stageRef.current?.placeAt(pointId)}
-                    {...(otherHint ? { otherViewHint: otherHint } : {})}
-                  />
-                  {activeLungComponent && (
-                    <div className="note-strip" style={{ marginTop: 8 }}>
-                      <IconInfo width={17} height={17} />
-                      <span className="small">
-                        Sırtta kalp sesleri zayıf duyulur; bu noktada yalnız akciğer bileşeni dinletilir.
-                      </span>
-                    </div>
-                  )}
-                  {activeFallback && fallbackPoint && (
-                    <div className="note-strip" style={{ marginTop: 8 }}>
-                      <IconInfo width={17} height={17} />
-                      <span className="small">
-                        Bu bölge için doğrudan kayıt yok; aynı bulgunun <strong>{fallbackPoint.fullLabel}</strong> kaydı çalınmaktadır.
-                      </span>
-                    </div>
-                  )}
+                  <span className="stage-fig">Figür: {figure}</span>
                 </div>
-                <Toolbar stageRef={stageRef} activePoint={activePoint} allowedViews={views} />
+                {activeLungComponent && (
+                  <div className="note-strip">
+                    <IconInfo width={17} height={17} />
+                    <span className="small">
+                      Sırtta kalp sesleri zayıf duyulur; bu noktada yalnız akciğer bileşeni dinletilir.
+                    </span>
+                  </div>
+                )}
+                {activeFallback && fallbackPoint && (
+                  <div className="note-strip">
+                    <IconInfo width={17} height={17} />
+                    <span className="small">
+                      Bu bölge için doğrudan kayıt yok; aynı bulgunun <strong>{fallbackPoint.fullLabel}</strong> kaydı çalınmaktadır.
+                    </span>
+                  </div>
+                )}
                 <div className="learn-examples">
                   <div className="learn-lbl">Örnekler</div>
                   <div className="ex-row" role="group" aria-label="Örnek seçimi">
@@ -413,9 +419,17 @@ export function LearnScreen({
                           onClick={() => {
                             setExampleIndex(index);
                             setActivePoint(null);
+                            setPlaying(false);
                           }}
                         >
-                          {entry.kind === "real" ? `Gerçek ${ordinal} · ${regions} bölge` : "Sentetik"}
+                          {entry.kind === "real" ? (
+                            <>
+                              Gerçek {ordinal}
+                              <small>{regions} bölge</small>
+                            </>
+                          ) : (
+                            "Sentetik"
+                          )}
                           {exampleDone(index) ? <span className="ex-done"> ✓<span className="sr-only"> dinlendi</span></span> : null}
                         </button>
                       );
@@ -427,74 +441,106 @@ export function LearnScreen({
                       : `Bu bulgu için açık veri kümelerinde bölge etiketli gerçek hasta kaydı yok; yalnız sentetik set (en az ${LEARN_EXAMPLE_SECONDS} sn dinleyin).`}
                   </p>
                 </div>
-                <PatientCard example={example} ordinal={realOrdinal} regions={pointIds.length} />
-              </div>
+                <PatientCard example={example} ordinal={realOrdinal} regions={pointIds.length} figure={figure} />
+              </section>
 
-              <div className="sim-side">
+              <section className="sim-side" aria-label="Kayıt ve açıklama">
                 <LearnWave
                   title={activeLabel ? `${libraryShortTitle(item.key)} · ${activeLabel}` : libraryShortTitle(item.key)}
                   meta={wave ? `${Math.round(wave.durationSec)} sn · ${example.kind === "real" ? "gerçek hasta" : "sentetik"}` : ""}
                   wave={wave}
                   markSource={markSource}
                   emptyText="Stetoskobu bir oskültasyon bölgesine sürükleyin; çalan kaydın dalga formu burada görünür."
-                />
-                <section className="learn-about" aria-labelledby="learn-about-title">
-                  <div className="la-head">
-                    <h3 id="learn-about-title">{libraryTitle(item.key)}</h3>
-                    <span className="learn-lbl">Bu ses hakkında</span>
-                    <button type="button" className="btn outline small ped-ref-btn" onClick={() => setPedModalOpen(true)}>
-                      <IconInfo width={14} height={14} /> Pediatrik referans
-                    </button>
-                  </div>
-                  {about.urgent ? <p className="la-alert">{about.urgent}</p> : null}
-                  <div className="la-card">
-                    <div className="learn-lbl">Tanım ve ölçüt</div>
-                    <p className="la-crit">{about.crit}</p>
-                  </div>
-                  <div className="la-card">
-                    <div className="learn-lbl">Bu kayıtta dinleyin</div>
-                    <ul className="la-look">
-                      {about.look.map((line) => (
-                        <li key={line}>{line}</li>
-                      ))}
-                    </ul>
-                  </div>
-                  <div className="la-card">
-                    <div className="learn-lbl">Neden oluşur?</div>
-                    <p className="la-mech">{about.mech}</p>
-                  </div>
-                  <p className="la-refs">
-                    <span>Kaynak:</span>
-                    {refs.map((ref) => (
-                      <a key={ref.doi} href={`https://doi.org/${ref.doi}`} target="_blank" rel="noopener noreferrer" title={ref.title}>
-                        {ref.label}
-                      </a>
-                    ))}
-                  </p>
-                  <p className="src-line">
-                    <IconCompare />
-                    Vaka kapsamı: {cov.p > 0 ? `${cov.p} uygulama vakası` : "vaka yok"}
-                    {cov.a > 0 ? `, ${cov.a} değerlendirme vakası` : ""}
-                  </p>
-                  {cov.p > 0 && (
+                  controls={
                     <>
                       <button
                         type="button"
-                        className="btn outline small mb-12"
+                        className="lw-play"
+                        aria-pressed={playing}
+                        disabled={shownPoint === null}
+                        onClick={togglePlay}
+                      >
+                        {playing ? "❚❚ Durdur" : "▶ Dinle"}
+                      </button>
+                      <span className="lw-lbl" id="learn-head-lbl">
+                        Göğüs başlığı
+                      </span>
+                      <div className="lw-seg" role="group" aria-labelledby="learn-head-lbl">
+                        {(["bell", "diaphragm"] as const).map((entry) => (
+                          <button
+                            key={entry}
+                            type="button"
+                            aria-pressed={state.head === entry}
+                            title={entry === "bell" ? "Bell — düşük frekans vurgusu" : "Diyafram — orta/yüksek frekans vurgusu"}
+                            onClick={() => dispatch({ type: "setHead", head: entry })}
+                          >
+                            {entry === "bell" ? "Bell" : "Diyafram"}
+                          </button>
+                        ))}
+                      </div>
+                    </>
+                  }
+                />
+                <section className="learn-about" aria-labelledby="learn-about-title">
+                  <div className="la-head">
+                    <span className="learn-eb">{groupLabel}</span>
+                    <h3 id="learn-about-title">{libraryTitle(item.key)}</h3>
+                    <span className="learn-lbl la-tag">Bu ses hakkında</span>
+                  </div>
+                  {about.urgent ? <p className="la-alert">{about.urgent}</p> : null}
+                  <div className="la-grid">
+                    <div className="la-card">
+                      <div className="learn-lbl">Tanım ve ölçüt</div>
+                      <p className="la-crit">{about.crit}</p>
+                      <p className="la-refs">
+                        <span>Kaynak:</span>
+                        {refs.map((ref) => (
+                          <a key={ref.doi} href={`https://doi.org/${ref.doi}`} target="_blank" rel="noopener noreferrer" title={ref.title}>
+                            {ref.label}
+                          </a>
+                        ))}
+                      </p>
+                    </div>
+                    <div className="la-card">
+                      <div className="learn-lbl">Bu kayıtta dinleyin</div>
+                      <ul className="la-look">
+                        {about.look.map((line) => (
+                          <li key={line}>{line}</li>
+                        ))}
+                      </ul>
+                    </div>
+                    <div className="la-card">
+                      <div className="learn-lbl">Neden oluşur?</div>
+                      <p className="la-mech">{about.mech}</p>
+                    </div>
+                  </div>
+                  <div className="la-actions">
+                    <p className="src-line">
+                      <IconCompare />
+                      Vaka kapsamı: {cov.p > 0 ? `${cov.p} uygulama vakası` : "vaka yok"}
+                      {cov.a > 0 ? `, ${cov.a} değerlendirme vakası` : ""}
+                    </p>
+                    <button type="button" className="btn outline small ped-ref-btn" onClick={() => setPedModalOpen(true)}>
+                      <IconInfo width={14} height={14} /> Pediatrik referans
+                    </button>
+                    {cov.p > 0 && (
+                      <button
+                        type="button"
+                        className="btn outline small"
                         onClick={() => (isVisitor ? requestSignIn?.() : startPracticeForFinding())}
                         disabled={practiceDisabled}
                       >
                         Bu sesle uygulama yap <IconArrowRight width={14} height={14} />
                       </button>
-                      {isVisitor || practiceLocked ? (
-                        <p className="lib-lock-notice" role="status">
-                          <IconLock width={14} height={14} aria-hidden="true" /> {practiceLockText}
-                        </p>
-                      ) : null}
-                    </>
-                  )}
+                    )}
+                  </div>
+                  {cov.p > 0 && (isVisitor || practiceLocked) ? (
+                    <p className="lib-lock-notice" role="status">
+                      <IconLock width={14} height={14} aria-hidden="true" /> {practiceLockText}
+                    </p>
+                  ) : null}
                 </section>
-              </div>
+              </section>
             </div>
           </div>
         </div>
@@ -505,7 +551,7 @@ export function LearnScreen({
   );
 }
 
-function PatientCard({ example, ordinal, regions }: { example: LearnExample; ordinal: number; regions: number }): JSX.Element {
+function PatientCard({ example, ordinal, regions, figure }: { example: LearnExample; ordinal: number; regions: number; figure: string }): JSX.Element {
   if (example.kind === "real") {
     return (
       <div className="patient-card">
@@ -544,8 +590,12 @@ function PatientCard({ example, ordinal, regions }: { example: LearnExample; ord
           <dd>{example.kind === "model" ? "Bölgesel yayılım modeli, çok bölgeli" : "Klinik manken (HLS-CMDS), çok bölgeli"}</dd>
         </div>
         <div className="pc-row">
-          <dt>Dinlenebilir bölge</dt>
-          <dd>{regions}</dd>
+          <dt>Dinlenebilir odak</dt>
+          <dd>{regions} bölge</dd>
+        </div>
+        <div className="pc-row">
+          <dt>Figür</dt>
+          <dd>{figure}</dd>
         </div>
       </dl>
       {example.kind === "model" ? <p className="pc-note">{example.note}</p> : null}
@@ -565,10 +615,4 @@ function VIEW_SUMMARY(example: Extract<LearnExample, { kind: "real" }>): string 
   return VIEW_ORDER.filter((entry) => counts.has(entry))
     .map((entry) => `${VIEW_LABEL[entry].toLocaleLowerCase("tr")} ${counts.get(entry)}`)
     .join(" · ");
-}
-
-function GroupIcon({ group, size = 17 }: { group: string; size?: number }): JSX.Element {
-  if (group === "heart") return <IconHeart width={size} height={size} />;
-  if (group === "mixed") return <IconCompare width={size} height={size} />;
-  return <IconLungs width={size} height={size} />;
 }
