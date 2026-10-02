@@ -11,7 +11,7 @@ import {
 } from "@egemed/gamification-core";
 import { OPACA_RULES } from "./rules";
 
-export interface DemoPeer {
+interface DemoPeer {
   id: string;
   displayName: string | null;
   public: boolean;
@@ -75,7 +75,7 @@ const MAX_ATTEMPTS_BY_PERIOD: Record<Period, number> = {
   academic_year: 40,
 };
 
-export interface DemoPeerPeriodRow {
+interface DemoPeerPeriodRow {
   periodScore: number | null;
   attemptsCount: number;
   reachedAt: string | null;

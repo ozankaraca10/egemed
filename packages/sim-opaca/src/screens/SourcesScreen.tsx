@@ -85,7 +85,7 @@ export interface SourcesScreenProps {
 }
 
 /** Eski Hakkında içeriği (mağazasız): sim içi Kaynaklar ekranı ve kabuğun `#/hakkinda` sayfası ortak kullanır. */
-export function OpacaAboutContent(): JSX.Element {
+function OpacaAboutContent(): JSX.Element {
   const counts = datasetCounts()
   return (
     <>

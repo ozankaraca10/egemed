@@ -36,4 +36,4 @@ export function useLearnGamiPort(): LearnGamiPort {
   );
 }
 
-export { getGamiRepo, isLocalRepo };
+export { getGamiRepo };

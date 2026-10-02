@@ -54,7 +54,7 @@ export function initials(name: string): string {
   return letters.map((ch) => ch!.toLocaleUpperCase("tr-TR")).join("");
 }
 
-export interface LocalRepoOptions {
+interface LocalRepoOptions {
   lmsStudentName?: string | null;
   stateOverride?: OpacaGamiState;
 }

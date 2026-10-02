@@ -75,12 +75,6 @@ export function canStartMode(mode: Mode, complete: boolean): boolean {
   return mode === "learn" || complete;
 }
 
-/** Görüntü gerçekten yüklendiğinde (film görüntüleyicide göründüğünde) öğe "açıldı"
- *  sayılır; yalnız listeden seçmek yetmez. */
-export function openedKeyOnImageReady(imageReady: boolean, itemKey: string): string | null {
-  return imageReady ? itemKey : null;
-}
-
 export interface LearnCompletionNotifier {
   /** Yerel küme tamamlandığı ilk anda host portuna bir kez yazar; hata sessizce yutulur
    *  (yeniden deneme bir sonraki açılışta, yeni notifier ile). */

@@ -93,7 +93,7 @@ export function caseResult(index = 1, overrides: Partial<SimCaseResult> = {}): S
   };
 }
 
-export interface FakeSessions extends SimSessionSource {
+interface FakeSessions extends SimSessionSource {
   readonly calls: string[];
   results: SimCaseResult[];
   finished: boolean;

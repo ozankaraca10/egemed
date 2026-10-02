@@ -1,6 +1,6 @@
 /** Avatar tonu (tasarım promptu K-A2). */
 
-export type AvatarTone = "t-blue" | "t-purple" | "t-green" | "t-amber" | "t-anon";
+type AvatarTone = "t-blue" | "t-purple" | "t-green" | "t-amber" | "t-anon";
 const TONES: AvatarTone[] = ["t-blue", "t-purple", "t-green", "t-amber"];
 
 export function avatarTone(id: string, anonymous = false): AvatarTone {

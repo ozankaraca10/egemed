@@ -8,7 +8,7 @@
 
 import type { SimRewardsSnapshot, SimRewardsSource } from "@egemed/sim-host";
 
-export interface RewardsTracker {
+interface RewardsTracker {
   /** Son bilinen ödül anlık görüntüsü; kanal yoksa/henüz gelmediyse null. */
   snapshot(): SimRewardsSnapshot | null;
   /** Kanal değişiminde çağrılır; dönüş aboneliği kaldırır. */

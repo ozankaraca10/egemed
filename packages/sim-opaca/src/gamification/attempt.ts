@@ -34,7 +34,7 @@ function hash(s: string): string {
   return (h >>> 0).toString(36);
 }
 
-export interface AttemptInput {
+interface AttemptInput {
   mode: GamiMode;
   results: CaseResult[];
   caseById: (id: string) => CaseDef | undefined;

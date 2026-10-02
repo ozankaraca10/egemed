@@ -1,7 +1,7 @@
 import type { JSX, ReactNode } from "react";
 import { useEmbedded } from "../EmbeddedContext";
 
-export interface ScreenHeadingProps {
+interface ScreenHeadingProps {
   readonly className?: string;
   readonly id?: string;
   readonly children: ReactNode;
@@ -24,7 +24,7 @@ export function ScreenHeading({ className, id, children }: ScreenHeadingProps): 
   );
 }
 
-export interface SectionHeadingProps {
+interface SectionHeadingProps {
   readonly className?: string;
   readonly id?: string;
   readonly children: ReactNode;
