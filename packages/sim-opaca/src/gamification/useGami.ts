@@ -20,7 +20,7 @@ import { computeStats, type OpacaStats } from "./stats";
 import { emptyState, type OpacaGamiState } from "./storage";
 import type { LeaderboardView } from "./types";
 
-export interface GamiView {
+interface GamiView {
   state: OpacaGamiState;
   stats: OpacaStats;
   level: LevelInfo;

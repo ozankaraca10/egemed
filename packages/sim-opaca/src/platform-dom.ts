@@ -1,16 +1,16 @@
 /** DOM yüzeyi — kök tsconfig DOM lib içermediğinden globalThis üzerinden erişilir. */
 
-export interface Focusable {
+interface Focusable {
   focus(): void;
 }
 
-export interface ScrollTarget {
+interface ScrollTarget {
   scrollIntoView(options?: { behavior?: string; block?: string }): void;
   focus(options?: { preventScroll?: boolean }): void;
   querySelector<T = unknown>(selector: string): T | null;
 }
 
-export interface DocLike {
+interface DocLike {
   getElementById(id: string): ScrollTarget | null;
   activeElement: Focusable | null;
   addEventListener(type: string, handler: (event: KeyLike) => void): void;
@@ -18,24 +18,15 @@ export interface DocLike {
   querySelectorAll<T = unknown>(selector: string): T[];
 }
 
-export interface KeyLike {
+interface KeyLike {
   key: string;
   shiftKey: boolean;
   preventDefault(): void;
 }
 
-export interface StorageLike {
+interface StorageLike {
   getItem(key: string): string | null;
   setItem(key: string, value: string): void;
-}
-
-export interface ResizeEntry {
-  contentRect: { width: number };
-}
-
-export interface ResizeObserverLike {
-  observe(target: unknown): void;
-  disconnect(): void;
 }
 
 export function documentLike(): DocLike | undefined {
@@ -59,14 +50,6 @@ export function searchParam(search: string, key: string): string | null {
     if (k === key) return decodeURIComponent(eq === -1 ? "" : part.slice(eq + 1));
   }
   return null;
-}
-
-export function createResizeObserver(
-  handler: (entries: ResizeEntry[]) => void,
-): ResizeObserverLike | null {
-  const Ctor = (globalThis as { ResizeObserver?: new (h: (entries: ResizeEntry[]) => void) => ResizeObserverLike })
-    .ResizeObserver;
-  return Ctor ? new Ctor(handler) : null;
 }
 
 export function locationSearch(): string {

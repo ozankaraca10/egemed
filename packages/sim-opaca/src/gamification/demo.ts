@@ -74,11 +74,11 @@ function replayEarned(state: OpacaGamiState): EarnedBadge[] {
   return earned;
 }
 
-export function demoStateEmpty(): OpacaGamiState {
+function demoStateEmpty(): OpacaGamiState {
   return emptyState();
 }
 
-export function demoStateFull(now: Date): OpacaGamiState {
+function demoStateFull(now: Date): OpacaGamiState {
   const rng = mulberry32(seedFromString("opaca-demo-full"));
   const attempts: OpacaAttemptRecord[] = [];
   const assessmentOffsets = [0, 1, 2, ...Array.from({ length: 25 }, (_, i) => 5 + i * 3)];
@@ -157,7 +157,7 @@ export function demoStateFull(now: Date): OpacaGamiState {
   return state;
 }
 
-export function demoStateWinner(now: Date): OpacaGamiState {
+function demoStateWinner(now: Date): OpacaGamiState {
   const rng = mulberry32(seedFromString("opaca-demo-winner"));
   const thisMonthStart = startOfMonthTr(now);
   const prevMonthAnchor = new Date(thisMonthStart.getTime() - DAY_MS);

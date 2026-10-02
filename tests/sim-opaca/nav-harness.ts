@@ -60,7 +60,7 @@ function sameDeps(previous: readonly unknown[] | null, next: readonly unknown[] 
   return previous.every((value, index) => Object.is(value, next[index]));
 }
 
-export interface HookHarness {
+interface HookHarness {
   /** Son render'ın kök elemanı (ör. StoreContext.Provider). */
   readonly tree: unknown;
   /** Yeniden render eder (bağımlılığı değişmeyen effect'ler koşmaz). */

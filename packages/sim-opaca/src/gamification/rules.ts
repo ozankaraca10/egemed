@@ -3,7 +3,7 @@
 
 import { DEFAULT_RULES, type GamiRules } from "@egemed/gamification-core";
 
-export interface OpacaBadgeRules {
+interface OpacaBadgeRules {
   sharpEye: readonly [number, number, number];
   filmQuality: number;
   interpreter: number;
@@ -23,7 +23,7 @@ export interface OpacaBadgeRules {
   noHintsCaseMin: number;
 }
 
-export interface OpacaGamiRules extends GamiRules {
+interface OpacaGamiRules extends GamiRules {
   badges: OpacaBadgeRules;
   storage: {
     key: string;
