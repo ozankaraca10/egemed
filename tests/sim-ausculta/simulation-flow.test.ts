@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { CASE_FLASH_MS, CASE_TRANSITION_MS, computeQuestionLatency, isAnswerCorrect, planAssessmentAutoAdvance, questionCursor, shouldStartCaseTransition, showCaseEndCard } from "../../packages/sim-ausculta/src/index";
+import { CASE_FLASH_MS, CASE_TRANSITION_MS, computeQuestionLatency, planAssessmentAutoAdvance, questionCursor, shouldStartCaseTransition, showCaseEndCard } from "../../packages/sim-ausculta/src/index";
 import type { CaseResult, Question, ScoringWeights } from "../../packages/sim-ausculta/src/index";
 
 /** S15a — SimulationScreen akış/skor türetme. Sentetik vaka; DOM yok. */
@@ -36,10 +36,8 @@ describe("simulation-flow (S15a)", () => {
   const qs = [question("q1"), question("q2")];
   const shownAt = { q1: 100, q2: 0 };
 
-  it("imleç, doğruluk ve gecikme", () => {
+  it("imleç ve gecikme (doğruluk sunucuda: ADR-009)", () => {
     expect(questionCursor(qs, 0, { q1: ["a"] }, { q1: true })).toEqual({ question: qs[0], canSubmit: true, revealed: true });
-    expect(isAnswerCorrect(qs[0]!, ["b"])).toBe(false);
-    expect(isAnswerCorrect(question("q2", ["a", "b"]), ["a", "b"])).toBe(true);
     expect(computeQuestionLatency(qs, shownAt, 4500)).toEqual({ q1: 4400 });
   });
 

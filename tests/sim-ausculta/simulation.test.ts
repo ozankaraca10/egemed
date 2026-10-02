@@ -119,11 +119,12 @@ describe("SimulationScreen", () => {
       questions: caseDef.questions,
       revealed: false,
       canSubmit: true,
-      given: question.correct,
       shownAt: { [question.id]: 100 },
       now: 500,
     });
-    for (const action of submit.dispatches) state = reducer(state, action, seam);
+    // ADR-009: plan yalnız hangi sorunun gönderileceğini söyler; doğruluk sunucudan gelir.
+    expect(submit.submitQid).toBe(question.id);
+    state = reducer(state, { type: "submitAnswer", qid: question.id, correct: true }, seam);
     expect(state.revealed[question.id]).toBe(true);
     const last = isLastQuestion(caseDef.questions, question);
     const next = planPrimaryAction({
@@ -132,10 +133,9 @@ describe("SimulationScreen", () => {
       questions: caseDef.questions,
       revealed: true,
       canSubmit: true,
-      given: question.correct,
       shownAt: { [question.id]: 100 },
       now: 800,
     });
-    expect(next.dispatches).toEqual([last ? { type: "finishCase" } : { type: "advance" }]);
+    expect(next).toMatchObject({ submitQid: null, finish: last, advance: !last });
   });
 });

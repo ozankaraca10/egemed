@@ -77,6 +77,19 @@ describe("sunucu notlandırması", () => {
     expect(good.questions[0]?.correctOptionIds.every((id) => id.startsWith("tok_"))).toBe(true);
   });
 
+  it("O9: uygulamada her ipucu 5 puan düşürür; değerlendirmede ipucu puanı etkilemez", () => {
+    if (caseDef === undefined) throw new Error("vaka yok");
+    const { keys } = ausculta.buildPublicCase(caseDef, { index: 0, mode: "practice", openedAt: "2026-09-27T10:00:00.000+03:00", newToken, random });
+    const answers = Object.fromEntries(
+      caseDef.questions.map((q) => [q.id, q.correct.map((optionId) => Object.keys(keys.options[q.id] ?? {}).find((token) => keys.options[q.id]?.[token] === optionId) ?? "")]),
+    );
+    const grade = (mode: "practice" | "assessment", hintsUsed: number) =>
+      ausculta.gradeCase(caseDef, keys, { index: 0, mode, answers, telemetry: EMPTY_TELEMETRY, hintsUsed }).total;
+    expect(grade("practice", 0)).toBeGreaterThanOrEqual(10);
+    expect(grade("practice", 2)).toBe(grade("practice", 0) - 10);
+    expect(grade("assessment", 2)).toBe(grade("assessment", 0));
+  });
+
   it("tanınmayan jeton puan getirmez", () => {
     if (caseDef === undefined) throw new Error("vaka yok");
     const { keys } = ausculta.buildPublicCase(caseDef, { index: 1, mode: "assessment", openedAt: "2026-09-27T10:00:00.000+03:00", newToken, random });

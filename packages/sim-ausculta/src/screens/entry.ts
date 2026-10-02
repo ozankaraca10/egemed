@@ -6,11 +6,6 @@ export function resolveEntryScreen(screen: Screen, embedded: boolean): Screen {
   return screen;
 }
 
-/** Oturum tohumu. Kaynak `Date.now()` yerine enjekte `now()` kullanılır. */
-export function sessionSeed(nowMs: number): number {
-  return (nowMs % 2147483647) | 0;
-}
-
 /** T209: öğrenme tamamlanmadan uygulama/değerlendirme hedefi öğrenmedir (kilit, öneri değil). */
 export function modePickTarget(mode: Mode, learnComplete: boolean, poolReady: boolean): Mode {
   if (!learnComplete && poolReady && mode !== "learn") return "learn";

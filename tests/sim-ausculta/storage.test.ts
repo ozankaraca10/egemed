@@ -28,9 +28,14 @@ function result(earned: number): CaseResult {
 describe("en iyi puan (bestScore, StoragePort)", () => {
 
   it("practice ve assessment birbirini etkilemez", () => {
-    let s: AppState = { ...initialState, mode: "practice" };
-    s = reducer(s, { type: "setResults", results: [result(100)] });
-    s = reducer({ ...s, mode: "assessment" }, { type: "setResults", results: [result(0)] });
+    // ADR-009 (T313): oturum sonuçları sunucudan gelir (`serverFinished`).
+    const finish = (state: AppState, mode: "practice" | "assessment", total: number): AppState => {
+      const started = reducer({ ...state, mode }, { type: "serverStarted", sessionId: `s-${mode}`, mode, caseCount: 1 });
+      return reducer(started, { type: "serverFinished", results: [result(total)], metas: {} });
+    };
+    let s: AppState = initialState;
+    s = finish(s, "practice", 100);
+    s = finish(s, "assessment", 0);
     expect(s.bestScore).toEqual({ practice: 100, assessment: 0 });
   });
 

@@ -1,12 +1,13 @@
 import { describe, expect, it } from "vitest";
-import { MASTERY_THRESHOLD, aggregateResults, practiceAdjusted, scoreCase } from "../../packages/sim-ausculta/src/index";
-import { CORE_CASES, poolFor } from "./bank-cases";
-import type { Telemetry } from "../../packages/sim-ausculta/src/index";
+import { MASTERY_THRESHOLD, aggregateResults, practiceAdjusted, scoreCase } from "../../packages/assessment-bank/src/ausculta/scoring";
+import type { Telemetry } from "../../packages/assessment-bank/src/ausculta/types";
+import { caseById, poolFor } from "../../packages/assessment-bank/src/ausculta/select";
 
-/** Kaynak tests/core.test.ts:236-315 (8 test → 8 test). Tam havuz: cases.json + poolFor('assessment'). */
+/** Sunucu notlandırması (ADR-009): vaka puanı yalnız bankada hesaplanır. T313 ile istemci
+ *  kopyası silindi; kurallar buradan sınanır. Tam havuz: cases.json + poolFor('assessment'). */
 
 describe("skor hesaplama", () => {
-  const c = CORE_CASES.find((x) => x.id === "case_normal_heart");
+  const c = caseById("case_normal_heart");
   if (!c) throw new Error("case_normal_heart yok");
   const baseTelemetry: Telemetry = {
     visits: {
