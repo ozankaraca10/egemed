@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { LIBRARY_ITEM_KEYS } from "../../packages/sim-ausculta/src/index";
+import { LIBRARY_GROUPS, LIBRARY_ITEM_KEYS, resolveLibrarySoundEx } from "../../packages/sim-ausculta/src/index";
 import { clipRecord, learnExamples, waveForSound } from "../../packages/sim-ausculta/src/data/learnSets";
 import pointsData from "../../packages/sim-ausculta/src/data/auscultation-points.json" with { type: "json" };
 
@@ -35,5 +35,17 @@ describe("öğrenme örnek seti", () => {
         }
       }
     }
+  });
+
+  it("T311: kütüphane çözücüsünün çaldığı her kaydın dalga zarfı var (çalarken panel boş kalmaz)", () => {
+    const points = (pointsData as unknown as { points: { id: string; view: string }[] }).points.filter((point) => point.view === "front" || point.view === "back");
+    const missing = new Set<string>();
+    for (const item of LIBRARY_GROUPS.flatMap((group) => group.items)) {
+      for (const point of points) {
+        const { record } = resolveLibrarySoundEx(item.category, item.acousticFinding, point.id);
+        if (record && !waveForSound(record)) missing.add(record.id);
+      }
+    }
+    expect([...missing]).toEqual([]);
   });
 });
