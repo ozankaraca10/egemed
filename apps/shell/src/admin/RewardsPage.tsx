@@ -245,7 +245,7 @@ export interface ConfirmDialogProps {
   readonly onCancel: () => void;
 }
 
-export function ConfirmDialog({ open, titleKey, bodyKey, confirmKey, cancelKey, busy, errorKey, onConfirm, onCancel }: ConfirmDialogProps): JSX.Element {
+function ConfirmDialog({ open, titleKey, bodyKey, confirmKey, cancelKey, busy, errorKey, onConfirm, onCancel }: ConfirmDialogProps): JSX.Element {
   return (
     <Dialog
       footer={
@@ -343,7 +343,7 @@ export function RewardsView({
   );
 }
 
-export interface RewardsPageProps {
+interface RewardsPageProps {
   /** Testte/gelecekte gerçek API kaynağıyla değiştirmek için enjekte edilir. */
   readonly dataSource?: RewardsDataSource;
 }

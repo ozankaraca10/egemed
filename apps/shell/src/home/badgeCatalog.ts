@@ -11,7 +11,7 @@ import { AUSCULTA_BADGES, OPACA_BADGES, PULSE_BADGES } from "@egemed/gami-catalo
 import type { SimId } from "@egemed/contracts";
 
 /** Dashboard'un gösterdiği katalog tanımı kırpığı (rule/progress vb. gerekmez). */
-export interface BadgeCatalogEntry {
+interface BadgeCatalogEntry {
   readonly id: string;
   readonly name: string;
   readonly description: string;
@@ -26,10 +26,6 @@ const CATALOGS: Readonly<Record<SimId, readonly BadgeCatalogEntry[]>> = {
   opaca: OPACA_BADGES,
 };
 
-/** Simin katalog uzunluğu: "x / toplam rozet" sayacının paydası. */
-export function badgeCatalogSize(simId: SimId): number {
-  return CATALOGS[simId].length;
-}
 
 /** Anahtarı katalog tanımıyla eşler; katalogda yoksa `undefined` (sessiz atlama). */
 export function catalogBadge(simId: SimId, key: string): BadgeCatalogEntry | undefined {

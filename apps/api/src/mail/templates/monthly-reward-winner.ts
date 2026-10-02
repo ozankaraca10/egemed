@@ -6,7 +6,7 @@ import { escapeHtml, joinTextLines, renderMailLayout } from "../layout";
 import { INSTITUTION_LINE, mailColors, mailFontFamily } from "../theme";
 import type { MailRenderResult } from "../types";
 
-export interface MonthlyRewardWinnerData {
+interface MonthlyRewardWinnerData {
   readonly recipientName: string;
   readonly simName: string;
   /** 1, 2 veya 3 — ay içi sıralama. */

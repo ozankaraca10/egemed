@@ -30,7 +30,7 @@ export const gamiBadgeSchema = z.strictObject({
   awardedAt: isoDateTimeSchema,
 });
 
-export const gamiBadgeProgressSchema = z.strictObject({
+const gamiBadgeProgressSchema = z.strictObject({
   value: z.number().int().min(0),
   max: z.number().int().min(0),
 });
@@ -90,7 +90,7 @@ export const ATTEMPT_SUMMARY_MAX = 1_000_000;
 
 /** Kodlu özet: anahtar kod, değer sınırlı tam sayı; serbest metin ve ham yanıt yasak. */
 /** T149: özet en fazla bu kadar kod taşır (sim kodları ~25; depolama şişirmesine karşı). */
-export const ATTEMPT_SUMMARY_MAX_KEYS = 64;
+const ATTEMPT_SUMMARY_MAX_KEYS = 64;
 
 export const attemptSummarySchema = z
   .record(z.string().regex(CODE_PATTERN), z.number().int().min(0).max(ATTEMPT_SUMMARY_MAX))

@@ -2,7 +2,7 @@ import { useEffect, useId, useRef, type JSX, type KeyboardEvent, type ReactNode 
 import { t } from "../i18n/tr";
 
 /** DOM lib'siz kök tsc için yapısal odak tipi (Tabs.tsx deseni). */
-export interface Focusable {
+interface Focusable {
   focus(): void;
 }
 

@@ -308,7 +308,7 @@ function UsersFilterFields({ query, units, onSearchChange, onFilterChange, onSor
 
 /** Test'lerde `Dialog` (Radix Portal) DOM'suz ortamda boş çizildiği için doğrudan
  *  içe aktarılıp çağrılabilsin diye dışa açılır (T163). */
-export interface BulkEditDialogProps {
+interface BulkEditDialogProps {
   readonly open: boolean;
   readonly count: number;
   readonly units: readonly AdminUnit[];
@@ -623,7 +623,7 @@ export function UsersListView({
   );
 }
 
-export interface UsersPageProps {
+interface UsersPageProps {
   /** Testte/gelecekte gerçek API kaynağıyla değiştirmek için enjekte edilir. */
   readonly dataSource?: UsersDataSource;
   /** Geçerli oturumun kimliği; kendi hesabını toplu seçimde devre dışı bırakmak için (T150, `App.tsx` `session.actorId` geçirir). */

@@ -127,7 +127,7 @@ export function RolesView({ status, summary }: RolesViewProps): JSX.Element {
   );
 }
 
-export interface RolesPageProps {
+interface RolesPageProps {
   /** Testte/gelecekte gerçek API kaynağıyla değiştirmek için enjekte edilir. */
   readonly dataSource?: UsersDataSource;
 }

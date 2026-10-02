@@ -36,13 +36,13 @@ export function isLearnUnlocked(session: ShellSession | null | undefined): boole
 }
 
 /** Sahte depodan okunan oturumun en dar yüzeyi (`devAuth.DevSession` yapısal olarak uyar). */
-export interface DevSessionLike {
+interface DevSessionLike {
   readonly role: EntryRole;
   readonly actorId: string;
 }
 
 /** `/auth/me` rol listesinin en dar yüzeyi; sözleşme şeması `{ role }` nesneleri döner. */
-export interface ApiRoleLike {
+interface ApiRoleLike {
   readonly role: string;
 }
 
@@ -61,7 +61,7 @@ export function sessionAllowsSim(session: ShellSession | null, simId: SimId): bo
  * Sunucudaki rol listesinden kabuk rolünü seçer (E3 §b): `admin` rolü varsa
  * yönetici, yoksa öğrenci. Yetki kararı her zaman `/auth/me` yanıtına dayanır.
  */
-export function shellRoleFromApiRoles(roles: readonly ApiRoleLike[]): EntryRole {
+function shellRoleFromApiRoles(roles: readonly ApiRoleLike[]): EntryRole {
   return roles.some((entry) => entry.role === "admin") ? "admin" : "student";
 }
 

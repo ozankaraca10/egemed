@@ -76,7 +76,7 @@ export function rewardStatusFor(reward: { readonly month: string; readonly final
 }
 
 /** En yeni ay önce (liste sırası, E4 ekran maddesi 2). */
-export function sortRewardsByMonthDesc(rewards: readonly AdminReward[]): AdminReward[] {
+function sortRewardsByMonthDesc(rewards: readonly AdminReward[]): AdminReward[] {
   return [...rewards].sort((a, b) => (a.month === b.month ? 0 : a.month < b.month ? 1 : -1));
 }
 
@@ -123,7 +123,7 @@ export function rewardFormValuesFrom(reward: AdminReward): RewardFormValues {
 }
 
 /** Bir satır bir madde; boş satırlar düşer (E4 ekran maddesi 3). */
-export function termsFromText(text: string): string[] {
+function termsFromText(text: string): string[] {
   return text
     .split("\n")
     .map((line) => line.trim())

@@ -6,13 +6,13 @@ import pg from "pg";
  */
 
 /** Sorgu sonucunun uygulamaya görünen dar yüzeyi. */
-export interface DbQueryResult {
+interface DbQueryResult {
   readonly rows: unknown[];
   readonly rowCount: number | null;
 }
 
 /** Havuzun uygulamaya görünen dar yüzeyi; `app.ts` bu arayüze bağlanır. */
-export interface Db {
+interface Db {
   query(text: string, params?: readonly unknown[]): Promise<DbQueryResult>;
   /** T66 — içe aktarma `apply` tek transaction'da çalışır (E3 §d). */
   transaction<T>(work: (query: Db["query"]) => Promise<T>): Promise<T>;

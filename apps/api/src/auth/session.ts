@@ -14,14 +14,14 @@ export const SESSION_COOKIE = "egemed_session";
 export const CSRF_COOKIE = "egemed_csrf";
 export const CSRF_HEADER = "x-csrf-token";
 
-export const SESSION_TOKEN_BYTES = 32; // 256 bit
+const SESSION_TOKEN_BYTES = 32; // 256 bit
 export const DEFAULT_SESSION_IDLE_MS = 30 * 60 * 1000;
 export const DEFAULT_SESSION_ABSOLUTE_MS = 12 * 60 * 60 * 1000;
 
 const CSRF_DOMAIN_SEPARATOR = "egemed.csrf.v1:";
 
 /** En az 256 bit rastgele belirteç (base64url). */
-export function createSessionToken(): string {
+function createSessionToken(): string {
   return randomBytes(SESSION_TOKEN_BYTES).toString("base64url");
 }
 
@@ -56,13 +56,13 @@ export function safeTokenEquals(left: string, right: string): boolean {
   return diff === 0;
 }
 
-export type SessionFailure = "missing" | "unknown" | "revoked" | "expired";
+type SessionFailure = "missing" | "unknown" | "revoked" | "expired";
 
 export type SessionVerifyResult =
   | { readonly ok: true; readonly session: SessionRecord }
   | { readonly ok: false; readonly reason: SessionFailure };
 
-export interface SessionServiceOptions {
+interface SessionServiceOptions {
   readonly sessions: SessionRepo;
   readonly now: () => number;
   readonly idleMs: number;

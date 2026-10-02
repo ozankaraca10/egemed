@@ -350,7 +350,7 @@ export function UserDetailView({
   );
 }
 
-export interface UserDetailPageProps {
+interface UserDetailPageProps {
   readonly userId: string;
   /** Geçerli oturumun kimliği; kendi admin rolünü kaldırma engeli için (T73, `App.tsx` `session.actorId` geçirir). */
   readonly currentUserId?: string | null;

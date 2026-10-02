@@ -249,7 +249,7 @@ export function UserFormView({
   );
 }
 
-export interface UserFormPageProps {
+interface UserFormPageProps {
   /** Testte/gelecekte gerçek API kaynağıyla değiştirmek için enjekte edilir. */
   readonly dataSource?: UsersDataSource;
 }

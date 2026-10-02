@@ -7,7 +7,7 @@
  * değiştirilmeden döner (güvenli taraf: sunum bozulmaz).
  */
 
-export interface WavVariation {
+interface WavVariation {
   /** [0,1): başlangıç kaydırma oranı. */
   readonly offset: number;
   /** Kazanç çarpanı (ör. 0.92–1.08). */

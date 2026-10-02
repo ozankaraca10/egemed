@@ -10,7 +10,7 @@ export const LOGIN_RATE_MAX = 8;
 export const LOGIN_RATE_WINDOW_MS = 15 * 60 * 1000;
 const MAX_KEYS = 4096;
 
-export interface LoginRateLimiter {
+interface LoginRateLimiter {
   consume(key: string, now: number): boolean;
 }
 

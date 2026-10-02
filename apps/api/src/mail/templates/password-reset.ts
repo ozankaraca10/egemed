@@ -6,7 +6,7 @@ import { escapeHtml, joinTextLines, renderMailLayout } from "../layout";
 import { INSTITUTION_LINE, mailColors, mailFontFamily } from "../theme";
 import type { MailRenderResult } from "../types";
 
-export interface PasswordResetData {
+interface PasswordResetData {
   readonly recipientName: string;
   readonly resetUrl: string;
   /** Örn. "60 dakika" — bağlantının geçerlilik süresi. */

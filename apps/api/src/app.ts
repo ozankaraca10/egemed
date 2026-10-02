@@ -33,12 +33,12 @@ import {
  */
 
 /** Havuzun uygulamaya görünen dar yüzeyi; `db.ts` çıktısı bunu yapısal olarak karşılar. */
-export interface DbHealth {
+interface DbHealth {
   query(text: string, params: readonly unknown[]): Promise<unknown>;
 }
 
 /** `createApp` bağımlılıkları; testler sahte havuz ve sabit saat enjekte eder. */
-export interface AppDeps {
+interface AppDeps {
   readonly db: DbHealth;
   readonly now: () => number;
   readonly auth: AuthDeps;
@@ -138,7 +138,7 @@ function applySecurityHeaders(c: Context): void {
 
 /** T149: JSON uçları için gövde sınırı; içe aktarma ucu 2 MB CSV + pay. */
 export const BODY_LIMIT_BYTES = 1024 * 1024;
-export const IMPORT_BODY_LIMIT_BYTES = 3 * 1024 * 1024;
+const IMPORT_BODY_LIMIT_BYTES = 3 * 1024 * 1024;
 
 export function createApp(deps: AppDeps): Hono<AppEnv> {
   const app = new Hono<AppEnv>();

@@ -54,7 +54,7 @@ export interface SeedRepo {
 }
 
 /** Havuzun depo katmanına görünen dar yüzeyi; `db.ts` çıktısı bunu karşılar. */
-export interface SeedDb {
+interface SeedDb {
   query(text: string, params: readonly unknown[]): Promise<{ readonly rows: readonly unknown[] }>;
 }
 

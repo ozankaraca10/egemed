@@ -17,7 +17,7 @@ import { toIstanbulIso } from "./users";
  * güvenen `registerAdminUserRoutes` çağrısından SONRA kaydedilmelidir.
  */
 
-export const auditListQuerySchema = z.object({
+const auditListQuerySchema = z.object({
   actorId: uuidSchema.optional(),
   action: z.string().regex(CODE_PATTERN).optional(),
   targetType: z.string().regex(CODE_PATTERN).optional(),
@@ -29,7 +29,7 @@ export const auditListQuerySchema = z.object({
   pageSize: pageSizeSchema.optional(),
 });
 
-export const DEFAULT_AUDIT_PAGE_SIZE = 20;
+const DEFAULT_AUDIT_PAGE_SIZE = 20;
 
 /** Liste satırı gövdesi: zaman Europe/Istanbul ofsetli ISO 8601'dir. */
 function auditRowBody(row: AuditListRow) {

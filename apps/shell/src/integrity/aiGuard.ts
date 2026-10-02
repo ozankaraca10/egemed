@@ -18,7 +18,7 @@ export type AiAgentSignal = "claude-in-chrome";
  * Bilinen ajan işaretleri: ajanın sayfaya eklediği öğeler. Liste yalnız
  * doğrulanmış işaretlerle genişletilir (yanlış pozitif = haksız engel).
  */
-export const AI_AGENT_MARKERS: readonly { readonly signal: AiAgentSignal; readonly selector: string }[] = [
+const AI_AGENT_MARKERS: readonly { readonly signal: AiAgentSignal; readonly selector: string }[] = [
   // Claude in Chrome eklentisi, kontrol ettiği sekmeye `claude-agent-*` kimlikli kaplama öğeleri ekler.
   { signal: "claude-in-chrome", selector: '[id^="claude-agent-"]' },
 ];

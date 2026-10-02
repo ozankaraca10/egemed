@@ -42,7 +42,7 @@ function fromSummary(simId: SimId, summary: GamiSimSummary | undefined, learnCom
 }
 
 /** Saf birleştirme (test edilebilir): özetler + öğrenme durumu → sim başına ilerleme. */
-export function buildSimProgress(
+function buildSimProgress(
   summaries: readonly GamiSimSummary[],
   learn: LearnStatus | null,
   learnExempt: boolean,

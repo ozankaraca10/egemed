@@ -36,13 +36,13 @@ import {
  * - Düello denemesi `challenge` modunda yazılır: yarım XP, liderliğe/aylık ödüle girmez.
  */
 
-export const CHALLENGE_TTL_MS = 24 * 60 * 60 * 1000;
-export const CHALLENGE_MAX_OPEN = 3;
-export const CHALLENGE_DAILY_MAX = 10;
+const CHALLENGE_TTL_MS = 24 * 60 * 60 * 1000;
+const CHALLENGE_MAX_OPEN = 3;
+const CHALLENGE_DAILY_MAX = 10;
 const DAY_MS = 24 * 60 * 60 * 1000;
 const CHALLENGE_SIMS: readonly SimId[] = ["ausculta"];
 
-export type ChallengeStatus = "open" | "accepted" | "finished" | "expired";
+type ChallengeStatus = "open" | "accepted" | "finished" | "expired";
 
 /** Düello sonucu: beraberlikte kazanan yoktur (`winner` null değil "draw"). */
 export type ChallengeWinner = "inviter" | "opponent" | "draw";
@@ -82,7 +82,7 @@ export interface ChallengeRepo {
   listDuelOutcomes(simId: SimId, userId: string): Promise<readonly DuelOutcomeRow[]>;
 }
 
-export interface ChallengeDeps {
+interface ChallengeDeps {
   readonly auth: AuthDeps;
   readonly challenges: ChallengeRepo;
   /** Öğrenme kilidi (27 Eyl 2026): ilgili simin tamamlama kaydı yoksa düello yok. */
@@ -94,7 +94,7 @@ export interface ChallengeDeps {
   readonly bans: Pick<CompetitionBansRepo, "isActive">;
 }
 
-export function hashChallengeCode(code: string): string {
+function hashChallengeCode(code: string): string {
   return createHash("sha256").update(`egemed-challenge:${code}`, "utf8").digest("hex");
 }
 
@@ -114,7 +114,7 @@ function decideWinner(inviter: { score: number; durationMs: number }, opponent: 
 }
 
 /** Kullanıcının bu simdeki son `limit` sonuçlanmış düellosu, en yenisi önce (T287). */
-export function recentDuelForm(rows: readonly DuelOutcomeRow[], userId: string, limit = 5): ("win" | "loss" | "draw")[] {
+function recentDuelForm(rows: readonly DuelOutcomeRow[], userId: string, limit = 5): ("win" | "loss" | "draw")[] {
   return rows
     .filter((row) => row.winner !== null && row.finishedAt !== null && row.opponentId !== null && (row.inviterId === userId || row.opponentId === userId))
     .sort((a, b) => (b.finishedAt ?? 0) - (a.finishedAt ?? 0))
@@ -351,7 +351,7 @@ async function awardDuelBadges(
 
 // --- Depolar -------------------------------------------------------------------
 
-export interface ChallengeDb {
+interface ChallengeDb {
   query(text: string, params: readonly unknown[]): Promise<{ readonly rows: readonly unknown[] }>;
 }
 

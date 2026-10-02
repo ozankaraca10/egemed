@@ -110,7 +110,7 @@ export async function insertUnit(
   return id;
 }
 
-export interface SeedUser {
+interface SeedUser {
   readonly id: string;
   readonly username: string;
   readonly displayName: string;

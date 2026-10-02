@@ -19,7 +19,7 @@ import {
  * istemci de dahil); `integrity` alanına bağlı sinyaller yalnız alan
  * gönderildiğinde hesaplanır (plan §1: "alan yoksa sinyal bilinmiyor sayılır").
  */
-export interface CaseSignalInput {
+interface CaseSignalInput {
   readonly simId: SimId;
   /** Vaka doğru mu (`SimCaseResult.mastery`); yanlışta too_fast/no_interaction_correct hiç hesaplanmaz. */
   readonly mastery: boolean;
@@ -50,7 +50,7 @@ export function median(values: readonly number[]): number | null {
   return sorted.length % 2 === 0 ? ((sorted[mid - 1] ?? 0) + (sorted[mid] ?? 0)) / 2 : (sorted[mid] ?? 0);
 }
 
-export interface SessionConsistencyInput {
+interface SessionConsistencyInput {
   readonly simId: SimId;
   /** Oturumun 0–100 puanı (plan §3: "%90 doğru" için vekil). */
   readonly correctRate: number;

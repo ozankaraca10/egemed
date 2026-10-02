@@ -40,7 +40,7 @@ export type ResolvedRoute =
   | { kind: "redirect"; href: `#${string}`; titleKey: TrKey }
   | { kind: "notFound"; path: string };
 
-export const ENTRY_PATHS: Record<EntryRole, `/giris/${string}`> = {
+const ENTRY_PATHS: Record<EntryRole, `/giris/${string}`> = {
   admin: "/giris/admin",
   student: "/giris/test-ogrenci",
 };
@@ -52,7 +52,7 @@ export const ADMIN_PATH = "/admin" as const;
 export const ADMIN_USERS_PATH = "/admin/kullanicilar" as const;
 
 /** Kullanıcı ekle alt yolu segmenti (T70, E3 §e.2): `#/admin/kullanicilar/yeni`. */
-export const ADMIN_USER_CREATE_SEGMENT = "yeni" as const;
+const ADMIN_USER_CREATE_SEGMENT = "yeni" as const;
 
 /** Toplu içe aktarma sihirbazı yolu (T71, E3 §e.4/§f). */
 export const ADMIN_IMPORT_PATH = "/admin/ice-aktar" as const;
@@ -78,7 +78,7 @@ export const ROUTES: readonly RouteDef[] = [
  * Okuma ana gezinmeden çıktı; bu yol yalnız eski bağlantıların tanınması ve
  * yönlendirilmesi için korunur.
  */
-export const CHALLENGES_PATH = "/meydan-okuma" as const;
+const CHALLENGES_PATH = "/meydan-okuma" as const;
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 /** Sim içi ekran bağlantısı (ör. `#/sims/opaca/modlar`, `#/sims/opaca/meydan-okuma`). */

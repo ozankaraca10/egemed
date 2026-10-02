@@ -31,7 +31,7 @@ import {
  */
 
 /** Normalize edilmiş işlem değeri: rol, sim, durum veya birim kimliği. */
-export type BulkValue = string | null;
+type BulkValue = string | null;
 
 export interface BulkApplyInput {
   readonly institutionId: string;

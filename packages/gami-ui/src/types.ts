@@ -1,5 +1,5 @@
 import type { JSX, ReactNode } from "react";
-import type { BadgeCategory, ChartPoint, Cohort, GamiLeaderboardRow, MonthlyReward, Period, RewardWinner, WeeklyGoal } from "@egemed/gamification-core";
+import type { BadgeCategory, GamiLeaderboardRow, Period } from "@egemed/gamification-core";
 
 export interface GamiIconProps {
   width?: number;
@@ -115,4 +115,4 @@ export interface GamiCongrats {
   sponsor: string;
 }
 
-export type { ChartPoint, Cohort, GamiLeaderboardRow, MonthlyReward, Period, RewardWinner, WeeklyGoal };
+export type { GamiLeaderboardRow, Period };

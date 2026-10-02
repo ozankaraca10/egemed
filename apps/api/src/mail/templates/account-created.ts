@@ -6,7 +6,7 @@ import { escapeHtml, joinTextLines, renderMailLayout } from "../layout";
 import { INSTITUTION_LINE, mailColors, mailFontFamily } from "../theme";
 import type { MailRenderResult } from "../types";
 
-export interface AccountCreatedData {
+interface AccountCreatedData {
   readonly recipientName: string;
   readonly username: string;
   readonly setupUrl: string;

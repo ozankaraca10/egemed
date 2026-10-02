@@ -13,7 +13,7 @@ import { outcomeFor } from "../challengeSource";
 
 type Form = "win" | "loss" | "draw";
 
-export function initialsOf(name: string): string {
+function initialsOf(name: string): string {
   const parts = name.replace(/\./g, " ").trim().split(/\s+/).filter(Boolean);
   const letters = parts.length > 1 ? `${parts[0]?.[0] ?? ""}${parts[parts.length - 1]?.[0] ?? ""}` : (parts[0] ?? "").slice(0, 2);
   return letters.toLocaleUpperCase("tr-TR") || "?";
@@ -62,7 +62,7 @@ export function FairPlayNotice({ tone = "light" }: { readonly tone?: "light" | "
   );
 }
 
-export interface FighterProps {
+interface FighterProps {
   readonly side: "me" | "rival";
   readonly name: string | null;
   readonly state?: string;
@@ -71,7 +71,7 @@ export interface FighterProps {
   readonly compact?: boolean;
 }
 
-export function Fighter({ side, name, state, waiting = false, crowned = false, compact = false }: FighterProps): JSX.Element {
+function Fighter({ side, name, state, waiting = false, crowned = false, compact = false }: FighterProps): JSX.Element {
   const cls = `eg-shell-arena__fighter eg-shell-arena__fighter--${side}${waiting ? " eg-shell-arena__fighter--waiting" : ""}`;
   return (
     <div className={cls}>
@@ -110,7 +110,7 @@ const FORM_LETTER: Record<Form, string> = { win: "G", loss: "M", draw: "B" };
 const FORM_LABEL: Record<Form, string> = { win: "Galibiyet", loss: "Mağlubiyet", draw: "Berabere" };
 
 /** Son sonuçlar şeridi (G/B/M); renk dışında harfle de ayırt edilir. */
-export function FormStrip({ form, label }: { readonly form: readonly Form[]; readonly label: string }): JSX.Element | null {
+function FormStrip({ form, label }: { readonly form: readonly Form[]; readonly label: string }): JSX.Element | null {
   if (form.length === 0) return null;
   return (
     <span aria-label={`${label}: ${form.map((entry) => FORM_LABEL[entry]).join(", ")}`} className="eg-shell-arena__form" role="img">

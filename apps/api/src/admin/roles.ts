@@ -18,7 +18,7 @@ import { insertAdminAudit, type AdminDb, type AdminDeps, type MemoryAdminStore }
  */
 
 /** Boş rol kümesi reddedilir: rolsüz kullanıcı hiçbir yetkiye sahip olamaz. */
-export const rolesUpdateSchema = z
+const rolesUpdateSchema = z
   .strictObject({
     roles: z
       .array(roleSchema)

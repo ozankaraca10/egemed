@@ -37,9 +37,9 @@ export const API_VERSION = "0.0.0";
 export const LOGIN_WINDOW_MS = 7 * 24 * 60 * 60 * 1000;
 
 /** Yaşayan kullanıcı durumları; yumuşak silinen kayıtlar sayılmaz (E3 §d). */
-export type OverviewUserStatus = Exclude<UserStatus, "deleted">;
+type OverviewUserStatus = Exclude<UserStatus, "deleted">;
 
-export const OVERVIEW_USER_STATUSES = USER_STATUSES.filter(
+const OVERVIEW_USER_STATUSES = USER_STATUSES.filter(
   (status): status is OverviewUserStatus => status !== "deleted",
 );
 
@@ -57,7 +57,7 @@ export interface AdminOverviewCounts {
   readonly sims: Readonly<Record<"pulse" | "ausculta" | "opaca", AdminOverviewSim>>;
 }
 
-export interface AdminOverviewSim {
+interface AdminOverviewSim {
   readonly accessUsers: number;
   readonly activeUsers30d: number;
   readonly attemptsThisMonth: { readonly practice: number; readonly assessment: number };
@@ -71,12 +71,12 @@ export interface AdminOverviewRepo {
 }
 
 /** Havuzun sağlık yoklamasına görünen dar yüzeyi; `app.ts` havuzu geçirir. */
-export interface AdminHealthDb {
+interface AdminHealthDb {
   query(text: string, params: readonly unknown[]): Promise<unknown>;
 }
 
 /** Havuzun overview deposuna görünen dar yüzeyi. */
-export interface AdminOverviewDb {
+interface AdminOverviewDb {
   query(text: string, params: readonly unknown[]): Promise<{ readonly rows: readonly unknown[] }>;
 }
 
@@ -263,7 +263,7 @@ export const adminHealthSchema = contractHealthSchema;
 // Rotalar
 // ---------------------------------------------------------------------------
 
-export interface AdminExtrasDeps {
+interface AdminExtrasDeps {
   /** Kapsam doğrulaması için `/admin/users` deposu (E3 §d). */
   readonly admin: Pick<AdminDeps, "users">;
   readonly gamification: GamificationRepo;

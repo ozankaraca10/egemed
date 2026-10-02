@@ -1,4 +1,3 @@
-import type { ReactNode } from "react";
 import { GamiBadgeIc } from "./GamiBadge";
 import { GamiDelta } from "./GamiLeaderboard";
 import type { GamiGainsModel, GamiIcons } from "./types";
@@ -65,5 +64,3 @@ export function GamiGainsView({ gains, icons, onAchievements, onLeaderboard, dem
     </section>
   );
 }
-
-export type { ReactNode };

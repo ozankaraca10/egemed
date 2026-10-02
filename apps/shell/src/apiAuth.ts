@@ -54,7 +54,7 @@ export function csrfTokenFromCookie(cookie: string): string | null {
 }
 
 /** API oturum akışının kabuk tarafından kullanılan en dar yüzeyi. */
-export interface ShellApiAuth {
+interface ShellApiAuth {
   /** Var olan çerez oturumunu `/auth/me` ile okur; oturum yoksa `null`. */
   restore(): Promise<ShellSession | null>;
   /** Dev sağlayıcısıyla oturum açar; rol sunucudan gelen `/auth/me` rolündendir. */
@@ -97,7 +97,7 @@ export function createShellApiAuth(baseUrl: string): ShellApiAuth | null {
   };
 }
 
-export interface ApiSubmitHandlers {
+interface ApiSubmitHandlers {
   /** Yerel kural veya sunucu reddi: form hata gösterir. */
   onInvalid(): void;
   /** Sunucu oturumu kuruldu; kayıt ve yönlendirme çağıranın işidir. */

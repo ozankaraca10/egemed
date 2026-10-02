@@ -16,7 +16,7 @@ import type { SeedInstitution, SeedRepo } from "./repo";
  * idempotenttir: var olan kayıt yeniden yazılmaz.
  */
 
-export type SeedMode = "admin" | "dev";
+type SeedMode = "admin" | "dev";
 
 export type SeedErrorCode =
   | "invalid_arguments"
@@ -41,7 +41,7 @@ export interface SeedDeps {
   readonly now: () => number;
 }
 
-export interface SeedInstitutionInput {
+interface SeedInstitutionInput {
   readonly code: string;
   readonly name: string;
 }
@@ -52,7 +52,7 @@ export const DEFAULT_DEV_INSTITUTION: SeedInstitutionInput = {
   name: "EGEMED Geliştirme",
 };
 
-export interface SeedArgs {
+interface SeedArgs {
   readonly mode: SeedMode;
   readonly username: string | undefined;
   readonly displayName: string | undefined;
@@ -118,7 +118,7 @@ export function parseSeedArgs(args: readonly string[]): SeedArgs {
   return { mode, username, displayName, allowProduction };
 }
 
-export interface SeedEnv {
+interface SeedEnv {
   /** `SEED_INSTITUTION_CODE` ve `SEED_INSTITUTION_NAME` birlikte verilir; yoksa null. */
   readonly institution: SeedInstitutionInput | null;
   readonly adminUsername: string | undefined;
@@ -148,12 +148,12 @@ export function loadSeedEnv(source: Record<string, string | undefined>): SeedEnv
   };
 }
 
-export interface SeedUserOutcome {
+interface SeedUserOutcome {
   readonly username: string;
   readonly outcome: "created" | "existing";
 }
 
-export interface BootstrapAdminInput {
+interface BootstrapAdminInput {
   readonly nodeEnv: Env["NODE_ENV"];
   readonly allowProduction: boolean;
   readonly institution: SeedInstitutionInput;
@@ -161,7 +161,7 @@ export interface BootstrapAdminInput {
   readonly displayName: string;
 }
 
-export interface BootstrapAdminResult {
+interface BootstrapAdminResult {
   readonly outcome: "created" | "existing";
   readonly userId: string;
   readonly institutionId: string;
@@ -268,7 +268,7 @@ export async function seedBootstrapAdmin(
   return { outcome: "created", userId: id, institutionId: institution.id };
 }
 
-export interface DevSeedUserSpec {
+interface DevSeedUserSpec {
   readonly username: string;
   readonly displayName: string;
   readonly roles: readonly Role[];
@@ -279,7 +279,7 @@ export interface DevSeedUserSpec {
  * Kabuktaki sahte hesaplarla aynı kullanıcı adları (apps/shell/src/devAuth.ts
  * `DEV_ACCOUNTS`); test bunların eşitliğini doğrular.
  */
-export const DEV_SEED_USERS: readonly DevSeedUserSpec[] = [
+const DEV_SEED_USERS: readonly DevSeedUserSpec[] = [
   // API-03: sim uçları yetkiyi `sim_access` ile ister; geliştirme yöneticisi simleri deneyebilsin.
   { username: "admin", displayName: "Geliştirme Yöneticisi", roles: ["admin"], simAccess: [...SIM_IDS] },
   {
@@ -290,13 +290,13 @@ export const DEV_SEED_USERS: readonly DevSeedUserSpec[] = [
   },
 ];
 
-export interface DevSeedInput {
+interface DevSeedInput {
   readonly nodeEnv: Env["NODE_ENV"];
   readonly devEnabled: boolean;
   readonly institution: SeedInstitutionInput;
 }
 
-export interface DevSeedResult {
+interface DevSeedResult {
   readonly institutionId: string;
   readonly users: readonly SeedUserOutcome[];
 }

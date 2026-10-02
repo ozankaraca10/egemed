@@ -46,7 +46,7 @@ export function scrollToSection(event: { preventDefault(): void }, id: string): 
   doc?.getElementById(id)?.scrollIntoView();
 }
 
-export interface HomePageProps {
+interface HomePageProps {
   /** Oturum varsa başlığın üstünde "Hoş geldiniz" + rol etiketi çizilir. */
   readonly session?: ShellSession | null;
 }

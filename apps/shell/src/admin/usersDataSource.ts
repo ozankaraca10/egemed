@@ -211,7 +211,7 @@ export interface BulkEditResult {
 }
 
 /** İstek düzeyinde geçersiz işlem+değer birleşimi; satır bazlı değil (bkz. yukarıdaki tip notu). */
-export type BulkValidationError = "role_not_permitted" | "unknown_unit";
+type BulkValidationError = "role_not_permitted" | "unknown_unit";
 
 /** `assign_role`/`revoke_role` yalnız `kullanici` kabul eder (§b); `set_unit` bilinen bir birimi hedeflemelidir. */
 export function validateBulkInput(input: BulkEditInput): BulkValidationError | null {
@@ -314,7 +314,7 @@ export function swapBaseRole(roles: readonly UserRole[], target: AssignableRole)
 }
 
 /** Kendi admin rolünü kaldırma girişimini engeller (E3 §e.6 uyarısı: "kendi admin rolünü kaldıramaz"). */
-export type RoleChangeError = "self_admin_removal";
+type RoleChangeError = "self_admin_removal";
 
 export function guardSelfAdminRemoval(
   current: AdminUserDetail,
@@ -403,7 +403,7 @@ function compareUsers(a: AdminUser, b: AdminUser, sort: UserSort): number {
 }
 
 /** Saf sıralama; girdi dizisini değiştirmez. */
-export function sortUsers(
+function sortUsers(
   users: readonly AdminUser[],
   sort: UserSort = DEFAULT_SORT,
   order: SortOrder = DEFAULT_ORDER,
@@ -425,7 +425,7 @@ export function clampPage(page: number | undefined): number {
 }
 
 /** Saf sayfalama; sıralanmış diziden dilim alır. */
-export function paginateUsers(
+function paginateUsers(
   users: readonly AdminUser[],
   page: number | undefined,
   pageSize: number | undefined,
@@ -437,7 +437,7 @@ export function paginateUsers(
 }
 
 /** Filtre → sıralama → sayfalama sırasıyla sorguyu uygular; `meta.total` filtre SONRASI sayıdır. */
-export function applyUsersQuery(users: readonly AdminUser[], query: UsersListQuery): UsersListResult {
+function applyUsersQuery(users: readonly AdminUser[], query: UsersListQuery): UsersListResult {
   const filtered = users.filter((user) => matchesUserQuery(user, query));
   const sorted = sortUsers(filtered, query.sort, query.order);
   const pageSize = clampPageSize(query.pageSize);
@@ -573,7 +573,7 @@ const STATUS_HISTORY_ACTION: Partial<Record<UserStatus, UserHistoryAction>> = {
 };
 
 /** Saf yama uygulayıcı; durum değişince geçmişe girdi ekler (E3 §d: her mutasyon audit'lenir). */
-export function applyUserPatch(current: AdminUserDetail, patch: UpdateUserInput, nowMs: number): AdminUserDetail {
+function applyUserPatch(current: AdminUserDetail, patch: UpdateUserInput, nowMs: number): AdminUserDetail {
   const nextStatus = patch.status ?? current.status;
   const historyAction =
     patch.status !== undefined && patch.status !== current.status ? STATUS_HISTORY_ACTION[patch.status] : undefined;

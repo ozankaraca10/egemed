@@ -10,7 +10,7 @@ export interface DevSession {
 }
 
 /** Rol başına sentetik aktör kimliği; depodan okunan kaydın doğrulamasında da kullanılır. */
-export const DEV_ACTOR_IDS: Record<EntryRole, DevSession["actorId"]> = {
+const DEV_ACTOR_IDS: Record<EntryRole, DevSession["actorId"]> = {
   admin: "dev-admin-0001",
   student: "dev-student-0001",
 };
@@ -31,7 +31,7 @@ export interface DevSessionStorage {
   removeItem(key: string): void;
 }
 
-export interface DevSessionStore {
+interface DevSessionStore {
   read(): DevSession | null;
   write(session: DevSession): void;
   clear(): void;
