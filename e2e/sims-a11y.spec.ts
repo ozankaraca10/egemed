@@ -300,12 +300,17 @@ async function collectSmallTargets(page: Page, sim: SimId): Promise<Map<string, 
         return parts.join(" > ");
       };
       const out: { selector: string; size: string; area: number }[] = [];
+      const finePointer = window.matchMedia("(pointer: fine)").matches;
+      const FINE_POINTER_MIN = 24;
       for (const element of scope.querySelectorAll("button, input, select, a")) {
         if (!(element instanceof HTMLElement)) continue;
         if (!element.checkVisibility({ checkVisibilityCSS: true, contentVisibilityAuto: true })) continue;
         const rect = element.getBoundingClientRect();
         if (rect.width <= 0 || rect.height <= 0) continue;
-        if (rect.width >= min && rect.height >= min) continue;
+        // T320: öğrenme ızgarası denetimleri fareli cihazda sıkıdır (pointer: fine); orada alt
+        // sınır WCAG 2.2 2.5.8 (24 px). Dokunmatikte ve diğer her yerde 44 px.
+        const limit = finePointer && element.closest(".learn-grid") !== null ? FINE_POINTER_MIN : min;
+        if (rect.width >= limit && rect.height >= limit) continue;
         out.push({
           selector: pathOf(element),
           size: `${Math.round(rect.width)}x${Math.round(rect.height)}`,

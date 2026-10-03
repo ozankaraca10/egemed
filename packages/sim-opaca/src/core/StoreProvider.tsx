@@ -40,6 +40,8 @@ export interface StoreContextValue {
   readonly now: () => number;
   /** Cihaz-yerel anahtar deposu (K-P3 kararına kadar port arkasında, §7.2). */
   readonly storage: StoragePort;
+  /** Pencere sınırı (zamanlayıcı, görünürlük); öğrenme inceleme süresi bununla sayılır (T320). */
+  readonly env: WindowLike;
 }
 
 const StoreContext = createContext<StoreContextValue | null>(null);
@@ -172,6 +174,6 @@ export function StoreProvider({
     return lifecycle.startTicker(TIMER_INTERVAL_MS, () => dispatch({ type: "timer", deltaMs: TIMER_INTERVAL_MS }));
   }, [dispatch, lifecycle, state.screen]);
 
-  const value: StoreContextValue = { state, dispatch, bus, runtime: simRuntime, now, storage };
+  const value: StoreContextValue = { state, dispatch, bus, runtime: simRuntime, now, storage, env };
   return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>;
 }

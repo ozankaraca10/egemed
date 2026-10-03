@@ -42,25 +42,45 @@ test.describe("Opaca öğrenme kilidi", () => {
     expect(errors, "konsol/sayfa hatası").toEqual([]);
   });
 
-  test("kütüphane konusunun görüntüsü yüklenince konu açıldı sayılır ve ilerleme artar", async ({ page }) => {
+  test("T320: konu, her filmi 15 sn incelenince tamamlanır; yüklenmeyen film sayılmaz", async ({ page }) => {
     const errors = trackErrors(page);
+    // Sayaç sayfa saatine bağlıdır; sahte saatle süre ileri sarılır (gerçek bekleme yok).
+    await page.clock.install();
     await openRoute(page, "#/sims/opaca");
     const root = page.locator(".eg-sim-opaca").first();
     await root.locator(".mode-card.learn button.eg-gami-mode-cta").click();
 
-    // Gerçek dosyası olan BT konusu seçilir; görüntü yüklenince öğe "açıldı" işareti alır
-    // (yalnız seçmek yetmez, E2E'de XR görüntüleri git-dışıdır; BT dosyaları depodadır).
+    // Gerçek dosyası olan BT konusu (BT dosyaları depodadır; XR görüntüleri git-dışıdır).
     await root.locator(".lib-item", { hasText: "Aksiyel anatomi" }).click();
-    await expect(root.getByRole("status", { name: "Öğrenme: 1/33 konu incelendi" })).toBeVisible();
-    await expect(root.locator(".lib-item.opened", { hasText: "açıldı" })).toHaveCount(1);
-    await expect(root.locator(".lib-group", { hasText: "Toraks BT" }).locator(".g-count")).toHaveText("1/2");
+    const films = root.locator(".ex-btn");
+    const count = await films.count();
+    expect(count).toBeGreaterThan(1);
 
-    // Yalnız seçmek yetmez: ilk görüntü dosyası depoda olmayan (XR) konu seçilince
-    // görüntü yüklenemez, kayıt büyümez ve işaret çizilmez.
-    await root.locator(".lib-item", { hasText: "Pnömotoraks" }).click();
-    await expect(root.locator(".film-empty", { hasText: "Görüntü dosyası yüklenemedi" })).toBeVisible();
-    await expect(root.getByRole("status", { name: "Öğrenme: 1/33 konu incelendi" })).toBeVisible();
-    await expect(root.locator(".lib-item.opened", { hasText: "açıldı" })).toHaveCount(1);
+    // Eşiğin altında konu tamamlanmaz.
+    await expect(root.locator(".film-stage img.is-loaded").first()).toBeVisible();
+    await page.clock.runFor(6_000);
+    await expect(films.first()).toContainText(/[56]\/15 sn/);
+    await expect(root.getByRole("status", { name: "Öğrenme: 0/33 konu incelendi" })).toBeVisible();
+
+    // Dosyası depoda olan filmler (BT) 15 sn sonra incelenmiş sayılır; Commons kesiti
+    // git-dışı çalışma zamanı klasöründedir: yüklenemez, süre kazanmaz, konu tamamlanmaz.
+    let loadedFilms = 0;
+    for (let index = 0; index < count; index += 1) {
+      await films.nth(index).click();
+      const loaded = root.locator(".film-stage img.is-loaded").first();
+      const failed = root.locator(".film-empty", { hasText: "Görüntü dosyası yüklenemedi" });
+      await expect(loaded.or(failed)).toBeVisible();
+      await page.clock.runFor(16_000);
+      if ((await failed.count()) > 0) {
+        await expect(films.nth(index)).toContainText("0/15 sn");
+      } else {
+        loadedFilms += 1;
+        await expect(films.nth(index)).toContainText("✓ incelendi");
+      }
+    }
+    expect(loadedFilms).toBeGreaterThan(0);
+    const expected = loadedFilms === count ? 1 : 0;
+    await expect(root.getByRole("status", { name: `Öğrenme: ${expected}/33 konu incelendi` })).toBeVisible();
     expect(errors, "konsol/sayfa hatası").toEqual([]);
   });
 

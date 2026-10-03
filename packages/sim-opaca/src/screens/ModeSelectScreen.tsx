@@ -2,6 +2,7 @@ import type { JSX } from 'react'
 import type { SimAudience } from '@egemed/sim-host'
 import { audienceCanUseMode, VISITOR_LOCK_TEXT } from '@egemed/sim-host'
 import { useLearnGate, useStartMode } from '../core/LearnGate'
+import { LEARN_VIEW_SECONDS } from '../core/learnLock'
 import { modeLearnLocked, modePickTarget } from '../core/flow'
 import { useStore } from '../core/StoreProvider'
 import { useGamiContext } from '../gamification/GamiContext'
@@ -79,7 +80,8 @@ export function ModeSelectScreen({
       key: 'learn',
       title: 'Öğrenme Modu',
       description: `${LIBRARY_ITEMS.length} konuyu örnek filmler, okuma bölgeleri ve uzman işaretlemeleriyle inceleyin.`,
-      bullets: ['ABCDE okuma rehberi', 'Uzman işaretlemesi açılıp kapanır', 'Süre ve puan yok'],
+      bullets: ['ABCDE okuma rehberi', 'Uzman işaretlemesi açılıp kapanır', 'Puan yok'],
+      criterion: `Her konudaki filmlerin (1–4) her biri en az ${LEARN_VIEW_SECONDS} sn incelenince konu tamamlanır.`,
       progress: gate.total > 0 ? gate.openedCount / gate.total : 0,
       cta: gate.openedCount > 0 ? 'Öğrenmeye devam et' : 'Öğrenmeye başla',
       onSelect: () => pick('learn'),

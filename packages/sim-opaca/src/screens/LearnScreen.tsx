@@ -3,7 +3,7 @@ import type { SimAudience } from '@egemed/sim-host'
 import { VISITOR_LOCK_TEXT } from '@egemed/sim-host'
 import { useChallenge } from '../EmbeddedContext'
 import { useLearnGate } from '../core/LearnGate'
-import { challengeLearnLockText } from '../core/learnLock'
+import { LEARN_VIEW_SECONDS, challengeLearnLockText, exampleKey } from '../core/learnLock'
 import { libraryExamples } from '../core/examples'
 import { useStore } from '../core/StoreProvider'
 import { isExpertSource } from '../core/images'
@@ -23,6 +23,8 @@ import { IconFilm, IconLock } from '../ui/icons'
  *  oyunlaştırma `gami` seam'i ile enjekte edilir (§7.7). */
 
 const LEARN_DWELL_MS = 800
+/** İnceleme sayacı adımı (ms); uyku/arka plan sıçramaları bu kadarla sınırlanır. */
+const VIEW_TICK_MS = 1000
 
 /** Aktif kütüphane öğesini görünür alana kaydırma (kaynak: `document.querySelector('.lib-item.active')`). */
 export interface LearnScreenEnv {
@@ -61,7 +63,7 @@ export function LearnScreen({
   gami,
   audience = 'student',
 }: LearnScreenProps): JSX.Element {
-  const { state, dispatch, now } = useStore()
+  const { state, dispatch, now, env: windowEnv } = useStore()
   const isVisitor = audience === 'visitor'
   const gate = useLearnGate()
   const challenge = useChallenge()
@@ -91,6 +93,26 @@ export function LearnScreen({
   const noZonesReason = image ? noZonesReasonForImage(image.id) : null
 
   useEffect(() => setActiveZones([]), [image?.id])
+
+  // T320: film yüklü ve sayfa görünürken geçen süre örneğe yazılır; konu, tüm filmleri
+  // LEARN_VIEW_SECONDS sn incelenince tamamlanır. Yalnız seçmek ya da yüklenmeyen film sayılmaz.
+  const [readyId, setReadyId] = useState<string | null>(null)
+  const addViewRef = useRef(gate.addView)
+  addViewRef.current = gate.addView
+  const viewedSeconds = (index: number): number => gate.seconds.get(exampleKey(item.key, index)) ?? 0
+  const currentDone = viewedSeconds(exampleIdx) >= LEARN_VIEW_SECONDS
+  useEffect(() => {
+    if (!image || readyId !== image.id || currentDone) return
+    let last = now()
+    let handle = windowEnv.setTimeout(function tick() {
+      const at = now()
+      const elapsed = Math.min(at - last, VIEW_TICK_MS * 2)
+      last = at
+      if (windowEnv.visibilityState === 'visible' && elapsed > 0) addViewRef.current(item.key, exampleIdx, elapsed)
+      handle = windowEnv.setTimeout(tick, VIEW_TICK_MS)
+    }, VIEW_TICK_MS)
+    return () => windowEnv.clearTimeout(handle)
+  }, [currentDone, exampleIdx, image, item.key, now, readyId, windowEnv])
 
   useEffect(() => {
     if (lastKey.current !== selectedKey) {
@@ -189,11 +211,9 @@ export function LearnScreen({
               <div className="learn-head">
                 <span className="learn-eb">{groupTitle}</span>
                 <h3 className="learn-title">{item.title}</h3>
-                <div className="learn-pills">
-                  <span className="lp topic">{item.badge}</span>
-                  {image ? <span className={`lp ${clinicalContextFor(image.id)?.hasReal ? 'real' : 'none'}`}>{clinicalContextFor(image.id)?.hasReal ? 'Gerçek hasta verisi' : 'Klinik kayıt yok'}</span> : null}
-                </div>
-                <p className="learn-study">Örnekler {examples.length} film · film yüklenince konu açılmış sayılır</p>
+                <p className="learn-study" role="status">
+                  {currentDone ? 'Bu film incelendi ✓' : `Bu film ${Math.floor(viewedSeconds(exampleIdx))}/${LEARN_VIEW_SECONDS} sn`} · konu, {examples.length} filmin her biri en az {LEARN_VIEW_SECONDS} sn incelenince tamamlanır
+                </p>
               </div>
               <div className="stage-card film-card">
                 {annotationFinding && (
@@ -218,9 +238,8 @@ export function LearnScreen({
                     showInfoOverlay={false}
                     fitContent
                     {...(onStackEnd ? { onStackEnd } : {})}
-                    // T218: öğenin görüntüsü film görüntüleyicide gerçekten yüklenince
-                    // "açıldı" sayılır; yalnız listeden seçmek yetmez.
-                    onImageReady={() => gate.markOpened(item.key)}
+                    // T320: inceleme süresi yalnız film gerçekten yüklenince sayılmaya başlar.
+                    onImageReady={() => setReadyId(image.id)}
                     env={NOOP_FILM_ENV}
                   />
                 ) : (
@@ -256,7 +275,7 @@ export function LearnScreen({
                       onClick={() => setExampleIdx(index)}
                     >
                       Örnek {index + 1}
-                      <small>{clinicalContextFor(entry.id)?.hasReal ? 'klinik kayıtlı' : 'kayıtsız'}</small>
+                      <small>{viewedSeconds(index) >= LEARN_VIEW_SECONDS ? '✓ incelendi' : `${Math.floor(viewedSeconds(index))}/${LEARN_VIEW_SECONDS} sn`}</small>
                     </button>
                   ))}
                 </div>

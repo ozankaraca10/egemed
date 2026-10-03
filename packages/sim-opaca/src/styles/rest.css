@@ -760,3 +760,14 @@
   .eg-sim-opaca .pcard-id div:nth-child(2){ border-right: 0; }
   .eg-sim-opaca .pcard-id div:nth-child(-n+2){ border-bottom: 1px solid var(--border); }
 }
+
+/* T320 — öğrenme modunda görüntü altı denetimler (araç çubuğu, ABCDE bölge çipleri, örnek
+   düğmeleri) fareli cihazlarda dikeyde sıkı (depo sahibi: "dikeyde çok yüksek"); dokunmatikte
+   (pointer: coarse) 44 px dokunma hedefi korunur. Fare için alt sınır WCAG 2.2 2.5.8 (24 px). */
+@media (pointer: fine) {
+  .eg-sim-opaca .learn-grid .film-tools .seg button, .eg-sim-opaca .learn-grid .film-tools .tool-btn{ min-height: 32px; min-width: 32px; padding: 5px 10px; }
+  .eg-sim-opaca .learn-grid .film-select select{ min-height: 32px; padding: 4px 8px; }
+  .eg-sim-opaca .learn-grid .zone-chip{ min-height: 28px; padding: 3px 10px; }
+  .eg-sim-opaca .learn-grid .zone-chips{ max-height: calc(3 * 28px + 2 * var(--sp-2) + var(--sp-1)); }
+  .eg-sim-opaca .learn-grid .ex-btn{ min-height: 36px; padding: 3px 8px; }
+}

@@ -16,6 +16,8 @@ export interface GamiModeCard {
   readonly title: string;
   readonly description: string;
   readonly bullets: readonly string[];
+  /** Öğrenme kartında konunun/modun tamamlanma ölçütü (ör. "Her filmi en az 15 sn inceleyin"). */
+  readonly criterion?: string;
   /** Kart altındaki durum satırı (ör. "En iyi puan: 84", "Henüz denenmedi", "12 G · 3 B · 5 M"). */
   readonly status?: string;
   /** Öğrenme kartındaki ilerleme (0–1); diğer kartlarda verilmez. */
@@ -117,6 +119,9 @@ export function GamiModeJourney({ simLabel, title = "Çalışma Modunu Seçin", 
             <ul className="eg-gami-mode-list">
               {card.bullets.map((bullet) => <li key={bullet}>{bullet}</li>)}
             </ul>
+            {card.criterion ? (
+              <p className="eg-gami-mode-criterion"><b>Tamamlama ölçütü</b>{card.criterion}</p>
+            ) : null}
             {card.extra}
             <div className="eg-gami-mode-status">
               {locked && card.lockText ? (

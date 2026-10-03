@@ -44,7 +44,8 @@ export function PatientCard({ image, context, topic, exampleNo, finding }: Patie
   const real = context?.hasReal === true
   const age = context?.age ?? image.ageYears ?? null
   const sex = context?.sex ?? (image.sex ? SEX_TEXT[image.sex] ?? null : null)
-  const view = context?.view ?? (image.viewPosition && image.viewPosition !== 'unknown' ? VIEW_TEXT[image.viewPosition] ?? image.viewPosition : null)
+  const rawView = context?.view ?? (image.viewPosition && image.viewPosition !== 'unknown' ? image.viewPosition : null)
+  const view = rawView ? VIEW_TEXT[rawView] ?? rawView : null
   const source = context?.source ?? image.sourceDataset
   const title = finding ? findingLabel(finding) : context?.labels[0]?.finding ?? topic
   const labels = context?.labels.length
