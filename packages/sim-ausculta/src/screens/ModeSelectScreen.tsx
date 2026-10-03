@@ -2,6 +2,7 @@ import type { JSX } from "react";
 import { audienceCanUseMode, VISITOR_LOCK_TEXT } from "@egemed/sim-host";
 import { defaultGamiIcons, GamiModeJourney, type GamiModeCard } from "@egemed/gami-ui";
 import { useLearnGate, useStartMode } from "../core/LearnGate";
+import { LEARN_EXAMPLE_SECONDS } from "../core/learnLock";
 import { useStore } from "../core/StoreProvider";
 import { SESSION_SIZE } from "../core/session";
 import type { Mode } from "../core/types";
@@ -53,6 +54,7 @@ export function ModeSelectScreen({ embedded = false, rewards = null, onLeaderboa
       title: "Öğrenme Modu",
       description: `${libraryCount} ses sınıfını metafor, dalga formu ve klinik bilgiyle sınırsız dinleyerek keşfedin.`,
       bullets: ["Rehberli öğrenme", "Ses metaforları", "Sınırsız dinleme"],
+      criterion: `Her konunun tüm örnekleri (sentetik + gerçek hasta) ses çalarken en az ${LEARN_EXAMPLE_SECONDS} sn dinlenince konu tamamlanır.`,
       progress: gate.total > 0 ? gate.listenedCount / gate.total : 0,
       cta: gate.listenedCount > 0 ? "Öğrenmeye devam et" : "Öğrenmeye başla",
       onSelect: () => pick("learn"),

@@ -4,7 +4,8 @@ import { describe, expect, it } from "vitest";
 import { EmbeddedProvider } from "../../../packages/sim-opaca/src/EmbeddedContext";
 import type { SimLearnPort } from "../../../packages/sim-host/src/SimHost";
 import {
-  LEARN_OPENED_KEY,
+  LEARN_VIEWED_KEY,
+  LEARN_VIEW_SECONDS,
   LIBRARY_ITEM_COUNT,
   LIBRARY_ITEM_KEYS,
   LIBRARY_ITEMS,
@@ -22,13 +23,30 @@ import {
   learnProgressText,
   libraryExampleCount,
   libraryExamples,
-  parseOpened,
+  exampleKey,
+  parseViewed,
   zonesForImage,
 } from "../../../packages/sim-opaca/src/index";
-import type { StoragePort, WindowLike } from "../../../packages/sim-opaca/src/index";
+import type { LearnTracker, StoragePort, WindowLike } from "../../../packages/sim-opaca/src/index";
 import { LEARN_EXAMPLE_LIMIT } from "../../../packages/sim-opaca/src/core/examples";
 import { hasClinicalContext } from "../../../packages/sim-opaca/src/data/clinicalContext";
 import { fakeSessions } from "../session-fixture";
+
+/** T320: konunun film sayısı (öğrenme örnekleri). */
+const filmCount = (key: string): number => libraryExamples(LIBRARY_ITEMS.find((item) => item.key === key)!).length;
+const FULL_MS = LEARN_VIEW_SECONDS * 1000;
+
+/** Tüm konuların tüm filmlerini eşik kadar inceler. */
+function viewAll(tracker: LearnTracker): void {
+  for (const key of LIBRARY_ITEM_KEYS) for (let index = 0; index < filmCount(key); index += 1) tracker.addView(key, index, FULL_MS);
+}
+
+/** Tüm filmleri incelenmiş kayıt (depo tohumu). */
+function fullViewedRecord(): string {
+  const out: Record<string, number> = {};
+  for (const key of LIBRARY_ITEM_KEYS) for (let index = 0; index < filmCount(key); index += 1) out[exampleKey(key, index)] = LEARN_VIEW_SECONDS;
+  return JSON.stringify(out);
+}
 
 /** T218 — öğrenme tamamlama tespiti ve mod kilidi: saf hesap + statik işaretleme.
  *  Ausculta T209 test kümesinin Opaca karşılığı. */
@@ -105,17 +123,17 @@ describe("contentVersion", () => {
   });
 });
 
-describe("parseOpened", () => {
-  it("bozuk/eksik veri boş küme sayılır", () => {
-    expect(parseOpened(null).size).toBe(0);
-    expect(parseOpened("{bozuk").size).toBe(0);
-    expect(parseOpened('"technique.systematic"').size).toBe(0);
-    expect(parseOpened("{}").size).toBe(0);
+describe("parseViewed", () => {
+  it("bozuk/eksik veri boş harita sayılır", () => {
+    expect(parseViewed(null).size).toBe(0);
+    expect(parseViewed("{bozuk").size).toBe(0);
+    expect(parseViewed('["technique.systematic#0"]').size).toBe(0);
+    expect(parseViewed("{}").size).toBe(0);
   });
 
-  it("kütüphanede olmayan anahtarlar yok sayılır, geçerli olanlar tekilleşir", () => {
-    const parsed = parseOpened('["technique.systematic","bilinmeyen","technique.systematic",3]');
-    expect([...parsed]).toEqual(["technique.systematic"]);
+  it("bilinmeyen konu/örnek ve geçersiz değerler yok sayılır; değer eşikle kırpılır", () => {
+    const parsed = parseViewed(JSON.stringify({ "technique.systematic#0": 99, "technique.systematic#99": 5, "bilinmeyen#0": 5, "technique.systematic#1": "x" }));
+    expect([...parsed.entries()]).toEqual([["technique.systematic#0", LEARN_VIEW_SECONDS]]);
   });
 });
 
@@ -182,56 +200,65 @@ describe("öğrenme tamamlanabilirliği", () => {
 });
 
 describe("createLearnTracker", () => {
-  it("konu açma kaydı kalıcıdır; yalnız seçmek kaydı büyütmez", () => {
+  it("T320: konu, tüm filmleri eşik kadar incelenince tamamlanır; kayıt kalıcıdır", () => {
     const storage = memoryStorage();
     const tracker = createLearnTracker({ storage });
+    const key = "technique.systematic";
+    const films = filmCount(key);
+    expect(films).toBeGreaterThan(1);
     expect(tracker.snapshot().openedCount).toBe(0);
-    expect(tracker.snapshot().complete).toBe(false);
     expect(tracker.snapshot().lockText).toBe(learnLockText(0, LIBRARY_ITEM_COUNT));
 
-    tracker.markOpened("technique.systematic");
+    // Eşiğin altında kalan süre ve tek film konuyu tamamlamaz.
+    tracker.addView(key, 0, FULL_MS - 1000);
+    expect(tracker.snapshot().openedCount).toBe(0);
+    tracker.addView(key, 0, 1000);
+    expect(tracker.snapshot().seconds.get(exampleKey(key, 0))).toBe(LEARN_VIEW_SECONDS);
+    expect(tracker.snapshot().openedCount).toBe(0);
+
+    for (let index = 1; index < films; index += 1) tracker.addView(key, index, FULL_MS);
     expect(tracker.snapshot().openedCount).toBe(1);
     expect(tracker.snapshot().progressText).toBe(learnProgressText(1, LIBRARY_ITEM_COUNT));
-    expect(JSON.parse(storage.entries.get(LEARN_OPENED_KEY) ?? "[]")).toEqual(["technique.systematic"]);
+    expect(JSON.parse(storage.entries.get(LEARN_VIEWED_KEY) ?? "{}")[exampleKey(key, 0)]).toBe(LEARN_VIEW_SECONDS);
 
     // Aynı depoyla yeni mount (açılış) kaydı korur.
     const reopened = createLearnTracker({ storage });
-    expect(reopened.snapshot().openedCount).toBe(1);
-    expect(reopened.snapshot().opened.has("technique.systematic")).toBe(true);
+    expect(reopened.snapshot().opened.has(key)).toBe(true);
   });
 
-  it("bozuk kayıt boş küme sayılır; bilinmeyen anahtar yok sayılır", () => {
-    const storage = memoryStorage({ [LEARN_OPENED_KEY]: "{bozuk" });
+  it("bozuk kayıt boş sayılır; bilinmeyen konu ve aralık dışı örnek yok sayılır", () => {
+    const storage = memoryStorage({ [LEARN_VIEWED_KEY]: "{bozuk" });
     const tracker = createLearnTracker({ storage });
-    expect(tracker.snapshot().openedCount).toBe(0);
-    tracker.markOpened("bilinmeyen.konu");
-    expect(tracker.snapshot().openedCount).toBe(0);
-    expect(storage.entries.get(LEARN_OPENED_KEY)).toBe("{bozuk");
+    tracker.addView("bilinmeyen.konu", 0, FULL_MS);
+    tracker.addView("technique.systematic", 99, FULL_MS);
+    tracker.addView("technique.systematic", 0, -5);
+    expect(tracker.snapshot().seconds.size).toBe(0);
+    expect(storage.entries.get(LEARN_VIEWED_KEY)).toBe("{bozuk");
   });
 
-  it("yerel küme tamamlanınca complete olur ve markComplete bir kez doğru sürümle çağrılır", () => {
+  it("tüm konular tamamlanınca complete olur ve markComplete bir kez doğru sürümle çağrılır", () => {
     const calls: string[] = [];
     const tracker = createLearnTracker({ storage: memoryStorage(), learn: learnPort(false, calls) });
-    for (const key of LIBRARY_ITEM_KEYS) tracker.markOpened(key);
+    viewAll(tracker);
     expect(tracker.snapshot().localComplete).toBe(true);
     expect(tracker.snapshot().complete).toBe(true);
     expect(calls).toEqual([OPACA_CONTENT_VERSION]);
-    // Fazladan markOpened/notify yeni çağrı üretmez.
-    tracker.markOpened(LIBRARY_ITEM_KEYS[0] ?? "");
+    // Fazladan inceleme/notify yeni çağrı üretmez.
+    tracker.addView(LIBRARY_ITEM_KEYS[0] ?? "", 0, FULL_MS);
     tracker.notify();
     expect(calls).toEqual([OPACA_CONTENT_VERSION]);
   });
 
-  it("açılışta küme zaten tamamsa notify kaydı tazeler (bir kez)", () => {
+  it("açılışta kayıt zaten tamamsa notify kaydı tazeler (bir kez)", () => {
     const calls: string[] = [];
-    const storage = memoryStorage({ [LEARN_OPENED_KEY]: JSON.stringify(LIBRARY_ITEM_KEYS) });
+    const storage = memoryStorage({ [LEARN_VIEWED_KEY]: fullViewedRecord() });
     const tracker = createLearnTracker({ storage, learn: learnPort(false, calls) });
     tracker.notify();
     tracker.notify();
     expect(calls).toEqual([OPACA_CONTENT_VERSION]);
   });
 
-  it("host complete ise yerel küme boşken de açıktır", () => {
+  it("host complete ise yerel kayıt boşken de açıktır", () => {
     const tracker = createLearnTracker({ storage: memoryStorage(), learn: learnPort(true) });
     expect(tracker.snapshot().hostComplete).toBe(true);
     expect(tracker.snapshot().openedCount).toBe(0);
@@ -246,7 +273,7 @@ describe("createLearnTracker", () => {
       },
     };
     const tracker = createLearnTracker({ storage: memoryStorage(), learn: failing });
-    for (const key of LIBRARY_ITEM_KEYS) tracker.markOpened(key);
+    viewAll(tracker);
     expect(tracker.snapshot().complete).toBe(true);
     await Promise.resolve();
   });
@@ -272,6 +299,9 @@ describe("ModeSelectScreen öğrenme kilidi", () => {
     expect(html).toContain("mode-card assessment learn-locked");
     expect(html).toContain('data-learn-locked="true"');
     expect(html).toContain("Önce öğrenme modunu tamamlayın: 0/33 konu incelendi.");
+    // T320: öğrenme kartı tamamlama ölçütünü gösterir.
+    expect(html).toContain("Tamamlama ölçütü");
+    expect(html).toContain(`en az ${LEARN_VIEW_SECONDS} sn incelenince konu tamamlanır`);
     // T289: kilitli düğmede metnin önünde kilit simgesi (svg) bulunur.
     expect(html).toMatch(/disabled=""[^>]*>(?:<svg[\s\S]*?<\/svg>)?Önce öğrenme modunu tamamlayın/);
   });
@@ -285,7 +315,7 @@ describe("ModeSelectScreen öğrenme kilidi", () => {
   });
 
   it("yerel küme tamamsa kartlar açıktır", () => {
-    const storage = memoryStorage({ [LEARN_OPENED_KEY]: JSON.stringify(LIBRARY_ITEM_KEYS) });
+    const storage = memoryStorage({ [LEARN_VIEWED_KEY]: fullViewedRecord() });
     const html = renderModes({ storage, sessions: true });
     expect(html).toContain('data-learn-locked="false"');
     expect(html).toContain("Vakaları çöz");

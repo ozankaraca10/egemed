@@ -104,7 +104,8 @@ export type { Action, AppState, ReducerSeam, StoragePort } from "./core/reducer"
 export { createFlushHandlers, createLifecycle } from "./core/lifecycle";
 export type { FlushTarget, Lifecycle, LifecycleHandlers, WindowLike } from "./core/lifecycle";
 export {
-  LEARN_OPENED_KEY,
+  LEARN_VIEWED_KEY,
+  LEARN_VIEW_SECONDS,
   LOCKED_LEARN_SNAPSHOT,
   OPACA_CONTENT_VERSION,
   canStartMode,
@@ -113,10 +114,11 @@ export {
   createLearnCompletionNotifier,
   createLearnTracker,
   learnLockText,
+  exampleKey,
   learnProgressText,
-  loadOpened,
-  parseOpened,
-  saveOpened,
+  loadViewed,
+  parseViewed,
+  saveViewed,
 } from "./core/learnLock";
 export type { LearnCompletionNotifier, LearnSnapshot, LearnTracker, LearnTrackerDeps } from "./core/learnLock";
 export { LearnGateProvider, useLearnGate, useStartMode } from "./core/LearnGate";

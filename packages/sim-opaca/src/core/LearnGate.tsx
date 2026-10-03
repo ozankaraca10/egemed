@@ -8,13 +8,13 @@ import type { Mode } from "./types";
  *  varsayılan KİLİTLİdir (fail-safe): kilit yalnız gerçek ilerleme kanalıyla açılır. */
 
 export interface LearnGateValue extends LearnSnapshot {
-  /** Kütüphane öğesinin görüntüsü film görüntüleyicide yüklendiğinde çağrılır; kalıcı kümeye yazar. */
-  markOpened(key: string): void;
+  /** Film yüklü ve sayfa görünürken geçen süreyi konunun örneğine ekler (T320: film başına 15 sn). */
+  addView(key: string, exampleIndex: number, ms: number): void;
 }
 
 const LearnGateContext = createContext<LearnGateValue>({
   ...LOCKED_LEARN_SNAPSHOT,
-  markOpened: () => undefined,
+  addView: () => undefined,
 });
 
 export function useLearnGate(): LearnGateValue {
@@ -42,7 +42,7 @@ export function LearnGateProvider({ learn, children }: LearnGateProviderProps): 
     tracker.notify();
   }, [tracker]);
   const value = useMemo<LearnGateValue>(
-    () => ({ ...snapshot, markOpened: (key: string) => tracker.markOpened(key) }),
+    () => ({ ...snapshot, addView: (key: string, exampleIndex: number, ms: number) => tracker.addView(key, exampleIndex, ms) }),
     [snapshot, tracker],
   );
   return <LearnGateContext.Provider value={value}>{children}</LearnGateContext.Provider>;

@@ -84,22 +84,24 @@ export async function unlockAuscultaLearn(page: Page): Promise<void> {
 
 /**
  * T218 — öğrenme kilidi tohumu: uygulama/değerlendirme akışından önce Opaca
- * öğrenmesini tamamlanmış sayar. İki yol birlikte açılır: yerel açıldı kümesi
- * tüm kütüphane anahtarlarıyla yazılır ve DEV kabuğun sekme deposu öğrenme kaydı
+ * öğrenmesini tamamlanmış sayar. İki yol birlikte açılır: yerel film inceleme
+ * haritası her konunun 0–3. filmleri için 15 sn yazılır (T320; fazla sıralar yok sayılır) ve DEV kabuğun sekme deposu öğrenme kaydı
  * (`egemed.learn.opaca`) işaretlenir. `addInitScript` her gezinmeden önce koşar.
- * (E2E'de XR görüntü dosyaları git-dışı olduğundan kayıt gerçek yüklemeyle üretilemez.)
+ * (E2E'de XR görüntü dosyaları git-dışı olduğundan kayıt gerçek incelemeyle üretilemez.)
  */
 export async function unlockOpacaLearn(page: Page): Promise<void> {
-  const opened = JSON.stringify(
-    (opacaLibrary.groups as { items: { key: string }[] }[]).flatMap((group) => group.items.map((item) => item.key)),
+  const viewed = JSON.stringify(
+    Object.fromEntries(
+      (opacaLibrary.groups as { items: { key: string }[] }[]).flatMap((group) => group.items.flatMap((item) => [0, 1, 2, 3].map((index) => [`${item.key}#${index}`, 15]))),
+    ),
   );
   const namespaces = ["egemed:anon:opaca:", "egemed:u:dev-student-0001:opaca:", "egemed:u:dev-admin-0001:opaca:"];
   await page.addInitScript(
-    (seed: { opened: string; namespaces: string[] }) => {
-      for (const namespace of seed.namespaces) localStorage.setItem(`${namespace}opaca.learn.opened`, seed.opened);
+    (seed: { viewed: string; namespaces: string[] }) => {
+      for (const namespace of seed.namespaces) localStorage.setItem(`${namespace}opaca.learn.viewed`, seed.viewed);
       sessionStorage.setItem("egemed.learn.opaca", "1");
     },
-    { opened, namespaces },
+    { viewed, namespaces },
   );
 }
 
