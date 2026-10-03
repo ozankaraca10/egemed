@@ -689,23 +689,31 @@ export const FilmViewer = forwardRef<FilmViewerHandle, FilmViewerProps>(function
             />
           </label>
         )}
-        <label className="film-select">
-          <span>Pencere</span>
-          <select value={preset} onChange={(e) => choosePreset((e.target as ValueTarget).value)}>
-            {presetOptions.map((p) => (
-              <option key={p.id} value={p.id}>
-                {p.label}
-              </option>
-            ))}
-            {preset === 'custom' && <option value="custom">Özel</option>}
-          </select>
-        </label>
+        {/* T324: Pencere, parlaklık/kontrast ve negatif tek "Görüntü" panelinde (araç çubuğu tek satır). */}
         <div className="popover-wrap">
-          <button type="button" className="tool-btn" aria-expanded={adjustOpen} onClick={() => setAdjustOpen((o) => !o)}>
-            Parlaklık / kontrast
+          <button
+            type="button"
+            className={`tool-btn film-view-btn ${invert || preset === 'custom' ? 'active' : ''}`}
+            aria-expanded={adjustOpen}
+            aria-haspopup="true"
+            onClick={() => setAdjustOpen((o) => !o)}
+          >
+            Görüntü: {presetOptions.find((p) => p.id === preset)?.label ?? 'Özel'}
+            {invert ? ' · negatif' : ''} <span aria-hidden="true">▾</span>
           </button>
           {adjustOpen && (
-            <div className="popover film-adjust" role="group" aria-label="Parlaklık ve kontrast">
+            <div className="popover film-adjust" role="group" aria-label="Görüntü ayarları">
+              <label className="film-select">
+                <span>Pencere</span>
+                <select value={preset} onChange={(e) => choosePreset((e.target as ValueTarget).value)}>
+                  {presetOptions.map((p) => (
+                    <option key={p.id} value={p.id}>
+                      {p.label}
+                    </option>
+                  ))}
+                  {preset === 'custom' && <option value="custom">Özel</option>}
+                </select>
+              </label>
               <label>
                 Parlaklık <b>{Math.round(win.brightness * 100)}%</b>
                 <input
@@ -734,20 +742,20 @@ export const FilmViewer = forwardRef<FilmViewerHandle, FilmViewerProps>(function
                   }}
                 />
               </label>
+              <button
+                type="button"
+                className={`tool-btn ${invert ? 'active' : ''}`}
+                aria-pressed={invert}
+                onClick={() => {
+                  setInvert((v) => !v)
+                  onTool?.('invert')
+                }}
+              >
+                Negatif
+              </button>
             </div>
           )}
         </div>
-        <button
-          type="button"
-          className={`tool-btn ${invert ? 'active' : ''}`}
-          aria-pressed={invert}
-          onClick={() => {
-            setInvert((v) => !v)
-            onTool?.('invert')
-          }}
-        >
-          Negatif
-        </button>
         {!strict && onToggleZones && !ctStack && zones.length > 0 && (
           <button
             type="button"

@@ -737,7 +737,7 @@
   .eg-sim-opaca:has(.learn-body){ overflow: hidden; }
   .eg-sim-opaca .screen-body.no-scroll.learn-body{ overflow: hidden; }
   /* Kabuk birleşik barı (3.3125rem) ve alt bilgisi (2.5625rem) düşülür (Ausculta T309 ile aynı). */
-  .eg-sim-opaca .learn-grid{ display: grid; flex: none; height: calc(100dvh - 3.3125rem - 2.5625rem); min-height: 560px; grid-template-rows: minmax(0, 1fr); align-items: stretch; }
+  .eg-sim-opaca .learn-grid{ display: grid; flex: none; height: calc(100dvh - 3.3125rem); min-height: 560px; grid-template-rows: minmax(0, 1fr); align-items: stretch; }
   .eg-sim-opaca .learn-grid > .lib-col, .eg-sim-opaca .learn-grid > .sim-main, .eg-sim-opaca .learn-grid > .sim-side{ min-height: 0; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; }
 }
 @media (min-width: 1024px) and (max-width: 1280px) {
@@ -799,3 +799,48 @@
 .eg-sim-opaca .film-tools .points-toggle{ background: transparent; color: var(--film-ink); border: 1px solid rgba(138, 163, 199, .3); border-radius: var(--r-sm); padding: 5px 10px; min-height: 32px; font-size: var(--fs-sm); }
 .eg-sim-opaca .film-tools .points-toggle input{ accent-color: var(--blue-400); }
 @media (pointer: coarse) { .eg-sim-opaca .film-tools .points-toggle{ min-height: 44px; } }
+
+/* T324 — Opaca dikey yer kazanımı (onaylı maket "Opaca Dikey Yer Maketi"): öğrenme ızgarası alt bilgi
+   satırını düşmez (alt bilgi akışta, katlanma altında); örnekler başlık satırında; film büyür;
+   kart başlığı/kimlik tek satır; konu bilgisi sekmeli; bölge çipleri tek satır. */
+.eg-sim-opaca .learn-titlerow{ align-items: center; gap: 6px 12px; }
+.eg-sim-opaca .learn-titlerow .learn-title{ font-size: 20px; }
+.eg-sim-opaca .learn-study{ font-size: var(--fs-xs); font-weight: 700; color: var(--ink-900); background: var(--card); border: 1px solid var(--border); border-radius: var(--r-pill); padding: 3px 9px; white-space: nowrap; }
+.eg-sim-opaca .learn-study.done{ color: var(--green-800); border-color: var(--green-100); background: var(--green-50); }
+.eg-sim-opaca .learn-titlerow .ex-row{ margin-left: auto; flex-wrap: nowrap; gap: 4px; }
+.eg-sim-opaca .learn-titlerow .ex-btn{ flex: none; min-width: 0; padding: 2px 10px; display: inline-grid; justify-items: center; line-height: 1.15; }
+.eg-sim-opaca .learn-grid .film-stage{ width: 100%; max-width: 100%; max-height: min(calc(100dvh - 17rem), 760px); }
+.eg-sim-opaca .learn-grid > .sim-main{ min-width: 0; }
+.eg-sim-opaca .pcard-h{ display: flex; align-items: center; gap: 8px; padding: 10px 14px; }
+.eg-sim-opaca .pcard-h h3{ font-size: var(--fs-md); flex: 1 1 auto; min-width: 0; }
+.eg-sim-opaca .pcard-meta{ margin: 0; padding: 8px 14px; border-bottom: 1px solid var(--border); font-size: var(--fs-sm); color: var(--ink-700); }
+.eg-sim-opaca .learn-about{ border: 1px solid var(--border); border-radius: 14px; background: var(--card); overflow: hidden; gap: 0; }
+.eg-sim-opaca .la-tabs{ display: flex; border-bottom: 1px solid var(--border); }
+.eg-sim-opaca .la-tab{ flex: 1 1 0; min-height: 36px; border: 0; border-bottom: 2px solid transparent; background: none; font: inherit; font-size: var(--fs-xs); font-weight: 600; color: var(--ink-600); cursor: pointer; }
+.eg-sim-opaca .la-tab.active{ border-bottom-color: var(--blue-600); color: var(--navy-900); font-weight: 700; }
+.eg-sim-opaca .la-panel{ margin: 0; padding: 10px 14px; font-size: var(--fs-sm); line-height: 1.5; color: var(--ink-700); }
+.eg-sim-opaca .zone-chips{ flex-wrap: nowrap; overflow-x: auto; gap: 4px 10px; scrollbar-width: thin; }
+.eg-sim-opaca .zone-step{ flex: none; }
+.eg-sim-opaca .zone-step + .zone-step{ padding-left: 10px; border-left: 1px solid var(--border); }
+.eg-sim-opaca .zone-step-list{ flex-wrap: nowrap; }
+.eg-sim-opaca .learn-grid .zone-chips{ max-height: none; }
+.eg-sim-opaca .film-adjust{ max-height: none; width: auto; }
+.eg-sim-opaca .film-adjust .tool-btn{ justify-self: start; }
+.eg-sim-opaca .case-view{ color: var(--ink-600); }
+.eg-sim-opaca .kv-grid:empty{ display: none; }
+.eg-sim-opaca .case-restart{ min-width: 32px; padding: 4px 8px; }
+.eg-sim-opaca .q-hint-note{ margin: 8px 0 0; font-size: var(--fs-xs); color: var(--film-ink); opacity: .85; }
+@media (pointer: fine) {
+  .eg-sim-opaca .learn-grid .lib-item{ min-height: 32px; padding: 3px 10px; }
+  .eg-sim-opaca .learn-titlerow .ex-btn{ min-height: 32px; }
+  .eg-sim-opaca .film-tools .seg button, .eg-sim-opaca .film-tools .tool-btn{ min-height: 32px; min-width: 32px; padding: 5px 10px; }
+  .eg-sim-opaca .film-select select{ min-height: 32px; padding: 4px 8px; }
+  .eg-sim-opaca .zone-chip{ min-height: 28px; padding: 3px 10px; }
+  .eg-sim-opaca .la-tab{ min-height: 32px; }
+}
+@media (max-width: 720px) {
+  .eg-sim-opaca .learn-titlerow .ex-row{ margin-left: 0; width: 100%; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .eg-sim-opaca .learn-titlerow .ex-btn{ min-height: 44px; }
+}
+/* Tek satır çip şeridi ızgara öğesini içerik genişliğine itmesin (yatay taşma yok). */
+.eg-sim-opaca .sim-main > *, .eg-sim-opaca .stage-card, .eg-sim-opaca .film-viewer, .eg-sim-opaca .zone-chips{ min-width: 0; max-width: 100%; }

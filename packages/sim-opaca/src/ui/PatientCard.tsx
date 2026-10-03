@@ -22,12 +22,20 @@ const ICON_PATHS: Record<string, string> = {
   bulb: 'M9 18h6M10 21h4M12 3a6 6 0 0 0-4 10.5c.7.7 1 1.5 1 2.5h6c0-1 .3-1.8 1-2.5A6 6 0 0 0 12 3z',
 }
 
+/** T324: kaynak kısa adla (kuruluş + yıl); tam başlık title ve erişilebilir adda. */
+export function shortRefLabel(title: string): string {
+  const year = /\((\d{4})\)/.exec(title)?.[1]
+  const words = title.split(/[\s:(—]+/).filter(Boolean)
+  const org = words[0]?.endsWith('.') ? words.slice(0, 3).join(' ') : words[0] ?? title
+  return year ? `${org} ${year}` : words.slice(0, 2).join(' ')
+}
+
 function RefLink({ label, ref }: { label: string; ref: VignetteRef }): JSX.Element {
   return (
     <p className="pcard-ref">
       {label}:{' '}
-      <a href={ref.url} target="_blank" rel="noreferrer">
-        {ref.title}
+      <a href={ref.url} target="_blank" rel="noreferrer" title={ref.title}>
+        {shortRefLabel(ref.title)} ↗
       </a>
     </p>
   )
@@ -69,22 +77,20 @@ export function PatientCard({ image, context, topic, exampleNo, finding, vignett
     : Object.entries(image.findings).map(([finding, src]) => ({ text: findingShort(finding), source: LABEL_SOURCE_TEXT[src] ?? src, expert: isExpertSource(src) }))
   return (
     <article className="pcard" aria-labelledby="pcard-title">
+      {/* T324: başlık ve kimlik tek satır; kayıt etiketi başlıkta (dikey yer kazanımı). */}
       <header className="pcard-h">
-        <span className="pcard-topic">{topic} · Örnek {exampleNo}</span>
-        <h3 id="pcard-title">{title}</h3>
+        <h3 id="pcard-title">Örnek {exampleNo} · {title}</h3>
+        {real ? <span className="ptag real"><i aria-hidden="true" />Gerçek hasta verisi</span> : <span className="ptag none"><i aria-hidden="true" />Kayıt yok</span>}
       </header>
-      <dl className="pcard-id">
-        <div><dt>Yaş</dt><dd>{age ?? '—'}</dd></div>
-        <div><dt>Cinsiyet</dt><dd>{sex ?? '—'}</dd></div>
-        <div><dt>Çekim</dt><dd title={view ? undefined : 'Kaynakta belirtilmemiş'}>{view ?? '—'}</dd></div>
-        <div><dt>Kaynak</dt><dd>{source}</dd></div>
-      </dl>
-      <section className="pcard-sec" aria-label="Klinik kayıt">
-        <div className="pcard-sec-h">
-          <h4>Klinik kayıt</h4>
-          {real ? <span className="ptag real"><i aria-hidden="true" />Gerçek hasta verisi</span> : <span className="ptag none"><i aria-hidden="true" />Kayıt yok</span>}
-        </div>
-        {context && context.items.length > 0 ? (
+      <p className="pcard-meta">
+        {[age !== null ? (typeof age === 'number' ? `${age} yaş` : age) : null, sex, view ?? 'Çekim belirtilmemiş', source].filter(Boolean).join(' · ')}
+      </p>
+      {/* Klinik kayıt yalnız kayıtta yaş/cinsiyet/çekim dışında bilgi varsa çizilir. */}
+      {context && context.items.length > 0 ? (
+        <section className="pcard-sec" aria-label="Klinik kayıt">
+          <div className="pcard-sec-h">
+            <h4>Klinik kayıt</h4>
+          </div>
           <ul className="pcard-rows">
             {context.items.map((row, index) => (
               <li key={index}>
@@ -94,19 +100,14 @@ export function PatientCard({ image, context, topic, exampleNo, finding, vignett
               </li>
             ))}
           </ul>
-        ) : null}
-        {context?.note ? <p className="pcard-note">{context.note}</p> : null}
-        {real && context.items.length === 0 && !context.note ? (
-          <p className="pcard-note">Kayıtta yaş, cinsiyet ve çekim dışında klinik bilgi yok.</p>
-        ) : null}
-        {!context ? <p className="pcard-note">Bu görüntü için kayıtlı hasta verisi yok.</p> : null}
-        {context?.orig ? (
-          <details className="pcard-orig">
-            <summary>Orijinal kayıt (İngilizce)</summary>
-            <p lang="en">{context.orig}</p>
-          </details>
-        ) : null}
-      </section>
+          {context.orig ? (
+            <details className="pcard-orig">
+              <summary>Orijinal kayıt (İngilizce)</summary>
+              <p lang="en">{context.orig}</p>
+            </details>
+          ) : null}
+        </section>
+      ) : null}
       {vignette ? (
         <>
           <section className="pcard-sec" aria-label="Başvuru öyküsü">
@@ -117,7 +118,7 @@ export function PatientCard({ image, context, topic, exampleNo, finding, vignett
             <ul className="pcard-story">
               {vignette.presentation.map((line, index) => <li key={index}>{line}</li>)}
             </ul>
-            <RefLink label="Tipik başvuru örüntüsü" ref={vignette.presentationRef} />
+            <RefLink label="Kaynak" ref={vignette.presentationRef} />
           </section>
           <section className="pcard-sec" aria-label="Ayırıcı tanıda düşün">
             <div className="pcard-sec-h">
@@ -132,15 +133,15 @@ export function PatientCard({ image, context, topic, exampleNo, finding, vignett
                 </li>
               ))}
             </ol>
-            <RefLink label="Terim ve ayırıcı tanı" ref={vignette.differentialRef} />
+            <RefLink label="Kaynak" ref={vignette.differentialRef} />
             <div className="pcard-pearl">
               <RowIcon name="bulb" />
               <p>
                 {vignette.pearl.text}{' '}
                 <span className="pcard-ref-inline">
                   Kaynak:{' '}
-                  <a href={vignette.pearl.ref.url} target="_blank" rel="noreferrer">
-                    {vignette.pearl.ref.title}
+                  <a href={vignette.pearl.ref.url} target="_blank" rel="noreferrer" title={vignette.pearl.ref.title}>
+                    {shortRefLabel(vignette.pearl.ref.title)} ↗
                   </a>
                 </span>
               </p>

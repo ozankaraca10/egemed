@@ -24,6 +24,14 @@ import { IconFilm, IconLock } from '../ui/icons'
  *  oyunlaştırma `gami` seam'i ile enjekte edilir (§7.7). */
 
 const LEARN_DWELL_MS = 800
+/** T324: konu bilgisi sekmeleri. */
+const ABOUT_TABS = [
+  { id: 'description', label: 'Tanım' },
+  { id: 'sign', label: 'Radyolojik ipucu' },
+  { id: 'readingTip', label: 'Okurken' },
+  { id: 'clinical', label: 'Klinik' },
+] as const
+type AboutTab = (typeof ABOUT_TABS)[number]['id']
 /** İnceleme sayacı adımı (ms); uyku/arka plan sıçramaları bu kadarla sınırlanır. */
 const VIEW_TICK_MS = 1000
 
@@ -73,6 +81,7 @@ export function LearnScreen({
   const [exampleIdx, setExampleIdx] = useState(() => state.learnFocusIdx ?? 0)
   const lastKey = useRef(selectedKey)
   const [showExpert, setShowExpert] = useState(true)
+  const [aboutTab, setAboutTab] = useState<AboutTab>('description')
   const [activeZones, setActiveZones] = useState<string[]>([])
   const viewerRef = useRef<FilmViewerHandle>(null)
 
@@ -221,10 +230,30 @@ export function LearnScreen({
                 <div className="learn-titlerow">
                   <span className="learn-eb">{groupTitle}</span>
                   <h3 className="learn-title">{item.title}</h3>
+                  {/* T324: inceleme süresi rozet; tam ölçüt title ile (dikey yer kazanımı). */}
+                  <span
+                    className={`learn-study${currentDone ? ' done' : ''}`}
+                    role="status"
+                    title={`Konu, ${examples.length} filmin her biri en az ${LEARN_VIEW_SECONDS} sn incelenince tamamlanır.`}
+                  >
+                    {currentDone ? 'Bu film incelendi ✓' : `Bu film ${Math.floor(viewedSeconds(exampleIdx))}/${LEARN_VIEW_SECONDS} sn`}
+                  </span>
+                  {/* T324: örnek seçimi başlık satırında (eskiden filmin altında, katlanma dışında). */}
+                  <div className="ex-row" role="group" aria-label="Örnek seçimi">
+                    {examples.map((entry, index) => (
+                      <button
+                        key={entry.id}
+                        type="button"
+                        className={`ex-btn${index === exampleIdx ? ' active' : ''}`}
+                        aria-pressed={index === exampleIdx}
+                        onClick={() => setExampleIdx(index)}
+                      >
+                        Örnek {index + 1}
+                        <small>{viewedSeconds(index) >= LEARN_VIEW_SECONDS ? '✓ incelendi' : `${Math.floor(viewedSeconds(index))}/${LEARN_VIEW_SECONDS} sn`}</small>
+                      </button>
+                    ))}
+                  </div>
                 </div>
-                <p className="learn-study" role="status">
-                  {currentDone ? 'Bu film incelendi ✓' : `Bu film ${Math.floor(viewedSeconds(exampleIdx))}/${LEARN_VIEW_SECONDS} sn`} · konu, {examples.length} filmin her biri en az {LEARN_VIEW_SECONDS} sn incelenince tamamlanır
-                </p>
               </div>
               <div className="stage-card film-card">
                 {image ? (
@@ -269,51 +298,31 @@ export function LearnScreen({
                   </p>
                 ) : null}
               </div>
-              <div className="learn-examples">
-                <div className="learn-lbl">Örnekler</div>
-                <div className="ex-row" role="group" aria-label="Örnek seçimi">
-                  {examples.map((entry, index) => (
-                    <button
-                      key={entry.id}
-                      type="button"
-                      className={`ex-btn${index === exampleIdx ? ' active' : ''}`}
-                      aria-pressed={index === exampleIdx}
-                      onClick={() => setExampleIdx(index)}
-                    >
-                      Örnek {index + 1}
-                      <small>{viewedSeconds(index) >= LEARN_VIEW_SECONDS ? '✓ incelendi' : `${Math.floor(viewedSeconds(index))}/${LEARN_VIEW_SECONDS} sn`}</small>
-                    </button>
-                  ))}
-                </div>
-              </div>
             </section>
 
             <section className="sim-side" aria-label="Hasta kartı ve konu bilgisi" tabIndex={0}>
               {image ? <PatientCard image={image} context={clinicalContextFor(image.id)} topic={item.short} exampleNo={exampleIdx + 1} finding={item.finding} vignette={vignetteFor(image.id)} /> : null}
-              <section className="learn-about" aria-labelledby="learn-about-title">
-                <div className="la-head">
-                  <span className="learn-eb">{groupTitle}</span>
-                  <h3 id="learn-about-title">{item.title}</h3>
-                  <span className="learn-lbl la-tag">Bu bulgu hakkında</span>
+              {/* T324: konu bilgisi sekmeli; ortadaki başlığın tekrarı kaldırıldı. */}
+              <section className="learn-about" aria-label="Bu bulgu hakkında">
+                <div className="la-tabs" role="tablist" aria-label="Bu bulgu hakkında">
+                  {ABOUT_TABS.map((tab) => (
+                    <button
+                      key={tab.id}
+                      type="button"
+                      role="tab"
+                      id={`la-tab-${tab.id}`}
+                      aria-selected={aboutTab === tab.id}
+                      aria-controls="la-panel"
+                      className={`la-tab${aboutTab === tab.id ? ' active' : ''}`}
+                      onClick={() => setAboutTab(tab.id)}
+                    >
+                      {tab.label}
+                    </button>
+                  ))}
                 </div>
-                <div className="la-grid">
-                  <div className="la-card">
-                    <div className="learn-lbl">Tanım</div>
-                    <p className="la-crit">{item.description}</p>
-                  </div>
-                  <div className="la-card">
-                    <div className="learn-lbl">Radyolojik ipucu</div>
-                    <p className="la-mech">{item.sign}</p>
-                  </div>
-                  <div className="la-card">
-                    <div className="learn-lbl">Okurken</div>
-                    <p className="la-mech">{item.readingTip}</p>
-                  </div>
-                  <div className="la-card">
-                    <div className="learn-lbl">Klinik</div>
-                    <p className="la-mech">{item.clinical}</p>
-                  </div>
-                </div>
+                <p className="la-panel" id="la-panel" role="tabpanel" aria-labelledby={`la-tab-${aboutTab}`}>
+                  {aboutTab === 'description' ? item.description : aboutTab === 'sign' ? item.sign : aboutTab === 'readingTip' ? item.readingTip : item.clinical}
+                </p>
               </section>
             </section>
           </div>
