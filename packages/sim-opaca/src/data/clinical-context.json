@@ -366,22 +366,6 @@
    "note": "Bu görüntüde kayıtlı hasta verisi yok (yayın / eğitim görüntüsü).",
    "hasReal": false
   },
-  "commons_scoliosis_adams": {
-   "age": null,
-   "sex": null,
-   "view": "AP",
-   "source": "Wikimedia Commons",
-   "items": [],
-   "labels": [
-    {
-     "finding": "Skolyoz",
-     "source": "yayın açıklaması"
-    }
-   ],
-   "orig": null,
-   "note": "Bu görüntüde kayıtlı hasta verisi yok (yayın / eğitim görüntüsü).",
-   "hasReal": false
-  },
   "commons_westermark": {
    "age": null,
    "sex": null,
@@ -494,22 +478,6 @@
    "note": "Bu görüntüde kayıtlı hasta verisi yok (yayın / eğitim görüntüsü).",
    "hasReal": false
   },
-  "epmc_pmc13022644_gr6": {
-   "age": null,
-   "sex": null,
-   "view": "AP",
-   "source": "Europe PMC olgu yayını",
-   "items": [],
-   "labels": [
-    {
-     "finding": "Kemik kırığı",
-     "source": "yayın açıklaması"
-    }
-   ],
-   "orig": null,
-   "note": "Bu görüntüde kayıtlı hasta verisi yok (yayın / eğitim görüntüsü).",
-   "hasReal": false
-  },
   "epmc_pmc13035185_cureus_0018_00000104431_i01": {
    "age": null,
    "sex": null,
@@ -583,22 +551,6 @@
    "labels": [
     {
      "finding": "Konjenital diyafram hernisi (Bochdalek/Morgagni)",
-     "source": "yayın açıklaması"
-    }
-   ],
-   "orig": null,
-   "note": "Bu görüntüde kayıtlı hasta verisi yok (yayın / eğitim görüntüsü).",
-   "hasReal": false
-  },
-  "epmc_pmc13435391_12893_2026_3881_fig1_html": {
-   "age": null,
-   "sex": null,
-   "view": null,
-   "source": "Europe PMC olgu yayını",
-   "items": [],
-   "labels": [
-    {
-     "finding": "Skolyoz",
      "source": "yayın açıklaması"
     }
    ],
@@ -807,22 +759,6 @@
    "labels": [
     {
      "finding": "Konjenital diyafram hernisi (Bochdalek/Morgagni)",
-     "source": "yayın açıklaması"
-    }
-   ],
-   "orig": null,
-   "note": "Bu görüntüde kayıtlı hasta verisi yok (yayın / eğitim görüntüsü).",
-   "hasReal": false
-  },
-  "epmc_pmc13544946_icrm_17_6822_g001": {
-   "age": null,
-   "sex": null,
-   "view": "LAT",
-   "source": "Europe PMC olgu yayını",
-   "items": [],
-   "labels": [
-    {
-     "finding": "Yükselmiş hemidiyafram (eventrasyon/paralizi)",
      "source": "yayın açıklaması"
     }
    ],

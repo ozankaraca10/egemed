@@ -79,10 +79,10 @@ describe("images.json görüntü yolları", () => {
   });
 
   it("manifest kapsamı beklenen sayıdadır (kopya bütünlüğü)", () => {
-    expect(records.length).toBe(597);
-    expect(paths.length).toBe(739);
+    expect(records.length).toBe(593);
+    expect(paths.length).toBe(735);
     expect(ctPaths.length).toBe(144);
-    expect(xrayPaths.length).toBe(595);
+    expect(xrayPaths.length).toBe(591);
   });
 
   it("CT görüntü ve karelerinin tamamı diskte vardır", () => {
