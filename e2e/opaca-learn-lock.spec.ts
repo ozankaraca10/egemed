@@ -80,7 +80,7 @@ test.describe("Opaca öğrenme kilidi", () => {
     }
     expect(loadedFilms).toBeGreaterThan(0);
     const expected = loadedFilms === count ? 1 : 0;
-    await expect(root.getByRole("status", { name: `Öğrenme: ${expected}/30 konu incelendi` })).toBeVisible();
+    await expect(root.getByRole("status", { name: `Öğrenme: ${expected}/33 konu incelendi` })).toBeVisible();
     expect(errors, "konsol/sayfa hatası").toEqual([]);
   });
 
