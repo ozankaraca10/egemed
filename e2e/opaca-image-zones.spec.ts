@@ -27,16 +27,17 @@ test.describe("Opaca görüntüye özgü okuma bölgeleri", () => {
     const errors = trackErrors(page);
     const root = await openLearn(page);
 
-    await root.locator(".lib-item", { hasText: "Radyoopak cisim" }).click();
-    await expect(root.locator('img[src*="commons_coin_ap.webp"]')).toBeVisible();
-    const firstRect = { x: 0.1411, y: 0.0642 };
+    // T321a: pediatrik konular çıktı; erişkin frontal film (Kardiyomegali, ilk örnek) kullanılır.
+    await root.locator(".lib-item", { hasText: "Kardiyomegali" }).click();
+    await expect(root.locator('img[src*="nih_00000211_041.webp"]')).toBeVisible();
+    const firstRect = { x: 0.3279, y: 0.0076 }; // ilk çizilen bölge: a_trachea (segmentasyon)
     const drawn = root.locator(".zone-rect").first();
     await expect(drawn).toHaveAttribute("x", String(firstRect.x));
     await expect(drawn).toHaveAttribute("y", String(firstRect.y));
     expect(firstRect.x).not.toBe(0.1); // Eski sabit PA şablonundaki b_r_upper.x
 
     await root.locator(".lib-item", { hasText: "Lateral grafi" }).click();
-    await expect(root.locator('img[src*="commons_coin_lat.webp"]')).toBeVisible();
+    await expect(root.locator('img[src*="commons_hiatal_lat.webp"]')).toBeVisible();
     await expect(root.locator(".zone-chip", { hasText: "Retrosternal" })).toBeVisible();
 
     await root.locator(".lib-item", { hasText: "Klavikula kırığı" }).click();

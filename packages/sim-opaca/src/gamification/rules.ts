@@ -11,7 +11,7 @@ interface OpacaBadgeRules {
   cardiac: number;
   nodule: number;
   tb: number;
-  pediatric: number;
+  parenchyma: number;
   diaphragm: number;
   bone: number;
   vascular: number;
@@ -41,7 +41,7 @@ export const OPACA_RULES: OpacaGamiRules = {
     cardiac: 5,
     nodule: 10,
     tb: 10,
-    pediatric: 5,
+    parenchyma: 10,
     diaphragm: 5,
     bone: 5,
     vascular: 3,

@@ -1,9 +1,9 @@
 {
-  "totalCases": 187,
-  "practicePoolSize": 187,
+  "totalCases": 179,
+  "practicePoolSize": 179,
   "assessmentPoolSize": 124,
   "assessmentQuestions": 399,
-  "pediatricCases": 8,
+  "pediatricCases": 0,
   "coverage": {
     "air_trapping": {
       "p": 1,
@@ -18,7 +18,7 @@
       "a": 9
     },
     "cardiomegaly": {
-      "p": 14,
+      "p": 13,
       "a": 8
     },
     "clavicle_fracture": {
@@ -62,15 +62,15 @@
       "a": 14
     },
     "normal": {
-      "p": 30,
+      "p": 28,
       "a": 28
     },
     "pleural_effusion": {
-      "p": 12,
+      "p": 11,
       "a": 9
     },
     "pneumothorax": {
-      "p": 15,
+      "p": 13,
       "a": 11
     },
     "rib_fracture": {
@@ -86,7 +86,7 @@
       "a": 0
     },
     "tuberculosis_cavity": {
-      "p": 10,
+      "p": 8,
       "a": 8
     },
     "tuberculosis_fibrosis": {

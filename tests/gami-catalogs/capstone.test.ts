@@ -24,7 +24,7 @@ const LEGACY_IDS: Readonly<Record<string, readonly string[]>> = {
   ],
   opaca: [
     "sharp-eye-1", "sharp-eye-2", "sharp-eye-3", "systematic", "film-quality", "fast-accurate",
-    "interpreter", "pleura", "cardiac", "nodule", "tb", "pediatric", "diaphragm", "bone", "vascular",
+    "interpreter", "pleura", "cardiac", "nodule", "tb", "diaphragm", "bone", "vascular", // T321a: "pediatric" kaldırıldı (depo sahibi)
     "streak-3", "streak-7", "streak-30", "marathon", "explorer", "ct-explorer", "practice-grit",
     "first-step", "threshold", "no-hints", "perfect", "all-topics",
     "duel-first", "duel-first-win", "duel-wins-3", "duel-wins-10", "duel-wins-25",

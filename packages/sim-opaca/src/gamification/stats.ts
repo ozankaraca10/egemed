@@ -14,7 +14,7 @@ export const TOPIC_BADGE_MATCH: Record<string, (findingId: string) => boolean> =
   cardiac: (id) => FINDINGS[id]?.group === "cardiac",
   nodule: (id) => id === "nodule_mass",
   tb: (id) => FINDINGS[id]?.group === "infection",
-  pediatric: (id) => FINDINGS[id]?.group === "pediatric",
+  parenchyma: (id) => FINDINGS[id]?.group === "parenchyma" && id !== "nodule_mass",
   diaphragm: (id) => FINDINGS[id]?.group === "diaphragm",
   bone: (id) => FINDINGS[id]?.group === "bone" && id.endsWith("fracture"),
   vascular: (id) => FINDINGS[id]?.group === "vascular",

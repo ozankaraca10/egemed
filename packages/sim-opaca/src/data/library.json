@@ -684,6 +684,30 @@
           }
         },
         {
+          "key": "finding.pneumonia_report",
+          "finding": "pneumonia_report",
+          "title": "Pnömoni",
+          "short": "Pnömoni",
+          "sub": "Toplum kökenli pnömoni, lober / yama tarzı konsolidasyon",
+          "description": "Akciğer parankiminin enfeksiyonudur. Grafide yeni ortaya çıkan, çoğunlukla lober ya da segmenter dağılımlı konsolidasyon veya yama tarzı opasite olarak görülür; hava bronkogramı ve silüet işareti eşlik edebilir.",
+          "sign": "Yeni opasite ve uyumlu klinik tablo birlikte aranır. Lober konsolidasyon ve hava bronkogramı bakteriyel etkeni, iki taraflı yama tarzı ya da interstisyel opasite viral/atipik etkeni düşündürebilir; ancak grafi etkeni tek başına ayırt edemez.",
+          "readingTip": "Opasitenin lobunu silüet işaretiyle belirleyin; ardından plevral efüzyon, kavitasyon ve hacim kaybını ayrıca arayın. Varsa eski grafiyle karşılaştırma opasitenin yeni olduğunu gösterir.",
+          "clinical": "ATS/IDSA (2019) toplum kökenli pnömoni kılavuzuna göre tanı, klinik bulgulara ek olarak grafide yeni infiltrat gösterilmesiyle konur. Radyolojik düzelme klinik iyileşmeden haftalar sonra gelebilir. Bu konudaki görüntüler NIH ChestX-ray14'te rapor metninden (NLP) 'Pneumonia' etiketi almıştır; radyolog doğrulaması değildir.",
+          "bestZones": [
+            "b_r_mid",
+            "b_r_lower",
+            "b_l_mid",
+            "b_l_lower",
+            "c_heart"
+          ],
+          "badge": "Parankim",
+          "ucep": {
+            "disease": "Pnömoni",
+            "level": "TT",
+            "status": "öneri"
+          }
+        },
+        {
           "key": "finding.nodule_mass",
           "finding": "nodule_mass",
           "title": "Nodül ve kitle",
@@ -1328,6 +1352,115 @@
           ],
           "ucep": {
             "disease": "Kardiyomegali",
+            "level": "T",
+            "status": "öneri"
+          }
+        },
+        {
+          "key": "finding.hiatal_hernia",
+          "finding": "hiatal_hernia",
+          "title": "Hiatal herni",
+          "short": "Hiatal herni",
+          "sub": "Retrokardiyak hava-sıvı seviyesi",
+          "description": "Mide bir kısmının diyafram hiatusundan toraksa herniasyonudur. PA grafide sıklıkla kalp gölgesinin arkasında/altında, retrokardiyak alanda yuvarlak hava-sıvı seviyeli bir gölge olarak görülür.",
+          "sign": "Retrokardiyak alanda hava-sıvı seviyeli, genellikle mide gazına devam eden yuvarlak/oval gölge tipiktir; lateral grafide retrokardiyak yerleşim daha net izlenir.",
+          "readingTip": "Kalp gölgesinin arkasını mutlaka tarayın; retrokardiyak hava-sıvı seviyesini plevral efüzyon ya da apse ile karıştırmayın — konumu ve gaz-sıvı düzeyinin mide ile devamlılığı ayırt edicidir.",
+          "clinical": "Küçük kayan (sliding) hiatal herniler sık görülür ve çoğunlukla semptomsuzdur; büyük ya da paraözofageal herniler gastroözofageal reflü, obstrüksiyon veya strangülasyon riski taşıyabilir.",
+          "bestZones": [
+            "c_heart",
+            "d_r_diaphragm",
+            "d_l_diaphragm"
+          ],
+          "badge": "Mediasten",
+          "pitfalls": [
+            "Retrokardiyak hava-sıvı seviyesi her zaman hiatal herni değildir; özofagus dilatasyonu (akalazya) benzer görünüm verebilir."
+          ],
+          "nextStep": "Şüpheli olgularda bariyumlu özofagogram veya üst gastrointestinal endoskopi ile doğrulama.",
+          "nextStepQuestion": [
+            {
+              "prompt": "Grafide retrokardiyak hava-sıvı seviyesiyle hiatal herni düşünülen semptomatik (reflü) bir hastada tanıyı doğrulamak için en uygun sonraki adım hangisidir?",
+              "options": [
+                {
+                  "id": "a",
+                  "label": "Bariyumlu özofagogram veya üst gastrointestinal endoskopi"
+                },
+                {
+                  "id": "b",
+                  "label": "Akciğer grafisini tekrarlamak"
+                },
+                {
+                  "id": "c",
+                  "label": "Doğrudan ampirik antireflü cerrahisi planlamak"
+                },
+                {
+                  "id": "d",
+                  "label": "Toraks BT'yi rutin ilk basamak olarak istemek"
+                }
+              ],
+              "correct": [
+                "a"
+              ],
+              "feedbackCorrect": "Doğru. Bariyumlu özofagogram veya endoskopi, herni tipini ve boyutunu, eşlik eden özofajit/striktürü değerlendirir.",
+              "feedbackIncorrect": "Akciğer grafisi hiatal herniyi düşündürebilir ama doğrulama için bariyumlu özofagogram veya endoskopi gerekir.",
+              "hint": "Özofagus ve mideyi doğrudan görüntüleyen bir yöntem düşünün."
+            },
+            {
+              "prompt": "Grafide retrokardiyak hava-sıvı seviyesi görülen bir hastada bu bulgunun en olası nedeni nedir?",
+              "options": [
+                {
+                  "id": "a",
+                  "label": "Hiatal herni içinde mide/bağırsak segmentinin toraksa yer değiştirmesi"
+                },
+                {
+                  "id": "b",
+                  "label": "Kalp içi bir apse"
+                },
+                {
+                  "id": "c",
+                  "label": "Akciğer parankiminde kavite"
+                },
+                {
+                  "id": "d",
+                  "label": "Plevral ampiyem"
+                }
+              ],
+              "correct": [
+                "a"
+              ],
+              "feedbackCorrect": "Doğru. Retrokardiyak hava-sıvı seviyesi, mide veya bağırsağın diyafram hiatusundan toraksa herniye olmasıyla oluşabilir.",
+              "feedbackIncorrect": "Retrokardiyak hava-sıvı seviyesi tipik olarak diyafram hiatusundan herniye olan bir gastrointestinal segmenti düşündürür.",
+              "hint": "Hava-sıvı seviyesi genellikle içi boş bir organ segmentinde görülür."
+            },
+            {
+              "prompt": "Büyük bir hiatal herni semptomatik hale geldiğinde (ör. obstrüksiyon, kanama) tedavi yaklaşımı nasıldır?",
+              "options": [
+                {
+                  "id": "a",
+                  "label": "Cerrahi onarım değerlendirilir"
+                },
+                {
+                  "id": "b",
+                  "label": "Yalnız antiasit tedavi yeterlidir ve başka adım gerekmez"
+                },
+                {
+                  "id": "c",
+                  "label": "İzlem dışında hiçbir şey yapılmaz"
+                },
+                {
+                  "id": "d",
+                  "label": "Doğrudan kemoterapi"
+                }
+              ],
+              "correct": [
+                "a"
+              ],
+              "feedbackCorrect": "Doğru. Komplike veya semptomatik büyük hiatal hernilerde cerrahi onarım gündeme gelir; küçük, asemptomatik hernilerde tıbbi tedavi yeterli olabilir.",
+              "feedbackIncorrect": "Komplikasyon (obstrüksiyon, kanama, volvulus) gelişen ya da medikal tedaviye dirençli büyük hiatal hernilerde cerrahi onarım değerlendirilir.",
+              "hint": "Komplikasyon geliştiğinde tıbbi tedavi tek başına yeterli mi?"
+            }
+          ],
+          "ucep": {
+            "disease": "Hiatal herni",
             "level": "T",
             "status": "öneri"
           }
@@ -2028,115 +2161,6 @@
       "title": "Diyafram",
       "items": [
         {
-          "key": "finding.hiatal_hernia",
-          "finding": "hiatal_hernia",
-          "title": "Hiatal herni",
-          "short": "Hiatal herni",
-          "sub": "Retrokardiyak hava-sıvı seviyesi",
-          "description": "Mide bir kısmının diyafram hiatusundan toraksa herniasyonudur. PA grafide sıklıkla kalp gölgesinin arkasında/altında, retrokardiyak alanda yuvarlak hava-sıvı seviyeli bir gölge olarak görülür.",
-          "sign": "Retrokardiyak alanda hava-sıvı seviyeli, genellikle mide gazına devam eden yuvarlak/oval gölge tipiktir; lateral grafide retrokardiyak yerleşim daha net izlenir.",
-          "readingTip": "Kalp gölgesinin arkasını mutlaka tarayın; retrokardiyak hava-sıvı seviyesini plevral efüzyon ya da apse ile karıştırmayın — konumu ve gaz-sıvı düzeyinin mide ile devamlılığı ayırt edicidir.",
-          "clinical": "Küçük kayan (sliding) hiatal herniler sık görülür ve çoğunlukla semptomsuzdur; büyük ya da paraözofageal herniler gastroözofageal reflü, obstrüksiyon veya strangülasyon riski taşıyabilir.",
-          "bestZones": [
-            "c_heart",
-            "d_r_diaphragm",
-            "d_l_diaphragm"
-          ],
-          "badge": "Diyafram",
-          "pitfalls": [
-            "Retrokardiyak hava-sıvı seviyesi her zaman hiatal herni değildir; özofagus dilatasyonu (akalazya) benzer görünüm verebilir."
-          ],
-          "nextStep": "Şüpheli olgularda bariyumlu özofagogram veya üst gastrointestinal endoskopi ile doğrulama.",
-          "nextStepQuestion": [
-            {
-              "prompt": "Grafide retrokardiyak hava-sıvı seviyesiyle hiatal herni düşünülen semptomatik (reflü) bir hastada tanıyı doğrulamak için en uygun sonraki adım hangisidir?",
-              "options": [
-                {
-                  "id": "a",
-                  "label": "Bariyumlu özofagogram veya üst gastrointestinal endoskopi"
-                },
-                {
-                  "id": "b",
-                  "label": "Akciğer grafisini tekrarlamak"
-                },
-                {
-                  "id": "c",
-                  "label": "Doğrudan ampirik antireflü cerrahisi planlamak"
-                },
-                {
-                  "id": "d",
-                  "label": "Toraks BT'yi rutin ilk basamak olarak istemek"
-                }
-              ],
-              "correct": [
-                "a"
-              ],
-              "feedbackCorrect": "Doğru. Bariyumlu özofagogram veya endoskopi, herni tipini ve boyutunu, eşlik eden özofajit/striktürü değerlendirir.",
-              "feedbackIncorrect": "Akciğer grafisi hiatal herniyi düşündürebilir ama doğrulama için bariyumlu özofagogram veya endoskopi gerekir.",
-              "hint": "Özofagus ve mideyi doğrudan görüntüleyen bir yöntem düşünün."
-            },
-            {
-              "prompt": "Grafide retrokardiyak hava-sıvı seviyesi görülen bir hastada bu bulgunun en olası nedeni nedir?",
-              "options": [
-                {
-                  "id": "a",
-                  "label": "Hiatal herni içinde mide/bağırsak segmentinin toraksa yer değiştirmesi"
-                },
-                {
-                  "id": "b",
-                  "label": "Kalp içi bir apse"
-                },
-                {
-                  "id": "c",
-                  "label": "Akciğer parankiminde kavite"
-                },
-                {
-                  "id": "d",
-                  "label": "Plevral ampiyem"
-                }
-              ],
-              "correct": [
-                "a"
-              ],
-              "feedbackCorrect": "Doğru. Retrokardiyak hava-sıvı seviyesi, mide veya bağırsağın diyafram hiatusundan toraksa herniye olmasıyla oluşabilir.",
-              "feedbackIncorrect": "Retrokardiyak hava-sıvı seviyesi tipik olarak diyafram hiatusundan herniye olan bir gastrointestinal segmenti düşündürür.",
-              "hint": "Hava-sıvı seviyesi genellikle içi boş bir organ segmentinde görülür."
-            },
-            {
-              "prompt": "Büyük bir hiatal herni semptomatik hale geldiğinde (ör. obstrüksiyon, kanama) tedavi yaklaşımı nasıldır?",
-              "options": [
-                {
-                  "id": "a",
-                  "label": "Cerrahi onarım değerlendirilir"
-                },
-                {
-                  "id": "b",
-                  "label": "Yalnız antiasit tedavi yeterlidir ve başka adım gerekmez"
-                },
-                {
-                  "id": "c",
-                  "label": "İzlem dışında hiçbir şey yapılmaz"
-                },
-                {
-                  "id": "d",
-                  "label": "Doğrudan kemoterapi"
-                }
-              ],
-              "correct": [
-                "a"
-              ],
-              "feedbackCorrect": "Doğru. Komplike veya semptomatik büyük hiatal hernilerde cerrahi onarım gündeme gelir; küçük, asemptomatik hernilerde tıbbi tedavi yeterli olabilir.",
-              "feedbackIncorrect": "Komplikasyon (obstrüksiyon, kanama, volvulus) gelişen ya da medikal tedaviye dirençli büyük hiatal hernilerde cerrahi onarım değerlendirilir.",
-              "hint": "Komplikasyon geliştiğinde tıbbi tedavi tek başına yeterli mi?"
-            }
-          ],
-          "ucep": {
-            "disease": "Hiatal herni",
-            "level": "T",
-            "status": "öneri"
-          }
-        },
-        {
           "key": "finding.diaphragm_hernia_congenital",
           "finding": "diaphragm_hernia_congenital",
           "title": "Konjenital diyafram hernisi (Bochdalek / Morgagni)",
@@ -2183,201 +2207,6 @@
           "ucep": {
             "disease": "Diyafram paralizisi/eventrasyonu",
             "level": "T",
-            "status": "öneri"
-          }
-        }
-      ]
-    },
-    {
-      "id": "pediatric",
-      "title": "Pediatrik solunum",
-      "items": [
-        {
-          "key": "finding.steeple_sign",
-          "finding": "steeple_sign",
-          "title": "Krup — kalem ucu (steeple) işareti",
-          "short": "Steeple işareti",
-          "sub": "Boyun AP grafisi",
-          "description": "Akut laringotrakeobronşitte (krup) subglottik ödem nedeniyle trakeanın boyun AP grafisinde kalem ucu gibi simetrik daralmasıdır ('steeple sign').",
-          "sign": "Daralma subglottik bölgede, simetrik ve yumuşak konturludur; epiglottitteki 'thumb sign'ın aksine akut, toksik görünüm ve tükürük salyalanması beklenmez.",
-          "readingTip": "Boyun AP grafisinde trakea hava kolonunun genişliğini omurga ile karşılaştırın; simetrik daralma krupu, asimetrik/lateralize daralma yabancı cismi düşündürür.",
-          "clinical": "Krup tanısı klinik olarak konur (havlar tarzda öksürük, stridor); grafi rutin gerekmez, atipik seyirde ya da tanı belirsizse istenir. Ayırıcı tanıda en önemli acil durum epiglottittir.",
-          "bestZones": [
-            "a_trachea"
-          ],
-          "badge": "Pediatrik",
-          "pitfalls": [
-            "Steeple sign'ın yokluğu krupu dışlamaz; tanı öncelikle kliniktir.",
-            "Toksik görünümlü, hızlı ilerleyen solunum sıkıntılı çocukta epiglottit düşünülmeli ve ağız içi muayene/boyun manipülasyonundan kaçınılmalıdır."
-          ],
-          "nextStep": "Toksik görünüm veya atipik seyirde epiglottit ayırıcı tanısı için lateral boyun grafisi (yalnız hasta stabilse) ve acil havayolu hazırlığıyla değerlendirme.",
-          "ucep": {
-            "disease": "Krup (akut laringotrakeobronşit)",
-            "level": "A",
-            "status": "öneri"
-          }
-        },
-        {
-          "key": "finding.epiglottitis_thumb_sign",
-          "finding": "epiglottitis_thumb_sign",
-          "title": "Epiglottit — başparmak (thumb) işareti",
-          "short": "Thumb işareti",
-          "sub": "Lateral boyun grafisi — acil durum",
-          "description": "Akut epiglottitte epiglotun ödem nedeniyle şişerek lateral boyun grafisinde başparmağa benzer yuvarlak, kalınlaşmış bir gölge oluşturmasıdır ('thumb sign'). Krup ile karışabilen ama çok daha acil bir üst havayolu tıkanıklığı nedenidir.",
-          "sign": "Epiglot normalde ince, yaprak biçimindeyken; thumb sign'da kalınlaşmış, yuvarlaklaşmış ve valleküla dolgunlaşmış görünür.",
-          "readingTip": "Bu grafi yalnız hasta stabilse ve havayolu güvenliği sağlanabiliyorsa çekilmelidir; klinik şüphe yüksekse görüntüleme için zaman kaybetmeden acil havayolu ekibi hazır bulunmalıdır.",
-          "clinical": "Epiglottit klinik bir acildir (toksik görünüm, tripod pozisyonu, salya akıtma, stridor); tanı doğrulaması için ağız içi muayene ya da boyun manipülasyonu havayolu tıkanıklığını hızlandırabileceğinden kaçınılmalıdır.",
-          "bestZones": [
-            "a_trachea"
-          ],
-          "badge": "Pediatrik",
-          "pitfalls": [
-            "Klinik olarak epiglottitten şüphelenildiğinde görüntüleme için hastayı yalnız bırakmayın ve havayolu ekibini önceden hazırlayın; grafi tanıyı geciktirmemelidir.",
-            "Normal lateral boyun grafisi epiglottiti tam olarak dışlamaz; klinik tablo baskınsa doğrudan kontrollü havayolu değerlendirmesine geçilir."
-          ],
-          "nextStep": "Acil havayolu ekibi (anestezi/KBB) eşliğinde kontrollü havayolu değerlendirmesi; ampirik antibiyotik başlanması.",
-          "ucep": {
-            "disease": "Akut epiglottit",
-            "level": "A",
-            "status": "öneri"
-          }
-        },
-        {
-          "key": "finding.foreign_body_radiopaque",
-          "finding": "foreign_body_radiopaque",
-          "title": "Yutulan radyoopak yabancı cisim",
-          "short": "Radyoopak cisim",
-          "sub": "Özofagus mu, trakea mı?",
-          "description": "Metalik/radyoopak cisimler (en sık bozuk para) düz grafide doğrudan görülebilir. Cismin yönelimi anatomik lokalizasyonu gösterir: özofagusta cisim koronal düzlemde (AP grafide yuvarlak/en geniş yüzüyle) yerleşirken, trakeada cisim sagital düzlemde (AP grafide ince kenarıyla, lateralde geniş yüzüyle) yerleşir.",
-          "sign": "AP grafide yuvarlak/disk şeklinde görünen ve lateral grafide ince bir çizgi olarak izlenen cisim özofagustadır (koronal yerleşim); tersi yönelim (AP'de ince, lateralde geniş) trakea/larinks yerleşimini düşündürür.",
-          "readingTip": "Cismin şeklini hem AP hem lateral grafide karşılaştırarak yönelimini belirleyin; boyun ve toraksın tamamını tarayın, ikinci bir cisim atlanmasın.",
-          "clinical": "Özofagustaki keskin kenarlı, pilli veya çok sayıda mıknatıslı cisimler perforasyon/nekroz riski nedeniyle acil endoskopik çıkarım gerektirir; künt tek para çoğu zaman spontan geçer ama izlem gerekir.",
-          "bestZones": [
-            "a_trachea",
-            "c_mediastinum"
-          ],
-          "badge": "Pediatrik",
-          "pitfalls": [
-            "Radyolusen cisimler (plastik, çoğu kemik parçası, cam) düz grafide görülmeyebilir; klinik şüphe varsa negatif grafi cismi dışlamaz.",
-            "Pil (düğme pil) yutulması özofagusta hızlı doku hasarına yol açabilecek bir acildir; çift kontur ('halo') işareti pille bozuk parayı ayırt etmeye yardımcı olabilir."
-          ],
-          "nextStep": "Özofagusta yerleşimli, semptomatik ya da pil/mıknatıs şüphesinde acil endoskopik çıkarım; asemptomatik mide altı yerleşiminde klinik izlem.",
-          "ucep": {
-            "disease": "Yabancı cisim aspirasyonu/yutulması",
-            "level": "A",
-            "status": "öneri"
-          }
-        },
-        {
-          "key": "finding.air_trapping",
-          "finding": "air_trapping",
-          "title": "Aspire edilen radyolusen yabancı cisim — hava hapsi",
-          "short": "Hava hapsi",
-          "sub": "Ekspiryum grafisinde ortaya çıkar",
-          "description": "Plastik, organik madde (fındık, fıstık vb.) gibi radyolusen cisimler düz grafide doğrudan görülmez; bronşta kısmi tıkanıcı ('ball-valve') etki yaparak etkilenen tarafta ekspiryumda havanın çıkamamasına (hava hapsi) yol açar.",
-          "sign": "İnspiryum grafisinde fark belirsiz olabilir; ekspiryum grafisinde etkilenen hemitoraks anormal derecede hiperlüsent kalır ve mediasten sağlam tarafa doğru kayar (normalde ekspiryumda mediasten hafifçe etkilenen tarafa kayar).",
-          "readingTip": "Öykü ani başlangıçlı öksürük/boğulma tarifliyorsa ve inspiryum grafisi normalse ekspiryum grafisi (ya da işbirliği kurulamayan küçük çocukta lateral dekübitus grafiler) istenmelidir.",
-          "clinical": "Aspirasyon şüphesi kuvvetliyse görüntüleme normal olsa bile bronkoskopi (tanısal ve tedavi edici) gerekebilir; görüntüleme negatifliği aspirasyonu dışlamaz.",
-          "bestZones": [
-            "b_r_upper",
-            "b_l_upper",
-            "b_r_lower",
-            "b_l_lower",
-            "d_r_diaphragm",
-            "d_l_diaphragm"
-          ],
-          "badge": "Pediatrik",
-          "pitfalls": [
-            "İnspiryum grafisi tek başına normal olabilir; ani başlangıçlı öksürük/boğulma öyküsünde negatif inspiryum grafisi aspirasyonu dışlamaz.",
-            "Küçük çocukta ekspiryum grafisi işbirliği gerektirir; işbirliği kurulamıyorsa iki taraflı lateral dekübitus grafiler alternatiftir."
-          ],
-          "nextStep": "Klinik şüphe yüksekse görüntüleme sonucundan bağımsız olarak tanısal/terapötik rijit bronkoskopi.",
-          "nextStepQuestion": [
-            {
-              "prompt": "Ani başlangıçlı öksürük/boğulma öyküsü olan ve inspiryum grafisi normal olan bir çocukta yabancı cisim aspirasyonu şüphesi devam ediyorsa bir sonraki en uygun adım hangisidir?",
-              "options": [
-                {
-                  "id": "a",
-                  "label": "Klinik şüphe yüksekse tanısal/terapötik bronkoskopi"
-                },
-                {
-                  "id": "b",
-                  "label": "Bulgu olmadığı için görüntülemeyi ve izlemi sonlandırmak"
-                },
-                {
-                  "id": "c",
-                  "label": "Yalnız antibiyotik başlayıp taburcu etmek"
-                },
-                {
-                  "id": "d",
-                  "label": "Toraks BT'yi rutin ilk basamak olarak istemek"
-                }
-              ],
-              "correct": [
-                "a"
-              ],
-              "feedbackCorrect": "Doğru. Klinik şüphe yüksekse görüntüleme normal olsa bile bronkoskopi gerekebilir; bronkoskopi hem tanısal hem terapötiktir.",
-              "feedbackIncorrect": "Negatif görüntüleme aspirasyonu dışlamaz. Klinik şüphe yüksekse tanısal/terapötik bronkoskopiye geçilir.",
-              "hint": "Öykü güçlüyse negatif görüntüleme yeterli değildir."
-            },
-            {
-              "prompt": "Tek taraflı hava hapsi (air trapping) grafi bulgusunun altta yatan mekanizması nedir?",
-              "options": [
-                {
-                  "id": "a",
-                  "label": "Kısmi bronşiyal obstrüksiyon — hava içeri girebilir ama ekspiryumda tam çıkamaz (kapak benzeri mekanizma)"
-                },
-                {
-                  "id": "b",
-                  "label": "Akciğerin tamamen havasız kalması"
-                },
-                {
-                  "id": "c",
-                  "label": "Plevral boşlukta serbest sıvı birikimi"
-                },
-                {
-                  "id": "d",
-                  "label": "Kalp büyümesi"
-                }
-              ],
-              "correct": [
-                "a"
-              ],
-              "feedbackCorrect": "Doğru. Kısmi obstrüksiyon 'top valve' (kapak) mekanizmasıyla çalışır: inspiryumda hava girer, ekspiryumda bronş daralıp havanın çıkışını engeller, distal akciğer hava hapseder.",
-              "feedbackIncorrect": "Hava hapsi, kısmi bronşiyal obstrüksiyonun kapak (ball-valve) mekanizmasıyla havayı içeri alıp dışarı bırakmamasıyla oluşur.",
-              "hint": "Tam tıkanıklık ile kısmi tıkanıklığın hava akımına etkisi farklıdır."
-            },
-            {
-              "prompt": "Şüpheli yabancı cisim aspirasyonunda hava hapsini daha iyi göstermek için hangi ek görüntüleme yöntemi kullanılabilir?",
-              "options": [
-                {
-                  "id": "a",
-                  "label": "Ekspiryum grafisi veya iki taraflı dekübit grafiler"
-                },
-                {
-                  "id": "b",
-                  "label": "Yalnız tek bir inspiryum grafisi yeterlidir"
-                },
-                {
-                  "id": "c",
-                  "label": "Kemik sintigrafisi"
-                },
-                {
-                  "id": "d",
-                  "label": "Ekokardiyografi"
-                }
-              ],
-              "correct": [
-                "a"
-              ],
-              "feedbackCorrect": "Doğru. Ekspiryum grafisi (veya çocuklarda dekübit grafiler) etkilenen tarafta hava hapsini vurgulayarak asimetriyi belirginleştirir.",
-              "feedbackIncorrect": "Standart inspiryum grafisi normal görünebilir; ekspiryum grafisi veya dekübit pozisyonlar hava hapsini ortaya çıkarmada yardımcıdır.",
-              "hint": "Hava hapsi ekspiryumda mı yoksa inspiryumda mı daha belirgin hale gelir?"
-            }
-          ],
-          "ucep": {
-            "disease": "Yabancı cisim aspirasyonu",
-            "level": "A",
             "status": "öneri"
           }
         }
