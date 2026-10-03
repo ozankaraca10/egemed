@@ -14,7 +14,7 @@ import { createNoopModalEnv, type ModalEnv } from '../ui/modal-env'
 import {
   IconDoc,
   IconArrowRight,
-  IconInfo,
+  IconReplay,
   IconLightbulb,
   IconClock,
   IconChevronLeft,
@@ -340,6 +340,18 @@ function CaseView({
                   <h3>Olgu</h3>
                   <div className="card-title-actions">
                     <span className="badge blue">Vaka {state.caseIndex + 1}/{total}</span>
+                    {!isAssessment && (
+                      // T324: yeniden başlatma başlık satırında simge düğmesi (dikey yer kazanımı).
+                      <button
+                        type="button"
+                        className="btn outline small icon-btn case-restart"
+                        aria-label="Oturumu yeniden başlat"
+                        title="Oturumu yeniden başlat"
+                        onClick={() => (hasProgress ? setRestartOpen(true) : startMode('practice'))}
+                      >
+                        <IconReplay width={16} height={16} />
+                      </button>
+                    )}
                     {remaining != null && (
                       <span className={`badge ${remaining <= 30 ? 'orange' : 'purple'} case-timer`} aria-live="off">
                         <IconClock width={13} height={13} /> {fmtSec(remaining)}
@@ -350,9 +362,9 @@ function CaseView({
                 <p className="case-line">
                   <strong>{patientLine(caseDef)}</strong> {caseDef.chiefComplaint}
                   <span className="case-history-full"> {caseDef.history}</span>
+                  <span className="case-view"> Projeksiyon: {VIEW_TEXT[image.viewPosition] ?? 'bilinmiyor'}.</span>
                 </p>
                 <div className="kv-grid">
-                  <KV k="Projeksiyon" v={VIEW_TEXT[image.viewPosition] ?? 'Bilinmiyor'} />
                   {caseDef.vitalSigns.hr && <KV k="Nabız" v={`${caseDef.vitalSigns.hr}/dk`} />}
                   {caseDef.vitalSigns.rr && <KV k="Solunum" v={`${caseDef.vitalSigns.rr}/dk`} />}
                   {caseDef.vitalSigns.spo2 && <KV k="SpO₂" v={`%${caseDef.vitalSigns.spo2}`} />}
@@ -360,17 +372,6 @@ function CaseView({
                     <KV k="Ateş" v={caseDef.vitalSigns.temp} />
                   )}
                 </div>
-                {!isAssessment && (
-                  <div className="sim-resample-row">
-                    <button
-                      type="button"
-                      className="btn outline small"
-                      onClick={() => (hasProgress ? setRestartOpen(true) : startMode('practice'))}
-                    >
-                      Oturumu yeniden başlat
-                    </button>
-                  </div>
-                )}
               </div>
 
               {endCard && state.pendingSummary ? (
@@ -432,12 +433,9 @@ function CaseView({
                       {primaryLabel(isAssessment, caseDef.questions[caseDef.questions.length - 1]?.id === q.id, lastCase, revealed)} <IconArrowRight />
                     </button>
                   </div>
-                </div>
-              ) : null}
-              {state.mode === 'practice' && !endCard ? (
-                <div className="note-strip">
-                  <IconInfo />
-                  <span>İpucu kullanmak uygulama puanınızı düşürür. Değerlendirme modunda ipucu yoktur.</span>
+                  {state.mode === 'practice' && (
+                    <p className="q-hint-note">İpucu kullanmak uygulama puanını düşürür; değerlendirmede ipucu yoktur.</p>
+                  )}
                 </div>
               ) : null}
             </div>

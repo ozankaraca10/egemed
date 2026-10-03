@@ -64,12 +64,19 @@ const STEP_LABEL: Record<GamiModeKey, string> = {
 export const GAMI_FAIR_PLAY_TEXT =
   "XP kazandıran hiçbir etkinlikte (uygulama, değerlendirme, Meydan Okuma) yapay zekâ ajanları, otomasyon araçları veya başkasının yardımı kullanılamaz. Platform, bu tür kullanımı tespit eden ölçümler içerir. İhlal tespit edilirse liderlik tablosu, rozetler, aylık ödüller ve Meydan Okuma dahil rekabet içeren tüm alanlardan engellenirsiniz.";
 
+/** T324: tek satır özet; tam kural "Ayrıntı" açılırında (dikey yer kazanımı). */
+const GAMI_FAIR_PLAY_SHORT = "XP kazandıran etkinliklerde yapay zekâ ajanı, otomasyon veya başkasının yardımı kullanılamaz.";
+
 export function GamiFairPlay({ icon }: { readonly icon: ReactNode }) {
   return (
-    <div className="eg-gami-fair" role="note">
-      <span className="eg-gami-fair-ic" aria-hidden="true">{icon}</span>
-      <p><b>Adil oyun kuralı.</b> {GAMI_FAIR_PLAY_TEXT}</p>
-    </div>
+    <details className="eg-gami-fair">
+      <summary>
+        <span className="eg-gami-fair-ic" aria-hidden="true">{icon}</span>
+        <span><b>Adil oyun kuralı.</b> {GAMI_FAIR_PLAY_SHORT}</span>
+        <span className="eg-gami-fair-more">Ayrıntı</span>
+      </summary>
+      <p>{GAMI_FAIR_PLAY_TEXT}</p>
+    </details>
   );
 }
 

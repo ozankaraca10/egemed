@@ -544,8 +544,12 @@
 .eg-gami-mode-vs .b{ background: var(--glass-chip); box-shadow: inset 0 0 0 2px var(--glass-line); color: var(--ink-300); }
 .eg-gami-mode-vs em{ font-size: var(--fs-lg); font-style: italic; font-weight: 900; color: var(--orange-500); }
 
-.eg-gami-fair{ display: flex; align-items: flex-start; gap: var(--sp-3); width: min(100%, 1180px); box-sizing: border-box; padding: var(--sp-3) var(--sp-4); border-radius: var(--r-md); background: var(--orange-100); box-shadow: inset 0 0 0 1px var(--orange-500); color: var(--ink-800); font-size: var(--fs-xs); line-height: 1.5; }
-.eg-gami-fair p{ margin: 0; }
+.eg-gami-fair{ display: block; width: min(100%, 1180px); box-sizing: border-box; padding: var(--sp-2) var(--sp-4); border-radius: var(--r-md); background: var(--orange-100); box-shadow: inset 0 0 0 1px var(--orange-500); color: var(--ink-800); font-size: var(--fs-xs); line-height: 1.5; }
+.eg-gami-fair p{ margin: var(--sp-2) 0 0 calc(24px + var(--sp-3)); }
+.eg-gami-fair summary{ display: flex; align-items: center; gap: var(--sp-3); min-height: 28px; cursor: pointer; list-style: none; }
+.eg-gami-fair summary::-webkit-details-marker{ display: none; }
+.eg-gami-fair-more{ margin-left: auto; flex: none; font-weight: 700; color: var(--blue-700); text-decoration: underline; }
+.eg-gami-fair[open] .eg-gami-fair-more{ visibility: hidden; }
 .eg-gami-fair b{ color: var(--amber-700); }
 .eg-gami-fair-ic{ display: grid; flex: none; place-items: center; width: 24px; height: 24px; border-radius: var(--r-sm); background: var(--orange-500); color: var(--navy-950); }
 

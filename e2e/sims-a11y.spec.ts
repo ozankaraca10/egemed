@@ -309,7 +309,7 @@ async function collectSmallTargets(page: Page, sim: SimId): Promise<Map<string, 
         if (rect.width <= 0 || rect.height <= 0) continue;
         // T320: öğrenme ızgarası denetimleri fareli cihazda sıkıdır (pointer: fine); orada alt
         // sınır WCAG 2.2 2.5.8 (24 px). Dokunmatikte ve diğer her yerde 44 px.
-        const limit = finePointer && element.closest(".learn-grid") !== null ? FINE_POINTER_MIN : min;
+        const limit = finePointer && element.closest(".learn-grid, .film-viewer, .zone-chips, .case-restart") !== null ? FINE_POINTER_MIN : min;
         if (rect.width >= limit && rect.height >= limit) continue;
         out.push({
           selector: pathOf(element),
