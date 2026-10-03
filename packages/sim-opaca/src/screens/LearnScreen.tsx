@@ -150,6 +150,14 @@ export function LearnScreen({
         }
       : undefined
 
+  // T323: uzman işaretlemesi seçimi film araç çubuğunun son satırının en sağında (dikey yer kazanımı).
+  const expertToggle = annotationFinding ? (
+    <label className="points-toggle">
+      <input type="checkbox" checked={showExpert} onChange={(e) => setShowExpert((e.currentTarget as unknown as { checked: boolean }).checked)} disabled={!hasExpertBox} />
+      {hasExpertBox ? 'Uzman işaretlemesini göster' : 'Bu filmde uzman işaretlemesi yok'}
+    </label>
+  ) : null
+
   const groupTitle = LIBRARY_GROUPS.find((g) => g.items.some((entry) => entry.key === item.key))?.title ?? ''
 
   return (
@@ -210,19 +218,15 @@ export function LearnScreen({
 
             <section className="sim-main" aria-label="Film ve örnekler">
               <div className="learn-head">
-                <span className="learn-eb">{groupTitle}</span>
-                <h3 className="learn-title">{item.title}</h3>
+                <div className="learn-titlerow">
+                  <span className="learn-eb">{groupTitle}</span>
+                  <h3 className="learn-title">{item.title}</h3>
+                </div>
                 <p className="learn-study" role="status">
                   {currentDone ? 'Bu film incelendi ✓' : `Bu film ${Math.floor(viewedSeconds(exampleIdx))}/${LEARN_VIEW_SECONDS} sn`} · konu, {examples.length} filmin her biri en az {LEARN_VIEW_SECONDS} sn incelenince tamamlanır
                 </p>
               </div>
               <div className="stage-card film-card">
-                {annotationFinding && (
-                  <label className="points-toggle">
-                    <input type="checkbox" checked={showExpert} onChange={(e) => setShowExpert((e.currentTarget as unknown as { checked: boolean }).checked)} disabled={!hasExpertBox} />
-                    {hasExpertBox ? 'Uzman işaretlemesini göster' : 'Bu filmde uzman işaretlemesi yok'}
-                  </label>
-                )}
                 {image ? (
                   <FilmViewer
                     ref={viewerRef}
@@ -238,6 +242,7 @@ export function LearnScreen({
                     onToggleZones={() => dispatch({ type: 'toggleZones' })}
                     showInfoOverlay={false}
                     fitContent
+                    toolbarEnd={expertToggle}
                     {...(onStackEnd ? { onStackEnd } : {})}
                     // T320: inceleme süresi yalnız film gerçekten yüklenince sayılmaya başlar.
                     onImageReady={() => setReadyId(image.id)}

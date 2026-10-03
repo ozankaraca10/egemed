@@ -1,4 +1,4 @@
-import { forwardRef, useCallback, useEffect, useImperativeHandle, useLayoutEffect, useRef, useState } from 'react'
+import { forwardRef, useCallback, useEffect, useImperativeHandle, useLayoutEffect, useRef, useState, type ReactNode } from 'react'
 import type { ImageRecord, ReadingZone, ViewerTool } from '../core/types'
 import {
   clamp,
@@ -157,6 +157,8 @@ export interface FilmViewerProps {
   fitContent?: boolean
   /** Kesit yığınında son kesite ulaşıldığında (görüntü başına bir kez) — oyunlaştırma "BT Kaşifi" için. */
   onStackEnd?: () => void
+  /** T323: araç çubuğunun sonuna (son satırın en sağı) eklenen denetim, ör. uzman işaretlemesi seçimi. */
+  toolbarEnd?: ReactNode
   /** T218: görüntü dosyası gerçekten yüklendiğinde (görüntü başına bir kez) — öğrenme
    *  kütüphanesinde öğenin "açıldı" sayılması için; yalnız seçmek yetmez. */
   onImageReady?: () => void
@@ -186,6 +188,7 @@ export const FilmViewer = forwardRef<FilmViewerHandle, FilmViewerProps>(function
     label,
     showInfoOverlay = false,
     fitContent = false,
+    toolbarEnd,
     onStackEnd,
     onImageReady,
     env = NOOP_FILM_ENV,
@@ -758,6 +761,7 @@ export const FilmViewer = forwardRef<FilmViewerHandle, FilmViewerProps>(function
             Okuma bölgeleri
           </button>
         )}
+        {toolbarEnd ? <div className="film-tools-end">{toolbarEnd}</div> : null}
         {(measures.length > 0 || pending) && (
           <span className="film-measure-out" role="status">
             {measures.length === 2 && measureRatio != null
