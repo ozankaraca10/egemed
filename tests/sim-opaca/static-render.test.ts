@@ -142,7 +142,7 @@ describe("Opaca App — kitle (T175)", () => {
     );
     // technique.systematic (ilk konu, varsayılan seçili) açık, kilit rozeti taşımaz.
     expect(html).not.toMatch(/lib-item active locked/);
-    // LIBRARY_ITEMS toplamı 30 (library.json, T321a); 6 öğe açık (ilk kategori + 2 bulgu), kalan 24 kilitli.
-    expect(html.match(/class="lib-item [^"]*locked"/g)?.length).toBe(24);
+    // LIBRARY_ITEMS toplamı 33 (library.json, T321b); 6 öğe açık (ilk kategori + 2 bulgu), kalan 27 kilitli.
+    expect(html.match(/class="lib-item [^"]*locked"/g)?.length).toBe(27);
   });
 });

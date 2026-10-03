@@ -41,8 +41,9 @@ const clinical = (list: ImageRecord[]): ImageRecord[] => {
 export const LEARN_EXAMPLE_LIMIT = 4;
 
 /** "Temel okuma" (technique grubu) konuları ABCDE okumayı öğretir; okuma bölgesi tanımlı olmayan görüntüler bu grupta gösterilmez. */
+/** T321b: yayın şekilleri (Europe PMC) üzerinde ok/işaret bulunur; temel okuma konularında gösterilmez. */
 const readable = (item: LibraryItem, list: ImageRecord[]): ImageRecord[] =>
-  clinical(item.group === "technique" ? list.filter((image) => zonesForImage(image.id) !== null) : list);
+  clinical(item.group === "technique" ? list.filter((image) => zonesForImage(image.id) !== null && image.sourceDataset !== "europepmc") : list);
 
 /** T321a (radyolog notu, 3 Eki 2026): öğrenme modunda pediatrik görüntü gösterilmez (pediatrik konular çıktı;
  *  lateral konusu da yalnız erişkin filmler). */

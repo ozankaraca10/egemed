@@ -14976,6 +14976,518 @@
    "orig": null,
    "note": "Bu görüntüde kayıtlı hasta verisi yok (yayın / eğitim görüntüsü).",
    "hasReal": false
+  },
+  "epmc_pmc12875552_f1": {
+   "age": 68,
+   "sex": "Erkek",
+   "view": "PA ön grafi (makale PA ve lateral çekimi bildiriyor)",
+   "source": "Europe PMC olgu yayını",
+   "items": [
+    {
+     "icon": "history",
+     "label": "Başvuru",
+     "value": "Tekrarlayan senkop, öksürük ve yorgunluk"
+    },
+    {
+     "icon": "eye",
+     "label": "Yayındaki tanı",
+     "value": "Dev inen torasik aort anevrizması"
+    },
+    {
+     "icon": "pin",
+     "label": "Yerleşim",
+     "value": "Sol üst/orta mediasten, inen aort boyunca; trakea sağa itiliyor"
+    }
+   ],
+   "labels": [
+    {
+     "finding": "Aort anevrizması",
+     "source": "yayın açıklaması"
+    }
+   ],
+   "orig": "A 68-year-old male patient ... presented ... due to recurrent episodes of syncope.",
+   "note": null,
+   "hasReal": true
+  },
+  "epmc_pmc13372284_fig1": {
+   "age": 60,
+   "sex": "Erkek",
+   "view": "Ayakta frontal akciğer grafisi (PA/AP belirtilmemiş)",
+   "source": "Europe PMC olgu yayını",
+   "items": [
+    {
+     "icon": "history",
+     "label": "Başvuru",
+     "value": "İlerleyici yutma güçlüğü ve bir yılda kilo kaybı"
+    },
+    {
+     "icon": "eye",
+     "label": "Yayındaki tanı",
+     "value": "Dev torasik aort anevrizması; belirgin aort topuzu"
+    },
+    {
+     "icon": "pin",
+     "label": "Yerleşim",
+     "value": "Sol üst mediasten/aort topuzu; trakea ve karina sağa deviye"
+    }
+   ],
+   "labels": [
+    {
+     "finding": "Aort anevrizması",
+     "source": "yayın açıklaması"
+    }
+   ],
+   "orig": "A 60-year-old gentleman presented to us with progressive dysphagia and significant weight loss.",
+   "note": null,
+   "hasReal": true
+  },
+  "epmc_pmc12553967_fig1": {
+   "age": "70’li yaşlar",
+   "sex": "Kadın",
+   "view": "AP ayakta akciğer grafisi (görüntü üzerindeki işaret)",
+   "source": "Europe PMC olgu yayını",
+   "items": [
+    {
+     "icon": "history",
+     "label": "Başvuru",
+     "value": "Yerde bulunma; olası düşme/bayılma"
+    },
+    {
+     "icon": "eye",
+     "label": "Yayındaki tanı",
+     "value": "Aort kavsinde rüptüre torasik aort anevrizması"
+    },
+    {
+     "icon": "pin",
+     "label": "Yerleşim",
+     "value": "Sol üst mediasten/aort kavsi"
+    }
+   ],
+   "labels": [
+    {
+     "finding": "Aort anevrizması",
+     "source": "yayın açıklaması"
+    }
+   ],
+   "orig": "A lady in her 70s was brought to the emergency department ... after being discovered lying on the floor.",
+   "note": null,
+   "hasReal": true
+  },
+  "epmc_pmc7801534_fig1": {
+   "age": 28,
+   "sex": "Erkek",
+   "view": "Frontal akciğer grafisi (PA/AP belirtilmemiş)",
+   "source": "Europe PMC olgu yayını",
+   "items": [
+    {
+     "icon": "history",
+     "label": "Başvuru",
+     "value": "Amfetamin kullanımı sonrası göğüs ağrısı"
+    },
+    {
+     "icon": "eye",
+     "label": "Yayındaki tanı",
+     "value": "Aort koarktasyonu distalinde kalsifiye inen torasik aort anevrizması"
+    },
+    {
+     "icon": "pin",
+     "label": "Yerleşim",
+     "value": "Sol üst mediasten/inen aort; üst kaburgalarda çentiklenme"
+    }
+   ],
+   "labels": [
+    {
+     "finding": "Aort anevrizması",
+     "source": "yayın açıklaması"
+    }
+   ],
+   "orig": "A 28-year-old male presented in 2010 with chest pain following amphetamine use.",
+   "note": null,
+   "hasReal": true
+  },
+  "epmc_pmc13618871_fig1": {
+   "age": 51,
+   "sex": "Kadın",
+   "view": "Frontal akciğer grafisi (PA/AP kayıtta belirtilmemiş)",
+   "source": "Europe PMC olgu yayını",
+   "items": [
+    {
+     "icon": "history",
+     "label": "Başvuru",
+     "value": "Tarama incelemesinde rastlantısal bulgu; daha sonra sırt ağrısı"
+    },
+    {
+     "icon": "eye",
+     "label": "Yayındaki tanı",
+     "value": "Sarkoidoza bağlı bilateral hiler lenfadenopati"
+    },
+    {
+     "icon": "pin",
+     "label": "Yerleşim",
+     "value": "Her iki hilus"
+    }
+   ],
+   "labels": [
+    {
+     "finding": "Lenfadenopati",
+     "source": "yayın açıklaması"
+    }
+   ],
+   "orig": "A 51-year-old female patient ... presented following incidental findings on routine screening mammography.",
+   "note": null,
+   "hasReal": true
+  },
+  "epmc_pmc10163919_fig1": {
+   "age": 42,
+   "sex": "Erkek",
+   "view": "Frontal akciğer grafisi (PA/AP kayıtta belirtilmemiş)",
+   "source": "Europe PMC olgu yayını",
+   "items": [
+    {
+     "icon": "history",
+     "label": "Başvuru",
+     "value": "Altı aydır aralıklı ateş ve eklem ağrıları"
+    },
+    {
+     "icon": "eye",
+     "label": "Yayındaki tanı",
+     "value": "Sarkoidoz; bilateral hiler lenfadenopati"
+    },
+    {
+     "icon": "pin",
+     "label": "Yerleşim",
+     "value": "Her iki hilus"
+    }
+   ],
+   "labels": [
+    {
+     "finding": "Lenfadenopati",
+     "source": "yayın açıklaması"
+    }
+   ],
+   "orig": "A 42-year-old gentleman presented with intermittent fever of six months with joint pains.",
+   "note": null,
+   "hasReal": true
+  },
+  "epmc_pmc11316136_ccr39186-fig-0002": {
+   "age": "35 (takipte ~37)",
+   "sex": "Erkek",
+   "view": "Frontal takip akciğer grafisi (PA/AP kayıtta belirtilmemiş)",
+   "source": "Europe PMC olgu yayını",
+   "items": [
+    {
+     "icon": "history",
+     "label": "Başvuru",
+     "value": "COVID sonrası süren solunum belirtileri; başlangıçta nefes darlığı ve öksürük"
+    },
+    {
+     "icon": "eye",
+     "label": "Yayındaki tanı",
+     "value": "Yeni gelişen sarkoidoz; bilateral hiler lenfadenopati"
+    },
+    {
+     "icon": "pin",
+     "label": "Yerleşim",
+     "value": "Her iki hilus"
+    }
+   ],
+   "labels": [
+    {
+     "finding": "Lenfadenopati",
+     "source": "yayın açıklaması"
+    }
+   ],
+   "orig": "A previously healthy 35-year-old white male presented ... with shortness of breath, body aches, cough, nasal congestion.",
+   "note": null,
+   "hasReal": true
+  },
+  "epmc_pmc12289318_fig3": {
+   "age": 41,
+   "sex": "Erkek",
+   "view": "PA ayakta akciğer grafisi (görüntü üzerindeki işaret)",
+   "source": "Europe PMC olgu yayını",
+   "items": [
+    {
+     "icon": "history",
+     "label": "Başvuru",
+     "value": "İki hafta bilateral parotis şişliği"
+    },
+    {
+     "icon": "eye",
+     "label": "Yayındaki tanı",
+     "value": "Sarkoidoz; simetrik hiler ve mediastinal lenfadenopati"
+    },
+    {
+     "icon": "pin",
+     "label": "Yerleşim",
+     "value": "Her iki hilus ve üst mediasten"
+    }
+   ],
+   "labels": [
+    {
+     "finding": "Lenfadenopati",
+     "source": "yayın açıklaması"
+    }
+   ],
+   "orig": "A 41-year-old ... male initially presented ... with a two-week history of bilateral parotid gland swelling.",
+   "note": null,
+   "hasReal": true
+  },
+  "epmc_pmc12612959_fig1": {
+   "age": 84,
+   "sex": "Kadın",
+   "view": "Frontal akciğer grafisi (PA/AP kayıtta belirtilmemiş)",
+   "source": "Europe PMC olgu yayını",
+   "items": [
+    {
+     "icon": "history",
+     "label": "Başvuru",
+     "value": "Ağrısız, ani ve geçici iki bacak güçsüzlüğü"
+    },
+    {
+     "icon": "eye",
+     "label": "Yayındaki tanı",
+     "value": "Tip A aort diseksiyonuna eşlik eden üst mediasten genişliği"
+    },
+    {
+     "icon": "pin",
+     "label": "Yerleşim",
+     "value": "Üst mediasten, aort kavsi çevresi"
+    }
+   ],
+   "labels": [
+    {
+     "finding": "Mediastinal genişleme",
+     "source": "yayın açıklaması"
+    }
+   ],
+   "orig": "An 84-year-old woman presented ... with sudden, transient bilateral lower-limb weakness lasting 90 minutes.",
+   "note": null,
+   "hasReal": true
+  },
+  "epmc_pmc13046306_fig2": {
+   "age": 68,
+   "sex": "Erkek",
+   "view": "Frontal akciğer grafisi (PA/AP kayıtta belirtilmemiş)",
+   "source": "Europe PMC olgu yayını",
+   "items": [
+    {
+     "icon": "history",
+     "label": "Başvuru",
+     "value": "Göğüs ağrısı olmadan ani bilinç değişikliği"
+    },
+    {
+     "icon": "eye",
+     "label": "Yayındaki tanı",
+     "value": "Tip A aort diseksiyonu; genişlemiş mediasten"
+    },
+    {
+     "icon": "pin",
+     "label": "Yerleşim",
+     "value": "Üst ve orta mediasten/aort konturu"
+    }
+   ],
+   "labels": [
+    {
+     "finding": "Mediastinal genişleme",
+     "source": "yayın açıklaması"
+    }
+   ],
+   "orig": "A 68-year-old man was brought to the emergency department ... with altered consciousness.",
+   "note": null,
+   "hasReal": true
+  },
+  "epmc_pmc8761487_fig2": {
+   "age": 82,
+   "sex": "Kadın",
+   "view": "Frontal akciğer grafisi (PA/AP kayıtta belirtilmemiş)",
+   "source": "Europe PMC olgu yayını",
+   "items": [
+    {
+     "icon": "history",
+     "label": "Başvuru",
+     "value": "Ani başlayan ve süren retrosternal ağrı"
+    },
+    {
+     "icon": "eye",
+     "label": "Yayındaki tanı",
+     "value": "Tip A aort diseksiyonuna bağlı mediastinal genişleme"
+    },
+    {
+     "icon": "pin",
+     "label": "Yerleşim",
+     "value": "Üst/orta mediasten ve kardiyomediastinal silüet"
+    }
+   ],
+   "labels": [
+    {
+     "finding": "Mediastinal genişleme",
+     "source": "yayın açıklaması"
+    }
+   ],
+   "orig": "An 82-year-old Caucasian female presented with sudden and persistent retrosternal pain.",
+   "note": null,
+   "hasReal": true
+  },
+  "epmc_pmc9893865_fig2": {
+   "age": 47,
+   "sex": "Erkek",
+   "view": "Yarı oturur frontal akciğer grafisi (PA/AP belirtilmemiş)",
+   "source": "Europe PMC olgu yayını",
+   "items": [
+    {
+     "icon": "history",
+     "label": "Başvuru",
+     "value": "Göğüs ağrısı"
+    },
+    {
+     "icon": "eye",
+     "label": "Yayındaki tanı",
+     "value": "Aort intramural hematomu/tip A akut aort sendromunda mediastinal genişlik"
+    },
+    {
+     "icon": "pin",
+     "label": "Yerleşim",
+     "value": "Üst mediasten"
+    }
+   ],
+   "labels": [
+    {
+     "finding": "Mediastinal genişleme",
+     "source": "yayın açıklaması"
+    }
+   ],
+   "orig": "We present the case of a 47-year-old male Sri Lankan patient with a history of hypertension.",
+   "note": null,
+   "hasReal": true
+  },
+  "epmc_pmc13143138_f2": {
+   "age": 19,
+   "sex": "Erkek",
+   "view": "Frontal akciğer grafisi (PA/AP belirtilmemiş)",
+   "source": "Europe PMC olgu yayını",
+   "items": [
+    {
+     "icon": "history",
+     "label": "Başvuru",
+     "value": "Dört gün ateş, balgamlı öksürük, boğaz ağrısı ve konjonktivit"
+    },
+    {
+     "icon": "eye",
+     "label": "Yayındaki tanı",
+     "value": "Chlamydia pneumoniae ilişkili toplum kökenli pnömoni"
+    },
+    {
+     "icon": "pin",
+     "label": "Yerleşim",
+     "value": "Sağ alt lob"
+    }
+   ],
+   "labels": [
+    {
+     "finding": "Pnömoni",
+     "source": "yayın açıklaması"
+    }
+   ],
+   "orig": "A 19-year-old male presented to the hospital after 4 days of fever, productive cough, sore throat and conjunctivitis.",
+   "note": null,
+   "hasReal": true
+  },
+  "epmc_pmc13318803_fig1": {
+   "age": 78,
+   "sex": "Kadın",
+   "view": "PA akciğer grafisi (altyazıda belirtilmiş)",
+   "source": "Europe PMC olgu yayını",
+   "items": [
+    {
+     "icon": "history",
+     "label": "Başvuru",
+     "value": "Üç aydır balgamlı öksürük ve sağ plöritik göğüs ağrısı"
+    },
+    {
+     "icon": "eye",
+     "label": "Yayındaki tanı",
+     "value": "Pulmoner mukormikoz; sağ üst lob konsolidasyonu"
+    },
+    {
+     "icon": "pin",
+     "label": "Yerleşim",
+     "value": "Sağ üst lob"
+    }
+   ],
+   "labels": [
+    {
+     "finding": "Pnömoni",
+     "source": "yayın açıklaması"
+    }
+   ],
+   "orig": "A 78-year-old woman ... initially presented with a three-month history of productive cough and right-sided pleuritic chest pain.",
+   "note": null,
+   "hasReal": true
+  },
+  "epmc_pmc12576348_fig1": {
+   "age": 38,
+   "sex": "Erkek",
+   "view": "Frontal akciğer grafisi (PA/AP belirtilmemiş)",
+   "source": "Europe PMC olgu yayını",
+   "items": [
+    {
+     "icon": "history",
+     "label": "Başvuru",
+     "value": "Beş gündür yüksek ateş, miyalji ve halsizlik; başlangıçta öksürük yok"
+    },
+    {
+     "icon": "eye",
+     "label": "Yayındaki tanı",
+     "value": "Erişkin pnömonisi; sağ alt zon konsolidasyonu"
+    },
+    {
+     "icon": "pin",
+     "label": "Yerleşim",
+     "value": "Sağ alt akciğer zonu"
+    }
+   ],
+   "labels": [
+    {
+     "finding": "Pnömoni",
+     "source": "yayın açıklaması"
+    }
+   ],
+   "orig": "A previously healthy 38-year-old male patient presented with a five-day history of high-grade fever, generalized myalgia, and malaise.",
+   "note": null,
+   "hasReal": true
+  },
+  "epmc_pmc12965395_fig1": {
+   "age": 35,
+   "sex": "Erkek",
+   "view": "Frontal akciğer grafisi (PA/AP belirtilmemiş)",
+   "source": "Europe PMC olgu yayını",
+   "items": [
+    {
+     "icon": "history",
+     "label": "Başvuru",
+     "value": "Beş gündür balgamlı öksürük, yüksek ateş ve artan nefes darlığı"
+    },
+    {
+     "icon": "eye",
+     "label": "Yayındaki tanı",
+     "value": "Burkholderia cepacia enfeksiyonunda sağ üst lob pnömonisi"
+    },
+    {
+     "icon": "pin",
+     "label": "Yerleşim",
+     "value": "Sağ üst lob"
+    }
+   ],
+   "labels": [
+    {
+     "finding": "Pnömoni",
+     "source": "yayın açıklaması"
+    }
+   ],
+   "orig": "A 35-year-old man ... presented ... with a five-day history of a productive cough, high-grade fever, and exacerbating dyspnoea.",
+   "note": null,
+   "hasReal": true
   }
  }
 }

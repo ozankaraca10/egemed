@@ -162,7 +162,7 @@ describe("createOpacaModule (SimHost adaptörü)", () => {
     await Promise.resolve();
     const lockedHtml = renderToStaticMarkup(lockedTree);
     expect(lockedHtml).toContain('data-learn-locked="true"');
-    expect(lockedHtml).toContain("Önce öğrenme modunu tamamlayın: 0/30 konu incelendi.");
+    expect(lockedHtml).toContain("Önce öğrenme modunu tamamlayın: 0/33 konu incelendi.");
   });
 
   it("T175: audience='faculty' — App'e audience geçer, reportLearn iletilmez (App gamiEnabled'ı kendi indirger)", () => {

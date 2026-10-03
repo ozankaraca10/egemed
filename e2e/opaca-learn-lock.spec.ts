@@ -14,7 +14,7 @@ import { unlockOpacaLearn } from "./sim-flows";
 test.describe("Opaca öğrenme kilidi", () => {
   // Ortamdan bağımsızlık: XR çalışma zamanı görüntüleri git-dışıdır ve bazı makinelerde
   // bulunur. Testler her zaman "XR dosyası yok" koşulunda koşar (Vite dev sunucusunun eksik dosyada döndürdüğü gibi HTML yanıt); depodaki BT
-  // görüntüleri etkilenmez. Aksi hâlde ilk konu kendiliğinden açılıp sayaç 1/30 olur.
+  // görüntüleri etkilenmez. Aksi hâlde ilk konu kendiliğinden açılıp sayaç 1/33 olur.
   test.beforeEach(async ({ page }) => {
     await page.route("**/assets/xray/runtime/**", (route) => route.fulfill({ status: 200, contentType: "text/html", body: "<!doctype html>" }));
   });
@@ -27,7 +27,7 @@ test.describe("Opaca öğrenme kilidi", () => {
     const practice = root.locator(".mode-card.practice");
     await expect(practice).toHaveClass(/learn-locked/);
     await expect(practice.locator("button.eg-gami-mode-cta")).toBeDisabled();
-    await expect(practice.getByText("Önce öğrenme modunu tamamlayın: 0/30 konu incelendi.")).toBeVisible();
+    await expect(practice.getByText("Önce öğrenme modunu tamamlayın: 0/33 konu incelendi.")).toBeVisible();
 
     const assessment = root.locator(".mode-card.assessment");
     await expect(assessment).toHaveClass(/learn-locked/);
@@ -36,7 +36,7 @@ test.describe("Opaca öğrenme kilidi", () => {
 
     // Öğrenme her zaman açıktır; ray başlığı ilerlemeyi gösterir (T318: konu uygulaması düğmesi yok).
     await root.locator(".mode-card.learn button.eg-gami-mode-cta").click();
-    await expect(root.getByRole("status", { name: "Öğrenme: 0/30 konu incelendi" })).toBeVisible();
+    await expect(root.getByRole("status", { name: "Öğrenme: 0/33 konu incelendi" })).toBeVisible();
     await captureRouteScreenshot(page, testInfo.project.name, "#/sims/opaca ogrenme kilidi");
 
     expect(errors, "konsol/sayfa hatası").toEqual([]);
@@ -60,7 +60,7 @@ test.describe("Opaca öğrenme kilidi", () => {
     await expect(root.locator(".film-stage img.is-loaded").first()).toBeVisible();
     await page.clock.runFor(6_000);
     await expect(films.first()).toContainText(/[56]\/15 sn/);
-    await expect(root.getByRole("status", { name: "Öğrenme: 0/30 konu incelendi" })).toBeVisible();
+    await expect(root.getByRole("status", { name: "Öğrenme: 0/33 konu incelendi" })).toBeVisible();
 
     // Dosyası depoda olan filmler (BT) 15 sn sonra incelenmiş sayılır; Commons kesiti
     // git-dışı çalışma zamanı klasöründedir: yüklenemez, süre kazanmaz, konu tamamlanmaz.
@@ -106,7 +106,7 @@ test.describe("Opaca öğrenme kilidi", () => {
     await expect(root).toBeVisible({ timeout: 20_000 });
     await expect(root.locator(".lib-col .lib-item").first()).toBeVisible();
     await expect(
-      root.getByText("Meydan okuma için önce öğrenme modunu tamamlayın: 0/30 konu incelendi."),
+      root.getByText("Meydan okuma için önce öğrenme modunu tamamlayın: 0/33 konu incelendi."),
     ).toBeVisible();
     expect(errors, "konsol/sayfa hatası").toEqual([]);
   });
