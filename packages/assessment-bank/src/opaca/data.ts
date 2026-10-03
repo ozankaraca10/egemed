@@ -10,10 +10,12 @@ import imageZonesJson from "../../../sim-opaca/src/data/image-zones.json" with {
 import { resolveZonesForImage, type ImageZonesData } from "../../../sim-opaca/src/data/imageZoneModel";
 import type { CaseDef, ImageRecord, ImagesManifest, ReadingZone } from "./types";
 
+/** T321a (depo sahibi, 3 Eki 2026): pediatrik vakalar Opaca uygulama/değerlendirme havuzlarından
+ *  çıkarıldı (öğrenme modunda da pediatrik konu yok). */
 export const ALL_CASES: readonly CaseDef[] = [
   ...((casesJson as unknown as { cases: CaseDef[] }).cases),
   ...((casesAutoJson as unknown as { cases: CaseDef[] }).cases),
-];
+].filter((caseDef) => caseDef.population !== "pediatrik");
 
 const manifest = imagesJson as unknown as ImagesManifest;
 const IMAGES: readonly ImageRecord[] = manifest.records ?? [];

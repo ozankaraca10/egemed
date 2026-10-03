@@ -22,7 +22,7 @@ function topicExamples(it: LibraryItem): ImageRecord[] {
       .filter((r): r is ImageRecord => !!r);
     return it.key === "ct.windows" ? [...stacks, ...pair] : [...stacks, ...pair.slice(0, 1)];
   }
-  const all = examplesFor(it.finding, undefined, { includePediatric: it.group === "pediatric" });
+  const all = examplesFor(it.finding);
   if (it.finding === null) return all.filter((r) => r.sourceDataset !== "wikimedia-commons");
   const ct = byCtRank(examplesFor(it.finding, undefined, { modality: "CT" }));
   if (!ct.length) return all;
@@ -44,6 +44,9 @@ export const LEARN_EXAMPLE_LIMIT = 4;
 const readable = (item: LibraryItem, list: ImageRecord[]): ImageRecord[] =>
   clinical(item.group === "technique" ? list.filter((image) => zonesForImage(image.id) !== null) : list);
 
+/** T321a (radyolog notu, 3 Eki 2026): öğrenme modunda pediatrik görüntü gösterilmez (pediatrik konular çıktı;
+ *  lateral konusu da yalnız erişkin filmler). */
+
 /** Öğrenme ekranının örnek film listesi (en fazla `LEARN_EXAMPLE_LIMIT`); boşsa konu için görüntü yoktur. */
 export function libraryExamples(item: LibraryItem): ImageRecord[] {
   if (item.key === "technique.projection") {
@@ -59,7 +62,7 @@ export function libraryExamples(item: LibraryItem): ImageRecord[] {
     return out;
   }
   if (item.key === "technique.lateral") {
-    return clinical(examplesFor(null, undefined, { includePediatric: true }).filter((image) => zoneSetForImage(image.id) === "lateral")).slice(0, LEARN_EXAMPLE_LIMIT);
+    return clinical(examplesFor(null).filter((image) => zoneSetForImage(image.id) === "lateral")).slice(0, LEARN_EXAMPLE_LIMIT);
   }
   return readable(item, topicExamples(item)).slice(0, LEARN_EXAMPLE_LIMIT);
 }
@@ -68,7 +71,7 @@ export function libraryExamples(item: LibraryItem): ImageRecord[] {
 export function libraryExampleCount(item: LibraryItem): number {
   if (item.key === "technique.projection") return readable(item, [...examplesFor(null, "PA"), ...examplesFor(null, "AP")]).length;
   if (item.key === "technique.lateral") {
-    return clinical(examplesFor(null, undefined, { includePediatric: true }).filter((image) => zoneSetForImage(image.id) === "lateral")).length;
+    return clinical(examplesFor(null).filter((image) => zoneSetForImage(image.id) === "lateral")).length;
   }
   return readable(item, topicExamples(item)).length;
 }

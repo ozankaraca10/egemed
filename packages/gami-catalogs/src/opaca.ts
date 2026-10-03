@@ -12,7 +12,7 @@ import { EMPTY_DUEL_STATS, duelBadges } from "./duel";
 
 /** Rozet konuları — sim `TOPIC_BADGE_MATCH` anahtarlarıyla aynı sıra (test eşitliği doğrular). */
 export const OPACA_TOPICS = [
-  "pleura", "cardiac", "nodule", "tb", "pediatric", "diaphragm", "bone", "vascular",
+  "pleura", "cardiac", "nodule", "tb", "parenchyma", "diaphragm", "bone", "vascular",
 ] as const;
 export type OpacaTopic = (typeof OPACA_TOPICS)[number];
 
@@ -25,7 +25,7 @@ export const OPACA_BADGE_RULES = {
   cardiac: 5,
   nodule: 10,
   tb: 10,
-  pediatric: 5,
+  parenchyma: 10,
   diaphragm: 5,
   bone: 5,
   vascular: 3,
@@ -134,14 +134,16 @@ export const OPACA_BADGES: BadgeDef<OpacaStats, OpacaBadgeContext>[] = [
     progress: topic("pleura", OPACA_BADGE_RULES.pleura),
   },
   {
-    id: "pediatric",
+    // T321a (depo sahibi, 3 Eki 2026): pediatrik konular ve vakalar Opaca'dan çıktı; "Pediatri"
+    // rozetinin yerine parankim alan rozeti (40 rozet ve capstone kuralı korunur).
+    id: "parenchyma",
     category: "topic",
-    icon: "User",
-    name: "Pediatri",
-    description: `${OPACA_BADGE_RULES.pediatric} pediatrik vakayı doğru tanı.`,
-    rule: "5 vaka",
-    studyKey: "finding.steeple_sign",
-    progress: topic("pediatric", OPACA_BADGE_RULES.pediatric),
+    icon: "Lungs",
+    name: "Parankim Okuyucu",
+    description: `${OPACA_BADGE_RULES.parenchyma} parankim vakasını (opasite, atelektazi, ödem, amfizem…) doğru tanı.`,
+    rule: "10 vaka",
+    studyKey: "finding.airspace_opacity",
+    progress: topic("parenchyma", OPACA_BADGE_RULES.parenchyma),
   },
   {
     id: "cardiac",

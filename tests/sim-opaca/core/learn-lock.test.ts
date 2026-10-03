@@ -176,13 +176,13 @@ describe("öğrenme tamamlanabilirliği", () => {
     }
   });
 
-  it("Lateral grafi konusu yalnız image-zones lateral setindeki üç grafiyi gösterir", () => {
+  it("Lateral grafi konusu yalnız image-zones lateral setindeki erişkin grafileri gösterir (T321a: pediatrik yok)", () => {
     const topic = LIBRARY_ITEMS.find((item) => item.key === "technique.lateral");
     expect(topic).toBeDefined();
     if (!topic) return;
     const examples = libraryExamples(topic);
-    expect(examples.map((image) => image.id)).toEqual(["commons_coin_lat", "commons_hiatal_lat", "commons_normal_lat"]);
-    expect(libraryExampleCount(topic)).toBe(3);
+    expect(examples.map((image) => image.id)).toEqual(["commons_hiatal_lat", "commons_normal_lat"]);
+    expect(libraryExampleCount(topic)).toBe(2);
   });
 
   it("Temel okuma konuları yalnız okuma bölgesi tanımlı görüntüleri gösterir ve sayar", () => {
@@ -298,7 +298,7 @@ describe("ModeSelectScreen öğrenme kilidi", () => {
     expect(html).toContain("mode-card practice learn-locked");
     expect(html).toContain("mode-card assessment learn-locked");
     expect(html).toContain('data-learn-locked="true"');
-    expect(html).toContain("Önce öğrenme modunu tamamlayın: 0/33 konu incelendi.");
+    expect(html).toContain("Önce öğrenme modunu tamamlayın: 0/30 konu incelendi.");
     // T320: öğrenme kartı tamamlama ölçütünü gösterir.
     expect(html).toContain("Tamamlama ölçütü");
     expect(html).toContain(`en az ${LEARN_VIEW_SECONDS} sn incelenince konu tamamlanır`);

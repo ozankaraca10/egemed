@@ -27,10 +27,10 @@
 
     "hyperinflation": { "label": "Hiperinflasyon (aşırı havalanma)", "short": "Hiperinflasyon", "group": "parenchyma", "teaching": true },
 
-    "foreign_body_radiopaque": { "label": "Radyoopak yabancı cisim", "short": "Radyoopak cisim", "group": "pediatric", "teaching": true },
-    "air_trapping": { "label": "Tek taraflı hava hapsi (radyolusen yabancı cisim bulgusu)", "short": "Hava hapsi", "group": "pediatric", "teaching": true },
-    "steeple_sign": { "label": "Kalem ucu (steeple) işareti", "short": "Steeple işareti", "group": "pediatric", "teaching": true },
-    "epiglottitis_thumb_sign": { "label": "Başparmak (thumb) işareti", "short": "Thumb işareti", "group": "pediatric", "teaching": true },
+    "foreign_body_radiopaque": { "label": "Radyoopak yabancı cisim", "short": "Radyoopak cisim", "group": "pediatric", "teaching": false },
+    "air_trapping": { "label": "Tek taraflı hava hapsi (radyolusen yabancı cisim bulgusu)", "short": "Hava hapsi", "group": "pediatric", "teaching": false },
+    "steeple_sign": { "label": "Kalem ucu (steeple) işareti", "short": "Steeple işareti", "group": "pediatric", "teaching": false },
+    "epiglottitis_thumb_sign": { "label": "Başparmak (thumb) işareti", "short": "Thumb işareti", "group": "pediatric", "teaching": false },
 
     "scoliosis": { "label": "Skolyoz", "short": "Skolyoz", "group": "bone", "teaching": true },
     "rib_fracture": { "label": "Kot kırığı", "short": "Kot kırığı", "group": "bone", "teaching": true },
