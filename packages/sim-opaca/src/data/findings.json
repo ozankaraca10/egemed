@@ -4,6 +4,9 @@
   "findings": {
     "normal": { "label": "Normal akciğer grafisi", "short": "Normal", "group": "technique", "teaching": true },
     "cardiomegaly": { "label": "Kardiyomegali", "short": "Kardiyomegali", "group": "cardiac", "teaching": true },
+    "lymphadenopathy": { "label": "Hiler / mediastinal lenfadenopati", "short": "Lenfadenopati", "group": "cardiac", "teaching": true },
+    "mediastinal_widening": { "label": "Mediasten genişlemesi", "short": "Mediasten genişlemesi", "group": "cardiac", "teaching": true },
+    "aortic_aneurysm": { "label": "Torasik aort anevrizması", "short": "Aort anevrizması", "group": "cardiac", "teaching": true },
     "pleural_effusion": { "label": "Plevral efüzyon", "short": "Efüzyon", "group": "pleura", "teaching": true },
     "pneumothorax": { "label": "Pnömotoraks", "short": "Pnömotoraks", "group": "pleura", "teaching": true },
     "airspace_opacity": { "label": "Havalı alan opasitesi (konsolidasyon)", "short": "Havalı alan opasitesi", "group": "parenchyma", "teaching": true },

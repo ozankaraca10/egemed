@@ -3414,6 +3414,646 @@
      "url": "https://pubs.rsna.org/doi/10.1148/radiol.2017161659"
     }
    }
+  },
+  "epmc_pmc12875552_f1": {
+   "presentation": [
+    "Son aylarda merdiven çıkarken nefesi daha çabuk daralıyor.",
+    "Yatarken göğsünde baskı hissi belirginleşiyor.",
+    "Uzun süreli hipertansiyon öyküsü var."
+   ],
+   "presentationRef": {
+    "title": "ESC Periferik Arter ve Aort Hastalıkları Kılavuzu (2024)",
+    "url": "https://www.escardio.org/guidelines/clinical-practice-guidelines/all-esc-practice-guidelines/peripheral-arterial-and-aortic-diseases/"
+   },
+   "differential": [
+    {
+     "dx": "İnen torasik aort anevrizması",
+     "clue": "Sol mediastinal genişleme ve trakeanın sağa itilmesi lehine."
+    },
+    {
+     "dx": "Aort uzaması veya ektazisi",
+     "clue": "Aort konturunu genişletir; belirgin kitle etkisi daha az beklenir."
+    },
+    {
+     "dx": "Mediastinal kitle",
+     "clue": "Aortla damar devamlılığı BT'de gösterilemezse düşünülür."
+    },
+    {
+     "dx": "Mediastinal lenfadenopati",
+     "clue": "Çoklu nodal büyüme mediastinal konturu değiştirebilir."
+    }
+   ],
+   "differentialRef": {
+    "title": "Fleischner Derneği Toraks Görüntüleme Terimleri Sözlüğü (2024)",
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC10902601/"
+   },
+   "pearl": {
+    "text": "Grafideki sol mediastinal kitle görünümü anevrizmayı düşündürür; gerçek damar çapını ve ilişkili komplikasyonları tek başına göstermez. Torasik aort BT anjiyografi ile değerlendirilir.",
+    "ref": {
+     "title": "ESC Periferik Arter ve Aort Hastalıkları Kılavuzu (2024)",
+     "url": "https://www.escardio.org/guidelines/clinical-practice-guidelines/all-esc-practice-guidelines/peripheral-arterial-and-aortic-diseases/"
+    }
+   }
+  },
+  "epmc_pmc13372284_fig1": {
+   "presentation": [
+    "Katı gıdalarla takılma hissi sıvılardan daha belirgin.",
+    "Zaman zaman sesinde kısılma fark ediyor.",
+    "Günlük yürüyüşlerde efor kapasitesi azalmış."
+   ],
+   "presentationRef": {
+    "title": "ESC Periferik Arter ve Aort Hastalıkları Kılavuzu (2024)",
+    "url": "https://www.escardio.org/guidelines/clinical-practice-guidelines/all-esc-practice-guidelines/peripheral-arterial-and-aortic-diseases/"
+   },
+   "differential": [
+    {
+     "dx": "Torasik aort anevrizması",
+     "clue": "Büyük aort topuzu ile trakea ve karina sağa deviye."
+    },
+    {
+     "dx": "Aort uzaması veya ektazisi",
+     "clue": "Topuzu belirginleştirebilir; gerçek anevrizma çapı grafiden ölçülemez."
+    },
+    {
+     "dx": "Mediastinal lenfoma",
+     "clue": "Damar dışı hacimli doku trakeayı itebilir."
+    },
+    {
+     "dx": "Özofagus kitlesi",
+     "clue": "Yutma güçlüğü yapabilir; aort konturuyla ilişkisi BT'de ayrılır."
+    }
+   ],
+   "differentialRef": {
+    "title": "Fleischner Derneği Toraks Görüntüleme Terimleri Sözlüğü (2024)",
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC10902601/"
+   },
+   "pearl": {
+    "text": "Aort topuzunun büyümesi ve hava yolunun yer değiştirmesi damar kökenli genişlemeyi düşündürür, ancak grafi nedeni kesinleştirmez. Torasik aort BT anjiyografi uygun sonraki incelemedir.",
+    "ref": {
+     "title": "ESC Periferik Arter ve Aort Hastalıkları Kılavuzu (2024)",
+     "url": "https://www.escardio.org/guidelines/clinical-practice-guidelines/all-esc-practice-guidelines/peripheral-arterial-and-aortic-diseases/"
+    }
+   }
+  },
+  "epmc_pmc12553967_fig1": {
+   "presentation": [
+    "Olay öncesindeki belirtiler güvenilir biçimde öğrenilemiyor.",
+    "Acil değerlendirmede solukluk ve soğuk terleme dikkat çekiyor.",
+    "Uzun süredir hipertansiyon öyküsü bulunuyor."
+   ],
+   "presentationRef": {
+    "title": "ESC Periferik Arter ve Aort Hastalıkları Kılavuzu (2024)",
+    "url": "https://www.escardio.org/guidelines/clinical-practice-guidelines/all-esc-practice-guidelines/peripheral-arterial-and-aortic-diseases/"
+   },
+   "differential": [
+    {
+     "dx": "Rüptüre torasik aort anevrizması",
+     "clue": "Aort kavsindeki yeni genişleme ve ani çökme lehine."
+    },
+    {
+     "dx": "Akut aort diseksiyonu",
+     "clue": "Akut olay ve geniş aort konturu ile benzer görünebilir."
+    },
+    {
+     "dx": "Travmatik aort yaralanması",
+     "clue": "Düşme veya travma öyküsü varsa dışlanmalıdır."
+    },
+    {
+     "dx": "Mediastinal kitle",
+     "clue": "Yavaş gelişim beklenir; akut tabloyu tek başına açıklamaz."
+    }
+   ],
+   "differentialRef": {
+    "title": "ESC Periferik Arter ve Aort Hastalıkları Kılavuzu (2024)",
+    "url": "https://www.escardio.org/guidelines/clinical-practice-guidelines/all-esc-practice-guidelines/peripheral-arterial-and-aortic-diseases/"
+   },
+   "pearl": {
+    "text": "AP grafide aort kavsi geniş görünse de rüptür grafiden doğrulanamaz. Akut aort sendromu şüphesinde uygun klinik koşullarda BT anjiyografi gerekir.",
+    "ref": {
+     "title": "ESC Periferik Arter ve Aort Hastalıkları Kılavuzu (2024)",
+     "url": "https://www.escardio.org/guidelines/clinical-practice-guidelines/all-esc-practice-guidelines/peripheral-arterial-and-aortic-diseases/"
+    }
+   }
+  },
+  "epmc_pmc7801534_fig1": {
+   "presentation": [
+    "Göğüsteki ağrı sırtına da yayılıyor.",
+    "Çocukluktan beri üst ekstremitelerde yüksek tansiyon ölçümleri olmuş.",
+    "Yürürken bacaklarında erken yorulma hissediyor."
+   ],
+   "presentationRef": {
+    "title": "ESC Periferik Arter ve Aort Hastalıkları Kılavuzu (2024)",
+    "url": "https://www.escardio.org/guidelines/clinical-practice-guidelines/all-esc-practice-guidelines/peripheral-arterial-and-aortic-diseases/"
+   },
+   "differential": [
+    {
+     "dx": "Koarktasyon distalinde inen aort anevrizması",
+     "clue": "Kalsifiye aort konturu ve kaburga çentiklenmesi destekler."
+    },
+    {
+     "dx": "İzole aort ektazisi",
+     "clue": "Kaburga çentiklenmesini ve genç yaştaki belirgin genişlemeyi açıklamaz."
+    },
+    {
+     "dx": "Mediastinal kitle",
+     "clue": "Damar devamlılığı yoksa BT'de ayrılır."
+    },
+    {
+     "dx": "Aort diseksiyonu",
+     "clue": "Ani ağrıya yol açabilir; kaburga çentiklenmesini açıklamaz."
+    }
+   ],
+   "differentialRef": {
+    "title": "ESC Periferik Arter ve Aort Hastalıkları Kılavuzu (2024)",
+    "url": "https://www.escardio.org/guidelines/clinical-practice-guidelines/all-esc-practice-guidelines/peripheral-arterial-and-aortic-diseases/"
+   },
+   "pearl": {
+    "text": "Kaburga çentiklenmesi uzun süreli kollateral dolaşımı düşündürür; grafi koarktasyon ile anevrizmanın anatomisini belirleyemez. Torasik aort BT anjiyografi ile incelenir.",
+    "ref": {
+     "title": "ESC Periferik Arter ve Aort Hastalıkları Kılavuzu (2024)",
+     "url": "https://www.escardio.org/guidelines/clinical-practice-guidelines/all-esc-practice-guidelines/peripheral-arterial-and-aortic-diseases/"
+    }
+   }
+  },
+  "epmc_pmc13618871_fig1": {
+   "presentation": [
+    "Günlük yaşamında efor kapasitesi büyük ölçüde korunmuş.",
+    "Aralıklı kuru öksürük tarifliyor.",
+    "Gözlerinde dönemsel kızarıklık fark etmiş."
+   ],
+   "presentationRef": {
+    "title": "ATS Sarkoidoz Tanı ve Saptama Kılavuzu (2020)",
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC7159433/"
+   },
+   "differential": [
+    {
+     "dx": "Sarkoidoza bağlı hiler lenfadenopati",
+     "clue": "Simetrik iki taraflı hiler dolgunluk lehine."
+    },
+    {
+     "dx": "Lenfoma",
+     "clue": "Asimetrik veya hacimli nodal paketler daha kuşkuludur."
+    },
+    {
+     "dx": "Tüberküloz lenfadeniti",
+     "clue": "Temas öyküsü veya nekrotik düğümler olasılığı artırır."
+    },
+    {
+     "dx": "Metastatik lenfadenopati",
+     "clue": "Bilinen primer kanser ve asimetrik düğümler destekler."
+    }
+   ],
+   "differentialRef": {
+    "title": "ATS Sarkoidoz Tanı ve Saptama Kılavuzu (2020)",
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC7159433/"
+   },
+   "pearl": {
+    "text": "Simetrik hiler dolgunluk sarkoidozu destekler, ancak grafi tek başına tanı koydurmaz. Klinik değerlendirme ve toraks BT sonrası doku gerekirse EBUS eşliğinde lenf düğümü örneklenir.",
+    "ref": {
+     "title": "ATS Sarkoidoz Tanı ve Saptama Kılavuzu (2020)",
+     "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC7159433/"
+    }
+   }
+  },
+  "epmc_pmc10163919_fig1": {
+   "presentation": [
+    "Merdiven çıkarken eskisinden çabuk yoruluyor.",
+    "Dönemsel kuru öksürüğü oluyor.",
+    "Gözde kızarıklık yakınması eşlik ediyor."
+   ],
+   "presentationRef": {
+    "title": "ATS Sarkoidoz Tanı ve Saptama Kılavuzu (2020)",
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC7159433/"
+   },
+   "differential": [
+    {
+     "dx": "Sarkoidoza bağlı hiler lenfadenopati",
+     "clue": "Simetrik bilateral hiler genişlik ve sistemik yakınmalar destekler."
+    },
+    {
+     "dx": "Tüberküloz lenfadeniti",
+     "clue": "Uzamış ateş ve olası temas öyküsü araştırılmalıdır."
+    },
+    {
+     "dx": "Lenfoma",
+     "clue": "Ateşle görülebilir; düğümlerin dağılımı ve doku ayırır."
+    },
+    {
+     "dx": "Metastatik lenfadenopati",
+     "clue": "Primer malignite ve asimetrik nodal dağılım beklenir."
+    }
+   ],
+   "differentialRef": {
+    "title": "ATS Sarkoidoz Tanı ve Saptama Kılavuzu (2020)",
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC7159433/"
+   },
+   "pearl": {
+    "text": "Bilateral hiler genişlik sarkoidozla uyumlu olsa da uzamış ateşte tüberküloz dışlanmalıdır. Klinik kuşkuda uygun solunum örneği için WHO önerili moleküler test istenir.",
+    "ref": {
+     "title": "WHO Tüberküloz Tanısı, Modül 3: Hızlı Tanı Testleri (2024)",
+     "url": "https://www.who.int/publications/i/item/9789240089488"
+    }
+   }
+  },
+  "epmc_pmc11316136_ccr39186-fig-0002": {
+   "presentation": [
+    "Efor kapasitesi önceki düzeyine henüz dönmemiş.",
+    "Zaman zaman göğüste hafif baskı hissediyor.",
+    "Süren yakınmaları nedeniyle takip görüntülemesi istenmiş."
+   ],
+   "presentationRef": {
+    "title": "ATS Sarkoidoz Tanı ve Saptama Kılavuzu (2020)",
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC7159433/"
+   },
+   "differential": [
+    {
+     "dx": "Sarkoidoza bağlı hiler lenfadenopati",
+     "clue": "Takipte ortaya çıkan bilateral hiler genişleme lehine."
+    },
+    {
+     "dx": "Lenfoma",
+     "clue": "Hacimli veya asimetrik düğümler varsa düşünülür."
+    },
+    {
+     "dx": "Tüberküloz lenfadeniti",
+     "clue": "Temas ve mikrobiyolojik kanıt aranır."
+    },
+    {
+     "dx": "Metastatik lenfadenopati",
+     "clue": "Primer tümör öyküsü ve asimetrik dağılım destekler."
+    }
+   ],
+   "differentialRef": {
+    "title": "ATS Sarkoidoz Tanı ve Saptama Kılavuzu (2020)",
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC7159433/"
+   },
+   "pearl": {
+    "text": "COVID sonrası devam eden belirtiler yeni hiler genişlemenin nedenini açıklamaz. Toraks BT ile nodal dağılım incelenir; tanı için örnekleme gerekirse EBUS tercih edilir.",
+    "ref": {
+     "title": "ATS Sarkoidoz Tanı ve Saptama Kılavuzu (2020)",
+     "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC7159433/"
+    }
+   }
+  },
+  "epmc_pmc12289318_fig3": {
+   "presentation": [
+    "Ağız kuruluğu eşlik ediyor.",
+    "Gözlerde yanma ve ışığa hassasiyet tarifliyor.",
+    "Son günlerde günlük etkinliklerinde çabuk yoruluyor."
+   ],
+   "presentationRef": {
+    "title": "ATS Sarkoidoz Tanı ve Saptama Kılavuzu (2020)",
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC7159433/"
+   },
+   "differential": [
+    {
+     "dx": "Sarkoidoza bağlı hiler ve mediastinal lenfadenopati",
+     "clue": "Simetrik nodal büyüme ile parotis bulgusu birlikte destekler."
+    },
+    {
+     "dx": "Lenfoma",
+     "clue": "Hacimli veya asimetrik nodlar ve sistemik belirtiler düşündürür."
+    },
+    {
+     "dx": "Tüberküloz lenfadeniti",
+     "clue": "Temas ve nekrotik düğüm görünümü olasılığı artırır."
+    },
+    {
+     "dx": "Metastatik lenfadenopati",
+     "clue": "Primer malignite ve düzensiz asimetrik dağılım aranır."
+    }
+   ],
+   "differentialRef": {
+    "title": "ATS Sarkoidoz Tanı ve Saptama Kılavuzu (2020)",
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC7159433/"
+   },
+   "pearl": {
+    "text": "Parotis bulgusu ile simetrik hiler ve mediastinal büyüme sarkoidozu destekler; grafi histolojik nedenini göstermez. Toraks BT ve gerekirse uygun düğümden EBUS örneklemesi düşünülür.",
+    "ref": {
+     "title": "ATS Sarkoidoz Tanı ve Saptama Kılavuzu (2020)",
+     "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC7159433/"
+    }
+   }
+  },
+  "epmc_pmc12612959_fig1": {
+   "presentation": [
+    "Atak sırasında kısa süreli dengesizlik hissetmiş.",
+    "Olay öncesinde belirgin travma tariflemiyor.",
+    "Uzun süredir hipertansiyon öyküsü bulunuyor."
+   ],
+   "presentationRef": {
+    "title": "ESC Periferik Arter ve Aort Hastalıkları Kılavuzu (2024)",
+    "url": "https://www.escardio.org/guidelines/clinical-practice-guidelines/all-esc-practice-guidelines/peripheral-arterial-and-aortic-diseases/"
+   },
+   "differential": [
+    {
+     "dx": "Tip A diseksiyonuna bağlı mediasten genişlemesi",
+     "clue": "Üst mediasten genişliği ve ani nörolojik tablo destekler."
+    },
+    {
+     "dx": "Torasik aort anevrizması",
+     "clue": "Aort kavsi konturunu genişletebilir; akut belirtiyi açıklamayabilir."
+    },
+    {
+     "dx": "Aort uzaması",
+     "clue": "Yaşla ilişkili genişlik yapabilir; akut güçsüzlük için yetersizdir."
+    },
+    {
+     "dx": "Mediastinal kitle",
+     "clue": "Yavaş gelişen genişleme beklenir; damar kökeni BT'de ayrılır."
+    }
+   ],
+   "differentialRef": {
+    "title": "ESC Periferik Arter ve Aort Hastalıkları Kılavuzu (2024)",
+    "url": "https://www.escardio.org/guidelines/clinical-practice-guidelines/all-esc-practice-guidelines/peripheral-arterial-and-aortic-diseases/"
+   },
+   "pearl": {
+    "text": "Üst mediasten genişliği diseksiyon için özgül değildir; ağrısız nörolojik başvuru da akut aort sendromunu dışlamaz. Şüphe halinde BT anjiyografi ile aort incelenir.",
+    "ref": {
+     "title": "ESC Periferik Arter ve Aort Hastalıkları Kılavuzu (2024)",
+     "url": "https://www.escardio.org/guidelines/clinical-practice-guidelines/all-esc-practice-guidelines/peripheral-arterial-and-aortic-diseases/"
+    }
+   }
+  },
+  "epmc_pmc13046306_fig2": {
+   "presentation": [
+    "Yakınları durum değişikliğinin dakikalar içinde geliştiğini anlatıyor.",
+    "Uzun yıllardır yüksek tansiyon nedeniyle izleniyor.",
+    "Olaydan hemen önce kısa süreli baş dönmesi fark edilmiş."
+   ],
+   "presentationRef": {
+    "title": "ESC Periferik Arter ve Aort Hastalıkları Kılavuzu (2024)",
+    "url": "https://www.escardio.org/guidelines/clinical-practice-guidelines/all-esc-practice-guidelines/peripheral-arterial-and-aortic-diseases/"
+   },
+   "differential": [
+    {
+     "dx": "Tip A diseksiyonuna bağlı mediasten genişlemesi",
+     "clue": "Geniş aort konturu ve ani bilinç değişikliği lehine."
+    },
+    {
+     "dx": "Hipertansif aort uzaması",
+     "clue": "Geniş kontur yapar; akut bilinç değişikliğini tek başına açıklamaz."
+    },
+    {
+     "dx": "Torasik aort anevrizması",
+     "clue": "Benzer kontur genişliği yapar; diseksiyon BT ile ayrılır."
+    },
+    {
+     "dx": "Mediastinal kitle",
+     "clue": "Yavaş gelişim beklenir; aortla devamlılık göstermez."
+    }
+   ],
+   "differentialRef": {
+    "title": "ESC Periferik Arter ve Aort Hastalıkları Kılavuzu (2024)",
+    "url": "https://www.escardio.org/guidelines/clinical-practice-guidelines/all-esc-practice-guidelines/peripheral-arterial-and-aortic-diseases/"
+   },
+   "pearl": {
+    "text": "Hipertansif aort uzaması ile diseksiyon grafide karışabilir; geniş mediasten tanı koydurmaz. Ağrısız ani nörolojik tabloda BT anjiyografi ile akut aort sendromu araştırılır.",
+    "ref": {
+     "title": "ESC Periferik Arter ve Aort Hastalıkları Kılavuzu (2024)",
+     "url": "https://www.escardio.org/guidelines/clinical-practice-guidelines/all-esc-practice-guidelines/peripheral-arterial-and-aortic-diseases/"
+    }
+   }
+  },
+  "epmc_pmc8761487_fig2": {
+   "presentation": [
+    "Ağrı kürek kemikleri arasına yayılıyor.",
+    "Başlangıç saatini net olarak tarifliyor.",
+    "Uzun süreli hipertansiyon öyküsü var."
+   ],
+   "presentationRef": {
+    "title": "ESC Periferik Arter ve Aort Hastalıkları Kılavuzu (2024)",
+    "url": "https://www.escardio.org/guidelines/clinical-practice-guidelines/all-esc-practice-guidelines/peripheral-arterial-and-aortic-diseases/"
+   },
+   "differential": [
+    {
+     "dx": "Tip A diseksiyonuna bağlı mediasten genişlemesi",
+     "clue": "Ani ağrı ve geniş kardiyomediastinal silüet lehine."
+    },
+    {
+     "dx": "Torasik aort anevrizması",
+     "clue": "Aort konturunu büyütebilir; akut ağrıda komplikasyon aranır."
+    },
+    {
+     "dx": "Aort uzaması",
+     "clue": "Silüeti genişletebilir; şiddetli ani ağrıyı açıklamaz."
+    },
+    {
+     "dx": "Mediastinal kitle",
+     "clue": "Genellikle daha yavaş seyirli kontur değişikliği yapar."
+    }
+   ],
+   "differentialRef": {
+    "title": "ESC Periferik Arter ve Aort Hastalıkları Kılavuzu (2024)",
+    "url": "https://www.escardio.org/guidelines/clinical-practice-guidelines/all-esc-practice-guidelines/peripheral-arterial-and-aortic-diseases/"
+   },
+   "pearl": {
+    "text": "Geniş kardiyomediastinal silüet diseksiyonu doğrulamaz ve normal grafi de dışlamaz. Akut aort sendromu kuşkusunda BT anjiyografi gerekir.",
+    "ref": {
+     "title": "ESC Periferik Arter ve Aort Hastalıkları Kılavuzu (2024)",
+     "url": "https://www.escardio.org/guidelines/clinical-practice-guidelines/all-esc-practice-guidelines/peripheral-arterial-and-aortic-diseases/"
+    }
+   }
+  },
+  "epmc_pmc9893865_fig2": {
+   "presentation": [
+    "Ağrı kürek kemikleri arasında da hissediliyor.",
+    "Başlangıcın istirahat sırasında olduğu belirtiliyor.",
+    "Son günlerde benzer bir atak tanımlamıyor."
+   ],
+   "presentationRef": {
+    "title": "ESC Periferik Arter ve Aort Hastalıkları Kılavuzu (2024)",
+    "url": "https://www.escardio.org/guidelines/clinical-practice-guidelines/all-esc-practice-guidelines/peripheral-arterial-and-aortic-diseases/"
+   },
+   "differential": [
+    {
+     "dx": "İntramural hematoma bağlı mediasten genişlemesi",
+     "clue": "Akut göğüs ağrısı ve üst mediasten genişliği uyumlu."
+    },
+    {
+     "dx": "Klasik aort diseksiyonu",
+     "clue": "Benzer ağrı ve kontur yapar; intimal flep BT'de aranır."
+    },
+    {
+     "dx": "Torasik aort anevrizması",
+     "clue": "Kronik genişleme olabilir; akut ağrıda komplikasyon düşünülür."
+    },
+    {
+     "dx": "Projeksiyona bağlı yalancı genişlik",
+     "clue": "Yarı oturur çekim mediastinal boyutu olduğundan büyük gösterebilir."
+    }
+   ],
+   "differentialRef": {
+    "title": "ESC Periferik Arter ve Aort Hastalıkları Kılavuzu (2024)",
+    "url": "https://www.escardio.org/guidelines/clinical-practice-guidelines/all-esc-practice-guidelines/peripheral-arterial-and-aortic-diseases/"
+   },
+   "pearl": {
+    "text": "Yarı oturur grafide mediasten genişliği teknik etkilerle artabilir; intramural hematom grafiden doğrulanmaz. Akut aort sendromunu değerlendirmek için BT anjiyografi gerekir.",
+    "ref": {
+     "title": "ESC Periferik Arter ve Aort Hastalıkları Kılavuzu (2024)",
+     "url": "https://www.escardio.org/guidelines/clinical-practice-guidelines/all-esc-practice-guidelines/peripheral-arterial-and-aortic-diseases/"
+    }
+   }
+  },
+  "epmc_pmc13143138_f2": {
+   "presentation": [
+    "Merdiven çıkarken nefesi daha çabuk daralıyor.",
+    "Öksürük geceleri uykusunu bölüyor.",
+    "Evde benzer solunum yolu yakınmaları olan kişiler var."
+   ],
+   "presentationRef": {
+    "title": "ATS/IDSA Toplum Kökenli Pnömoni Kılavuzu (2019)",
+    "url": "https://www.idsociety.org/practice-guideline/community-acquired-pneumonia-cap-in-adults"
+   },
+   "differential": [
+    {
+     "dx": "Toplum kökenli pnömoni",
+     "clue": "Sağ alt lob konsolidasyonu ve akut enfeksiyon belirtileri uyumlu."
+    },
+    {
+     "dx": "Atelektazi",
+     "clue": "Hacim kaybı ve fissür çekilmesi varsa düşünülür."
+    },
+    {
+     "dx": "Aspirasyon pnömonisi",
+     "clue": "Bağımlı alt lob yerleşimi destekleyebilir; aspirasyon öyküsü aranır."
+    },
+    {
+     "dx": "Pulmoner enfarkt",
+     "clue": "Ani plöritik ağrı ve periferik kama opasitesi beklenir."
+    }
+   ],
+   "differentialRef": {
+    "title": "ATS/IDSA Toplum Kökenli Pnömoni Kılavuzu (2019)",
+    "url": "https://www.idsociety.org/practice-guideline/community-acquired-pneumonia-cap-in-adults"
+   },
+   "pearl": {
+    "text": "Sağ alt lob konsolidasyonu pnömoniyi destekler, fakat grafi Chlamydia pneumoniae etkenini belirleyemez. Klinik ağırlık ve uygun mikrobiyolojik inceleme birlikte değerlendirilir.",
+    "ref": {
+     "title": "ATS/IDSA Toplum Kökenli Pnömoni Kılavuzu (2019)",
+     "url": "https://www.idsociety.org/practice-guideline/community-acquired-pneumonia-cap-in-adults"
+    }
+   }
+  },
+  "epmc_pmc13318803_fig1": {
+   "presentation": [
+    "Günlük yürüyüş mesafesi giderek kısalmış.",
+    "İştahsızlık ve gece terlemesi eklenmiş.",
+    "Diyabet ve bağışıklık baskılanması açısından öyküsü ayrıntılandırılıyor."
+   ],
+   "presentationRef": {
+    "title": "ECMM/MSG Küresel Mukormikoz Tanı ve Yönetim Kılavuzu (2019)",
+    "url": "https://www.ecmm.info/guidelines/mucormycoses-2019/"
+   },
+   "differential": [
+    {
+     "dx": "Mukormikoza bağlı pnömoni",
+     "clue": "Uzamış seyir ve üst lob konsolidasyonu uyumlu; etken grafiden anlaşılmaz."
+    },
+    {
+     "dx": "Pulmoner tüberküloz",
+     "clue": "Kronik seyir ve üst lob yerleşimi destekler."
+    },
+    {
+     "dx": "Akciğer malignitesi",
+     "clue": "Kalıcı odaksal konsolidasyon ve ileri yaşta düşünülür."
+    },
+    {
+     "dx": "Bakteriyel pnömoni",
+     "clue": "Konsolidasyon yapabilir; üç aylık seyir olağan değildir."
+    }
+   ],
+   "differentialRef": {
+    "title": "ECMM/MSG Küresel Mukormikoz Tanı ve Yönetim Kılavuzu (2019)",
+    "url": "https://www.ecmm.info/guidelines/mucormycoses-2019/"
+   },
+   "pearl": {
+    "text": "Sağ üst lob konsolidasyonu mukormikoz için özgül değildir. Toraks BT ile yayılım değerlendirilir; mikolojik ve histopatolojik örnekleme tanıyı destekler.",
+    "ref": {
+     "title": "ECMM/MSG Küresel Mukormikoz Tanı ve Yönetim Kılavuzu (2019)",
+     "url": "https://www.ecmm.info/guidelines/mucormycoses-2019/"
+    }
+   }
+  },
+  "epmc_pmc12576348_fig1": {
+   "presentation": [
+    "İştahı azalmış ve sıvı alımı düşmüş.",
+    "Yakınları solunumunun hızlandığını fark etmiş.",
+    "Sonradan nefes alırken sağ yanda batma başlamış."
+   ],
+   "presentationRef": {
+    "title": "ATS/IDSA Toplum Kökenli Pnömoni Kılavuzu (2019)",
+    "url": "https://www.idsociety.org/practice-guideline/community-acquired-pneumonia-cap-in-adults"
+   },
+   "differential": [
+    {
+     "dx": "Toplum kökenli pnömoni",
+     "clue": "Sağ alt zonda yamalı konsolidasyon ve ateş uyumlu."
+    },
+    {
+     "dx": "Viral alt solunum yolu enfeksiyonu",
+     "clue": "Miyaljiyle başlayabilir; odaksal konsolidasyon ek değerlendirme gerektirir."
+    },
+    {
+     "dx": "Atelektazi",
+     "clue": "Hacim kaybı ve bronkovasküler çekilme varsa düşünülür."
+    },
+    {
+     "dx": "Pulmoner enfarkt",
+     "clue": "Ani plöritik ağrı ve periferik kama opasitesi beklenir."
+    }
+   ],
+   "differentialRef": {
+    "title": "ATS/IDSA Toplum Kökenli Pnömoni Kılavuzu (2019)",
+    "url": "https://www.idsociety.org/practice-guideline/community-acquired-pneumonia-cap-in-adults"
+   },
+   "pearl": {
+    "text": "Başlangıçta öksürük olmaması pnömoniyi dışlamaz; yamalı konsolidasyon etkeni göstermez. Klinik ağırlık ve oksijenlenme değerlendirilir, gerekirse ek mikrobiyolojik inceleme seçilir.",
+    "ref": {
+     "title": "ATS/IDSA Toplum Kökenli Pnömoni Kılavuzu (2019)",
+     "url": "https://www.idsociety.org/practice-guideline/community-acquired-pneumonia-cap-in-adults"
+    }
+   }
+  },
+  "epmc_pmc12965395_fig1": {
+   "presentation": [
+    "Merdiven çıkarken belirgin çabuk yoruluyor.",
+    "Öksürük geceleri uykusunu bölüyor.",
+    "Önceden solunum yolu hastalığı olup olmadığı sorgulanıyor."
+   ],
+   "presentationRef": {
+    "title": "ATS/IDSA Toplum Kökenli Pnömoni Kılavuzu (2019)",
+    "url": "https://www.idsociety.org/practice-guideline/community-acquired-pneumonia-cap-in-adults"
+   },
+   "differential": [
+    {
+     "dx": "Burkholderia cepacia ilişkili pnömoni",
+     "clue": "Sağ üst lob konsolidasyonu ve akut enfeksiyon tablosu uyumlu."
+    },
+    {
+     "dx": "Pulmoner tüberküloz",
+     "clue": "Üst lob yerleşimi nedeniyle mikrobiyolojik ayırım gerekir."
+    },
+    {
+     "dx": "Atelektazi",
+     "clue": "Hacim kaybı ve fissür yer değiştirmesi beklenir."
+    },
+    {
+     "dx": "Viral pnömoni",
+     "clue": "Genellikle daha yaygın opasiteler beklenir; grafi etkeni ayırmaz."
+    }
+   ],
+   "differentialRef": {
+    "title": "ATS/IDSA Toplum Kökenli Pnömoni Kılavuzu (2019)",
+    "url": "https://www.idsociety.org/practice-guideline/community-acquired-pneumonia-cap-in-adults"
+   },
+   "pearl": {
+    "text": "Sağ üst lob konsolidasyonu pnömoniyi destekler, ancak grafi Burkholderia cepacia etkenini saptayamaz. Uygun solunum örneğinde mikrobiyolojik tanı değerlendirilir.",
+    "ref": {
+     "title": "ATS/IDSA Toplum Kökenli Pnömoni Kılavuzu (2019)",
+     "url": "https://www.idsociety.org/practice-guideline/community-acquired-pneumonia-cap-in-adults"
+    }
+   }
   }
  }
 }

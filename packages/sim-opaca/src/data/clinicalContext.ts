@@ -16,7 +16,8 @@ export interface ClinicalLabel {
 }
 
 export interface ClinicalContext {
-  readonly age: number | null;
+  /** Yayın kayıtlarında yaş metin olabilir (ör. "70'li yaşlar"). */
+  readonly age: number | string | null;
   readonly sex: string | null;
   readonly view: string | null;
   readonly source: string;

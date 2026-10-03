@@ -169,10 +169,7 @@ describe("öğrenme tamamlanabilirliği", () => {
   });
 
   it("T322: öğrenme modundaki her filmin denetlenmiş hasta kartı içeriği var", () => {
-    // T321b'de yeni görüntülerle birlikte üretilecek (yeni eklenen konu); liste yalnız küçülür.
-    const pending = new Set(["finding.pneumonia_report"]);
     for (const item of LIBRARY_ITEMS) {
-      if (pending.has(item.key)) continue;
       for (const image of libraryExamples(item)) {
         const vignette = vignetteFor(image.id);
         expect(vignette, `${item.key}: ${image.id}`).not.toBeNull();
@@ -313,7 +310,7 @@ describe("ModeSelectScreen öğrenme kilidi", () => {
     expect(html).toContain("mode-card practice learn-locked");
     expect(html).toContain("mode-card assessment learn-locked");
     expect(html).toContain('data-learn-locked="true"');
-    expect(html).toContain("Önce öğrenme modunu tamamlayın: 0/30 konu incelendi.");
+    expect(html).toContain("Önce öğrenme modunu tamamlayın: 0/33 konu incelendi.");
     // T320: öğrenme kartı tamamlama ölçütünü gösterir.
     expect(html).toContain("Tamamlama ölçütü");
     expect(html).toContain(`en az ${LEARN_VIEW_SECONDS} sn incelenince konu tamamlanır`);

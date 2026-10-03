@@ -1,6 +1,6 @@
 {
  "generatedAt": "2026-09-23T07:36:23.124Z",
- "count": 593,
+ "count": 609,
  "records": [
   {
    "id": "commons_clavicle_fx",
@@ -22435,6 +22435,595 @@
     "author": "LIDC-IDRI (Armato ve ark.) / TCIA",
     "attribution": "Armato SG III, McLennan G, Bidaut L, McNitt-Gray MF, Meyer CR, Reeves AP, Zhao B, Aberle DR, Henschke CI, Hoffman EA, Kazerooni EA, MacMahon H, van Beeke EJT, Yankelevitz D, Biancardi AM, Bland PH, Brown MS, Engelmann RM, Laderach GE, Max D, Pais RC, Qing DPY, Roberts RY, Smith AR, Starkey A, Batra P, Caligiuri P, Farooqi A, Gladish GW, Jude CM, Munden RF, Petkovska I, Quint LE, Schwartz LH, Sundaram B, Dodd LE, Fenimore C, Gur D, Petrick N, Freymann J, Kirby J, Hughes B, Casteele AV, Gupte S, Sallam M, Heath MD, Kuhn MH, Dharaiya E, Burns R, Fryd DS, Salganicoff M, Anand V, Shreter U, Vastagh S, Croft BY. Data From LIDC-IDRI [Data set]. The Cancer Imaging Archive (2015). https://doi.org/10.7937/K9/TCIA.2015.LO9QL9SX — Clark K, Vendt B, Smith K, Freymann J, Kirby J, Koppel P, Moore S, Phillips S, Maffitt D, Pringle M, Tarbox L, Prior F. The Cancer Imaging Archive (TCIA): Maintaining and Operating a Public Information Repository. Journal of Digital Imaging, 26(6), 1045-1057 (2013). DOI: 10.1007/s10278-013-9622-7",
     "sourceUrl": "https://doi.org/10.7937/K9/TCIA.2015.LO9QL9SX"
+   }
+  },
+  {
+   "id": "epmc_pmc12875552_f1",
+   "sourceDataset": "europepmc",
+   "sourceFile": "amed-32-413-g001.jpg",
+   "viewPosition": "PA",
+   "ageYears": 68,
+   "sex": "M",
+   "population": "yetiskin",
+   "width": 525,
+   "height": 500,
+   "originalWidth": 525,
+   "originalHeight": 500,
+   "findings": {
+    "aortic_aneurysm": "author_caption"
+   },
+   "negatives": {},
+   "annotations": [],
+   "quality": null,
+   "runtimeUrl": "assets/xray/runtime/epmc_pmc12875552_f1.webp",
+   "bytes": 17054,
+   "validationStatus": "validated",
+   "clinicalReview": "beklemede",
+   "issues": [
+    "Bu görüntünün bulgu bilgisi Europe PMC PMC12875552 makalesinin figür altyazısına dayanır (author_caption); radyolog tarafından doğrulanmamıştır — hekim onayı bekliyor.",
+    "Figür altyazısı: Pre-op chest X-ray with massive mediastinal mass with trachea deviated to the right"
+   ],
+   "bodyPart": "toraks",
+   "modality": "XR",
+   "license": {
+    "name": "CC BY 4.0 (Europe PMC açık erişim — bkz. makale için tam lisans metni)",
+    "url": "https://creativecommons.org/licenses/by/4.0/",
+    "author": "Zhumagaliyev R, Orazymbetov Y, Aitaliyev S, Arslan S, Lenkutis T, Siudikas A, Benetis R.",
+    "attribution": "Zhumagaliyev R, Orazymbetov Y, Aitaliyev S, Arslan S, Lenkutis T, Siudikas A, Benetis R. (2025). Giant Descending Thoracic Aortic Aneurysm: A Case Report. DOI: 10.15388/Amed.2025.32.2.14. Şekil F1; CC BY 4.0: https://creativecommons.org/licenses/by/4.0/. Kaynak: https://pmc.ncbi.nlm.nih.gov/articles/PMC12875552/figure/F1/. Küçük önizleme yeniden boyutlandırıldı.",
+    "sourceUrl": "https://pmc.ncbi.nlm.nih.gov/articles/PMC12875552/figure/F1/"
+   }
+  },
+  {
+   "id": "epmc_pmc13372284_fig1",
+   "sourceDataset": "europepmc",
+   "sourceFile": "cureus-0018-00000110802-i01.jpg",
+   "viewPosition": "unknown",
+   "ageYears": 60,
+   "sex": "M",
+   "population": "yetiskin",
+   "width": 750,
+   "height": 752,
+   "originalWidth": 750,
+   "originalHeight": 752,
+   "findings": {
+    "aortic_aneurysm": "author_caption"
+   },
+   "negatives": {},
+   "annotations": [],
+   "quality": null,
+   "runtimeUrl": "assets/xray/runtime/epmc_pmc13372284_fig1.webp",
+   "bytes": 32044,
+   "validationStatus": "validated",
+   "clinicalReview": "beklemede",
+   "issues": [
+    "Bu görüntünün bulgu bilgisi Europe PMC PMC13372284 makalesinin figür altyazısına dayanır (author_caption); radyolog tarafından doğrulanmamıştır — hekim onayı bekliyor.",
+    "Figür altyazısı: Erect chest radiograph showing an enlarged aortic knuckle (black arrowheads) and deviation of the lower trachea and carina to the right (white arrow)",
+    "Seçim notu veya figür altyazısı görüntü üzerinde ok/işaretleme olabileceğini bildiriyor — hekim onayında ayrıca değerlendirilmeli."
+   ],
+   "bodyPart": "toraks",
+   "modality": "XR",
+   "license": {
+    "name": "CC BY 4.0 (Europe PMC açık erişim — bkz. makale için tam lisans metni)",
+    "url": "https://creativecommons.org/licenses/by/4.0/",
+    "author": "Ahuja A, Bag A, Goel S, I I, Agstam S.",
+    "attribution": "Ahuja A, Bag A, Goel S, I I, Agstam S. (2026). Dysphagia Aortica Secondary to a Giant Aortic Aneurysm: An Old Sign Revisited. DOI: 10.7759/cureus.110802. Şekil FIG1; CC BY 4.0: https://creativecommons.org/licenses/by/4.0/. Kaynak: https://pmc.ncbi.nlm.nih.gov/articles/PMC13372284/figure/FIG1/. Küçük önizleme yeniden boyutlandırıldı.",
+    "sourceUrl": "https://pmc.ncbi.nlm.nih.gov/articles/PMC13372284/figure/FIG1/"
+   }
+  },
+  {
+   "id": "epmc_pmc12553967_fig1",
+   "sourceDataset": "europepmc",
+   "sourceFile": "cureus-0017-00000093235-i01.jpg",
+   "viewPosition": "AP",
+   "ageYears": null,
+   "sex": "F",
+   "population": "yetiskin",
+   "width": 750,
+   "height": 619,
+   "originalWidth": 750,
+   "originalHeight": 619,
+   "findings": {
+    "aortic_aneurysm": "author_caption"
+   },
+   "negatives": {},
+   "annotations": [],
+   "quality": null,
+   "runtimeUrl": "assets/xray/runtime/epmc_pmc12553967_fig1.webp",
+   "bytes": 17486,
+   "validationStatus": "validated",
+   "clinicalReview": "beklemede",
+   "issues": [
+    "Bu görüntünün bulgu bilgisi Europe PMC PMC12553967 makalesinin figür altyazısına dayanır (author_caption); radyolog tarafından doğrulanmamıştır — hekim onayı bekliyor.",
+    "Figür altyazısı: A large thoracic aortic aneurysm was found in the region of the aortic arch, which was not evident on previous examination as highlighted by the red arrow.",
+    "Seçim notu veya figür altyazısı görüntü üzerinde ok/işaretleme olabileceğini bildiriyor — hekim onayında ayrıca değerlendirilmeli."
+   ],
+   "bodyPart": "toraks",
+   "modality": "XR",
+   "license": {
+    "name": "CC BY 4.0 (Europe PMC açık erişim — bkz. makale için tam lisans metni)",
+    "url": "https://creativecommons.org/licenses/by/4.0/",
+    "author": "Mahmood A, Sarwar S, Mahmoud Hamouda A.",
+    "attribution": "Mahmood A, Sarwar S, Mahmoud Hamouda A. (2025). Stable Ruptured Thoracic Aortic Aneurysm. DOI: 10.7759/cureus.93235. Şekil FIG1; CC BY 4.0: https://creativecommons.org/licenses/by/4.0/. Kaynak: https://pmc.ncbi.nlm.nih.gov/articles/PMC12553967/figure/FIG1/. Küçük önizleme yeniden boyutlandırıldı.",
+    "sourceUrl": "https://pmc.ncbi.nlm.nih.gov/articles/PMC12553967/figure/FIG1/"
+   }
+  },
+  {
+   "id": "epmc_pmc7801534_fig1",
+   "sourceDataset": "europepmc",
+   "sourceFile": "42155_2020_193_Fig1_HTML.jpg",
+   "viewPosition": "unknown",
+   "ageYears": 28,
+   "sex": "M",
+   "population": "yetiskin",
+   "width": 596,
+   "height": 727,
+   "originalWidth": 596,
+   "originalHeight": 727,
+   "findings": {
+    "aortic_aneurysm": "author_caption"
+   },
+   "negatives": {},
+   "annotations": [],
+   "quality": null,
+   "runtimeUrl": "assets/xray/runtime/epmc_pmc7801534_fig1.webp",
+   "bytes": 15590,
+   "validationStatus": "validated",
+   "clinicalReview": "beklemede",
+   "issues": [
+    "Bu görüntünün bulgu bilgisi Europe PMC PMC7801534 makalesinin figür altyazısına dayanır (author_caption); radyolog tarafından doğrulanmamıştır — hekim onayı bekliyor.",
+    "Figür altyazısı: Presenting chest radiograph with a large calcified aortic aneurysm and rib notching in the right upper zone (Black Arrows)",
+    "Seçim notu veya figür altyazısı görüntü üzerinde ok/işaretleme olabileceğini bildiriyor — hekim onayında ayrıca değerlendirilmeli."
+   ],
+   "bodyPart": "toraks",
+   "modality": "XR",
+   "license": {
+    "name": "CC BY 4.0 (Europe PMC açık erişim — bkz. makale için tam lisans metni)",
+    "url": "https://creativecommons.org/licenses/by/4.0/",
+    "author": "Abdel-Hadi O, Thomson J, McPherson SJ.",
+    "attribution": "Abdel-Hadi O, Thomson J, McPherson SJ. (2021). Endovascular repair of de novo post-stenotic aortic coarctation aneurysms with complex collateral supply: two cases with long and medium term follow-up. DOI: 10.1186/s42155-020-00193-4. Şekil Fig1; CC BY 4.0: https://creativecommons.org/licenses/by/4.0/. Kaynak: https://pmc.ncbi.nlm.nih.gov/articles/PMC7801534/figure/Fig1/. Küçük önizleme yeniden boyutlandırıldı.",
+    "sourceUrl": "https://pmc.ncbi.nlm.nih.gov/articles/PMC7801534/figure/Fig1/"
+   }
+  },
+  {
+   "id": "epmc_pmc13618871_fig1",
+   "sourceDataset": "europepmc",
+   "sourceFile": "cureus-0018-00000115404-i01.webp",
+   "viewPosition": "unknown",
+   "ageYears": 51,
+   "sex": "F",
+   "population": "yetiskin",
+   "width": 1024,
+   "height": 868,
+   "originalWidth": 1600,
+   "originalHeight": 1356,
+   "findings": {
+    "lymphadenopathy": "author_caption"
+   },
+   "negatives": {},
+   "annotations": [],
+   "quality": null,
+   "runtimeUrl": "assets/xray/runtime/epmc_pmc13618871_fig1.webp",
+   "bytes": 27950,
+   "validationStatus": "validated",
+   "clinicalReview": "beklemede",
+   "issues": [
+    "Bu görüntünün bulgu bilgisi Europe PMC PMC13618871 makalesinin figür altyazısına dayanır (author_caption); radyolog tarafından doğrulanmamıştır — hekim onayı bekliyor.",
+    "Figür altyazısı: Chest radiograph demonstrating bilateral hilar prominence (yellow arrows), consistent with pulmonary involvement of sarcoidosis",
+    "Seçim notu veya figür altyazısı görüntü üzerinde ok/işaretleme olabileceğini bildiriyor — hekim onayında ayrıca değerlendirilmeli."
+   ],
+   "bodyPart": "toraks",
+   "modality": "XR",
+   "license": {
+    "name": "CC BY 4.0 (Europe PMC açık erişim — bkz. makale için tam lisans metni)",
+    "url": "https://creativecommons.org/licenses/by/4.0/",
+    "author": "Garcia Salazar AA, Alfonso García CB, Filiberto Arevalo JL, Fernandez Eng IL, Yakubu A.",
+    "attribution": "Garcia Salazar AA, Alfonso García CB, Filiberto Arevalo JL, Fernandez Eng IL, Yakubu A. (2026). Vertebral Sarcoidosis Mimicking Metastatic Disease in a Patient With Prior Melanoma: A Diagnostic Challenge. DOI: 10.7759/cureus.115404. Şekil FIG1; CC BY 4.0: https://creativecommons.org/licenses/by/4.0/. Kaynak: https://pmc.ncbi.nlm.nih.gov/articles/PMC13618871/figure/FIG1/. Küçük önizleme yeniden boyutlandırıldı.",
+    "sourceUrl": "https://pmc.ncbi.nlm.nih.gov/articles/PMC13618871/figure/FIG1/"
+   }
+  },
+  {
+   "id": "epmc_pmc10163919_fig1",
+   "sourceDataset": "europepmc",
+   "sourceFile": "cureus-0015-00000037208-i01.jpg",
+   "viewPosition": "unknown",
+   "ageYears": 42,
+   "sex": "M",
+   "population": "yetiskin",
+   "width": 750,
+   "height": 790,
+   "originalWidth": 750,
+   "originalHeight": 790,
+   "findings": {
+    "lymphadenopathy": "author_caption"
+   },
+   "negatives": {},
+   "annotations": [],
+   "quality": null,
+   "runtimeUrl": "assets/xray/runtime/epmc_pmc10163919_fig1.webp",
+   "bytes": 16080,
+   "validationStatus": "validated",
+   "clinicalReview": "beklemede",
+   "issues": [
+    "Bu görüntünün bulgu bilgisi Europe PMC PMC10163919 makalesinin figür altyazısına dayanır (author_caption); radyolog tarafından doğrulanmamıştır — hekim onayı bekliyor.",
+    "Figür altyazısı: Chest radiograph showing bilateral hilar lymphadenopathy.",
+    "Seçim notu veya figür altyazısı görüntü üzerinde ok/işaretleme olabileceğini bildiriyor — hekim onayında ayrıca değerlendirilmeli."
+   ],
+   "bodyPart": "toraks",
+   "modality": "XR",
+   "license": {
+    "name": "CC BY 3.0 (Europe PMC açık erişim — bkz. makale için tam lisans metni)",
+    "url": "https://creativecommons.org/licenses/by/3.0/",
+    "author": "Kamath SD, Upadhyay A, Jakka S.",
+    "attribution": "Kamath SD, Upadhyay A, Jakka S. (2023). Rare Presentations of Sarcoidosis: A Case Series. DOI: 10.7759/cureus.37208. Şekil FIG1; CC BY 3.0: https://creativecommons.org/licenses/by/3.0/. Kaynak: https://pmc.ncbi.nlm.nih.gov/articles/PMC10163919/figure/FIG1/. Küçük önizleme yeniden boyutlandırıldı.",
+    "sourceUrl": "https://pmc.ncbi.nlm.nih.gov/articles/PMC10163919/figure/FIG1/"
+   }
+  },
+  {
+   "id": "epmc_pmc11316136_ccr39186-fig-0002",
+   "sourceDataset": "europepmc",
+   "sourceFile": "CCR3-12-e9186-g004.jpg",
+   "viewPosition": "unknown",
+   "ageYears": null,
+   "sex": "M",
+   "population": "yetiskin",
+   "width": 660,
+   "height": 523,
+   "originalWidth": 660,
+   "originalHeight": 523,
+   "findings": {
+    "lymphadenopathy": "author_caption"
+   },
+   "negatives": {},
+   "annotations": [],
+   "quality": null,
+   "runtimeUrl": "assets/xray/runtime/epmc_pmc11316136_ccr39186-fig-0002.webp",
+   "bytes": 16960,
+   "validationStatus": "validated",
+   "clinicalReview": "beklemede",
+   "issues": [
+    "Bu görüntünün bulgu bilgisi Europe PMC PMC11316136 makalesinin figür altyazısına dayanır (author_caption); radyolog tarafından doğrulanmamıştır — hekim onayı bekliyor.",
+    "Figür altyazısı: Follow‐up chest x‐ray. Follow‐up chest x‐ray reveals bilateral hilar enlargement, indicative of lymphadenopathy.",
+    "Seçim notu veya figür altyazısı görüntü üzerinde ok/işaretleme olabileceğini bildiriyor — hekim onayında ayrıca değerlendirilmeli."
+   ],
+   "bodyPart": "toraks",
+   "modality": "XR",
+   "license": {
+    "name": "CC BY 4.0 (Europe PMC açık erişim — bkz. makale için tam lisans metni)",
+    "url": "https://creativecommons.org/licenses/by/4.0/",
+    "author": "Rodriguez-Nava G, El Kamari V, Chang H, Egoryan G, Bonilla HF.",
+    "attribution": "Rodriguez-Nava G, El Kamari V, Chang H, Egoryan G, Bonilla HF. (2024). New‐onset sarcoidosis in a patient with long COVID. DOI: 10.1002/ccr3.9186. Şekil ccr39186-fig-0002; CC BY 4.0: https://creativecommons.org/licenses/by/4.0/. Kaynak: https://pmc.ncbi.nlm.nih.gov/articles/PMC11316136/figure/ccr39186-fig-0002/. Küçük önizleme yeniden boyutlandırıldı.",
+    "sourceUrl": "https://pmc.ncbi.nlm.nih.gov/articles/PMC11316136/figure/ccr39186-fig-0002/"
+   }
+  },
+  {
+   "id": "epmc_pmc12289318_fig3",
+   "sourceDataset": "europepmc",
+   "sourceFile": "cureus-0017-00000086682-i03.jpg",
+   "viewPosition": "PA",
+   "ageYears": 41,
+   "sex": "M",
+   "population": "yetiskin",
+   "width": 750,
+   "height": 714,
+   "originalWidth": 750,
+   "originalHeight": 714,
+   "findings": {
+    "lymphadenopathy": "author_caption"
+   },
+   "negatives": {},
+   "annotations": [],
+   "quality": null,
+   "runtimeUrl": "assets/xray/runtime/epmc_pmc12289318_fig3.webp",
+   "bytes": 19750,
+   "validationStatus": "validated",
+   "clinicalReview": "beklemede",
+   "issues": [
+    "Bu görüntünün bulgu bilgisi Europe PMC PMC12289318 makalesinin figür altyazısına dayanır (author_caption); radyolog tarafından doğrulanmamıştır — hekim onayı bekliyor.",
+    "Figür altyazısı: Chest X-ray with arrows showing symmetrical hilar and mediastinal lymphadenopathy.",
+    "Seçim notu veya figür altyazısı görüntü üzerinde ok/işaretleme olabileceğini bildiriyor — hekim onayında ayrıca değerlendirilmeli."
+   ],
+   "bodyPart": "toraks",
+   "modality": "XR",
+   "license": {
+    "name": "CC BY 4.0 (Europe PMC açık erişim — bkz. makale için tam lisans metni)",
+    "url": "https://creativecommons.org/licenses/by/4.0/",
+    "author": "Patel A, Siddique R, Khan A.",
+    "attribution": "Patel A, Siddique R, Khan A. (2025). An Interesting Presentation of Hypercalcaemia in a Middle-Aged Male. DOI: 10.7759/cureus.86682. Şekil FIG3; CC BY 4.0: https://creativecommons.org/licenses/by/4.0/. Kaynak: https://pmc.ncbi.nlm.nih.gov/articles/PMC12289318/figure/FIG3/. Küçük önizleme yeniden boyutlandırıldı.",
+    "sourceUrl": "https://pmc.ncbi.nlm.nih.gov/articles/PMC12289318/figure/FIG3/"
+   }
+  },
+  {
+   "id": "epmc_pmc12612959_fig1",
+   "sourceDataset": "europepmc",
+   "sourceFile": "cureus-0017-00000094540-i01.jpg",
+   "viewPosition": "unknown",
+   "ageYears": 84,
+   "sex": "F",
+   "population": "yetiskin",
+   "width": 750,
+   "height": 864,
+   "originalWidth": 750,
+   "originalHeight": 864,
+   "findings": {
+    "mediastinal_widening": "author_caption"
+   },
+   "negatives": {},
+   "annotations": [],
+   "quality": null,
+   "runtimeUrl": "assets/xray/runtime/epmc_pmc12612959_fig1.webp",
+   "bytes": 27206,
+   "validationStatus": "validated",
+   "clinicalReview": "beklemede",
+   "issues": [
+    "Bu görüntünün bulgu bilgisi Europe PMC PMC12612959 makalesinin figür altyazısına dayanır (author_caption); radyolog tarafından doğrulanmamıştır — hekim onayı bekliyor.",
+    "Figür altyazısı: The red arrow shows an 83-mm upper mediastinal width, indicating mediastinal widening.",
+    "Seçim notu veya figür altyazısı görüntü üzerinde ok/işaretleme olabileceğini bildiriyor — hekim onayında ayrıca değerlendirilmeli."
+   ],
+   "bodyPart": "toraks",
+   "modality": "XR",
+   "license": {
+    "name": "CC BY 4.0 (Europe PMC açık erişim — bkz. makale için tam lisans metni)",
+    "url": "https://creativecommons.org/licenses/by/4.0/",
+    "author": "Sakurai K, Inoue R, Nishizawa T.",
+    "attribution": "Sakurai K, Inoue R, Nishizawa T. (2025). Painless Aortic Dissection With Bradycardia, Hypotension, and Lower Limb Weakness: A Case Report. DOI: 10.7759/cureus.94540. Şekil FIG1; CC BY 4.0: https://creativecommons.org/licenses/by/4.0/. Kaynak: https://pmc.ncbi.nlm.nih.gov/articles/PMC12612959/figure/FIG1/. Küçük önizleme yeniden boyutlandırıldı.",
+    "sourceUrl": "https://pmc.ncbi.nlm.nih.gov/articles/PMC12612959/figure/FIG1/"
+   }
+  },
+  {
+   "id": "epmc_pmc13046306_fig2",
+   "sourceDataset": "europepmc",
+   "sourceFile": "cureus-0018-00000104626-i02.jpg",
+   "viewPosition": "unknown",
+   "ageYears": 68,
+   "sex": "M",
+   "population": "yetiskin",
+   "width": 750,
+   "height": 756,
+   "originalWidth": 750,
+   "originalHeight": 756,
+   "findings": {
+    "mediastinal_widening": "author_caption"
+   },
+   "negatives": {},
+   "annotations": [],
+   "quality": null,
+   "runtimeUrl": "assets/xray/runtime/epmc_pmc13046306_fig2.webp",
+   "bytes": 19760,
+   "validationStatus": "validated",
+   "clinicalReview": "beklemede",
+   "issues": [
+    "Bu görüntünün bulgu bilgisi Europe PMC PMC13046306 makalesinin figür altyazısına dayanır (author_caption); radyolog tarafından doğrulanmamıştır — hekim onayı bekliyor.",
+    "Figür altyazısı: A chest radiograph obtained at admission showing a widened mediastinum (blue arrows), initially thought to indicate aortic unfolding from longstanding systemic hypertension.",
+    "Seçim notu veya figür altyazısı görüntü üzerinde ok/işaretleme olabileceğini bildiriyor — hekim onayında ayrıca değerlendirilmeli."
+   ],
+   "bodyPart": "toraks",
+   "modality": "XR",
+   "license": {
+    "name": "CC BY 4.0 (Europe PMC açık erişim — bkz. makale için tam lisans metni)",
+    "url": "https://creativecommons.org/licenses/by/4.0/",
+    "author": "Osigwe PC, Ozomaro OE, Osigwe IS, Osigwe E, Uzoma-Azoma L.",
+    "attribution": "Osigwe PC, Ozomaro OE, Osigwe IS, Osigwe E, Uzoma-Azoma L. (2026). Painless Acute Type A Aortic Dissection Masquerading as an Acute Neurological Event: A Case Report. DOI: 10.7759/cureus.104626. Şekil FIG2; CC BY 4.0: https://creativecommons.org/licenses/by/4.0/. Kaynak: https://pmc.ncbi.nlm.nih.gov/articles/PMC13046306/figure/FIG2/. Küçük önizleme yeniden boyutlandırıldı.",
+    "sourceUrl": "https://pmc.ncbi.nlm.nih.gov/articles/PMC13046306/figure/FIG2/"
+   }
+  },
+  {
+   "id": "epmc_pmc8761487_fig2",
+   "sourceDataset": "europepmc",
+   "sourceFile": "cureus-0013-00000020487-i02.jpg",
+   "viewPosition": "unknown",
+   "ageYears": 82,
+   "sex": "F",
+   "population": "yetiskin",
+   "width": 750,
+   "height": 803,
+   "originalWidth": 750,
+   "originalHeight": 803,
+   "findings": {
+    "mediastinal_widening": "author_caption"
+   },
+   "negatives": {},
+   "annotations": [],
+   "quality": null,
+   "runtimeUrl": "assets/xray/runtime/epmc_pmc8761487_fig2.webp",
+   "bytes": 17690,
+   "validationStatus": "validated",
+   "clinicalReview": "beklemede",
+   "issues": [
+    "Bu görüntünün bulgu bilgisi Europe PMC PMC8761487 makalesinin figür altyazısına dayanır (author_caption); radyolog tarafından doğrulanmamıştır — hekim onayı bekliyor.",
+    "Figür altyazısı: Chest X-ray with mediastinal widening and an enlarged cardiomediastinal silhouette"
+   ],
+   "bodyPart": "toraks",
+   "modality": "XR",
+   "license": {
+    "name": "CC BY 3.0 (Europe PMC açık erişim — bkz. makale için tam lisans metni)",
+    "url": "https://creativecommons.org/licenses/by/3.0/",
+    "author": "Luís H, Machado B, Barros C, Gomes M, Bilreiro M.",
+    "attribution": "Luís H, Machado B, Barros C, Gomes M, Bilreiro M. (2021). Lower Airway Infection Delaying the Diagnosis of Aortic Dissection in an Elderly Woman. DOI: 10.7759/cureus.20487. Şekil FIG2; CC BY 3.0: https://creativecommons.org/licenses/by/3.0/. Kaynak: https://pmc.ncbi.nlm.nih.gov/articles/PMC8761487/figure/FIG2/. Küçük önizleme yeniden boyutlandırıldı.",
+    "sourceUrl": "https://pmc.ncbi.nlm.nih.gov/articles/PMC8761487/figure/FIG2/"
+   }
+  },
+  {
+   "id": "epmc_pmc9893865_fig2",
+   "sourceDataset": "europepmc",
+   "sourceFile": "cureus-0015-00000033300-i02.jpg",
+   "viewPosition": "unknown",
+   "ageYears": 47,
+   "sex": "M",
+   "population": "yetiskin",
+   "width": 750,
+   "height": 416,
+   "originalWidth": 750,
+   "originalHeight": 416,
+   "findings": {
+    "mediastinal_widening": "author_caption"
+   },
+   "negatives": {},
+   "annotations": [],
+   "quality": null,
+   "runtimeUrl": "assets/xray/runtime/epmc_pmc9893865_fig2.webp",
+   "bytes": 5902,
+   "validationStatus": "validated",
+   "clinicalReview": "beklemede",
+   "issues": [
+    "Bu görüntünün bulgu bilgisi Europe PMC PMC9893865 makalesinin figür altyazısına dayanır (author_caption); radyolog tarafından doğrulanmamıştır — hekim onayı bekliyor.",
+    "Figür altyazısı: Chest X-ray in the semi-sitting position showing the widening mediastinum (arrow).",
+    "Seçim notu veya figür altyazısı görüntü üzerinde ok/işaretleme olabileceğini bildiriyor — hekim onayında ayrıca değerlendirilmeli."
+   ],
+   "bodyPart": "toraks",
+   "modality": "XR",
+   "license": {
+    "name": "CC BY (sürüm belirtilmemiş; Europe PMC açık erişim — bkz. makale için tam lisans metni)",
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC9893865/figure/FIG2/",
+    "author": "Kanaan T, Abdelrahman AS, Jaber J, Fahmi AM, Almasalmeh A, Alnakawa S, Kanaan T.",
+    "attribution": "Kanaan T, Abdelrahman AS, Jaber J, Fahmi AM, Almasalmeh A, Alnakawa S, Kanaan T. (2023). Type A Aortic Dissection With Intramural Hematoma: A Challenging Diagnosis. DOI: 10.7759/cureus.33300. Şekil FIG2; CC BY (sürüm belirtilmemiş): https://www.ebi.ac.uk/europepmc/webservices/rest/PMC9893865/fullTextXML. Kaynak: https://pmc.ncbi.nlm.nih.gov/articles/PMC9893865/figure/FIG2/. Küçük önizleme yeniden boyutlandırıldı.",
+    "sourceUrl": "https://pmc.ncbi.nlm.nih.gov/articles/PMC9893865/figure/FIG2/"
+   }
+  },
+  {
+   "id": "epmc_pmc13143138_f2",
+   "sourceDataset": "europepmc",
+   "sourceFile": "acmi-8-01160-g002.jpg",
+   "viewPosition": "unknown",
+   "ageYears": 19,
+   "sex": "M",
+   "population": "yetiskin",
+   "width": 735,
+   "height": 746,
+   "originalWidth": 735,
+   "originalHeight": 746,
+   "findings": {
+    "pneumonia_report": "author_caption"
+   },
+   "negatives": {},
+   "annotations": [],
+   "quality": null,
+   "runtimeUrl": "assets/xray/runtime/epmc_pmc13143138_f2.webp",
+   "bytes": 27250,
+   "validationStatus": "validated",
+   "clinicalReview": "beklemede",
+   "issues": [
+    "Bu görüntünün bulgu bilgisi Europe PMC PMC13143138 makalesinin figür altyazısına dayanır (author_caption); radyolog tarafından doğrulanmamıştır — hekim onayı bekliyor.",
+    "Figür altyazısı: Chest X-ray taken on admission, demonstrating right lower lobe consolidation consistent with CAP.",
+    "Seçim notu veya figür altyazısı görüntü üzerinde ok/işaretleme olabileceğini bildiriyor — hekim onayında ayrıca değerlendirilmeli."
+   ],
+   "bodyPart": "toraks",
+   "modality": "XR",
+   "license": {
+    "name": "CC BY (sürüm belirtilmemiş; Europe PMC açık erişim — bkz. makale için tam lisans metni)",
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC13143138/figure/F2/",
+    "author": "Schonhofer C, Santhanam D, Fung JST, Press N.",
+    "attribution": "Schonhofer C, Santhanam D, Fung JST, Press N. (2026). Reactive infectious mucocutaneous eruption secondary to Chlamydia pneumoniae infection in a 19-year-old: a case report. DOI: 10.1099/acmi.0.001160.v3. Şekil F2; CC BY (sürüm belirtilmemiş): https://www.ebi.ac.uk/europepmc/webservices/rest/PMC13143138/fullTextXML. Kaynak: https://pmc.ncbi.nlm.nih.gov/articles/PMC13143138/figure/F2/. Küçük önizleme yeniden boyutlandırıldı.",
+    "sourceUrl": "https://pmc.ncbi.nlm.nih.gov/articles/PMC13143138/figure/F2/"
+   }
+  },
+  {
+   "id": "epmc_pmc13318803_fig1",
+   "sourceDataset": "europepmc",
+   "sourceFile": "cureus-0018-00000110004-i01.jpg",
+   "viewPosition": "PA",
+   "ageYears": 78,
+   "sex": "F",
+   "population": "yetiskin",
+   "width": 750,
+   "height": 873,
+   "originalWidth": 750,
+   "originalHeight": 873,
+   "findings": {
+    "pneumonia_report": "author_caption"
+   },
+   "negatives": {},
+   "annotations": [],
+   "quality": null,
+   "runtimeUrl": "assets/xray/runtime/epmc_pmc13318803_fig1.webp",
+   "bytes": 34428,
+   "validationStatus": "validated",
+   "clinicalReview": "beklemede",
+   "issues": [
+    "Bu görüntünün bulgu bilgisi Europe PMC PMC13318803 makalesinin figür altyazısına dayanır (author_caption); radyolog tarafından doğrulanmamıştır — hekim onayı bekliyor.",
+    "Figür altyazısı: Chest X-ray (posterior-anterior view) on admission showing right upper lobe consolidation (indicated by the black arrow).",
+    "Seçim notu veya figür altyazısı görüntü üzerinde ok/işaretleme olabileceğini bildiriyor — hekim onayında ayrıca değerlendirilmeli."
+   ],
+   "bodyPart": "toraks",
+   "modality": "XR",
+   "license": {
+    "name": "CC BY 4.0 (Europe PMC açık erişim — bkz. makale için tam lisans metni)",
+    "url": "https://creativecommons.org/licenses/by/4.0/",
+    "author": "Raja T, Jayathilake N, Peiris M.",
+    "attribution": "Raja T, Jayathilake N, Peiris M. (2026). Pulmonary Mucormycosis Presenting as Non-resolving Pneumonia in an Elderly Patient With Uncontrolled Diabetes Mellitus: A Case Report. DOI: 10.7759/cureus.110004. Şekil FIG1; CC BY 4.0: https://creativecommons.org/licenses/by/4.0/. Kaynak: https://pmc.ncbi.nlm.nih.gov/articles/PMC13318803/figure/FIG1/. Küçük önizleme yeniden boyutlandırıldı.",
+    "sourceUrl": "https://pmc.ncbi.nlm.nih.gov/articles/PMC13318803/figure/FIG1/"
+   }
+  },
+  {
+   "id": "epmc_pmc12576348_fig1",
+   "sourceDataset": "europepmc",
+   "sourceFile": "cureus-0017-00000093540-i01.jpg",
+   "viewPosition": "unknown",
+   "ageYears": 38,
+   "sex": "M",
+   "population": "yetiskin",
+   "width": 750,
+   "height": 751,
+   "originalWidth": 750,
+   "originalHeight": 751,
+   "findings": {
+    "pneumonia_report": "author_caption"
+   },
+   "negatives": {},
+   "annotations": [],
+   "quality": null,
+   "runtimeUrl": "assets/xray/runtime/epmc_pmc12576348_fig1.webp",
+   "bytes": 51766,
+   "validationStatus": "validated",
+   "clinicalReview": "beklemede",
+   "issues": [
+    "Bu görüntünün bulgu bilgisi Europe PMC PMC12576348 makalesinin figür altyazısına dayanır (author_caption); radyolog tarafından doğrulanmamıştır — hekim onayı bekliyor.",
+    "Figür altyazısı: Frontal chest radiograph (April 12, 2025) showing patchy consolidation in the right lower lung zone, consistent with evolving pneumonia.",
+    "Seçim notu veya figür altyazısı görüntü üzerinde ok/işaretleme olabileceğini bildiriyor — hekim onayında ayrıca değerlendirilmeli."
+   ],
+   "bodyPart": "toraks",
+   "modality": "XR",
+   "license": {
+    "name": "CC BY 4.0 (Europe PMC açık erişim — bkz. makale için tam lisans metni)",
+    "url": "https://creativecommons.org/licenses/by/4.0/",
+    "author": "Elnakib M.",
+    "attribution": "Elnakib M. (2025). Occult Pneumonia in an Immunocompetent Adult With Initially Normal Imaging and Laboratory Results: A Case Report. DOI: 10.7759/cureus.93540. Şekil FIG1; CC BY 4.0: https://creativecommons.org/licenses/by/4.0/. Kaynak: https://pmc.ncbi.nlm.nih.gov/articles/PMC12576348/figure/FIG1/. Küçük önizleme yeniden boyutlandırıldı.",
+    "sourceUrl": "https://pmc.ncbi.nlm.nih.gov/articles/PMC12576348/figure/FIG1/"
+   }
+  },
+  {
+   "id": "epmc_pmc12965395_fig1",
+   "sourceDataset": "europepmc",
+   "sourceFile": "cureus-0018-00000103212-i01.jpg",
+   "viewPosition": "unknown",
+   "ageYears": 35,
+   "sex": "M",
+   "population": "yetiskin",
+   "width": 750,
+   "height": 826,
+   "originalWidth": 750,
+   "originalHeight": 826,
+   "findings": {
+    "pneumonia_report": "author_caption"
+   },
+   "negatives": {},
+   "annotations": [],
+   "quality": null,
+   "runtimeUrl": "assets/xray/runtime/epmc_pmc12965395_fig1.webp",
+   "bytes": 49242,
+   "validationStatus": "validated",
+   "clinicalReview": "beklemede",
+   "issues": [
+    "Bu görüntünün bulgu bilgisi Europe PMC PMC12965395 makalesinin figür altyazısına dayanır (author_caption); radyolog tarafından doğrulanmamıştır — hekim onayı bekliyor.",
+    "Figür altyazısı: Chest radiograph showing right upper lobe consolidation at presentation."
+   ],
+   "bodyPart": "toraks",
+   "modality": "XR",
+   "license": {
+    "name": "CC BY 4.0 (Europe PMC açık erişim — bkz. makale için tam lisans metni)",
+    "url": "https://creativecommons.org/licenses/by/4.0/",
+    "author": "Jesiah N, Mayurathan P.",
+    "attribution": "Jesiah N, Mayurathan P. (2026). Burkholderia cepacia Bacteremia Complicated by Acute Parotid Abscess in a Poorly Controlled Diabetic Patient With Community-Acquired Pneumonia: A Case Report. DOI: 10.7759/cureus.103212. Şekil FIG1; CC BY 4.0: https://creativecommons.org/licenses/by/4.0/. Kaynak: https://pmc.ncbi.nlm.nih.gov/articles/PMC12965395/figure/FIG1/. Küçük önizleme yeniden boyutlandırıldı.",
+    "sourceUrl": "https://pmc.ncbi.nlm.nih.gov/articles/PMC12965395/figure/FIG1/"
    }
   }
  ]

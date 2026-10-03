@@ -63,8 +63,8 @@ describe("paketlenen veri (kaynak davranışı)", () => {
   });
 
   it("her görüntü tam olarak bölgeli veya bölgesiz listede", () => {
-    expect(Object.keys(imageZones.images)).toHaveLength(575);
-    expect(Object.keys(imageZones.noZones)).toHaveLength(18);
+    expect(Object.keys(imageZones.images)).toHaveLength(590);
+    expect(Object.keys(imageZones.noZones)).toHaveLength(19);
     for (const image of IMAGES) {
       const memberships = Number(imageZones.images[image.id] !== undefined) + Number(imageZones.noZones[image.id] !== undefined);
       expect(memberships, image.id).toBe(1);

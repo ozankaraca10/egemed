@@ -52,6 +52,25 @@ for (const file of files) {
   copiedBytes += sourceSize;
 }
 
+// T321b: EGEMED CLIX kaynağına yazılmaz; sonradan eklenen açık erişim görüntüleri (Europe PMC, CC BY)
+// ayrı bir ek kaynaktan düz klasör olarak kopyalanır.
+const DEFAULT_EXTRA_DIR = "/Users/ozankaraca/Documents/Codex/2026-09-23/egemed-tools/opaca-yeni/aktarim/runtime";
+const extraDir = process.env.OPACA_EXTRA_SOURCE_DIR ?? DEFAULT_EXTRA_DIR;
+if (existsSync(extraDir)) {
+  for (const file of walk(extraDir)) {
+    const dest = join(targetDir, relative(extraDir, file));
+    const sourceSize = statSync(file).size;
+    if (existsSync(dest) && statSync(dest).size === sourceSize) {
+      unchanged += 1;
+      continue;
+    }
+    copyFileSync(file, dest);
+    copied += 1;
+    copiedBytes += sourceSize;
+  }
+  console.log(`Ek kaynak: ${extraDir}`);
+}
+
 const missing = files.filter((file) => !existsSync(join(targetDir, relative(sourceDir, file))));
 const megabytes = (bytes) => `${(bytes / 1024 / 1024).toFixed(1)} MB`;
 

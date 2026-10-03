@@ -1357,6 +1357,71 @@
           }
         },
         {
+          "key": "finding.lymphadenopathy",
+          "finding": "lymphadenopathy",
+          "title": "Hiler / mediastinal lenfadenopati",
+          "short": "Lenfadenopati",
+          "sub": "Hiler dolgunluk, paratrakeal ve aortopulmoner pencere",
+          "description": "Hilus ya da mediastendeki lenf düğümlerinin büyümesidir. Grafide hiler gölgelerin lobüle genişlemesi, sağ paratrakeal çizginin kalınlaşması veya aortopulmoner pencerenin dolması olarak görülür.",
+          "sign": "İki taraflı simetrik hiler lenfadenopati (sağ paratrakeal düğümle birlikte) sarkoidozu; tek taraflı, asimetrik ya da hacimli nodal paket lenfoma, tüberküloz ve metastazı düşündürür.",
+          "readingTip": "İki hilusun boyut ve yoğunluğunu karşılaştırın; lobüle kontur damardan çok düğümü düşündürür. Sağ paratrakeal çizgiye ve aortopulmoner pencereye ayrıca bakın.",
+          "clinical": "Grafi lenfadenopatiyi düşündürür; dağılım için kontrastlı toraks BT, tanı için gerektiğinde EBUS eşliğinde örnekleme yapılır (ATS sarkoidoz kılavuzu, 2020). Bu konudaki görüntüler Europe PMC olgu yayınlarındandır; bulgu yazar altyazısına dayanır, hekim onayı bekliyor.",
+          "bestZones": [
+            "c_mediastinum",
+            "b_r_mid",
+            "b_l_mid"
+          ],
+          "badge": "Mediasten",
+          "ucep": {
+            "disease": "Sarkoidoz / lenfadenopati",
+            "level": "T",
+            "status": "öneri"
+          }
+        },
+        {
+          "key": "finding.mediastinal_widening",
+          "finding": "mediastinal_widening",
+          "title": "Mediasten genişlemesi",
+          "short": "Mediasten genişlemesi",
+          "sub": "Üst mediasten ve büyük damar genişliği",
+          "description": "Üst mediastenin olağandan geniş görünmesidir. Aort ve büyük damarların genişlemesi, kanama (hematom), kitle ya da lenf düğümleri neden olabilir; yatarak (AP) çekim ve rotasyon yalancı genişlik yaratır.",
+          "sign": "Aort topuzu konturunun silinmesi ya da düzensizleşmesi, trakeanın veya nazogastrik tüpün sağa itilmesi ve sol apikal plevral başlık akut aort sendromu ya da mediastinal hematomu düşündürür.",
+          "readingTip": "Önce tekniği kontrol edin (PA/AP, rotasyon, inspirasyon); ardından aort topuzu konturunu ve trakeanın orta hatta olup olmadığını değerlendirin. Eski grafiyle karşılaştırma yeni genişlemeyi gösterir.",
+          "clinical": "Mediasten genişliği akut aort diseksiyonu için ne duyarlı ne özgüldür; normal grafi akut aort sendromunu dışlamaz. Klinik şüphede BT anjiyografi yapılır (ESC aort hastalıkları kılavuzu, 2024). Bu konudaki görüntüler Europe PMC olgu yayınlarındandır; bulgu yazar altyazısına dayanır, hekim onayı bekliyor.",
+          "bestZones": [
+            "c_mediastinum",
+            "a_trachea",
+            "c_heart"
+          ],
+          "badge": "Mediasten",
+          "ucep": {
+            "disease": "Aort diseksiyonu",
+            "level": "A",
+            "status": "öneri"
+          }
+        },
+        {
+          "key": "finding.aortic_aneurysm",
+          "finding": "aortic_aneurysm",
+          "title": "Torasik aort anevrizması",
+          "short": "Aort anevrizması",
+          "sub": "Aort topuzu ve inen aort genişlemesi",
+          "description": "Torasik aortun kalıcı, lokal genişlemesidir. Grafide aort topuzunun belirginleşmesi, inen aort boyunca sol paravertebral konturun genişlemesi ya da mediastinal kitle görünümü olarak izlenir; duvarında kalsifikasyon görülebilir.",
+          "sign": "Aortla devamlılık gösteren, düzgün sınırlı mediastinal opasite ve trakeanın yer değiştirmesi anevrizmayı düşündürür; aortun kıvrımlı uzaması (ektazi) ayırıcı tanıdadır.",
+          "readingTip": "Aort topuzunu ve inen aort konturunu diyaframa kadar izleyin; duvar kalsifikasyonunu ve trakea itilmesini arayın. Genç hastada kaburga çentiklenmesi koarktasyonu düşündürür.",
+          "clinical": "Grafi aort çapını güvenilir ölçemez; tanı ve çap ölçümü için BT anjiyografi ya da MR gerekir (ESC aort hastalıkları kılavuzu, 2024). Bu konudaki görüntüler Europe PMC olgu yayınlarındandır; bulgu yazar altyazısına dayanır, hekim onayı bekliyor.",
+          "bestZones": [
+            "c_mediastinum",
+            "a_trachea"
+          ],
+          "badge": "Mediasten",
+          "ucep": {
+            "disease": "Aort anevrizması",
+            "level": "T",
+            "status": "öneri"
+          }
+        },
+        {
           "key": "finding.hiatal_hernia",
           "finding": "hiatal_hernia",
           "title": "Hiatal herni",
