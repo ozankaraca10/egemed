@@ -27,7 +27,7 @@ export const SIM_FACTS: Record<SimId, readonly { readonly value: number; readonl
   ],
   opaca: [
     { value: 33, labelKey: "sims.page.fact.topics" },
-    { value: 188, labelKey: "sims.page.fact.practice" },
+    { value: 187, labelKey: "sims.page.fact.practice" },
     { value: 124, labelKey: "sims.page.fact.labeled" },
   ],
 };

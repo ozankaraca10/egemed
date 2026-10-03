@@ -1,6 +1,6 @@
 {
  "generatedAt": "2026-09-23T07:36:23.124Z",
- "count": 597,
+ "count": 593,
  "records": [
   {
    "id": "commons_clavicle_fx",
@@ -829,42 +829,6 @@
    }
   },
   {
-   "id": "commons_scoliosis_adams",
-   "sourceDataset": "wikimedia-commons",
-   "sourceFile": "Initial diagnosis of scoliosis with adams test and x-rays.jpg",
-   "viewPosition": "AP",
-   "ageYears": null,
-   "sex": null,
-   "population": "yetiskin",
-   "width": 611,
-   "height": 492,
-   "originalWidth": 611,
-   "originalHeight": 492,
-   "findings": {
-    "scoliosis": "author_caption"
-   },
-   "negatives": {},
-   "annotations": [],
-   "quality": null,
-   "runtimeUrl": "assets/xray/runtime/commons_scoliosis_adams.webp",
-   "bytes": 19416,
-   "validationStatus": "validated",
-   "clinicalReview": "beklemede",
-   "issues": [
-    "Bu görüntünün bulgu/projeksiyon bilgisi yükleyenin açıklamasına dayanır (author_caption); radyolog tarafından doğrulanmamıştır — hekim onayı bekliyor.",
-    "Commons açıklaması: Initianal diagnosis of scoliosis: dorsal and forward bending photographs (Adam's Forward Bend Test), AP and latero-lateral radiographs"
-   ],
-   "bodyPart": "toraks",
-   "modality": "XR",
-   "license": {
-    "name": "CC BY 2.0",
-    "url": "https://creativecommons.org/licenses/by/2.0",
-    "author": "Rigo M, Negrini S, Weiss HR, Grivas TB, Maruyama T, Kotwicki T",
-    "attribution": "Rigo M, Negrini S, Weiss HR, Grivas TB, Maruyama T, Kotwicki T — CC BY 2.0, Wikimedia Commons",
-    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Initial_diagnosis_of_scoliosis_with_adams_test_and_x-rays.jpg"
-   }
-  },
-  {
    "id": "commons_westermark",
    "sourceDataset": "wikimedia-commons",
    "sourceFile": "AP Chest X-Ray.tif",
@@ -1119,43 +1083,6 @@
    }
   },
   {
-   "id": "epmc_pmc13022644_gr6",
-   "sourceDataset": "europepmc",
-   "sourceFile": "gr6.jpg",
-   "viewPosition": "AP",
-   "ageYears": null,
-   "sex": null,
-   "population": "yetiskin",
-   "width": 645,
-   "height": 332,
-   "originalWidth": 645,
-   "originalHeight": 332,
-   "findings": {
-    "fracture": "author_caption"
-   },
-   "negatives": {},
-   "annotations": [],
-   "quality": null,
-   "runtimeUrl": "assets/xray/runtime/epmc_pmc13022644_gr6.webp",
-   "bytes": 14574,
-   "validationStatus": "validated",
-   "clinicalReview": "beklemede",
-   "issues": [
-    "Bu görüntünün bulgu bilgisi Europe PMC PMC13022644 makalesinin figür altyazısına dayanır (author_caption); radyolog tarafından doğrulanmamıştır — hekim onayı bekliyor.",
-    "Figür altyazısı: Post-operative anteroposterior radiograph demonstrating satisfactory hardware placement and restoration of sternoclavicular joint alignment.",
-    "Not: bulgu anahtar sözcüğü altyazıda değil, makale başlığında geçiyor — \"Anterior sternoclavicular joint disruption with ipsilateral medial clavicle fracture in an adolescent: case report and literature review.\" (yazar kaynaklı teşhis iddiası, radyolog doğrulaması değil)."
-   ],
-   "bodyPart": "toraks",
-   "modality": "XR",
-   "license": {
-    "name": "CC BY 4.0 (Europe PMC açık erişim — bkz. makale için tam lisans metni)",
-    "url": "https://europepmc.org/article/PMC/PMC13022644",
-    "author": "Alabdali A, AlQattan O, Ahmad H, Almutairi M, Al Jubori A.",
-    "attribution": "Alabdali A, AlQattan O, Ahmad H, Almutairi M, Al Jubori A.. \"Anterior sternoclavicular joint disruption with ipsilateral medial clavicle fracture in an adolescent: case report and literature review.\". doi:10.1016/j.xrrt.2026.100697. Europe PMC PMC13022644 (açık erişim).",
-    "sourceUrl": "https://europepmc.org/article/PMC/PMC13022644"
-   }
-  },
-  {
    "id": "epmc_pmc13035185_cureus_0018_00000104431_i01",
    "sourceDataset": "europepmc",
    "sourceFile": "cureus-0018-00000104431-i01.jpg",
@@ -1338,42 +1265,6 @@
     "author": "Gaudin J, Parekh S, Aleman Oliva C, Haley A, Patel P.",
     "attribution": "Gaudin J, Parekh S, Aleman Oliva C, Haley A, Patel P.. \"Hazardous Hernia: Mechanical Ventilation in an Adult With a Congenital Diaphragmatic Hernia.\". doi:10.7759/cureus.110977. Europe PMC PMC13375092 (açık erişim).",
     "sourceUrl": "https://europepmc.org/article/PMC/PMC13375092"
-   }
-  },
-  {
-   "id": "epmc_pmc13435391_12893_2026_3881_fig1_html",
-   "sourceDataset": "europepmc",
-   "sourceFile": "12893_2026_3881_Fig1_HTML.jpg",
-   "viewPosition": "unknown",
-   "ageYears": null,
-   "sex": null,
-   "population": "yetiskin",
-   "width": 744,
-   "height": 521,
-   "originalWidth": 744,
-   "originalHeight": 521,
-   "findings": {
-    "scoliosis": "author_caption"
-   },
-   "negatives": {},
-   "annotations": [],
-   "quality": null,
-   "runtimeUrl": "assets/xray/runtime/epmc_pmc13435391_12893_2026_3881_fig1_html.webp",
-   "bytes": 52084,
-   "validationStatus": "validated",
-   "clinicalReview": "beklemede",
-   "issues": [
-    "Bu görüntünün bulgu bilgisi Europe PMC PMC13435391 makalesinin figür altyazısına dayanır (author_caption); radyolog tarafından doğrulanmamıştır — hekim onayı bekliyor.",
-    "Figür altyazısı: ( A-B ) Anteroposterior and lateral X-ray films showed severe thoracolumbar kyphoscoliosis along with compensatory thoracic lordosis. The C7-T5 angle on the lateral radiograph was − 15°. ( C ) Preoperative CT reconstruction showed significant wedging vertebrae at the apical area. ( D-E ) Preoperative CT scan revealed a narrowed thoracic inlet (AP diameter: 29.2 mm) with moderate tracheal stenosis (AP diameter: 1.2 mm) (T2 level). ( F-G ) After 1 month of halo-gravity traction, the scoliosis and kyphosis improved to 46° and 62°, respectively, and the C7-T5 angle improved slightly to -11°. (H-K) After growing rod insertion, the deformities were significantly corrected, while the C7-T5 angle remained − 11°. The anteroposterior diameters of both the thoracic inlet and the previously compressed airway increased slightly postoperatively (30.6 mm and 1.5 mm, respectively)"
-   ],
-   "bodyPart": "toraks",
-   "modality": "XR",
-   "license": {
-    "name": "CC BY 4.0 (Europe PMC açık erişim — bkz. makale için tam lisans metni)",
-    "url": "https://europepmc.org/article/PMC/PMC13435391",
-    "author": "Sun S, Li S, Liu Z, Shi B, Qiu Y, Zhu Z, Mao S.",
-    "attribution": "Sun S, Li S, Liu Z, Shi B, Qiu Y, Zhu Z, Mao S.. \"Iatrogenic thoracic inlet narrowing during growing rod distraction causing critical tracheal stenosis: a case report and management implications.\". doi:10.1186/s12893-026-03881-5. Europe PMC PMC13435391 (açık erişim).",
-    "sourceUrl": "https://europepmc.org/article/PMC/PMC13435391"
    }
   },
   {
@@ -1853,43 +1744,6 @@
     "author": "Rahimi MT, Amanat A, Asmati M, Sharif N, Rahimi TA, Mohammadi MH.",
     "attribution": "Rahimi MT, Amanat A, Asmati M, Sharif N, Rahimi TA, Mohammadi MH.. \"Adaptability of minimally invasive thoracoscopic repair for congenital diaphragmatic hernia: a neonatal case report from a low-income country.\". doi:10.1097/rc9.0000000000000868. Europe PMC PMC13544677 (açık erişim).",
     "sourceUrl": "https://europepmc.org/article/PMC/PMC13544677"
-   }
-  },
-  {
-   "id": "epmc_pmc13544946_icrm_17_6822_g001",
-   "sourceDataset": "europepmc",
-   "sourceFile": "icrm-17-6822-g001.webp",
-   "viewPosition": "LAT",
-   "ageYears": null,
-   "sex": null,
-   "population": "yetiskin",
-   "width": 1024,
-   "height": 726,
-   "originalWidth": 1599,
-   "originalHeight": 1133,
-   "findings": {
-    "elevated_hemidiaphragm": "author_caption"
-   },
-   "negatives": {},
-   "annotations": [],
-   "quality": null,
-   "runtimeUrl": "assets/xray/runtime/epmc_pmc13544946_icrm_17_6822_g001.webp",
-   "bytes": 26492,
-   "validationStatus": "validated",
-   "clinicalReview": "beklemede",
-   "issues": [
-    "Bu görüntünün bulgu bilgisi Europe PMC PMC13544946 makalesinin figür altyazısına dayanır (author_caption); radyolog tarafından doğrulanmamıştır — hekim onayı bekliyor.",
-    "Figür altyazısı: Chest X-ray images. A: Normal antero-posterior chest radiograph pre-ablation. B: Post-procedural antero-posterior chest radiograph showing right hemidiaphragm elevation consistent with diaphragm paralysis. C: Post-procedural lateral chest radiograph showing right hemidiaphragm elevation consistent with diaphragm paralysis. D: Post-procedural 3-month follow-up antero-posterior chest radiograph showing right hemidiaphragm elevation consistent with diaphragm paralysis. E: Post-procedural 3-month follow-up lateral chest radiograph showing right hemidiaphragm elevation consistent with diaphragm paralysis.",
-    "Not: bulgu anahtar sözcüğü altyazıda değil, makale başlığında geçiyor — \"A Case Report of Right Phrenic Nerve Palsy Following Pulsed Field Ablation in a Patient with Persistent Atrial Fibrillation.\" (yazar kaynaklı teşhis iddiası, radyolog doğrulaması değil)."
-   ],
-   "bodyPart": "toraks",
-   "modality": "XR",
-   "license": {
-    "name": "CC BY 4.0 (Europe PMC açık erişim — bkz. makale için tam lisans metni)",
-    "url": "https://europepmc.org/article/PMC/PMC13544946",
-    "author": "Munshi H, Ahmad A, Dajani A, Khraisat O, Hammad A, Tiyyagura S.",
-    "attribution": "Munshi H, Ahmad A, Dajani A, Khraisat O, Hammad A, Tiyyagura S.. \"A Case Report of Right Phrenic Nerve Palsy Following Pulsed Field Ablation in a Patient with Persistent Atrial Fibrillation.\". doi:10.19102/icrm.2026.17082. Europe PMC PMC13544946 (açık erişim).",
-    "sourceUrl": "https://europepmc.org/article/PMC/PMC13544946"
    }
   },
   {

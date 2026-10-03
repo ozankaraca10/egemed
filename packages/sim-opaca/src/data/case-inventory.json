@@ -1,6 +1,6 @@
 {
-  "totalCases": 188,
-  "practicePoolSize": 188,
+  "totalCases": 187,
+  "practicePoolSize": 187,
   "assessmentPoolSize": 124,
   "assessmentQuestions": 399,
   "pediatricCases": 8,
@@ -30,10 +30,6 @@
       "a": 0
     },
     "edema": {
-      "p": 1,
-      "a": 0
-    },
-    "elevated_hemidiaphragm": {
       "p": 1,
       "a": 0
     },
