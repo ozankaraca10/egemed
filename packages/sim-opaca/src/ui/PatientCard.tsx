@@ -3,10 +3,12 @@ import type { ClinicalContext } from '../data/clinicalContext'
 import { isExpertSource } from '../core/images'
 import type { ImageRecord } from '../core/types'
 import { LABEL_SOURCE_TEXT, findingLabel, findingShort } from '../data/terminology'
+import type { Vignette, VignetteRef } from '../data/vignettes'
 
 /** T318 — öğrenme modu sağ çerçeve hasta kartı (onaylı maket: "Opaca öğrenme modu — sağ çerçeve
  *  hasta kartı"). Kayıttan gelen bilgi "Gerçek hasta verisi" etiketiyle, kayıt yoksa açık notla
- *  gösterilir. Kurgusal öykü ve ayırıcı tanı notları hekim onayından sonra eklenecek (şimdi yok). */
+ *  gösterilir. T322: kurgusal başvuru öyküsü ("Kurgusal · eğitim amaçlı") ve ayırıcı tanı ("Eğitim
+ *  notu") ayrı etiketle eklenir; yapay zekâ üretimi + Claude denetimi, hekim onayı bekliyor. */
 
 const ICON_PATHS: Record<string, string> = {
   eye: 'M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12zm10 3a3 3 0 1 0 0-6 3 3 0 0 0 0 6z',
@@ -17,6 +19,18 @@ const ICON_PATHS: Record<string, string> = {
   flask: 'M9 3h6M10 3v6L5 19a1.5 1.5 0 0 0 1.3 2h11.4a1.5 1.5 0 0 0 1.3-2L14 9V3',
   clock: 'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM12 7v5l3 2',
   check: 'M20 6 9 17l-5-5',
+  bulb: 'M9 18h6M10 21h4M12 3a6 6 0 0 0-4 10.5c.7.7 1 1.5 1 2.5h6c0-1 .3-1.8 1-2.5A6 6 0 0 0 12 3z',
+}
+
+function RefLink({ label, ref }: { label: string; ref: VignetteRef }): JSX.Element {
+  return (
+    <p className="pcard-ref">
+      {label}:{' '}
+      <a href={ref.url} target="_blank" rel="noreferrer">
+        {ref.title}
+      </a>
+    </p>
+  )
 }
 
 function RowIcon({ name }: { name: string }): JSX.Element {
@@ -38,9 +52,11 @@ export interface PatientCardProps {
   readonly exampleNo: number
   /** Konunun bulgusu; kart başlığı bu bulguyu gösterir (görüntüdeki ilk etiketi değil). */
   readonly finding?: string | null
+  /** Kurgusal başvuru öyküsü ve ayırıcı tanı (T322); yoksa bu bölümler çizilmez. */
+  readonly vignette?: Vignette | null
 }
 
-export function PatientCard({ image, context, topic, exampleNo, finding }: PatientCardProps): JSX.Element {
+export function PatientCard({ image, context, topic, exampleNo, finding, vignette = null }: PatientCardProps): JSX.Element {
   const real = context?.hasReal === true
   const age = context?.age ?? image.ageYears ?? null
   const sex = context?.sex ?? (image.sex ? SEX_TEXT[image.sex] ?? null : null)
@@ -84,7 +100,54 @@ export function PatientCard({ image, context, topic, exampleNo, finding }: Patie
           <p className="pcard-note">Kayıtta yaş, cinsiyet ve çekim dışında klinik bilgi yok.</p>
         ) : null}
         {!context ? <p className="pcard-note">Bu görüntü için kayıtlı hasta verisi yok.</p> : null}
+        {context?.orig ? (
+          <details className="pcard-orig">
+            <summary>Orijinal kayıt (İngilizce)</summary>
+            <p lang="en">{context.orig}</p>
+          </details>
+        ) : null}
       </section>
+      {vignette ? (
+        <>
+          <section className="pcard-sec" aria-label="Başvuru öyküsü">
+            <div className="pcard-sec-h">
+              <h4>Başvuru öyküsü</h4>
+              <span className="ptag fic"><i aria-hidden="true" />Kurgusal · eğitim amaçlı</span>
+            </div>
+            <ul className="pcard-story">
+              {vignette.presentation.map((line, index) => <li key={index}>{line}</li>)}
+            </ul>
+            <RefLink label="Tipik başvuru örüntüsü" ref={vignette.presentationRef} />
+          </section>
+          <section className="pcard-sec" aria-label="Ayırıcı tanıda düşün">
+            <div className="pcard-sec-h">
+              <h4>Ayırıcı tanıda düşün</h4>
+              <span className="ptag note"><i aria-hidden="true" />Eğitim notu</span>
+            </div>
+            <ol className="pcard-dd">
+              {vignette.differential.map((entry, index) => (
+                <li key={index}>
+                  <span className="n" aria-hidden="true">{index + 1}</span>
+                  <div><b>{entry.dx}</b><span>{entry.clue}</span></div>
+                </li>
+              ))}
+            </ol>
+            <RefLink label="Terim ve ayırıcı tanı" ref={vignette.differentialRef} />
+            <div className="pcard-pearl">
+              <RowIcon name="bulb" />
+              <p>
+                {vignette.pearl.text}{' '}
+                <span className="pcard-ref-inline">
+                  Kaynak:{' '}
+                  <a href={vignette.pearl.ref.url} target="_blank" rel="noreferrer">
+                    {vignette.pearl.ref.title}
+                  </a>
+                </span>
+              </p>
+            </div>
+          </section>
+        </>
+      ) : null}
       <section className="pcard-sec" aria-label="Görüntü etiketleri">
         <div className="pcard-sec-h"><h4>Görüntü etiketleri</h4></div>
         <ul className="pcard-labels">
@@ -97,7 +160,13 @@ export function PatientCard({ image, context, topic, exampleNo, finding }: Patie
         </ul>
       </section>
       <footer className="pcard-src">
-        {real ? 'Kayıttan yalnız çeviri; kurgu eklenmedi. ' : ''}
+        {vignette ? (
+          <span className="pcard-review">
+            <i aria-hidden="true" />
+            Kurgusal öykü ve eğitim notları yapay zekâ ile üretildi, kayıtla tutarlılık için denetlendi; hekim onayı bekliyor.{' '}
+          </span>
+        ) : null}
+        {real ? 'Klinik kayıt bölümü kayıttan yalnız çeviridir. ' : ''}
         Hekim onayı: {image.clinicalReview === 'onayli' ? 'onaylı' : 'beklemede'}.
         {image.license ? (
           <>

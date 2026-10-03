@@ -30,6 +30,7 @@ import {
 import type { LearnTracker, StoragePort, WindowLike } from "../../../packages/sim-opaca/src/index";
 import { LEARN_EXAMPLE_LIMIT } from "../../../packages/sim-opaca/src/core/examples";
 import { hasClinicalContext } from "../../../packages/sim-opaca/src/data/clinicalContext";
+import { vignetteFor } from "../../../packages/sim-opaca/src/data/vignettes";
 import { fakeSessions } from "../session-fixture";
 
 /** T320: konunun film sayısı (öğrenme örnekleri). */
@@ -164,6 +165,20 @@ describe("öğrenme tamamlanabilirliği", () => {
       expect(examples.length, `${item.key}: örnek film yok`).toBeGreaterThan(0);
       expect(examples[0]?.runtimeUrl, `${item.key}: görüntü adresi yok`).toBeTruthy();
       expect(libraryExampleCount(item), `${item.key}: sayaç`).toBeGreaterThan(0);
+    }
+  });
+
+  it("T322: öğrenme modundaki her filmin denetlenmiş hasta kartı içeriği var", () => {
+    // T321b'de yeni görüntülerle birlikte üretilecek (yeni eklenen konu); liste yalnız küçülür.
+    const pending = new Set(["finding.pneumonia_report"]);
+    for (const item of LIBRARY_ITEMS) {
+      if (pending.has(item.key)) continue;
+      for (const image of libraryExamples(item)) {
+        const vignette = vignetteFor(image.id);
+        expect(vignette, `${item.key}: ${image.id}`).not.toBeNull();
+        expect(vignette!.differential.length, image.id).toBeGreaterThanOrEqual(3);
+        expect(vignette!.presentationRef.url, image.id).toMatch(/^https:\/\//);
+      }
     }
   });
 

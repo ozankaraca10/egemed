@@ -14,6 +14,7 @@ import { LIBRARY_GROUPS, LIBRARY_ITEMS } from '../data/terminology'
 import { clinicalContextFor } from '../data/clinicalContext'
 import { FilmViewer, createNoopFilmEnv, type FilmViewerHandle } from '../ui/FilmViewer'
 import { PatientCard } from '../ui/PatientCard'
+import { vignetteFor } from '../data/vignettes'
 import { ZoneChips } from '../ui/ZoneChips'
 import { Footer, EcgDeco } from '../ui/chrome'
 import { IconFilm, IconLock } from '../ui/icons'
@@ -283,7 +284,7 @@ export function LearnScreen({
             </section>
 
             <section className="sim-side" aria-label="Hasta kartı ve konu bilgisi" tabIndex={0}>
-              {image ? <PatientCard image={image} context={clinicalContextFor(image.id)} topic={item.short} exampleNo={exampleIdx + 1} finding={item.finding} /> : null}
+              {image ? <PatientCard image={image} context={clinicalContextFor(image.id)} topic={item.short} exampleNo={exampleIdx + 1} finding={item.finding} vignette={vignetteFor(image.id)} /> : null}
               <section className="learn-about" aria-labelledby="learn-about-title">
                 <div className="la-head">
                   <span className="learn-eb">{groupTitle}</span>

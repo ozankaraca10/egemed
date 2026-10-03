@@ -1,0 +1,3419 @@
+{
+ "version": 1,
+ "kind": "kurgusal eğitim içeriği (yapay zekâ üretimi, Claude denetimi; hekim onayı bekliyor)",
+ "generatedBy": "gpt-6.1-sol max",
+ "review": {
+  "by": "Claude Opus 5.5",
+  "date": "2026-10-03",
+  "physicianApproval": "beklemede"
+ },
+ "images": {
+  "nih_00000001_000": {
+   "presentation": [
+    "57 yaşında erkek hasta: eforla artan nefes darlığı için akciğer grafisi istenir.",
+    "Önceki grafilerle değişim olup olmadığı öğrenilir.",
+    "Öksürük, ateş ve göğüs ağrısının süresi sorgulanır."
+   ],
+   "presentationRef": {
+    "title": "ACR Acute Respiratory Illness in Immunocompetent Patients (2024)",
+    "url": "https://acsearch.acr.org/docs/69446/Narrative/"
+   },
+   "differential": [
+    {
+     "dx": "Sistematik okuma (ABCDE)",
+     "clue": "A hava yolu, B akciğer-plevra, C kalp-mediasten, D diyafram, E kemik-yumuşak doku sırasıyla."
+    },
+    {
+     "dx": "Projeksiyon yanılgısı",
+     "clue": "AP çekim kalp silüetini olduğundan büyük gösterebilir."
+    },
+    {
+     "dx": "Eşlik eden akciğer bulgusu",
+     "clue": "Tek etikete odaklanmak ikinci lezyonu atlatabilir."
+    },
+    {
+     "dx": "Rotasyon veya yetersiz inspirasyon",
+     "clue": "Asimetri ve bazal opasite taklidi oluşturabilir."
+    }
+   ],
+   "differentialRef": {
+    "title": "Fleischner Society: Glossary of Terms for Thoracic Imaging (2024)",
+    "url": "https://pubs.rsna.org/doi/full/10.1148/radiol.232558"
+   },
+   "pearl": {
+    "text": "Grafide tek etikete odaklanma; hava yolu, kemikler, kardiyak silüet, diyafram ve plevrayı da tara. Şüpheli bulguyu eski grafi ve klinikle karşılaştır.",
+    "ref": {
+     "title": "Fleischner Society: Glossary of Terms for Thoracic Imaging (2024)",
+     "url": "https://pubs.rsna.org/doi/full/10.1148/radiol.232558"
+    }
+   }
+  },
+  "nih_00000001_001": {
+   "presentation": [
+    "58 yaşında erkek hasta: eforla nefes darlığı için kontrol grafisi istenir.",
+    "Önceki grafiyle değişim sorgulanır.",
+    "Kronik akciğer hastalığı ve kardiyak yakınmalar birlikte değerlendirilir."
+   ],
+   "presentationRef": {
+    "title": "ACR Acute Respiratory Illness in Immunocompetent Patients (2024)",
+    "url": "https://acsearch.acr.org/docs/69446/Narrative/"
+   },
+   "differential": [
+    {
+     "dx": "Sistematik okuma (ABCDE)",
+     "clue": "A hava yolu, B akciğer-plevra, C kalp-mediasten, D diyafram, E kemik-yumuşak doku sırasıyla."
+    },
+    {
+     "dx": "Projeksiyon yanılgısı",
+     "clue": "AP çekim kalp silüetini olduğundan büyük gösterebilir."
+    },
+    {
+     "dx": "Eşlik eden akciğer bulgusu",
+     "clue": "Tek etikete odaklanmak ikinci lezyonu atlatabilir."
+    },
+    {
+     "dx": "Rotasyon veya yetersiz inspirasyon",
+     "clue": "Asimetri ve bazal opasite taklidi oluşturabilir."
+    }
+   ],
+   "differentialRef": {
+    "title": "Fleischner Society: Glossary of Terms for Thoracic Imaging (2024)",
+    "url": "https://pubs.rsna.org/doi/full/10.1148/radiol.232558"
+   },
+   "pearl": {
+    "text": "Grafide tek etikete odaklanma; hava yolu, kemikler, kardiyak silüet, diyafram ve plevrayı da tara. Şüpheli bulguyu eski grafi ve klinikle karşılaştır.",
+    "ref": {
+     "title": "Fleischner Society: Glossary of Terms for Thoracic Imaging (2024)",
+     "url": "https://pubs.rsna.org/doi/full/10.1148/radiol.232558"
+    }
+   }
+  },
+  "nih_00000003_000": {
+   "presentation": [
+    "81 yaşında kadın hasta: göğüs yakınması nedeniyle grafi istenir.",
+    "Öksürük ve nefes darlığının süresi sorgulanır.",
+    "Eski görüntülerde diyafram ve mediasten görünümü araştırılır."
+   ],
+   "presentationRef": {
+    "title": "ACR Acute Respiratory Illness in Immunocompetent Patients (2024)",
+    "url": "https://acsearch.acr.org/docs/69446/Narrative/"
+   },
+   "differential": [
+    {
+     "dx": "Sistematik okuma (ABCDE)",
+     "clue": "A hava yolu, B akciğer-plevra, C kalp-mediasten, D diyafram, E kemik-yumuşak doku sırasıyla."
+    },
+    {
+     "dx": "Projeksiyon yanılgısı",
+     "clue": "AP çekim kalp silüetini olduğundan büyük gösterebilir."
+    },
+    {
+     "dx": "Eşlik eden akciğer bulgusu",
+     "clue": "Tek etikete odaklanmak ikinci lezyonu atlatabilir."
+    },
+    {
+     "dx": "Rotasyon veya yetersiz inspirasyon",
+     "clue": "Asimetri ve bazal opasite taklidi oluşturabilir."
+    }
+   ],
+   "differentialRef": {
+    "title": "Fleischner Society: Glossary of Terms for Thoracic Imaging (2024)",
+    "url": "https://pubs.rsna.org/doi/full/10.1148/radiol.232558"
+   },
+   "pearl": {
+    "text": "Grafide tek etikete odaklanma; hava yolu, kemikler, kardiyak silüet, diyafram ve plevrayı da tara. Şüpheli bulguyu eski grafi ve klinikle karşılaştır.",
+    "ref": {
+     "title": "Fleischner Society: Glossary of Terms for Thoracic Imaging (2024)",
+     "url": "https://pubs.rsna.org/doi/full/10.1148/radiol.232558"
+    }
+   }
+  },
+  "nih_00000003_001": {
+   "presentation": [
+    "74 yaşında kadın hasta: kontrol grafisi önceki görüntüyle karşılaştırılır.",
+    "Solunum yakınmalarının sürüp sürmediği sorgulanır.",
+    "Diyafram ve mediasten görünümündeki değişim araştırılır."
+   ],
+   "presentationRef": {
+    "title": "ACR Acute Respiratory Illness in Immunocompetent Patients (2024)",
+    "url": "https://acsearch.acr.org/docs/69446/Narrative/"
+   },
+   "differential": [
+    {
+     "dx": "Sistematik okuma (ABCDE)",
+     "clue": "A hava yolu, B akciğer-plevra, C kalp-mediasten, D diyafram, E kemik-yumuşak doku sırasıyla."
+    },
+    {
+     "dx": "Projeksiyon yanılgısı",
+     "clue": "AP çekim kalp silüetini olduğundan büyük gösterebilir."
+    },
+    {
+     "dx": "Eşlik eden akciğer bulgusu",
+     "clue": "Tek etikete odaklanmak ikinci lezyonu atlatabilir."
+    },
+    {
+     "dx": "Rotasyon veya yetersiz inspirasyon",
+     "clue": "Asimetri ve bazal opasite taklidi oluşturabilir."
+    }
+   ],
+   "differentialRef": {
+    "title": "Fleischner Society: Glossary of Terms for Thoracic Imaging (2024)",
+    "url": "https://pubs.rsna.org/doi/full/10.1148/radiol.232558"
+   },
+   "pearl": {
+    "text": "Grafide tek etikete odaklanma; hava yolu, kemikler, kardiyak silüet, diyafram ve plevrayı da tara. Şüpheli bulguyu eski grafi ve klinikle karşılaştır.",
+    "ref": {
+     "title": "Fleischner Society: Glossary of Terms for Thoracic Imaging (2024)",
+     "url": "https://pubs.rsna.org/doi/full/10.1148/radiol.232558"
+    }
+   }
+  },
+  "nih_00000013_001": {
+   "presentation": [
+    "60 yaşında erkek hasta: ani göğüs ağrısı ve nefes darlığı ile başvurur.",
+    "Kronik akciğer hastalığı ve sigara öyküsü sorgulanır.",
+    "Önceki grafiyle plevral havanın değişimi değerlendirilir."
+   ],
+   "presentationRef": {
+    "title": "ACR Acute Respiratory Illness in Immunocompetent Patients (2024)",
+    "url": "https://acsearch.acr.org/docs/69446/Narrative/"
+   },
+   "differential": [
+    {
+     "dx": "Projeksiyon: PA ve AP",
+     "clue": "AP çekim kalp boyutunu büyütebilir; PA ile doğrudan kıyaslanmaz."
+    },
+    {
+     "dx": "Rotasyon",
+     "clue": "Klavikula uçları ile spinöz çıkıntı aralıkları eşit değildir."
+    },
+    {
+     "dx": "Yetersiz inspirasyon",
+     "clue": "Bazal damarlar kalabalık, kalp gölgesi geniş görünür."
+    },
+    {
+     "dx": "Gerçek plevral hava",
+     "clue": "Plevral çizgi distalinde damar izi seçilmez."
+    }
+   ],
+   "differentialRef": {
+    "title": "Fleischner Society: Glossary of Terms for Thoracic Imaging (2024)",
+    "url": "https://pubs.rsna.org/doi/full/10.1148/radiol.232558"
+   },
+   "pearl": {
+    "text": "AP/PA ve pozisyon farkı kalp boyutu ile akciğer yoğunluğunu değiştirir. Pnömotoraks şüphesini projeksiyon yanılgısıyla karıştırmadan değerlendir.",
+    "ref": {
+     "title": "BTS Guideline for Pleural Disease (2023)",
+     "url": "https://www.brit-thoracic.org.uk/clinical-resources/guidelines/pleural-disease/"
+    }
+   }
+  },
+  "nih_00000013_002": {
+   "presentation": [
+    "60 yaşında erkek hasta: nefes darlığı nedeniyle yeniden yatak başı grafi istenir.",
+    "Göğüs ağrısındaki değişim sorgulanır.",
+    "Önceki iki grafiyle amfizem ve plevral hava karşılaştırılır."
+   ],
+   "presentationRef": {
+    "title": "ACR Acute Respiratory Illness in Immunocompetent Patients (2024)",
+    "url": "https://acsearch.acr.org/docs/69446/Narrative/"
+   },
+   "differential": [
+    {
+     "dx": "Projeksiyon: PA ve AP",
+     "clue": "AP çekim kalp boyutunu büyütebilir; PA ile doğrudan kıyaslanmaz."
+    },
+    {
+     "dx": "Rotasyon",
+     "clue": "Klavikula uçları ile spinöz çıkıntı aralıkları eşit değildir."
+    },
+    {
+     "dx": "Yetersiz inspirasyon",
+     "clue": "Bazal damarlar kalabalık, kalp gölgesi geniş görünür."
+    },
+    {
+     "dx": "Gerçek plevral hava",
+     "clue": "Plevral çizgi distalinde damar izi seçilmez."
+    }
+   ],
+   "differentialRef": {
+    "title": "Fleischner Society: Glossary of Terms for Thoracic Imaging (2024)",
+    "url": "https://pubs.rsna.org/doi/full/10.1148/radiol.232558"
+   },
+   "pearl": {
+    "text": "AP/PA ve pozisyon farkı kalp boyutu ile akciğer yoğunluğunu değiştirir. Pnömotoraks şüphesini projeksiyon yanılgısıyla karıştırmadan değerlendir.",
+    "ref": {
+     "title": "BTS Guideline for Pleural Disease (2023)",
+     "url": "https://www.brit-thoracic.org.uk/clinical-resources/guidelines/pleural-disease/"
+    }
+   }
+  },
+  "commons_coin_lat": {
+   "presentation": [
+    "Örnek başvuru: yabancı cisim yutma veya aspirasyon şüphesiyle görüntüleme istenir.",
+    "Öksürük, yutma güçlüğü ve olay zamanı sorgulanır.",
+    "Ön grafiyle cismin derinliği karşılaştırılır."
+   ],
+   "presentationRef": {
+    "title": "ACR Acute Respiratory Illness in Immunocompetent Patients (2024)",
+    "url": "https://acsearch.acr.org/docs/69446/Narrative/"
+   },
+   "differential": [
+    {
+     "dx": "Lateral grafi anatomisi",
+     "clue": "Radyoopak cismin ön-arka yerleşimi gösterilebilir."
+    },
+    {
+     "dx": "Özofagustaki yabancı cisim",
+     "clue": "Arka mediasten yerleşimi düşündürür."
+    },
+    {
+     "dx": "Hava yolundaki yabancı cisim",
+     "clue": "Ön hava yolu izdüşümü düşündürür."
+    },
+    {
+     "dx": "Görüntü artefaktı",
+     "clue": "Dış işaretleyici tekrarlayan projeksiyonda yer değiştirir."
+    }
+   ],
+   "differentialRef": {
+    "title": "Fleischner Society: Glossary of Terms for Thoracic Imaging (2024)",
+    "url": "https://pubs.rsna.org/doi/full/10.1148/radiol.232558"
+   },
+   "pearl": {
+    "text": "Yan grafi retrokardiyak ve retrosternal alanları açığa çıkarır; tek görüntüyle kesin anatomik yerleşim koyma. Ön grafi ve klinik öyküyle birlikte değerlendir.",
+    "ref": {
+     "title": "Fleischner Society: Glossary of Terms for Thoracic Imaging (2024)",
+     "url": "https://pubs.rsna.org/doi/full/10.1148/radiol.232558"
+    }
+   }
+  },
+  "commons_hiatal_lat": {
+   "presentation": [
+    "Örnek başvuru: yemek sonrası retrosternal yanma tariflenir.",
+    "Regürjitasyon ve yutma güçlüğü sorgulanır.",
+    "Yan görüntüde retrokardiyak yapının yerleşimi incelenir."
+   ],
+   "presentationRef": {
+    "title": "ACR Acute Respiratory Illness in Immunocompetent Patients (2024)",
+    "url": "https://acsearch.acr.org/docs/69446/Narrative/"
+   },
+   "differential": [
+    {
+     "dx": "Lateral grafi anatomisi",
+     "clue": "Sternum önü, kalp arkası ve diyafram arkası ayrı taranır."
+    },
+    {
+     "dx": "Retrokardiyak lezyon",
+     "clue": "Ön grafide kalp arkasında gizlenebilir."
+    },
+    {
+     "dx": "Hiatal herni",
+     "clue": "Kalp arkasında hava-sıvı seviyesi oluşturabilir."
+    },
+    {
+     "dx": "Yabancı cisim yerleşimi",
+     "clue": "Yan görüntü özofagus ve hava yolu derinliğini ayırır."
+    }
+   ],
+   "differentialRef": {
+    "title": "Fleischner Society: Glossary of Terms for Thoracic Imaging (2024)",
+    "url": "https://pubs.rsna.org/doi/full/10.1148/radiol.232558"
+   },
+   "pearl": {
+    "text": "Yan grafi retrokardiyak ve retrosternal alanları açığa çıkarır; tek görüntüyle kesin anatomik yerleşim koyma. Ön grafi ve klinik öyküyle birlikte değerlendir.",
+    "ref": {
+     "title": "Fleischner Society: Glossary of Terms for Thoracic Imaging (2024)",
+     "url": "https://pubs.rsna.org/doi/full/10.1148/radiol.232558"
+    }
+   }
+  },
+  "commons_normal_lat": {
+   "presentation": [
+    "Örnek başvuru: hafif solunum yakınması için iki yönlü grafi istenir.",
+    "Önceki görüntülerle karşılaştırma planlanır.",
+    "Yan grafide retrokardiyak ve retrosternal alanlar taranır."
+   ],
+   "presentationRef": {
+    "title": "ACR Acute Respiratory Illness in Immunocompetent Patients (2024)",
+    "url": "https://acsearch.acr.org/docs/69446/Narrative/"
+   },
+   "differential": [
+    {
+     "dx": "Lateral grafi anatomisi",
+     "clue": "Sternum önü, kalp arkası ve diyafram arkası ayrı taranır."
+    },
+    {
+     "dx": "Retrokardiyak lezyon",
+     "clue": "Ön grafide kalp arkasında gizlenebilir."
+    },
+    {
+     "dx": "Hiatal herni",
+     "clue": "Kalp arkasında hava-sıvı seviyesi oluşturabilir."
+    },
+    {
+     "dx": "Yabancı cisim yerleşimi",
+     "clue": "Yan görüntü özofagus ve hava yolu derinliğini ayırır."
+    }
+   ],
+   "differentialRef": {
+    "title": "Fleischner Society: Glossary of Terms for Thoracic Imaging (2024)",
+    "url": "https://pubs.rsna.org/doi/full/10.1148/radiol.232558"
+   },
+   "pearl": {
+    "text": "Yan grafi retrokardiyak ve retrosternal alanları açığa çıkarır; tek görüntüyle kesin anatomik yerleşim koyma. Ön grafi ve klinik öyküyle birlikte değerlendir.",
+    "ref": {
+     "title": "Fleischner Society: Glossary of Terms for Thoracic Imaging (2024)",
+     "url": "https://pubs.rsna.org/doi/full/10.1148/radiol.232558"
+    }
+   }
+  },
+  "nih_00000246_004": {
+   "presentation": [
+    "51 yaşında erkek hasta: hafif öksürük nedeniyle akciğer grafisi istenir.",
+    "Yakınmaların süresi ve vital bulgular değerlendirilir.",
+    "Önceki görüntüler varsa karşılaştırılır.",
+    "Önceki seri grafilerle karşılaştırma istenir."
+   ],
+   "presentationRef": {
+    "title": "ACR Acute Respiratory Illness in Immunocompetent Patients (2024)",
+    "url": "https://acsearch.acr.org/docs/69446/Narrative/"
+   },
+   "differential": [
+    {
+     "dx": "Normal akciğer grafisi",
+     "clue": "Uzman panelinin görüntü değerlendirmesinde belirgin patoloji yok."
+    },
+    {
+     "dx": "Erken pnömoni",
+     "clue": "Klinik şüphe güçlü olsa da erken grafi normal kalabilir."
+    },
+    {
+     "dx": "Küçük pnömotoraks",
+     "clue": "Apikal plevral çizgi sistematik taramada aranır."
+    },
+    {
+     "dx": "Gizli retrokardiyak opasite",
+     "clue": "Kalp arkasında küçük lezyon gözden kaçabilir."
+    }
+   ],
+   "differentialRef": {
+    "title": "Fleischner Society: Glossary of Terms for Thoracic Imaging (2024)",
+    "url": "https://pubs.rsna.org/doi/full/10.1148/radiol.232558"
+   },
+   "pearl": {
+    "text": "Normal grafi tüm göğüs hastalıklarını dışlamaz. Klinik şüphe sürerse muayene, izlem ve uygun ileri görüntülemeyi birlikte değerlendir.",
+    "ref": {
+     "title": "ACR Acute Respiratory Illness in Immunocompetent Patients (2024)",
+     "url": "https://acsearch.acr.org/docs/69446/Narrative/"
+    }
+   }
+  },
+  "nih_00000468_027": {
+   "presentation": [
+    "31 yaşında erkek hasta: hafif öksürük nedeniyle akciğer grafisi istenir.",
+    "Yakınmaların süresi ve vital bulgular değerlendirilir.",
+    "Önceki görüntüler varsa karşılaştırılır.",
+    "Önceki seri grafilerle karşılaştırma istenir."
+   ],
+   "presentationRef": {
+    "title": "ACR Acute Respiratory Illness in Immunocompetent Patients (2024)",
+    "url": "https://acsearch.acr.org/docs/69446/Narrative/"
+   },
+   "differential": [
+    {
+     "dx": "Normal akciğer grafisi",
+     "clue": "Uzman panelinin görüntü değerlendirmesinde belirgin patoloji yok."
+    },
+    {
+     "dx": "Erken pnömoni",
+     "clue": "Klinik şüphe güçlü olsa da erken grafi normal kalabilir."
+    },
+    {
+     "dx": "Küçük pnömotoraks",
+     "clue": "Apikal plevral çizgi sistematik taramada aranır."
+    },
+    {
+     "dx": "Gizli retrokardiyak opasite",
+     "clue": "Kalp arkasında küçük lezyon gözden kaçabilir."
+    }
+   ],
+   "differentialRef": {
+    "title": "Fleischner Society: Glossary of Terms for Thoracic Imaging (2024)",
+    "url": "https://pubs.rsna.org/doi/full/10.1148/radiol.232558"
+   },
+   "pearl": {
+    "text": "Normal grafi tüm göğüs hastalıklarını dışlamaz. Klinik şüphe sürerse muayene, izlem ve uygun ileri görüntülemeyi birlikte değerlendir.",
+    "ref": {
+     "title": "ACR Acute Respiratory Illness in Immunocompetent Patients (2024)",
+     "url": "https://acsearch.acr.org/docs/69446/Narrative/"
+    }
+   }
+  },
+  "nih_00000756_000": {
+   "presentation": [
+    "50 yaşında erkek hasta: hafif öksürük nedeniyle akciğer grafisi istenir.",
+    "Yakınmaların süresi ve vital bulgular değerlendirilir.",
+    "Önceki görüntüler varsa karşılaştırılır."
+   ],
+   "presentationRef": {
+    "title": "ACR Acute Respiratory Illness in Immunocompetent Patients (2024)",
+    "url": "https://acsearch.acr.org/docs/69446/Narrative/"
+   },
+   "differential": [
+    {
+     "dx": "Normal akciğer grafisi",
+     "clue": "Uzman panelinin görüntü değerlendirmesinde belirgin patoloji yok."
+    },
+    {
+     "dx": "Erken pnömoni",
+     "clue": "Klinik şüphe güçlü olsa da erken grafi normal kalabilir."
+    },
+    {
+     "dx": "Küçük pnömotoraks",
+     "clue": "Apikal plevral çizgi sistematik taramada aranır."
+    },
+    {
+     "dx": "Gizli retrokardiyak opasite",
+     "clue": "Kalp arkasında küçük lezyon gözden kaçabilir."
+    }
+   ],
+   "differentialRef": {
+    "title": "Fleischner Society: Glossary of Terms for Thoracic Imaging (2024)",
+    "url": "https://pubs.rsna.org/doi/full/10.1148/radiol.232558"
+   },
+   "pearl": {
+    "text": "Normal grafi tüm göğüs hastalıklarını dışlamaz. Klinik şüphe sürerse muayene, izlem ve uygun ileri görüntülemeyi birlikte değerlendir.",
+    "ref": {
+     "title": "ACR Acute Respiratory Illness in Immunocompetent Patients (2024)",
+     "url": "https://acsearch.acr.org/docs/69446/Narrative/"
+    }
+   }
+  },
+  "nih_00000808_013": {
+   "presentation": [
+    "48 yaşında kadın hasta: hafif öksürük nedeniyle akciğer grafisi istenir.",
+    "Yakınmaların süresi ve vital bulgular değerlendirilir.",
+    "Önceki görüntüler varsa karşılaştırılır.",
+    "Önceki seri grafilerle karşılaştırma istenir."
+   ],
+   "presentationRef": {
+    "title": "ACR Acute Respiratory Illness in Immunocompetent Patients (2024)",
+    "url": "https://acsearch.acr.org/docs/69446/Narrative/"
+   },
+   "differential": [
+    {
+     "dx": "Normal akciğer grafisi",
+     "clue": "Uzman panelinin görüntü değerlendirmesinde belirgin patoloji yok."
+    },
+    {
+     "dx": "Erken pnömoni",
+     "clue": "Klinik şüphe güçlü olsa da erken grafi normal kalabilir."
+    },
+    {
+     "dx": "Küçük pnömotoraks",
+     "clue": "Apikal plevral çizgi sistematik taramada aranır."
+    },
+    {
+     "dx": "Gizli retrokardiyak opasite",
+     "clue": "Kalp arkasında küçük lezyon gözden kaçabilir."
+    }
+   ],
+   "differentialRef": {
+    "title": "Fleischner Society: Glossary of Terms for Thoracic Imaging (2024)",
+    "url": "https://pubs.rsna.org/doi/full/10.1148/radiol.232558"
+   },
+   "pearl": {
+    "text": "Normal grafi tüm göğüs hastalıklarını dışlamaz. Klinik şüphe sürerse muayene, izlem ve uygun ileri görüntülemeyi birlikte değerlendir.",
+    "ref": {
+     "title": "ACR Acute Respiratory Illness in Immunocompetent Patients (2024)",
+     "url": "https://acsearch.acr.org/docs/69446/Narrative/"
+    }
+   }
+  },
+  "nih_00002106_000": {
+   "presentation": [
+    "30 yaşında erkek hasta: ani plöritik ağrı ve nefes darlığı vardır.",
+    "Önceden bilinen akciğer odağı ve eski grafiler sorgulanır.",
+    "Plevral değişiklik ile nodül benzeri odak birlikte değerlendirilir."
+   ],
+   "presentationRef": {
+    "title": "BTS Guideline for Pleural Disease (2023)",
+    "url": "https://www.brit-thoracic.org.uk/clinical-resources/guidelines/pleural-disease/"
+   },
+   "differential": [
+    {
+     "dx": "Pnömotoraks",
+     "clue": "Plevral çizginin dışında damar izi görülmez."
+    },
+    {
+     "dx": "Bül veya amfizem",
+     "clue": "İnce duvarlı hava boşluğu plevral çizgiyi taklit edebilir."
+    },
+    {
+     "dx": "Deri kıvrımı",
+     "clue": "Çizginin dışında damar izleri sürer."
+    },
+    {
+     "dx": "Eşlik eden nodül/kitle",
+     "clue": "Radyolog kutusunda ayrıca nodül/kitle odağı işaretlidir."
+    }
+   ],
+   "differentialRef": {
+    "title": "Fleischner Society: Glossary of Terms for Thoracic Imaging (2024)",
+    "url": "https://pubs.rsna.org/doi/full/10.1148/radiol.232558"
+   },
+   "pearl": {
+    "text": "Grafi plevral havayı gösterebilir; bül ve deri kıvrımı taklitlerini ayır. Klinik kötüleşme varsa görüntüden bağımsız acil değerlendirme gerekir.",
+    "ref": {
+     "title": "BTS Guideline for Pleural Disease (2023)",
+     "url": "https://www.brit-thoracic.org.uk/clinical-resources/guidelines/pleural-disease/"
+    }
+   }
+  },
+  "nih_00003400_003": {
+   "presentation": [
+    "25 yaşında kadın hasta: ani başlayan tek taraflı plöritik göğüs ağrısı vardır.",
+    "Nefes darlığı yakınmaya eşlik eder.",
+    "Akciğer hastalığı ve yakın zamanda girişim öyküsü sorgulanır.",
+    "Önceki seri grafilerle karşılaştırma istenir."
+   ],
+   "presentationRef": {
+    "title": "BTS Guideline for Pleural Disease (2023)",
+    "url": "https://www.brit-thoracic.org.uk/clinical-resources/guidelines/pleural-disease/"
+   },
+   "differential": [
+    {
+     "dx": "Pnömotoraks",
+     "clue": "Plevral çizginin dışında damar izi görülmez."
+    },
+    {
+     "dx": "Bül veya amfizem",
+     "clue": "İnce duvarlı hava boşluğu plevral çizgiyi taklit edebilir."
+    },
+    {
+     "dx": "Deri kıvrımı",
+     "clue": "Çizginin dışında damar izleri sürer."
+    },
+    {
+     "dx": "Atelektazi",
+     "clue": "Hacim kaybı ve fissür çekilmesi öne çıkar."
+    }
+   ],
+   "differentialRef": {
+    "title": "Fleischner Society: Glossary of Terms for Thoracic Imaging (2024)",
+    "url": "https://pubs.rsna.org/doi/full/10.1148/radiol.232558"
+   },
+   "pearl": {
+    "text": "Grafi plevral havayı gösterebilir; bül ve deri kıvrımı taklitlerini ayır. Klinik kötüleşme varsa görüntüden bağımsız acil değerlendirme gerekir.",
+    "ref": {
+     "title": "BTS Guideline for Pleural Disease (2023)",
+     "url": "https://www.brit-thoracic.org.uk/clinical-resources/guidelines/pleural-disease/"
+    }
+   }
+  },
+  "nih_00005869_001": {
+   "presentation": [
+    "35 yaşında kadın hasta: plöritik ağrı ve nefes darlığı ile başvurur.",
+    "Öksürük, balgam ve ateş de sorgulanır.",
+    "Plevral hava ile parankim opasitesi birlikte araştırılır."
+   ],
+   "presentationRef": {
+    "title": "BTS Guideline for Pleural Disease (2023)",
+    "url": "https://www.brit-thoracic.org.uk/clinical-resources/guidelines/pleural-disease/"
+   },
+   "differential": [
+    {
+     "dx": "Pnömotoraks",
+     "clue": "Plevral çizginin dışında damar izi görülmez."
+    },
+    {
+     "dx": "Bül veya amfizem",
+     "clue": "İnce duvarlı hava boşluğu plevral çizgiyi taklit edebilir."
+    },
+    {
+     "dx": "Deri kıvrımı",
+     "clue": "Çizginin dışında damar izleri sürer."
+    },
+    {
+     "dx": "Eşlik eden pnömonik opasite",
+     "clue": "Radyolog kutusunda konsolidasyon; rapor etiketinde pnömoni vardır."
+    }
+   ],
+   "differentialRef": {
+    "title": "Fleischner Society: Glossary of Terms for Thoracic Imaging (2024)",
+    "url": "https://pubs.rsna.org/doi/full/10.1148/radiol.232558"
+   },
+   "pearl": {
+    "text": "Pnömotoraks ve parankim opasitesi aynı grafide bulunabilir; birini saptayınca okumayı bitirme. Klinik ve önceki görüntülerle birlikte değerlendir.",
+    "ref": {
+     "title": "BTS Guideline for Pleural Disease (2023)",
+     "url": "https://www.brit-thoracic.org.uk/clinical-resources/guidelines/pleural-disease/"
+    }
+   }
+  },
+  "nih_00009368_006": {
+   "presentation": [
+    "82 yaşında erkek hasta: yeni nefes darlığı nedeniyle yatak başı grafi istenir.",
+    "Önceki seri görüntüler ve yakınmaların seyri sorgulanır.",
+    "Atelektazi veya eşlik eden herni öyküsü değerlendirilir."
+   ],
+   "presentationRef": {
+    "title": "BTS Guideline for Pleural Disease (2023)",
+    "url": "https://www.brit-thoracic.org.uk/clinical-resources/guidelines/pleural-disease/"
+   },
+   "differential": [
+    {
+     "dx": "Pnömotoraks",
+     "clue": "Plevral çizginin dışında damar izi görülmez."
+    },
+    {
+     "dx": "Bül veya amfizem",
+     "clue": "İnce duvarlı hava boşluğu plevral çizgiyi taklit edebilir."
+    },
+    {
+     "dx": "Deri kıvrımı",
+     "clue": "Çizginin dışında damar izleri sürer."
+    },
+    {
+     "dx": "Eşlik eden atelektazi",
+     "clue": "Rapor NLP etiketinde hacim kaybı bulgusu bulunur."
+    }
+   ],
+   "differentialRef": {
+    "title": "Fleischner Society: Glossary of Terms for Thoracic Imaging (2024)",
+    "url": "https://pubs.rsna.org/doi/full/10.1148/radiol.232558"
+   },
+   "pearl": {
+    "text": "Grafi plevral havayı gösterebilir; bül ve deri kıvrımı taklitlerini ayır. Klinik kötüleşme varsa görüntüden bağımsız acil değerlendirme gerekir.",
+    "ref": {
+     "title": "BTS Guideline for Pleural Disease (2023)",
+     "url": "https://www.brit-thoracic.org.uk/clinical-resources/guidelines/pleural-disease/"
+    }
+   }
+  },
+  "nih_00000344_003": {
+   "presentation": [
+    "33 yaşında erkek hasta: giderek artan nefes darlığı ile başvurur.",
+    "Göğüste dolgunluk ya da plöritik ağrı tarifler.",
+    "Kalp hastalığı, enfeksiyon ve malignite öyküsü sorgulanır.",
+    "Önceki seri grafilerle karşılaştırma istenir."
+   ],
+   "presentationRef": {
+    "title": "BTS Guideline for Pleural Disease (2023)",
+    "url": "https://www.brit-thoracic.org.uk/clinical-resources/guidelines/pleural-disease/"
+   },
+   "differential": [
+    {
+     "dx": "Plevral efüzyon",
+     "clue": "Kostofrenik açı silinmesi ve menisküs görünümü destekler."
+    },
+    {
+     "dx": "Atelektazi",
+     "clue": "Hacim kaybı komşu yapıları etkilenen tarafa çeker."
+    },
+    {
+     "dx": "Parankim konsolidasyonu",
+     "clue": "Hava bronkogramı plevral sıvıdan çok parankimi düşündürür."
+    },
+    {
+     "dx": "Plevral kalınlaşma",
+     "clue": "Eski görüntülerde kalıcılık ve BT ayrımı sağlar."
+    }
+   ],
+   "differentialRef": {
+    "title": "Fleischner Society: Glossary of Terms for Thoracic Imaging (2024)",
+    "url": "https://pubs.rsna.org/doi/full/10.1148/radiol.232558"
+   },
+   "pearl": {
+    "text": "Grafi sıvının varlığını düşündürür, nedenini belirlemez. Özellikle açıklanamayan tek taraflı efüzyonda toraks ultrasonu ve uygun sıvı incelemesi gerekir.",
+    "ref": {
+     "title": "BTS Guideline for Pleural Disease (2023)",
+     "url": "https://www.brit-thoracic.org.uk/clinical-resources/guidelines/pleural-disease/"
+    }
+   }
+  },
+  "nih_00005066_030": {
+   "presentation": [
+    "51 yaşında erkek hasta: giderek artan nefes darlığı ile başvurur.",
+    "Ortopnenin varlığı ve öksürük sorgulanır.",
+    "Kardiyak öykü ile parankim enfeksiyonu olasılığı birlikte değerlendirilir."
+   ],
+   "presentationRef": {
+    "title": "BTS Guideline for Pleural Disease (2023)",
+    "url": "https://www.brit-thoracic.org.uk/clinical-resources/guidelines/pleural-disease/"
+   },
+   "differential": [
+    {
+     "dx": "Plevral efüzyon",
+     "clue": "Kostofrenik açı silinmesi ve menisküs görünümü destekler."
+    },
+    {
+     "dx": "Atelektazi",
+     "clue": "Hacim kaybı komşu yapıları etkilenen tarafa çeker."
+    },
+    {
+     "dx": "Parankim konsolidasyonu",
+     "clue": "Hava bronkogramı plevral sıvıdan çok parankimi düşündürür."
+    },
+    {
+     "dx": "Eşlik eden kardiyomegali",
+     "clue": "Kalp genişliği ve efüzyon birlikte kardiyak neden düşündürebilir."
+    }
+   ],
+   "differentialRef": {
+    "title": "Fleischner Society: Glossary of Terms for Thoracic Imaging (2024)",
+    "url": "https://pubs.rsna.org/doi/full/10.1148/radiol.232558"
+   },
+   "pearl": {
+    "text": "Plevral sıvı, geniş kalp gölgesi ve konsolidasyon birlikte olabilir; tek etiyolojiye erken bağlama. Ultrason ve klinik değerlendirme neden ayrımını sağlar.",
+    "ref": {
+     "title": "BTS Guideline for Pleural Disease (2023)",
+     "url": "https://www.brit-thoracic.org.uk/clinical-resources/guidelines/pleural-disease/"
+    }
+   }
+  },
+  "nih_00008814_010": {
+   "presentation": [
+    "36 yaşında erkek hasta: öksürük ve plöritik ağrı tarifler.",
+    "Ateş ve nefes darlığının süresi öğrenilir.",
+    "Plevral sıvı ve eşlik eden opasite birlikte araştırılır."
+   ],
+   "presentationRef": {
+    "title": "BTS Guideline for Pleural Disease (2023)",
+    "url": "https://www.brit-thoracic.org.uk/clinical-resources/guidelines/pleural-disease/"
+   },
+   "differential": [
+    {
+     "dx": "Plevral efüzyon",
+     "clue": "Kostofrenik açı silinmesi ve menisküs görünümü destekler."
+    },
+    {
+     "dx": "Atelektazi",
+     "clue": "Hacim kaybı komşu yapıları etkilenen tarafa çeker."
+    },
+    {
+     "dx": "Parankim konsolidasyonu",
+     "clue": "Hava bronkogramı plevral sıvıdan çok parankimi düşündürür."
+    },
+    {
+     "dx": "Plevral kalınlaşma",
+     "clue": "Eski görüntülerde kalıcılık ve BT ayrımı sağlar."
+    }
+   ],
+   "differentialRef": {
+    "title": "Fleischner Society: Glossary of Terms for Thoracic Imaging (2024)",
+    "url": "https://pubs.rsna.org/doi/full/10.1148/radiol.232558"
+   },
+   "pearl": {
+    "text": "Grafi sıvının varlığını düşündürür, nedenini belirlemez. Özellikle açıklanamayan tek taraflı efüzyonda toraks ultrasonu ve uygun sıvı incelemesi gerekir.",
+    "ref": {
+     "title": "BTS Guideline for Pleural Disease (2023)",
+     "url": "https://www.brit-thoracic.org.uk/clinical-resources/guidelines/pleural-disease/"
+    }
+   }
+  },
+  "nih_00010007_168": {
+   "presentation": [
+    "58 yaşında erkek hasta: giderek artan nefes darlığı ile başvurur.",
+    "Göğüste dolgunluk ya da plöritik ağrı tarifler.",
+    "Kalp hastalığı, enfeksiyon ve malignite öyküsü sorgulanır.",
+    "Önceki seri grafilerle karşılaştırma istenir."
+   ],
+   "presentationRef": {
+    "title": "BTS Guideline for Pleural Disease (2023)",
+    "url": "https://www.brit-thoracic.org.uk/clinical-resources/guidelines/pleural-disease/"
+   },
+   "differential": [
+    {
+     "dx": "Plevral efüzyon",
+     "clue": "Kostofrenik açı silinmesi ve menisküs görünümü destekler."
+    },
+    {
+     "dx": "Atelektazi",
+     "clue": "Hacim kaybı komşu yapıları etkilenen tarafa çeker."
+    },
+    {
+     "dx": "Parankim konsolidasyonu",
+     "clue": "Hava bronkogramı plevral sıvıdan çok parankimi düşündürür."
+    },
+    {
+     "dx": "Plevral kalınlaşma",
+     "clue": "Eski görüntülerde kalıcılık ve BT ayrımı sağlar."
+    }
+   ],
+   "differentialRef": {
+    "title": "Fleischner Society: Glossary of Terms for Thoracic Imaging (2024)",
+    "url": "https://pubs.rsna.org/doi/full/10.1148/radiol.232558"
+   },
+   "pearl": {
+    "text": "Grafi sıvının varlığını düşündürür, nedenini belirlemez. Özellikle açıklanamayan tek taraflı efüzyonda toraks ultrasonu ve uygun sıvı incelemesi gerekir.",
+    "ref": {
+     "title": "BTS Guideline for Pleural Disease (2023)",
+     "url": "https://www.brit-thoracic.org.uk/clinical-resources/guidelines/pleural-disease/"
+    }
+   }
+  },
+  "nih_00000193_019": {
+   "presentation": [
+    "54 yaşında erkek hasta: öksürük ve yeni nefes darlığı vardır.",
+    "Ateş ve balgamın varlığı sorgulanır.",
+    "Kalp yetersizliği veya aspirasyon öyküsü araştırılır.",
+    "Önceki seri grafilerle karşılaştırma istenir."
+   ],
+   "presentationRef": {
+    "title": "ATS/IDSA Community-Acquired Pneumonia Guideline (2019)",
+    "url": "https://www.idsociety.org/practice-guideline/community-acquired-pneumonia-cap-in-adults"
+   },
+   "differential": [
+    {
+     "dx": "Havalı alan opasitesi",
+     "clue": "Alveoler dolum paterni; tek başına etiyoloji söylemez."
+    },
+    {
+     "dx": "Pnömoni",
+     "clue": "Ateş, öksürük ve odaksal konsolidasyon destekler."
+    },
+    {
+     "dx": "Pulmoner ödem",
+     "clue": "İki taraflı santral dağılım ve efüzyon eşlik edebilir."
+    },
+    {
+     "dx": "Atelektazi",
+     "clue": "Hacim kaybı ve fissür yer değiştirmesi ayırt ettirir."
+    }
+   ],
+   "differentialRef": {
+    "title": "Fleischner Society: Glossary of Terms for Thoracic Imaging (2024)",
+    "url": "https://pubs.rsna.org/doi/full/10.1148/radiol.232558"
+   },
+   "pearl": {
+    "text": "Konsolidasyon bir görüntü tanımıdır; otomatik olarak pnömoni değildir. Klinik bulgularla yorumla, gerektiğinde önceki grafiyle karşılaştır.",
+    "ref": {
+     "title": "ACR Acute Respiratory Illness in Immunocompetent Patients (2024)",
+     "url": "https://acsearch.acr.org/docs/69446/Narrative/"
+    }
+   }
+  },
+  "nih_00000506_013": {
+   "presentation": [
+    "27 yaşında erkek hasta: öksürük ve artan nefes darlığı ile başvurur.",
+    "Ateş, ortopne ve kardiyak öykü sorgulanır.",
+    "Opasiteye efüzyon veya ödem eşlik edip etmediği araştırılır."
+   ],
+   "presentationRef": {
+    "title": "ATS/IDSA Community-Acquired Pneumonia Guideline (2019)",
+    "url": "https://www.idsociety.org/practice-guideline/community-acquired-pneumonia-cap-in-adults"
+   },
+   "differential": [
+    {
+     "dx": "Havalı alan opasitesi",
+     "clue": "Alveoler dolum paterni; tek başına etiyoloji söylemez."
+    },
+    {
+     "dx": "Pnömoni",
+     "clue": "Ateş, öksürük ve odaksal konsolidasyon destekler."
+    },
+    {
+     "dx": "Pulmoner ödem",
+     "clue": "İki taraflı santral dağılım ve efüzyon eşlik edebilir."
+    },
+    {
+     "dx": "Eşlik eden plevral efüzyon",
+     "clue": "Rapor NLP etiketinde efüzyon da vardır."
+    }
+   ],
+   "differentialRef": {
+    "title": "Fleischner Society: Glossary of Terms for Thoracic Imaging (2024)",
+    "url": "https://pubs.rsna.org/doi/full/10.1148/radiol.232558"
+   },
+   "pearl": {
+    "text": "Konsolidasyon, ödem ve efüzyon etiketleri birbirini dışlamaz; grafi etiyolojiyi kesinleştirmez. Klinik ve önceki görüntüyle karşılaştır.",
+    "ref": {
+     "title": "ACR Acute Respiratory Illness in Immunocompetent Patients (2024)",
+     "url": "https://acsearch.acr.org/docs/69446/Narrative/"
+    }
+   }
+  },
+  "nih_00002980_000": {
+   "presentation": [
+    "64 yaşında erkek hasta: öksürük ve yeni nefes darlığı vardır.",
+    "Ateş ve balgamın varlığı sorgulanır.",
+    "Kalp yetersizliği veya aspirasyon öyküsü araştırılır."
+   ],
+   "presentationRef": {
+    "title": "ATS/IDSA Community-Acquired Pneumonia Guideline (2019)",
+    "url": "https://www.idsociety.org/practice-guideline/community-acquired-pneumonia-cap-in-adults"
+   },
+   "differential": [
+    {
+     "dx": "Havalı alan opasitesi",
+     "clue": "Alveoler dolum paterni; tek başına etiyoloji söylemez."
+    },
+    {
+     "dx": "Pnömoni",
+     "clue": "Ateş, öksürük ve odaksal konsolidasyon destekler."
+    },
+    {
+     "dx": "Pulmoner ödem",
+     "clue": "İki taraflı santral dağılım ve efüzyon eşlik edebilir."
+    },
+    {
+     "dx": "Atelektazi",
+     "clue": "Hacim kaybı ve fissür yer değiştirmesi ayırt ettirir."
+    }
+   ],
+   "differentialRef": {
+    "title": "Fleischner Society: Glossary of Terms for Thoracic Imaging (2024)",
+    "url": "https://pubs.rsna.org/doi/full/10.1148/radiol.232558"
+   },
+   "pearl": {
+    "text": "Konsolidasyon bir görüntü tanımıdır; otomatik olarak pnömoni değildir. Klinik bulgularla yorumla, gerektiğinde önceki grafiyle karşılaştır.",
+    "ref": {
+     "title": "ACR Acute Respiratory Illness in Immunocompetent Patients (2024)",
+     "url": "https://acsearch.acr.org/docs/69446/Narrative/"
+    }
+   }
+  },
+  "nih_00003064_035": {
+   "presentation": [
+    "35 yaşında erkek hasta: öksürük ve göğüs rahatsızlığı ile başvurur.",
+    "Ateş ve balgamın süresi sorgulanır.",
+    "Eski grafilerde opasite ve plevral bulgular karşılaştırılır."
+   ],
+   "presentationRef": {
+    "title": "ATS/IDSA Community-Acquired Pneumonia Guideline (2019)",
+    "url": "https://www.idsociety.org/practice-guideline/community-acquired-pneumonia-cap-in-adults"
+   },
+   "differential": [
+    {
+     "dx": "Havalı alan opasitesi",
+     "clue": "Alveoler dolum paterni; tek başına etiyoloji söylemez."
+    },
+    {
+     "dx": "Pnömoni",
+     "clue": "Ateş, öksürük ve odaksal konsolidasyon destekler."
+    },
+    {
+     "dx": "Pulmoner ödem",
+     "clue": "İki taraflı santral dağılım ve efüzyon eşlik edebilir."
+    },
+    {
+     "dx": "Eşlik eden plevral bulgu",
+     "clue": "Rapor NLP etiketinde efüzyon ve kalınlaşma vardır."
+    }
+   ],
+   "differentialRef": {
+    "title": "Fleischner Society: Glossary of Terms for Thoracic Imaging (2024)",
+    "url": "https://pubs.rsna.org/doi/full/10.1148/radiol.232558"
+   },
+   "pearl": {
+    "text": "Konsolidasyon bir görüntü tanımıdır; otomatik olarak pnömoni değildir. Klinik bulgularla yorumla, gerektiğinde önceki grafiyle karşılaştır.",
+    "ref": {
+     "title": "ACR Acute Respiratory Illness in Immunocompetent Patients (2024)",
+     "url": "https://acsearch.acr.org/docs/69446/Narrative/"
+    }
+   }
+  },
+  "nih_00001555_002": {
+   "presentation": [
+    "72 yaşında kadın hasta: başka bir nedenle çekilen grafide odak saptanır.",
+    "Sigara ve önceki malignite öyküsü sorgulanır.",
+    "Eski görüntülerde odağın varlığı araştırılır.",
+    "Önceki seri grafilerle karşılaştırma istenir."
+   ],
+   "presentationRef": {
+    "title": "ACR Incidentally Detected Indeterminate Pulmonary Nodule (2023)",
+    "url": "https://acsearch.acr.org/docs/69455/Narrative"
+   },
+   "differential": [
+    {
+     "dx": "Nodül/kitle",
+     "clue": "Sınırlı yuvarlak opasite; boyut ve kenar BT ile değerlendirilir."
+    },
+    {
+     "dx": "Üst üste binen anatomik gölgeler",
+     "clue": "İki boyutlu grafide yalancı nodül oluşabilir."
+    },
+    {
+     "dx": "Enfeksiyöz odak",
+     "clue": "Klinik enfeksiyon ve zamanla gerileme lehinedir."
+    },
+    {
+     "dx": "Kalsifiye granülom",
+     "clue": "Tipik kalsifikasyon ve stabilite benignliği destekler."
+    }
+   ],
+   "differentialRef": {
+    "title": "Fleischner Society: Glossary of Terms for Thoracic Imaging (2024)",
+    "url": "https://pubs.rsna.org/doi/full/10.1148/radiol.232558"
+   },
+   "pearl": {
+    "text": "Grafi nodülü fark ettirir ama güvenilir boyut ve yapı tanımı için ince kesit toraks BT gerekir. BT sonrası izlem kararı boyut ve klinik riske göre verilir.",
+    "ref": {
+     "title": "Fleischner Society Incidental Pulmonary Nodule Guidelines (2017)",
+     "url": "https://pubs.rsna.org/doi/10.1148/radiol.2017161659"
+    }
+   }
+  },
+  "nih_00001688_000": {
+   "presentation": [
+    "59 yaşında kadın hasta: başka bir nedenle çekilen grafide odak saptanır.",
+    "Sigara ve önceki malignite öyküsü sorgulanır.",
+    "Eski görüntülerde odağın varlığı araştırılır."
+   ],
+   "presentationRef": {
+    "title": "ACR Incidentally Detected Indeterminate Pulmonary Nodule (2023)",
+    "url": "https://acsearch.acr.org/docs/69455/Narrative"
+   },
+   "differential": [
+    {
+     "dx": "Nodül/kitle",
+     "clue": "Sınırlı yuvarlak opasite; boyut ve kenar BT ile değerlendirilir."
+    },
+    {
+     "dx": "Üst üste binen anatomik gölgeler",
+     "clue": "İki boyutlu grafide yalancı nodül oluşabilir."
+    },
+    {
+     "dx": "Enfeksiyöz odak",
+     "clue": "Klinik enfeksiyon ve zamanla gerileme lehinedir."
+    },
+    {
+     "dx": "Kalsifiye granülom",
+     "clue": "Tipik kalsifikasyon ve stabilite benignliği destekler."
+    }
+   ],
+   "differentialRef": {
+    "title": "Fleischner Society: Glossary of Terms for Thoracic Imaging (2024)",
+    "url": "https://pubs.rsna.org/doi/full/10.1148/radiol.232558"
+   },
+   "pearl": {
+    "text": "Grafi nodülü fark ettirir ama güvenilir boyut ve yapı tanımı için ince kesit toraks BT gerekir. BT sonrası izlem kararı boyut ve klinik riske göre verilir.",
+    "ref": {
+     "title": "Fleischner Society Incidental Pulmonary Nodule Guidelines (2017)",
+     "url": "https://pubs.rsna.org/doi/10.1148/radiol.2017161659"
+    }
+   }
+  },
+  "nih_00003948_001": {
+   "presentation": [
+    "63 yaşında erkek hasta: görüntülemede odak saptanması üzerine değerlendirilir.",
+    "Ani göğüs ağrısı ve nefes darlığı ayrıca sorgulanır.",
+    "Önceki grafiyle odak ve plevral hava karşılaştırılır."
+   ],
+   "presentationRef": {
+    "title": "ACR Incidentally Detected Indeterminate Pulmonary Nodule (2023)",
+    "url": "https://acsearch.acr.org/docs/69455/Narrative"
+   },
+   "differential": [
+    {
+     "dx": "Nodül/kitle",
+     "clue": "Sınırlı yuvarlak opasite; boyut ve kenar BT ile değerlendirilir."
+    },
+    {
+     "dx": "Üst üste binen anatomik gölgeler",
+     "clue": "İki boyutlu grafide yalancı nodül oluşabilir."
+    },
+    {
+     "dx": "Enfeksiyöz odak",
+     "clue": "Klinik enfeksiyon ve zamanla gerileme lehinedir."
+    },
+    {
+     "dx": "Eşlik eden pnömotoraks",
+     "clue": "Rapor NLP etiketinde plevral hava da vardır."
+    }
+   ],
+   "differentialRef": {
+    "title": "Fleischner Society: Glossary of Terms for Thoracic Imaging (2024)",
+    "url": "https://pubs.rsna.org/doi/full/10.1148/radiol.232558"
+   },
+   "pearl": {
+    "text": "Grafi nodülü fark ettirir ama güvenilir boyut ve yapı tanımı için ince kesit toraks BT gerekir. BT sonrası izlem kararı boyut ve klinik riske göre verilir.",
+    "ref": {
+     "title": "Fleischner Society Incidental Pulmonary Nodule Guidelines (2017)",
+     "url": "https://pubs.rsna.org/doi/10.1148/radiol.2017161659"
+    }
+   }
+  },
+  "nih_00000181_061": {
+   "presentation": [
+    "52 yaşında kadın hasta: yeni nefes darlığı ya da öksürük nedeniyle görüntüleme istenir.",
+    "Hareketsizlik ve sekresyon birikimi öyküsü sorgulanır.",
+    "Eski grafilerde aynı bölgede opasite olup olmadığı incelenir.",
+    "Önceki seri grafilerle karşılaştırma istenir."
+   ],
+   "presentationRef": {
+    "title": "ACR Acute Respiratory Illness in Immunocompetent Patients (2024)",
+    "url": "https://acsearch.acr.org/docs/69446/Narrative/"
+   },
+   "differential": [
+    {
+     "dx": "Atelektazi",
+     "clue": "Hacim kaybı, fissür ve mediasten çekilmesi destekler."
+    },
+    {
+     "dx": "Pnömonik konsolidasyon",
+     "clue": "Hacim kaybı olmadan hava bronkogramı görülebilir."
+    },
+    {
+     "dx": "Plevral efüzyon",
+     "clue": "Menisküs ve bağımlı sıvı dağılımı ayırt ettirir."
+    },
+    {
+     "dx": "Fibrotik bant",
+     "clue": "Eski görüntülerde kalıcılık ve çizgisel görünüm destekler."
+    }
+   ],
+   "differentialRef": {
+    "title": "Fleischner Society: Glossary of Terms for Thoracic Imaging (2024)",
+    "url": "https://pubs.rsna.org/doi/full/10.1148/radiol.232558"
+   },
+   "pearl": {
+    "text": "Atelektaziyi konsolidasyondan ayıran ana ipucu hacim kaybıdır. Süreğen veya açıklanamayan kollapsta obstrüksiyon için toraks BT düşünülebilir.",
+    "ref": {
+     "title": "ACR Acute Respiratory Illness in Immunocompetent Patients (2024)",
+     "url": "https://acsearch.acr.org/docs/69446/Narrative/"
+    }
+   }
+  },
+  "nih_00000468_033": {
+   "presentation": [
+    "31 yaşında erkek hasta: yeni nefes darlığı ya da öksürük nedeniyle görüntüleme istenir.",
+    "Hareketsizlik ve sekresyon birikimi öyküsü sorgulanır.",
+    "Eski grafilerde aynı bölgede opasite olup olmadığı incelenir.",
+    "Önceki seri grafilerle karşılaştırma istenir."
+   ],
+   "presentationRef": {
+    "title": "ACR Acute Respiratory Illness in Immunocompetent Patients (2024)",
+    "url": "https://acsearch.acr.org/docs/69446/Narrative/"
+   },
+   "differential": [
+    {
+     "dx": "Atelektazi",
+     "clue": "Hacim kaybı, fissür ve mediasten çekilmesi destekler."
+    },
+    {
+     "dx": "Pnömonik konsolidasyon",
+     "clue": "Hacim kaybı olmadan hava bronkogramı görülebilir."
+    },
+    {
+     "dx": "Plevral efüzyon",
+     "clue": "Menisküs ve bağımlı sıvı dağılımı ayırt ettirir."
+    },
+    {
+     "dx": "Fibrotik bant",
+     "clue": "Eski görüntülerde kalıcılık ve çizgisel görünüm destekler."
+    }
+   ],
+   "differentialRef": {
+    "title": "Fleischner Society: Glossary of Terms for Thoracic Imaging (2024)",
+    "url": "https://pubs.rsna.org/doi/full/10.1148/radiol.232558"
+   },
+   "pearl": {
+    "text": "Atelektaziyi konsolidasyondan ayıran ana ipucu hacim kaybıdır. Süreğen veya açıklanamayan kollapsta obstrüksiyon için toraks BT düşünülebilir.",
+    "ref": {
+     "title": "ACR Acute Respiratory Illness in Immunocompetent Patients (2024)",
+     "url": "https://acsearch.acr.org/docs/69446/Narrative/"
+    }
+   }
+  },
+  "nih_00000808_002": {
+   "presentation": [
+    "50 yaşında kadın hasta: yeni nefes darlığı ya da öksürük nedeniyle görüntüleme istenir.",
+    "Hareketsizlik ve sekresyon birikimi öyküsü sorgulanır.",
+    "Eski grafilerde aynı bölgede opasite olup olmadığı incelenir.",
+    "Önceki seri grafilerle karşılaştırma istenir."
+   ],
+   "presentationRef": {
+    "title": "ACR Acute Respiratory Illness in Immunocompetent Patients (2024)",
+    "url": "https://acsearch.acr.org/docs/69446/Narrative/"
+   },
+   "differential": [
+    {
+     "dx": "Atelektazi",
+     "clue": "Hacim kaybı, fissür ve mediasten çekilmesi destekler."
+    },
+    {
+     "dx": "Pnömonik konsolidasyon",
+     "clue": "Hacim kaybı olmadan hava bronkogramı görülebilir."
+    },
+    {
+     "dx": "Plevral efüzyon",
+     "clue": "Menisküs ve bağımlı sıvı dağılımı ayırt ettirir."
+    },
+    {
+     "dx": "Fibrotik bant",
+     "clue": "Eski görüntülerde kalıcılık ve çizgisel görünüm destekler."
+    }
+   ],
+   "differentialRef": {
+    "title": "Fleischner Society: Glossary of Terms for Thoracic Imaging (2024)",
+    "url": "https://pubs.rsna.org/doi/full/10.1148/radiol.232558"
+   },
+   "pearl": {
+    "text": "Atelektaziyi konsolidasyondan ayıran ana ipucu hacim kaybıdır. Süreğen veya açıklanamayan kollapsta obstrüksiyon için toraks BT düşünülebilir.",
+    "ref": {
+     "title": "ACR Acute Respiratory Illness in Immunocompetent Patients (2024)",
+     "url": "https://acsearch.acr.org/docs/69446/Narrative/"
+    }
+   }
+  },
+  "nih_00000865_006": {
+   "presentation": [
+    "43 yaşında erkek hasta: yeni nefes darlığı ya da öksürük nedeniyle görüntüleme istenir.",
+    "Hareketsizlik ve sekresyon birikimi öyküsü sorgulanır.",
+    "Eski grafilerde aynı bölgede opasite olup olmadığı incelenir.",
+    "Önceki seri grafilerle karşılaştırma istenir."
+   ],
+   "presentationRef": {
+    "title": "ACR Acute Respiratory Illness in Immunocompetent Patients (2024)",
+    "url": "https://acsearch.acr.org/docs/69446/Narrative/"
+   },
+   "differential": [
+    {
+     "dx": "Atelektazi",
+     "clue": "Hacim kaybı, fissür ve mediasten çekilmesi destekler."
+    },
+    {
+     "dx": "Pnömonik konsolidasyon",
+     "clue": "Hacim kaybı olmadan hava bronkogramı görülebilir."
+    },
+    {
+     "dx": "Plevral efüzyon",
+     "clue": "Menisküs ve bağımlı sıvı dağılımı ayırt ettirir."
+    },
+    {
+     "dx": "Fibrotik bant",
+     "clue": "Eski görüntülerde kalıcılık ve çizgisel görünüm destekler."
+    }
+   ],
+   "differentialRef": {
+    "title": "Fleischner Society: Glossary of Terms for Thoracic Imaging (2024)",
+    "url": "https://pubs.rsna.org/doi/full/10.1148/radiol.232558"
+   },
+   "pearl": {
+    "text": "Atelektaziyi konsolidasyondan ayıran ana ipucu hacim kaybıdır. Süreğen veya açıklanamayan kollapsta obstrüksiyon için toraks BT düşünülebilir.",
+    "ref": {
+     "title": "ACR Acute Respiratory Illness in Immunocompetent Patients (2024)",
+     "url": "https://acsearch.acr.org/docs/69446/Narrative/"
+    }
+   }
+  },
+  "nih_00000211_006": {
+   "presentation": [
+    "58 yaşında kadın hasta: artan nefes darlığı ve yatınca zorlanma tarifler.",
+    "Kardiyak hastalık öyküsü sorgulanır.",
+    "Plevral sıvı ve kronik akciğer değişiklikleri birlikte incelenir."
+   ],
+   "presentationRef": {
+    "title": "ESC Heart Failure Guidelines (2021)",
+    "url": "https://esc365.escardio.org/journal/1687"
+   },
+   "differential": [
+    {
+     "dx": "Pulmoner ödem",
+     "clue": "Bilateral perihiler opasite ve interstisyel çizgiler destekler."
+    },
+    {
+     "dx": "Pnömoni",
+     "clue": "Ateş ve daha odaksal dağılım lehinedir."
+    },
+    {
+     "dx": "Diffüz alveoler hasar",
+     "clue": "Ağır hipoksemiyle yaygın opasiteler oluşturabilir."
+    },
+    {
+     "dx": "Pulmoner hemoraji",
+     "clue": "Hemoptizi ve hızla değişen opasiteler düşündürür."
+    }
+   ],
+   "differentialRef": {
+    "title": "Fleischner Society: Glossary of Terms for Thoracic Imaging (2024)",
+    "url": "https://pubs.rsna.org/doi/full/10.1148/radiol.232558"
+   },
+   "pearl": {
+    "text": "Grafide ödem paterni görülse de kardiyak nedeni tek başına doğrulanmaz. Klinik muayene, natriüretik peptit ve ekokardiyografi ile birlikte değerlendir.",
+    "ref": {
+     "title": "ESC Heart Failure Guidelines (2026)",
+     "url": "https://www.escardio.org/guidelines/clinical-practice-guidelines/all-esc-practice-guidelines/heart-failure/"
+    }
+   }
+  },
+  "nih_00001152_004": {
+   "presentation": [
+    "32 yaşında kadın hasta: saatler içinde artan nefes darlığı ile başvurur.",
+    "Yatar pozisyonda artan solunum sıkıntısı tarifler.",
+    "Kardiyak ve böbrek hastalığı öyküsü sorgulanır.",
+    "Önceki seri grafilerle karşılaştırma istenir."
+   ],
+   "presentationRef": {
+    "title": "ESC Heart Failure Guidelines (2021)",
+    "url": "https://esc365.escardio.org/journal/1687"
+   },
+   "differential": [
+    {
+     "dx": "Pulmoner ödem",
+     "clue": "Bilateral perihiler opasite ve interstisyel çizgiler destekler."
+    },
+    {
+     "dx": "Pnömoni",
+     "clue": "Ateş ve daha odaksal dağılım lehinedir."
+    },
+    {
+     "dx": "Diffüz alveoler hasar",
+     "clue": "Ağır hipoksemiyle yaygın opasiteler oluşturabilir."
+    },
+    {
+     "dx": "Pulmoner hemoraji",
+     "clue": "Hemoptizi ve hızla değişen opasiteler düşündürür."
+    }
+   ],
+   "differentialRef": {
+    "title": "Fleischner Society: Glossary of Terms for Thoracic Imaging (2024)",
+    "url": "https://pubs.rsna.org/doi/full/10.1148/radiol.232558"
+   },
+   "pearl": {
+    "text": "Grafide ödem paterni görülse de kardiyak nedeni tek başına doğrulanmaz. Klinik muayene, natriüretik peptit ve ekokardiyografi ile birlikte değerlendir.",
+    "ref": {
+     "title": "ESC Heart Failure Guidelines (2026)",
+     "url": "https://www.escardio.org/guidelines/clinical-practice-guidelines/all-esc-practice-guidelines/heart-failure/"
+    }
+   }
+  },
+  "nih_00008291_011": {
+   "presentation": [
+    "33 yaşında kadın hasta: nefes darlığı ve öksürükle başvurur.",
+    "Ateş ve ortopnenin varlığı sorgulanır.",
+    "Ödem ile odaksal enfeksiyon olasılığı birlikte değerlendirilir."
+   ],
+   "presentationRef": {
+    "title": "ESC Heart Failure Guidelines (2021)",
+    "url": "https://esc365.escardio.org/journal/1687"
+   },
+   "differential": [
+    {
+     "dx": "Pulmoner ödem",
+     "clue": "Bilateral perihiler opasite ve interstisyel çizgiler destekler."
+    },
+    {
+     "dx": "Pnömoni",
+     "clue": "Ateş ve daha odaksal dağılım lehinedir."
+    },
+    {
+     "dx": "Diffüz alveoler hasar",
+     "clue": "Ağır hipoksemiyle yaygın opasiteler oluşturabilir."
+    },
+    {
+     "dx": "Eşlik eden havalı alan opasitesi",
+     "clue": "Radyolog kutusu odaksal opasiteyi ayrıca işaretler."
+    }
+   ],
+   "differentialRef": {
+    "title": "Fleischner Society: Glossary of Terms for Thoracic Imaging (2024)",
+    "url": "https://pubs.rsna.org/doi/full/10.1148/radiol.232558"
+   },
+   "pearl": {
+    "text": "Grafide ödem paterni görülse de kardiyak nedeni tek başına doğrulanmaz. Klinik muayene, natriüretik peptit ve ekokardiyografi ile birlikte değerlendir.",
+    "ref": {
+     "title": "ESC Heart Failure Guidelines (2026)",
+     "url": "https://www.escardio.org/guidelines/clinical-practice-guidelines/all-esc-practice-guidelines/heart-failure/"
+    }
+   }
+  },
+  "nih_00000009_000": {
+   "presentation": [
+    "72 yaşında erkek hasta: uzun süredir efor dispnesi ile başvurur.",
+    "Kronik öksürük ve sigara maruziyeti sorgulanır.",
+    "Yakınmalardaki yeni değişim değerlendirilir."
+   ],
+   "presentationRef": {
+    "title": "GOLD COPD Report (2025)",
+    "url": "https://goldcopd.org/2025-gold-report/"
+   },
+   "differential": [
+    {
+     "dx": "Amfizem",
+     "clue": "Düşük yoğunluk, damar seyrekliği ve büller destekler."
+    },
+    {
+     "dx": "Astım ilişkili hiperinflasyon",
+     "clue": "Hava hapsi olabilir; amfizem tanısını tek başına koydurmaz."
+    },
+    {
+     "dx": "Teknik aşırı inspirasyon",
+     "clue": "Hacim artar fakat parankimal yıkım kanıtı değildir."
+    },
+    {
+     "dx": "Pnömotoraks",
+     "clue": "Gerçek plevral çizgi ve distal damarsız alan aranır."
+    }
+   ],
+   "differentialRef": {
+    "title": "Fleischner Society: Glossary of Terms for Thoracic Imaging (2024)",
+    "url": "https://pubs.rsna.org/doi/full/10.1148/radiol.232558"
+   },
+   "pearl": {
+    "text": "Grafide amfizem ipuçları olabilir; KOAH tanısı için spirometri gerekir. Ani ağrıda eşlik eden pnömotoraksı ayrıca ara.",
+    "ref": {
+     "title": "GOLD COPD Report (2025)",
+     "url": "https://goldcopd.org/2025-gold-report/"
+    }
+   }
+  },
+  "epmc_pmc12702530_cureus_0017_00000096755_i01": {
+   "presentation": [
+    "Örnek başvuru: eforla artan nefes darlığı için grafi istenir.",
+    "Kronik öksürük ve sigara maruziyeti sorgulanır.",
+    "Önceki spirometri ve grafilerle karşılaştırma istenir."
+   ],
+   "presentationRef": {
+    "title": "GOLD COPD Report (2025)",
+    "url": "https://goldcopd.org/2025-gold-report/"
+   },
+   "differential": [
+    {
+     "dx": "Hiperinflasyon",
+     "clue": "Basık diyaframlar ve artmış akciğer hacmi destekler."
+    },
+    {
+     "dx": "KOAH",
+     "clue": "Kronik semptomlar ve obstrüktif spirometri gerekir."
+    },
+    {
+     "dx": "Astım",
+     "clue": "Değişken belirtiler ve geri dönüşlü obstrüksiyon düşündürür."
+    },
+    {
+     "dx": "Derin inspirasyon etkisi",
+     "clue": "Tek çekimde artan hacim hastalık kanıtı değildir."
+    }
+   ],
+   "differentialRef": {
+    "title": "Fleischner Society: Glossary of Terms for Thoracic Imaging (2024)",
+    "url": "https://pubs.rsna.org/doi/full/10.1148/radiol.232558"
+   },
+   "pearl": {
+    "text": "Hiperinflasyon bir görüntü bulgusudur; KOAH ile eş anlamlı değildir. Tanı için spirometri ile hava akımı kısıtlılığını doğrula.",
+    "ref": {
+     "title": "GOLD COPD Report (2025)",
+     "url": "https://goldcopd.org/2025-gold-report/"
+    }
+   }
+  },
+  "epmc_pmc13163515_diagnostics_16_01329_g001": {
+   "presentation": [
+    "Örnek başvuru: tekrarlayan hışıltı ve nefes darlığı araştırılır.",
+    "Belirtilerin değişkenliği ve maruziyet öyküsü sorgulanır.",
+    "Önceki solunum testleri gözden geçirilir."
+   ],
+   "presentationRef": {
+    "title": "GOLD COPD Report (2025)",
+    "url": "https://goldcopd.org/2025-gold-report/"
+   },
+   "differential": [
+    {
+     "dx": "Hiperinflasyon",
+     "clue": "Basık diyaframlar ve artmış akciğer hacmi destekler."
+    },
+    {
+     "dx": "KOAH",
+     "clue": "Kronik semptomlar ve obstrüktif spirometri gerekir."
+    },
+    {
+     "dx": "Astım",
+     "clue": "Değişken belirtiler ve geri dönüşlü obstrüksiyon düşündürür."
+    },
+    {
+     "dx": "Derin inspirasyon etkisi",
+     "clue": "Tek çekimde artan hacim hastalık kanıtı değildir."
+    }
+   ],
+   "differentialRef": {
+    "title": "Fleischner Society: Glossary of Terms for Thoracic Imaging (2024)",
+    "url": "https://pubs.rsna.org/doi/full/10.1148/radiol.232558"
+   },
+   "pearl": {
+    "text": "Hiperinflasyon bir görüntü bulgusudur; KOAH ile eş anlamlı değildir. Tanı için spirometri ile hava akımı kısıtlılığını doğrula.",
+    "ref": {
+     "title": "GOLD COPD Report (2025)",
+     "url": "https://goldcopd.org/2025-gold-report/"
+    }
+   }
+  },
+  "epmc_pmc13477804_cureus_0018_00000112821_i01": {
+   "presentation": [
+    "Örnek başvuru: uzun süren öksürük nedeniyle grafi istenir.",
+    "Efor kapasitesindeki değişim ve nefes darlığı sorgulanır.",
+    "Eski grafilerde akciğer hacmi karşılaştırılır."
+   ],
+   "presentationRef": {
+    "title": "GOLD COPD Report (2025)",
+    "url": "https://goldcopd.org/2025-gold-report/"
+   },
+   "differential": [
+    {
+     "dx": "Hiperinflasyon",
+     "clue": "Basık diyaframlar ve artmış akciğer hacmi destekler."
+    },
+    {
+     "dx": "KOAH",
+     "clue": "Kronik semptomlar ve obstrüktif spirometri gerekir."
+    },
+    {
+     "dx": "Astım",
+     "clue": "Değişken belirtiler ve geri dönüşlü obstrüksiyon düşündürür."
+    },
+    {
+     "dx": "Derin inspirasyon etkisi",
+     "clue": "Tek çekimde artan hacim hastalık kanıtı değildir."
+    }
+   ],
+   "differentialRef": {
+    "title": "Fleischner Society: Glossary of Terms for Thoracic Imaging (2024)",
+    "url": "https://pubs.rsna.org/doi/full/10.1148/radiol.232558"
+   },
+   "pearl": {
+    "text": "Hiperinflasyon bir görüntü bulgusudur; KOAH ile eş anlamlı değildir. Tanı için spirometri ile hava akımı kısıtlılığını doğrula.",
+    "ref": {
+     "title": "GOLD COPD Report (2025)",
+     "url": "https://goldcopd.org/2025-gold-report/"
+    }
+   }
+  },
+  "nih_00000211_041": {
+   "presentation": [
+    "59 yaşında kadın hasta: eforla nefes darlığı için kontrol grafisi istenir.",
+    "Ortopnenin ve bacak şişliğinin varlığı sorgulanır.",
+    "Plevral sıvı öyküsü ile kalp gölgesi birlikte değerlendirilir."
+   ],
+   "presentationRef": {
+    "title": "ESC Heart Failure Guidelines (2021)",
+    "url": "https://esc365.escardio.org/journal/1687"
+   },
+   "differential": [
+    {
+     "dx": "Kardiyomegali",
+     "clue": "PA çekimde geniş kardiyotorasik oran destekler."
+    },
+    {
+     "dx": "AP büyütme etkisi",
+     "clue": "Taşınabilir çekim kalp silüetini yalancı genişletir."
+    },
+    {
+     "dx": "Perikardiyal efüzyon",
+     "clue": "Globüler silüet olabilir; ekokardiyografi ayırt eder."
+    },
+    {
+     "dx": "Toraks deformitesi veya rotasyon",
+     "clue": "Projeksiyon silüet ölçümünü yanıltır."
+    }
+   ],
+   "differentialRef": {
+    "title": "Fleischner Society: Glossary of Terms for Thoracic Imaging (2024)",
+    "url": "https://pubs.rsna.org/doi/full/10.1148/radiol.232558"
+   },
+   "pearl": {
+    "text": "Kalp gölgesi genişliği kalp yetersizliğini tek başına kanıtlamaz. Özellikle AP grafide büyütmeyi hesaba kat; klinik gerektirirse ekokardiyografi iste.",
+    "ref": {
+     "title": "ESC Heart Failure Guidelines (2026)",
+     "url": "https://www.escardio.org/guidelines/clinical-practice-guidelines/all-esc-practice-guidelines/heart-failure/"
+    }
+   }
+  },
+  "nih_00000377_004": {
+   "presentation": [
+    "57 yaşında kadın hasta: eforla artan nefes darlığı için grafi istenir.",
+    "Ortopnenin ve bacak şişliğinin varlığı sorgulanır.",
+    "Kardiyovasküler öykü ve eski grafiler değerlendirilir.",
+    "Önceki seri grafilerle karşılaştırma istenir."
+   ],
+   "presentationRef": {
+    "title": "ESC Heart Failure Guidelines (2021)",
+    "url": "https://esc365.escardio.org/journal/1687"
+   },
+   "differential": [
+    {
+     "dx": "Kardiyomegali",
+     "clue": "PA çekimde geniş kardiyotorasik oran destekler."
+    },
+    {
+     "dx": "AP büyütme etkisi",
+     "clue": "Bu grafi PA olduğundan teknik büyütme açıklaması zayıftır."
+    },
+    {
+     "dx": "Perikardiyal efüzyon",
+     "clue": "Globüler silüet olabilir; ekokardiyografi ayırt eder."
+    },
+    {
+     "dx": "Toraks deformitesi veya rotasyon",
+     "clue": "Projeksiyon silüet ölçümünü yanıltır."
+    }
+   ],
+   "differentialRef": {
+    "title": "Fleischner Society: Glossary of Terms for Thoracic Imaging (2024)",
+    "url": "https://pubs.rsna.org/doi/full/10.1148/radiol.232558"
+   },
+   "pearl": {
+    "text": "PA grafide geniş kalp silüeti AP büyütmesine bağlanamaz; yine de tek başına kalp yetersizliği tanısı değildir. Klinik gerektirirse ekokardiyografi iste.",
+    "ref": {
+     "title": "ESC Heart Failure Guidelines (2026)",
+     "url": "https://www.escardio.org/guidelines/clinical-practice-guidelines/all-esc-practice-guidelines/heart-failure/"
+    }
+   }
+  },
+  "nih_00000661_000": {
+   "presentation": [
+    "57 yaşında erkek hasta: eforla artan nefes darlığı için grafi istenir.",
+    "Ortopnenin ve bacak şişliğinin varlığı sorgulanır.",
+    "Kardiyovasküler öykü ve eski grafiler değerlendirilir."
+   ],
+   "presentationRef": {
+    "title": "ESC Heart Failure Guidelines (2021)",
+    "url": "https://esc365.escardio.org/journal/1687"
+   },
+   "differential": [
+    {
+     "dx": "Kardiyomegali",
+     "clue": "PA çekimde geniş kardiyotorasik oran destekler."
+    },
+    {
+     "dx": "AP büyütme etkisi",
+     "clue": "Bu grafi PA olduğundan teknik büyütme açıklaması zayıftır."
+    },
+    {
+     "dx": "Perikardiyal efüzyon",
+     "clue": "Globüler silüet olabilir; ekokardiyografi ayırt eder."
+    },
+    {
+     "dx": "Toraks deformitesi veya rotasyon",
+     "clue": "Projeksiyon silüet ölçümünü yanıltır."
+    }
+   ],
+   "differentialRef": {
+    "title": "Fleischner Society: Glossary of Terms for Thoracic Imaging (2024)",
+    "url": "https://pubs.rsna.org/doi/full/10.1148/radiol.232558"
+   },
+   "pearl": {
+    "text": "PA grafide geniş kalp silüeti AP büyütmesine bağlanamaz; yine de tek başına kalp yetersizliği tanısı değildir. Klinik gerektirirse ekokardiyografi iste.",
+    "ref": {
+     "title": "ESC Heart Failure Guidelines (2026)",
+     "url": "https://www.escardio.org/guidelines/clinical-practice-guidelines/all-esc-practice-guidelines/heart-failure/"
+    }
+   }
+  },
+  "nih_00003394_006": {
+   "presentation": [
+    "69 yaşında erkek hasta: eforla artan nefes darlığı için grafi istenir.",
+    "Ortopnenin ve bacak şişliğinin varlığı sorgulanır.",
+    "Kardiyovasküler öykü ve eski grafiler değerlendirilir.",
+    "Önceki seri grafilerle karşılaştırma istenir."
+   ],
+   "presentationRef": {
+    "title": "ESC Heart Failure Guidelines (2021)",
+    "url": "https://esc365.escardio.org/journal/1687"
+   },
+   "differential": [
+    {
+     "dx": "Kardiyomegali",
+     "clue": "PA çekimde geniş kardiyotorasik oran destekler."
+    },
+    {
+     "dx": "AP büyütme etkisi",
+     "clue": "Taşınabilir çekim kalp silüetini yalancı genişletir."
+    },
+    {
+     "dx": "Perikardiyal efüzyon",
+     "clue": "Globüler silüet olabilir; ekokardiyografi ayırt eder."
+    },
+    {
+     "dx": "Toraks deformitesi veya rotasyon",
+     "clue": "Projeksiyon silüet ölçümünü yanıltır."
+    }
+   ],
+   "differentialRef": {
+    "title": "Fleischner Society: Glossary of Terms for Thoracic Imaging (2024)",
+    "url": "https://pubs.rsna.org/doi/full/10.1148/radiol.232558"
+   },
+   "pearl": {
+    "text": "Kalp gölgesi genişliği kalp yetersizliğini tek başına kanıtlamaz. Özellikle AP grafide büyütmeyi hesaba kat; klinik gerektirirse ekokardiyografi iste.",
+    "ref": {
+     "title": "ESC Heart Failure Guidelines (2026)",
+     "url": "https://www.escardio.org/guidelines/clinical-practice-guidelines/all-esc-practice-guidelines/heart-failure/"
+    }
+   }
+  },
+  "nih_00029579_014": {
+   "presentation": [
+    "24 yaşında kadın hasta: göğüs duvarına darbe sonrası ağrı vardır.",
+    "Nefes darlığı ve plöritik ağrı da sorgulanır.",
+    "Kemik, plevra ve parankim yaralanması birlikte araştırılır."
+   ],
+   "presentationRef": {
+    "title": "ACR Rib Fractures (2018)",
+    "url": "https://acsearch.acr.org/docs/69450/Narrative/"
+   },
+   "differential": [
+    {
+     "dx": "Kemik kırığı",
+     "clue": "Kortikal süreksizlik ve basamaklanma destekler."
+    },
+    {
+     "dx": "Eski kırık",
+     "clue": "Kallus ve düzgün korteks iyileşmeyi düşündürür."
+    },
+    {
+     "dx": "Üst üste binme / vasküler iz",
+     "clue": "Kortikal süreklilik bozulmaz; ek projeksiyonda kaybolur."
+    },
+    {
+     "dx": "Eşlik eden pnömotoraks",
+     "clue": "Radyolog kutusunda plevral hava da işaretli; travmada mutlaka ara."
+    }
+   ],
+   "differentialRef": {
+    "title": "Fleischner Society: Glossary of Terms for Thoracic Imaging (2024)",
+    "url": "https://pubs.rsna.org/doi/full/10.1148/radiol.232558"
+   },
+   "pearl": {
+    "text": "Kırıkla birlikte pnömotoraks ve parankim opasitesi etiketlenmiştir; tek bulguya odaklanma. Göğüs duvarı kadar plevra ve akciğeri de değerlendir.",
+    "ref": {
+     "title": "ACR Rib Fractures (2018)",
+     "url": "https://acsearch.acr.org/docs/69450/Narrative/"
+    }
+   }
+  },
+  "commons_rib_fx_2347": {
+   "presentation": [
+    "Örnek başvuru: göğse darbe sonrası odaksal kot ağrısı vardır.",
+    "Öksürürken ağrının artıp artmadığı sorulur.",
+    "Nefes darlığı ve ek göğüs yaralanması sorgulanır."
+   ],
+   "presentationRef": {
+    "title": "ACR Rib Fractures (2018)",
+    "url": "https://acsearch.acr.org/docs/69450/Narrative/"
+   },
+   "differential": [
+    {
+     "dx": "Kot kırığı",
+     "clue": "Kot korteksinde süreksizlik veya basamaklanma görülür."
+    },
+    {
+     "dx": "Eski kot kırığı",
+     "clue": "Kallus ve düzgün korteks iyileşmeyi düşündürür."
+    },
+    {
+     "dx": "Üst üste binen vasküler iz",
+     "clue": "İz korteks boyunca sürekli kırık çizgisi oluşturmaz."
+    },
+    {
+     "dx": "Pnömotoraks",
+     "clue": "Plevral çizgi kırığa eşlik eden yaralanmayı gösterebilir."
+    }
+   ],
+   "differentialRef": {
+    "title": "Fleischner Society: Glossary of Terms for Thoracic Imaging (2024)",
+    "url": "https://pubs.rsna.org/doi/full/10.1148/radiol.232558"
+   },
+   "pearl": {
+    "text": "Kot kırığı grafide silik kalabilir; ağrı odağı ve eşlik eden plevral bulgularla birlikte yorumla. Klinik şüphede hedefli inceleme seçilebilir.",
+    "ref": {
+     "title": "ACR Rib Fractures (2018)",
+     "url": "https://acsearch.acr.org/docs/69450/Narrative/"
+    }
+   }
+  },
+  "commons_rib_fx_multi": {
+   "presentation": [
+    "Örnek başvuru: düşme sonrası göğüs duvarı ağrısı ile başvurur.",
+    "Birden fazla ağrı odağı olup olmadığı sorulur.",
+    "Derin nefeste ağrı ve nefes darlığı araştırılır."
+   ],
+   "presentationRef": {
+    "title": "ACR Rib Fractures (2018)",
+    "url": "https://acsearch.acr.org/docs/69450/Narrative/"
+   },
+   "differential": [
+    {
+     "dx": "Kot kırığı",
+     "clue": "Kot korteksinde süreksizlik veya basamaklanma görülür."
+    },
+    {
+     "dx": "Eski kot kırığı",
+     "clue": "Kallus ve düzgün korteks iyileşmeyi düşündürür."
+    },
+    {
+     "dx": "Üst üste binen vasküler iz",
+     "clue": "İz korteks boyunca sürekli kırık çizgisi oluşturmaz."
+    },
+    {
+     "dx": "Pnömotoraks",
+     "clue": "Plevral çizgi kırığa eşlik eden yaralanmayı gösterebilir."
+    }
+   ],
+   "differentialRef": {
+    "title": "Fleischner Society: Glossary of Terms for Thoracic Imaging (2024)",
+    "url": "https://pubs.rsna.org/doi/full/10.1148/radiol.232558"
+   },
+   "pearl": {
+    "text": "Kot kırığı grafide silik kalabilir; ağrı odağı ve eşlik eden plevral bulgularla birlikte yorumla. Klinik şüphede hedefli inceleme seçilebilir.",
+    "ref": {
+     "title": "ACR Rib Fractures (2018)",
+     "url": "https://acsearch.acr.org/docs/69450/Narrative/"
+    }
+   }
+  },
+  "epmc_pmc13536977_cureus_0018_00000115642_i01": {
+   "presentation": [
+    "Örnek başvuru: göğüs travması sonrası keskin yan ağrısı vardır.",
+    "Öksürük ve inspirasyonla artış sorgulanır.",
+    "Plevral yaralanma belirtileri ayrıca değerlendirilir."
+   ],
+   "presentationRef": {
+    "title": "ACR Rib Fractures (2018)",
+    "url": "https://acsearch.acr.org/docs/69450/Narrative/"
+   },
+   "differential": [
+    {
+     "dx": "Kot kırığı",
+     "clue": "Kot korteksinde süreksizlik veya basamaklanma görülür."
+    },
+    {
+     "dx": "Eski kot kırığı",
+     "clue": "Kallus ve düzgün korteks iyileşmeyi düşündürür."
+    },
+    {
+     "dx": "Üst üste binen vasküler iz",
+     "clue": "İz korteks boyunca sürekli kırık çizgisi oluşturmaz."
+    },
+    {
+     "dx": "Pnömotoraks",
+     "clue": "Plevral çizgi kırığa eşlik eden yaralanmayı gösterebilir."
+    }
+   ],
+   "differentialRef": {
+    "title": "Fleischner Society: Glossary of Terms for Thoracic Imaging (2024)",
+    "url": "https://pubs.rsna.org/doi/full/10.1148/radiol.232558"
+   },
+   "pearl": {
+    "text": "Kot kırığı grafide silik kalabilir; ağrı odağı ve eşlik eden plevral bulgularla birlikte yorumla. Klinik şüphede hedefli inceleme seçilebilir.",
+    "ref": {
+     "title": "ACR Rib Fractures (2018)",
+     "url": "https://acsearch.acr.org/docs/69450/Narrative/"
+    }
+   }
+  },
+  "epmc_pmc13536977_cureus_0018_00000115642_i02": {
+   "presentation": [
+    "Örnek başvuru: kontrol grafisinde göğüs duvarı ağrısı yeniden değerlendirilir.",
+    "Ağrının seyri ve solunumla ilişkisi sorgulanır.",
+    "Önceki travma görüntüleriyle karşılaştırma yapılır."
+   ],
+   "presentationRef": {
+    "title": "ACR Rib Fractures (2018)",
+    "url": "https://acsearch.acr.org/docs/69450/Narrative/"
+   },
+   "differential": [
+    {
+     "dx": "Kot kırığı",
+     "clue": "Kot korteksinde süreksizlik veya basamaklanma görülür."
+    },
+    {
+     "dx": "Eski kot kırığı",
+     "clue": "Kallus ve düzgün korteks iyileşmeyi düşündürür."
+    },
+    {
+     "dx": "Üst üste binen vasküler iz",
+     "clue": "İz korteks boyunca sürekli kırık çizgisi oluşturmaz."
+    },
+    {
+     "dx": "Pnömotoraks",
+     "clue": "Plevral çizgi kırığa eşlik eden yaralanmayı gösterebilir."
+    }
+   ],
+   "differentialRef": {
+    "title": "Fleischner Society: Glossary of Terms for Thoracic Imaging (2024)",
+    "url": "https://pubs.rsna.org/doi/full/10.1148/radiol.232558"
+   },
+   "pearl": {
+    "text": "Kot kırığı grafide silik kalabilir; ağrı odağı ve eşlik eden plevral bulgularla birlikte yorumla. Klinik şüphede hedefli inceleme seçilebilir.",
+    "ref": {
+     "title": "ACR Rib Fractures (2018)",
+     "url": "https://acsearch.acr.org/docs/69450/Narrative/"
+    }
+   }
+  },
+  "commons_clavicle_fx": {
+   "presentation": [
+    "Örnek başvuru: omuz üzerine düşme sonrası köprücük kemiği ağrısı vardır.",
+    "Omuz hareketindeki kısıtlılık sorgulanır.",
+    "Göğüs ve kol çevresinde ek yaralanma araştırılır."
+   ],
+   "presentationRef": {
+    "title": "ACR Acute Shoulder Pain (2024)",
+    "url": "https://acsearch.acr.org/docs/69433/Narrative"
+   },
+   "differential": [
+    {
+     "dx": "Klavikula kırığı",
+     "clue": "Kortikal kesinti ve fragman yer değiştirmesi destekler."
+    },
+    {
+     "dx": "Akromioklaviküler ayrışma",
+     "clue": "Eklem aralığı ve klavikula hizası değişir."
+    },
+    {
+     "dx": "Eski kırık deformitesi",
+     "clue": "Kallus ve yuvarlaklaşmış uçlar kronikliği destekler."
+    },
+    {
+     "dx": "Üst üste binme artefaktı",
+     "clue": "Ek projeksiyonda yalancı çizgi kaybolur."
+    }
+   ],
+   "differentialRef": {
+    "title": "Fleischner Society: Glossary of Terms for Thoracic Imaging (2024)",
+    "url": "https://pubs.rsna.org/doi/full/10.1148/radiol.232558"
+   },
+   "pearl": {
+    "text": "Göğüs grafisi klavikula kırığını gösterebilir; yer değiştirme ve eklem ilişkisi için hedefli omuz/klavikula görüntüsü değerlendir. Eşlik eden toraks yaralanmasını da ara.",
+    "ref": {
+     "title": "ACR Acute Shoulder Pain (2024)",
+     "url": "https://acsearch.acr.org/docs/69433/Narrative"
+    }
+   }
+  },
+  "epmc_pmc13537486_cureus_0018_00000113883_i01": {
+   "presentation": [
+    "Örnek başvuru: spor yaralanması sonrası omuz ağrısı vardır.",
+    "Köprücük kemiği üzerinde hassasiyet tariflenir.",
+    "Boyun ve göğüs yakınmaları ayrıca sorgulanır."
+   ],
+   "presentationRef": {
+    "title": "ACR Acute Shoulder Pain (2024)",
+    "url": "https://acsearch.acr.org/docs/69433/Narrative"
+   },
+   "differential": [
+    {
+     "dx": "Klavikula kırığı",
+     "clue": "Kortikal kesinti ve fragman yer değiştirmesi destekler."
+    },
+    {
+     "dx": "Akromioklaviküler ayrışma",
+     "clue": "Eklem aralığı ve klavikula hizası değişir."
+    },
+    {
+     "dx": "Eski kırık deformitesi",
+     "clue": "Kallus ve yuvarlaklaşmış uçlar kronikliği destekler."
+    },
+    {
+     "dx": "Üst üste binme artefaktı",
+     "clue": "Ek projeksiyonda yalancı çizgi kaybolur."
+    }
+   ],
+   "differentialRef": {
+    "title": "Fleischner Society: Glossary of Terms for Thoracic Imaging (2024)",
+    "url": "https://pubs.rsna.org/doi/full/10.1148/radiol.232558"
+   },
+   "pearl": {
+    "text": "Göğüs grafisi klavikula kırığını gösterebilir; yer değiştirme ve eklem ilişkisi için hedefli omuz/klavikula görüntüsü değerlendir. Eşlik eden toraks yaralanmasını da ara.",
+    "ref": {
+     "title": "ACR Acute Shoulder Pain (2024)",
+     "url": "https://acsearch.acr.org/docs/69433/Narrative"
+    }
+   }
+  },
+  "epmc_pmc13537486_cureus_0018_00000113883_i02": {
+   "presentation": [
+    "Örnek başvuru: düşme sonrasında omuz kuşağındaki ağrı değerlendirilir.",
+    "Kol hareketinin ağrıyı artırıp artırmadığı sorulur.",
+    "Eski yaralanma öyküsü ve önceki grafiler incelenir."
+   ],
+   "presentationRef": {
+    "title": "ACR Acute Shoulder Pain (2024)",
+    "url": "https://acsearch.acr.org/docs/69433/Narrative"
+   },
+   "differential": [
+    {
+     "dx": "Klavikula kırığı",
+     "clue": "Kortikal kesinti ve fragman yer değiştirmesi destekler."
+    },
+    {
+     "dx": "Akromioklaviküler ayrışma",
+     "clue": "Eklem aralığı ve klavikula hizası değişir."
+    },
+    {
+     "dx": "Eski kırık deformitesi",
+     "clue": "Kallus ve yuvarlaklaşmış uçlar kronikliği destekler."
+    },
+    {
+     "dx": "Üst üste binme artefaktı",
+     "clue": "Ek projeksiyonda yalancı çizgi kaybolur."
+    }
+   ],
+   "differentialRef": {
+    "title": "Fleischner Society: Glossary of Terms for Thoracic Imaging (2024)",
+    "url": "https://pubs.rsna.org/doi/full/10.1148/radiol.232558"
+   },
+   "pearl": {
+    "text": "Göğüs grafisi klavikula kırığını gösterebilir; yer değiştirme ve eklem ilişkisi için hedefli omuz/klavikula görüntüsü değerlendir. Eşlik eden toraks yaralanmasını da ara.",
+    "ref": {
+     "title": "ACR Acute Shoulder Pain (2024)",
+     "url": "https://acsearch.acr.org/docs/69433/Narrative"
+    }
+   }
+  },
+  "commons_scoliosis": {
+   "presentation": [
+    "Örnek başvuru: omuzların eşit yükseklikte olmaması nedeniyle değerlendirilir.",
+    "Sırt ağrısı ve duruş değişikliği sorgulanır.",
+    "Önceki omurga görüntüleri araştırılır."
+   ],
+   "presentationRef": {
+    "title": "Scoliosis Research Society: Diagnosing Scoliosis",
+    "url": "https://www.srs.org/Patients/Diagnosis-And-Treatment/Diagnosing-Scoliosis"
+   },
+   "differential": [
+    {
+     "dx": "Skolyoz",
+     "clue": "Koronal eğrilik ve vertebral rotasyon destekler."
+    },
+    {
+     "dx": "Pozisyonel eğrilik",
+     "clue": "Rotasyon olmadan yatış veya duruşla değişebilir."
+    },
+    {
+     "dx": "Pelvik eğiklik",
+     "clue": "Omurga eğrisi pozisyona ikincil olabilir."
+    },
+    {
+     "dx": "Göğüs grafisi projeksiyon etkisi",
+     "clue": "Tam omurga görülmediğinde açı güvenilir ölçülemez."
+    }
+   ],
+   "differentialRef": {
+    "title": "Scoliosis Research Society: Diagnosing Scoliosis",
+    "url": "https://www.srs.org/Patients/Diagnosis-And-Treatment/Diagnosing-Scoliosis"
+   },
+   "pearl": {
+    "text": "Göğüs grafisi eğriliği fark ettirir; skolyoz derecesi için ayakta tam omurga grafisinde Cobb açısı ölçülür. Duruş etkisi ayrıca değerlendirilir.",
+    "ref": {
+     "title": "Scoliosis Research Society: Diagnosing Scoliosis",
+     "url": "https://www.srs.org/Patients/Diagnosis-And-Treatment/Diagnosing-Scoliosis"
+    }
+   }
+  },
+  "epmc_pmc13531370_crra_2026_9939709_g005": {
+   "presentation": [
+    "Örnek başvuru: gövdede eğrilik fark edilmesi üzerine grafi istenir.",
+    "Bel-sırt ağrısının seyri öğrenilir.",
+    "Ayakta duruş ve eski omurga filmleri karşılaştırılır."
+   ],
+   "presentationRef": {
+    "title": "Scoliosis Research Society: Diagnosing Scoliosis",
+    "url": "https://www.srs.org/Patients/Diagnosis-And-Treatment/Diagnosing-Scoliosis"
+   },
+   "differential": [
+    {
+     "dx": "Skolyoz",
+     "clue": "Koronal eğrilik ve vertebral rotasyon destekler."
+    },
+    {
+     "dx": "Pozisyonel eğrilik",
+     "clue": "Rotasyon olmadan yatış veya duruşla değişebilir."
+    },
+    {
+     "dx": "Pelvik eğiklik",
+     "clue": "Omurga eğrisi pozisyona ikincil olabilir."
+    },
+    {
+     "dx": "Göğüs grafisi projeksiyon etkisi",
+     "clue": "Tam omurga görülmediğinde açı güvenilir ölçülemez."
+    }
+   ],
+   "differentialRef": {
+    "title": "Scoliosis Research Society: Diagnosing Scoliosis",
+    "url": "https://www.srs.org/Patients/Diagnosis-And-Treatment/Diagnosing-Scoliosis"
+   },
+   "pearl": {
+    "text": "Göğüs grafisi eğriliği fark ettirir; skolyoz derecesi için ayakta tam omurga grafisinde Cobb açısı ölçülür. Duruş etkisi ayrıca değerlendirilir.",
+    "ref": {
+     "title": "Scoliosis Research Society: Diagnosing Scoliosis",
+     "url": "https://www.srs.org/Patients/Diagnosis-And-Treatment/Diagnosing-Scoliosis"
+    }
+   }
+  },
+  "nlm_montgomery_mcucxr_0104_1": {
+   "presentation": [
+    "59 yaşında erkek hasta: geçirilmiş TB sonrası kontrol grafisi istenir.",
+    "Yeni öksürük veya sistemik belirti olup olmadığı sorgulanır.",
+    "Yeni TB teması ve diğer akciğer riskleri sorgulanır."
+   ],
+   "presentationRef": {
+    "title": "T.C. Sağlık Bakanlığı Tüberküloz Tanı ve Tedavi Rehberi (2019)",
+    "url": "https://hsgm.saglik.gov.tr/depo/birimler/tuberkuloz-db/Dokumanlar/Rehberler/Tuberkuloz_Tani_ve_Tedavi_Rehberi.pdf"
+   },
+   "differential": [
+    {
+     "dx": "Tüberküloz sekeli",
+     "clue": "Sol üst lob skarı iki yıldır değişmemiş."
+    },
+    {
+     "dx": "Aktif tüberküloz",
+     "clue": "Yeni infiltrasyon veya mikrobiyolojik kanıt yok."
+    },
+    {
+     "dx": "Eski fungal enfeksiyon",
+     "clue": "Kronik skar benzer görünüm oluşturabilir."
+    },
+    {
+     "dx": "Apikal malignite",
+     "clue": "Büyüme olursa ayrıca değerlendirilir."
+    }
+   ],
+   "differentialRef": {
+    "title": "Fleischner Society: Glossary of Terms for Thoracic Imaging (2024)",
+    "url": "https://pubs.rsna.org/doi/full/10.1148/radiol.232558"
+   },
+   "pearl": {
+    "text": "Sol üst lob skarının iki yıl stabil olması eski sekeli destekler; grafi tek başına tüm aktivite olasılığını dışlamaz. Yeni semptom varsa mikrobiyolojiyle değerlendir.",
+    "ref": {
+     "title": "WHO Tuberculosis Module 3: Rapid Diagnostics, 3rd ed. (2024)",
+     "url": "https://www.who.int/publications/i/item/9789240089488"
+    }
+   }
+  },
+  "nlm_montgomery_mcucxr_0108_1": {
+   "presentation": [
+    "40 yaşında erkek hasta: uzamış öksürük ve balgam ile başvurur.",
+    "Gece terlemesi ve kilo değişimi sorgulanır.",
+    "Temas sonrası yakınmaların başlangıcı öğrenilir."
+   ],
+   "presentationRef": {
+    "title": "T.C. Sağlık Bakanlığı Tüberküloz Tanı ve Tedavi Rehberi (2019)",
+    "url": "https://hsgm.saglik.gov.tr/depo/birimler/tuberkuloz-db/Dokumanlar/Rehberler/Tuberkuloz_Tani_ve_Tedavi_Rehberi.pdf"
+   },
+   "differential": [
+    {
+     "dx": "Tüberküloz",
+     "clue": "Üst lob infiltrasyonu, kavite veya sekel bağlamla yorumlanır."
+    },
+    {
+     "dx": "Bakteriyel pnömoni",
+     "clue": "Akut ateş ve lobar konsolidasyon destekleyebilir."
+    },
+    {
+     "dx": "Fungal enfeksiyon",
+     "clue": "Kavite veya nodüller benzer görünüm oluşturabilir."
+    },
+    {
+     "dx": "Malignite",
+     "clue": "Kalıcı odak ya da kitle farklı tanıyı gerektirir."
+    }
+   ],
+   "differentialRef": {
+    "title": "Fleischner Society: Glossary of Terms for Thoracic Imaging (2024)",
+    "url": "https://pubs.rsna.org/doi/full/10.1148/radiol.232558"
+   },
+   "pearl": {
+    "text": "Üst lob kavitesi ve pozitif yayma/kültür aktif TB ile uyumludur. Grafi yaygınlığı gösterir; mikrobiyoloji tanıyı doğrular.",
+    "ref": {
+     "title": "WHO Tuberculosis Module 3: Rapid Diagnostics, 3rd ed. (2024)",
+     "url": "https://www.who.int/publications/i/item/9789240089488"
+    }
+   }
+  },
+  "nlm_montgomery_mcucxr_0113_1": {
+   "presentation": [
+    "84 yaşında kadın hasta: öksürük ve genel durum değişikliği nedeniyle değerlendirilir.",
+    "Nefes darlığı ve plöritik ağrı sorgulanır.",
+    "Önceki akciğer enfeksiyonları hakkında öykü alınır."
+   ],
+   "presentationRef": {
+    "title": "T.C. Sağlık Bakanlığı Tüberküloz Tanı ve Tedavi Rehberi (2019)",
+    "url": "https://hsgm.saglik.gov.tr/depo/birimler/tuberkuloz-db/Dokumanlar/Rehberler/Tuberkuloz_Tani_ve_Tedavi_Rehberi.pdf"
+   },
+   "differential": [
+    {
+     "dx": "Miliyer tüberküloz",
+     "clue": "Yaygın 1–3 mm nodüller; kayıtta aktif TB ile uyumlu yorumlanmış."
+    },
+    {
+     "dx": "Miliyer metastaz",
+     "clue": "Bilinen primer tümör; nodüller bazallerde daha iri olabilir."
+    },
+    {
+     "dx": "Sarkoidoz",
+     "clue": "Hiler lenfadenopati ve perilenfatik nodüller eşlik eder."
+    },
+    {
+     "dx": "Fungal enfeksiyon (histoplazmoz)",
+     "clue": "Endemik maruziyet ve bağışıklık durumu sorgulanır."
+    }
+   ],
+   "differentialRef": {
+    "title": "Fleischner Society: Glossary of Terms for Thoracic Imaging (2024)",
+    "url": "https://pubs.rsna.org/doi/full/10.1148/radiol.232558"
+   },
+   "pearl": {
+    "text": "Yaygın miliyer nodüller, sağ orta lob opasitesi ve efüzyon aynı anda bulunur. Eski kalsifiye granülom aktif hastalığı dışlamaz.",
+    "ref": {
+     "title": "WHO Tuberculosis Module 3: Rapid Diagnostics, 3rd ed. (2024)",
+     "url": "https://www.who.int/publications/i/item/9789240089488"
+    }
+   }
+  },
+  "nlm_montgomery_mcucxr_0117_1": {
+   "presentation": [
+    "85 yaşında kadın hasta: TB tedavisi sonrası kontrol grafisi istenir.",
+    "Yeni öksürük ve sistemik belirtiler sorgulanır.",
+    "Eski grafilerle klinik değişim birlikte değerlendirilir."
+   ],
+   "presentationRef": {
+    "title": "T.C. Sağlık Bakanlığı Tüberküloz Tanı ve Tedavi Rehberi (2019)",
+    "url": "https://hsgm.saglik.gov.tr/depo/birimler/tuberkuloz-db/Dokumanlar/Rehberler/Tuberkuloz_Tani_ve_Tedavi_Rehberi.pdf"
+   },
+   "differential": [
+    {
+     "dx": "Tüberküloz sonrası stabil görünüm",
+     "clue": "Altı aylık takipte değişim bildirilmemiş."
+    },
+    {
+     "dx": "Aktif tüberküloz",
+     "clue": "Yeni değişim ve mikrobiyolojik kanıt gerektirir."
+    },
+    {
+     "dx": "Fibrotik sekel",
+     "clue": "Kalıcı skar eski hastalığı düşündürür."
+    }
+   ],
+   "differentialRef": {
+    "title": "Fleischner Society: Glossary of Terms for Thoracic Imaging (2024)",
+    "url": "https://pubs.rsna.org/doi/full/10.1148/radiol.232558"
+   },
+   "pearl": {
+    "text": "Altı aylık stabil grafi aktiviteyi tek başına belirlemez; bu olgu tedavisi tamamlanmış takip hastasıdır. Yeni klinik şüphede mikrobiyolojik değerlendirme gerekir.",
+    "ref": {
+     "title": "WHO Tuberculosis Module 3: Rapid Diagnostics, 3rd ed. (2024)",
+     "url": "https://www.who.int/publications/i/item/9789240089488"
+    }
+   }
+  },
+  "nlm_montgomery_mcucxr_0141_1": {
+   "presentation": [
+    "27 yaşında erkek hasta: uzamış öksürük nedeniyle değerlendirilir.",
+    "Balgam ve sistemik belirtiler sorgulanır.",
+    "TB teması veya önceki enfeksiyon öyküsü öğrenilir."
+   ],
+   "presentationRef": {
+    "title": "T.C. Sağlık Bakanlığı Tüberküloz Tanı ve Tedavi Rehberi (2019)",
+    "url": "https://hsgm.saglik.gov.tr/depo/birimler/tuberkuloz-db/Dokumanlar/Rehberler/Tuberkuloz_Tani_ve_Tedavi_Rehberi.pdf"
+   },
+   "differential": [
+    {
+     "dx": "Kaviter tüberküloz",
+     "clue": "Üst lob ağırlıklı kavite ve infiltrasyon destekler."
+    },
+    {
+     "dx": "Akciğer apsesi",
+     "clue": "Hava-sıvı seviyesi ve aspirasyon öyküsü ayırt ettirir."
+    },
+    {
+     "dx": "Kaviter malignite",
+     "clue": "Düzensiz kalın duvar ve kalıcı kitle düşündürür."
+    },
+    {
+     "dx": "Fungal enfeksiyon",
+     "clue": "Kavite içinde mantar topu veya nodüller olabilir."
+    }
+   ],
+   "differentialRef": {
+    "title": "Fleischner Society: Glossary of Terms for Thoracic Imaging (2024)",
+    "url": "https://pubs.rsna.org/doi/full/10.1148/radiol.232558"
+   },
+   "pearl": {
+    "text": "Kayıtta küçük kavitasyon olası diye belirtilmiştir; kesin kavite gibi sunma. Aktif TB şüphesi mikrobiyolojiyle doğrulanır.",
+    "ref": {
+     "title": "WHO Tuberculosis Module 3: Rapid Diagnostics, 3rd ed. (2024)",
+     "url": "https://www.who.int/publications/i/item/9789240089488"
+    }
+   }
+  },
+  "nlm_montgomery_mcucxr_0142_1": {
+   "presentation": [
+    "43 yaşında kadın hasta: uzamış öksürük ve balgam nedeniyle başvurur.",
+    "TB teması ile ateşin süresi sorgulanır.",
+    "Gece terlemesi ve kilo kaybı olup olmadığı öğrenilir."
+   ],
+   "presentationRef": {
+    "title": "T.C. Sağlık Bakanlığı Tüberküloz Tanı ve Tedavi Rehberi (2019)",
+    "url": "https://hsgm.saglik.gov.tr/depo/birimler/tuberkuloz-db/Dokumanlar/Rehberler/Tuberkuloz_Tani_ve_Tedavi_Rehberi.pdf"
+   },
+   "differential": [
+    {
+     "dx": "Kaviter tüberküloz",
+     "clue": "Üst lob apikal-posterior ve alt lob süperior segment tipik yerleşimdir."
+    },
+    {
+     "dx": "Akciğer apsesi",
+     "clue": "Hava-sıvı seviyesi ve aspirasyon öyküsü ayırt ettirir."
+    },
+    {
+     "dx": "Kaviter malignite",
+     "clue": "Düzensiz kalın duvar ve kalıcı kitle düşündürür."
+    },
+    {
+     "dx": "Fungal enfeksiyon",
+     "clue": "Kavite içinde mantar topu veya nodüller olabilir."
+    }
+   ],
+   "differentialRef": {
+    "title": "Fleischner Society: Glossary of Terms for Thoracic Imaging (2024)",
+    "url": "https://pubs.rsna.org/doi/full/10.1148/radiol.232558"
+   },
+   "pearl": {
+    "text": "Kavite tüberküloza özgü değildir; grafi olası aktiviteyi gösterir ama etkeni kanıtlamaz. Balgamda hızlı moleküler test ve kültürle değerlendir.",
+    "ref": {
+     "title": "WHO Tuberculosis Module 3: Rapid Diagnostics, 3rd ed. (2024)",
+     "url": "https://www.who.int/publications/i/item/9789240089488"
+    }
+   }
+  },
+  "nlm_montgomery_mcucxr_0150_1": {
+   "presentation": [
+    "32 yaşında erkek hasta: öksürük ve nefes darlığı ile başvurur.",
+    "Plöritik ağrı ve ateşin süresi sorgulanır.",
+    "Yakın temaslılarda benzer semptom olup olmadığı öğrenilir."
+   ],
+   "presentationRef": {
+    "title": "T.C. Sağlık Bakanlığı Tüberküloz Tanı ve Tedavi Rehberi (2019)",
+    "url": "https://hsgm.saglik.gov.tr/depo/birimler/tuberkuloz-db/Dokumanlar/Rehberler/Tuberkuloz_Tani_ve_Tedavi_Rehberi.pdf"
+   },
+   "differential": [
+    {
+     "dx": "Kaviter tüberküloz",
+     "clue": "Üst lob ağırlıklı kavite ve infiltrasyon destekler."
+    },
+    {
+     "dx": "Akciğer apsesi",
+     "clue": "Hava-sıvı seviyesi ve aspirasyon öyküsü ayırt ettirir."
+    },
+    {
+     "dx": "Kaviter malignite",
+     "clue": "Düzensiz kalın duvar ve kalıcı kitle düşündürür."
+    },
+    {
+     "dx": "Fungal enfeksiyon",
+     "clue": "Kavite içinde mantar topu veya nodüller olabilir."
+    }
+   ],
+   "differentialRef": {
+    "title": "Fleischner Society: Glossary of Terms for Thoracic Imaging (2024)",
+    "url": "https://pubs.rsna.org/doi/full/10.1148/radiol.232558"
+   },
+   "pearl": {
+    "text": "Büyük sağ üst lob kavitesi ve sol efüzyon, pozitif ARB/MTB testleriyle aktif TB bağlamındadır. Grafi dağılımı gösterir, etkeni mikrobiyoloji doğrular.",
+    "ref": {
+     "title": "WHO Tuberculosis Module 3: Rapid Diagnostics, 3rd ed. (2024)",
+     "url": "https://www.who.int/publications/i/item/9789240089488"
+    }
+   }
+  },
+  "nlm_montgomery_mcucxr_0253_1": {
+   "presentation": [
+    "31 yaşında erkek hasta: yakın dönemde pnömosistis pnömonisi tedavisi almış hasta kötüleşir.",
+    "Artan nefes darlığı ve öksürük araştırılır.",
+    "Ateş ve diğer enfeksiyon belirtilerinin seyri öğrenilir."
+   ],
+   "presentationRef": {
+    "title": "T.C. Sağlık Bakanlığı Tüberküloz Tanı ve Tedavi Rehberi (2019)",
+    "url": "https://hsgm.saglik.gov.tr/depo/birimler/tuberkuloz-db/Dokumanlar/Rehberler/Tuberkuloz_Tani_ve_Tedavi_Rehberi.pdf"
+   },
+   "differential": [
+    {
+     "dx": "Miliyer patern",
+     "clue": "İki akciğerde yaygın küçük nodüller görüntü tanımıdır."
+    },
+    {
+     "dx": "Yineleyen pnömosistis pnömonisi",
+     "clue": "Klinik kayıtta asıl olasılık olarak belirtilir."
+    },
+    {
+     "dx": "Miliyer tüberküloz",
+     "clue": "Görüntü ayırıcı tanısında; mikrobiyolojik doğrulama yok."
+    },
+    {
+     "dx": "Miliyer metastaz",
+     "clue": "Bilinen kanser öyküsü ve BT dağılımı aranır."
+    }
+   ],
+   "differentialRef": {
+    "title": "Fleischner Society: Glossary of Terms for Thoracic Imaging (2024)",
+    "url": "https://pubs.rsna.org/doi/full/10.1148/radiol.232558"
+   },
+   "pearl": {
+    "text": "Yaygın ince nodüller miliyer paterni düşündürür; bu kayıtta yineleyen pnömosistis daha olası yorumlanmıştır. TB için ayrı mikrobiyolojik doğrulama gerekir.",
+    "ref": {
+     "title": "WHO Tuberculosis Module 3: Rapid Diagnostics, 3rd ed. (2024)",
+     "url": "https://www.who.int/publications/i/item/9789240089488"
+    }
+   }
+  },
+  "nlm_montgomery_mcucxr_0140_1": {
+   "presentation": [
+    "34 yaşında erkek hasta: TB tedavisi altındaki hastada kontrol grafisi istenir.",
+    "Yeni öksürük veya ateş olup olmadığı sorgulanır.",
+    "Karın ve solunum yakınmalarının seyri birlikte değerlendirilir."
+   ],
+   "presentationRef": {
+    "title": "T.C. Sağlık Bakanlığı Tüberküloz Tanı ve Tedavi Rehberi (2019)",
+    "url": "https://hsgm.saglik.gov.tr/depo/birimler/tuberkuloz-db/Dokumanlar/Rehberler/Tuberkuloz_Tani_ve_Tedavi_Rehberi.pdf"
+   },
+   "differential": [
+    {
+     "dx": "Fibrotik/kalsifik TB sekeli",
+     "clue": "Sol üst lobda küçük kalsifiye granülom vardır."
+    },
+    {
+     "dx": "Akciğer dışı aktif TB",
+     "clue": "Psoas apsesi kültür pozitif ve tedavi altındadır."
+    },
+    {
+     "dx": "Eski fungal granülom",
+     "clue": "Akciğer kalsifikasyonu etiyolojisi tek grafide ayrılamaz."
+    }
+   ],
+   "differentialRef": {
+    "title": "Fleischner Society: Glossary of Terms for Thoracic Imaging (2024)",
+    "url": "https://pubs.rsna.org/doi/full/10.1148/radiol.232558"
+   },
+   "pearl": {
+    "text": "Sol üst lob küçük kalsifiye granülomu akciğerde aktif TB kanıtı değildir; hastada akciğer dışı kültür pozitif TB vardır. Yeni akciğer bulgusunda ayrıca değerlendirme gerekir.",
+    "ref": {
+     "title": "WHO Tuberculosis Module 3: Rapid Diagnostics, 3rd ed. (2024)",
+     "url": "https://www.who.int/publications/i/item/9789240089488"
+    }
+   }
+  },
+  "nlm_montgomery_mcucxr_0162_1": {
+   "presentation": [
+    "49 yaşında erkek hasta: yeni öksürük nedeniyle kontrol incelemesi istenir.",
+    "Gece terlemesi ve kilo değişimi sorgulanır.",
+    "Eski grafilerle belirtilerin zaman ilişkisi araştırılır."
+   ],
+   "presentationRef": {
+    "title": "T.C. Sağlık Bakanlığı Tüberküloz Tanı ve Tedavi Rehberi (2019)",
+    "url": "https://hsgm.saglik.gov.tr/depo/birimler/tuberkuloz-db/Dokumanlar/Rehberler/Tuberkuloz_Tani_ve_Tedavi_Rehberi.pdf"
+   },
+   "differential": [
+    {
+     "dx": "Fibrotik/kalsifik TB sekeli",
+     "clue": "Sağ apikal fibrozis ve kalsifikasyon eski hastalığı düşündürür."
+    },
+    {
+     "dx": "Aktif tüberküloz",
+     "clue": "Solda yeni kavite; sağ apeks de aktivite açısından kuşkulu."
+    },
+    {
+     "dx": "Kaviter malignite",
+     "clue": "Kalıcı veya büyüyen düzensiz duvarlı kavite araştırılır."
+    },
+    {
+     "dx": "Fungal kavite",
+     "clue": "Kavite içinde kolonizasyon olabilir; mikrobiyoloji ayırır."
+    }
+   ],
+   "differentialRef": {
+    "title": "Fleischner Society: Glossary of Terms for Thoracic Imaging (2024)",
+    "url": "https://pubs.rsna.org/doi/full/10.1148/radiol.232558"
+   },
+   "pearl": {
+    "text": "Sağ apikal fibrozis eski sekeli düşündürür; soldaki yeni kavite ve lordotik görüntüdeki sağ apikal kavite aktivite kuşkusunu artırır. Balgam mikrobiyolojisi gerekir.",
+    "ref": {
+     "title": "WHO Tuberculosis Module 3: Rapid Diagnostics, 3rd ed. (2024)",
+     "url": "https://www.who.int/publications/i/item/9789240089488"
+    }
+   }
+  },
+  "commons_hiatal_pa": {
+   "presentation": [
+    "Örnek başvuru: yemeklerden sonra göğüs arkasında yanma tariflenir.",
+    "Regürjitasyon ve yutma güçlüğü sorgulanır.",
+    "Şikâyetin yatınca artıp artmadığı öğrenilir."
+   ],
+   "presentationRef": {
+    "title": "SAGES Guidelines for the Surgical Treatment of Hiatal Hernias (2024)",
+    "url": "https://www.sages.org/publications/guidelines/guidelines-for-the-surgical-treatment-of-hiatal-hernias/"
+   },
+   "differential": [
+    {
+     "dx": "Hiatal herni",
+     "clue": "Retrokardiyak hava-sıvı seviyesi mide yerleşimini düşündürür."
+    },
+    {
+     "dx": "Özofagus genişlemesi",
+     "clue": "Mediastinal hava-sıvı görünümü benzer olabilir."
+    },
+    {
+     "dx": "Retrokardiyak akciğer kavitesi",
+     "clue": "Parankim içinde kalır; lateral görüntü ayırt ettirir."
+    },
+    {
+     "dx": "Diyafram hernisi",
+     "clue": "Diyaframdaki farklı defektten karın içeriği geçebilir."
+    }
+   ],
+   "differentialRef": {
+    "title": "Fleischner Society: Glossary of Terms for Thoracic Imaging (2024)",
+    "url": "https://pubs.rsna.org/doi/full/10.1148/radiol.232558"
+   },
+   "pearl": {
+    "text": "Grafi büyük hiatal herniyi düşündürebilir fakat tipini güvenle belirlemez. Anatomik ilişkiyi kontrastlı özofagus incelemesi veya uygun kesitsel görüntüleme netleştirir.",
+    "ref": {
+     "title": "SAGES Guidelines for the Surgical Treatment of Hiatal Hernias (2024)",
+     "url": "https://www.sages.org/publications/guidelines/guidelines-for-the-surgical-treatment-of-hiatal-hernias/"
+    }
+   }
+  },
+  "epmc_pmc13078844_cureus_0018_00000105272_i01": {
+   "presentation": [
+    "Örnek başvuru: yutma güçlüğü ve yemek sonrası dolgunluk yakınması vardır.",
+    "Reflü belirtisi ve kilo değişimi sorgulanır.",
+    "Önceki üst sindirim sistemi görüntüleri araştırılır."
+   ],
+   "presentationRef": {
+    "title": "SAGES Guidelines for the Surgical Treatment of Hiatal Hernias (2024)",
+    "url": "https://www.sages.org/publications/guidelines/guidelines-for-the-surgical-treatment-of-hiatal-hernias/"
+   },
+   "differential": [
+    {
+     "dx": "Hiatal herni",
+     "clue": "Retrokardiyak hava-sıvı seviyesi mide yerleşimini düşündürür."
+    },
+    {
+     "dx": "Özofagus genişlemesi",
+     "clue": "Mediastinal hava-sıvı görünümü benzer olabilir."
+    },
+    {
+     "dx": "Retrokardiyak akciğer kavitesi",
+     "clue": "Parankim içinde kalır; lateral görüntü ayırt ettirir."
+    },
+    {
+     "dx": "Diyafram hernisi",
+     "clue": "Diyaframdaki farklı defektten karın içeriği geçebilir."
+    }
+   ],
+   "differentialRef": {
+    "title": "Fleischner Society: Glossary of Terms for Thoracic Imaging (2024)",
+    "url": "https://pubs.rsna.org/doi/full/10.1148/radiol.232558"
+   },
+   "pearl": {
+    "text": "Grafi büyük hiatal herniyi düşündürebilir fakat tipini güvenle belirlemez. Anatomik ilişkiyi kontrastlı özofagus incelemesi veya uygun kesitsel görüntüleme netleştirir.",
+    "ref": {
+     "title": "SAGES Guidelines for the Surgical Treatment of Hiatal Hernias (2024)",
+     "url": "https://www.sages.org/publications/guidelines/guidelines-for-the-surgical-treatment-of-hiatal-hernias/"
+    }
+   }
+  },
+  "epmc_pmc13099005_cureus_0018_00000105653_i02": {
+   "presentation": [
+    "Örnek başvuru: göğüs arkasında basınç hissi nedeniyle değerlendirilir.",
+    "Öğünle ilişkili yanma ve regürjitasyon sorulur.",
+    "Yakınmaların süresi ve önceki görüntüler incelenir."
+   ],
+   "presentationRef": {
+    "title": "SAGES Guidelines for the Surgical Treatment of Hiatal Hernias (2024)",
+    "url": "https://www.sages.org/publications/guidelines/guidelines-for-the-surgical-treatment-of-hiatal-hernias/"
+   },
+   "differential": [
+    {
+     "dx": "Hiatal herni",
+     "clue": "Retrokardiyak hava-sıvı seviyesi mide yerleşimini düşündürür."
+    },
+    {
+     "dx": "Özofagus genişlemesi",
+     "clue": "Mediastinal hava-sıvı görünümü benzer olabilir."
+    },
+    {
+     "dx": "Retrokardiyak akciğer kavitesi",
+     "clue": "Parankim içinde kalır; lateral görüntü ayırt ettirir."
+    },
+    {
+     "dx": "Diyafram hernisi",
+     "clue": "Diyaframdaki farklı defektten karın içeriği geçebilir."
+    }
+   ],
+   "differentialRef": {
+    "title": "Fleischner Society: Glossary of Terms for Thoracic Imaging (2024)",
+    "url": "https://pubs.rsna.org/doi/full/10.1148/radiol.232558"
+   },
+   "pearl": {
+    "text": "Grafi büyük hiatal herniyi düşündürebilir fakat tipini güvenle belirlemez. Anatomik ilişkiyi kontrastlı özofagus incelemesi veya uygun kesitsel görüntüleme netleştirir.",
+    "ref": {
+     "title": "SAGES Guidelines for the Surgical Treatment of Hiatal Hernias (2024)",
+     "url": "https://www.sages.org/publications/guidelines/guidelines-for-the-surgical-treatment-of-hiatal-hernias/"
+    }
+   }
+  },
+  "commons_diaphragm_hernia": {
+   "presentation": [
+    "Örnek başvuru: tekrarlayan nefes darlığı için grafi istenir.",
+    "Yakınmaların yemekle ilişkisi sorgulanır.",
+    "Önceki diyafram görüntüleri incelenir."
+   ],
+   "presentationRef": {
+    "title": "ACR Hernia Appropriateness Criteria (2022)",
+    "url": "https://acsearch.acr.org/docs/3158169/Narrative/"
+   },
+   "differential": [
+    {
+     "dx": "Konjenital diyafram hernisi",
+     "clue": "Karın içeriği diyafram defektinden toraksa geçer."
+    },
+    {
+     "dx": "Hiatal herni",
+     "clue": "Mide özofagus hiatusundan geçer; farklı yerleşimlidir."
+    },
+    {
+     "dx": "Diyafram eventrasyonu",
+     "clue": "Sürekli diyafram konturu yükselir; gerçek defekt yoktur."
+    },
+    {
+     "dx": "Bazal akciğer kisti",
+     "clue": "Karın organlarıyla süreklilik göstermez."
+    }
+   ],
+   "differentialRef": {
+    "title": "Fleischner Society: Glossary of Terms for Thoracic Imaging (2024)",
+    "url": "https://pubs.rsna.org/doi/full/10.1148/radiol.232558"
+   },
+   "pearl": {
+    "text": "Grafi intratorasik karın içeriğini düşündürebilir; Bochdalek/Morgagni alt tipini tek başına kesinleştirme. Toraks ve batın BT anatomik defekti gösterir.",
+    "ref": {
+     "title": "ACR Hernia Appropriateness Criteria (2022)",
+     "url": "https://acsearch.acr.org/docs/3158169/Narrative/"
+    }
+   }
+  },
+  "commons_morgagni_hernia": {
+   "presentation": [
+    "Örnek başvuru: rutin grafide diyafram komşuluğunda anormal gölge görülür.",
+    "Solunum veya karın yakınması olup olmadığı sorgulanır.",
+    "Önceki grafilerde kalıcılık araştırılır."
+   ],
+   "presentationRef": {
+    "title": "ACR Hernia Appropriateness Criteria (2022)",
+    "url": "https://acsearch.acr.org/docs/3158169/Narrative/"
+   },
+   "differential": [
+    {
+     "dx": "Konjenital diyafram hernisi",
+     "clue": "Karın içeriği diyafram defektinden toraksa geçer."
+    },
+    {
+     "dx": "Hiatal herni",
+     "clue": "Mide özofagus hiatusundan geçer; farklı yerleşimlidir."
+    },
+    {
+     "dx": "Diyafram eventrasyonu",
+     "clue": "Sürekli diyafram konturu yükselir; gerçek defekt yoktur."
+    },
+    {
+     "dx": "Bazal akciğer kisti",
+     "clue": "Karın organlarıyla süreklilik göstermez."
+    }
+   ],
+   "differentialRef": {
+    "title": "Fleischner Society: Glossary of Terms for Thoracic Imaging (2024)",
+    "url": "https://pubs.rsna.org/doi/full/10.1148/radiol.232558"
+   },
+   "pearl": {
+    "text": "Grafi intratorasik karın içeriğini düşündürebilir; Bochdalek/Morgagni alt tipini tek başına kesinleştirme. Toraks ve batın BT anatomik defekti gösterir.",
+    "ref": {
+     "title": "ACR Hernia Appropriateness Criteria (2022)",
+     "url": "https://acsearch.acr.org/docs/3158169/Narrative/"
+    }
+   }
+  },
+  "epmc_pmc13375092_cureus_0018_00000110977_i01": {
+   "presentation": [
+    "Örnek başvuru: göğüs ve karın yakınmaları birlikte değerlendirilir.",
+    "Nefes darlığının süresi sorgulanır.",
+    "Diyafram konturu eski görüntülerle karşılaştırılır."
+   ],
+   "presentationRef": {
+    "title": "ACR Hernia Appropriateness Criteria (2022)",
+    "url": "https://acsearch.acr.org/docs/3158169/Narrative/"
+   },
+   "differential": [
+    {
+     "dx": "Konjenital diyafram hernisi",
+     "clue": "Karın içeriği diyafram defektinden toraksa geçer."
+    },
+    {
+     "dx": "Hiatal herni",
+     "clue": "Mide özofagus hiatusundan geçer; farklı yerleşimlidir."
+    },
+    {
+     "dx": "Diyafram eventrasyonu",
+     "clue": "Sürekli diyafram konturu yükselir; gerçek defekt yoktur."
+    },
+    {
+     "dx": "Bazal akciğer kisti",
+     "clue": "Karın organlarıyla süreklilik göstermez."
+    }
+   ],
+   "differentialRef": {
+    "title": "Fleischner Society: Glossary of Terms for Thoracic Imaging (2024)",
+    "url": "https://pubs.rsna.org/doi/full/10.1148/radiol.232558"
+   },
+   "pearl": {
+    "text": "Grafi intratorasik karın içeriğini düşündürebilir; Bochdalek/Morgagni alt tipini tek başına kesinleştirme. Toraks ve batın BT anatomik defekti gösterir.",
+    "ref": {
+     "title": "ACR Hernia Appropriateness Criteria (2022)",
+     "url": "https://acsearch.acr.org/docs/3158169/Narrative/"
+    }
+   }
+  },
+  "epmc_pmc13544677_rc9_138_3840_g003": {
+   "presentation": [
+    "Örnek başvuru: başka nedenle çekilen grafide bazal anormallik dikkat çeker.",
+    "Tekrarlayan solunum ve karın yakınmaları sorgulanır.",
+    "Eski görüntülerde aynı bulgunun varlığı araştırılır."
+   ],
+   "presentationRef": {
+    "title": "ACR Hernia Appropriateness Criteria (2022)",
+    "url": "https://acsearch.acr.org/docs/3158169/Narrative/"
+   },
+   "differential": [
+    {
+     "dx": "Konjenital diyafram hernisi",
+     "clue": "Karın içeriği diyafram defektinden toraksa geçer."
+    },
+    {
+     "dx": "Hiatal herni",
+     "clue": "Mide özofagus hiatusundan geçer; farklı yerleşimlidir."
+    },
+    {
+     "dx": "Diyafram eventrasyonu",
+     "clue": "Sürekli diyafram konturu yükselir; gerçek defekt yoktur."
+    },
+    {
+     "dx": "Bazal akciğer kisti",
+     "clue": "Karın organlarıyla süreklilik göstermez."
+    }
+   ],
+   "differentialRef": {
+    "title": "Fleischner Society: Glossary of Terms for Thoracic Imaging (2024)",
+    "url": "https://pubs.rsna.org/doi/full/10.1148/radiol.232558"
+   },
+   "pearl": {
+    "text": "Grafi intratorasik karın içeriğini düşündürebilir; Bochdalek/Morgagni alt tipini tek başına kesinleştirme. Toraks ve batın BT anatomik defekti gösterir.",
+    "ref": {
+     "title": "ACR Hernia Appropriateness Criteria (2022)",
+     "url": "https://acsearch.acr.org/docs/3158169/Narrative/"
+    }
+   }
+  },
+  "epmc_pmc12978380_jmc_17_04_153_g001": {
+   "presentation": [
+    "Örnek başvuru: eforla nefes darlığı nedeniyle görüntüleme istenir.",
+    "Boyun veya toraks cerrahisi öyküsü sorgulanır.",
+    "Önceki grafilerde diyafram seviyesi karşılaştırılır."
+   ],
+   "presentationRef": {
+    "title": "ACR Chronic Dyspnea—Noncardiovascular Origin (2024)",
+    "url": "https://acsearch.acr.org/docs/69448/Narrative"
+   },
+   "differential": [
+    {
+     "dx": "Yükselmiş hemidiyafram",
+     "clue": "Bir kubbe karşı tarafa göre yüksek görünür."
+    },
+    {
+     "dx": "Diyafram paralizisi",
+     "clue": "Hareket azalması ultrason veya floroskopide gösterilir."
+    },
+    {
+     "dx": "Eventrasyon",
+     "clue": "Bütünlük korunur; kontur geniş alanda yükselir."
+    },
+    {
+     "dx": "Bazal atelektazi",
+     "clue": "Hacim kaybı diyaframı ikincil olarak yükseltir."
+    }
+   ],
+   "differentialRef": {
+    "title": "Fleischner Society: Glossary of Terms for Thoracic Imaging (2024)",
+    "url": "https://pubs.rsna.org/doi/full/10.1148/radiol.232558"
+   },
+   "pearl": {
+    "text": "Tek grafide hemidiyafram yüksekliği paralizi tanısı koydurmaz. Diyafram hareketini ultrason veya floroskopi ile değerlendir; bazal hacim kaybını ara.",
+    "ref": {
+     "title": "ACR Chronic Dyspnea—Noncardiovascular Origin (2024)",
+     "url": "https://acsearch.acr.org/docs/69448/Narrative"
+    }
+   }
+  },
+  "epmc_pmc13489553_cureus_0018_00000113007_i02": {
+   "presentation": [
+    "Örnek başvuru: kontrol grafisinde diyafram yüksekliği fark edilir.",
+    "Nefes darlığının duruşla değişimi sorgulanır.",
+    "Eski grafiler ve toraks girişimi öyküsü incelenir."
+   ],
+   "presentationRef": {
+    "title": "ACR Chronic Dyspnea—Noncardiovascular Origin (2024)",
+    "url": "https://acsearch.acr.org/docs/69448/Narrative"
+   },
+   "differential": [
+    {
+     "dx": "Yükselmiş hemidiyafram",
+     "clue": "Bir kubbe karşı tarafa göre yüksek görünür."
+    },
+    {
+     "dx": "Diyafram paralizisi",
+     "clue": "Hareket azalması ultrason veya floroskopide gösterilir."
+    },
+    {
+     "dx": "Eventrasyon",
+     "clue": "Bütünlük korunur; kontur geniş alanda yükselir."
+    },
+    {
+     "dx": "Bazal atelektazi",
+     "clue": "Hacim kaybı diyaframı ikincil olarak yükseltir."
+    }
+   ],
+   "differentialRef": {
+    "title": "Fleischner Society: Glossary of Terms for Thoracic Imaging (2024)",
+    "url": "https://pubs.rsna.org/doi/full/10.1148/radiol.232558"
+   },
+   "pearl": {
+    "text": "Tek grafide hemidiyafram yüksekliği paralizi tanısı koydurmaz. Diyafram hareketini ultrason veya floroskopi ile değerlendir; bazal hacim kaybını ara.",
+    "ref": {
+     "title": "ACR Chronic Dyspnea—Noncardiovascular Origin (2024)",
+     "url": "https://acsearch.acr.org/docs/69448/Narrative"
+    }
+   }
+  },
+  "commons_westermark": {
+   "presentation": [
+    "Örnek başvuru: ani başlayan nefes darlığı ile başvurur.",
+    "Plöritik ağrı ve bacak şişliği sorgulanır.",
+    "Hareketsizlik öyküsü değerlendirilir."
+   ],
+   "presentationRef": {
+    "title": "ESC Acute Pulmonary Embolism Guidelines (2019)",
+    "url": "https://www.escardio.org/guidelines/clinical-practice-guidelines/all-esc-practice-guidelines/acute-pulmonary-embolism/"
+   },
+   "differential": [
+    {
+     "dx": "Westermark işareti",
+     "clue": "Bölgesel damar seyrekliği emboliyi düşündürebilir."
+    },
+    {
+     "dx": "Aşırı penetrasyon",
+     "clue": "Damar izlerini yalancı azaltabilir."
+    },
+    {
+     "dx": "Amfizem",
+     "clue": "Damar seyrekliği ve hiperlüsensi oluşturabilir."
+    },
+    {
+     "dx": "Swyer-James (MacLeod) sendromu",
+     "clue": "Tek taraflı küçük hiperlüsent akciğer ve ekspiryumda hava hapsi."
+    }
+   ],
+   "differentialRef": {
+    "title": "Fleischner Society: Glossary of Terms for Thoracic Imaging (2024)",
+    "url": "https://pubs.rsna.org/doi/full/10.1148/radiol.232558"
+   },
+   "pearl": {
+    "text": "Westermark işareti duyarlı ya da tek başına tanısal değildir. Klinik olasılığa göre D-dimer ve uygun hastada BT pulmoner anjiyografi değerlendir.",
+    "ref": {
+     "title": "ACR Suspected Pulmonary Embolism",
+     "url": "https://acsearch.acr.org/docs/69404/narrative/"
+    }
+   }
+  },
+  "epmc_pmc8143826_cpcem_05_261_g001": {
+   "presentation": [
+    "Örnek başvuru: ani plöritik göğüs ağrısı nedeniyle grafi istenir.",
+    "Nefes darlığı ve oksijenlenme değerlendirilir.",
+    "Venöz tromboemboli riskleri sorgulanır."
+   ],
+   "presentationRef": {
+    "title": "ESC Acute Pulmonary Embolism Guidelines (2019)",
+    "url": "https://www.escardio.org/guidelines/clinical-practice-guidelines/all-esc-practice-guidelines/acute-pulmonary-embolism/"
+   },
+   "differential": [
+    {
+     "dx": "Westermark işareti",
+     "clue": "Bölgesel damar seyrekliği emboliyi düşündürebilir."
+    },
+    {
+     "dx": "Aşırı penetrasyon",
+     "clue": "Damar izlerini yalancı azaltabilir."
+    },
+    {
+     "dx": "Amfizem",
+     "clue": "Damar seyrekliği ve hiperlüsensi oluşturabilir."
+    },
+    {
+     "dx": "Swyer-James (MacLeod) sendromu",
+     "clue": "Tek taraflı küçük hiperlüsent akciğer ve ekspiryumda hava hapsi."
+    }
+   ],
+   "differentialRef": {
+    "title": "Fleischner Society: Glossary of Terms for Thoracic Imaging (2024)",
+    "url": "https://pubs.rsna.org/doi/full/10.1148/radiol.232558"
+   },
+   "pearl": {
+    "text": "Westermark işareti duyarlı ya da tek başına tanısal değildir. Klinik olasılığa göre D-dimer ve uygun hastada BT pulmoner anjiyografi değerlendir.",
+    "ref": {
+     "title": "ACR Suspected Pulmonary Embolism",
+     "url": "https://acsearch.acr.org/docs/69404/narrative/"
+    }
+   }
+  },
+  "epmc_pmc9936914_jbsr_107_1_3052_g1": {
+   "presentation": [
+    "Örnek başvuru: yeni nefes darlığı ve çarpıntı araştırılır.",
+    "Bacak yakınmaları ile yakın zamanda yolculuk öyküsü sorulur.",
+    "Klinik emboli olasılığı hesaplanır."
+   ],
+   "presentationRef": {
+    "title": "ESC Acute Pulmonary Embolism Guidelines (2019)",
+    "url": "https://www.escardio.org/guidelines/clinical-practice-guidelines/all-esc-practice-guidelines/acute-pulmonary-embolism/"
+   },
+   "differential": [
+    {
+     "dx": "Westermark işareti",
+     "clue": "Bölgesel damar seyrekliği emboliyi düşündürebilir."
+    },
+    {
+     "dx": "Aşırı penetrasyon",
+     "clue": "Damar izlerini yalancı azaltabilir."
+    },
+    {
+     "dx": "Amfizem",
+     "clue": "Damar seyrekliği ve hiperlüsensi oluşturabilir."
+    },
+    {
+     "dx": "Swyer-James (MacLeod) sendromu",
+     "clue": "Tek taraflı küçük hiperlüsent akciğer ve ekspiryumda hava hapsi."
+    }
+   ],
+   "differentialRef": {
+    "title": "Fleischner Society: Glossary of Terms for Thoracic Imaging (2024)",
+    "url": "https://pubs.rsna.org/doi/full/10.1148/radiol.232558"
+   },
+   "pearl": {
+    "text": "Westermark işareti duyarlı ya da tek başına tanısal değildir. Klinik olasılığa göre D-dimer ve uygun hastada BT pulmoner anjiyografi değerlendir.",
+    "ref": {
+     "title": "ACR Suspected Pulmonary Embolism",
+     "url": "https://acsearch.acr.org/docs/69404/narrative/"
+    }
+   }
+  },
+  "commons_hampton_hump": {
+   "presentation": [
+    "Örnek başvuru: plöritik göğüs ağrısı ve nefes darlığı vardır.",
+    "Hemoptizi ve bacak yakınmaları sorgulanır.",
+    "Önceki tromboemboli öyküsü öğrenilir."
+   ],
+   "presentationRef": {
+    "title": "ESC Acute Pulmonary Embolism Guidelines (2019)",
+    "url": "https://www.escardio.org/guidelines/clinical-practice-guidelines/all-esc-practice-guidelines/acute-pulmonary-embolism/"
+   },
+   "differential": [
+    {
+     "dx": "Hampton hörgücü",
+     "clue": "Plevraya dayalı kama biçimli opasite enfarktı düşündürür."
+    },
+    {
+     "dx": "Pnömoni",
+     "clue": "Ateş ve segmental konsolidasyon benzer görünür."
+    },
+    {
+     "dx": "Atelektazi",
+     "clue": "Hacim kaybı ve fissür çekilmesi ayırt ettirir."
+    },
+    {
+     "dx": "Pulmoner hemoraji",
+     "clue": "Kama opasitesi klinik bağlamda benzer olabilir."
+    }
+   ],
+   "differentialRef": {
+    "title": "Fleischner Society: Glossary of Terms for Thoracic Imaging (2024)",
+    "url": "https://pubs.rsna.org/doi/full/10.1148/radiol.232558"
+   },
+   "pearl": {
+    "text": "Hampton hörgücü emboliyi düşündüren bir ipucudur ama tek başına doğrulama değildir. Klinik olasılığa uygun damar görüntülemesi gerekir.",
+    "ref": {
+     "title": "ACR Suspected Pulmonary Embolism",
+     "url": "https://acsearch.acr.org/docs/69404/narrative/"
+    }
+   }
+  },
+  "epmc_pmc9609840_vaccines_10_01659_g001": {
+   "presentation": [
+    "Örnek başvuru: ani nefes darlığı için grafi istenir.",
+    "Plöritik ağrı veya kanlı balgam olup olmadığı sorulur.",
+    "Hareketsizlik ve venöz tromboemboli öyküsü sorgulanır."
+   ],
+   "presentationRef": {
+    "title": "ESC Acute Pulmonary Embolism Guidelines (2019)",
+    "url": "https://www.escardio.org/guidelines/clinical-practice-guidelines/all-esc-practice-guidelines/acute-pulmonary-embolism/"
+   },
+   "differential": [
+    {
+     "dx": "Hampton hörgücü",
+     "clue": "Plevraya dayalı kama biçimli opasite enfarktı düşündürür."
+    },
+    {
+     "dx": "Pnömoni",
+     "clue": "Ateş ve segmental konsolidasyon benzer görünür."
+    },
+    {
+     "dx": "Atelektazi",
+     "clue": "Hacim kaybı ve fissür çekilmesi ayırt ettirir."
+    },
+    {
+     "dx": "Pulmoner hemoraji",
+     "clue": "Kama opasitesi klinik bağlamda benzer olabilir."
+    }
+   ],
+   "differentialRef": {
+    "title": "Fleischner Society: Glossary of Terms for Thoracic Imaging (2024)",
+    "url": "https://pubs.rsna.org/doi/full/10.1148/radiol.232558"
+   },
+   "pearl": {
+    "text": "Hampton hörgücü emboliyi düşündüren bir ipucudur ama tek başına doğrulama değildir. Klinik olasılığa uygun damar görüntülemesi gerekir.",
+    "ref": {
+     "title": "ACR Suspected Pulmonary Embolism",
+     "url": "https://acsearch.acr.org/docs/69404/narrative/"
+    }
+   }
+  },
+  "commons_pe_cta_massive": {
+   "presentation": [
+    "Örnek başvuru: ani ve belirgin nefes darlığı nedeniyle BT anjiyografi istenir.",
+    "Göğüs ağrısı ve bayılma öyküsü sorgulanır.",
+    "Klinik emboli olasılığı değerlendirilir."
+   ],
+   "presentationRef": {
+    "title": "ESC Acute Pulmonary Embolism Guidelines (2019)",
+    "url": "https://www.escardio.org/guidelines/clinical-practice-guidelines/all-esc-practice-guidelines/acute-pulmonary-embolism/"
+   },
+   "differential": [
+    {
+     "dx": "BT pulmoner anjiyografide dolum defekti",
+     "clue": "Kontrastlı arter lümeninde çevrili düşük yoğunluklu odak görülür."
+    },
+    {
+     "dx": "Akım artefaktı",
+     "clue": "Yetersiz kontrast karışımı yalancı defekt oluşturabilir."
+    },
+    {
+     "dx": "Hareket artefaktı",
+     "clue": "Solunum bulanıklığı damar sınırını bozar."
+    },
+    {
+     "dx": "Kronik tromboemboli",
+     "clue": "Eksantrik, duvara yapışık trombüs, ağ/bant ve damar daralması."
+    }
+   ],
+   "differentialRef": {
+    "title": "Fleischner Society: Glossary of Terms for Thoracic Imaging (2024)",
+    "url": "https://pubs.rsna.org/doi/full/10.1148/radiol.232558"
+   },
+   "pearl": {
+    "text": "Gerçek intraluminal defekti kontrast ve hareket artefaktından ayır; komşu kesitleri izle. Klinik olasılıkla uyumlu BT anjiyografi tanıyı destekler.",
+    "ref": {
+     "title": "ACR Suspected Pulmonary Embolism",
+     "url": "https://acsearch.acr.org/docs/69404/narrative/"
+    }
+   }
+  },
+  "commons_pe_ctpa": {
+   "presentation": [
+    "Örnek başvuru: yeni plöritik ağrı nedeniyle BT anjiyografi istenir.",
+    "Nefes darlığı ve bacak şişliği sorgulanır.",
+    "Önceki tromboemboli öyküsü öğrenilir."
+   ],
+   "presentationRef": {
+    "title": "ESC Acute Pulmonary Embolism Guidelines (2019)",
+    "url": "https://www.escardio.org/guidelines/clinical-practice-guidelines/all-esc-practice-guidelines/acute-pulmonary-embolism/"
+   },
+   "differential": [
+    {
+     "dx": "BT pulmoner anjiyografide dolum defekti",
+     "clue": "Kontrastlı arter lümeninde çevrili düşük yoğunluklu odak görülür."
+    },
+    {
+     "dx": "Akım artefaktı",
+     "clue": "Yetersiz kontrast karışımı yalancı defekt oluşturabilir."
+    },
+    {
+     "dx": "Hareket artefaktı",
+     "clue": "Solunum bulanıklığı damar sınırını bozar."
+    },
+    {
+     "dx": "Kronik tromboemboli",
+     "clue": "Eksantrik, duvara yapışık trombüs, ağ/bant ve damar daralması."
+    }
+   ],
+   "differentialRef": {
+    "title": "Fleischner Society: Glossary of Terms for Thoracic Imaging (2024)",
+    "url": "https://pubs.rsna.org/doi/full/10.1148/radiol.232558"
+   },
+   "pearl": {
+    "text": "Gerçek intraluminal defekti kontrast ve hareket artefaktından ayır; komşu kesitleri izle. Klinik olasılıkla uyumlu BT anjiyografi tanıyı destekler.",
+    "ref": {
+     "title": "ACR Suspected Pulmonary Embolism",
+     "url": "https://acsearch.acr.org/docs/69404/narrative/"
+    }
+   }
+  },
+  "epmc_pmc13531219_gr5": {
+   "presentation": [
+    "Örnek başvuru: açıklanamayan ani nefes darlığı araştırılır.",
+    "Yakın zamanda hareketsizlik ve bacak yakınmaları sorulur.",
+    "Klinik olasılık ile görüntüleme kararı ilişkilendirilir."
+   ],
+   "presentationRef": {
+    "title": "ESC Acute Pulmonary Embolism Guidelines (2019)",
+    "url": "https://www.escardio.org/guidelines/clinical-practice-guidelines/all-esc-practice-guidelines/acute-pulmonary-embolism/"
+   },
+   "differential": [
+    {
+     "dx": "BT pulmoner anjiyografide dolum defekti",
+     "clue": "Kontrastlı arter lümeninde çevrili düşük yoğunluklu odak görülür."
+    },
+    {
+     "dx": "Akım artefaktı",
+     "clue": "Yetersiz kontrast karışımı yalancı defekt oluşturabilir."
+    },
+    {
+     "dx": "Hareket artefaktı",
+     "clue": "Solunum bulanıklığı damar sınırını bozar."
+    },
+    {
+     "dx": "Kronik tromboemboli",
+     "clue": "Eksantrik, duvara yapışık trombüs, ağ/bant ve damar daralması."
+    }
+   ],
+   "differentialRef": {
+    "title": "Fleischner Society: Glossary of Terms for Thoracic Imaging (2024)",
+    "url": "https://pubs.rsna.org/doi/full/10.1148/radiol.232558"
+   },
+   "pearl": {
+    "text": "Gerçek intraluminal defekti kontrast ve hareket artefaktından ayır; komşu kesitleri izle. Klinik olasılıkla uyumlu BT anjiyografi tanıyı destekler.",
+    "ref": {
+     "title": "ACR Suspected Pulmonary Embolism",
+     "url": "https://acsearch.acr.org/docs/69404/narrative/"
+    }
+   }
+  },
+  "epmc_pmc13537522_omag165f1": {
+   "presentation": [
+    "Örnek başvuru: göğüs ağrısı ve nefes darlığı sonrası BT anjiyografi istenir.",
+    "Oksijenlenme ve bacak şişliği değerlendirilir.",
+    "Önceki emboli veya travma öyküsü sorgulanır."
+   ],
+   "presentationRef": {
+    "title": "ESC Acute Pulmonary Embolism Guidelines (2019)",
+    "url": "https://www.escardio.org/guidelines/clinical-practice-guidelines/all-esc-practice-guidelines/acute-pulmonary-embolism/"
+   },
+   "differential": [
+    {
+     "dx": "BT pulmoner anjiyografide dolum defekti",
+     "clue": "Kontrastlı arter lümeninde çevrili düşük yoğunluklu odak görülür."
+    },
+    {
+     "dx": "Akım artefaktı",
+     "clue": "Yetersiz kontrast karışımı yalancı defekt oluşturabilir."
+    },
+    {
+     "dx": "Hareket artefaktı",
+     "clue": "Solunum bulanıklığı damar sınırını bozar."
+    },
+    {
+     "dx": "Kronik tromboemboli",
+     "clue": "Eksantrik, duvara yapışık trombüs, ağ/bant ve damar daralması."
+    }
+   ],
+   "differentialRef": {
+    "title": "Fleischner Society: Glossary of Terms for Thoracic Imaging (2024)",
+    "url": "https://pubs.rsna.org/doi/full/10.1148/radiol.232558"
+   },
+   "pearl": {
+    "text": "Gerçek intraluminal defekti kontrast ve hareket artefaktından ayır; komşu kesitleri izle. Klinik olasılıkla uyumlu BT anjiyografi tanıyı destekler.",
+    "ref": {
+     "title": "ACR Suspected Pulmonary Embolism",
+     "url": "https://acsearch.acr.org/docs/69404/narrative/"
+    }
+   }
+  },
+  "tcia_nodule_mass_01": {
+   "presentation": [
+    "Örnek başvuru: BT kesitinde işaretli odak için anatomik yerleşim araştırılır.",
+    "Önceki BT ile değişim sorgulanır.",
+    "Nodülün damar ve bronşlarla ilişkisi incelenir."
+   ],
+   "presentationRef": {
+    "title": "Fleischner Society: Glossary of Terms for Thoracic Imaging (2024)",
+    "url": "https://pubs.rsna.org/doi/full/10.1148/radiol.232558"
+   },
+   "differential": [
+    {
+     "dx": "Aksiyel kesit anatomisi",
+     "clue": "Sağ-sol, anterior-posterior ve damar-bronş ilişkisi sistematik okunur."
+    },
+    {
+     "dx": "Damarın nodül sanılması",
+     "clue": "Komşu kesitlerde tübüler devamlılık görülür."
+    },
+    {
+     "dx": "Bronşun damar sanılması",
+     "clue": "Hava lümeni ve duvarı ayırt ettirir."
+    },
+    {
+     "dx": "Hacim ortalaması",
+     "clue": "Kalın kesit küçük yapıları birleştirebilir."
+    }
+   ],
+   "differentialRef": {
+    "title": "Fleischner Society: Glossary of Terms for Thoracic Imaging (2024)",
+    "url": "https://pubs.rsna.org/doi/full/10.1148/radiol.232558"
+   },
+   "pearl": {
+    "text": "Tek aksiyel kesit gerçek lezyon yerleşimini kanıtlamaz. Komşu kesitleri ve koronal/sagital yeniden biçimlendirmeleri birlikte değerlendir.",
+    "ref": {
+     "title": "Fleischner Society Incidental Pulmonary Nodule Guidelines (2017)",
+     "url": "https://pubs.rsna.org/doi/10.1148/radiol.2017161659"
+    }
+   }
+  },
+  "tcia_ct_intro_01": {
+   "presentation": [
+    "Örnek başvuru: toraks BT bulgusunun yerleşimi için aksiyel kesit incelenir.",
+    "Çekimin klinik nedeni ve önceki incelemeler sorgulanır.",
+    "Lezyon varsa komşu kesitlerle sürekliliği araştırılır."
+   ],
+   "presentationRef": {
+    "title": "Fleischner Society: Glossary of Terms for Thoracic Imaging (2024)",
+    "url": "https://pubs.rsna.org/doi/full/10.1148/radiol.232558"
+   },
+   "differential": [
+    {
+     "dx": "Aksiyel kesit anatomisi",
+     "clue": "Sağ-sol, anterior-posterior ve damar-bronş ilişkisi sistematik okunur."
+    },
+    {
+     "dx": "Damarın nodül sanılması",
+     "clue": "Komşu kesitlerde tübüler devamlılık görülür."
+    },
+    {
+     "dx": "Bronşun damar sanılması",
+     "clue": "Hava lümeni ve duvarı ayırt ettirir."
+    },
+    {
+     "dx": "Hacim ortalaması",
+     "clue": "Kalın kesit küçük yapıları birleştirebilir."
+    }
+   ],
+   "differentialRef": {
+    "title": "Fleischner Society: Glossary of Terms for Thoracic Imaging (2024)",
+    "url": "https://pubs.rsna.org/doi/full/10.1148/radiol.232558"
+   },
+   "pearl": {
+    "text": "Tek aksiyel kesit gerçek lezyon yerleşimini kanıtlamaz. Komşu kesitleri ve koronal/sagital yeniden biçimlendirmeleri birlikte değerlendir.",
+    "ref": {
+     "title": "Fleischner Society: Glossary of Terms for Thoracic Imaging (2024)",
+     "url": "https://pubs.rsna.org/doi/full/10.1148/radiol.232558"
+    }
+   }
+  },
+  "commons_ct_axial_lung_window": {
+   "presentation": [
+    "Örnek başvuru: BT akciğer penceresinde anatomik yapılar incelenir.",
+    "Çekimin klinik nedeni sorgulanır.",
+    "Şüpheli alan varsa komşu kesitlerle sürekliliği araştırılır."
+   ],
+   "presentationRef": {
+    "title": "Fleischner Society: Glossary of Terms for Thoracic Imaging (2024)",
+    "url": "https://pubs.rsna.org/doi/full/10.1148/radiol.232558"
+   },
+   "differential": [
+    {
+     "dx": "Aksiyel kesit anatomisi",
+     "clue": "Sağ-sol, anterior-posterior ve damar-bronş ilişkisi sistematik okunur."
+    },
+    {
+     "dx": "Damarın nodül sanılması",
+     "clue": "Komşu kesitlerde tübüler devamlılık görülür."
+    },
+    {
+     "dx": "Bronşun damar sanılması",
+     "clue": "Hava lümeni ve duvarı ayırt ettirir."
+    },
+    {
+     "dx": "Hacim ortalaması",
+     "clue": "Kalın kesit küçük yapıları birleştirebilir."
+    }
+   ],
+   "differentialRef": {
+    "title": "Fleischner Society: Glossary of Terms for Thoracic Imaging (2024)",
+    "url": "https://pubs.rsna.org/doi/full/10.1148/radiol.232558"
+   },
+   "pearl": {
+    "text": "Tek aksiyel kesit gerçek lezyon yerleşimini kanıtlamaz. Komşu kesitleri ve koronal/sagital yeniden biçimlendirmeleri birlikte değerlendir.",
+    "ref": {
+     "title": "Fleischner Society: Glossary of Terms for Thoracic Imaging (2024)",
+     "url": "https://pubs.rsna.org/doi/full/10.1148/radiol.232558"
+    }
+   }
+  },
+  "commons_ct_axial_mediastinal_window": {
+   "presentation": [
+    "Örnek başvuru: BT üzerindeki nodül/kitle etiketi yeniden değerlendirilir.",
+    "Eski kesitlerle boyut değişimi araştırılır.",
+    "Akciğer ve mediasten pencereleri karşılaştırılır."
+   ],
+   "presentationRef": {
+    "title": "Fleischner Society: Glossary of Terms for Thoracic Imaging (2024)",
+    "url": "https://pubs.rsna.org/doi/full/10.1148/radiol.232558"
+   },
+   "differential": [
+    {
+     "dx": "Pencere ayarları: akciğer ve mediasten",
+     "clue": "Aynı veri farklı doku aralıklarında ayrı ayrıntı gösterir."
+    },
+    {
+     "dx": "Yalancı nodül",
+     "clue": "Damar devamlılığı komşu kesitlerde belirir."
+    },
+    {
+     "dx": "Kalsifikasyon",
+     "clue": "Mediasten penceresi yoğunluğu daha iyi gösterir."
+    },
+    {
+     "dx": "Buzlu cam bileşeni",
+     "clue": "Akciğer penceresinde daha iyi değerlendirilir."
+    }
+   ],
+   "differentialRef": {
+    "title": "Fleischner Society: Glossary of Terms for Thoracic Imaging (2024)",
+    "url": "https://pubs.rsna.org/doi/full/10.1148/radiol.232558"
+   },
+   "pearl": {
+    "text": "Pencere değişimi yeni veri üretmez; aynı kesitte parankim ve yumuşak doku ayrıntılarını görünür kılar. Nodülün yapısını ince kesit ve iki pencereyle değerlendir.",
+    "ref": {
+     "title": "Fleischner Society Incidental Pulmonary Nodule Guidelines (2017)",
+     "url": "https://pubs.rsna.org/doi/10.1148/radiol.2017161659"
+    }
+   }
+  }
+ }
+}
