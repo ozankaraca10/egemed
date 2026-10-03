@@ -56,6 +56,11 @@ describe("LearnScreen (statik render)", () => {
     expect(html).toContain('aria-label="Hasta kartı ve konu bilgisi"');
     expect(html).toContain("Klinik kayıt");
     expect(html).toMatch(/Gerçek hasta verisi|Kayıt yok/);
+    // T322: kurgusal başvuru öyküsü ve ayırıcı tanı ayrı etiketle; onay durumu açıkça yazılır.
+    expect(html).toContain("Başvuru öyküsü");
+    expect(html).toContain("Kurgusal · eğitim amaçlı");
+    expect(html).toContain("Ayırıcı tanıda düşün");
+    expect(html).toContain("hekim onayı bekliyor");
     expect(sampleTopic).toBeDefined();
     expect(html).toContain(sampleTopic!.short);
     expect(html).toContain(esc(sampleTopic!.title));
