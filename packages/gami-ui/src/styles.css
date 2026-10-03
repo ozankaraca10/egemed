@@ -550,6 +550,9 @@
 .eg-gami-fair summary::-webkit-details-marker{ display: none; }
 .eg-gami-fair-more{ margin-left: auto; flex: none; font-weight: 700; color: var(--blue-700); text-decoration: underline; }
 .eg-gami-fair[open] .eg-gami-fair-more{ visibility: hidden; }
+/* T325: Pulse eski yapıyı (div + p) kullanır; simge ve metin yan yana kalır. */
+div.eg-gami-fair{ display: flex; align-items: flex-start; gap: var(--sp-3); padding: var(--sp-3) var(--sp-4); }
+div.eg-gami-fair p{ margin: 0; }
 .eg-gami-fair b{ color: var(--amber-700); }
 .eg-gami-fair-ic{ display: grid; flex: none; place-items: center; width: 24px; height: 24px; border-radius: var(--r-sm); background: var(--orange-500); color: var(--navy-950); }
 
